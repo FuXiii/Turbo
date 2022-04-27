@@ -1,0 +1,2 @@
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libspirv-cross-cored.a CMakeFiles/spirv-cross-core.dir/spirv_cross.cpp.obj CMakeFiles/spirv-cross-core.dir/spirv_parser.cpp.obj CMakeFiles/spirv-cross-core.dir/spirv_cross_parsed_ir.cpp.obj CMakeFiles/spirv-cross-core.dir/spirv_cfg.cpp.obj
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libspirv-cross-cored.a

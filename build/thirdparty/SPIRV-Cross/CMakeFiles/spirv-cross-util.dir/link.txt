@@ -1,0 +1,2 @@
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libspirv-cross-utild.a CMakeFiles/spirv-cross-util.dir/spirv_cross_util.cpp.obj
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libspirv-cross-utild.a

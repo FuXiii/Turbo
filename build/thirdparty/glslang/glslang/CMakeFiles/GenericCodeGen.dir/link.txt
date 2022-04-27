@@ -1,0 +1,2 @@
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libGenericCodeGend.a CMakeFiles/GenericCodeGen.dir/GenericCodeGen/CodeGen.cpp.obj CMakeFiles/GenericCodeGen.dir/GenericCodeGen/Link.cpp.obj
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libGenericCodeGend.a

@@ -1,0 +1,2 @@
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libglslang-default-resource-limitsd.a CMakeFiles/glslang-default-resource-limits.dir/ResourceLimits.cpp.obj CMakeFiles/glslang-default-resource-limits.dir/resource_limits_c.cpp.obj
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libglslang-default-resource-limitsd.a

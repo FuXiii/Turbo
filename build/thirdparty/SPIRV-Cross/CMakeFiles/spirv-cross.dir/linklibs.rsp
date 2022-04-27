@@ -1,0 +1,1 @@
+ libspirv-cross-glsld.a libspirv-cross-hlsld.a libspirv-cross-cppd.a libspirv-cross-reflectd.a libspirv-cross-msld.a libspirv-cross-utild.a libspirv-cross-cored.a libspirv-cross-glsld.a libspirv-cross-cored.a -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

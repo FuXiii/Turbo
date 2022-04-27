@@ -1,0 +1,2 @@
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libHLSLd.a CMakeFiles/HLSL.dir/stub.cpp.obj
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libHLSLd.a

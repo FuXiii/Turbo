@@ -1,0 +1,1 @@
+-IE:/Turbo/./engine/include -IE:/Turbo/./thirdparty/SPIRV-Cross -IE:/Turbo/thirdparty/VulkanMemoryAllocator/include -IE:/Turbo/thirdparty/glslang/glslang/.. -IE:/Turbo/build/include -IE:/Turbo/thirdparty/glslang/SPIRV/.. -IE:/Turbo/thirdparty/SPIRV-Cross -isystem F:/VulkanSDK/1.3.204.1/Include

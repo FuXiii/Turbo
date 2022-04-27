@@ -1,0 +1,88 @@
+#include "TVmaAllocator.h"
+#include "TDevice.h"
+#include "TException.h"
+#include "TInstance.h"
+#include "TPhysicalDevice.h"
+#include "TVulkanAllocator.h"
+
+//#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+
+void Turbo::Core::TVmaAllocator::InternalCreate()
+{
+    TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
+    TInstance *instance = physical_device->GetInstance();
+    Turbo::Core::TVersion vulkan_version = instance->GetVulkanVersion();
+
+    VmaVulkanFunctions vulkanFunctions = {};
+    vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+    vulkanFunctions.vkGetPhysicalDeviceProperties = &vkGetPhysicalDeviceProperties;
+    vulkanFunctions.vkGetPhysicalDeviceMemoryProperties = &vkGetPhysicalDeviceMemoryProperties;
+    vulkanFunctions.vkAllocateMemory = &vkAllocateMemory;
+    vulkanFunctions.vkFreeMemory = &vkFreeMemory;
+    vulkanFunctions.vkMapMemory = &vkMapMemory;
+    vulkanFunctions.vkUnmapMemory = &vkUnmapMemory;
+    vulkanFunctions.vkFlushMappedMemoryRanges = &vkFlushMappedMemoryRanges;
+    vulkanFunctions.vkInvalidateMappedMemoryRanges = &vkInvalidateMappedMemoryRanges;
+    vulkanFunctions.vkBindBufferMemory = &vkBindBufferMemory;
+    vulkanFunctions.vkBindImageMemory = &vkBindImageMemory;
+    vulkanFunctions.vkGetBufferMemoryRequirements = &vkGetBufferMemoryRequirements;
+    vulkanFunctions.vkGetImageMemoryRequirements = &vkGetImageMemoryRequirements;
+    vulkanFunctions.vkCreateBuffer = &vkCreateBuffer;
+    vulkanFunctions.vkCreateImage = &vkCreateImage;
+    vulkanFunctions.vkDestroyBuffer = &vkDestroyBuffer;
+    vulkanFunctions.vkDestroyImage = &vkDestroyImage;
+    vulkanFunctions.vkCmdCopyBuffer = &vkCmdCopyBuffer;
+
+    VmaAllocatorCreateInfo vma_allocator_create_info = {};
+    vma_allocator_create_info.instance = instance->GetVkInstance();
+    vma_allocator_create_info.physicalDevice = physical_device->GetVkPhysicalDevice();
+    vma_allocator_create_info.device = this->device->GetVkDevice();
+    vma_allocator_create_info.vulkanApiVersion = VK_MAKE_VERSION(vulkan_version.GetMajor(), vulkan_version.GetMinor(), 0);
+    vma_allocator_create_info.pAllocationCallbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    vma_allocator_create_info.pVulkanFunctions = &vulkanFunctions;
+
+    VkResult result = vmaCreateAllocator(&vma_allocator_create_info, (VmaAllocator *)this->vmaAllocator);
+    if (result != VK_SUCCESS)
+    {
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+    }
+}
+
+void Turbo::Core::TVmaAllocator::InternalDestroy()
+{
+    VmaAllocator *vma_allocator = (VmaAllocator *)(this->vmaAllocator);
+    vmaDestroyAllocator(*vma_allocator);
+}
+
+Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulkanHandle()
+{
+    if (device != nullptr)
+    {
+        this->device = device;
+        this->vmaAllocator = malloc(sizeof(VmaAllocator));
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+    }
+}
+
+Turbo::Core::TVmaAllocator::~TVmaAllocator()
+{
+    this->InternalDestroy();
+    free(this->vmaAllocator);
+    this->vmaAllocator = nullptr;
+}
+
+void *Turbo::Core::TVmaAllocator::GetVmaAllocator()
+{
+    return this->vmaAllocator;
+}
+
+std::string Turbo::Core::TVmaAllocator::ToString()
+{
+    return std::string();
+}

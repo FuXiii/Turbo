@@ -1,0 +1,3 @@
+F:\CMake\bin\cmake.exe -E rm -f CMakeFiles\Turbo.dir/objects.a
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc CMakeFiles\Turbo.dir/objects.a @CMakeFiles\Turbo.dir\objects1.rsp
+F:\llvm-mingw-20211002-msvcrt-x86_64\bin\clang++.exe -g -Wl,--whole-archive CMakeFiles\Turbo.dir/objects.a -Wl,--no-whole-archive -o Turbo.exe -Wl,--out-implib,libTurbo.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Turbo.dir\linklibs.rsp
