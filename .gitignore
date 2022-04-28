@@ -1,2 +1,4 @@
 build/
 .ppm
+.cache/
+./vscode
