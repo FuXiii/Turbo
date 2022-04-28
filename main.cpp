@@ -224,6 +224,7 @@ int main()
 
     std::vector<Turbo::Core::TSubpass> subpasses;
     subpasses.push_back(subpass);
+
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, Turbo::Core::TPipelineType::Graphics, attachemts, subpasses);
 
     std::vector<Turbo::Core::TImageView *> image_views;
@@ -473,15 +474,10 @@ int main()
     }
 
     delete fence;
-
     delete pipeline;
-
     delete frame_buffer;
-
     delete render_pass;
-
     descriptor_pool->Free(descriptor_set);
-
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;
@@ -491,7 +487,6 @@ int main()
     delete color_image;
     delete vertex_buffer;
     delete scale_buffer;
-
     command_pool->Free(command_buffer);
     delete command_pool;
     delete device;

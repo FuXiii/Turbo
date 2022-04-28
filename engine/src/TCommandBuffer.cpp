@@ -77,14 +77,18 @@ void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFram
     uint32_t attachemnt_count = renderPass->GetAttachments().size();
 
     VkClearValue vk_clear_value_color = {};
-    vk_clear_value_color.color.float32[0] = 1.0f;
-    vk_clear_value_color.color.float32[1] = 1.0f;
-    vk_clear_value_color.color.float32[2] = 1.0f;
-    vk_clear_value_color.color.float32[3] = 1.0f;
-    vk_clear_value_color.depthStencil.depth = 1.0f;
+    vk_clear_value_color.color.float32[0] = 0.0f;
+    vk_clear_value_color.color.float32[1] = 0.0f;
+    vk_clear_value_color.color.float32[2] = 0.0f;
+    vk_clear_value_color.color.float32[3] = 0.0f;
+    vk_clear_value_color.depthStencil.depth = 0.0f;
     vk_clear_value_color.depthStencil.stencil = 0.0f;
 
-    std::vector<VkClearValue> vk_clear_values(attachemnt_count, vk_clear_value_color);
+    std::vector<VkClearValue> vk_clear_values;
+    for (uint32_t attachment_index; attachment_index < attachemnt_count; attachment_index++)
+    {
+        vk_clear_values.push_back(vk_clear_value_color);
+    }
 
     VkRenderPassBeginInfo vk_render_pass_begin_info = {};
     vk_render_pass_begin_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

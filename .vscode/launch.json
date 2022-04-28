@@ -15,22 +15,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            // "miDebuggerPath": "F:/llvm-mingw-20211002-msvcrt-x86_64/bin/lldb-mi.exe",
-            // "miDebuggerArgs": "",
-            //"miDebuggerPath": "F:/LLVM/bin/lldb.exe",
-            //"miDebuggerArgs": "--arch x86_64",
-            // "setupCommands": [
-            //     {
-            //         "description": "Enable pretty-printing for gdb",
-            //         "text": "-enable-pretty-printing",
-            //         "ignoreFailures": true
-            //     },
-            //     {
-            //         "description": "Set Disassembly Flavor to Intel",
-            //         "text": "-gdb-set disassembly-flavor intel",
-            //         "ignoreFailures": true
-            //     }
-            // ],
             "preLaunchTask": "build"
         }
     ]
