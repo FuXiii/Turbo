@@ -15,6 +15,8 @@ Turbo是渲染引擎
 * 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
 * 使用MarkDown书写文字和文档，使用drawio绘制设计图表
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
+* **目前存在的问题待解决，请查看`docs/Issue.md`**
+
 
 ## Trifles
 
