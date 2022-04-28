@@ -14,7 +14,7 @@ void Turbo::Core::TBuffer::InternalCreate()
     vk_buffer_create_info.pNext = nullptr;
     vk_buffer_create_info.flags = this->bufferFlags;
     vk_buffer_create_info.size = this->size;
-    vk_buffer_create_info.usage = this->usage;
+    vk_buffer_create_info.usage = this->usages;
     // vk_buffer_create_info.sharingMode=???;//By Vma?
     // vk_buffer_create_info.queueFamilyIndexCount=???;//By Vma?
     // vk_buffer_create_info.pQueueFamilyIndices=???;//By Vma?
@@ -38,14 +38,14 @@ void Turbo::Core::TBuffer::InternalDestroy()
     vmaDestroyBuffer(*vma_allocator, this->vkBuffer, *vma_allocation);
 }
 
-Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, VkBufferUsageFlags usage, TMemoryFlags memoryFlags, VkDeviceSize size)
+Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
 {
     if (device != nullptr)
     {
         this->device = device;
         this->bufferFlags = bufferFlags;
         this->memoryFlags = memoryFlags;
-        this->usage = usage;
+        this->usages = usages;
         this->size = size;
         this->vmaAllocation = malloc(sizeof(VmaAllocation));
         this->InternalCreate();
@@ -65,12 +65,12 @@ Turbo::Core::TBuffer::~TBuffer()
 
 Turbo::Core::TBufferUsageFlags Turbo::Core::TBuffer::GetBufferUsageFlags()
 {
-    return this->usage;
+    return this->usages;
 }
 
 bool Turbo::Core::TBuffer::IsTransferSource()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
     {
         return true;
     }
@@ -80,7 +80,7 @@ bool Turbo::Core::TBuffer::IsTransferSource()
 
 bool Turbo::Core::TBuffer::IsTransferDestination()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT)
     {
         return true;
     }
@@ -90,7 +90,7 @@ bool Turbo::Core::TBuffer::IsTransferDestination()
 
 bool Turbo::Core::TBuffer::IsUniformTexelBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT)
     {
         return true;
     }
@@ -100,7 +100,7 @@ bool Turbo::Core::TBuffer::IsUniformTexelBuffer()
 
 bool Turbo::Core::TBuffer::IsStorageTexelBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT)
     {
         return true;
     }
@@ -110,7 +110,7 @@ bool Turbo::Core::TBuffer::IsStorageTexelBuffer()
 
 bool Turbo::Core::TBuffer::IsUniformBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
     {
         return true;
     }
@@ -120,7 +120,7 @@ bool Turbo::Core::TBuffer::IsUniformBuffer()
 
 bool Turbo::Core::TBuffer::IsStorageBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
     {
         return true;
     }
@@ -130,7 +130,7 @@ bool Turbo::Core::TBuffer::IsStorageBuffer()
 
 bool Turbo::Core::TBuffer::IsIndexBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
     {
         return true;
     }
@@ -140,7 +140,7 @@ bool Turbo::Core::TBuffer::IsIndexBuffer()
 
 bool Turbo::Core::TBuffer::IsVertexBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
     {
         return true;
     }
@@ -150,7 +150,7 @@ bool Turbo::Core::TBuffer::IsVertexBuffer()
 
 bool Turbo::Core::TBuffer::IsIndirectBuffer()
 {
-    if (this->usage & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+    if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
     {
         return true;
     }

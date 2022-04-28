@@ -1,6 +1,6 @@
 #include "TAttachment.h"
 
-Turbo::Core::TAttachment::TAttachment(VkFormat format, VkSampleCountFlagBits samples, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkAttachmentLoadOp stencilLoadOp, VkAttachmentStoreOp stencilStoreOp, VkImageLayout initialLayout, VkImageLayout finalLayout) : Turbo::Core::TInfo()
+Turbo::Core::TAttachment::TAttachment(VkFormat format, TSampleCountBits samples, TLoadOp loadOp, TStoreOp storeOp, TLoadOp stencilLoadOp, TStoreOp stencilStoreOp, TImageLayout initialLayout, TImageLayout finalLayout) : Turbo::Core::TInfo()
 {
     this->format = format;
     this->samples = samples;
@@ -21,37 +21,37 @@ VkFormat Turbo::Core::TAttachment::GetVkFormat()
     return this->format;
 }
 
-VkSampleCountFlagBits Turbo::Core::TAttachment::GetVkSampleCountFlagBits()
+Turbo::Core::TSampleCountBits Turbo::Core::TAttachment::GetVkSampleCountFlagBits()
 {
     return this->samples;
 }
 
-VkAttachmentLoadOp Turbo::Core::TAttachment::GetLoadOp()
+Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetLoadOp()
 {
     return this->loadOp;
 }
 
-VkAttachmentStoreOp Turbo::Core::TAttachment::GetStoreOp()
+Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStoreOp()
 {
     return this->storeOp;
 }
 
-VkAttachmentLoadOp Turbo::Core::TAttachment::GetStencilLoadOp()
+Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetStencilLoadOp()
 {
     return this->stencilLoadOp;
 }
 
-VkAttachmentStoreOp Turbo::Core::TAttachment::GetStencilStoreOp()
+Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStencilStoreOp()
 {
     return this->stencilStoreOp;
 }
 
-VkImageLayout Turbo::Core::TAttachment::GetInitialLayout()
+Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetInitialLayout()
 {
     return this->initialLayout;
 }
 
-VkImageLayout Turbo::Core::TAttachment::GetFinalLayout()
+Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetFinalLayout()
 {
     return this->finalLayout;
 }
