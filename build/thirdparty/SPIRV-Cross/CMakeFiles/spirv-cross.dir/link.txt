@@ -1,3 +1,0 @@
-F:\CMake\bin\cmake.exe -E rm -f CMakeFiles\spirv-cross.dir/objects.a
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc CMakeFiles\spirv-cross.dir/objects.a @CMakeFiles\spirv-cross.dir\objects1.rsp
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\clang++.exe -g -Wl,--whole-archive CMakeFiles\spirv-cross.dir/objects.a -Wl,--no-whole-archive -o spirv-cross.exe -Wl,--out-implib,libspirv-cross.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\spirv-cross.dir\linklibs.rsp

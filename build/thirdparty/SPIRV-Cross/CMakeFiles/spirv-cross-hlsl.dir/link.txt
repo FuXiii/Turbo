@@ -1,2 +1,0 @@
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libspirv-cross-hlsld.a CMakeFiles/spirv-cross-hlsl.dir/spirv_hlsl.cpp.obj
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libspirv-cross-hlsld.a

@@ -1,2 +1,0 @@
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libSPVRemapperd.a CMakeFiles/SPVRemapper.dir/SPVRemapper.cpp.obj CMakeFiles/SPVRemapper.dir/doc.cpp.obj
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libSPVRemapperd.a

@@ -1,2 +1,0 @@
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc libSPIRVd.a CMakeFiles/SPIRV.dir/GlslangToSpv.cpp.obj CMakeFiles/SPIRV.dir/InReadableOrder.cpp.obj CMakeFiles/SPIRV.dir/Logger.cpp.obj CMakeFiles/SPIRV.dir/SpvBuilder.cpp.obj CMakeFiles/SPIRV.dir/SpvPostProcess.cpp.obj CMakeFiles/SPIRV.dir/doc.cpp.obj CMakeFiles/SPIRV.dir/SpvTools.cpp.obj CMakeFiles/SPIRV.dir/disassemble.cpp.obj CMakeFiles/SPIRV.dir/CInterface/spirv_c_interface.cpp.obj
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ranlib.exe libSPIRVd.a

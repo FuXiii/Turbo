@@ -1,3 +1,0 @@
-F:\CMake\bin\cmake.exe -E rm -f CMakeFiles\glslangValidator.dir/objects.a
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\llvm-ar.exe qc CMakeFiles\glslangValidator.dir/objects.a @CMakeFiles\glslangValidator.dir\objects1.rsp
-F:\llvm-mingw-20211002-msvcrt-x86_64\bin\clang++.exe -g -Wl,-undefined,error -Wl,--whole-archive CMakeFiles\glslangValidator.dir/objects.a -Wl,--no-whole-archive -o glslangValidator.exe -Wl,--out-implib,libglslangValidator.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\glslangValidator.dir\linklibs.rsp
