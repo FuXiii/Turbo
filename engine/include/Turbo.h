@@ -29,6 +29,8 @@ namespace Core
 #define TURBO_ENGINE_VERSION_0_0 TURBO_MAKE_VERSION(0, 0, 0)
 #define TYRBO_DEFAULT_SHADER_ENTRY_POINT "main"
 
+typedef VkDeviceSize TDeviceSize;
+
 typedef enum class TResult : int32_t
 {
     SHADER_LINK_FAILED = -16,
@@ -102,14 +104,9 @@ typedef uint32_t TQueueFamilyIndex;
 typedef size_t TMemoryTypeIndex;
 
 typedef VkImageCreateFlags TImageCreateFlags;
-typedef VkImageType TImageType;
-typedef VkSampleCountFlagBits TSampleCountFlagBits;
-typedef VkImageTiling TImageTiling;
 typedef VkImageUsageFlags TImageUsageFlags;
-typedef VkImageLayout TImageLayout;
 
 typedef VkImageViewCreateFlags TImageViewCreateFlags;
-typedef VkImageViewType TImageViewType;
 typedef VkImageAspectFlags TImageAspectFlags;
 
 typedef VkSurfaceTransformFlagsKHR TSurfaceTransformFlagsKHR;

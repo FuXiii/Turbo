@@ -11,6 +11,66 @@ namespace Core
 class TDevice;
 class TDeviceMemory;
 
+typedef enum TImageType
+{
+    DIMENSION_1D = 0,
+    DIMENSION_2D = 1,
+    DIMENSION_3D = 2,
+} TImageType;
+
+typedef enum TSampleCountBits
+{
+    SAMPLE_1_BIT = 0x00000001,
+    SAMPLE_2_BIT = 0x00000002,
+    SAMPLE_4_BIT = 0x00000004,
+    SAMPLE_8_BIT = 0x00000008,
+    SAMPLE_16_BIT = 0x00000010,
+    SAMPLE_32_BIT = 0x00000020,
+    SAMPLE_64_BIT = 0x00000040,
+} TSampleCountBits;
+typedef VkFlags TSampleCounts;
+
+typedef enum TImageTiling
+{
+    OPTIMAL = 0,
+    LINEAR = 1
+} TImageTiling;
+
+typedef enum TImageUsageBits
+{
+    IMAGE_TRANSFER_SRC = 0x00000001,
+    IMAGE_TRANSFER_DST = 0x00000002,
+    IMAGE_SAMPLED = 0x00000004,
+    IMAGE_STORAGE = 0x00000008,
+    IMAGE_COLOR_ATTACHMENT = 0x00000010,
+    IMAGE_DEPTH_STENCIL_ATTACHMENT = 0x00000020,
+    IMAGE_TRANSIENT_ATTACHMENT = 0x00000040,
+    IMAGE_INPUT_ATTACHMENT = 0x00000080,
+} TImageUsageBits;
+typedef VkFlags TImageUsages;
+
+typedef enum TImageLayout
+{
+    LAYOUT_UNDEFINED = 0,
+    LAYOUT_GENERAL = 1,
+    LAYOUT_COLOR_ATTACHMENT_OPTIMAL = 2,
+    LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL = 3,
+    LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL = 4,
+    LAYOUT_SHADER_READ_ONLY_OPTIMAL = 5,
+    LAYOUT_TRANSFER_SRC_OPTIMAL = 6,
+    LAYOUT_TRANSFER_DST_OPTIMAL = 7,
+    LAYOUT_PREINITIALIZED = 8,
+    LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL = 1000117000,
+    LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL = 1000117001,
+    LAYOUT_DEPTH_ATTACHMENT_OPTIMAL = 1000241000,
+    LAYOUT_DEPTH_READ_ONLY_OPTIMAL = 1000241001,
+    LAYOUT_STENCIL_ATTACHMENT_OPTIMAL = 1000241002,
+    LAYOUT_STENCIL_READ_ONLY_OPTIMAL = 1000241003,
+    LAYOUT_READ_ONLY_OPTIMAL = 1000314000,
+    LAYOUT_ATTACHMENT_OPTIMAL = 1000314001,
+    LAYOUT_PRESENT_SRC_KHR = 1000001002,
+} TImageLayout;
+
 class TImage : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -21,22 +81,22 @@ class TImage : public Turbo::Core::TVulkanHandle
 
     T_VULKAN_HANDLE_DATA VkImageCreateFlags imageFlags;
     T_VULKAN_HANDLE_DATA TMemoryFlags memoryFlags = 0;
-    T_VULKAN_HANDLE_DATA VkImageType type;
+    T_VULKAN_HANDLE_DATA TImageType type;
     T_VULKAN_HANDLE_DATA TFormatInfo format;
     T_VULKAN_HANDLE_DATA VkExtent3D extent;
     T_VULKAN_HANDLE_DATA uint32_t mipLevels;
     T_VULKAN_HANDLE_DATA uint32_t arrayLayers;
-    T_VULKAN_HANDLE_DATA VkSampleCountFlagBits samples;
-    T_VULKAN_HANDLE_DATA VkImageTiling tiling;
-    T_VULKAN_HANDLE_DATA VkImageUsageFlags usage;
-    T_VULKAN_HANDLE_DATA VkImageLayout layout;
+    T_VULKAN_HANDLE_DATA TSampleCountBits samples;
+    T_VULKAN_HANDLE_DATA TImageTiling tiling;
+    T_VULKAN_HANDLE_DATA TImageUsages usages;
+    T_VULKAN_HANDLE_DATA TImageLayout layout;
 
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, VkImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, TMemoryFlags memoryFlags, VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED);
+    explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::LAYOUT_UNDEFINED);
     ~TImage();
 
   public:

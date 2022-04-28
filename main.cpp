@@ -176,21 +176,21 @@ int main()
     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
-    Turbo::Core::TBuffer *scale_buffer = new Turbo::Core::TBuffer(device, 0, VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    Turbo::Core::TBuffer *scale_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
     void *scale_ptr = scale_buffer->Map();
     memcpy(scale_ptr, &scale, sizeof(scale));
     scale_buffer->Unmap();
 
-    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, VkBufferUsageFlagBits::VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX_DATA));
+    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX_DATA));
     void *vertex_buffer_ptr = vertex_buffer->Map();
     memcpy(vertex_buffer_ptr, VERTEX_DATA, sizeof(VERTEX_DATA));
     vertex_buffer->Unmap();
 
-    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, VkImageType::VK_IMAGE_TYPE_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::B8G8R8A8_SRGB), 500, 500, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED);
-    Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, VkImageViewType::VK_IMAGE_VIEW_TYPE_2D, color_image->GetFormat(), VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::B8G8R8A8_SRGB), 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::LAYOUT_UNDEFINED);
+    Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, VkImageType::VK_IMAGE_TYPE_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::D32_SFLOAT), 500, 500, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED);
-    Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, VkImageViewType::VK_IMAGE_VIEW_TYPE_2D, depth_image->GetFormat(), VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::D32_SFLOAT), 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::LAYOUT_UNDEFINED);
+    Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
@@ -212,11 +212,11 @@ int main()
     descriptor_set->BindData(0, 0, buffers);
 
     Turbo::Core::TSubpass subpass;
-    subpass.AddColorAttachmentReference(0, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    subpass.SetDepthStencilAttachmentReference(1, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-    Turbo::Core::TAttachment color_attachment(color_image->GetFormat().GetVkFormat(), VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT, VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR, VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE, VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE, VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED, VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    Turbo::Core::TAttachment depth_attachment(VkFormat::VK_FORMAT_D32_SFLOAT, VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT, VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR, VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE, VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE, VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED, VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment color_attachment(color_image->GetFormat().GetVkFormat(), Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::LOAD_OP_CLEAR, Turbo::Core::TStoreOp::STORE_OP_STORE, Turbo::Core::TLoadOp::LOAD_OP_DONT_CARE, Turbo::Core::TStoreOp::STORE_OP_DONT_CARE, Turbo::Core::TImageLayout::LAYOUT_UNDEFINED, Turbo::Core::TImageLayout::LAYOUT_PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment depth_attachment(VkFormat::VK_FORMAT_D32_SFLOAT, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::LOAD_OP_CLEAR, Turbo::Core::TStoreOp::STORE_OP_STORE, Turbo::Core::TLoadOp::LOAD_OP_DONT_CARE, Turbo::Core::TStoreOp::STORE_OP_DONT_CARE, Turbo::Core::TImageLayout::LAYOUT_UNDEFINED, Turbo::Core::TImageLayout::LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TAttachment> attachemts;
     attachemts.push_back(color_attachment);
@@ -411,8 +411,8 @@ int main()
         vkDestroyFence(device->GetVkDevice(), cmdFence, NULL);
 
         std::string filename;
-
-        filename.append("./VulkanImage");
+        filename.append("E:/Turbo");
+        filename.append("/VulkanImage");
         filename.append(".ppm");
 
         VkImageSubresource subres = {};

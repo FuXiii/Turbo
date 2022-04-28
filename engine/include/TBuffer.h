@@ -12,6 +12,20 @@ class TDevice;
 class TQueueFamilyInfo;
 class TDeviceMemory;
 
+typedef enum TBufferUsageBits
+{
+    BUFFER_TRANSFER_SRC = 0x00000001,
+    BUFFER_TRANSFER_DST = 0x00000002,
+    BUFFER_UNIFORM_TEXEL = 0x00000004,
+    BUFFER_STORAGE_TEXEL = 0x00000008,
+    BUFFER_UNIFORM_BUFFER = 0x00000010,
+    BUFFER_STORAGE_BUFFER = 0x00000020,
+    BUFFER_INDEX_BUFFER = 0x00000040,
+    BUFFER_VERTEX_BUFFER = 0x00000080,
+    BUFFER_INDIRECT_BUFFER = 0x00000100,
+} TBufferUsageBits;
+typedef VkFlags TBufferUsages;
+
 class TBuffer : public TVulkanHandle
 {
   private:
@@ -20,10 +34,10 @@ class TBuffer : public TVulkanHandle
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_CHILDREN;
 
-    T_VULKAN_HANDLE_DATA VkDeviceSize size = 0;
+    T_VULKAN_HANDLE_DATA TDeviceSize size = 0;
     T_VULKAN_HANDLE_DATA VkBufferCreateFlags bufferFlags = 0;
     T_VULKAN_HANDLE_DATA TMemoryFlags memoryFlags = 0;
-    T_VULKAN_HANDLE_DATA VkBufferUsageFlags usage = 0;
+    T_VULKAN_HANDLE_DATA TBufferUsages usages = 0;
 
   protected:
     // virtual void AddChildHandle(TCommandBufferPool *commandBufferPool);
@@ -32,7 +46,7 @@ class TBuffer : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, VkBufferUsageFlags usage, TMemoryFlags memoryFlags, VkDeviceSize size);
+    explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
     ~TBuffer();
 
     void *Map();

@@ -13,7 +13,7 @@ void Turbo::Core::TImageView::InternalCreate()
     vk_component_mapping.a = VkComponentSwizzle::VK_COMPONENT_SWIZZLE_A;
 
     VkImageSubresourceRange vk_image_subresource_range = {};
-    vk_image_subresource_range.aspectMask = this->aspectMask;
+    vk_image_subresource_range.aspectMask = this->aspects;
     vk_image_subresource_range.baseMipLevel = this->baseMipLevel;
     vk_image_subresource_range.levelCount = this->levelCount;
     vk_image_subresource_range.baseArrayLayer = this->baseArrayLayer;
@@ -24,7 +24,7 @@ void Turbo::Core::TImageView::InternalCreate()
     vk_image_view_create_info.pNext = nullptr;
     vk_image_view_create_info.flags = 0;
     vk_image_view_create_info.image = this->image->GetVkImage();
-    vk_image_view_create_info.viewType = this->viewType;
+    vk_image_view_create_info.viewType = (VkImageViewType)this->viewType;
     vk_image_view_create_info.format = this->format.GetVkFormat();
     vk_image_view_create_info.components = vk_component_mapping;
     vk_image_view_create_info.subresourceRange = vk_image_subresource_range;
@@ -46,14 +46,14 @@ void Turbo::Core::TImageView::InternalDestroy()
     this->vkImageView = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TImageView::TImageView(TImage *image, VkImageViewType viewType, TFormatInfo format, VkImageAspectFlags aspectMask, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
     {
         this->image = image;
         this->viewType = viewType;
         this->format = format;
-        this->aspectMask = aspectMask;
+        this->aspects = aspects;
         this->baseMipLevel = baseMipLevel;
         this->levelCount = levelCount;
         this->baseArrayLayer = baseArrayLayer;

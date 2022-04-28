@@ -17,7 +17,6 @@ Turbo是渲染引擎
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 
-
 ## Trifles
 
 * 整理一下头文件，有点乱，去掉不必要的头文件
@@ -387,3 +386,27 @@ Turbo是渲染引擎
   >* `TFence`中新增`void WaitUntil()`将会一直等待，直到指令运行结束
   >* 新增`TSemaphore`类
   >* `TDeviceQueue`中新增`bool Submit(std::vector<TSemaphore *> &waitSemaphores, std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)`函数，用于提交指令。
+
+  * 2022/4/27 设计架构
+  >
+  >* 发布至`GitHub`和`Gitee`上
+  >* 提炼`issue`
+
+  * 2022/4/28 设计架构
+
+  >* `TBuffer`中增加`typedef enum TBufferUsageBits`枚举，与`Vulkan`标准一致
+  >* `TBuffer`中增加`typedef VkFlags TBufferUsages`声明,用于声明`TBuffer`的`uage`，与`Vulkan`标准一致
+  >* `Turbo.h`中增加`typedef VkDeviceSize TDeviceSize`用于`TBuffer`的构造函数中，与`Vulkan`标准一致
+  >* `TImage`中增加`typedef enum TImageType`枚举，用于声明`TImage`的`type`,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef enum TSampleCountBits`枚举,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef VkFlags TSampleCounts`声明,用于`TImage`的构造函数中,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef enum TImageTiling`枚举,用于`TImage`的构造函数中,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef enum TImageUsageBits`枚举,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef VkFlags TImageUsages`声明,用于`TImage`的构造函数中,与`Vulkan`标准一致
+  >* `TImage`中增加`typedef enum TImageLayout`枚举,用于`TImage`的构造函数中,与`Vulkan`标准一致
+  >* `TImageView`中增加`typedef enum TImageViewType`枚举,用于`TImageView`的构造函数中,与`Vulkan`标准一致
+  >* `TImageView`中增加`typedef enum TImageAspectBits`枚举,与`Vulkan`标准一致
+  >* `TImageView`中增加`typedef VkFlags TImageAspects`声明,用于`TImageView`的构造函数中,与`Vulkan`标准一致
+  >* `TAttachment`中增加`typedef enum TLoadOp`声明,用于`TAttachment`的构造函数中,与`Vulkan`标准一致
+  >* `TAttachment`中增加`typedef enum TStoreOp`声明,用于`TAttachment`的构造函数中,与`Vulkan`标准一致
+  >

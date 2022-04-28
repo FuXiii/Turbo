@@ -13,13 +13,13 @@ void Turbo::Core::TRenderPass::InternalCreate()
         VkAttachmentDescription vk_attachment_description = {};
         vk_attachment_description.flags = 0;
         vk_attachment_description.format = attachment_item.GetVkFormat();
-        vk_attachment_description.samples = attachment_item.GetVkSampleCountFlagBits();
-        vk_attachment_description.loadOp = attachment_item.GetLoadOp();
-        vk_attachment_description.storeOp = attachment_item.GetStoreOp();
-        vk_attachment_description.stencilLoadOp = attachment_item.GetStencilLoadOp();
-        vk_attachment_description.stencilStoreOp = attachment_item.GetStencilStoreOp();
-        vk_attachment_description.initialLayout = attachment_item.GetInitialLayout();
-        vk_attachment_description.finalLayout = attachment_item.GetFinalLayout();
+        vk_attachment_description.samples = (VkSampleCountFlagBits)attachment_item.GetVkSampleCountFlagBits();
+        vk_attachment_description.loadOp = (VkAttachmentLoadOp)attachment_item.GetLoadOp();
+        vk_attachment_description.storeOp = (VkAttachmentStoreOp)attachment_item.GetStoreOp();
+        vk_attachment_description.stencilLoadOp = (VkAttachmentLoadOp)attachment_item.GetStencilLoadOp();
+        vk_attachment_description.stencilStoreOp = (VkAttachmentStoreOp)attachment_item.GetStencilStoreOp();
+        vk_attachment_description.initialLayout = (VkImageLayout)attachment_item.GetInitialLayout();
+        vk_attachment_description.finalLayout = (VkImageLayout)attachment_item.GetFinalLayout();
 
         vk_attachment_descriptions.push_back(vk_attachment_description);
     }

@@ -33,42 +33,42 @@ Turbo::Core::TSubpass::TSubpass(const TSubpass &obj)
     *this->depthStencil = *obj.depthStencil;
 }
 
-void Turbo::Core::TSubpass::AddColorAttachmentReference(uint32_t attachment, VkImageLayout layout)
+void Turbo::Core::TSubpass::AddColorAttachmentReference(uint32_t attachment, TImageLayout layout)
 {
     VkAttachmentReference attachment_reference = {};
     attachment_reference.attachment = attachment;
-    attachment_reference.layout = layout;
+    attachment_reference.layout = (VkImageLayout)layout;
     this->colors->push_back(attachment_reference);
 }
 
-void Turbo::Core::TSubpass::AddResolveAttachmentReference(uint32_t attachment, VkImageLayout layout)
+void Turbo::Core::TSubpass::AddResolveAttachmentReference(uint32_t attachment, TImageLayout layout)
 {
     VkAttachmentReference attachment_reference = {};
     attachment_reference.attachment = attachment;
-    attachment_reference.layout = layout;
+    attachment_reference.layout = (VkImageLayout)layout;
     this->resolves->push_back(attachment_reference);
 }
 
-void Turbo::Core::TSubpass::AddInputAttachmentReference(uint32_t attachment, VkImageLayout layout)
+void Turbo::Core::TSubpass::AddInputAttachmentReference(uint32_t attachment, TImageLayout layout)
 {
     VkAttachmentReference attachment_reference = {};
     attachment_reference.attachment = attachment;
-    attachment_reference.layout = layout;
+    attachment_reference.layout = (VkImageLayout)layout;
     this->inputs->push_back(attachment_reference);
 }
 
-void Turbo::Core::TSubpass::AddPreserveAttachmentReference(uint32_t attachment, VkImageLayout layout)
+void Turbo::Core::TSubpass::AddPreserveAttachmentReference(uint32_t attachment, TImageLayout layout)
 {
     VkAttachmentReference attachment_reference = {};
     attachment_reference.attachment = attachment;
-    attachment_reference.layout = layout;
+    attachment_reference.layout = (VkImageLayout)layout;
     this->preserves->push_back(attachment_reference);
 }
 
-void Turbo::Core::TSubpass::SetDepthStencilAttachmentReference(uint32_t attachment, VkImageLayout layout)
+void Turbo::Core::TSubpass::SetDepthStencilAttachmentReference(uint32_t attachment, TImageLayout layout)
 {
     this->depthStencil->attachment = attachment;
-    this->depthStencil->layout = layout;
+    this->depthStencil->layout = (VkImageLayout)layout;
 }
 
 std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetColorAttachmentReferences()

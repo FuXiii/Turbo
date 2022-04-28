@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TSUBPASS_H
 #define TSUBPASS_H
+#include "TImage.h"
 #include "TInfo.h"
 
 namespace Turbo
@@ -22,11 +23,11 @@ class TSubpass : public Turbo::Core::TInfo
     TSubpass(const TSubpass &obj);
     ~TSubpass();
 
-    void AddColorAttachmentReference(uint32_t attachment, VkImageLayout layout);
-    void AddResolveAttachmentReference(uint32_t attachment, VkImageLayout layout);
-    void AddInputAttachmentReference(uint32_t attachment, VkImageLayout layout);
-    void AddPreserveAttachmentReference(uint32_t attachment, VkImageLayout layout);
-    void SetDepthStencilAttachmentReference(uint32_t attachment, VkImageLayout layout);
+    void AddColorAttachmentReference(uint32_t attachment, TImageLayout layout);
+    void AddResolveAttachmentReference(uint32_t attachment, TImageLayout layout);
+    void AddInputAttachmentReference(uint32_t attachment, TImageLayout layout);
+    void AddPreserveAttachmentReference(uint32_t attachment, TImageLayout layout);
+    void SetDepthStencilAttachmentReference(uint32_t attachment, TImageLayout layout);
     void Clear();
 
     std::vector<VkAttachmentReference> *GetColorAttachmentReferences();
