@@ -410,3 +410,15 @@ Turbo是渲染引擎
   >* `TAttachment`中增加`typedef enum TLoadOp`声明,用于`TAttachment`的构造函数中,与`Vulkan`标准一致
   >* `TAttachment`中增加`typedef enum TStoreOp`声明,用于`TAttachment`的构造函数中,与`Vulkan`标准一致
   >
+
+  * 2022/4/29 设计架构
+  >
+  >* `TAttachment`中重命名`typedef enum TStoreOp`声明,成`typedef enum class TStoreOp`,优化枚举内命名
+  >* `TAttachment`中重命名`typedef enum TLoadOp`声明,成`typedef enum class TLoadOp`,优化枚举内命名
+  >* `TImageLayout`中重命名`typedef enum TImageLayout`声明,成`typedef enum class TImageLayout`,优化枚举内命名
+  >* `TFormatInfo`进一步设计优化，完善了如下:
+  >   * `typedef enum TFormatContentType`、
+  >   * `typedef enum class TFormatDataType`、
+  >   * `typedef enum class TFormatCompression`、
+  >   * `typedef enum class TFormatReduceFactor`
+  >* `TFormatInfo`实现了`uint32_t GetTexelBlockSize()`函数，用于返回该格式下数据占用的字节数
