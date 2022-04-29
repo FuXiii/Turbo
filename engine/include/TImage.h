@@ -108,6 +108,8 @@ class TImage : public Turbo::Core::TVulkanHandle
     uint32_t GetHeight();
     uint32_t GetDepth();
 
+    TSampleCountBits GetSampleCountBits();
+
     virtual std::string ToString() override;
 };
 } // namespace Core

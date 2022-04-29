@@ -422,3 +422,6 @@ Turbo是渲染引擎
   >   * `typedef enum class TFormatCompression`、
   >   * `typedef enum class TFormatReduceFactor`
   >* `TFormatInfo`实现了`uint32_t GetTexelBlockSize()`函数，用于返回该格式下数据占用的字节数
+  >* `TAttachment`构造函数中`VKFormat`替换成了`TFormatInfo`
+  >* `TImage`增加`TSampleCountBits GetSampleCountBits()`函数，用于获取采样数
+  >* `VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`基本描述框图`TurboDesign.drawwio`整理完成

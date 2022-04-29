@@ -215,15 +215,15 @@ int main()
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-    Turbo::Core::TAttachment color_attachment(color_image->GetFormat().GetVkFormat(), Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
-    Turbo::Core::TAttachment depth_attachment(VkFormat::VK_FORMAT_D32_SFLOAT, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    std::vector<Turbo::Core::TSubpass> subpasses;
+    subpasses.push_back(subpass);
+
+    Turbo::Core::TAttachment color_attachment(color_image->GetFormat(), color_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TAttachment> attachemts;
     attachemts.push_back(color_attachment);
     attachemts.push_back(depth_attachment);
-
-    std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass);
 
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, Turbo::Core::TPipelineType::Graphics, attachemts, subpasses);
 

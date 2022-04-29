@@ -12,7 +12,7 @@ void Turbo::Core::TRenderPass::InternalCreate()
     {
         VkAttachmentDescription vk_attachment_description = {};
         vk_attachment_description.flags = 0;
-        vk_attachment_description.format = attachment_item.GetVkFormat();
+        vk_attachment_description.format = attachment_item.GetFormat().GetVkFormat();
         vk_attachment_description.samples = (VkSampleCountFlagBits)attachment_item.GetVkSampleCountFlagBits();
         vk_attachment_description.loadOp = (VkAttachmentLoadOp)attachment_item.GetLoadOp();
         vk_attachment_description.storeOp = (VkAttachmentStoreOp)attachment_item.GetStoreOp();

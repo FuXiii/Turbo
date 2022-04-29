@@ -6,7 +6,7 @@
 
 * `Turbo::Core::TCommandBuffer::BeginRenderPass()中的ClearColor` 可能有问题（等到支持窗口渲染后再调，调试起来方便），而且现在写死了，需要开放对外接口(比如说放到`TAttachemnt`中声明)。
 
-* **`Now in dev:(优化TFormatInfo)`** `TFormatInfo` 目前用起来比较麻烦，提供一种简便方法，比如隐示转换。
+* `TFormatInfo` 目前用起来比较麻烦，提供一种简便方法，比如隐示转换。
 
 * `Turbo::Core::TBuffer`的构造函数需要传入`VkBufferCreateFlags`，在`Turbo`中用起来比较奇怪，或者不向外提供该参数（目前搞不清楚用法，或者就这么放着到最后再说）
 
@@ -40,12 +40,14 @@
 
 * **`Note:`** `Turbo::Core::TSubpass`中的`std::vector<VkAttachmentReference> ...`保留，用起来很方便
 
-* **`Now in dev:(优化TFormatInfo)`** `Turbo::Core::TAttachment`构造函数中对于`Vulkan`声明的数据结构依赖过多，须自定义（`VkFormat`,`VkSampleCountFlagBits`,`VkAttachmentLoadOp`,`VkAttachmentStoreOp`等）
+* ~~`Turbo::Core::TAttachment`构造函数中对于`Vulkan`声明的数据结构依赖过多，须自定义（`VkFormat`,`VkSampleCountFlagBits`,`VkAttachmentLoadOp`,`VkAttachmentStoreOp`等）~~ 2022/4/29
 
-* 对于`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`考虑如何设计，使用起来方便
+* **`Dev now :`**对于`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`考虑如何设计，使用起来方便
 
 * `Turbo::Core::TRenderPass`构造函数的`TPipelineType type`转移到`TSubpass`中
 
 * `Turbo::Core::TPipeline`重度依赖`Vulkan`的数据结构
+
+* `Turbo::Core::TPipeline`目前只实现了`Graphic`，计算管线`Compute`未实现
 
 * `Turbo::Core::TCommandBuffer`很多指令未实现，待实现

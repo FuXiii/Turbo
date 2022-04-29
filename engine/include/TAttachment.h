@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TATTACHMENT_H
 #define TATTACHMENT_H
+#include "TFormatInfo.h"
 #include "TImage.h"
 #include "TInfo.h"
 
@@ -27,7 +28,7 @@ typedef enum class TStoreOp
 class TAttachment : public Turbo::Core::TInfo
 {
   private:
-    VkFormat format;
+    TFormatInfo format;
     TSampleCountBits samples;
     TLoadOp loadOp;
     TStoreOp storeOp;
@@ -37,11 +38,11 @@ class TAttachment : public Turbo::Core::TInfo
     TImageLayout finalLayout;
 
   public:
-    TAttachment(VkFormat format, TSampleCountBits samples, TLoadOp loadOp, TStoreOp storeOp, TLoadOp stencilLoadOp, TStoreOp stencilStoreOp, TImageLayout initialLayout, TImageLayout finalLayout);
+    TAttachment(TFormatInfo format, TSampleCountBits samples, TLoadOp loadOp, TStoreOp storeOp, TLoadOp stencilLoadOp, TStoreOp stencilStoreOp, TImageLayout initialLayout, TImageLayout finalLayout);
     ~TAttachment();
 
   public:
-    VkFormat GetVkFormat();
+    TFormatInfo GetFormat();
     TSampleCountBits GetVkSampleCountFlagBits();
     TLoadOp GetLoadOp();
     TStoreOp GetStoreOp();

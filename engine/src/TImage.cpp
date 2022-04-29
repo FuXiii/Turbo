@@ -216,6 +216,11 @@ uint32_t Turbo::Core::TImage::GetDepth()
     return this->extent.depth;
 }
 
+Turbo::Core::TSampleCountBits Turbo::Core::TImage::GetSampleCountBits()
+{
+    return this->samples;
+}
+
 std::string Turbo::Core::TImage::ToString()
 {
     return std::string();
