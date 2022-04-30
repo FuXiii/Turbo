@@ -51,3 +51,5 @@
 * `Turbo::Core::TPipeline`目前只实现了`Graphic`，计算管线`Compute`未实现
 
 * `Turbo::Core::TCommandBuffer`很多指令未实现，待实现
+
+* `Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`

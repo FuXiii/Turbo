@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TPIPELINE_H
 #define TPIPELINE_H
+#include "TFormatInfo.h"
 #include "TScissor.h"
 #include "TViewport.h"
 #include "TVulkanHandle.h"
@@ -18,6 +19,55 @@ typedef enum class TPipelineType
     Compute
 } TPipelineType;
 
+class TVertexAttribute : public Turbo::Core::TInfo
+{
+  private:
+    uint32_t location;
+    TFormatInfo format;
+    uint32_t offset;
+
+  public:
+    TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset);
+    ~TVertexAttribute();
+
+    uint32_t GetLocation();
+    TFormatInfo GetFormat();
+    uint32_t GetOffset();
+
+  public:
+    virtual std::string ToString() override;
+};
+
+typedef enum class TVertexRate
+{
+    VERTEX = 0,
+    INSTANCE = 1
+} TVertexRate;
+
+class TVertexBinding : public Turbo::Core::TInfo
+{
+  private:
+    uint32_t binding;
+    uint32_t stride;
+    TVertexRate rate;
+    std::vector<TVertexAttribute> vertexAttributes;
+
+  public:
+    TVertexBinding(uint32_t binding, uint32_t stride, TVertexRate rate);
+    ~TVertexBinding();
+
+    void AddAttribute(uint32_t location, TFormatInfo format, uint32_t offset);
+    void AddAttribute(TVertexAttribute &vertexAttribute);
+
+    uint32_t GetBinding();
+    uint32_t GetStride();
+    TVertexRate GetVertexRate();
+    const std::vector<TVertexAttribute> &GetVertexAttributes();
+
+  public:
+    virtual std::string ToString() override;
+};
+
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -32,8 +82,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     VkPrimitiveTopology primitiveTopology;
     bool primitiveRestartEnable;
 
-    std::vector<VkVertexInputBindingDescription> vkVertexInputBindingDescriptions;
-    std::vector<VkVertexInputAttributeDescription> vkVertexInputAttributeDescriptions;
+    std::vector<TVertexBinding> vertexBindings;
 
     std::vector<TViewport> viewports;
     std::vector<TScissor> scissors;
@@ -56,7 +105,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipeline(TRenderPass *renderPass, uint32_t subpass, TPipelineType type, VkPrimitiveTopology primitiveTopology, bool primitiveRestartEnable, std::vector<VkVertexInputBindingDescription> &vkVertexInputBindingDescriptions, std::vector<VkVertexInputAttributeDescription> vkVertexInputAttributeDescriptions, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders);
+    TPipeline(TRenderPass *renderPass, uint32_t subpass, TPipelineType type, VkPrimitiveTopology primitiveTopology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders);
     ~TPipeline();
 
   public:
@@ -69,8 +118,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
     bool GetPrimitiveRestartEnable();
 
-    std::vector<VkVertexInputBindingDescription> GetVkVertexInputBindingDescriptions();
-    std::vector<VkVertexInputAttributeDescription> GetVkVertexInputAttributeDescriptions();
+    const std::vector<TVertexBinding> &GetVertexBindings();
 
     std::vector<TShader *> GetShaders();
 

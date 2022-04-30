@@ -233,26 +233,11 @@ int main()
 
     Turbo::Core::TFramebuffer *frame_buffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
 
-    VkVertexInputBindingDescription vertex_input_binding_description;
-    vertex_input_binding_description.binding = 0;
-    vertex_input_binding_description.stride = sizeof(VERTEX_DATA[0]);
-    vertex_input_binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    Turbo::Core::TVertexBinding vertex_binding(0, sizeof(VERTEX_DATA[0]), Turbo::Core::TVertexRate::VERTEX);
+    vertex_binding.AddAttribute(0, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::R32G32B32A32_SFLOAT), 0);  // pos
+    vertex_binding.AddAttribute(1, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::R32G32B32A32_SFLOAT), 16); // color
 
-    VkVertexInputAttributeDescription vertex_position_attribute;
-    vertex_position_attribute.location = 0;
-    vertex_position_attribute.binding = 0;
-    vertex_position_attribute.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    vertex_position_attribute.offset = 0;
-
-    VkVertexInputAttributeDescription vertex_color_attribute;
-    vertex_color_attribute.location = 1;
-    vertex_color_attribute.binding = 0;
-    vertex_color_attribute.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    vertex_color_attribute.offset = 16;
-
-    std::vector<VkVertexInputBindingDescription> vk_vertex_input_binding_descriptions{vertex_input_binding_description};
-
-    std::vector<VkVertexInputAttributeDescription> vertex_input_attribute_descriptions{vertex_position_attribute, vertex_color_attribute};
+    std::vector<Turbo::Core::TVertexBinding> vertex_bindings{vertex_binding};
 
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
@@ -264,7 +249,7 @@ int main()
     scissors.push_back(scissor);
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
-    Turbo::Core::TPipeline *pipeline = new Turbo::Core::TPipeline(render_pass, 0, Turbo::Core::TPipelineType::Graphics, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false, vk_vertex_input_binding_descriptions, vertex_input_attribute_descriptions, viewports, scissors, false, false, VkPolygonMode::VK_POLYGON_MODE_FILL, VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT, VkFrontFace::VK_FRONT_FACE_CLOCKWISE, false, 0, 0, 0, 1, shaders);
+    Turbo::Core::TPipeline *pipeline = new Turbo::Core::TPipeline(render_pass, 0, Turbo::Core::TPipelineType::Graphics, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, VkPolygonMode::VK_POLYGON_MODE_FILL, VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT, VkFrontFace::VK_FRONT_FACE_CLOCKWISE, false, 0, 0, 0, 1, shaders);
 
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets;
     descriptor_sets.push_back(descriptor_set);
