@@ -1,10 +1,88 @@
+#include "TPipeline.h"
 #include "TDescriptorSetLayout.h"
 #include "TDevice.h"
 #include "TException.h"
-#include "TPipeline.h"
 #include "TRenderPass.h"
 #include "TShader.h"
 #include "TVulkanAllocator.h"
+
+Turbo::Core::TVertexAttribute::TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset) : Turbo::Core::TInfo()
+{
+    this->location = location;
+    this->format = format;
+    this->offset = offset;
+}
+
+Turbo::Core::TVertexAttribute::~TVertexAttribute()
+{
+}
+
+uint32_t Turbo::Core::TVertexAttribute::GetLocation()
+{
+    return this->location;
+}
+
+Turbo::Core::TFormatInfo Turbo::Core::TVertexAttribute::GetFormat()
+{
+    return this->format;
+}
+
+uint32_t Turbo::Core::TVertexAttribute::GetOffset()
+{
+    return this->offset;
+}
+
+std::string Turbo::Core::TVertexAttribute::ToString()
+{
+    return std::string();
+}
+
+Turbo::Core::TVertexBinding::TVertexBinding(uint32_t binding, uint32_t stride, TVertexRate rate) : Turbo::Core::TInfo()
+{
+    this->binding = binding;
+    this->stride = stride;
+    this->rate = rate;
+}
+
+Turbo::Core::TVertexBinding::~TVertexBinding()
+{
+}
+
+void Turbo::Core::TVertexBinding::AddAttribute(uint32_t location, TFormatInfo format, uint32_t offset)
+{
+    TVertexAttribute vertex_attribute(location, format, offset);
+    this->AddAttribute(vertex_attribute);
+}
+
+void Turbo::Core::TVertexBinding::AddAttribute(TVertexAttribute &vertexAttribute)
+{
+    this->vertexAttributes.push_back(vertexAttribute);
+}
+
+uint32_t Turbo::Core::TVertexBinding::GetBinding()
+{
+    return this->binding;
+}
+
+uint32_t Turbo::Core::TVertexBinding::GetStride()
+{
+    return this->stride;
+}
+
+Turbo::Core::TVertexRate Turbo::Core::TVertexBinding::GetVertexRate()
+{
+    return this->rate;
+}
+
+const std::vector<Turbo::Core::TVertexAttribute> &Turbo::Core::TVertexBinding::GetVertexAttributes()
+{
+    return this->vertexAttributes;
+}
+
+std::string Turbo::Core::TVertexBinding::ToString()
+{
+    return std::string();
+}
 
 void Turbo::Core::TPipeline::InternalCreate()
 {
@@ -58,14 +136,40 @@ void Turbo::Core::TPipeline::InternalCreate()
             vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
         }
 
+        std::vector<VkVertexInputBindingDescription> vk_vertex_input_binding_descriptions;
+        std::vector<VkVertexInputAttributeDescription> vk_vertex_input_attribute_descriptions;
+
+        for (TVertexBinding &vertex_binding_item : this->vertexBindings)
+        {
+            uint32_t binding = vertex_binding_item.GetBinding();
+
+            std::vector<TVertexAttribute> vertex_attributes = vertex_binding_item.GetVertexAttributes();
+            for (TVertexAttribute &vertex_attribute_item : vertex_attributes)
+            {
+                VkVertexInputAttributeDescription vk_vertex_input_attribute_description = {};
+                vk_vertex_input_attribute_description.location = vertex_attribute_item.GetLocation();
+                vk_vertex_input_attribute_description.binding = binding;
+                vk_vertex_input_attribute_description.format = vertex_attribute_item.GetFormat().GetVkFormat();
+                vk_vertex_input_attribute_description.offset = vertex_attribute_item.GetOffset();
+
+                vk_vertex_input_attribute_descriptions.push_back(vk_vertex_input_attribute_description);
+            }
+            VkVertexInputBindingDescription vk_vertex_input_binding_description = {};
+            vk_vertex_input_binding_description.binding = binding;
+            vk_vertex_input_binding_description.stride = vertex_binding_item.GetStride();
+            vk_vertex_input_binding_description.inputRate = (VkVertexInputRate)vertex_binding_item.GetVertexRate();
+
+            vk_vertex_input_binding_descriptions.push_back(vk_vertex_input_binding_description);
+        }
+
         VkPipelineVertexInputStateCreateInfo vk_pipeline_vertex_input_state_create_info = {};
         vk_pipeline_vertex_input_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vk_pipeline_vertex_input_state_create_info.pNext = nullptr;
         vk_pipeline_vertex_input_state_create_info.flags = 0;
-        vk_pipeline_vertex_input_state_create_info.vertexBindingDescriptionCount = this->vkVertexInputBindingDescriptions.size();
-        vk_pipeline_vertex_input_state_create_info.pVertexBindingDescriptions = this->vkVertexInputBindingDescriptions.data();
-        vk_pipeline_vertex_input_state_create_info.vertexAttributeDescriptionCount = this->vkVertexInputAttributeDescriptions.size();
-        vk_pipeline_vertex_input_state_create_info.pVertexAttributeDescriptions = this->vkVertexInputAttributeDescriptions.data();
+        vk_pipeline_vertex_input_state_create_info.vertexBindingDescriptionCount = vk_vertex_input_binding_descriptions.size();
+        vk_pipeline_vertex_input_state_create_info.pVertexBindingDescriptions = vk_vertex_input_binding_descriptions.data();
+        vk_pipeline_vertex_input_state_create_info.vertexAttributeDescriptionCount = vk_vertex_input_attribute_descriptions.size();
+        vk_pipeline_vertex_input_state_create_info.pVertexAttributeDescriptions = vk_vertex_input_attribute_descriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo vk_pipeline_input_assembly_state_create_info = {};
         vk_pipeline_input_assembly_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -253,7 +357,7 @@ void Turbo::Core::TPipeline::InternalDestroy()
     vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
 }
 
-Turbo::Core::TPipeline::TPipeline(TRenderPass *renderPass, uint32_t subpass, TPipelineType type, VkPrimitiveTopology primitiveTopology, bool primitiveRestartEnable, std::vector<VkVertexInputBindingDescription> &vkVertexInputBindingDescriptions, std::vector<VkVertexInputAttributeDescription> vkVertexInputAttributeDescriptions, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TRenderPass *renderPass, uint32_t subpass, TPipelineType type, VkPrimitiveTopology primitiveTopology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders) : Turbo::Core::TVulkanHandle()
 {
     if (renderPass != nullptr)
     {
@@ -265,8 +369,7 @@ Turbo::Core::TPipeline::TPipeline(TRenderPass *renderPass, uint32_t subpass, TPi
         this->shaders = shaders;
 
         // VkPipelineVertexInputStateCreateInfo
-        this->vkVertexInputBindingDescriptions = vkVertexInputBindingDescriptions;
-        this->vkVertexInputAttributeDescriptions = vkVertexInputAttributeDescriptions;
+        this->vertexBindings = vertexBindings;
 
         // VkPipelineInputAssemblyStateCreateInfo
         this->primitiveTopology = primitiveTopology;
@@ -355,14 +458,9 @@ bool Turbo::Core::TPipeline::GetPrimitiveRestartEnable()
     return this->primitiveRestartEnable;
 }
 
-std::vector<VkVertexInputBindingDescription> Turbo::Core::TPipeline::GetVkVertexInputBindingDescriptions()
+const std::vector<Turbo::Core::TVertexBinding> &Turbo::Core::TPipeline::GetVertexBindings()
 {
-    return this->vkVertexInputBindingDescriptions;
-}
-
-std::vector<VkVertexInputAttributeDescription> Turbo::Core::TPipeline::GetVkVertexInputAttributeDescriptions()
-{
-    return this->vkVertexInputAttributeDescriptions;
+    return this->vertexBindings;
 }
 
 std::vector<Turbo::Core::TViewport> Turbo::Core::TPipeline::GetViewports()

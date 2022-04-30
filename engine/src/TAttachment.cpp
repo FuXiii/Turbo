@@ -1,6 +1,6 @@
 #include "TAttachment.h"
 
-Turbo::Core::TAttachment::TAttachment(VkFormat format, TSampleCountBits samples, TLoadOp loadOp, TStoreOp storeOp, TLoadOp stencilLoadOp, TStoreOp stencilStoreOp, TImageLayout initialLayout, TImageLayout finalLayout) : Turbo::Core::TInfo()
+Turbo::Core::TAttachment::TAttachment(TFormatInfo format, TSampleCountBits samples, TLoadOp loadOp, TStoreOp storeOp, TLoadOp stencilLoadOp, TStoreOp stencilStoreOp, TImageLayout initialLayout, TImageLayout finalLayout) : Turbo::Core::TInfo()
 {
     this->format = format;
     this->samples = samples;
@@ -16,7 +16,7 @@ Turbo::Core::TAttachment::~TAttachment()
 {
 }
 
-VkFormat Turbo::Core::TAttachment::GetVkFormat()
+Turbo::Core::TFormatInfo Turbo::Core::TAttachment::GetFormat()
 {
     return this->format;
 }

@@ -41,75 +41,75 @@ void Turbo::Core::TImage::InternalCreate()
 
     switch (this->layout)
     {
-    case LAYOUT_UNDEFINED: {
+    case TImageLayout::UNDEFINED: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
     break;
-    case LAYOUT_GENERAL: {
+    case TImageLayout::GENERAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
     }
     break;
-    case LAYOUT_COLOR_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::COLOR_ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL: {
+    case TImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_SHADER_READ_ONLY_OPTIMAL: {
+    case TImageLayout::SHADER_READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_TRANSFER_SRC_OPTIMAL: {
+    case TImageLayout::TRANSFER_SRC_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     }
     break;
-    case LAYOUT_TRANSFER_DST_OPTIMAL: {
+    case TImageLayout::TRANSFER_DST_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     }
     break;
-    case LAYOUT_PREINITIALIZED: {
+    case TImageLayout::PREINITIALIZED: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_PREINITIALIZED;
     }
     break;
-    case LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL: {
+    case TImageLayout::DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_DEPTH_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::DEPTH_ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_DEPTH_READ_ONLY_OPTIMAL: {
+    case TImageLayout::DEPTH_READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_STENCIL_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::STENCIL_ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_STENCIL_READ_ONLY_OPTIMAL: {
+    case TImageLayout::STENCIL_READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_READ_ONLY_OPTIMAL: {
+    case TImageLayout::READ_ONLY_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
     }
     break;
-    case LAYOUT_ATTACHMENT_OPTIMAL: {
+    case TImageLayout::ATTACHMENT_OPTIMAL: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
     }
     break;
-    case LAYOUT_PRESENT_SRC_KHR: {
+    case TImageLayout::PRESENT_SRC_KHR: {
         vk_image_layout = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     }
     break;
@@ -214,6 +214,11 @@ uint32_t Turbo::Core::TImage::GetHeight()
 uint32_t Turbo::Core::TImage::GetDepth()
 {
     return this->extent.depth;
+}
+
+Turbo::Core::TSampleCountBits Turbo::Core::TImage::GetSampleCountBits()
+{
+    return this->samples;
 }
 
 std::string Turbo::Core::TImage::ToString()

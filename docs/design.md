@@ -14,7 +14,7 @@
 - 引擎将基于**Vulkan**开发，重点实现Vulkan 1.0/1.2，未来可能会适配其他图形API
 
 - 基于 ~~ECS~~和**FrameGraph**技术实现
-    - 对于ECS, Turbo核心不会依附于任何树状结构层次数据接口，ECS属于上层建筑
+  - 对于ECS, Turbo核心不会依附于任何树状结构层次数据接口，ECS属于上层建筑
 
 - 支持**多线程渲染**
 
@@ -40,3 +40,23 @@
 
 - ~~Log 使用 spdlog库实现~~(Log功能不应该是核心功能里的)
 - ~~ECS 使用 entt库实现~~(ECS功能也不是核心里的，待开发到高层时再展开)
+
+## Shader 文件扩展
+
+- ".vert": "vert", // for a vertex shader
+- ".vs": "vert", // for a vertex shader
+- ".frag": "frag", // for a fragment shader
+- ".fs": "frag", // for a fragment shader
+- ".gs": "geom", // for a geometry shader
+- ".geom": "geom", // for a geometry shader
+- ".comp": "comp", // for a compute shader
+- ".tesc": "tesc", // for a tessellation control shader
+- ".tese": "tese", // for a tessellation evaluation shader
+- ".rgen": "rgen", // for a ray generation shader
+- ".rint": "rint", // for a ray intersection shader
+- ".rahit": "rahit", // for a ray any hit shader
+- ".rchit": "rchit", // for a ray closest shader
+- ".rmiss": "rmiss", // for a ray miss shader
+- ".rcall": "rcall", // for a ray callable shader
+- ".mesh": "mesh", // for a mesh shader
+- ".task": "task" // for a task shader

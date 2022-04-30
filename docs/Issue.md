@@ -40,12 +40,16 @@
 
 * **`Note:`** `Turbo::Core::TSubpass`中的`std::vector<VkAttachmentReference> ...`保留，用起来很方便
 
-* **`Now in dev:`** `Turbo::Core::TAttachment`构造函数中对于`Vulkan`声明的数据结构依赖过多，须自定义（`VkFormat`,`VkSampleCountFlagBits`,`VkAttachmentLoadOp`,`VkAttachmentStoreOp`等）
+* ~~`Turbo::Core::TAttachment`构造函数中对于`Vulkan`声明的数据结构依赖过多，须自定义（`VkFormat`,`VkSampleCountFlagBits`,`VkAttachmentLoadOp`,`VkAttachmentStoreOp`等）~~ 2022/4/29
 
-* 对于`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`考虑如何设计，使用起来方便
+* **`Dev now :`**对于`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`考虑如何设计，使用起来方便
 
 * `Turbo::Core::TRenderPass`构造函数的`TPipelineType type`转移到`TSubpass`中
 
 * `Turbo::Core::TPipeline`重度依赖`Vulkan`的数据结构
 
+* `Turbo::Core::TPipeline`目前只实现了`Graphic`，计算管线`Compute`未实现
+
 * `Turbo::Core::TCommandBuffer`很多指令未实现，待实现
+
+* `Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`
