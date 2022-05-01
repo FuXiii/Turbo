@@ -13,7 +13,7 @@
 #include "TShader.h"
 
 #include "TAttachment.h"
-#include "TPipeline.h"
+#include "TGraphicsPipeline.h"
 #include "TRenderPass.h"
 #include "TSubpass.h"
 
@@ -186,10 +186,10 @@ int main()
     memcpy(vertex_buffer_ptr, VERTEX_DATA, sizeof(VERTEX_DATA));
     vertex_buffer->Unmap();
 
-    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::B8G8R8A8_SRGB), 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::D32_SFLOAT), 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
@@ -234,8 +234,8 @@ int main()
     Turbo::Core::TFramebuffer *frame_buffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
 
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(VERTEX_DATA[0]), Turbo::Core::TVertexRate::VERTEX);
-    vertex_binding.AddAttribute(0, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::R32G32B32A32_SFLOAT), 0);  // pos
-    vertex_binding.AddAttribute(1, Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::R32G32B32A32_SFLOAT), 16); // color
+    vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0);  // pos
+    vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 16); // color
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings{vertex_binding};
 
@@ -249,7 +249,7 @@ int main()
     scissors.push_back(scissor);
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
-    Turbo::Core::TPipeline *pipeline = new Turbo::Core::TPipeline(render_pass, 0, Turbo::Core::TPipelineType::Graphics, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, VkPolygonMode::VK_POLYGON_MODE_FILL, VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT, VkFrontFace::VK_FRONT_FACE_CLOCKWISE, false, 0, 0, 0, 1, shaders);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, shaders);
 
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets;
     descriptor_sets.push_back(descriptor_set);
