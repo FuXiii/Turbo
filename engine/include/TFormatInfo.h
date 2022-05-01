@@ -277,7 +277,6 @@ typedef enum TFormatContentType
     UNUSED = 0x080,   ///???
 } TFormatContentTypeEnum;
 
-//���ڶ����ʽ����������
 typedef enum class TFormatDataType
 {
     UNSIGNED_NORMALIZED, // UNORM 	: float : unsigned normalized values in the range [0,1]
@@ -324,7 +323,7 @@ class TFormatInfo : public TObject
     static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);
 
   public:
-    explicit TFormatInfo(TFormatType formatType = TFormatType::R8G8B8A8_SRGB);
+    TFormatInfo(TFormatType formatType = TFormatType::R8G8B8A8_SRGB);
     ~TFormatInfo();
 
   public:

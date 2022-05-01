@@ -430,3 +430,16 @@ Turbo是渲染引擎
   >`TPipeline.h`中增加`TVertexAttribute`，`TVertexBinding`类，分别用于表示`VkVertexInputAttributeDescription`和`VkVertexInputBindingDescription`
   >`TPipeline.h`中增加`typedef enum class TVertexRate`类，用于表示`VkVertexInputRate`
   >`TPipeline.h`中剔除`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`的使用，改为使用`TVertexAttribute`，`TVertexBinding`
+
+  * 2022/5/1 设计架构
+  >`TFormatInfo.h`中,构造函数声明去掉`explicit`，使得可直接使用`TFormatType`进行隐示类型转换到`TFormatInfo`
+  >`TPipeline.h`中增加`typedef enum class TTopologyType`用于对应`VkPrimitiveTopology`
+  >`TPipeline.h`中对于`VkPrimitiveTopology`替换成使用`TTopologyType`
+  >`TPipeline.h`中增加`typedef enum class TPolygonMode`用于对应`VkPolygonMode`
+  >`TPipeline.h`中对于`VkPolygonMode`替换成使用`TPolygonMode`
+  >`TPipeline.h`中增加`typedef enum TCullModeBits`用于对应`VkCullModeFlagBits`
+  >`TPipeline.h`中增加`typedef VkFlags TCullModes`用于对应`VkCullModeFlags`
+  >`TPipeline.h`中对于`VkCullModeFlags`替换成使用`TCullModes`
+  >`TPipeline.h`中增加`typedef enum class TFrontFace`用于对应`VkFrontFace`
+  >`TPipeline.h`中对于`VkFrontFace`替换成使用`TFrontFace`
+  >创建`TGraphicsPipeline`继承自`TPipeline`,将原先`TPipeline`中有关图形管线的内容搬到了`TGraphicsPipeline`中
