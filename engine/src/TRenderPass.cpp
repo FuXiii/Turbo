@@ -38,6 +38,25 @@ void Turbo::Core::TRenderPass::InternalCreate()
     break;
     }
 
+    uint32_t subpass_index = 0;
+    uint32_t subpasses_count = this->subpasses.size();
+
+    std::vector<VkSubpassDependency> vk_subpass_dependencys;
+
+    if (subpasses_count > 0)
+    {
+        VkSubpassDependency top_subpass_external_dependency = {};
+        top_subpass_external_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        top_subpass_external_dependency.dstSubpass = 0;
+        top_subpass_external_dependency.srcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        top_subpass_external_dependency.dstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+        top_subpass_external_dependency.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        top_subpass_external_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        top_subpass_external_dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        vk_subpass_dependencys.push_back(top_subpass_external_dependency);
+    }
+
     std::vector<VkSubpassDescription> vk_subpass_descriptions;
     for (TSubpass &subpass_item : this->subpasses)
     {
@@ -48,12 +67,42 @@ void Turbo::Core::TRenderPass::InternalCreate()
         vk_subpass_description.pInputAttachments = subpass_item.GetInputAttachmentReferences()->data();
         vk_subpass_description.colorAttachmentCount = subpass_item.GetColorAttachmentReferences()->size();
         vk_subpass_description.pColorAttachments = subpass_item.GetColorAttachmentReferences()->data();
-        vk_subpass_description.pResolveAttachments = nullptr;
+        vk_subpass_description.pResolveAttachments = subpass_item.GetResolveAttachmentReferences()->data();
         vk_subpass_description.pDepthStencilAttachment = subpass_item.GetDepthStencilAttachmentReference();
         vk_subpass_description.preserveAttachmentCount = 0;
         vk_subpass_description.pPreserveAttachments = nullptr;
 
         vk_subpass_descriptions.push_back(vk_subpass_description);
+
+        if ((subpass_index + 1) <= (subpasses_count - 1))
+        {
+            VkSubpassDependency vk_subpass_dependency = {};
+            vk_subpass_dependency.srcSubpass = subpass_index;
+            vk_subpass_dependency.dstSubpass = subpass_index + 1;
+            vk_subpass_dependency.srcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+            vk_subpass_dependency.dstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+            vk_subpass_dependency.srcAccessMask = 0;
+            vk_subpass_dependency.dstAccessMask = 0;
+            vk_subpass_dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+            vk_subpass_dependencys.push_back(vk_subpass_dependency);
+        }
+
+        subpass_index = subpass_index + 1;
+    }
+
+    if (subpasses_count > 0)
+    {
+        VkSubpassDependency end_subpass_external_dependency = {};
+        end_subpass_external_dependency.srcSubpass = this->subpasses.size() - 1;
+        end_subpass_external_dependency.dstSubpass = VK_SUBPASS_EXTERNAL;
+        end_subpass_external_dependency.srcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+        end_subpass_external_dependency.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        end_subpass_external_dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        end_subpass_external_dependency.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        end_subpass_external_dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        vk_subpass_dependencys.push_back(end_subpass_external_dependency);
     }
 
     VkRenderPassCreateInfo vk_render_pass_create_info;
@@ -64,8 +113,8 @@ void Turbo::Core::TRenderPass::InternalCreate()
     vk_render_pass_create_info.pAttachments = vk_attachment_descriptions.data();
     vk_render_pass_create_info.subpassCount = vk_subpass_descriptions.size();
     vk_render_pass_create_info.pSubpasses = vk_subpass_descriptions.data();
-    vk_render_pass_create_info.dependencyCount = 0;
-    vk_render_pass_create_info.pDependencies = nullptr;
+    vk_render_pass_create_info.dependencyCount = vk_subpass_dependencys.size();
+    vk_render_pass_create_info.pDependencies = vk_subpass_dependencys.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();

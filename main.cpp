@@ -138,7 +138,7 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
                                     "   outColor = inColor;\n"
-                                    "   gl_Position = myBufferVals.scale * pos;\n"
+                                    "   gl_Position =vec4( myBufferVals.scale * pos.x,myBufferVals.scale * pos.y,myBufferVals.scale * pos.z,1);\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
@@ -170,7 +170,11 @@ int main()
 
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device);
+
+    VkPhysicalDeviceFeatures vk_physical_device_features = {};
+    vk_physical_device_features.sampleRateShading = VK_TRUE;
+
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, nullptr, &vk_physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
@@ -181,12 +185,19 @@ int main()
     memcpy(scale_ptr, &scale, sizeof(scale));
     scale_buffer->Unmap();
 
+    scale = 0.5f;
+
+    Turbo::Core::TBuffer *scale_buffer_zero_point_five = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    scale_ptr = scale_buffer_zero_point_five->Map();
+    memcpy(scale_ptr, &scale, sizeof(scale));
+    scale_buffer_zero_point_five->Unmap();
+
     Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX_DATA));
     void *vertex_buffer_ptr = vertex_buffer->Map();
     memcpy(vertex_buffer_ptr, VERTEX_DATA, sizeof(VERTEX_DATA));
     vertex_buffer->Unmap();
 
-    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
@@ -211,12 +222,19 @@ int main()
     buffers.push_back(scale_buffer);
     descriptor_set->BindData(0, 0, buffers);
 
+    Turbo::Core::TDescriptorSet *descriptor_set_zero_point_five = descriptor_pool->Allocate(descriptor_set_layout);
+    std::vector<Turbo::Core::TBuffer *> buffers2;
+    buffers2.push_back(scale_buffer_zero_point_five);
+    descriptor_set_zero_point_five->BindData(0, 0, buffers2);
+
     Turbo::Core::TSubpass subpass;
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+    // subpass.AddResolveAttachmentReference(1, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass);
+    subpasses.push_back(subpass); // subpass 1
+    subpasses.push_back(subpass); // subpass 2
 
     Turbo::Core::TAttachment color_attachment(color_image->GetFormat(), color_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -249,10 +267,14 @@ int main()
     scissors.push_back(scissor);
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, shaders);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
+    Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
 
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets;
     descriptor_sets.push_back(descriptor_set);
+
+    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets2;
+    descriptor_sets2.push_back(descriptor_set_zero_point_five);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -260,10 +282,14 @@ int main()
     command_buffer->Begin();
     command_buffer->BeginRenderPass(render_pass, frame_buffer);
     command_buffer->BindPipeline(pipeline);
-    command_buffer->BindDescriptorSets(pipeline, 0, descriptor_sets);
+    command_buffer->BindDescriptorSets(0, descriptor_sets);
     command_buffer->BindVertexBuffers(vertex_buffers);
     command_buffer->SetViewport(viewports);
     command_buffer->SetScissor(scissors);
+    command_buffer->Draw(3, 1, 0, 0);
+    command_buffer->NextSubpass();
+    command_buffer->BindPipeline(pipeline2);
+    command_buffer->BindDescriptorSets(0, descriptor_sets2);
     command_buffer->Draw(3, 1, 0, 0);
     command_buffer->EndRenderPass();
     command_buffer->End();
@@ -277,14 +303,16 @@ int main()
     fence->WaitUntil();
 
     {
+        Turbo::Core::TImage *source_image = color_image;
+
         VkResult res = VkResult::VK_ERROR_UNKNOWN;
         VkImageCreateInfo image_create_info_ = {};
         image_create_info_.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         image_create_info_.pNext = NULL;
         image_create_info_.imageType = VK_IMAGE_TYPE_2D;
-        image_create_info_.format = color_image->GetFormat().GetVkFormat();
-        image_create_info_.extent.width = color_image->GetWidth();
-        image_create_info_.extent.height = color_image->GetHeight();
+        image_create_info_.format = source_image->GetFormat().GetVkFormat();
+        image_create_info_.extent.width = source_image->GetWidth();
+        image_create_info_.extent.height = source_image->GetHeight();
         image_create_info_.extent.depth = 1;
         image_create_info_.mipLevels = 1;
         image_create_info_.arrayLayers = 1;
@@ -341,7 +369,7 @@ int main()
 
         set_image_layout(_commandBuffer, mappableImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-        set_image_layout(_commandBuffer, color_image->GetVkImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+        set_image_layout(_commandBuffer, source_image->GetVkImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
         VkImageCopy copy_region;
         copy_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -358,11 +386,11 @@ int main()
         copy_region.dstOffset.x = 0;
         copy_region.dstOffset.y = 0;
         copy_region.dstOffset.z = 0;
-        copy_region.extent.width = color_image->GetWidth();
-        copy_region.extent.height = color_image->GetHeight();
+        copy_region.extent.width = source_image->GetWidth();
+        copy_region.extent.height = source_image->GetHeight();
         copy_region.extent.depth = 1;
 
-        vkCmdCopyImage(_commandBuffer, color_image->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mappableImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
+        vkCmdCopyImage(_commandBuffer, source_image->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mappableImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
 
         set_image_layout(_commandBuffer, mappableImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
 
@@ -414,30 +442,30 @@ int main()
         std::ofstream file(filename.c_str(), std::ios::binary);
 
         file << "P6\n";
-        file << color_image->GetWidth() << " ";
-        file << color_image->GetHeight() << "\n";
+        file << source_image->GetWidth() << " ";
+        file << source_image->GetHeight() << "\n";
         file << 255 << "\n";
 
         int x = 0;
         int y = 0;
 
-        for (y = 0; y < color_image->GetHeight(); y++)
+        for (y = 0; y < source_image->GetHeight(); y++)
         {
             const int *row = (const int *)ptr;
             int swapped;
 
-            if (color_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || color_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
+            if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
             {
-                for (x = 0; x < color_image->GetWidth(); x++)
+                for (x = 0; x < source_image->GetWidth(); x++)
                 {
                     swapped = (*row & 0xff00ff00) | (*row & 0x000000ff) << 16 | (*row & 0x00ff0000) >> 16;
                     file.write((char *)&swapped, 3);
                     row++;
                 }
             }
-            else if (color_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
+            else if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
             {
-                for (x = 0; x < color_image->GetWidth(); x++)
+                for (x = 0; x < source_image->GetWidth(); x++)
                 {
                     file.write((char *)row, 3);
                     row++;
@@ -460,9 +488,11 @@ int main()
 
     delete fence;
     delete pipeline;
+    delete pipeline2;
     delete frame_buffer;
     delete render_pass;
     descriptor_pool->Free(descriptor_set);
+    descriptor_pool->Free(descriptor_set_zero_point_five);
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;
@@ -472,6 +502,7 @@ int main()
     delete color_image;
     delete vertex_buffer;
     delete scale_buffer;
+    delete scale_buffer_zero_point_five;
     command_pool->Free(command_buffer);
     delete command_pool;
     delete device;

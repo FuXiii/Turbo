@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TGRAPHICSPIPELINE_H
 #define TGRAPHICSPIPELINE_H
+#include "TImage.h"
 #include "TPipeline.h"
 
 namespace Turbo
@@ -120,6 +121,9 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     float depthBiasSlopeFactor;
     float lineWidth;
 
+    bool multisampleEnable;
+    TSampleCountBits sample;
+
     uint32_t subpass;
 
   protected:
@@ -127,7 +131,7 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     virtual void InternalDestroy() override;
 
   public:
-    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders);
+    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, std::vector<TShader *> &shaders);
     ~TGraphicsPipeline();
 
     TTopologyType GetTopologyType();

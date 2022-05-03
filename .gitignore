@@ -1,4 +1,4 @@
 build/
-.ppm
-.cache/
+*.ppm
+*.cache/
 ./vscode
