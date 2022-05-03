@@ -213,9 +213,13 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_multi_sample_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     vk_pipeline_multi_sample_state_create_info.pNext = nullptr;
     vk_pipeline_multi_sample_state_create_info.flags = 0;
-    vk_pipeline_multi_sample_state_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    vk_pipeline_multi_sample_state_create_info.sampleShadingEnable = VK_FALSE;
-    vk_pipeline_multi_sample_state_create_info.minSampleShading = 0.0f;
+    vk_pipeline_multi_sample_state_create_info.sampleShadingEnable = VK_FALSE; // VK_FALSE;
+    if (this->multisampleEnable)
+    {
+        vk_pipeline_multi_sample_state_create_info.sampleShadingEnable = VK_TRUE;
+    }
+    vk_pipeline_multi_sample_state_create_info.rasterizationSamples = (VkSampleCountFlagBits)this->sample;
+    vk_pipeline_multi_sample_state_create_info.minSampleShading = 1.0f; //[0,1]
     vk_pipeline_multi_sample_state_create_info.pSampleMask = nullptr;
     vk_pipeline_multi_sample_state_create_info.alphaToCoverageEnable = VK_FALSE;
     vk_pipeline_multi_sample_state_create_info.alphaToOneEnable = VK_FALSE;
@@ -311,7 +315,7 @@ void Turbo::Core::TGraphicsPipeline::InternalDestroy()
     vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, std::vector<TShader *> &shaders) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
+Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, std::vector<TShader *> &shaders) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
 {
     if (renderPass != nullptr)
     {
@@ -348,7 +352,8 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         this->lineWidth = lineWidth;
 
         // VkPipelineMultisampleStateCreateInfo
-        // 目前为 VK_SAMPLE_COUNT_1_BIT
+        this->multisampleEnable = multisampleEnable;
+        this->sample = sample;
 
         // VkPipelineDepthStencilStateCreateInfo
         // 目前为 VK_COMPARE_OP_ALWAYS

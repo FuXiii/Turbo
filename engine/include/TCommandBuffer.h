@@ -25,7 +25,10 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TCommandBufferPool *commandBufferPool = nullptr;
     T_VULKAN_HANDLE_HANDLE VkCommandBuffer vkCommandBuffer = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN; //??? 
+    T_VULKAN_HANDLE_CHILDREN; //???
+
+    TRenderPass *currentRenderPass = nullptr;
+    TPipeline *currentPipeline = nullptr;
 
   protected:
     virtual void InternalCreate() override;
@@ -41,7 +44,7 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     bool Begin();
     void BeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     void BindPipeline(TPipeline *pipeline);
-    void BindDescriptorSets(TPipeline *pipeline, uint32_t firstSet, std::vector<TDescriptorSet *>& descriptorSets);
+    void BindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets);
     void BindVertexBuffers(std::vector<TBuffer *> &vertexBuffers);
     void SetViewport(std::vector<TViewport> &viewports);
     void SetScissor(std::vector<TScissor> &scissors);

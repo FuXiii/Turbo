@@ -5,6 +5,7 @@
 - `fixed :` <font color=green>**[ ✓ ]year/month/day**</font>
 - `error :` <font color=red>**[ 🞭 ]year/month/day**</font>
 - `alarm :` <font color=yellow>**[ ! ]year/month/day**</font>
+- `develope :` <font color=orange>**[ 🛠 ] now**</font>
 
 ### **文档！别忘写文档**
 
@@ -13,6 +14,8 @@
 - `Turbo::Core::TCommandBuffer::BeginRenderPass()中的ClearColor` 可能有问题（等到支持窗口渲染后再调，调试起来方便），而且现在写死了，需要开放对外接口(比如说放到`TAttachemnt`中声明)。
 
 - <font color=green>**[ ✓ ]2022/5/1**</font> ~~`TFormatInfo` 目前用起来比较麻烦，提供一种简便方法，比如隐示转换。~~
+
+- `TFormatInfo`增加对于`vkGetPhysicalDeviceFormatProperties(...)`和`vkGetPhysicalDeviceImageFormatProperties(...)`功能的实现接口
 
 - `Turbo::Core::TBuffer`的构造函数需要传入`VkBufferCreateFlags`，在`Turbo`中用起来比较奇怪，或者不向外提供该参数（目前搞不清楚用法，或者就这么放着到最后再说）
 
@@ -52,7 +55,7 @@
 
 - `Turbo::Core::TRenderPass`构造函数的`TPipelineType type`转移到`TSubpass`中
 
-- **`Dev now:`** `Turbo::Core::TPipeline`重度依赖`Vulkan`的数据结构
+- <font color=green>**[ ✓ ]2022/5/2**</font>  ~~`Turbo::Core::TPipeline`重度依赖`Vulkan`的数据结构~~
 
 - `Turbo::Core::TPipeline`目前只实现了`Graphic`，计算管线`Compute`未实现
 
@@ -61,12 +64,22 @@
 - 计算管线`Compute`未实现
 
 - `Turbo::Core::TPipeline`目前`...CreatInfo`不完整，有些数据是写死的，如：
-  - `VkPipelineMultisampleStateCreateInfo`
+  - ~~`VkPipelineMultisampleStateCreateInfo`~~
   - `VkPipelineDepthStencilStateCreateInfo`
   - `VkPipelineColorBlendAttachmentState`
   - `VkPipelineColorBlendStateCreateInfo`
   - `VkPipelineDynamicStateCreateInfo`
 
+- 目前只实现了`TGraphicsPipeline`中所有的`VkPipelineShaderStageCreateInfo::pName`指代的`Shader`入口函数全是`main`,考虑是否提供自定义化接口(`glslang`好像提供相关入口函数获取功能)
+
+- 目前只实现了`TGraphicsPipeline`中的`VkDynamicState`目前是写死的将`VK_DYNAMIC_STATE_VIEWPORT`和`VK_DYNAMIC_STATE_SCISSOR`加入了动态数组中
+
 - `Turbo::Core::TCommandBuffer`很多指令未实现，待实现
 
-- `Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`
+- `Second Command Buffer`目前`Turbo`不支持
+
+- <font color=orange>**[ 🛠 ] now**</font>  `Subpass Dependence`目前`Turbo`未实现
+
+- <font color=green>**[ ✓ ]2022/5/2**</font> ~~实现`Turbo::Core::TCommandBuffer::NextSubpass()`函数~~
+
+- <font color=green>**[ ✓ ]2022/5/2**</font>  ~~`Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`~~

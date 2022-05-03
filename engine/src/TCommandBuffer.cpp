@@ -41,9 +41,15 @@ void Turbo::Core::TCommandBuffer::InternalDestroy()
 
 Turbo::Core::TCommandBuffer::TCommandBuffer(TCommandBufferPool *commandBufferPool) : Turbo::Core::TVulkanHandle()
 {
-    this->commandBufferPool = commandBufferPool;
-
-    this->InternalCreate();
+    if (commandBufferPool != nullptr)
+    {
+        this->commandBufferPool = commandBufferPool;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+    }
 }
 
 Turbo::Core::TCommandBuffer::~TCommandBuffer()
@@ -111,6 +117,8 @@ void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFram
     vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
 
     vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+
+    this->currentRenderPass = renderPass;
 }
 
 void Turbo::Core::TCommandBuffer::BindPipeline(TPipeline *pipeline)
@@ -130,31 +138,40 @@ void Turbo::Core::TCommandBuffer::BindPipeline(TPipeline *pipeline)
     }
 
     vkCmdBindPipeline(this->vkCommandBuffer, vk_pipeline_bind_point, pipeline->GetVkPipeline());
+
+    this->currentPipeline = pipeline;
 }
 
-void Turbo::Core::TCommandBuffer::BindDescriptorSets(TPipeline *pipeline, uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets)
+void Turbo::Core::TCommandBuffer::BindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
-    switch (pipeline->GetType())
+    if (this->currentPipeline != nullptr)
     {
-    case TPipelineType::Compute: {
-        vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
-    }
-    break;
-    case TPipelineType::Graphics: {
-        vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-    }
-    break;
-    }
+        switch (this->currentPipeline->GetType())
+        {
+        case TPipelineType::Compute: {
+            vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+        }
+        break;
+        case TPipelineType::Graphics: {
+            vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
+        }
+        break;
+        }
 
-    std::vector<VkDescriptorSet> vk_descriptor_sets;
-    for (TDescriptorSet *descriptor_set_item : descriptorSets)
+        std::vector<VkDescriptorSet> vk_descriptor_sets;
+        for (TDescriptorSet *descriptor_set_item : descriptorSets)
+        {
+            vk_descriptor_sets.push_back(descriptor_set_item->GetVkDescriptorSet());
+        }
+
+        vkCmdBindDescriptorSets(this->vkCommandBuffer, vk_pipeline_bind_point, this->currentPipeline->GetVkPipelineLayout(), firstSet, vk_descriptor_sets.size(), vk_descriptor_sets.data(), 0, nullptr);
+    }
+    else
     {
-        vk_descriptor_sets.push_back(descriptor_set_item->GetVkDescriptorSet());
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
     }
-
-    vkCmdBindDescriptorSets(this->vkCommandBuffer, vk_pipeline_bind_point, pipeline->GetVkPipelineLayout(), firstSet, vk_descriptor_sets.size(), vk_descriptor_sets.data(), 0, nullptr);
 }
 
 void Turbo::Core::TCommandBuffer::BindVertexBuffers(std::vector<TBuffer *> &vertexBuffers)
@@ -220,6 +237,8 @@ void Turbo::Core::TCommandBuffer::NextSubpass()
 void Turbo::Core::TCommandBuffer::EndRenderPass()
 {
     vkCmdEndRenderPass(this->vkCommandBuffer);
+    this->currentPipeline = nullptr;
+    this->currentRenderPass = nullptr;
 }
 
 bool Turbo::Core::TCommandBuffer::End()
