@@ -447,9 +447,11 @@ Turbo是渲染引擎
   >* 创建`TGraphicsPipeline`继承自`TPipeline`,将原先`TPipeline`中有关图形管线的内容搬到了`TGraphicsPipeline`中
 
   * 2022/5/2 设计架构
-  >`TGraphicsPipeline`中增加`bool multisampleEnable`和`TSampleCountBits sample`的成员变量，提供对`Multisample`特性的支持
-  >`TCommandBuffer`中增加`TRenderPass *currentRenderPass`和`TPipeline *currentPipeline`的成员变量，提供对当前使用的`RenderPass`和`Pipeline`的引用
+  >
+  >* `TGraphicsPipeline`中增加`bool multisampleEnable`和`TSampleCountBits sample`的成员变量，提供对`Multisample`特性的支持
+  >* `TCommandBuffer`中增加`TRenderPass *currentRenderPass`和`TPipeline *currentPipeline`的成员变量，提供对当前使用的`RenderPass`和`Pipeline`的引用
 
   * 2022/5/3 设计架构
-  >`TCommandBuffer`中实现了`void Turbo::Core::TCommandBuffer::NextSubpass()`的成员函数，提供对`vkCmdNextSubpass(...)`特性的支持
-  >`Turbo`核心现已支持多`Subpass`渲染
+  >
+  >* `TCommandBuffer`中实现了`void Turbo::Core::TCommandBuffer::NextSubpass()`的成员函数，提供对`vkCmdNextSubpass(...)`特性的支持
+  >* `Turbo`核心现已支持多`Subpass`渲染
