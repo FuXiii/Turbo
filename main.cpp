@@ -227,9 +227,8 @@ int main()
     buffers2.push_back(scale_buffer_zero_point_five);
     descriptor_set_zero_point_five->BindData(0, 0, buffers2);
 
-    Turbo::Core::TSubpass subpass;
+    Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-    // subpass.AddResolveAttachmentReference(1, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TSubpass> subpasses;
@@ -243,7 +242,7 @@ int main()
     attachemts.push_back(color_attachment);
     attachemts.push_back(depth_attachment);
 
-    Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, Turbo::Core::TPipelineType::Graphics, attachemts, subpasses);
+    Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
     std::vector<Turbo::Core::TImageView *> image_views;
     image_views.push_back(color_image_view);
@@ -303,6 +302,9 @@ int main()
     fence->WaitUntil();
 
     {
+
+        std::string save_file_path = "E:/Turbo/";
+        std::string save_file_name("VulkanImage");
         Turbo::Core::TImage *source_image = color_image;
 
         VkResult res = VkResult::VK_ERROR_UNKNOWN;
@@ -424,8 +426,8 @@ int main()
         vkDestroyFence(device->GetVkDevice(), cmdFence, NULL);
 
         std::string filename;
-        filename.append("E:/Turbo");
-        filename.append("/VulkanImage");
+        filename.append(save_file_path);
+        filename.append(save_file_name);
         filename.append(".ppm");
 
         VkImageSubresource subres = {};

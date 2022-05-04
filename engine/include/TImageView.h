@@ -67,6 +67,13 @@ class TImageView : public TVulkanHandle
     TImage *GetImage();
 
     VkImageView GetVkImageView();
+    TImageViewType GetViewType();
+    TFormatInfo GetFormat();
+    TImageAspects GetAspects();
+    uint32_t GetBaseMipLevel();
+    uint32_t GetLevelCount();
+    uint32_t GetBaseArrayLayer();
+    uint32_t GetLayerCount();
 
     // Inherited via TObject
     virtual std::string ToString() override;

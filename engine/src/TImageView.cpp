@@ -82,6 +82,41 @@ VkImageView Turbo::Core::TImageView::GetVkImageView()
     return this->vkImageView;
 }
 
+Turbo::Core::TImageViewType Turbo::Core::TImageView::GetViewType()
+{
+    return this->viewType;
+}
+
+Turbo::Core::TFormatInfo Turbo::Core::TImageView::GetFormat()
+{
+    return this->format;
+}
+
+Turbo::Core::TImageAspects Turbo::Core::TImageView::GetAspects()
+{
+    return this->aspects;
+}
+
+uint32_t Turbo::Core::TImageView::GetBaseMipLevel()
+{
+    return this->baseMipLevel;
+}
+
+uint32_t Turbo::Core::TImageView::GetLevelCount()
+{
+    return this->levelCount;
+}
+
+uint32_t Turbo::Core::TImageView::GetBaseArrayLayer()
+{
+    return this->baseArrayLayer;
+}
+
+uint32_t Turbo::Core::TImageView::GetLayerCount()
+{
+    return this->layerCount;
+}
+
 std::string Turbo::Core::TImageView::ToString()
 {
     return std::string();

@@ -24,20 +24,6 @@ void Turbo::Core::TRenderPass::InternalCreate()
         vk_attachment_descriptions.push_back(vk_attachment_description);
     }
 
-    VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-    switch (this->type)
-    {
-    case TPipelineType::Compute: {
-        vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
-    }
-    break;
-    case TPipelineType::Graphics: {
-        vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-    }
-    break;
-    }
-
     uint32_t subpass_index = 0;
     uint32_t subpasses_count = this->subpasses.size();
 
@@ -60,6 +46,20 @@ void Turbo::Core::TRenderPass::InternalCreate()
     std::vector<VkSubpassDescription> vk_subpass_descriptions;
     for (TSubpass &subpass_item : this->subpasses)
     {
+        VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+        switch (subpass_item.GetPipelineType())
+        {
+        case TPipelineType::Compute: {
+            vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+        }
+        break;
+        case TPipelineType::Graphics: {
+            vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
+        }
+        break;
+        }
+
         VkSubpassDescription vk_subpass_description = {};
         vk_subpass_description.flags = 0;
         vk_subpass_description.pipelineBindPoint = vk_pipeline_bind_point;
@@ -83,7 +83,7 @@ void Turbo::Core::TRenderPass::InternalCreate()
             vk_subpass_dependency.dstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
             vk_subpass_dependency.srcAccessMask = 0;
             vk_subpass_dependency.dstAccessMask = 0;
-            vk_subpass_dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+            vk_subpass_dependency.dependencyFlags = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT;
 
             vk_subpass_dependencys.push_back(vk_subpass_dependency);
         }
@@ -132,12 +132,11 @@ void Turbo::Core::TRenderPass::InternalDestroy()
     vkDestroyRenderPass(vk_device, this->vkRenderPass, allocator);
 }
 
-Turbo::Core::TRenderPass::TRenderPass(TDevice *device, TPipelineType type, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TRenderPass::TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr || subpasses.size() == 0)
     {
         this->device = device;
-        this->type = type;
         this->subpasses = subpasses;
         this->attachments = attachments;
 

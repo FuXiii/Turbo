@@ -6,7 +6,6 @@
 #include "TDeviceQueue.h"
 #include "TException.h"
 #include "TFramebuffer.h"
-#include "TPipeline.h"
 #include "TRenderPass.h"
 #include "TScissor.h"
 #include "TSubpass.h"
@@ -259,6 +258,131 @@ bool Turbo::Core::TCommandBuffer::Reset()
         return true;
     }
     return false;
+}
+
+void Turbo::Core::TCommandBuffer::PipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers)
+{
+    std::vector<VkMemoryBarrier> vk_memory_barriers;
+    for (TMemoryBarrier &memory_barrier_item : memoryBarriers)
+    {
+        VkMemoryBarrier vk_memory_barrier = {};
+        vk_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        vk_memory_barrier.pNext = nullptr;
+        vk_memory_barrier.srcAccessMask = memory_barrier_item.GetSrcAccess();
+        vk_memory_barrier.dstAccessMask = memory_barrier_item.GetDstAccess();
+
+        vk_memory_barriers.push_back(vk_memory_barrier);
+    }
+
+    std::vector<VkBufferMemoryBarrier> vk_buffer_memory_barriers;
+    for (TBufferMemoryBarrier &memory_barrier_item : bufferBarriers)
+    {
+        VkBufferMemoryBarrier vk_buffer_memory_barrier = {};
+        vk_buffer_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        vk_buffer_memory_barrier.pNext = nullptr;
+        vk_buffer_memory_barrier.srcAccessMask = memory_barrier_item.GetSrcAccess();
+        vk_buffer_memory_barrier.dstAccessMask = memory_barrier_item.GetDstAccess();
+        vk_buffer_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        vk_buffer_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        vk_buffer_memory_barrier.buffer = memory_barrier_item.GetBuffer()->GetVkBuffer();
+        vk_buffer_memory_barrier.offset = memory_barrier_item.GetOffset();
+        vk_buffer_memory_barrier.size = memory_barrier_item.GetSize();
+
+        vk_buffer_memory_barriers.push_back(vk_buffer_memory_barrier);
+    }
+
+    std::vector<VkImageMemoryBarrier> vk_image_memory_barriers;
+    for (TImageMemoryBarrier &image_barrier_item : imageBarriers)
+    {
+        VkImageMemoryBarrier vk_image_memory_barrier = {};
+        vk_image_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        vk_image_memory_barrier.pNext = nullptr;
+        vk_image_memory_barrier.srcAccessMask = image_barrier_item.GetSrcAccess();
+        vk_image_memory_barrier.dstAccessMask = image_barrier_item.GetDstAccess();
+        vk_image_memory_barrier.oldLayout = (VkImageLayout)image_barrier_item.GetOldLayout();
+        vk_image_memory_barrier.newLayout = (VkImageLayout)image_barrier_item.GetNewLayout();
+        vk_image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        vk_image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        vk_image_memory_barrier.image = image_barrier_item.GetImage()->GetVkImage();
+        vk_image_memory_barrier.subresourceRange.aspectMask = image_barrier_item.GetAspects();
+        vk_image_memory_barrier.subresourceRange.baseMipLevel = image_barrier_item.GetBaseMipLevel();
+        vk_image_memory_barrier.subresourceRange.levelCount = image_barrier_item.GetLevelCount();
+        vk_image_memory_barrier.subresourceRange.baseArrayLayer = image_barrier_item.GetBaseArrayLayer();
+        vk_image_memory_barrier.subresourceRange.layerCount = image_barrier_item.GetLayerCount();
+
+        vk_image_memory_barriers.push_back(vk_image_memory_barrier);
+    }
+
+    vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, vk_memory_barriers.size(), vk_memory_barriers.data(), vk_buffer_memory_barriers.size(), vk_buffer_memory_barriers.data(), vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
+}
+
+void Turbo::Core::TCommandBuffer::PipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier)
+{
+    VkMemoryBarrier vk_memory_barrier = {};
+    vk_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    vk_memory_barrier.pNext = nullptr;
+    vk_memory_barrier.srcAccessMask = memoryBarrier.GetSrcAccess();
+    vk_memory_barrier.dstAccessMask = memoryBarrier.GetDstAccess();
+
+    std::vector<VkMemoryBarrier> vk_memory_barriers;
+    vk_memory_barriers.push_back(vk_memory_barrier);
+
+    vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, vk_memory_barriers.size(), vk_memory_barriers.data(), 0, nullptr, 0, nullptr);
+}
+
+void Turbo::Core::TCommandBuffer::PipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier)
+{
+    VkBufferMemoryBarrier vk_buffer_memory_barrier = {};
+    vk_buffer_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    vk_buffer_memory_barrier.pNext = nullptr;
+    vk_buffer_memory_barrier.srcAccessMask = bufferBarrier.GetSrcAccess();
+    vk_buffer_memory_barrier.dstAccessMask = bufferBarrier.GetDstAccess();
+    vk_buffer_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vk_buffer_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vk_buffer_memory_barrier.buffer = bufferBarrier.GetBuffer()->GetVkBuffer();
+    vk_buffer_memory_barrier.offset = bufferBarrier.GetOffset();
+    vk_buffer_memory_barrier.size = bufferBarrier.GetSize();
+
+    std::vector<VkBufferMemoryBarrier> vk_buffer_memory_barriers;
+    vk_buffer_memory_barriers.push_back(vk_buffer_memory_barrier);
+
+    vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, vk_buffer_memory_barriers.size(), vk_buffer_memory_barriers.data(), 0, nullptr);
+}
+
+void Turbo::Core::TCommandBuffer::PipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier)
+{
+    VkImageMemoryBarrier vk_image_memory_barrier = {};
+    vk_image_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vk_image_memory_barrier.pNext = nullptr;
+    vk_image_memory_barrier.srcAccessMask = imageBarrier.GetSrcAccess();
+    vk_image_memory_barrier.dstAccessMask = imageBarrier.GetDstAccess();
+    vk_image_memory_barrier.oldLayout = (VkImageLayout)imageBarrier.GetOldLayout();
+    vk_image_memory_barrier.newLayout = (VkImageLayout)imageBarrier.GetNewLayout();
+    vk_image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vk_image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vk_image_memory_barrier.image = imageBarrier.GetImage()->GetVkImage();
+    vk_image_memory_barrier.subresourceRange.aspectMask = imageBarrier.GetAspects();
+    vk_image_memory_barrier.subresourceRange.baseMipLevel = imageBarrier.GetBaseMipLevel();
+    vk_image_memory_barrier.subresourceRange.levelCount = imageBarrier.GetLevelCount();
+    vk_image_memory_barrier.subresourceRange.baseArrayLayer = imageBarrier.GetBaseArrayLayer();
+    vk_image_memory_barrier.subresourceRange.layerCount = imageBarrier.GetLayerCount();
+
+    std::vector<VkImageMemoryBarrier> vk_image_memory_barriers;
+    vk_image_memory_barriers.push_back(vk_image_memory_barrier);
+
+    vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 0, nullptr, vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
+}
+
+void Turbo::Core::TCommandBuffer::TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, image, oldLayout, newLayout, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+    this->PipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
+}
+
+void Turbo::Core::TCommandBuffer::TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView)
+{
+    TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, imageView, oldLayout, newLayout);
+    this->PipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
 std::string Turbo::Core::TCommandBuffer::ToString()
