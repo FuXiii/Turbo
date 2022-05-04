@@ -1,7 +1,9 @@
 #include "TSubpass.h"
 
-Turbo::Core::TSubpass::TSubpass() : Turbo::Core::TInfo()
+Turbo::Core::TSubpass::TSubpass(TPipelineType type) : Turbo::Core::TInfo()
 {
+    this->type = type;
+
     this->colors = new std::vector<VkAttachmentReference>();
     this->resolves = new std::vector<VkAttachmentReference>();
     this->inputs = new std::vector<VkAttachmentReference>();
@@ -102,6 +104,11 @@ void Turbo::Core::TSubpass::Clear()
     this->resolves->clear();
     this->inputs->clear();
     this->preserves->clear();
+}
+
+Turbo::Core::TPipelineType Turbo::Core::TSubpass::GetPipelineType()
+{
+    return this->type;
 }
 
 std::string Turbo::Core::TSubpass::ToString()

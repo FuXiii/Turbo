@@ -2,7 +2,6 @@
 #ifndef TRENDERPASS_H
 #define TRENDERPASS_H
 #include "TAttachment.h"
-#include "TPipeline.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -22,14 +21,12 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_CHILDREN std::vector<TSubpass> subpasses;
     T_VULKAN_HANDLE_DATA std::vector<TAttachment> attachments;
 
-    TPipelineType type;
-
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    TRenderPass(TDevice *device, TPipelineType type, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
+    TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
     ~TRenderPass();
 
     VkRenderPass GetVkRenderPass();

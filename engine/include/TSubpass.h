@@ -3,6 +3,7 @@
 #define TSUBPASS_H
 #include "TImage.h"
 #include "TInfo.h"
+#include "TPipeline.h"
 
 namespace Turbo
 {
@@ -17,9 +18,10 @@ class TSubpass : public Turbo::Core::TInfo
     std::vector<VkAttachmentReference> *inputs;
     std::vector<VkAttachmentReference> *preserves;
     VkAttachmentReference *depthStencil;
+    TPipelineType type;
 
   public:
-    TSubpass();
+    TSubpass(TPipelineType type);
     TSubpass(const TSubpass &obj);
     ~TSubpass();
 
@@ -35,6 +37,8 @@ class TSubpass : public Turbo::Core::TInfo
     std::vector<VkAttachmentReference> *GetInputAttachmentReferences();
     std::vector<VkAttachmentReference> *GetPreserveAttachmentReferences();
     VkAttachmentReference *GetDepthStencilAttachmentReference();
+
+    TPipelineType GetPipelineType();
 
   public:
     virtual std::string ToString() override;

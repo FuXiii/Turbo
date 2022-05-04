@@ -1,6 +1,8 @@
 #pragma once
 #ifndef TCOMMANDBUFFER_H
 #define TCOMMANDBUFFER_H
+#include "TBarrier.h"
+#include "TPipeline.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -11,7 +13,6 @@ namespace Core
 class TCommandBufferPool;
 class TRenderPass;
 class TFramebuffer;
-class TPipeline;
 class TBuffer;
 class TViewport;
 class TScissor;
@@ -54,7 +55,16 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     bool End();
     bool Reset();
 
-    void PipelineBarrier();
+    void PipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers);
+    void PipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier);
+    void PipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier);
+    void PipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier);
+
+    void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess,TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView);
+
+    void TransformDeviceQueue();
+
     void BindIndexBuffer();
     void DrawIndexed();
     void DrawIndexedIndirect();

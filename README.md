@@ -455,3 +455,23 @@ Turbo是渲染引擎
   >
   >* `TCommandBuffer`中实现了`void Turbo::Core::TCommandBuffer::NextSubpass()`的成员函数，提供对`vkCmdNextSubpass(...)`特性的支持
   >* `Turbo`核心现已支持多`Subpass`渲染
+  >* 将`TRenderPass`的`TPipelineType`转移到了`TSubpass`中，符合`Vulkan`标准
+  >* `TPipeline.h`中新增`typedef enum TPipelineStageBits`和`typedef VkFlags TPipelineStages`，对应`Vulkan`的`VkPipelineStageFlagBits`和`VkPipelineStageFlags`
+  >* `Turbo.h`中新增`typedef enum TAccessBits`和`typedef VkFlags TAccess`，对应`Vulkan`的`VkAccessFlagBits`和`VkAccessFlags`
+  >* 新增`TBarrier.h`和`TBarrier.cpp`，用于实现`VkMemoryBarrier`、`VkBufferMemoryBarrier`、`VkImageMemoryBarrier`<font color=yellow> 未完待续 </font>
+
+  * 2022/5/4 设计架构
+  >
+  >* `TBarrier.h`中增加了`TBarrier`、`TMemoryBarrier`、`TBufferMemoryBarrier`、`TImageMemoryBarrier`的成员函数，提供对`VkMemoryBarrier`、`VkBufferMemoryBarrier`、`VkImageMemoryBarrier`特性的支持
+  >* `TImageView`中增加了获取成员变量的方法
+  >* `TCommandBuffer`中增加并实现如下函数
+  >
+  >```CXX
+  >void PipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers);
+  > void PipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier);
+  > void PipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier);
+  > void PipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier);
+  >void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+  > void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess,TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView);
+  >```
+  >
