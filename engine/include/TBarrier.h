@@ -65,7 +65,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
     uint32_t layerCount;
 
   public:
-    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *view, TImageLayout oldLayout, TImageLayout newLayout);
 
     TImageLayout GetOldLayout();

@@ -168,6 +168,15 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> &waitSemaphores
     return true;
 }
 
+void Turbo::Core::TDeviceQueue::WaitIdle()
+{
+    VkResult result = vkQueueWaitIdle(this->vkQueue);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        throw Turbo::Core::TException(TResult::FAIL);
+    }
+}
+
 std::string Turbo::Core::TDeviceQueue::ToString()
 {
     return std::string();

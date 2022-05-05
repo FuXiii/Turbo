@@ -90,9 +90,13 @@ TRenderPass render_pass_1(subpass_chain_1);
 TRenderPass render_pass_2(subpass_chain_2);
 ```
 
-- <font color=orange>**[ 🛠 ] now**</font> 实现`Barrier`
+- <font color=green>**[ ✓ ]2022/5/4**</font> ~~实现`Barrier`~~
+
+- <font color=orange>**[ 🛠 ] now**</font> 实现`TCommandBuffer::FillBuffer()`
 
 - 也许`TCommandBuffer`对于`Barrier`中的`TAccess`也许可以由内部根据`oldLayout`和`newLayout`来确定数值
+
+- `TImage`需要对外提供`TImageLayout GetImageLayout()`来获取当前的图像布局,或者也许应该是`TCommandBuffer`中获取当前`TImage`的`TImageLayout`，因为图片布局在`TCommandBuffer`中随意变换的，只有在`TCommanBuffer`被推送运行后，图片布局才确定下来，此时可以用于刷新真正`TImage`中的图片布局，`TCommandBuffer`命令之间的图片布局变换只是变换`TImage`的临时图片布局
 
 - <font color=green>**[ ✓ ]2022/5/3**</font>  ~~`Subpass Dependence`目前`Turbo`未实现~~
 

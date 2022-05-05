@@ -385,6 +385,135 @@ void Turbo::Core::TCommandBuffer::TransformImageLayout(TPipelineStages srcStages
     this->PipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
+void Turbo::Core::TCommandBuffer::FillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, uint32_t data)
+{
+    vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, data);
+}
+
+void Turbo::Core::TCommandBuffer::FillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, float data)
+{
+    vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, *(const uint32_t *)&data);
+}
+
+void Turbo::Core::TCommandBuffer::UpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data)
+{
+    if (buffer != nullptr && data != nullptr)
+    {
+        vkCmdUpdateBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, data);
+    }
+}
+
+void Turbo::Core::TCommandBuffer::CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size)
+{
+    VkBufferCopy vk_buffer_copy = {};
+    vk_buffer_copy.srcOffset = srcOffset;
+    vk_buffer_copy.dstOffset = dstOffset;
+    vk_buffer_copy.size = size;
+
+    vkCmdCopyBuffer(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstBuffer->GetVkBuffer(), 1, &vk_buffer_copy);
+}
+
+void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    VkClearColorValue vk_clear_color_value = {};
+    vk_clear_color_value.float32[0] = r;
+    vk_clear_color_value.float32[1] = g;
+    vk_clear_color_value.float32[2] = b;
+    vk_clear_color_value.float32[3] = a;
+    // vk_clear_color_value.int32[0] = (int32_t)r;
+    // vk_clear_color_value.int32[1] = (int32_t)g;
+    // vk_clear_color_value.int32[2] = (int32_t)b;
+    // vk_clear_color_value.int32[3] = (int32_t)a;
+    // vk_clear_color_value.uint32[0] = (uint32_t)r;
+    // vk_clear_color_value.uint32[1] = (uint32_t)g;
+    // vk_clear_color_value.uint32[2] = (uint32_t)b;
+    // vk_clear_color_value.uint32[3] = (uint32_t)a;
+
+    VkImageSubresourceRange vk_image_subresource_range = {};
+    vk_image_subresource_range.aspectMask = aspects;
+    vk_image_subresource_range.baseMipLevel = baseMipLevel;
+    vk_image_subresource_range.levelCount = levelCount;
+    vk_image_subresource_range.baseArrayLayer = baseMipLevel;
+    vk_image_subresource_range.layerCount = layerCount;
+
+    vkCmdClearColorImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_color_value, 1, &vk_image_subresource_range);
+}
+
+void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects)
+{
+    this->ClearColorImage(image, layout, r, g, b, a, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
+}
+
+void Turbo::Core::TCommandBuffer::ClearColorImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a)
+{
+    this->ClearColorImage(imageView->GetImage(), layout, r, g, b, a, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
+}
+
+void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
+    vk_clear_depth_stencil_value.depth = depth;
+    vk_clear_depth_stencil_value.stencil = stencil;
+
+    VkImageSubresourceRange vk_image_subresource_range = {};
+    vk_image_subresource_range.aspectMask = aspects;
+    vk_image_subresource_range.baseMipLevel = baseMipLevel;
+    vk_image_subresource_range.levelCount = levelCount;
+    vk_image_subresource_range.baseArrayLayer = baseMipLevel;
+    vk_image_subresource_range.layerCount = layerCount;
+
+    vkCmdClearDepthStencilImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_depth_stencil_value, 1, &vk_image_subresource_range);
+}
+
+void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects)
+{
+    this->ClearDepthStencilImage(image, layout, depth, stencil, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
+}
+
+void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth, uint32_t stencil)
+{
+    this->ClearDepthStencilImage(imageView->GetImage(), layout, depth, stencil, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
+}
+
+void Turbo::Core::TCommandBuffer::ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    TImageUsages image_usages = image->GetUsages();
+    if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+        this->ClearDepthStencilImage(image, layout, depth, stencil, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+    }
+    else
+    {
+        this->ClearColorImage(image, layout, r, g, b, a, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+    }
+}
+
+void Turbo::Core::TCommandBuffer::ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects)
+{
+    TImageUsages image_usages = image->GetUsages();
+    if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+        this->ClearDepthStencilImage(image, layout, depth, stencil, aspects);
+    }
+    else
+    {
+        this->ClearColorImage(image, layout, r, g, b, a, aspects);
+    }
+}
+
+void Turbo::Core::TCommandBuffer::ClearImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
+{
+    TImageUsages image_usages = imageView->GetImage()->GetUsages();
+    if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+        this->ClearDepthStencilImage(imageView, layout, depth, stencil);
+    }
+    else
+    {
+        this->ClearColorImage(imageView, layout, r, g, b, a);
+    }
+}
+
 std::string Turbo::Core::TCommandBuffer::ToString()
 {
     return std::string();

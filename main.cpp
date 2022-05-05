@@ -279,6 +279,8 @@ int main()
     vertex_buffers.push_back(vertex_buffer);
 
     command_buffer->Begin();
+    scale = 0.1f;
+    command_buffer->UpdateBuffer(scale_buffer_zero_point_five, 0, sizeof(scale), &scale);
     command_buffer->BeginRenderPass(render_pass, frame_buffer);
     command_buffer->BindPipeline(pipeline);
     command_buffer->BindDescriptorSets(0, descriptor_sets);
@@ -291,6 +293,9 @@ int main()
     command_buffer->BindDescriptorSets(0, descriptor_sets2);
     command_buffer->Draw(3, 1, 0, 0);
     command_buffer->EndRenderPass();
+    command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, color_image_view);
+    command_buffer->ClearImage(color_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 1, 0, 0, 1);
+    command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, color_image_view);
     command_buffer->End();
 
     Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
@@ -302,7 +307,6 @@ int main()
     fence->WaitUntil();
 
     {
-
         std::string save_file_path = "E:/Turbo/";
         std::string save_file_name("VulkanImage");
         Turbo::Core::TImage *source_image = color_image;

@@ -80,6 +80,7 @@ typedef VkFlags TMemoryFlags;
 
 typedef enum TAccessBits
 {
+    ACCESS_NONE = 0,
     INDIRECT_COMMAND_READ_BIT = 0x00000001,
     INDEX_READ_BIT = 0x00000002,
     VERTEX_ATTRIBUTE_READ_BIT = 0x00000004,

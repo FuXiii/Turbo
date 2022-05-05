@@ -277,18 +277,19 @@ typedef enum TFormatContentType
     UNUSED = 0x080,   ///???
 } TFormatContentTypeEnum;
 
-typedef enum class TFormatDataType
+typedef enum TFormatDataTypeBits
 {
-    UNSIGNED_NORMALIZED, // UNORM 	: float : unsigned normalized values in the range [0,1]
-    SIGNED_NORMALIZED,   // SNORM 	: float : signed normalized values in the range [-1,1]
-    UNSIGNED_SCALED,     // USCALED : float : unsigned integer values that get converted to floating-point in the range [0,(2^n)-1]
-    SIGNED_SCALED,       // SSCALED ：float : signed integer values that get converted to floating-point in the range [(-2^(n-1)),(2^(n-1))-1]
-    UNSIGNED_INTEGER,    // UINT 	: int 	: unsigned integer values in the range [0,(2^n)-1]
-    SIGNED_INTEGER,      // SINT 	: int 	: signed integer values in the range [-2^(n-1),(2^(n-1))-1]
-    SRGB,                // SRGB	: float : The R, G, and B components are unsigned normalized values that represent values using sRGB nonlinear encoding, while the A component (if one exists) is a regular unsigned normalized value
-    SIGNED_FLOAT,        // SFLOAT	: float : signed floating-point numbers
-    UNSIGNED_FLOAT       // UFLOAT	: float : unsigned floating-point numbers (used by packed, shared exponent, and some compressed formats)
-} TFormatDataTypeEnum;
+    UNSIGNED_NORMALIZED = 0x00000001, // UNORM 	: float : unsigned normalized values in the range [0,1]
+    SIGNED_NORMALIZED = 0x00000002,   // SNORM 	: float : signed normalized values in the range [-1,1]
+    UNSIGNED_SCALED = 0x00000004,     // USCALED : float : unsigned integer values that get converted to floating-point in the range [0,(2^n)-1]
+    SIGNED_SCALED = 0x00000008,       // SSCALED ：float : signed integer values that get converted to floating-point in the range [(-2^(n-1)),(2^(n-1))-1]
+    UNSIGNED_INTEGER = 0x00000010,    // UINT 	  : uint 	: unsigned integer values in the range [0,(2^n)-1]
+    SIGNED_INTEGER = 0x00000020,      // SINT 	  : int 	: signed integer values in the range [-2^(n-1),(2^(n-1))-1]
+    SRGB = 0x00000040,                // SRGB	  : float : The R, G, and B components are unsigned normalized values that represent values using sRGB nonlinear encoding, while the A component (if one exists) is a regular unsigned normalized value
+    SIGNED_FLOAT = 0x00000080,        // SFLOAT	: float : signed floating-point numbers
+    UNSIGNED_FLOAT = 0x00000100       // UFLOAT	: float : unsigned floating-point numbers (used by packed, shared exponent, and some compressed formats)
+} TFormatDataTypeBitsEnum;
+typedef VkFlags TFormatDataTypes;
 
 typedef enum class TFormatCompression
 {
@@ -330,8 +331,7 @@ class TFormatInfo : public TObject
     TFormatType GetFormatType();
     VkFormat GetVkFormat();
 
-    // TFormatDataType GetFormatDataType();//����formatType��ȡ��ʽ��������
-
+    TFormatDataTypes GetFormatDataType();
     // bool IsPacked();
     // uint32_t GetPackGroup();
     // uint32_t GetPackBits();

@@ -463,6 +463,15 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
     return result;
 }
 
+void Turbo::Core::TDevice::WaitIdle()
+{
+    VkResult result = vkDeviceWaitIdle(this->vkDevice);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        throw Turbo::Core::TException(TResult::FAIL);
+    }
+}
+
 std::string Turbo::Core::TDevice::ToString()
 {
     return std::string();
