@@ -79,20 +79,64 @@ bool Turbo::Core::TCommandBuffer::Begin()
 
 void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
 {
-    uint32_t attachemnt_count = renderPass->GetAttachments().size();
+    TPhysicalDevice *physical_device = renderPass->GetDevice()->GetPhysicalDevice();
 
-    VkClearValue vk_clear_value_color = {};
-    vk_clear_value_color.color.float32[0] = 0.0f;
-    vk_clear_value_color.color.float32[1] = 0.0f;
-    vk_clear_value_color.color.float32[2] = 0.0f;
-    vk_clear_value_color.color.float32[3] = 0.0f;
-    vk_clear_value_color.depthStencil.depth = 0.0f;
-    vk_clear_value_color.depthStencil.stencil = 0.0f;
+    std::vector<TAttachment> attachemnts = renderPass->GetAttachments();
+    uint32_t attachemnts_count = attachemnts.size();
 
+    // TODO: Attachment clear color data should define in attachemnt
     std::vector<VkClearValue> vk_clear_values;
-    for (uint32_t attachment_index; attachment_index < attachemnt_count; attachment_index++)
+    for (uint32_t attachment_index; attachment_index < attachemnts_count; attachment_index++)
     {
-        vk_clear_values.push_back(vk_clear_value_color);
+        TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
+        TFormatFeatures format_feature = format_info.GetOptimalFeatures(physical_device);
+
+        if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+        {
+            VkClearValue vk_clear_value = {};
+            vk_clear_value.depthStencil.depth = 0.0f;
+            vk_clear_value.depthStencil.stencil = 0.0f;
+
+            vk_clear_values.push_back(vk_clear_value);
+        }
+        else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
+        {
+
+            TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+
+            VkClearColorValue vk_clear_color_value = {};
+            if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+            {
+                vk_clear_color_value.int32[0] = (int32_t)0;
+                vk_clear_color_value.int32[1] = (int32_t)0;
+                vk_clear_color_value.int32[2] = (int32_t)0;
+                vk_clear_color_value.int32[3] = (int32_t)0;
+            }
+            else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+            {
+                vk_clear_color_value.uint32[0] = (uint32_t)0;
+                vk_clear_color_value.uint32[1] = (uint32_t)0;
+                vk_clear_color_value.uint32[2] = (uint32_t)0;
+                vk_clear_color_value.uint32[3] = (uint32_t)0;
+            }
+            else
+            {
+                vk_clear_color_value.float32[0] = 0;
+                vk_clear_color_value.float32[1] = 0;
+                vk_clear_color_value.float32[2] = 0;
+                vk_clear_color_value.float32[3] = 0;
+            }
+
+            VkClearValue vk_clear_value = {};
+            vk_clear_value.color = vk_clear_color_value;
+
+            vk_clear_values.push_back(vk_clear_value);
+        }
+        else
+        {
+            VkClearValue vk_clear_value = {};
+            vk_clear_values.push_back(vk_clear_value);
+        }
     }
 
     VkRenderPassBeginInfo vk_render_pass_begin_info = {};
@@ -415,19 +459,31 @@ void Turbo::Core::TCommandBuffer::CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuf
 
 void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
+    TFormatInfo image_format = image->GetFormat();
+    TFormatDataTypes format_data_types = image_format.GetFormatDataType();
+
     VkClearColorValue vk_clear_color_value = {};
-    vk_clear_color_value.float32[0] = r;
-    vk_clear_color_value.float32[1] = g;
-    vk_clear_color_value.float32[2] = b;
-    vk_clear_color_value.float32[3] = a;
-    // vk_clear_color_value.int32[0] = (int32_t)r;
-    // vk_clear_color_value.int32[1] = (int32_t)g;
-    // vk_clear_color_value.int32[2] = (int32_t)b;
-    // vk_clear_color_value.int32[3] = (int32_t)a;
-    // vk_clear_color_value.uint32[0] = (uint32_t)r;
-    // vk_clear_color_value.uint32[1] = (uint32_t)g;
-    // vk_clear_color_value.uint32[2] = (uint32_t)b;
-    // vk_clear_color_value.uint32[3] = (uint32_t)a;
+    if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+    {
+        vk_clear_color_value.int32[0] = (int32_t)r;
+        vk_clear_color_value.int32[1] = (int32_t)g;
+        vk_clear_color_value.int32[2] = (int32_t)b;
+        vk_clear_color_value.int32[3] = (int32_t)a;
+    }
+    else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+    {
+        vk_clear_color_value.uint32[0] = (uint32_t)r;
+        vk_clear_color_value.uint32[1] = (uint32_t)g;
+        vk_clear_color_value.uint32[2] = (uint32_t)b;
+        vk_clear_color_value.uint32[3] = (uint32_t)a;
+    }
+    else
+    {
+        vk_clear_color_value.float32[0] = r;
+        vk_clear_color_value.float32[1] = g;
+        vk_clear_color_value.float32[2] = b;
+        vk_clear_color_value.float32[3] = a;
+    }
 
     VkImageSubresourceRange vk_image_subresource_range = {};
     vk_image_subresource_range.aspectMask = aspects;

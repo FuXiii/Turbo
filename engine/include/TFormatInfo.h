@@ -308,6 +308,24 @@ typedef enum class TFormatReduceFactor
     FACTOR_444, // all three planes of a three-planar image are the same size.
 } TFormatReduceFactor;
 
+typedef enum TFormatFeatureBits
+{
+    FEATURE_SAMPLED_IMAGE_BIT = 0x00000001,
+    FEATURE_STORAGE_IMAGE_BIT = 0x00000002,
+    FEATURE_STORAGE_IMAGE_ATOMIC_BIT = 0x00000004,
+    FEATURE_UNIFORM_TEXEL_BUFFER_BIT = 0x00000008,
+    FEATURE_STORAGE_TEXEL_BUFFER_BIT = 0x00000010,
+    FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT = 0x00000020,
+    FEATURE_VERTEX_BUFFER_BIT = 0x00000040,
+    FEATURE_COLOR_ATTACHMENT_BIT = 0x00000080,
+    FEATURE_COLOR_ATTACHMENT_BLEND_BIT = 0x00000100,
+    FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT = 0x00000200,
+    FEATURE_BLIT_SRC_BIT = 0x00000400,
+    FEATURE_BLIT_DST_BIT = 0x00000800,
+    FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT = 0x00001000,
+} TFormatFeatureBits;
+typedef VkFlags TFormatFeatures;
+
 class TPhysicalDevice;
 
 class TFormatInfo : public TObject
@@ -332,6 +350,11 @@ class TFormatInfo : public TObject
     VkFormat GetVkFormat();
 
     TFormatDataTypes GetFormatDataType();
+
+    TFormatFeatures GetlLinearFeatures(TPhysicalDevice *physicalDevice);
+    TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
+    TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
+
     // bool IsPacked();
     // uint32_t GetPackGroup();
     // uint32_t GetPackBits();

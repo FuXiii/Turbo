@@ -501,3 +501,18 @@ Turbo是渲染引擎
   >* `TImage`增加`TImageUsages GetUsages()`、`uint32_t GetMipLevels()`、`uint32_t GetArrayLayers();` 成员函数
   >* `TFormatInfo.h`中将`typedef enum TFormatDataType`修改成`typedef enum TFormatDataTypeBits`、增加`typedef VkFlags TFormatDataTypes`声明
   >* `TFormatInfo`中增加`TFormatDataTypes GetFormatDataType()`成员函数，用于获取格式所对应的的数据类型（主要用于`ClearColor`中）
+
+  * 2022/5/6 设计架构
+  >
+  >* `TFormatInfo`增加`typedef enum TFormatFeatureBits`和`typedef VkFlags TFormatFeatures`用于对应`VkFormatFeatureFlagBits`和`VkFormatFeatureFlags`
+  >* `TFormatInfo`增加如下函数:
+  >
+  >```CXX
+  > TFormatFeatures GetlLinearFeatures(TPhysicalDevice *physicalDevice);
+  > TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
+  > TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
+  >```
+  >
+  > 用于获取`VkFormatProperties`对应的数据
+  >
+  >* 解决了`TCommandBuffer::BeginRenderPass(...)`中`ClearColor`不生效的问题（考虑`ClearColor`的颜色声明放到`TAttachment`中，或者`BeginRenderPass(...)`提供颜色设置接口）

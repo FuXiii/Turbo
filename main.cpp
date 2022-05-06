@@ -294,7 +294,7 @@ int main()
     command_buffer->Draw(3, 1, 0, 0);
     command_buffer->EndRenderPass();
     command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, color_image_view);
-    command_buffer->ClearImage(color_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 1, 0, 0, 1);
+    //command_buffer->ClearImage(color_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 1, 0, 0, 1);
     command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, color_image_view);
     command_buffer->End();
 

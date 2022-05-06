@@ -21,9 +21,6 @@ std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormat
             if (format_properties.bufferFeatures || format_properties.linearTilingFeatures || format_properties.optimalTilingFeatures)
             {
                 TFormatInfo format(static_cast<TFormatType>(TAllFormats[format_index]));
-                format.linearTilingFeatures = format_properties.linearTilingFeatures;
-                format.optimalTilingFeatures = format_properties.optimalTilingFeatures;
-                format.bufferFeatures = format_properties.bufferFeatures;
                 formats.push_back(format);
             }
         }
@@ -109,7 +106,6 @@ Turbo::Core::TFormatDataTypes Turbo::Core::TFormatInfo::GetFormatDataType()
     case VkFormat::VK_FORMAT_X8_D24_UNORM_PACK32:
     case VkFormat::VK_FORMAT_A8B8G8R8_UNORM_PACK32:
     case VkFormat::VK_FORMAT_R16G16B16_UNORM:
-
     case VkFormat::VK_FORMAT_G8B8G8R8_422_UNORM:
     case VkFormat::VK_FORMAT_B8G8R8G8_422_UNORM:
     case VkFormat::VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16:
@@ -652,6 +648,42 @@ uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
     }
     break;
     }
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlLinearFeatures(TPhysicalDevice *physicalDevice)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
+
+    return format_properties.linearTilingFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetOptimalFeatures(TPhysicalDevice *physicalDevice)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
+
+    return format_properties.optimalTilingFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlBufferFeatures(TPhysicalDevice *physicalDevice)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
+
+    return format_properties.bufferFeatures;
 }
 
 bool Turbo::Core::TFormatInfo::operator==(const TFormatInfo &format) const
