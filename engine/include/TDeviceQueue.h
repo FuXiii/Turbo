@@ -47,6 +47,8 @@ class TDeviceQueue : public TVulkanHandle
 
     bool Submit(std::vector<TSemaphore *> &waitSemaphores, std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
 
+    void WaitIdle();
+
     virtual std::string ToString() override;
 };
 } // namespace Core

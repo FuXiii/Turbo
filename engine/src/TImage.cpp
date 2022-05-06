@@ -221,6 +221,21 @@ Turbo::Core::TSampleCountBits Turbo::Core::TImage::GetSampleCountBits()
     return this->samples;
 }
 
+Turbo::Core::TImageUsages Turbo::Core::TImage::GetUsages()
+{
+    return this->usages;
+}
+
+uint32_t Turbo::Core::TImage::GetMipLevels()
+{
+    return this->mipLevels;
+}
+
+uint32_t Turbo::Core::TImage::GetArrayLayers()
+{
+    return this->arrayLayers;
+}
+
 std::string Turbo::Core::TImage::ToString()
 {
     return std::string();

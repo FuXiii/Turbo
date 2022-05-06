@@ -110,6 +110,10 @@ class TImage : public Turbo::Core::TVulkanHandle
 
     TSampleCountBits GetSampleCountBits();
 
+    TImageUsages GetUsages();
+    uint32_t GetMipLevels();
+    uint32_t GetArrayLayers();
+
     virtual std::string ToString() override;
 };
 } // namespace Core

@@ -61,9 +61,31 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     void PipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier);
 
     void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess,TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView);
+    void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView);
 
-    void TransformDeviceQueue();
+    void FillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, uint32_t data = 0);
+    void FillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, float data = 0.0f);
+
+    // The special value VK_WHOLE_SIZE is not accepted for the size parameter to
+    // vkCmdUpdateBuffer() because it is also used as the size of the host memory region that is the
+    // source of the data. The maximum size of data that can be placed in a buffer with
+    // vkCmdUpdateBuffer() is 65,536 bytes.
+    void UpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data);
+    void CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size);
+
+    void ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects);
+    void ClearColorImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
+
+    void ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects);
+    void ClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth = 0, uint32_t stencil = 0);
+
+    void ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects);
+    void ClearImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0, float depth = 0, uint32_t stencil = 0);
+
+    void TransferDeviceQueue();
 
     void BindIndexBuffer();
     void DrawIndexed();
@@ -73,13 +95,8 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     void SetLineWidth();
     void ExecuteCommands();
 
-    void FillBuffer();
-
     void BlitImage();
     void ClearAttachments();
-    void ClearColorImage();
-    void ClearDepthStencilImage();
-    void CopyBuffer();
     void CopyBufferToImage();
     void CopyImage();
     void CopyImageToBuffer();

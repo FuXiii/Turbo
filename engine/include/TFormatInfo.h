@@ -277,18 +277,19 @@ typedef enum TFormatContentType
     UNUSED = 0x080,   ///???
 } TFormatContentTypeEnum;
 
-typedef enum class TFormatDataType
+typedef enum TFormatDataTypeBits
 {
-    UNSIGNED_NORMALIZED, // UNORM 	: float : unsigned normalized values in the range [0,1]
-    SIGNED_NORMALIZED,   // SNORM 	: float : signed normalized values in the range [-1,1]
-    UNSIGNED_SCALED,     // USCALED : float : unsigned integer values that get converted to floating-point in the range [0,(2^n)-1]
-    SIGNED_SCALED,       // SSCALED ：float : signed integer values that get converted to floating-point in the range [(-2^(n-1)),(2^(n-1))-1]
-    UNSIGNED_INTEGER,    // UINT 	: int 	: unsigned integer values in the range [0,(2^n)-1]
-    SIGNED_INTEGER,      // SINT 	: int 	: signed integer values in the range [-2^(n-1),(2^(n-1))-1]
-    SRGB,                // SRGB	: float : The R, G, and B components are unsigned normalized values that represent values using sRGB nonlinear encoding, while the A component (if one exists) is a regular unsigned normalized value
-    SIGNED_FLOAT,        // SFLOAT	: float : signed floating-point numbers
-    UNSIGNED_FLOAT       // UFLOAT	: float : unsigned floating-point numbers (used by packed, shared exponent, and some compressed formats)
-} TFormatDataTypeEnum;
+    UNSIGNED_NORMALIZED = 0x00000001, // UNORM 	: float : unsigned normalized values in the range [0,1]
+    SIGNED_NORMALIZED = 0x00000002,   // SNORM 	: float : signed normalized values in the range [-1,1]
+    UNSIGNED_SCALED = 0x00000004,     // USCALED : float : unsigned integer values that get converted to floating-point in the range [0,(2^n)-1]
+    SIGNED_SCALED = 0x00000008,       // SSCALED ：float : signed integer values that get converted to floating-point in the range [(-2^(n-1)),(2^(n-1))-1]
+    UNSIGNED_INTEGER = 0x00000010,    // UINT 	  : uint 	: unsigned integer values in the range [0,(2^n)-1]
+    SIGNED_INTEGER = 0x00000020,      // SINT 	  : int 	: signed integer values in the range [-2^(n-1),(2^(n-1))-1]
+    SRGB = 0x00000040,                // SRGB	  : float : The R, G, and B components are unsigned normalized values that represent values using sRGB nonlinear encoding, while the A component (if one exists) is a regular unsigned normalized value
+    SIGNED_FLOAT = 0x00000080,        // SFLOAT	: float : signed floating-point numbers
+    UNSIGNED_FLOAT = 0x00000100       // UFLOAT	: float : unsigned floating-point numbers (used by packed, shared exponent, and some compressed formats)
+} TFormatDataTypeBitsEnum;
+typedef VkFlags TFormatDataTypes;
 
 typedef enum class TFormatCompression
 {
@@ -306,6 +307,24 @@ typedef enum class TFormatReduceFactor
     FACTOR_420, // planes other than the first are reduced in size by a factor of two both horizontally and vertically
     FACTOR_444, // all three planes of a three-planar image are the same size.
 } TFormatReduceFactor;
+
+typedef enum TFormatFeatureBits
+{
+    FEATURE_SAMPLED_IMAGE_BIT = 0x00000001,
+    FEATURE_STORAGE_IMAGE_BIT = 0x00000002,
+    FEATURE_STORAGE_IMAGE_ATOMIC_BIT = 0x00000004,
+    FEATURE_UNIFORM_TEXEL_BUFFER_BIT = 0x00000008,
+    FEATURE_STORAGE_TEXEL_BUFFER_BIT = 0x00000010,
+    FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT = 0x00000020,
+    FEATURE_VERTEX_BUFFER_BIT = 0x00000040,
+    FEATURE_COLOR_ATTACHMENT_BIT = 0x00000080,
+    FEATURE_COLOR_ATTACHMENT_BLEND_BIT = 0x00000100,
+    FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT = 0x00000200,
+    FEATURE_BLIT_SRC_BIT = 0x00000400,
+    FEATURE_BLIT_DST_BIT = 0x00000800,
+    FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT = 0x00001000,
+} TFormatFeatureBits;
+typedef VkFlags TFormatFeatures;
 
 class TPhysicalDevice;
 
@@ -330,7 +349,11 @@ class TFormatInfo : public TObject
     TFormatType GetFormatType();
     VkFormat GetVkFormat();
 
-    // TFormatDataType GetFormatDataType();//����formatType��ȡ��ʽ��������
+    TFormatDataTypes GetFormatDataType();
+
+    TFormatFeatures GetlLinearFeatures(TPhysicalDevice *physicalDevice);
+    TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
+    TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
 
     // bool IsPacked();
     // uint32_t GetPackGroup();

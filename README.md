@@ -475,3 +475,44 @@ Turbo是渲染引擎
   > void TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess,TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView);
   >```
   >
+  
+  * 2022/5/5 设计架构
+  >
+  >* `TCommandBuffer`中增加并实现如下
+  >
+  >```CXX
+  >void FillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, uint32_t data = 0);
+  >void FillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, float data = 0.0f);
+  >void UpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data);
+  >void CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size);
+  >void ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+  > void ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects);
+  > void ClearColorImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
+  > void ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+  > void ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects);
+  > void ClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth = 0, uint32_t stencil = 0);
+  > void ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+  > void ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects);
+  > void ClearImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0, float depth = 0, uint32_t stencil = 0);
+  > ```
+  >
+  >* `TDeviceQueue`增加`void WaitIdle()`成员函数
+  >* `TDevice`增加`void WaitIdle()`成员函数
+  >* `TImage`增加`TImageUsages GetUsages()`、`uint32_t GetMipLevels()`、`uint32_t GetArrayLayers();` 成员函数
+  >* `TFormatInfo.h`中将`typedef enum TFormatDataType`修改成`typedef enum TFormatDataTypeBits`、增加`typedef VkFlags TFormatDataTypes`声明
+  >* `TFormatInfo`中增加`TFormatDataTypes GetFormatDataType()`成员函数，用于获取格式所对应的的数据类型（主要用于`ClearColor`中）
+
+  * 2022/5/6 设计架构
+  >
+  >* `TFormatInfo`增加`typedef enum TFormatFeatureBits`和`typedef VkFlags TFormatFeatures`用于对应`VkFormatFeatureFlagBits`和`VkFormatFeatureFlags`
+  >* `TFormatInfo`增加如下函数:
+  >
+  >```CXX
+  > TFormatFeatures GetlLinearFeatures(TPhysicalDevice *physicalDevice);
+  > TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
+  > TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
+  >```
+  >
+  > 用于获取`VkFormatProperties`对应的数据
+  >
+  >* 解决了`TCommandBuffer::BeginRenderPass(...)`中`ClearColor`不生效的问题（考虑`ClearColor`的颜色声明放到`TAttachment`中，或者`BeginRenderPass(...)`提供颜色设置接口）

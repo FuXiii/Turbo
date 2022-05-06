@@ -11,7 +11,9 @@
 
 - 考虑`Turbo`中是否内置几个`TCommandBufferPool`用于`Turbo`引擎内部自己用（在`Turbo::Core::TDevice`被创建，内部生成`Turbo::Core::TDeviceQueue`之后，`Turbo::Core::TDevice`被销毁与其相关的`TCommandBufferPool`和其相关的内部资源也会一并销毁）。（该功能应该在`CommandBuffer`所有功能实现结束之后实现）
 
-- `Turbo::Core::TCommandBuffer::BeginRenderPass()中的ClearColor` 可能有问题（等到支持窗口渲染后再调，调试起来方便），而且现在写死了，需要开放对外接口(比如说放到`TAttachemnt`中声明)。
+- <font color=green>**[ ✓ ]2022/5/6**</font> ~~<font color=yellow>**[ ! ]2022/5/6 基本搞清问题原因了，`TFormatInfo` 需要提供对于`VkFormatFeatureFlagBits`的支持，通过调用`vkGetPhysicalDeviceFormatProperties`获得。**</font> `Turbo::Core::TCommandBuffer::BeginRenderPass()中的ClearColor` 可能有问题（等到支持窗口渲染后再调，调试起来方便），而且现在写死了，需要开放对外接口(比如说放到`TAttachemnt`中声明)。~~
+
+- 考虑将`TCommandBuffer::BeginRenderPass()`中的`ClearColor`得颜色数据放到`TAttachment`中，这样用户就可以自定义`ClearColore`了
 
 - `Turbo::Core::TCommandBuffer::BeginRenderPass()中的ClearColor` 中有些函数形参传的是引用（特别是`std::vector<XXX>& xxx`），这将会导致很多没有必要的内存创建，尝试将引用改成指针。
 
@@ -90,9 +92,13 @@ TRenderPass render_pass_1(subpass_chain_1);
 TRenderPass render_pass_2(subpass_chain_2);
 ```
 
-- <font color=orange>**[ 🛠 ] now**</font> 实现`Barrier`
+- <font color=green>**[ ✓ ]2022/5/4**</font> ~~实现`Barrier`~~
+
+- <font color=green>**[ ✓ ]2022/5/5**</font> ~~实现`TCommandBuffer::FillBuffer()`~~
 
 - 也许`TCommandBuffer`对于`Barrier`中的`TAccess`也许可以由内部根据`oldLayout`和`newLayout`来确定数值
+
+- `TImage`需要对外提供`TImageLayout GetImageLayout()`来获取当前的图像布局,或者也许应该是`TCommandBuffer`中获取当前`TImage`的`TImageLayout`，因为图片布局在`TCommandBuffer`中随意变换的，只有在`TCommanBuffer`被推送运行后，图片布局才确定下来，此时可以用于刷新真正`TImage`中的图片布局，`TCommandBuffer`命令之间的图片布局变换只是变换`TImage`的临时图片布局
 
 - <font color=green>**[ ✓ ]2022/5/3**</font>  ~~`Subpass Dependence`目前`Turbo`未实现~~
 

@@ -71,6 +71,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     TDeviceQueue *GetBestSparseBindingQueue();
     TDeviceQueue *GetBestProtectedQueue();
 
+    void WaitIdle();
+
     virtual std::string ToString() override;
 };
 } // namespace Core
