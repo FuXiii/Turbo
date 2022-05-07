@@ -93,96 +93,96 @@ Turbo::Core::TShaderDataType SpirvCrossSPIRTypeBaseTypeToTShaderDataType(spirv_c
     switch (baseType)
     {
     case spirv_cross::SPIRType::BaseType::Unknown: {
-        return Turbo::Core::TShaderDataType::UNKNOWN;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Void: {
-        return Turbo::Core::TShaderDataType::VOID;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_VOID;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Boolean: {
-        return Turbo::Core::TShaderDataType::BOOLEAN;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_BOOLEAN;
     }
     break;
     case spirv_cross::SPIRType::BaseType::SByte: {
-        return Turbo::Core::TShaderDataType::SBYTE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SBYTE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UByte: {
-        return Turbo::Core::TShaderDataType::UBYTE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UBYTE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Short: {
-        return Turbo::Core::TShaderDataType::SHORT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SHORT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UShort: {
-        return Turbo::Core::TShaderDataType::USHORT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_USHORT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Int: {
-        return Turbo::Core::TShaderDataType::INT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_INT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UInt: {
-        return Turbo::Core::TShaderDataType::UINT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UINT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Int64: {
-        return Turbo::Core::TShaderDataType::INT64;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_INT64;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UInt64: {
-        return Turbo::Core::TShaderDataType::UINT64;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UINT64;
     }
     break;
     case spirv_cross::SPIRType::BaseType::AtomicCounter: {
-        return Turbo::Core::TShaderDataType::ATOMIC_COUNTER;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_ATOMIC_COUNTER;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Half: {
-        return Turbo::Core::TShaderDataType::HALF;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_HALF;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Float: {
-        return Turbo::Core::TShaderDataType::FLOAT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_FLOAT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Double: {
-        return Turbo::Core::TShaderDataType::DOUBLE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_DOUBLE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Struct: {
-        return Turbo::Core::TShaderDataType::STRUCT;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_STRUCT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Image: {
-        return Turbo::Core::TShaderDataType::IMAGE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_IMAGE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::SampledImage: {
-        return Turbo::Core::TShaderDataType::SAMPLED_IMAGE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SAMPLED_IMAGE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Sampler: {
-        return Turbo::Core::TShaderDataType::SAMPLER;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SAMPLER;
     }
     break;
     case spirv_cross::SPIRType::BaseType::AccelerationStructure: {
-        return Turbo::Core::TShaderDataType::ACCELERATION_STRUCTURE;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_ACCELERATION_STRUCTURE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::RayQuery: {
-        return Turbo::Core::TShaderDataType::RAYQUERY;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_RAYQUERY;
     }
     break;
     default: {
-        return Turbo::Core::TShaderDataType::UNKNOWN;
+        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
     }
     break;
     }
 
-    return Turbo::Core::TShaderDataType::UNKNOWN;
+    return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
 }
 
 void Turbo::Core::TShader::InternalCreate()

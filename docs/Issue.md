@@ -98,6 +98,16 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 也许`TCommandBuffer`对于`Barrier`中的`TAccess`也许可以由内部根据`oldLayout`和`newLayout`来确定数值
 
+- 需要提供`TBufferView`
+
+- 需要提供`TDisplay`
+
+- 需要提供`TFilter`对应`VkFilter`
+
+- 梳理一下`TExtensionInfo`类，最好类似`TFormatInfo`的类思想
+
+- `TInstance`的`IsEnabledExtension(string)`函数中倒腾了两遍，没有必要，提供一个新的对应函数：``IsEnabledExtension(Turbo::Core::TExtensionType)`
+
 - `TImage`需要对外提供`TImageLayout GetImageLayout()`来获取当前的图像布局,或者也许应该是`TCommandBuffer`中获取当前`TImage`的`TImageLayout`，因为图片布局在`TCommandBuffer`中随意变换的，只有在`TCommanBuffer`被推送运行后，图片布局才确定下来，此时可以用于刷新真正`TImage`中的图片布局，`TCommandBuffer`命令之间的图片布局变换只是变换`TImage`的临时图片布局
 
 - <font color=green>**[ ✓ ]2022/5/3**</font>  ~~`Subpass Dependence`目前`Turbo`未实现~~
@@ -105,3 +115,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - <font color=green>**[ ✓ ]2022/5/2**</font> ~~实现`Turbo::Core::TCommandBuffer::NextSubpass()`函数~~
 
 - <font color=green>**[ ✓ ]2022/5/2**</font>  ~~`Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`~~
+
+- <font color=orange>**[ 🛠 ] now**</font>提供`Swapchain`

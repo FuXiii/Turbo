@@ -1,474 +1,519 @@
 #include "TSurface.h"
+#include "TDevice.h"
 #include "TException.h"
 #include "TInstance.h"
 #include "TPhysicalDevice.h"
+#include "TVulkanAllocator.h"
 
-#if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
-Turbo::Core::TSurface::TSurface(TPhysicalDevice* physicalDevice, HINSTANCE hinstance, HWND hwnd)
+void Turbo::Extension::TSurface::InternalCreate()
 {
-	if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
-	{
-		TInstance* instance = physicalDevice->GetInstance();
-		if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && instance->IsEnabledExtension(TExtensionType::VK_KHR_SURFACE))
-		{
-			VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
-			win32_surface_create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-			win32_surface_create_info.pNext = nullptr;
-			win32_surface_create_info.flags = 0;
-			win32_surface_create_info.hinstance = hinstance;
-			win32_surface_create_info.hwnd = hwnd;
+    Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
+    if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
+    {
 
-			VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, nullptr, &this->vkSurfaceKHR);
-			if (result != VK_SUCCESS)
-			{
-				throw TException(VkResultToTResult(result));
-			}
+#if defined(TURBO_PLATFORM_WINDOWS)
+        VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
+        win32_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+        win32_surface_create_info.pNext = nullptr;
+        win32_surface_create_info.flags = 0;
+        win32_surface_create_info.hinstance = hinstance;
+        win32_surface_create_info.hwnd = hwnd;
 
-			this->physicalDevice = physicalDevice;
+        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+        VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
+        if (result != VK_SUCCESS)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+        }
+#elif defined(__APPLE__)
+#elif defined(ANDROID) || defined(__ANDROID__)
+#elif defined(__linux) || defined(__linux__)
+#elif defined(__unix) || defined(__unix__)
+#else
+#endif
+        this->GetSurfaceSupportQueueFamilys();
+        this->GetSurfaceCapabilities();
+        this->GetSurfaceSupportSurfaceFormats();
+        this->GetSurfaceSupportPresentationMode();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
+}
 
-			this->GetSurfaceSupportQueueFamilys();
-			this->GetSurfaceCapabilities();
-			this->GetSurfaceSupportSurfaceFormats();
-			this->GetSurfaceSupportPresentationMode();
-		}
-		else
-		{
-			throw TException(TResult::INVALID_PARAMETER);
-		}
-	}
-	else
-	{
-		throw TException(TResult::INVALID_PARAMETER);
-	}
+void Turbo::Extension::TSurface::InternalDestroy()
+{
+    if (this->device != nullptr)
+    {
+        Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
+        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+
+        if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
+        {
+            vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
+        }
+    }
+}
+
+#if defined(TURBO_PLATFORM_WINDOWS)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd)
+{
+    if (device != nullptr)
+    {
+        this->device = device;
+        this->hinstance = hinstance;
+        this->hwnd = hwnd;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
 }
 #endif
 
-Turbo::Core::TSurface::~TSurface()
+Turbo::Extension::TSurface::~TSurface()
 {
-	if (this->physicalDevice != nullptr)
-	{
-		TInstance* instance = physicalDevice->GetInstance();
-		if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
-		{
-			vkDestroySurfaceKHR(this->physicalDevice->GetInstance()->GetVkInstance(), this->vkSurfaceKHR, nullptr);
-		}
-	}
+    this->InternalDestroy();
 }
 
-void Turbo::Core::TSurface::GetSurfaceSupportQueueFamilys()
+void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
 {
-	size_t queue_family_count = this->physicalDevice->GetQueueFamilyCount();
-	for (size_t queue_family_index = 0; queue_family_index < queue_family_count; queue_family_index++)
-	{
-		TQueueFamilyInfo queue_family = this->physicalDevice->GetQueueFamilyByIndex(static_cast<uint32_t>(queue_family_index));
+    Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
+    size_t queue_family_count = physical_device->GetQueueFamilyCount();
+    for (size_t queue_family_index = 0; queue_family_index < queue_family_count; queue_family_index++)
+    {
+        Turbo::Core::TQueueFamilyInfo queue_family = physical_device->GetQueueFamilyByIndex(static_cast<uint32_t>(queue_family_index));
 
-		VkBool32 is_support = VK_FALSE;
+        VkBool32 is_support_surface = VK_FALSE;
 
-		VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR(this->physicalDevice->GetVkPhysicalDevice(), queue_family.GetIndex(), this->vkSurfaceKHR, &is_support);
-		if (result == VK_SUCCESS)
-		{
-			if (is_support == VK_TRUE)
-			{
-				this->supportQueueFamilys.push_back(queue_family);
-			}
-		}
-		else
-		{
-			throw TException(VkResultToTResult(result));
-		}
-	}
+        VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->vkSurfaceKHR, &is_support_surface);
+        if (result == VK_SUCCESS)
+        {
+            if (is_support_surface == VK_TRUE)
+            {
+#if defined(TURBO_PLATFORM_WINDOWS)
+                VkBool32 is_support_win32_presentation = vkGetPhysicalDeviceWin32PresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex());
+                if (is_support_win32_presentation == VK_TRUE)
+                {
+                    this->supportQueueFamilys.push_back(queue_family);
+                }
+                else
+                {
+                    throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+                }
+#elif defined(__APPLE__)
+#elif defined(ANDROID) || defined(__ANDROID__)
+#elif defined(__linux) || defined(__linux__)
+#elif defined(__unix) || defined(__unix__)
+#else
+#endif
+            }
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+        }
+    }
 
-	//��ǰ�豸��֧�ָ�Surface
-	if (this->supportQueueFamilys.size() == 0)
-	{
-		throw TException(TResult::UNSUPPORTED);
-	}
+    if (this->supportQueueFamilys.size() == 0)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+    }
 }
 
-void Turbo::Core::TSurface::GetSurfaceCapabilities()
+void Turbo::Extension::TSurface::GetSurfaceCapabilities()
 {
-	VkSurfaceCapabilitiesKHR surface_capanilities;
-	VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(this->physicalDevice->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_capanilities);
-	if (result == VK_SUCCESS)
-	{
-		this->minImageCount = surface_capanilities.minImageCount;
-		this->maxImageCount = surface_capanilities.maxImageCount;
-		this->currentExtent = surface_capanilities.currentExtent;
-		this->minImageExtent = surface_capanilities.minImageExtent;
-		this->maxImageExtent = surface_capanilities.maxImageExtent;
-		this->maxImageArrayLayers = surface_capanilities.maxImageArrayLayers;
+    Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
-		this->supportedTransforms = surface_capanilities.supportedTransforms;
-		this->currentTransform = surface_capanilities.currentTransform;
-		this->supportedCompositeAlpha = surface_capanilities.supportedCompositeAlpha;
-		this->supportedUsageFlags = surface_capanilities.supportedUsageFlags;
-	}
-	else
-	{
-		throw TException(VkResultToTResult(result));
-	}
+    VkSurfaceCapabilitiesKHR surface_capanilities;
+    VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_capanilities);
+    if (result == VK_SUCCESS)
+    {
+        this->minImageCount = surface_capanilities.minImageCount;
+        this->maxImageCount = surface_capanilities.maxImageCount;
+        this->currentExtent = surface_capanilities.currentExtent;
+        this->minImageExtent = surface_capanilities.minImageExtent;
+        this->maxImageExtent = surface_capanilities.maxImageExtent;
+        this->maxImageArrayLayers = surface_capanilities.maxImageArrayLayers;
+
+        this->supportedTransforms = surface_capanilities.supportedTransforms;
+        this->currentTransform = surface_capanilities.currentTransform;
+        this->supportedCompositeAlpha = surface_capanilities.supportedCompositeAlpha;
+        this->supportedUsageFlags = surface_capanilities.supportedUsageFlags;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+    }
 }
 
-void Turbo::Core::TSurface::GetSurfaceSupportSurfaceFormats()
+void Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats()
 {
-	uint32_t surface_format_count = 0;
-	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(this->physicalDevice->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, nullptr);
-	if (result == VK_SUCCESS && surface_format_count > 0)
-	{
-		std::vector<VkSurfaceFormatKHR> surface_formats;
-		surface_formats.resize(surface_format_count);
+    Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
-		result = vkGetPhysicalDeviceSurfaceFormatsKHR(this->physicalDevice->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, surface_formats.data());
-		if (result == VK_SUCCESS)
-		{
-			std::vector<TFormatInfo> support_formats = this->physicalDevice->GetSupportFormats();
-			size_t support_formats_size = support_formats.size();
+    uint32_t surface_format_count = 0;
+    VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, nullptr);
+    if (result == VK_SUCCESS && surface_format_count > 0)
+    {
+        std::vector<VkSurfaceFormatKHR> surface_formats;
+        surface_formats.resize(surface_format_count);
 
-			for (size_t surface_format_index = 0; surface_format_index < surface_format_count; surface_format_index++)
-			{
-				if (support_formats_size > 0)
-				{
-					for (size_t support_format_index = 0; support_format_index < support_formats_size; support_format_index++)
-					{
-						if (support_formats[support_format_index].GetVkFormat() == surface_formats[surface_format_index].format)
-						{
-							TSurfaceFormat surface_format;
-							surface_format.format = support_formats[support_format_index];
-							surface_format.colorSpace = TColorSpace(static_cast<TColorSpaceType>(surface_formats[surface_format_index].colorSpace));
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, surface_formats.data());
+        if (result == VK_SUCCESS)
+        {
+            std::vector<Turbo::Core::TFormatInfo> support_formats = physical_device->GetSupportFormats();
+            size_t support_formats_size = support_formats.size();
 
-							this->surfaceFormats.push_back(surface_format);
-							break;
-						}
-					}
-				}
-				else
-				{
-					throw TException(TResult::INVALID_PARAMETER);
-				}
-			}
+            for (size_t surface_format_index = 0; surface_format_index < surface_format_count; surface_format_index++)
+            {
+                if (support_formats_size > 0)
+                {
+                    for (size_t support_format_index = 0; support_format_index < support_formats_size; support_format_index++)
+                    {
+                        if (support_formats[support_format_index].GetVkFormat() == surface_formats[surface_format_index].format)
+                        {
+                            Turbo::Core::TSurfaceFormat surface_format;
+                            surface_format.format = support_formats[support_format_index];
+                            surface_format.colorSpace = Turbo::Core::TColorSpace(static_cast<Turbo::Core::TColorSpaceType>(surface_formats[surface_format_index].colorSpace));
 
-			if (this->surfaceFormats.size() == 0)
-			{
-				throw TException(TResult::UNSUPPORTED);
-			}
-		}
-		else
-		{
-			throw TException(VkResultToTResult(result));
-		}
-	}
-	else
-	{
-		throw TException(VkResultToTResult(result));
-	}
+                            this->surfaceFormats.push_back(surface_format);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+                }
+            }
+
+            if (this->surfaceFormats.size() == 0)
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            }
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+        }
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+    }
 }
 
-void Turbo::Core::TSurface::GetSurfaceSupportPresentationMode()
+void Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode()
 {
-	this->presentModeFlags = 0;
+    Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
-	uint32_t present_mode_count = 0;
-	VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR(this->physicalDevice->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, nullptr);
-	if (result == VK_SUCCESS)
-	{
-		if (present_mode_count > 0)
-		{
-			this->presentModes.resize(present_mode_count);
-			result = vkGetPhysicalDeviceSurfacePresentModesKHR(this->physicalDevice->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, this->presentModes.data());
-			if (result == VK_SUCCESS)
-			{
-				for (size_t present_mode_index = 0; present_mode_index < present_mode_count; present_mode_index++)
-				{
-					if (!(this->presentModeFlags & 0x001))
-					{
-						if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR)
-						{
-							this->presentModeFlags |= 0x001;
-						}
-					}
+    this->presentModeFlags = 0;
 
-					if (!(this->presentModeFlags & 0x002))
-					{
-						if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR)
-						{
-							this->presentModeFlags |= 0x002;
-						}
-					}
+    uint32_t present_mode_count = 0;
+    VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, nullptr);
+    if (result == VK_SUCCESS)
+    {
+        if (present_mode_count > 0)
+        {
+            this->presentModes.resize(present_mode_count);
+            result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, this->presentModes.data());
+            if (result == VK_SUCCESS)
+            {
+                for (size_t present_mode_index = 0; present_mode_index < present_mode_count; present_mode_index++)
+                {
+                    if (!(this->presentModeFlags & 0x001))
+                    {
+                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR)
+                        {
+                            this->presentModeFlags |= 0x001;
+                        }
+                    }
 
-					if (!(this->presentModeFlags & 0x004))
-					{
-						if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR)
-						{
-							this->presentModeFlags |= 0x004;
-						}
-					}
+                    if (!(this->presentModeFlags & 0x002))
+                    {
+                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR)
+                        {
+                            this->presentModeFlags |= 0x002;
+                        }
+                    }
 
-					if (!(this->presentModeFlags & 0x008))
-					{
-						if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_RELAXED_KHR)
-						{
-							this->presentModeFlags |= 0x008;
-						}
-					}
-				}
-			}
-			else
-			{
-				throw TException(TResult::UNSUPPORTED);
-			}
-		}
-		else
-		{
-			throw TException(TResult::UNSUPPORTED);
-		}
-	}
-	else
-	{
-		throw TException(VkResultToTResult(result));
-	}
+                    if (!(this->presentModeFlags & 0x004))
+                    {
+                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR)
+                        {
+                            this->presentModeFlags |= 0x004;
+                        }
+                    }
+
+                    if (!(this->presentModeFlags & 0x008))
+                    {
+                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_RELAXED_KHR)
+                        {
+                            this->presentModeFlags |= 0x008;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            }
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+    }
 }
 
-VkSurfaceKHR Turbo::Core::TSurface::GetVkSurfaceKHR()
+VkSurfaceKHR Turbo::Extension::TSurface::GetVkSurfaceKHR()
 {
-	return this->vkSurfaceKHR;
+    return this->vkSurfaceKHR;
 }
 
-uint32_t Turbo::Core::TSurface::GetMinImageCount()
+uint32_t Turbo::Extension::TSurface::GetMinImageCount()
 {
-	return this->minImageCount;
+    return this->minImageCount;
 }
 
-uint32_t Turbo::Core::TSurface::GetMaxImageCount()
+uint32_t Turbo::Extension::TSurface::GetMaxImageCount()
 {
-	return this->maxImageCount;
+    return this->maxImageCount;
 }
 
-Turbo::Core::TExtent2D Turbo::Core::TSurface::GetCurrentExtent()
+Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetCurrentExtent()
 {
-	return this->currentExtent;
+    return this->currentExtent;
 }
 
-Turbo::Core::TExtent2D Turbo::Core::TSurface::GetMinImageExtent()
+Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetMinImageExtent()
 {
-	return this->minImageExtent;
+    return this->minImageExtent;
 }
 
-Turbo::Core::TExtent2D Turbo::Core::TSurface::GetMaxImageExtent()
+Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetMaxImageExtent()
 {
-	return this->maxImageExtent;
+    return this->maxImageExtent;
 }
 
-uint32_t Turbo::Core::TSurface::GetMaxImageArrayLayers()
+uint32_t Turbo::Extension::TSurface::GetMaxImageArrayLayers()
 {
-	return this->maxImageArrayLayers;
+    return this->maxImageArrayLayers;
 }
 
-bool Turbo::Core::TSurface::IsSupportIdentityTransform()
+bool Turbo::Extension::TSurface::IsSupportIdentityTransform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportRotate90Transform()
+bool Turbo::Extension::TSurface::IsSupportRotate90Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportRotate180Transform()
+bool Turbo::Extension::TSurface::IsSupportRotate180Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportRotate270Transform()
+bool Turbo::Extension::TSurface::IsSupportRotate270Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportHorizontalMirrorTransform()
+bool Turbo::Extension::TSurface::IsSupportHorizontalMirrorTransform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportHorizontalMirrorRotate90Transform()
+bool Turbo::Extension::TSurface::IsSupportHorizontalMirrorRotate90Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportHorizontalMirrorRotate180Transform()
+bool Turbo::Extension::TSurface::IsSupportHorizontalMirrorRotate180Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportHorizontalMirrorRotate270Transform()
+bool Turbo::Extension::TSurface::IsSupportHorizontalMirrorRotate270Transform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportInheritTransform()
+bool Turbo::Extension::TSurface::IsSupportInheritTransform()
 {
-	if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedTransforms & VkSurfaceTransformFlagBitsKHR::VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportCompositeAlphaOpaque()
+bool Turbo::Extension::TSurface::IsSupportCompositeAlphaOpaque()
 {
-	if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportCompositeAlphaPreMultiplied()
+bool Turbo::Extension::TSurface::IsSupportCompositeAlphaPreMultiplied()
 {
-	if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportCompositeAlphaPostMultiplied()
+bool Turbo::Extension::TSurface::IsSupportCompositeAlphaPostMultiplied()
 {
-	if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportCompositeAlphaInherit()
+bool Turbo::Extension::TSurface::IsSupportCompositeAlphaInherit()
 {
-	if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
-	{
-		return true;
-	}
+    if (this->supportedCompositeAlpha & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportPresentModeImmediate()
+bool Turbo::Extension::TSurface::IsSupportPresentModeImmediate()
 {
-	if (this->presentModeFlags & 0x001)
-	{
-		return true;
-	}
+    if (this->presentModeFlags & 0x001)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportPresentModeMailbox()
+bool Turbo::Extension::TSurface::IsSupportPresentModeMailbox()
 {
-	if (this->presentModeFlags & 0x002)
-	{
-		return true;
-	}
+    if (this->presentModeFlags & 0x002)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportPresentModeFifo()
+bool Turbo::Extension::TSurface::IsSupportPresentModeFifo()
 {
-	if (this->presentModeFlags & 0x004)
-	{
-		return true;
-	}
+    if (this->presentModeFlags & 0x004)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TSurface::IsSupportPresentModeFifoRelaxed()
+bool Turbo::Extension::TSurface::IsSupportPresentModeFifoRelaxed()
 {
-	if (this->presentModeFlags & 0x008)
-	{
-		return true;
-	}
+    if (this->presentModeFlags & 0x008)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-std::vector<Turbo::Core::TSurfaceFormat> Turbo::Core::TSurface::GetSurfaceFormats()
+std::vector<Turbo::Core::TSurfaceFormat> Turbo::Extension::TSurface::GetSurfaceFormats()
 {
-	return this->surfaceFormats;
+    return this->surfaceFormats;
 }
 
-std::vector<Turbo::Core::TPresentMode> Turbo::Core::TSurface::GetPresentModes()
+std::vector<Turbo::Core::TPresentMode> Turbo::Extension::TSurface::GetPresentModes()
 {
-	return this->presentModes;
+    return this->presentModes;
 }
 
-Turbo::Core::TSurfaceTransformFlagsKHR Turbo::Core::TSurface::GetSupportedTransforms()
+Turbo::Core::TSurfaceTransformFlagsKHR Turbo::Extension::TSurface::GetSupportedTransforms()
 {
-	return this->supportedTransforms;
+    return this->supportedTransforms;
 }
 
-Turbo::Core::TSurfaceTransformFlagBitsKHR Turbo::Core::TSurface::GetCurrentTransform()
+Turbo::Core::TSurfaceTransformFlagBitsKHR Turbo::Extension::TSurface::GetCurrentTransform()
 {
-	return this->currentTransform;
+    return this->currentTransform;
 }
 
-Turbo::Core::TCompositeAlphaFlagsKHR Turbo::Core::TSurface::GetSupportedCompositeAlpha()
+Turbo::Core::TCompositeAlphaFlagsKHR Turbo::Extension::TSurface::GetSupportedCompositeAlpha()
 {
-	return this->supportedCompositeAlpha;
+    return this->supportedCompositeAlpha;
 }
 
-Turbo::Core::TImageUsageFlags Turbo::Core::TSurface::GetSupportedUsageFlags()
+Turbo::Core::TImageUsageFlags Turbo::Extension::TSurface::GetSupportedUsageFlags()
 {
-	return this->supportedUsageFlags;
+    return this->supportedUsageFlags;
 }
 
-Turbo::Core::TPhysicalDevice * Turbo::Core::TSurface::GetPhysicalDevice()
+Turbo::Core::TDevice *Turbo::Extension::TSurface::GetDevice()
 {
-	return this->physicalDevice;
+    return this->device;
 }
 
-std::string Turbo::Core::TSurface::ToString()
+std::string Turbo::Extension::TSurface::ToString()
 {
-	return std::string();
+    return std::string();
 }

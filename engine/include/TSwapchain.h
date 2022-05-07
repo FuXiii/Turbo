@@ -5,24 +5,24 @@
 
 namespace Turbo
 {
-	namespace Core
-	{
-		class TDevice;
-		class TSurface;
+namespace Core
+{
+class TDevice;
+class TSurface;
 
-		class TSwapchain :public TObject
-		{
-		private:
-			TDevice* device = nullptr;
-			VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
+class TSwapchain : public TObject
+{
+  private:
+    TDevice *device = nullptr;
+    VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
 
-		public:
-			explicit TSwapchain(TDevice* device, TSurface* surface);
-			~TSwapchain();
+  public:
+    explicit TSwapchain(TDevice *device, TSurface *surface);
+    ~TSwapchain();
 
-		public:
-			virtual std::string ToString() override;
-		};
-	}
-}
+  public:
+    virtual std::string ToString() override;
+};
+} // namespace Core
+} // namespace Turbo
 #endif // !TSWAPCHAIN_H
