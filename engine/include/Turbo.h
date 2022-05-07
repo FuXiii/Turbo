@@ -8,6 +8,20 @@
 #include <iostream>
 //</Test Delete>
 
+#if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
+#define TURBO_PLATFORM_WINDOWS
+#elif defined(__APPLE__)
+#define TURBO_PLATFORM_APPLE
+#elif defined(ANDROID) || defined(__ANDROID__)
+#define TURBO_PLATFORM_ANDROID
+#elif defined(__linux) || defined(__linux__)
+#define TURBO_PLATFORM_LINUX
+#elif defined(__unix) || defined(__unix__)
+#define TURBO_PLATFORM_UNIX
+#else
+#define TURBO_PLATFORM_UNDEFINED
+#endif
+
 namespace Turbo
 {
 namespace Core

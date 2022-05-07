@@ -570,6 +570,91 @@ void Turbo::Core::TCommandBuffer::ClearImage(TImageView *imageView, TImageLayout
     }
 }
 
+void Turbo::Core::TCommandBuffer::CopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+{
+    VkImageSubresourceLayers vk_image_subresource_layers = {};
+    vk_image_subresource_layers.aspectMask = aspects;
+    vk_image_subresource_layers.mipLevel = mipLevel;
+    vk_image_subresource_layers.baseArrayLayer = baseArrayLayer;
+    vk_image_subresource_layers.layerCount = layerCount;
+
+    VkBufferImageCopy vk_buffer_image_copy = {};
+    vk_buffer_image_copy.bufferOffset = bufferOffset;
+    vk_buffer_image_copy.bufferRowLength = bufferRowLength;
+    vk_buffer_image_copy.bufferImageHeight = bufferImageHeight;
+    vk_buffer_image_copy.imageSubresource = vk_image_subresource_layers;
+    vk_buffer_image_copy.imageOffset.x = imageOffsetX;
+    vk_buffer_image_copy.imageOffset.y = imageOffsetY;
+    vk_buffer_image_copy.imageOffset.z = imageOffsetZ;
+    vk_buffer_image_copy.imageExtent.width = imageWidth;
+    vk_buffer_image_copy.imageExtent.height = imageHeight;
+    vk_buffer_image_copy.imageExtent.depth = imageDepth;
+
+    vkCmdCopyBufferToImage(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstImage->GetVkImage(), (VkImageLayout)layout, 1, &vk_buffer_image_copy);
+}
+
+void Turbo::Core::TCommandBuffer::CopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+{
+    VkImageSubresourceLayers vk_image_subresource_layers = {};
+    vk_image_subresource_layers.aspectMask = aspects;
+    vk_image_subresource_layers.mipLevel = mipLevel;
+    vk_image_subresource_layers.baseArrayLayer = baseArrayLayer;
+    vk_image_subresource_layers.layerCount = layerCount;
+
+    VkBufferImageCopy vk_buffer_image_copy = {};
+    vk_buffer_image_copy.bufferOffset = bufferOffset;
+    vk_buffer_image_copy.bufferRowLength = bufferRowLength;
+    vk_buffer_image_copy.bufferImageHeight = bufferImageHeight;
+    vk_buffer_image_copy.imageSubresource = vk_image_subresource_layers;
+    vk_buffer_image_copy.imageOffset.x = imageOffsetX;
+    vk_buffer_image_copy.imageOffset.y = imageOffsetY;
+    vk_buffer_image_copy.imageOffset.z = imageOffsetZ;
+    vk_buffer_image_copy.imageExtent.width = imageWidth;
+    vk_buffer_image_copy.imageExtent.height = imageHeight;
+    vk_buffer_image_copy.imageExtent.depth = imageDepth;
+
+    vkCmdCopyImageToBuffer(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)layout, dstBuffer->GetVkBuffer(), 1, &vk_buffer_image_copy);
+}
+
+void Turbo::Core::TCommandBuffer::CopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
+{
+    VkImageSubresourceLayers src_subresource = {};
+    src_subresource.aspectMask = srcAspects;
+    src_subresource.mipLevel = srcMipLevel;
+    src_subresource.baseArrayLayer = srcBaseArrayLayer;
+    src_subresource.layerCount = srcLayerCount;
+
+    VkOffset3D src_offset = {};
+    src_offset.x = srcImageOffsetX;
+    src_offset.y = srcImageOffsetY;
+    src_offset.z = srcImageOffsetZ;
+
+    VkImageSubresourceLayers dst_subresource = {};
+    dst_subresource.aspectMask = dstAspects;
+    dst_subresource.mipLevel = dstMipLevel;
+    dst_subresource.baseArrayLayer = dstBaseArrayLayer;
+    dst_subresource.layerCount = dstLayerCount;
+
+    VkOffset3D dst_offset = {};
+    dst_offset.x = dstImageOffsetX;
+    dst_offset.y = dstImageOffsetY;
+    dst_offset.z = dstImageOffsetZ;
+
+    VkExtent3D extent = {};
+    extent.width = width;
+    extent.height = height;
+    extent.depth = depth;
+
+    VkImageCopy vk_image_copy = {};
+    vk_image_copy.srcSubresource = src_subresource;
+    vk_image_copy.srcOffset = src_offset;
+    vk_image_copy.dstSubresource = dst_subresource;
+    vk_image_copy.dstOffset = dst_offset;
+    vk_image_copy.extent = extent;
+
+    vkCmdCopyImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_copy);
+}
+
 std::string Turbo::Core::TCommandBuffer::ToString()
 {
     return std::string();

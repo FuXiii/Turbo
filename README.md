@@ -516,3 +516,37 @@ Turbo是渲染引擎
   > 用于获取`VkFormatProperties`对应的数据
   >
   >* 解决了`TCommandBuffer::BeginRenderPass(...)`中`ClearColor`不生效的问题（考虑`ClearColor`的颜色声明放到`TAttachment`中，或者`BeginRenderPass(...)`提供颜色设置接口）
+  >* `TCommandBuffer`中实现了如下指令函数：
+  >
+  >```CXX
+  > void CopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+  > void CopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
+  > void CopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+  >```
+  >
+  >* `Turbo.h`中增加如下声明:
+  >
+  >```CXX
+  > #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
+  > #define TURBO_PLATFORM_WINDOWS
+  > #elif defined(__APPLE__)
+  > #define TURBO_PLATFORM_APPLE
+  > #elif defined(ANDROID) || defined(__ANDROID__)
+  > #define TURBO_PLATFORM_ANDROID
+  > #elif defined(__linux) || defined(__linux__)
+  > #define TURBO_PLATFORM_LINUX
+  > #elif defined(__unix) || defined(__unix__)
+  > #define TURBO_PLATFORM_UNIX
+  > #else
+  > #define TURBO_PLATFORM_UNDEFINED
+  > #endif
+  >```
+  >
+  >* `TDescriptor.h`中的`typedef enum class TShaderDataType`内容重命名。声明有冲突
+  >* `Turbo`中新增`Turbo::Extension`命名空间
+  >* 开始修缮`TSurface.h`将其加入`Turbo::Extension`命名空间中<font color=yellow> 未完待续 </font>
+
+  * 2022/5/7 设计架构
+  >
+  >* `TSurface.h`修缮完成
+  >* 开始修缮`TSwapchain.h`将其加入`Turbo::Extension`命名空间中<font color=yellow> 未完待续 </font>
