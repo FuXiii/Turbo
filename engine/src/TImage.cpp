@@ -152,6 +152,24 @@ void Turbo::Core::TImage::InternalDestroy()
     vmaDestroyImage(*vma_allocator, this->vkImage, *vma_allocation);
 }
 
+Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+{
+    this->device = device;
+    this->vkImage = vkImage;
+    this->imageFlags = imageFlags;
+    this->type = type;
+    this->format = format;
+    this->extent.width = width;
+    this->extent.height = height;
+    this->extent.depth = depth;
+    this->mipLevels = mipLevels;
+    this->arrayLayers = arrayLayers;
+    this->samples = samples;
+    this->tiling = tiling;
+    this->usages = usages;
+    this->layout = layout;
+}
+
 Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)

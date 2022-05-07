@@ -1,8 +1,9 @@
 #pragma once
 #ifndef TSURFACE_H
 #define TSURFACE_H
+#include "TImage.h"
+#include "TInfo.h"
 #include "TQueueFamilyInfo.h"
-#include "TSurfaceFormat.h"
 #include "TVulkanHandle.h"
 
 #if defined(TURBO_PLATFORM_WINDOWS)
@@ -29,7 +30,82 @@ namespace Turbo
 namespace Extension
 {
 
-typedef VkFlags TPresentModeFlags;
+typedef enum class TColorSpaceType
+{
+    UNDEFINED = -1,
+    SRGB_NONLINEAR = VkColorSpaceKHR::VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+} TColorSpaceTypeEnum;
+
+class TColorSpace : public Turbo::Core::TInfo
+{
+  public:
+    friend class TSurface;
+
+  private:
+    TColorSpaceType colorSpaceType;
+
+  public:
+    explicit TColorSpace(TColorSpaceType colorSpaceType = TColorSpaceType::SRGB_NONLINEAR);
+    ~TColorSpace();
+
+  public:
+    TColorSpaceType GetColorSpaceType();
+    VkColorSpaceKHR GetVkColorSpaceKHR();
+
+    virtual std::string ToString() override;
+};
+
+class TSurfaceFormat : public Turbo::Core::TInfo
+{
+  public:
+    friend class Turbo::Extension::TSurface;
+
+  private:
+    Turbo::Core::TFormatInfo format;
+    TColorSpace colorSpace;
+
+  public:
+    explicit TSurfaceFormat();
+    explicit TSurfaceFormat(Turbo::Core::TFormatInfo format, TColorSpace colorSpace);
+    ~TSurfaceFormat();
+
+  public:
+    Turbo::Core::TFormatInfo GetFormat();
+    TColorSpace GetColorSpace();
+
+    virtual std::string ToString() override;
+};
+
+typedef enum TSurfaceTransformBits
+{
+    TRANSFORM_IDENTITY_BIT = 0x00000001,
+    TRANSFORM_ROTATE_90_BIT = 0x00000002,
+    TRANSFORM_ROTATE_180_BIT = 0x00000004,
+    TRANSFORM_ROTATE_270_BIT = 0x00000008,
+    TRANSFORM_HORIZONTAL_MIRROR_BIT = 0x00000010,
+    TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT = 0x00000020,
+    TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT = 0x00000040,
+    TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT = 0x00000080,
+    TRANSFORM_INHERIT_BIT = 0x00000100,
+} TSurfaceTransformBits;
+typedef VkFlags TSurfaceTransforms;
+
+typedef enum TCompositeAlphaBits
+{
+    ALPHA_OPAQUE_BIT = 0x00000001,
+    ALPHA_PRE_MULTIPLIED_BIT = 0x00000002,
+    ALPHA_POST_MULTIPLIED_BIT = 0x00000004,
+    ALPHA_INHERIT_BIT = 0x00000008,
+} TCompositeAlphaBits;
+typedef VkFlags TCompositeAlphas;
+
+typedef enum class TPresentMode
+{
+    IMMEDIATE = 0,
+    MAILBOX = 1,
+    FIFO = 2,
+    FIFO_RELAXED = 3,
+} TPresentMode;
 
 class TSurface : public Turbo::Core::TVulkanHandle
 {
@@ -46,23 +122,13 @@ class TSurface : public Turbo::Core::TVulkanHandle
     Turbo::Core::TExtent2D maxImageExtent;
     uint32_t maxImageArrayLayers;
 
-    Turbo::Core::TSurfaceTransformFlagsKHR supportedTransforms;
-    Turbo::Core::TSurfaceTransformFlagBitsKHR currentTransform;
-    Turbo::Core::TCompositeAlphaFlagsKHR supportedCompositeAlpha;
-    Turbo::Core::TImageUsageFlags supportedUsageFlags;
+    Turbo::Extension::TSurfaceTransforms supportedTransforms;
+    Turbo::Extension::TSurfaceTransformBits currentTransform;
+    Turbo::Extension::TCompositeAlphas supportedCompositeAlpha;
+    Turbo::Core::TImageUsages supportedUsageFlags;
 
-    std::vector<Turbo::Core::TSurfaceFormat> surfaceFormats;
-    std::vector<Turbo::Core::TPresentMode> presentModes;
-
-    /*
-    {
-        IMMEDIATE=0x001,
-        MAILBOX=0x002,
-        FIFO=0x004,
-        FIFO_RELAXED=0x008
-    }
-    */
-    TPresentModeFlags presentModeFlags;
+    std::vector<Turbo::Extension::TSurfaceFormat> surfaceFormats;
+    std::vector<Turbo::Extension::TPresentMode> presentModes;
 
 #if defined(TURBO_PLATFORM_WINDOWS)
     HINSTANCE hinstance;
@@ -88,15 +154,14 @@ class TSurface : public Turbo::Core::TVulkanHandle
 #if defined(TURBO_PLATFORM_WINDOWS)
     explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
-    explicit TSurface();
+    explicit TSurface(...);
 #elif defined(ANDROID) || defined(__ANDROID__)
     explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window);
 #elif defined(__linux) || defined(__linux__)
-    explicit TSurface();
+    explicit TSurface(...);
 #elif defined(__unix) || defined(__unix__)
-    explicit TSurface();
+    explicit TSurface(...);
 #else
-    explicit TSurface(VkSurfaceKHR vkSurfaceKHR);
 #endif
     ~TSurface();
 
@@ -106,8 +171,14 @@ class TSurface : public Turbo::Core::TVulkanHandle
     uint32_t GetMinImageCount();
     uint32_t GetMaxImageCount();
     Turbo::Core::TExtent2D GetCurrentExtent();
+    uint32_t GetCurrentWidth();
+    uint32_t GetCurrentHeight();
     Turbo::Core::TExtent2D GetMinImageExtent();
+    uint32_t GetMinWidth();
+    uint32_t GetMinHeight();
     Turbo::Core::TExtent2D GetMaxImageExtent();
+    uint32_t GetMaxWidth();
+    uint32_t GetMaxHeight();
     uint32_t GetMaxImageArrayLayers();
 
     bool IsSupportIdentityTransform();
@@ -130,13 +201,13 @@ class TSurface : public Turbo::Core::TVulkanHandle
     bool IsSupportPresentModeFifo();
     bool IsSupportPresentModeFifoRelaxed();
 
-    std::vector<Turbo::Core::TSurfaceFormat> GetSurfaceFormats();
-    std::vector<Turbo::Core::TPresentMode> GetPresentModes();
+    std::vector<Turbo::Extension::TSurfaceFormat> GetSurfaceFormats();
+    std::vector<Turbo::Extension::TPresentMode> GetPresentModes();
 
-    Turbo::Core::TSurfaceTransformFlagsKHR GetSupportedTransforms();
-    Turbo::Core::TSurfaceTransformFlagBitsKHR GetCurrentTransform();
-    Turbo::Core::TCompositeAlphaFlagsKHR GetSupportedCompositeAlpha();
-    Turbo::Core::TImageUsageFlags GetSupportedUsageFlags();
+    Turbo::Extension::TSurfaceTransforms GetSupportedTransforms();
+    Turbo::Extension::TSurfaceTransformBits GetCurrentTransform();
+    Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha();
+    Turbo::Core::TImageUsages GetSupportedUsages();
 
     Turbo::Core::TDevice *GetDevice();
 

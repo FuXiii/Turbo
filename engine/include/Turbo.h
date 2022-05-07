@@ -141,16 +141,9 @@ typedef uint32_t TQueueFamilyIndex;
 typedef size_t TMemoryTypeIndex;
 
 typedef VkImageCreateFlags TImageCreateFlags;
-typedef VkImageUsageFlags TImageUsageFlags;
 
 typedef VkImageViewCreateFlags TImageViewCreateFlags;
 typedef VkImageAspectFlags TImageAspectFlags;
-
-typedef VkSurfaceTransformFlagsKHR TSurfaceTransformFlagsKHR;
-typedef VkSurfaceTransformFlagBitsKHR TSurfaceTransformFlagBitsKHR;
-typedef VkCompositeAlphaFlagsKHR TCompositeAlphaFlagsKHR;
-
-typedef VkPresentModeKHR TPresentMode;
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_H

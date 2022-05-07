@@ -3,158 +3,276 @@
 #include "TException.h"
 #include "TPhysicalDevice.h"
 #include "TSurface.h"
+#include "TVulkanAllocator.h"
 
-Turbo::Core::TSwapchain::TSwapchain(TDevice *device, TSurface *surface)
+// Turbo::Extension::TSwapchainImage::TSwapchainImage(Turbo::Core::TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, Turbo::Core::TImageType type, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, Turbo::Core::TSampleCountBits samples, Turbo::Core::TImageTiling tiling, Turbo::Core::TImageUsages usages, Turbo::Core::TImageLayout layout) : Turbo::Core::TImage(device, vkImage, imageFlags, type, format, width, height, depth, mipLevels, arrayLayers, samples, tiling, usages, layout)
+// {
+// }
+
+void Turbo::Extension::TSwapchain::InternalCreate()
 {
-    // if (device != nullptr && surface != nullptr && device->GetPhysicalDevice() != nullptr && surface->GetPhysicalDevice() != nullptr && device->GetPhysicalDevice()->GetVkPhysicalDevice() != VK_NULL_HANDLE && surface->GetPhysicalDevice()->GetVkPhysicalDevice() != VK_NULL_HANDLE && surface->GetVkSurfaceKHR() != VK_NULL_HANDLE)
-    // {
-    //     if (device->GetPhysicalDevice()->GetVkPhysicalDevice() == surface->GetPhysicalDevice()->GetVkPhysicalDevice() && device->IsEnabledExtension(TExtensionType::VK_KHR_SWAPCHAIN))
-    //     {
-    //         VkSwapchainCreateInfoKHR swapchain_create_info = {};
-    //         swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    //         swapchain_create_info.pNext = nullptr;
-    //         swapchain_create_info.flags = 0;
-    //         swapchain_create_info.surface = surface->GetVkSurfaceKHR();
-    //         if (surface->GetMaxImageCount() >= 3)
-    //         {
-    //             swapchain_create_info.minImageCount = 3;
-    //         }
-    //         else
-    //         {
-    //             swapchain_create_info.minImageCount = surface->GetMinImageCount();
-    //         }
+    if (this->device != nullptr && this->vkSurfaceKHR != VK_NULL_HANDLE)
+    {
+        // for external VkSurfaceKHR
+        // vkGetPhysicalDeviceSurfaceSupportKHR
+        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    }
+    else
+    {
+        // imageCount
+        if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         VkFormat target_surface_format = VkFormat::VK_FORMAT_UNDEFINED;
-    //         VkColorSpaceKHR target_surface_color_space = VkColorSpaceKHR::VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    //         std::vector<Turbo::Core::TSurfaceFormat> surface_formats = surface->GetSurfaceFormats();
-    //         size_t surface_format_count = surface_formats.size();
-    //         for (size_t surface_format_index = 0; surface_format_index < surface_format_count; surface_format_index++)
-    //         {
-    //             VkFormat format = surface_formats[surface_format_index].GetFormat().GetVkFormat();
-    //             if (format == VkFormat::VK_FORMAT_R8G8B8A8_SRGB)
-    //             {
-    //                 target_surface_format = VkFormat::VK_FORMAT_R8G8B8A8_SRGB;
-    //                 target_surface_color_space = surface_formats[surface_format_index].GetColorSpace().GetVkColorSpaceKHR();
-    //                 break;
-    //             }
-    //             else if (format == VkFormat::VK_FORMAT_B8G8R8A8_SRGB)
-    //             {
-    //                 target_surface_format = VkFormat::VK_FORMAT_B8G8R8A8_SRGB;
-    //                 target_surface_color_space = surface_formats[surface_format_index].GetColorSpace().GetVkColorSpaceKHR();
-    //                 break;
-    //             }
-    //             else if (format == VkFormat::VK_FORMAT_R8G8B8A8_UNORM)
-    //             {
-    //                 target_surface_format = VkFormat::VK_FORMAT_R8G8B8A8_UNORM;
-    //                 target_surface_color_space = surface_formats[surface_format_index].GetColorSpace().GetVkColorSpaceKHR();
-    //                 break;
-    //             }
-    //             else if (format == VkFormat::VK_FORMAT_B8G8R8A8_UNORM)
-    //             {
-    //                 target_surface_format = VkFormat::VK_FORMAT_B8G8R8A8_UNORM;
-    //                 target_surface_color_space = surface_formats[surface_format_index].GetColorSpace().GetVkColorSpaceKHR();
-    //                 break;
-    //             }
-    //         }
+        // surfaceFormat
+        std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = this->surface->GetSurfaceFormats();
+        bool is_support_surface_format = false;
+        for (Turbo::Extension::TSurfaceFormat &surface_format_item : surface_formats)
+        {
+            if (this->format.GetVkFormat() == surface_format_item.GetFormat().GetVkFormat())
+            {
+                is_support_surface_format = true;
+                break;
+            }
+        }
 
-    //         if (target_surface_format != VkFormat::VK_FORMAT_UNDEFINED && target_surface_color_space == VkColorSpaceKHR::VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-    //         {
-    //             swapchain_create_info.imageFormat = surface->GetSurfaceFormats()[0].GetFormat().GetVkFormat();
-    //             swapchain_create_info.imageColorSpace = target_surface_color_space;
-    //         }
-    //         else
-    //         {
-    //             throw TException(TResult::UNSUPPORTED);
-    //         }
+        if (!is_support_surface_format)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         swapchain_create_info.imageExtent = surface->GetCurrentExtent();
+        // width
+        if ((this->surface->GetMinWidth() > this->width) || (this->surface->GetMaxWidth() < this->width))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         if (surface->GetMaxImageArrayLayers() >= 1)
-    //         {
-    //             swapchain_create_info.imageArrayLayers = 1;
-    //         }
-    //         else
-    //         {
-    //             throw TException(TResult::UNSUPPORTED);
-    //         }
+        // height
+        if ((this->surface->GetMinHeight() > this->height) || (this->surface->GetMaxHeight() < this->height))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         if (surface->GetSupportedUsageFlags() & VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-    //         {
-    //             swapchain_create_info.imageUsage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    //         }
-    //         else
-    //         {
-    //             throw TException(TResult::UNSUPPORTED);
-    //         }
+        // arrayLayers
+        if (this->surface->GetMaxImageArrayLayers() > this->imageArrayLayers)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         swapchain_create_info.imageSharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
-    //         swapchain_create_info.queueFamilyIndexCount = 0;
-    //         swapchain_create_info.pQueueFamilyIndices = nullptr;
-    //         swapchain_create_info.preTransform = surface->GetCurrentTransform();
+        // usages
+        Turbo::Core::TImageUsages surface_support_images_usages = this->surface->GetSupportedUsages();
+        if ((surface_support_images_usages & this->usages) != this->usages)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         if (surface->GetSupportedCompositeAlpha() & VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
-    //         {
-    //             swapchain_create_info.compositeAlpha = VkCompositeAlphaFlagBitsKHR::VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    //         }
-    //         else
-    //         {
-    //             throw TException(TResult::UNSUPPORTED);
-    //         }
+        // transform
+        TSurfaceTransforms surface_support_transforms = this->surface->GetSupportedTransforms();
+        if ((surface_support_transforms & this->transform) != this->transform)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         if (surface->IsSupportPresentModeFifoRelaxed())
-    //         {
-    //             swapchain_create_info.presentMode = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_RELAXED_KHR;
-    //         }
-    //         else if (surface->IsSupportPresentModeFifo())
-    //         {
-    //             swapchain_create_info.presentMode = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
-    //         }
-    //         else if (surface->IsSupportPresentModeMailbox())
-    //         {
-    //             swapchain_create_info.presentMode = VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR;
-    //         }
-    //         else if (surface->IsSupportPresentModeImmediate())
-    //         {
-    //             swapchain_create_info.presentMode = VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR;
-    //         }
-    //         else
-    //         {
-    //             throw TException(TResult::UNSUPPORTED);
-    //         }
+        // compositeAlpha
+        TCompositeAlphas surface_support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
+        if ((surface_support_composite_alphas & this->compositeAlpha) != this->compositeAlpha)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
 
-    //         swapchain_create_info.clipped = VK_TRUE;
-    //         swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
+        // presentMode
+        std::vector<TPresentMode> surface_support_present_modes = this->surface->GetPresentModes();
+        bool is_support_present_mode = false;
+        for (TPresentMode &present_mode_item : surface_support_present_modes)
+        {
+            if (this->presentMode == present_mode_item)
+            {
+                is_support_present_mode = true;
+                break;
+            }
+        }
 
-    //         VkResult result = vkCreateSwapchainKHR(device->GetVkDevice(), &swapchain_create_info, nullptr, &this->vkSwapchainKHR);
-    //         if (result == VK_SUCCESS)
-    //         {
-    //             this->device = device;
-    //         }
-    //         else
-    //         {
-    //             throw TException(VkResultToTResult(result));
-    //         }
-    //     }
-    //     else
-    //     {
-    //         throw TException(TResult::INVALID_PARAMETER);
-    //     }
-    // }
-    // else
-    // {
-    //     throw TException(TResult::INVALID_PARAMETER);
-    // }
+        if (!is_support_present_mode)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
+
+        VkSwapchainCreateInfoKHR vk_swapchain_create_info_khr = {};
+        vk_swapchain_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        vk_swapchain_create_info_khr.pNext = nullptr;
+        vk_swapchain_create_info_khr.flags = 0;
+        vk_swapchain_create_info_khr.surface = this->surface->GetVkSurfaceKHR();
+        vk_swapchain_create_info_khr.minImageCount = this->minImageCount;
+        vk_swapchain_create_info_khr.imageFormat = this->format.GetVkFormat();
+        vk_swapchain_create_info_khr.imageColorSpace = VkColorSpaceKHR::VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+        vk_swapchain_create_info_khr.imageExtent.width = this->width;
+        vk_swapchain_create_info_khr.imageExtent.height = this->height;
+        vk_swapchain_create_info_khr.imageArrayLayers = this->imageArrayLayers;
+        vk_swapchain_create_info_khr.imageUsage = this->usages;
+        vk_swapchain_create_info_khr.imageSharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
+        vk_swapchain_create_info_khr.queueFamilyIndexCount = 0;
+        vk_swapchain_create_info_khr.pQueueFamilyIndices = nullptr;
+        vk_swapchain_create_info_khr.preTransform = (VkSurfaceTransformFlagBitsKHR)this->transform;
+        vk_swapchain_create_info_khr.compositeAlpha = (VkCompositeAlphaFlagBitsKHR)this->compositeAlpha;
+        vk_swapchain_create_info_khr.presentMode = (VkPresentModeKHR)this->presentMode;
+        vk_swapchain_create_info_khr.clipped = VK_FALSE;
+        if (this->isClipped)
+        {
+            vk_swapchain_create_info_khr.clipped = VK_TRUE;
+        }
+        vk_swapchain_create_info_khr.oldSwapchain = nullptr;
+
+        VkDevice vk_device = this->surface->GetDevice()->GetVkDevice();
+        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+
+        VkResult result = vkCreateSwapchainKHR(vk_device, &vk_swapchain_create_info_khr, allocator, &this->vkSwapchainKHR);
+        if (result != VK_SUCCESS)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+        }
+
+        // Get VkImages
+        uint32_t image_count;
+        result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, nullptr);
+        if (result != VK_SUCCESS)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+        }
+
+        std::vector<VkImage> vk_images;
+        vk_images.resize(image_count);
+        result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, vk_images.data());
+        if (result != VK_SUCCESS)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+        }
+
+        for (VkImage vk_image_item : vk_images)
+        {
+            Turbo::Core::TImage *image = new Turbo::Core::TImage(this->device, vk_image_item, 0, Core::TImageType::DIMENSION_2D, this->format, this->width, this->height, 1, 1, this->imageArrayLayers, Core::TSampleCountBits::SAMPLE_1_BIT, Core::TImageTiling::OPTIMAL, this->usages, Core::TImageLayout::UNDEFINED);
+            this->images.push_back(image);
+        }
+    }
 }
 
-Turbo::Core::TSwapchain::~TSwapchain()
+void Turbo::Extension::TSwapchain::InternalDestroy()
 {
-    // if (this->device != nullptr && this->vkSwapchainKHR != VK_NULL_HANDLE)
-    // {
-    //     vkDestroySwapchainKHR(this->device->GetVkDevice(), this->vkSwapchainKHR, nullptr);
-    // }
+    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    if (this->device != nullptr && this->vkSurfaceKHR != VK_NULL_HANDLE)
+    {
+        // for external VkSurfaceKHR
+        vkDestroySwapchainKHR(this->device->GetVkDevice(), this->vkSwapchainKHR, allocator);
+    }
+    else
+    {
+        // for Turbo Surface
+        vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
+    }
 }
 
-std::string Turbo::Core::TSwapchain::ToString()
+Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
+{
+    if (surface != nullptr)
+    {
+        this->surface = surface;
+        this->minImageCount = minImageCount;
+        this->format = format;
+        this->width = width;
+        this->height = height;
+        this->imageArrayLayers = imageArrayLayers;
+        this->usages = usages;
+        this->transform = transform;
+        this->compositeAlpha = compositeAlpha;
+        this->presentMode = presentMode;
+        this->isClipped = isClipped;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
+}
+
+Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
+{
+    if (surface != nullptr)
+    {
+        this->surface = surface;
+        this->minImageCount = minImageCount;
+        this->format = format;
+        this->width = surface->GetCurrentWidth();
+        this->height = surface->GetCurrentHeight();
+        this->imageArrayLayers = 1;
+        this->usages = usages;
+        this->transform = surface->GetCurrentTransform();
+
+        TCompositeAlphas support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
+        if (!this->surface->IsSupportCompositeAlphaOpaque())
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        }
+        this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+
+        if (this->surface->IsSupportPresentModeFifo())
+        {
+            this->presentMode = TPresentMode::FIFO;
+        }
+        else if (this->surface->IsSupportPresentModeFifoRelaxed())
+        {
+            this->presentMode = TPresentMode::FIFO_RELAXED;
+        }
+        else if (this->surface->IsSupportPresentModeMailbox())
+        {
+            this->presentMode = TPresentMode::MAILBOX;
+        }
+        else
+        {
+            this->presentMode = TPresentMode::IMMEDIATE;
+        }
+        this->isClipped = isClipped;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
+}
+
+Turbo::Extension::TSwapchain::TSwapchain(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
+{
+    if (device != nullptr && vkSurfaceKHR != VK_NULL_HANDLE)
+    {
+        this->device = device;
+        this->vkSurfaceKHR = vkSurfaceKHR;
+
+        this->minImageCount = minImageCount;
+        this->format = format;
+        this->width = width;
+        this->height = height;
+        this->imageArrayLayers = imageArrayLayers;
+        this->usages = usages;
+        this->transform = transform;
+        this->compositeAlpha = compositeAlpha;
+        this->presentMode = presentMode;
+        this->isClipped = isClipped;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
+}
+
+Turbo::Extension::TSwapchain::~TSwapchain()
+{
+    this->InternalDestroy();
+}
+
+std::string Turbo::Extension::TSwapchain::ToString()
 {
     return std::string();
 }

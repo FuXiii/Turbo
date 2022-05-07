@@ -5,6 +5,77 @@
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
 
+Turbo::Extension::TColorSpace::TColorSpace(TColorSpaceType colorSpaceType)
+{
+    this->colorSpaceType = colorSpaceType;
+}
+
+Turbo::Extension::TColorSpace::~TColorSpace()
+{
+}
+
+Turbo::Extension::TColorSpaceType Turbo::Extension::TColorSpace::GetColorSpaceType()
+{
+    return this->colorSpaceType;
+}
+
+VkColorSpaceKHR Turbo::Extension::TColorSpace::GetVkColorSpaceKHR()
+{
+    return static_cast<VkColorSpaceKHR>(this->colorSpaceType);
+}
+
+std::string Turbo::Extension::TColorSpace::ToString()
+{
+    switch (this->colorSpaceType)
+    {
+    case Turbo::Extension::TColorSpaceType::UNDEFINED: {
+        return std::string("UNDEFINED");
+    }
+    break;
+    case Turbo::Extension::TColorSpaceType::SRGB_NONLINEAR: {
+        return std::string("SRGB_NONLINEAR");
+    }
+    break;
+    default: {
+        return std::string("UNDEFINED");
+    }
+    break;
+    }
+
+    return std::string();
+}
+
+Turbo::Extension::TSurfaceFormat::TSurfaceFormat()
+{
+    this->format = Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::UNDEFINED);
+    this->colorSpace = TColorSpace(TColorSpaceType::UNDEFINED);
+}
+
+Turbo::Extension::TSurfaceFormat::TSurfaceFormat(Turbo::Core::TFormatInfo format, TColorSpace colorSpace)
+{
+    this->format = format;
+    this->colorSpace = colorSpace;
+}
+
+Turbo::Extension::TSurfaceFormat::~TSurfaceFormat()
+{
+}
+
+Turbo::Core::TFormatInfo Turbo::Extension::TSurfaceFormat::GetFormat()
+{
+    return this->format;
+}
+
+Turbo::Extension::TColorSpace Turbo::Extension::TSurfaceFormat::GetColorSpace()
+{
+    return this->colorSpace;
+}
+
+std::string Turbo::Extension::TSurfaceFormat::ToString()
+{
+    return std::string();
+}
+
 void Turbo::Extension::TSurface::InternalCreate()
 {
     Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
@@ -72,6 +143,24 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
         throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
     }
 }
+#elif defined(__APPLE__)
+Turbo::Extension::TSurface::TSurface(...)
+{
+}
+#elif defined(ANDROID) || defined(__ANDROID__)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)
+{
+    ...
+}
+#elif defined(__linux) || defined(__linux__)
+Turbo::Extension::TSurface::TSurface(...)
+{
+}
+#elif defined(__unix) || defined(__unix__)
+Turbo::Extension::TSurface::TSurface(...)
+{
+}
+#else
 #endif
 
 Turbo::Extension::TSurface::~TSurface()
@@ -140,7 +229,7 @@ void Turbo::Extension::TSurface::GetSurfaceCapabilities()
         this->maxImageArrayLayers = surface_capanilities.maxImageArrayLayers;
 
         this->supportedTransforms = surface_capanilities.supportedTransforms;
-        this->currentTransform = surface_capanilities.currentTransform;
+        this->currentTransform = (TSurfaceTransformBits)surface_capanilities.currentTransform;
         this->supportedCompositeAlpha = surface_capanilities.supportedCompositeAlpha;
         this->supportedUsageFlags = surface_capanilities.supportedUsageFlags;
     }
@@ -175,9 +264,9 @@ void Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats()
                     {
                         if (support_formats[support_format_index].GetVkFormat() == surface_formats[surface_format_index].format)
                         {
-                            Turbo::Core::TSurfaceFormat surface_format;
+                            Turbo::Extension::TSurfaceFormat surface_format;
                             surface_format.format = support_formats[support_format_index];
-                            surface_format.colorSpace = Turbo::Core::TColorSpace(static_cast<Turbo::Core::TColorSpaceType>(surface_formats[surface_format_index].colorSpace));
+                            surface_format.colorSpace = Turbo::Extension::TColorSpace(static_cast<Turbo::Extension::TColorSpaceType>(surface_formats[surface_format_index].colorSpace));
 
                             this->surfaceFormats.push_back(surface_format);
                             break;
@@ -210,50 +299,37 @@ void Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode()
 {
     Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
-    this->presentModeFlags = 0;
-
     uint32_t present_mode_count = 0;
     VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, nullptr);
     if (result == VK_SUCCESS)
     {
         if (present_mode_count > 0)
         {
-            this->presentModes.resize(present_mode_count);
-            result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, this->presentModes.data());
+            std::vector<VkPresentModeKHR> vk_present_mode_khrs;
+            vk_present_mode_khrs.resize(present_mode_count);
+            result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, vk_present_mode_khrs.data());
             if (result == VK_SUCCESS)
             {
                 for (size_t present_mode_index = 0; present_mode_index < present_mode_count; present_mode_index++)
                 {
-                    if (!(this->presentModeFlags & 0x001))
+                    switch (vk_present_mode_khrs[present_mode_index])
                     {
-                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR)
-                        {
-                            this->presentModeFlags |= 0x001;
-                        }
+                    case VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR: {
+                        this->presentModes.push_back(TPresentMode::IMMEDIATE);
                     }
-
-                    if (!(this->presentModeFlags & 0x002))
-                    {
-                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR)
-                        {
-                            this->presentModeFlags |= 0x002;
-                        }
+                    break;
+                    case VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR: {
+                        this->presentModes.push_back(TPresentMode::MAILBOX);
                     }
-
-                    if (!(this->presentModeFlags & 0x004))
-                    {
-                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR)
-                        {
-                            this->presentModeFlags |= 0x004;
-                        }
+                    break;
+                    case VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR: {
+                        this->presentModes.push_back(TPresentMode::FIFO);
                     }
-
-                    if (!(this->presentModeFlags & 0x008))
-                    {
-                        if (presentModes[present_mode_index] == VkPresentModeKHR::VK_PRESENT_MODE_FIFO_RELAXED_KHR)
-                        {
-                            this->presentModeFlags |= 0x008;
-                        }
+                    break;
+                    case VkPresentModeKHR::VK_PRESENT_MODE_FIFO_RELAXED_KHR: {
+                        this->presentModes.push_back(TPresentMode::FIFO_RELAXED);
+                    }
+                    break;
                     }
                 }
             }
@@ -293,14 +369,44 @@ Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetCurrentExtent()
     return this->currentExtent;
 }
 
+uint32_t Turbo::Extension::TSurface::GetCurrentWidth()
+{
+    return this->currentExtent.width;
+}
+
+uint32_t Turbo::Extension::TSurface::GetCurrentHeight()
+{
+    return this->currentExtent.height;
+}
+
 Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetMinImageExtent()
 {
     return this->minImageExtent;
 }
 
+uint32_t Turbo::Extension::TSurface::GetMinWidth()
+{
+    return this->minImageExtent.width;
+}
+
+uint32_t Turbo::Extension::TSurface::GetMinHeight()
+{
+    return this->minImageExtent.height;
+}
+
 Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetMaxImageExtent()
 {
     return this->maxImageExtent;
+}
+
+uint32_t Turbo::Extension::TSurface::GetMaxWidth()
+{
+    return this->maxImageExtent.width;
+}
+
+uint32_t Turbo::Extension::TSurface::GetMaxHeight()
+{
+    return this->maxImageExtent.height;
 }
 
 uint32_t Turbo::Extension::TSurface::GetMaxImageArrayLayers()
@@ -440,9 +546,12 @@ bool Turbo::Extension::TSurface::IsSupportCompositeAlphaInherit()
 
 bool Turbo::Extension::TSurface::IsSupportPresentModeImmediate()
 {
-    if (this->presentModeFlags & 0x001)
+    for (TPresentMode &present_mode_item : this->presentModes)
     {
-        return true;
+        if (present_mode_item == TPresentMode::IMMEDIATE)
+        {
+            return true;
+        }
     }
 
     return false;
@@ -450,9 +559,12 @@ bool Turbo::Extension::TSurface::IsSupportPresentModeImmediate()
 
 bool Turbo::Extension::TSurface::IsSupportPresentModeMailbox()
 {
-    if (this->presentModeFlags & 0x002)
+    for (TPresentMode &present_mode_item : this->presentModes)
     {
-        return true;
+        if (present_mode_item == TPresentMode::MAILBOX)
+        {
+            return true;
+        }
     }
 
     return false;
@@ -460,9 +572,12 @@ bool Turbo::Extension::TSurface::IsSupportPresentModeMailbox()
 
 bool Turbo::Extension::TSurface::IsSupportPresentModeFifo()
 {
-    if (this->presentModeFlags & 0x004)
+    for (TPresentMode &present_mode_item : this->presentModes)
     {
-        return true;
+        if (present_mode_item == TPresentMode::FIFO)
+        {
+            return true;
+        }
     }
 
     return false;
@@ -470,40 +585,43 @@ bool Turbo::Extension::TSurface::IsSupportPresentModeFifo()
 
 bool Turbo::Extension::TSurface::IsSupportPresentModeFifoRelaxed()
 {
-    if (this->presentModeFlags & 0x008)
+    for (TPresentMode &present_mode_item : this->presentModes)
     {
-        return true;
+        if (present_mode_item == TPresentMode::FIFO_RELAXED)
+        {
+            return true;
+        }
     }
 
     return false;
 }
 
-std::vector<Turbo::Core::TSurfaceFormat> Turbo::Extension::TSurface::GetSurfaceFormats()
+std::vector<Turbo::Extension::TSurfaceFormat> Turbo::Extension::TSurface::GetSurfaceFormats()
 {
     return this->surfaceFormats;
 }
 
-std::vector<Turbo::Core::TPresentMode> Turbo::Extension::TSurface::GetPresentModes()
+std::vector<Turbo::Extension::TPresentMode> Turbo::Extension::TSurface::GetPresentModes()
 {
     return this->presentModes;
 }
 
-Turbo::Core::TSurfaceTransformFlagsKHR Turbo::Extension::TSurface::GetSupportedTransforms()
+Turbo::Extension::TSurfaceTransforms Turbo::Extension::TSurface::GetSupportedTransforms()
 {
     return this->supportedTransforms;
 }
 
-Turbo::Core::TSurfaceTransformFlagBitsKHR Turbo::Extension::TSurface::GetCurrentTransform()
+Turbo::Extension::TSurfaceTransformBits Turbo::Extension::TSurface::GetCurrentTransform()
 {
     return this->currentTransform;
 }
 
-Turbo::Core::TCompositeAlphaFlagsKHR Turbo::Extension::TSurface::GetSupportedCompositeAlpha()
+Turbo::Extension::TCompositeAlphas Turbo::Extension::TSurface::GetSupportedCompositeAlpha()
 {
     return this->supportedCompositeAlpha;
 }
 
-Turbo::Core::TImageUsageFlags Turbo::Extension::TSurface::GetSupportedUsageFlags()
+Turbo::Core::TImageUsages Turbo::Extension::TSurface::GetSupportedUsages()
 {
     return this->supportedUsageFlags;
 }
