@@ -330,6 +330,9 @@ void Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode()
                         this->presentModes.push_back(TPresentMode::FIFO_RELAXED);
                     }
                     break;
+                    default: {
+                    }
+                    break;
                     }
                 }
             }

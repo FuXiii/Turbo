@@ -29,6 +29,7 @@ namespace Turbo
 {
 namespace Extension
 {
+class TSurface;
 
 typedef enum class TColorSpaceType
 {
