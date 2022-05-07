@@ -309,125 +309,29 @@ int main()
     {
         std::string save_file_path = "E:/Turbo/";
         std::string save_file_name("VulkanImage");
+
         Turbo::Core::TImage *source_image = color_image;
 
-        VkResult res = VkResult::VK_ERROR_UNKNOWN;
-        VkImageCreateInfo image_create_info_ = {};
-        image_create_info_.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        image_create_info_.pNext = NULL;
-        image_create_info_.imageType = VK_IMAGE_TYPE_2D;
-        image_create_info_.format = source_image->GetFormat().GetVkFormat();
-        image_create_info_.extent.width = source_image->GetWidth();
-        image_create_info_.extent.height = source_image->GetHeight();
-        image_create_info_.extent.depth = 1;
-        image_create_info_.mipLevels = 1;
-        image_create_info_.arrayLayers = 1;
-        image_create_info_.samples = VK_SAMPLE_COUNT_1_BIT;
-        image_create_info_.tiling = VK_IMAGE_TILING_LINEAR;
-        image_create_info_.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        image_create_info_.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-        image_create_info_.queueFamilyIndexCount = 0;
-        image_create_info_.pQueueFamilyIndices = NULL;
-        image_create_info_.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        image_create_info_.flags = 0;
+        Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, source_image->GetFormat(), source_image->GetWidth(), source_image->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
 
-        VkImage mappableImage = VK_NULL_HANDLE;
-        res = vkCreateImage(device->GetVkDevice(), &image_create_info_, nullptr, &mappableImage);
+        Turbo::Core::TCommandBuffer *temp_command_buffer = command_pool->Allocate();
 
-        VkMemoryRequirements mem_reqs;
+        temp_command_buffer->Begin();
+        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->CopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
+        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->End();
 
-        vkGetImageMemoryRequirements(device->GetVkDevice(), mappableImage, &mem_reqs);
+        Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(device);
+        std::vector<Turbo::Core::TSemaphore *> gpu_copy_to_cpu_wait_semaphores;
+        std::vector<Turbo::Core::TSemaphore *> gpu_copy_to_cpu_signal_semaphores;
 
-        VkPhysicalDeviceMemoryProperties physical_device_memory_properties = {};
-        vkGetPhysicalDeviceMemoryProperties(physical_device->GetVkPhysicalDevice(), &physical_device_memory_properties);
+        queue->Submit(gpu_copy_to_cpu_wait_semaphores, gpu_copy_to_cpu_signal_semaphores, temp_command_buffer, gpu_copy_to_cpu_fence);
 
-        uint32_t _index = UINT32_MAX;
-        bool is_success = memory_type_from_properties(physical_device_memory_properties, mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_index);
+        gpu_copy_to_cpu_fence->WaitUntil();
 
-        VkMemoryAllocateInfo mem_alloc = {};
-        mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        mem_alloc.pNext = NULL;
-        mem_alloc.allocationSize = mem_reqs.size;
-        mem_alloc.memoryTypeIndex = _index;
-
-        VkDeviceMemory mappableMemory;
-        res = vkAllocateMemory(device->GetVkDevice(), &mem_alloc, NULL, &(mappableMemory));
-
-        res = vkBindImageMemory(device->GetVkDevice(), mappableImage, mappableMemory, 0);
-
-        VkCommandBufferAllocateInfo commandBuffer_Allocate_Info;
-        commandBuffer_Allocate_Info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBuffer_Allocate_Info.pNext = nullptr;
-        commandBuffer_Allocate_Info.commandBufferCount = 1;
-        commandBuffer_Allocate_Info.commandPool = command_pool->GetVkCommandPool();
-        commandBuffer_Allocate_Info.level = VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-        VkCommandBuffer _commandBuffer;
-        res = vkAllocateCommandBuffers(device->GetVkDevice(), &commandBuffer_Allocate_Info, &_commandBuffer);
-
-        VkCommandBufferBeginInfo cmd_buf_info = {};
-        cmd_buf_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        cmd_buf_info.pNext = NULL;
-        cmd_buf_info.flags = 0;
-        cmd_buf_info.pInheritanceInfo = NULL;
-
-        res = vkBeginCommandBuffer(_commandBuffer, &cmd_buf_info);
-
-        set_image_layout(_commandBuffer, mappableImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-        set_image_layout(_commandBuffer, source_image->GetVkImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-        VkImageCopy copy_region;
-        copy_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        copy_region.srcSubresource.mipLevel = 0;
-        copy_region.srcSubresource.baseArrayLayer = 0;
-        copy_region.srcSubresource.layerCount = 1;
-        copy_region.srcOffset.x = 0;
-        copy_region.srcOffset.y = 0;
-        copy_region.srcOffset.z = 0;
-        copy_region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        copy_region.dstSubresource.mipLevel = 0;
-        copy_region.dstSubresource.baseArrayLayer = 0;
-        copy_region.dstSubresource.layerCount = 1;
-        copy_region.dstOffset.x = 0;
-        copy_region.dstOffset.y = 0;
-        copy_region.dstOffset.z = 0;
-        copy_region.extent.width = source_image->GetWidth();
-        copy_region.extent.height = source_image->GetHeight();
-        copy_region.extent.depth = 1;
-
-        vkCmdCopyImage(_commandBuffer, source_image->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mappableImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
-
-        set_image_layout(_commandBuffer, mappableImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
-
-        vkEndCommandBuffer(_commandBuffer);
-
-        VkSubmitInfo submit_info = {};
-        submit_info.pNext = NULL;
-        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submit_info.waitSemaphoreCount = 0;
-        submit_info.pWaitSemaphores = NULL;
-        submit_info.pWaitDstStageMask = NULL;
-        submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &_commandBuffer;
-        submit_info.signalSemaphoreCount = 0;
-        submit_info.pSignalSemaphores = NULL;
-
-        VkFenceCreateInfo fenceInfo;
-        VkFence cmdFence;
-        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceInfo.pNext = NULL;
-        fenceInfo.flags = 0;
-        vkCreateFence(device->GetVkDevice(), &fenceInfo, NULL, &cmdFence);
-
-        vkQueueSubmit(queue->GetVkQueue(), 1, &submit_info, cmdFence);
-
-        do
-        {
-            res = vkWaitForFences(device->GetVkDevice(), 1, &cmdFence, VK_TRUE, UINT64_MAX);
-        } while (res == VK_TIMEOUT);
-
-        vkDestroyFence(device->GetVkDevice(), cmdFence, NULL);
+        delete gpu_copy_to_cpu_fence;
 
         std::string filename;
         filename.append(save_file_path);
@@ -439,10 +343,9 @@ int main()
         subres.mipLevel = 0;
         subres.arrayLayer = 0;
         VkSubresourceLayout sr_layout;
-        vkGetImageSubresourceLayout(device->GetVkDevice(), mappableImage, &subres, &sr_layout);
+        vkGetImageSubresourceLayout(device->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
 
-        char *ptr;
-        res = vkMapMemory(device->GetVkDevice(), mappableMemory, 0, mem_reqs.size, 0, (void **)&ptr);
+        char *ptr = (char *)temp_image->Map();
 
         ptr += sr_layout.offset;
         std::ofstream file(filename.c_str(), std::ios::binary);
@@ -487,9 +390,9 @@ int main()
         }
 
         file.close();
-        vkUnmapMemory(device->GetVkDevice(), mappableMemory);
-        vkDestroyImage(device->GetVkDevice(), mappableImage, NULL);
-        vkFreeMemory(device->GetVkDevice(), mappableMemory, NULL);
+        temp_image->Unmap();
+        delete temp_image;
+        command_pool->Free(temp_command_buffer);
     }
 
     delete fence;

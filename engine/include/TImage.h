@@ -114,6 +114,9 @@ class TImage : public Turbo::Core::TVulkanHandle
     uint32_t GetMipLevels();
     uint32_t GetArrayLayers();
 
+    void *Map();
+    void Unmap();
+
     virtual std::string ToString() override;
 };
 } // namespace Core
