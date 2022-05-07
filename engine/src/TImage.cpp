@@ -236,6 +236,24 @@ uint32_t Turbo::Core::TImage::GetArrayLayers()
     return this->arrayLayers;
 }
 
+void *Turbo::Core::TImage::Map()
+{
+    void *result = nullptr;
+    if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+    {
+        VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
+        vmaMapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), &result);
+    }
+
+    return result;
+}
+
+void Turbo::Core::TImage::Unmap()
+{
+    VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
+    vmaUnmapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation));
+}
+
 std::string Turbo::Core::TImage::ToString()
 {
     return std::string();
