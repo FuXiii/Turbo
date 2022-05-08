@@ -10,7 +10,9 @@ namespace Turbo
 namespace Core
 {
 class TDevice;
-}
+class TSemaphore;
+class TFence;
+} // namespace Core
 } // namespace Turbo
 
 namespace Turbo
@@ -22,11 +24,6 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TSurface *surface = nullptr;
     T_VULKAN_HANDLE_HANDLE VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
-
-    // <for external VkSurfaceKHR>
-    T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = nullptr;
-    T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
-    // <for external VkSurfaceKHR>
 
     uint32_t minImageCount;
     Turbo::Core::TFormatInfo format;
@@ -48,8 +45,12 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
   public:
     explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
     explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
-    explicit TSwapchain(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
     ~TSwapchain();
+
+    const std::vector<Turbo::Core::TImage *> &GetImages();
+
+    Turbo::Core::TResult AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
+    Turbo::Core::TResult AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
 
   public:
     virtual std::string ToString() override;

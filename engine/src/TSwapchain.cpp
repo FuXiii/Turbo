@@ -1,23 +1,17 @@
 #include "TSwapchain.h"
 #include "TDevice.h"
 #include "TException.h"
+#include "TFence.h"
 #include "TPhysicalDevice.h"
+#include "TSemaphore.h"
 #include "TSurface.h"
 #include "TVulkanAllocator.h"
 
-// Turbo::Extension::TSwapchainImage::TSwapchainImage(Turbo::Core::TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, Turbo::Core::TImageType type, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, Turbo::Core::TSampleCountBits samples, Turbo::Core::TImageTiling tiling, Turbo::Core::TImageUsages usages, Turbo::Core::TImageLayout layout) : Turbo::Core::TImage(device, vkImage, imageFlags, type, format, width, height, depth, mipLevels, arrayLayers, samples, tiling, usages, layout)
-// {
-// }
-
 void Turbo::Extension::TSwapchain::InternalCreate()
 {
-    if (this->device != nullptr && this->vkSurfaceKHR != VK_NULL_HANDLE)
-    {
-        // for external VkSurfaceKHR
-        // vkGetPhysicalDeviceSurfaceSupportKHR
-        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    }
-    else
+    Turbo::Core::TDevice *device = this->surface->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    if (device != nullptr && vk_device != VK_NULL_HANDLE && device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
     {
         // imageCount
         if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
@@ -123,7 +117,6 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         }
         vk_swapchain_create_info_khr.oldSwapchain = nullptr;
 
-        VkDevice vk_device = this->surface->GetDevice()->GetVkDevice();
         VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
         VkResult result = vkCreateSwapchainKHR(vk_device, &vk_swapchain_create_info_khr, allocator, &this->vkSwapchainKHR);
@@ -150,25 +143,20 @@ void Turbo::Extension::TSwapchain::InternalCreate()
 
         for (VkImage vk_image_item : vk_images)
         {
-            Turbo::Core::TImage *image = new Turbo::Core::TImage(this->device, vk_image_item, 0, Core::TImageType::DIMENSION_2D, this->format, this->width, this->height, 1, 1, this->imageArrayLayers, Core::TSampleCountBits::SAMPLE_1_BIT, Core::TImageTiling::OPTIMAL, this->usages, Core::TImageLayout::UNDEFINED);
+            Turbo::Core::TImage *image = new Turbo::Core::TImage(this->surface->GetDevice(), vk_image_item, 0, Core::TImageType::DIMENSION_2D, this->format, this->width, this->height, 1, 1, this->imageArrayLayers, Core::TSampleCountBits::SAMPLE_1_BIT, Core::TImageTiling::OPTIMAL, this->usages, Core::TImageLayout::UNDEFINED);
             this->images.push_back(image);
         }
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
     }
 }
 
 void Turbo::Extension::TSwapchain::InternalDestroy()
 {
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    if (this->device != nullptr && this->vkSurfaceKHR != VK_NULL_HANDLE)
-    {
-        // for external VkSurfaceKHR
-        vkDestroySwapchainKHR(this->device->GetVkDevice(), this->vkSwapchainKHR, allocator);
-    }
-    else
-    {
-        // for Turbo Surface
-        vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
-    }
+    vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
 }
 
 Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
@@ -241,35 +229,67 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
-{
-    if (device != nullptr && vkSurfaceKHR != VK_NULL_HANDLE)
-    {
-        this->device = device;
-        this->vkSurfaceKHR = vkSurfaceKHR;
-
-        this->minImageCount = minImageCount;
-        this->format = format;
-        this->width = width;
-        this->height = height;
-        this->imageArrayLayers = imageArrayLayers;
-        this->usages = usages;
-        this->transform = transform;
-        this->compositeAlpha = compositeAlpha;
-        this->presentMode = presentMode;
-        this->isClipped = isClipped;
-
-        this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
-    }
-}
-
 Turbo::Extension::TSwapchain::~TSwapchain()
 {
     this->InternalDestroy();
+}
+
+const std::vector<Turbo::Core::TImage *> &Turbo::Extension::TSwapchain::GetImages()
+{
+    return this->images;
+}
+
+Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index)
+{
+    if (index != nullptr)
+    {
+        VkSemaphore signal_semaphore = VK_NULL_HANDLE;
+        VkFence signal_fence = VK_NULL_HANDLE;
+
+        if (signalSemphore != nullptr)
+        {
+            signal_semaphore = signalSemphore->GetVkSemaphore();
+        }
+
+        if (signalFence != nullptr)
+        {
+            signal_fence = signalFence->GetVkFence();
+        }
+
+        Turbo::Core::TDevice *device = this->surface->GetDevice();
+        VkDevice vk_device = device->GetVkDevice();
+        VkResult result = vkAcquireNextImageKHR(vk_device, this->vkSwapchainKHR, timeout, signal_semaphore, signal_fence, index);
+        switch (result)
+        {
+        case VkResult::VK_SUCCESS: {
+            return Turbo::Core::TResult::SUCCESS;
+        }
+        break;
+        case VkResult::VK_TIMEOUT: {
+            return Turbo::Core::TResult::TIMEOUT;
+        }
+        break;
+        case VkResult::VK_NOT_READY: {
+            return Turbo::Core::TResult::NOT_READY;
+        }
+        break;
+        case VkResult::VK_SUBOPTIMAL_KHR: {
+            return Turbo::Core::TResult::SUBOPTIMAL;
+        }
+        break;
+        default: {
+            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL);
+        }
+        break;
+        }
+    }
+
+    return Turbo::Core::TResult::INVALID_PARAMETER;
+}
+
+Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index)
+{
+    return this->AcquireNextImage(UINT64_MAX, signalSemphore, signalFence, index);
 }
 
 std::string Turbo::Extension::TSwapchain::ToString()

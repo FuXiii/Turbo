@@ -114,6 +114,8 @@ class TSurface : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
 
+    bool isExternalHandle = false;
+
     std::vector<Turbo::Core::TQueueFamilyInfo> supportQueueFamilys;
 
     uint32_t minImageCount;
@@ -164,6 +166,9 @@ class TSurface : public Turbo::Core::TVulkanHandle
     explicit TSurface(...);
 #else
 #endif
+    // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
+    explicit TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR);
+
     ~TSurface();
 
   public:

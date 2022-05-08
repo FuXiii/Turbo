@@ -79,22 +79,32 @@ std::string Turbo::Extension::TSurfaceFormat::ToString()
 void Turbo::Extension::TSurface::InternalCreate()
 {
     Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
-    if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
+    if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE)
     {
 
 #if defined(TURBO_PLATFORM_WINDOWS)
-        VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
-        win32_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        win32_surface_create_info.pNext = nullptr;
-        win32_surface_create_info.flags = 0;
-        win32_surface_create_info.hinstance = hinstance;
-        win32_surface_create_info.hwnd = hwnd;
-
-        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
-        if (result != VK_SUCCESS)
+        if (!this->isExternalHandle)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+            if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE))
+            {
+                VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
+                win32_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+                win32_surface_create_info.pNext = nullptr;
+                win32_surface_create_info.flags = 0;
+                win32_surface_create_info.hinstance = this->hinstance;
+                win32_surface_create_info.hwnd = this->hwnd;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+                }
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            }
         }
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
@@ -115,14 +125,17 @@ void Turbo::Extension::TSurface::InternalCreate()
 
 void Turbo::Extension::TSurface::InternalDestroy()
 {
-    if (this->device != nullptr)
+    if (!this->isExternalHandle)
     {
-        Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
-        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-
-        if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
+        if (this->device != nullptr)
         {
-            vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
+            Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
+            VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+
+            if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
+            {
+                vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
+            }
         }
     }
 }
@@ -132,6 +145,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
 {
     if (device != nullptr)
     {
+        this->isExternalHandle = false;
         this->device = device;
         this->hinstance = hinstance;
         this->hwnd = hwnd;
@@ -162,6 +176,22 @@ Turbo::Extension::TSurface::TSurface(...)
 }
 #else
 #endif
+
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR)
+{
+    if (device != nullptr && vkSurfaceKHR != VK_NULL_HANDLE)
+    {
+        this->isExternalHandle = true;
+        this->device = device;
+        this->vkSurfaceKHR = vkSurfaceKHR;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+    }
+}
 
 Turbo::Extension::TSurface::~TSurface()
 {

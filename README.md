@@ -573,3 +573,9 @@ Turbo是渲染引擎
   >* `TImage.h`中加入`Turbo::Extension::TSwapchain`的声明和`TImage()`默认无参构造函数，用于`Turbo::Extension::TSwapchain`构建`TSwaphainImage`，其为`TImage`的友元类
   >* `main.cpp`中将`GPU`图片拷贝到`CPU`的纯`Vulkan`代码改成`Turbo`规范
   >* 有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`<font color=yellow> 未完待续 </font>
+  >
+  * 2022/5/8 设计架构
+  >
+  >* 之前 `TSwapchain`对外部提供的`VkSurfaceKHR`的接口改成由`TSurface`提供，`TSwapchain`统一使用`TSurface`
+  >* 之前 `TSwapchain`修缮完毕
+  >* `TResult`新增`TResult::NOT_READY`和`TResult::SUBOPTIMAL`用于`Turbo::Extension::TSwapchain::AcquireNextImage(...)`的返回结果
