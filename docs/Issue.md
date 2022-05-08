@@ -116,4 +116,4 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/2**</font>  ~~`Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`~~
 
-- <font color=orange>**[ 🛠 ] now**</font> (该功能转移至`TSurface`中) 提供`Swapchain`,有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`
+- <font color=green>**[ ✓ ]2022/5/8**</font> ~~**(该功能转移至`TSurface`中)** 提供`Swapchain`,有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`~~

@@ -577,5 +577,5 @@ Turbo是渲染引擎
   * 2022/5/8 设计架构
   >
   >* 之前 `TSwapchain`对外部提供的`VkSurfaceKHR`的接口改成由`TSurface`提供，`TSwapchain`统一使用`TSurface`
-  >* 之前 `TSwapchain`修缮完毕
+  >* `TSwapchain`修缮完毕
   >* `TResult`新增`TResult::NOT_READY`和`TResult::SUBOPTIMAL`用于`Turbo::Extension::TSwapchain::AcquireNextImage(...)`的返回结果
