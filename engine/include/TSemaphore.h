@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TSEMAPHORE_H
 #define TSEMAPHORE_H
+#include "TPipeline.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -21,12 +22,12 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TSemaphore(TDevice *device, VkPipelineStageFlags waitDstStageMask);
+    TSemaphore(TDevice *device, TPipelineStages waitDstStageMask);
     ~TSemaphore();
 
     VkSemaphore GetVkSemaphore();
 
-    VkPipelineStageFlags GetWaitDstStageMask();
+    TPipelineStages GetWaitDstStageMask();
 
   public:
     virtual std::string ToString() override;

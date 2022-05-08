@@ -292,6 +292,11 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImageUntil(Turbo::
     return this->AcquireNextImage(UINT64_MAX, signalSemphore, signalFence, index);
 }
 
+VkSwapchainKHR Turbo::Extension::TSwapchain::GetVkSwapchainKHR()
+{
+    return this->vkSwapchainKHR;
+}
+
 std::string Turbo::Extension::TSwapchain::ToString()
 {
     return std::string();
