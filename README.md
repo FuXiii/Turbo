@@ -548,6 +548,34 @@ Turbo是渲染引擎
 
   * 2022/5/7 设计架构
   >
+  >* `TSurface.h`中`Turbo::Core::TImageUsageFlags TSurface::GetSupportedUsageFlags()`修改成`Turbo::Core::TImageUsages GetSupportedUsages()`
+  >* `TSurface.h`中增加如下：
+  >
+  >```CXX
+  > typedef enum TSurfaceTransformBits;
+  > typedef VkFlags TSurfaceTransforms;
+  > typedef enum TCompositeAlphaBits;
+  > typedef VkFlags TCompositeAlphas;
+  > typedef enum class TPresentMode;
+  > uint32_t GetCurrentWidth();
+  > uint32_t GetCurrentHeight();
+  > uint32_t GetMinWidth();
+  > uint32_t GetMinHeight();
+  > uint32_t GetMaxWidth();
+  > uint32_t GetMaxHeight();
+  >```
+  >
+  >* 将`TColorSpace`类和`TSurfaceFormat`转移到`TSurface.h`中，并将`TColorSpace.h/.cpp`和`TSurfaceFormat.h/.cpp`移除
+  >
   >* `TSurface.h`修缮完成
   >* 开始修缮`TSwapchain.h`将其加入`Turbo::Extension`命名空间中<font color=yellow> 未完待续 </font>
   >* `TImage.h`中加入`void *Map()`和`void Unmap()`成员函数,用于映射`host`可访问内存
+  >* `TImage.h`中加入`Turbo::Extension::TSwapchain`的声明和`TImage()`默认无参构造函数，用于`Turbo::Extension::TSwapchain`构建`TSwaphainImage`，其为`TImage`的友元类
+  >* `main.cpp`中将`GPU`图片拷贝到`CPU`的纯`Vulkan`代码改成`Turbo`规范
+  >* 有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`<font color=yellow> 未完待续 </font>
+  >
+  * 2022/5/8 设计架构
+  >
+  >* 之前 `TSwapchain`对外部提供的`VkSurfaceKHR`的接口改成由`TSurface`提供，`TSwapchain`统一使用`TSurface`
+  >* `TSwapchain`修缮完毕
+  >* `TResult`新增`TResult::NOT_READY`和`TResult::SUBOPTIMAL`用于`Turbo::Extension::TSwapchain::AcquireNextImage(...)`的返回结果

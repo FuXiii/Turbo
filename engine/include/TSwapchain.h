@@ -1,28 +1,60 @@
 #pragma once
 #ifndef TSWAPCHAIN_H
 #define TSWAPCHAIN_H
-#include "TObject.h"
+#include "TFormatInfo.h"
+#include "TSurface.h"
+#include "TVulkanHandle.h"
 
 namespace Turbo
 {
 namespace Core
 {
 class TDevice;
-class TSurface;
+class TSemaphore;
+class TFence;
+} // namespace Core
+} // namespace Turbo
 
-class TSwapchain : public TObject
+namespace Turbo
+{
+namespace Extension
+{
+class TSwapchain : public Turbo::Core::TVulkanHandle
 {
   private:
-    TDevice *device = nullptr;
-    VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
+    T_VULKAN_HANDLE_PARENT TSurface *surface = nullptr;
+    T_VULKAN_HANDLE_HANDLE VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
+
+    uint32_t minImageCount;
+    Turbo::Core::TFormatInfo format;
+    uint32_t width;
+    uint32_t height;
+    uint32_t imageArrayLayers;
+    Turbo::Core::TImageUsages usages;
+    TSurfaceTransformBits transform;
+    TCompositeAlphaBits compositeAlpha;
+    TPresentMode presentMode;
+    bool isClipped;
+
+    std::vector<Turbo::Core::TImage *> images;
+
+  private:
+    virtual void InternalCreate() override;
+    virtual void InternalDestroy() override;
 
   public:
-    explicit TSwapchain(TDevice *device, TSurface *surface);
+    explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
+    explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
     ~TSwapchain();
+
+    const std::vector<Turbo::Core::TImage *> &GetImages();
+
+    Turbo::Core::TResult AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
+    Turbo::Core::TResult AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
 
   public:
     virtual std::string ToString() override;
 };
-} // namespace Core
+} // namespace Extension
 } // namespace Turbo
 #endif // !TSWAPCHAIN_H

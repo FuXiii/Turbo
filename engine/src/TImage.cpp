@@ -152,6 +152,24 @@ void Turbo::Core::TImage::InternalDestroy()
     vmaDestroyImage(*vma_allocator, this->vkImage, *vma_allocation);
 }
 
+Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+{
+    this->device = device;
+    this->vkImage = vkImage;
+    this->imageFlags = imageFlags;
+    this->type = type;
+    this->format = format;
+    this->extent.width = width;
+    this->extent.height = height;
+    this->extent.depth = depth;
+    this->mipLevels = mipLevels;
+    this->arrayLayers = arrayLayers;
+    this->samples = samples;
+    this->tiling = tiling;
+    this->usages = usages;
+    this->layout = layout;
+}
+
 Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
@@ -239,10 +257,13 @@ uint32_t Turbo::Core::TImage::GetArrayLayers()
 void *Turbo::Core::TImage::Map()
 {
     void *result = nullptr;
-    if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+    if (this->vmaAllocation != nullptr)
     {
-        VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
-        vmaMapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), &result);
+        if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+        {
+            VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
+            vmaMapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), &result);
+        }
     }
 
     return result;
@@ -250,8 +271,11 @@ void *Turbo::Core::TImage::Map()
 
 void Turbo::Core::TImage::Unmap()
 {
-    VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
-    vmaUnmapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation));
+    if (this->vmaAllocation != nullptr)
+    {
+        VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
+        vmaUnmapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation));
+    }
 }
 
 std::string Turbo::Core::TImage::ToString()

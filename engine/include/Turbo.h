@@ -66,7 +66,9 @@ typedef enum class TResult : int32_t
     FAIL = -1,
     UNDEFINED = 0,
     SUCCESS = 1,
-    TIMEOUT = 2
+    TIMEOUT = 2,
+    NOT_READY = 3,
+    SUBOPTIMAL = 4
 } TResultEnum;
 
 typedef enum TMemoryFlagsBits
@@ -141,16 +143,9 @@ typedef uint32_t TQueueFamilyIndex;
 typedef size_t TMemoryTypeIndex;
 
 typedef VkImageCreateFlags TImageCreateFlags;
-typedef VkImageUsageFlags TImageUsageFlags;
 
 typedef VkImageViewCreateFlags TImageViewCreateFlags;
 typedef VkImageAspectFlags TImageAspectFlags;
-
-typedef VkSurfaceTransformFlagsKHR TSurfaceTransformFlagsKHR;
-typedef VkSurfaceTransformFlagBitsKHR TSurfaceTransformFlagBitsKHR;
-typedef VkCompositeAlphaFlagsKHR TCompositeAlphaFlagsKHR;
-
-typedef VkPresentModeKHR TPresentMode;
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_H

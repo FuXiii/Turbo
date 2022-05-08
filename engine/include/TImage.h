@@ -6,6 +6,14 @@
 
 namespace Turbo
 {
+namespace Extension
+{
+class TSwapchain;
+}
+} // namespace Turbo
+
+namespace Turbo
+{
 namespace Core
 {
 class TDevice;
@@ -73,6 +81,9 @@ typedef enum class TImageLayout
 
 class TImage : public Turbo::Core::TVulkanHandle
 {
+  public:
+    friend class Turbo::Extension::TSwapchain;
+
   private:
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkImage vkImage = VK_NULL_HANDLE;
@@ -94,6 +105,9 @@ class TImage : public Turbo::Core::TVulkanHandle
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
+
+  private:
+    TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout); // for swapchain
 
   public:
     explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
