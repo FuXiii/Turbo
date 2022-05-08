@@ -210,6 +210,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     std::vector<Turbo::Extension::TSurfaceFormat> GetSurfaceFormats();
     std::vector<Turbo::Extension::TPresentMode> GetPresentModes();
 
+    std::vector<Turbo::Core::TQueueFamilyInfo> GetSupportQueueFamilys();
     Turbo::Extension::TSurfaceTransforms GetSupportedTransforms();
     Turbo::Extension::TSurfaceTransformBits GetCurrentTransform();
     Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha();

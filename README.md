@@ -584,3 +584,5 @@ Turbo是渲染引擎
   >* `TDevice`的`InternalCreate()`中有`Bug`，已修复
   >* `TCommandBuffer`的`BeginRenderPass()`中有`Bug`，已修复
   >* `TSemaphore`中的`VkPipelineStageFlags`改成`TPipelineStages`，统一`Turbo`标准
+  >* `TDeviceQueue`中增加`TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)`函数用于调用`vkQueuePresentKHR`
+  >* `TDeviceQueue`中增加`bool IsSupportSurface(Turbo::Extension::TSurface *surface)`判断该队列是否支持该`TSurface`

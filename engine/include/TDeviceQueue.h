@@ -6,6 +6,15 @@
 
 namespace Turbo
 {
+namespace Extension
+{
+class TSurface;
+class TSwapchain;
+} // namespace Extension
+} // namespace Turbo
+
+namespace Turbo
+{
 namespace Core
 {
 class TDevice;
@@ -48,6 +57,10 @@ class TDeviceQueue : public TVulkanHandle
     bool Submit(std::vector<TSemaphore *> &waitSemaphores, std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
 
     void WaitIdle();
+
+    bool IsSupportSurface(Turbo::Extension::TSurface *surface);
+
+    TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex);
 
     virtual std::string ToString() override;
 };

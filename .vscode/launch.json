@@ -9,7 +9,9 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/Turbo.exe",
-            "args": ["--arch x86_64"],
+            "args": [
+                "--arch x86_64"
+            ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

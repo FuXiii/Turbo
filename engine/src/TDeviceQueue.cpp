@@ -7,6 +7,8 @@
 #include "TPhysicalDevice.h"
 #include "TQueueFamilyInfo.h"
 #include "TSemaphore.h"
+#include "TSurface.h"
+#include "TSwapchain.h"
 #include "TVulkanAllocator.h"
 
 void Turbo::Core::TDeviceQueue::AddChildHandle(TCommandBufferPool *commandBufferPool)
@@ -175,6 +177,59 @@ void Turbo::Core::TDeviceQueue::WaitIdle()
     {
         throw Turbo::Core::TException(TResult::FAIL);
     }
+}
+
+bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *surface)
+{
+    uint32_t queue_family_index = this->queueFamily.GetIndex();
+    std::vector<Turbo::Core::TQueueFamilyInfo> support_queue_familys = surface->GetSupportQueueFamilys();
+    for (Turbo::Core::TQueueFamilyInfo &queue_family_item : support_queue_familys)
+    {
+        if (queue_family_index == queue_family_item.GetIndex())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)
+{
+    if (swapchain != nullptr)
+    {
+        VkSwapchainKHR vk_swapchain_khr = swapchain->GetVkSwapchainKHR();
+        uint32_t image_index = imageIndex;
+        VkPresentInfoKHR vk_present_info_khr = {};
+        vk_present_info_khr.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        vk_present_info_khr.pNext = nullptr;
+        vk_present_info_khr.waitSemaphoreCount = 0;
+        vk_present_info_khr.pWaitSemaphores = nullptr;
+        vk_present_info_khr.swapchainCount = 1;
+        vk_present_info_khr.pSwapchains = &vk_swapchain_khr;
+        vk_present_info_khr.pImageIndices = &image_index;
+        vk_present_info_khr.pResults = nullptr;
+
+        VkResult result = vkQueuePresentKHR(this->vkQueue, &vk_present_info_khr);
+        switch (result)
+        {
+        case VkResult::VK_SUCCESS: {
+            return Turbo::Core::TResult::SUCCESS;
+        }
+        break;
+            break;
+        case VkResult::VK_SUBOPTIMAL_KHR: {
+            return Turbo::Core::TResult::SUBOPTIMAL;
+        }
+        break;
+        default: {
+            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL);
+        }
+        break;
+        }
+    }
+
+    return TResult::INVALID_PARAMETER;
 }
 
 std::string Turbo::Core::TDeviceQueue::ToString()

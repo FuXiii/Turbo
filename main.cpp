@@ -310,21 +310,7 @@ int main()
 
             command_buffer->Reset(); // you can create an command buffer each for one swapchain image,for now just one command buffer
 
-            VkSwapchainKHR temp_swapchain = swapchain->GetVkSwapchainKHR();
-
-            //<推送到显示队列,显示图片,这部分Turbo框架还没设计，现在懒得设计，等以后有时间的吧 (～￣(OO)￣)ブ>
-            VkPresentInfoKHR present;
-            present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-            present.pNext = nullptr;
-            present.waitSemaphoreCount = 0;
-            present.pWaitSemaphores = nullptr;
-            present.swapchainCount = 1;
-            present.pSwapchains = &temp_swapchain;
-            present.pImageIndices = &current_image_index;
-            present.pResults = nullptr;
-
-            vkQueuePresentKHR(queue->GetVkQueue() /*graphicQueue支持显示功能*/, &present);
-            //<推送到显示队列,显示图片,这部分Turbo框架还没设计，现在懒得设计，等以后有时间的吧 (～￣(OO)￣)ブ>
+            queue->Present(swapchain, current_image_index);
         }
         break;
         case Turbo::Core::TResult::TIMEOUT: {
@@ -346,7 +332,6 @@ int main()
         }
 
         delete wait_image_ready;
-
         //</End Rendering>
     }
 
