@@ -86,7 +86,7 @@ void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFram
 
     // TODO: Attachment clear color data should define in attachemnt
     std::vector<VkClearValue> vk_clear_values;
-    for (uint32_t attachment_index; attachment_index < attachemnts_count; attachment_index++)
+    for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
     {
         TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
         TFormatFeatures format_feature = format_info.GetOptimalFeatures(physical_device);

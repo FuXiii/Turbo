@@ -18,9 +18,12 @@ add_subdirectory(./thirdparty)
 
 add_subdirectory(./engine)
 
+add_dependencies(${PROJECT_NAME} SDL2-static)
+
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./engine/include
     PUBLIC ./thirdparty/SPIRV-Cross
+    PUBLIC ./thirdparty/SDL2/include/
     )
 
 target_link_directories(${PROJECT_NAME} 
@@ -33,6 +36,7 @@ PUBLIC thirdparty/glslang/OGLCompilersDLL
 PUBLIC thirdparty/glslang/SPIRV
 
 PUBLIC thirdparty/SPIRV-Cross
+PUBLIC /thirdparty/SDL2/
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
@@ -45,4 +49,6 @@ SPIRV
 spirv-cross-core
 spirv-cross-glsl
 spirv-cross-hlsl
+${SDL2_LIBRARIES}
+SDL2-static
 )

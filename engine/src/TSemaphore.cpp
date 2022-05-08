@@ -45,7 +45,7 @@ Turbo::Core::TSemaphore::~TSemaphore()
     this->InternalDestroy();
 }
 
-VkPipelineStageFlags Turbo::Core::TSemaphore::GetWaitDstStageMask()
+Turbo::Core::TPipelineStages Turbo::Core::TSemaphore::GetWaitDstStageMask()
 {
     return this->waitDstStageMask;
 }

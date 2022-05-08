@@ -102,7 +102,11 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 需要提供`TDisplay`
 
+- 需要修缮`TExtension`，尝试分成`TInstanceExtension`和`TPhysicalDeviceExtension`
+
 - 需要提供`TFilter`对应`VkFilter`
+
+- 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 
 - 梳理一下`TExtensionInfo`类，最好类似`TFormatInfo`的类思想
 

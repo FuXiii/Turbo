@@ -90,14 +90,14 @@ void Turbo::Core::TDevice::InternalCreate()
 
     size_t enable_layer_count = this->enabledLayers.size();
     std::vector<const char *> enable_layer_names(enable_layer_count);
-    for (uint32_t enable_layer_index; enable_layer_index < enable_layer_count; enable_layer_index++)
+    for (uint32_t enable_layer_index = 0; enable_layer_index < enable_layer_count; enable_layer_index++)
     {
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
     }
 
     size_t enable_extension_count = this->enabledExtensions.size();
     std::vector<const char *> enable_extension_names(enable_extension_count);
-    for (uint32_t enable_extension_index; enable_extension_index < enable_extension_count; enable_extension_index++)
+    for (uint32_t enable_extension_index = 0; enable_extension_index < enable_extension_count; enable_extension_index++)
     {
         enable_extension_names[enable_extension_index] = this->enabledExtensions[enable_extension_index].GetName().c_str();
     }

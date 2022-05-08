@@ -578,4 +578,9 @@ Turbo是渲染引擎
   >
   >* 之前 `TSwapchain`对外部提供的`VkSurfaceKHR`的接口改成由`TSurface`提供，`TSwapchain`统一使用`TSurface`
   >* `TSwapchain`修缮完毕
+  >* `TSwapchain`中增加`VkSwapchainKHR GetVkSwapchainKHR()`成员函数
   >* `TResult`新增`TResult::NOT_READY`和`TResult::SUBOPTIMAL`用于`Turbo::Extension::TSwapchain::AcquireNextImage(...)`的返回结果
+  >* `./thirdparty`新增`SDL2`库用于创建窗口
+  >* `TDevice`的`InternalCreate()`中有`Bug`，已修复
+  >* `TCommandBuffer`的`BeginRenderPass()`中有`Bug`，已修复
+  >* `TSemaphore`中的`VkPipelineStageFlags`改成`TPipelineStages`，统一`Turbo`标准

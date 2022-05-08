@@ -52,6 +52,8 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     Turbo::Core::TResult AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
     Turbo::Core::TResult AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
 
+    VkSwapchainKHR GetVkSwapchainKHR();
+
   public:
     virtual std::string ToString() override;
 };
