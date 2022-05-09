@@ -584,3 +584,10 @@ Turbo是渲染引擎
   >* `TDevice`的`InternalCreate()`中有`Bug`，已修复
   >* `TCommandBuffer`的`BeginRenderPass()`中有`Bug`，已修复
   >* `TSemaphore`中的`VkPipelineStageFlags`改成`TPipelineStages`，统一`Turbo`标准
+  >* `TDeviceQueue`中增加`TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)`函数用于调用`vkQueuePresentKHR`
+  >* `TDeviceQueue`中增加`bool IsSupportSurface(Turbo::Extension::TSurface *surface)`判断该队列是否支持该`TSurface`
+
+  * 2022/5/9 设计架构
+  >
+  >* 进入调整阶段
+  >* `TCommandBuffer`中有关`VkCmd...`的成员函数前面加上`Cmd...`的前缀,与`CommandBuffer::Begin()`和`CommandBuffer::End()`等非命令成员函数分开，直接告诉用户哪些会是`VkCmd...`哪些不是

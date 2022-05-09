@@ -639,6 +639,11 @@ std::vector<Turbo::Extension::TPresentMode> Turbo::Extension::TSurface::GetPrese
     return this->presentModes;
 }
 
+std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Extension::TSurface::GetSupportQueueFamilys()
+{
+    return this->supportQueueFamilys;
+}
+
 Turbo::Extension::TSurfaceTransforms Turbo::Extension::TSurface::GetSupportedTransforms()
 {
     return this->supportedTransforms;
