@@ -28,6 +28,10 @@
 
 - 支持PBR模型
 
+- 支持 gltf 模型
+
+- 支持 KTX 格式纹理
+
 ## Memory And Resource Feature
 
 ---

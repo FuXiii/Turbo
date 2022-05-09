@@ -282,19 +282,19 @@ int main()
         case Turbo::Core::TResult::SUCCESS: {
             // successed get image and go on rendering
             command_buffer->Begin();
-            command_buffer->UpdateBuffer(dynamic_buffer, 0, sizeof(scale_data), &scale_data);
-            command_buffer->BeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
-            command_buffer->BindPipeline(pipeline);
-            command_buffer->BindDescriptorSets(0, descriptor_sets);
-            command_buffer->BindVertexBuffers(vertex_buffers);
-            command_buffer->SetViewport(viewports);
-            command_buffer->SetScissor(scissors);
-            command_buffer->Draw(3, 1, 0, 0);
-            command_buffer->NextSubpass();
-            command_buffer->BindPipeline(pipeline2);
-            command_buffer->BindDescriptorSets(0, descriptor_sets2);
-            command_buffer->Draw(3, 1, 0, 0);
-            command_buffer->EndRenderPass();
+            command_buffer->CmdUpdateBuffer(dynamic_buffer, 0, sizeof(scale_data), &scale_data);
+            command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+            command_buffer->CmdBindPipeline(pipeline);
+            command_buffer->CmdBindDescriptorSets(0, descriptor_sets);
+            command_buffer->CmdBindVertexBuffers(vertex_buffers);
+            command_buffer->CmdSetViewport(viewports);
+            command_buffer->CmdSetScissor(scissors);
+            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdNextSubpass();
+            command_buffer->CmdBindPipeline(pipeline2);
+            command_buffer->CmdBindDescriptorSets(0, descriptor_sets2);
+            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdEndRenderPass();
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
@@ -346,10 +346,10 @@ int main()
         Turbo::Core::TCommandBuffer *temp_command_buffer = command_pool->Allocate();
 
         temp_command_buffer->Begin();
-        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        temp_command_buffer->CopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
-        temp_command_buffer->TransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        temp_command_buffer->CmdCopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
+        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         temp_command_buffer->End();
 
         Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(device);

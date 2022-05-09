@@ -77,7 +77,7 @@ bool Turbo::Core::TCommandBuffer::Begin()
     return false;
 }
 
-void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
+void Turbo::Core::TCommandBuffer::CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
 {
     TPhysicalDevice *physical_device = renderPass->GetDevice()->GetPhysicalDevice();
 
@@ -164,7 +164,7 @@ void Turbo::Core::TCommandBuffer::BeginRenderPass(TRenderPass *renderPass, TFram
     this->currentRenderPass = renderPass;
 }
 
-void Turbo::Core::TCommandBuffer::BindPipeline(TPipeline *pipeline)
+void Turbo::Core::TCommandBuffer::CmdBindPipeline(TPipeline *pipeline)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
@@ -185,7 +185,7 @@ void Turbo::Core::TCommandBuffer::BindPipeline(TPipeline *pipeline)
     this->currentPipeline = pipeline;
 }
 
-void Turbo::Core::TCommandBuffer::BindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets)
+void Turbo::Core::TCommandBuffer::CmdBindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
@@ -217,7 +217,7 @@ void Turbo::Core::TCommandBuffer::BindDescriptorSets(uint32_t firstSet, std::vec
     }
 }
 
-void Turbo::Core::TCommandBuffer::BindVertexBuffers(std::vector<TBuffer *> &vertexBuffers)
+void Turbo::Core::TCommandBuffer::CmdBindVertexBuffers(std::vector<TBuffer *> &vertexBuffers)
 {
     std::vector<VkBuffer> vertex_buffers;
     std::vector<VkDeviceSize> offsets;
@@ -231,7 +231,7 @@ void Turbo::Core::TCommandBuffer::BindVertexBuffers(std::vector<TBuffer *> &vert
     vkCmdBindVertexBuffers(this->vkCommandBuffer, 0, vertexBuffers.size(), vertex_buffers.data(), offsets.data());
 }
 
-void Turbo::Core::TCommandBuffer::SetViewport(std::vector<TViewport> &viewports)
+void Turbo::Core::TCommandBuffer::CmdSetViewport(std::vector<TViewport> &viewports)
 {
     std::vector<VkViewport> vk_viewports;
     for (TViewport &viewport_item : viewports)
@@ -250,7 +250,7 @@ void Turbo::Core::TCommandBuffer::SetViewport(std::vector<TViewport> &viewports)
     vkCmdSetViewport(this->vkCommandBuffer, 0, vk_viewports.size(), vk_viewports.data());
 }
 
-void Turbo::Core::TCommandBuffer::SetScissor(std::vector<TScissor> &scissors)
+void Turbo::Core::TCommandBuffer::CmdSetScissor(std::vector<TScissor> &scissors)
 {
     std::vector<VkRect2D> vk_scissors;
     for (TScissor &scissor_item : scissors)
@@ -267,17 +267,17 @@ void Turbo::Core::TCommandBuffer::SetScissor(std::vector<TScissor> &scissors)
     vkCmdSetScissor(this->vkCommandBuffer, 0, vk_scissors.size(), vk_scissors.data());
 }
 
-void Turbo::Core::TCommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+void Turbo::Core::TCommandBuffer::CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
     vkCmdDraw(this->vkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
-void Turbo::Core::TCommandBuffer::NextSubpass()
+void Turbo::Core::TCommandBuffer::CmdNextSubpass()
 {
     vkCmdNextSubpass(this->vkCommandBuffer, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void Turbo::Core::TCommandBuffer::EndRenderPass()
+void Turbo::Core::TCommandBuffer::CmdEndRenderPass()
 {
     vkCmdEndRenderPass(this->vkCommandBuffer);
     this->currentPipeline = nullptr;
@@ -304,7 +304,7 @@ bool Turbo::Core::TCommandBuffer::Reset()
     return false;
 }
 
-void Turbo::Core::TCommandBuffer::PipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers)
+void Turbo::Core::TCommandBuffer::CmdPipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers)
 {
     std::vector<VkMemoryBarrier> vk_memory_barriers;
     for (TMemoryBarrier &memory_barrier_item : memoryBarriers)
@@ -360,7 +360,7 @@ void Turbo::Core::TCommandBuffer::PipelineBarrier(TPipelineStages srcStages, TPi
     vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, vk_memory_barriers.size(), vk_memory_barriers.data(), vk_buffer_memory_barriers.size(), vk_buffer_memory_barriers.data(), vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
 }
 
-void Turbo::Core::TCommandBuffer::PipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier)
+void Turbo::Core::TCommandBuffer::CmdPipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier)
 {
     VkMemoryBarrier vk_memory_barrier = {};
     vk_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -374,7 +374,7 @@ void Turbo::Core::TCommandBuffer::PipelineMemoryBarrier(TPipelineStages srcStage
     vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, vk_memory_barriers.size(), vk_memory_barriers.data(), 0, nullptr, 0, nullptr);
 }
 
-void Turbo::Core::TCommandBuffer::PipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier)
+void Turbo::Core::TCommandBuffer::CmdPipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier)
 {
     VkBufferMemoryBarrier vk_buffer_memory_barrier = {};
     vk_buffer_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -393,7 +393,7 @@ void Turbo::Core::TCommandBuffer::PipelineBufferBarrier(TPipelineStages srcStage
     vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, vk_buffer_memory_barriers.size(), vk_buffer_memory_barriers.data(), 0, nullptr);
 }
 
-void Turbo::Core::TCommandBuffer::PipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier)
+void Turbo::Core::TCommandBuffer::CmdPipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier)
 {
     VkImageMemoryBarrier vk_image_memory_barrier = {};
     vk_image_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -417,29 +417,29 @@ void Turbo::Core::TCommandBuffer::PipelineImageBarrier(TPipelineStages srcStages
     vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 0, nullptr, vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
 }
 
-void Turbo::Core::TCommandBuffer::TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBuffer::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, image, oldLayout, newLayout, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
-    this->PipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
+    this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
-void Turbo::Core::TCommandBuffer::TransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView)
+void Turbo::Core::TCommandBuffer::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, imageView, oldLayout, newLayout);
-    this->PipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
+    this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
-void Turbo::Core::TCommandBuffer::FillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, uint32_t data)
+void Turbo::Core::TCommandBuffer::CmdFillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, uint32_t data)
 {
     vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, data);
 }
 
-void Turbo::Core::TCommandBuffer::FillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, float data)
+void Turbo::Core::TCommandBuffer::CmdFillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, float data)
 {
     vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, *(const uint32_t *)&data);
 }
 
-void Turbo::Core::TCommandBuffer::UpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data)
+void Turbo::Core::TCommandBuffer::CmdUpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data)
 {
     if (buffer != nullptr && data != nullptr)
     {
@@ -457,7 +457,7 @@ void Turbo::Core::TCommandBuffer::CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuf
     vkCmdCopyBuffer(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstBuffer->GetVkBuffer(), 1, &vk_buffer_copy);
 }
 
-void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBuffer::CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TFormatInfo image_format = image->GetFormat();
     TFormatDataTypes format_data_types = image_format.GetFormatDataType();
@@ -495,17 +495,17 @@ void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout la
     vkCmdClearColorImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_color_value, 1, &vk_image_subresource_range);
 }
 
-void Turbo::Core::TCommandBuffer::ClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects)
+void Turbo::Core::TCommandBuffer::CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects)
 {
-    this->ClearColorImage(image, layout, r, g, b, a, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
+    this->CmdClearColorImage(image, layout, r, g, b, a, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
 }
 
-void Turbo::Core::TCommandBuffer::ClearColorImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a)
+void Turbo::Core::TCommandBuffer::CmdClearColorImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a)
 {
-    this->ClearColorImage(imageView->GetImage(), layout, r, g, b, a, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
+    this->CmdClearColorImage(imageView->GetImage(), layout, r, g, b, a, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
 }
 
-void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBuffer::CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
     vk_clear_depth_stencil_value.depth = depth;
@@ -521,56 +521,56 @@ void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImage *image, TImageLa
     vkCmdClearDepthStencilImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_depth_stencil_value, 1, &vk_image_subresource_range);
 }
 
-void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects)
+void Turbo::Core::TCommandBuffer::CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects)
 {
-    this->ClearDepthStencilImage(image, layout, depth, stencil, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
+    this->CmdClearDepthStencilImage(image, layout, depth, stencil, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
 }
 
-void Turbo::Core::TCommandBuffer::ClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth, uint32_t stencil)
+void Turbo::Core::TCommandBuffer::CmdClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth, uint32_t stencil)
 {
-    this->ClearDepthStencilImage(imageView->GetImage(), layout, depth, stencil, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
+    this->CmdClearDepthStencilImage(imageView->GetImage(), layout, depth, stencil, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
 }
 
-void Turbo::Core::TCommandBuffer::ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
-{
-    TImageUsages image_usages = image->GetUsages();
-    if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
-    {
-        this->ClearDepthStencilImage(image, layout, depth, stencil, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
-    }
-    else
-    {
-        this->ClearColorImage(image, layout, r, g, b, a, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
-    }
-}
-
-void Turbo::Core::TCommandBuffer::ClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects)
+void Turbo::Core::TCommandBuffer::CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TImageUsages image_usages = image->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-        this->ClearDepthStencilImage(image, layout, depth, stencil, aspects);
+        this->CmdClearDepthStencilImage(image, layout, depth, stencil, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
     }
     else
     {
-        this->ClearColorImage(image, layout, r, g, b, a, aspects);
+        this->CmdClearColorImage(image, layout, r, g, b, a, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
     }
 }
 
-void Turbo::Core::TCommandBuffer::ClearImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
+void Turbo::Core::TCommandBuffer::CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects)
+{
+    TImageUsages image_usages = image->GetUsages();
+    if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+        this->CmdClearDepthStencilImage(image, layout, depth, stencil, aspects);
+    }
+    else
+    {
+        this->CmdClearColorImage(image, layout, r, g, b, a, aspects);
+    }
+}
+
+void Turbo::Core::TCommandBuffer::CmdClearImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
 {
     TImageUsages image_usages = imageView->GetImage()->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-        this->ClearDepthStencilImage(imageView, layout, depth, stencil);
+        this->CmdClearDepthStencilImage(imageView, layout, depth, stencil);
     }
     else
     {
-        this->ClearColorImage(imageView, layout, r, g, b, a);
+        this->CmdClearColorImage(imageView, layout, r, g, b, a);
     }
 }
 
-void Turbo::Core::TCommandBuffer::CopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+void Turbo::Core::TCommandBuffer::CmdCopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
 {
     VkImageSubresourceLayers vk_image_subresource_layers = {};
     vk_image_subresource_layers.aspectMask = aspects;
@@ -593,7 +593,7 @@ void Turbo::Core::TCommandBuffer::CopyBufferToImage(TBuffer *srcBuffer, TImage *
     vkCmdCopyBufferToImage(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstImage->GetVkImage(), (VkImageLayout)layout, 1, &vk_buffer_image_copy);
 }
 
-void Turbo::Core::TCommandBuffer::CopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+void Turbo::Core::TCommandBuffer::CmdCopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
 {
     VkImageSubresourceLayers vk_image_subresource_layers = {};
     vk_image_subresource_layers.aspectMask = aspects;
@@ -616,7 +616,7 @@ void Turbo::Core::TCommandBuffer::CopyImageToBuffer(TImage *srcImage, TImageLayo
     vkCmdCopyImageToBuffer(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)layout, dstBuffer->GetVkBuffer(), 1, &vk_buffer_image_copy);
 }
 
-void Turbo::Core::TCommandBuffer::CopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
+void Turbo::Core::TCommandBuffer::CmdCopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
 {
     VkImageSubresourceLayers src_subresource = {};
     src_subresource.aspectMask = srcAspects;
