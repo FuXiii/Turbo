@@ -133,7 +133,6 @@ typedef VkMemoryMapFlags TMemoryMapFlags;
 typedef VkPhysicalDeviceLimits TPhysicalDeviceLimits;
 typedef VkPhysicalDeviceSparseProperties TPhysicalDeviceSparseProperties;
 typedef VkPhysicalDeviceFeatures TPhysicalDeviceFeatures;
-typedef VkFormatFeatureFlags TFormatFeatureFlags;
 
 typedef VkBufferCreateFlags TBufferCreateFlags;
 typedef VkBufferUsageFlags TBufferUsageFlags;

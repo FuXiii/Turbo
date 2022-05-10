@@ -12,6 +12,12 @@ class TDevice;
 class TQueueFamilyInfo;
 class TDeviceMemory;
 
+typedef enum class TIndexType
+{
+    UINT16 = 0,
+    UINT32 = 1
+} TIndexType;
+
 typedef enum TBufferUsageBits
 {
     BUFFER_TRANSFER_SRC = 0x00000001,

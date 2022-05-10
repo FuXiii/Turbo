@@ -1,5 +1,4 @@
 #include "TCommandBuffer.h"
-#include "TBuffer.h"
 #include "TCommandBufferPool.h"
 #include "TDescriptorSet.h"
 #include "TDevice.h"
@@ -447,7 +446,7 @@ void Turbo::Core::TCommandBuffer::CmdUpdateBuffer(TBuffer *buffer, TDeviceSize o
     }
 }
 
-void Turbo::Core::TCommandBuffer::CopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size)
+void Turbo::Core::TCommandBuffer::CmdCopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size)
 {
     VkBufferCopy vk_buffer_copy = {};
     vk_buffer_copy.srcOffset = srcOffset;
@@ -653,6 +652,16 @@ void Turbo::Core::TCommandBuffer::CmdCopyImage(TImage *srcImage, TImageLayout sr
     vk_image_copy.extent = extent;
 
     vkCmdCopyImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_copy);
+}
+
+void Turbo::Core::TCommandBuffer::CmdBindIndexBuffer(TBuffer *buffer, TDeviceSize offset, TIndexType indexType)
+{
+    vkCmdBindIndexBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, (VkIndexType)indexType);
+}
+
+void Turbo::Core::TCommandBuffer::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+{
+    vkCmdDrawIndexed(this->vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
 std::string Turbo::Core::TCommandBuffer::ToString()

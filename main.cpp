@@ -46,11 +46,14 @@ struct Vertex
 #define XYZ1(_x_, _y_, _z_) (_x_), (_y_), (_z_), 1.f
 #define RGB(_x_, _y_, _z_) (_x_), (_y_), (_z_)
 
-static const Vertex VERTEX_DATA[] = {
-    {XYZ1(0.0f, -0.5f, 0), RGB(1.f, 0.f, 0.f)},
-    {XYZ1(0.5f, 0.5f, 0), RGB(0.f, 1.f, 0.f)},
-    {XYZ1(-0.5f, 0.5f, 0), RGB(0.f, 0.f, 1.f)},
+static const Vertex VERTEXS_DATA[] = {
+    {XYZ1(0.5f, 0.5f, 0.0f), RGB(1.f, 0.f, 0.f)},
+    {XYZ1(-0.5f, 0.5f, 0.0f), RGB(0.f, 1.f, 0.f)},
+    {XYZ1(-0.5f, -0.5f, 0.0f), RGB(0.f, 0.f, 1.f)},
+    {XYZ1(0.5f, -0.50f, 0.0f), RGB(1.f, 1.f, 0.f)},
 };
+
+std::vector<uint32_t> INDICES_DATA = {0, 1, 2, 2, 3, 0};
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
@@ -164,10 +167,15 @@ int main()
     memcpy(scale_ptr, &scale, sizeof(scale));
     dynamic_buffer->Unmap();
 
-    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX_DATA));
+    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEXS_DATA));
     void *vertex_buffer_ptr = vertex_buffer->Map();
-    memcpy(vertex_buffer_ptr, VERTEX_DATA, sizeof(VERTEX_DATA));
+    memcpy(vertex_buffer_ptr, VERTEXS_DATA, sizeof(VERTEXS_DATA));
     vertex_buffer->Unmap();
+
+    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDICES_DATA));
+    void *index_buffer_ptr = index_buffer->Map();
+    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA) * INDICES_DATA.size());
+    index_buffer->Unmap();
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
@@ -213,7 +221,7 @@ int main()
 
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
-    Turbo::Core::TVertexBinding vertex_binding(0, sizeof(VERTEX_DATA[0]), Turbo::Core::TVertexRate::VERTEX);
+    Turbo::Core::TVertexBinding vertex_binding(0, sizeof(VERTEXS_DATA[0]), Turbo::Core::TVertexRate::VERTEX);
     vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0);  // pos
     vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 16); // color
 
@@ -281,19 +289,22 @@ int main()
         {
         case Turbo::Core::TResult::SUCCESS: {
             // successed get image and go on rendering
+
+            // because we just have one command buffer, so we should reset the command buffer for each frame
+            // If we create command buffer for each swapchain image, we don't need to reset it each frame
             command_buffer->Begin();
-            command_buffer->CmdUpdateBuffer(dynamic_buffer, 0, sizeof(scale_data), &scale_data);
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindDescriptorSets(0, descriptor_sets);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(viewports);
             command_buffer->CmdSetScissor(scissors);
-            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdBindIndexBuffer(index_buffer);
+            command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdNextSubpass();
             command_buffer->CmdBindPipeline(pipeline2);
             command_buffer->CmdBindDescriptorSets(0, descriptor_sets2);
-            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
 
@@ -442,6 +453,7 @@ int main()
     {
         delete image_view_item;
     }
+    delete index_buffer;
     delete vertex_buffer;
     delete scale_buffer;
     delete dynamic_buffer;
