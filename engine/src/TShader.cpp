@@ -199,7 +199,7 @@ void Turbo::Core::TShader::InternalCreate()
     VkResult result = vkCreateShaderModule(vk_device, &vk_shader_module_create_info, allocator, &this->vkShaderModule);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::InternalCreate");
     }
 
     for (TDescriptorSetLayout *descriptor_set_item : this->descriptorSetLayouts)
@@ -536,7 +536,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         bool is_initialize_process = glslang::InitializeProcess();
         if (!is_initialize_process)
         {
-            throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+            throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::TShader::glslang::InitializeProcess()");
         }
 
         TBuiltInResource resources = {};
@@ -660,7 +660,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         if (!shader_glslang.parse(&resources /*glslang::DefaultTBuiltInResource*/, 100, false, messages))
         {
             std::string log_messgae(shader_glslang.getInfoLog());
-            throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, log_messgae);
+            throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
         glslang::TProgram program;
@@ -668,7 +668,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         if (!program.link(messages))
         {
             std::string log_messgae(program.getInfoLog());
-            throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, log_messgae);
+            throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
         std::vector<uint32_t> shader_spir;
@@ -685,7 +685,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TShader::TShader");
     }
 }
 
@@ -706,7 +706,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, size_t size, ui
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TShader::TShader");
     }
 }
 

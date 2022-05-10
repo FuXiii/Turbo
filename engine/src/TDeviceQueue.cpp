@@ -89,12 +89,12 @@ Turbo::Core::TDeviceQueue::TDeviceQueue(TDevice *device, TQueueFamilyInfo &queue
         }
         else
         {
-            throw Turbo::Core::TException(TResult::RESOURCE_STARVATION);
+            throw Turbo::Core::TException(TResult::RESOURCE_STARVATION, "Turbo::Core::TDeviceQueue::TDeviceQueue");
         }
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDeviceQueue::TDeviceQueue");
     }
 }
 
@@ -164,7 +164,7 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> &waitSemaphores
     VkResult result = vkQueueSubmit(this->vkQueue, 1, &vk_submit_info, vk_fence);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::FAIL);
+        throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDeviceQueue::Submit::vkQueueSubmit");
     }
 
     return true;
@@ -175,7 +175,7 @@ void Turbo::Core::TDeviceQueue::WaitIdle()
     VkResult result = vkQueueWaitIdle(this->vkQueue);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::FAIL);
+        throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDeviceQueue::WaitIdle");
     }
 }
 
@@ -223,7 +223,7 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapc
         }
         break;
         default: {
-            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL);
+            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Turbo::Core::TDeviceQueue::Present");
         }
         break;
         }

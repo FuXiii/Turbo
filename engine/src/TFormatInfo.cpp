@@ -352,7 +352,7 @@ Turbo::Core::TFormatDataTypes Turbo::Core::TFormatInfo::GetFormatDataType()
     }
     break;
     default: {
-        throw Turbo::Core::TException(TResult::UNDEFINED);
+        throw Turbo::Core::TException(TResult::UNDEFINED, "Turbo::Core::TFormatInfo::GetFormatDataType", "there has some VkFormats that Turbo don't support yet");
     }
     break;
     }

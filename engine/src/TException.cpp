@@ -6,13 +6,14 @@ Turbo::Core::TException::TException() : std::exception(), Turbo::Core::TObject()
     this->result = TResult::UNDEFINED;
 }
 
-Turbo::Core::TException::TException(TResult result, std::string message)
+Turbo::Core::TException::TException(TResult result, const std::string &message, const std::string &tip)
 {
     this->result = result;
     this->message = message;
+    this->tip = tip;
     if (!this->message.empty())
     {
-        std::cout << "[Error]:" << message << std::endl;
+        std::cout << "[Error]:" << this->message << "< " << this->tip << " >" << std::endl;
     }
 }
 

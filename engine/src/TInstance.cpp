@@ -109,7 +109,7 @@ Turbo::Core::TInstance::TInstance(std::vector<TLayerInfo> *enabledLayers, std::v
     if (result != VkResult::VK_SUCCESS)
     {
         this->vulkanVersion = TVersion(0, 0, 0, 0);
-        throw Turbo::Core::TException(VkResultToTResult(result));
+        throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::TInstance");
     }
 }
 
@@ -264,7 +264,7 @@ void Turbo::Core::TInstance::InternalCreate()
     VkResult result = vkCreateInstance(&instance_create_info, allocator, &this->vkInstance);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(VkResultToTResult(result));
+        throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::InternalCreate::vkCreateInstance");
     }
 
     this->supportLayers = TLayerInfo::GetInstanceLayers();
@@ -448,7 +448,7 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t
 {
     if (index > this->physicalDevices.size() - 1)
     {
-        throw Turbo::Core::TException(TResult::OUT_OF_RANGE);
+        throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TInstance::GetPhysicalDevice");
     }
 
     return this->physicalDevices[index];

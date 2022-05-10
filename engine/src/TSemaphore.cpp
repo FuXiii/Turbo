@@ -15,7 +15,7 @@ void Turbo::Core::TSemaphore::InternalCreate()
     VkResult result = vkCreateSemaphore(vk_device, &vk_semaphore_create_info, allocator, &this->vkSemaphore);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TSemaphore::InternalCreate::vkCreateSemaphore");
     }
 }
 
@@ -36,7 +36,7 @@ Turbo::Core::TSemaphore::TSemaphore(TDevice *device, VkPipelineStageFlags waitDs
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TSemaphore::TSemaphore");
     }
 }
 

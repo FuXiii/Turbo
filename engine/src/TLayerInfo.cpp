@@ -256,8 +256,7 @@ bool Turbo::Core::TLayerInfo::IsSupportInstanceLayer(TLayerType layerType)
     return false;
 }
 
-Turbo::Core::TLayerInfo::TLayerInfo()
-    : Turbo::Core::TInfo()
+Turbo::Core::TLayerInfo::TLayerInfo() : Turbo::Core::TInfo()
 {
     this->layerType = TLayerType::UNDEFINED;
     this->name = "";
@@ -305,7 +304,7 @@ Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index
     TExtensionInfo result;
     if (index > this->extensions.size() - 1)
     {
-        throw Turbo::Core::TException(TResult::OUT_OF_RANGE);
+        throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TLayerInfo::GetExtension");
     }
 
     return this->extensions[index];

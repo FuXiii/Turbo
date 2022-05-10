@@ -34,7 +34,7 @@ void Turbo::Core::TImageView::InternalCreate()
     VkResult result = vkCreateImageView(vk_device, &vk_image_view_create_info, allocator, &this->vkImageView);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TImageView::InternalCreate::vkCreateImageView");
     }
 }
 
@@ -63,7 +63,7 @@ Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFor
     }
     else
     {
-        throw TException(TResult::INVALID_PARAMETER);
+        throw TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImageView::TImageView");
     }
 }
 

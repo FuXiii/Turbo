@@ -30,10 +30,9 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
     VkResult result = vkCreateCommandPool(vk_device, &command_pool_create_info, allocator, &this->vkCommandPool);
-
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TCommandBufferPool::InternalCreate::vkCreateCommandPool");
     }
 
     std::vector<TCommandBuffer *> command_buffers = this->GetPool();
@@ -69,7 +68,7 @@ Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) :
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBufferPool::TCommandBufferPool");
     }
 }
 

@@ -303,7 +303,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     VkResult result = vkCreateGraphicsPipelines(vk_device, VK_NULL_HANDLE, 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TGraphicsPipeline::InternalCreate::vkCreateGraphicsPipelines");
     }
 }
 
@@ -371,7 +371,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TGraphicsPipeline::TGraphicsPipeline");
     }
 }
 

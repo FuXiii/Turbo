@@ -604,3 +604,6 @@ Turbo是渲染引擎
   >```
   >
   >用于索引渲染
+  >
+  >* `TAllocator`平台相关使用`Turbo.h`中定义的宏
+  >* 开始整理`TException`的输出信息,和优化`TException`

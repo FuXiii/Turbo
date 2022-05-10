@@ -174,7 +174,7 @@ int main()
 
     Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDICES_DATA));
     void *index_buffer_ptr = index_buffer->Map();
-    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA) * INDICES_DATA.size());
+    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA));
     index_buffer->Unmap();
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);

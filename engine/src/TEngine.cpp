@@ -6,7 +6,7 @@ void Turbo::Core::TEngine::VerificationInitVulkan()
 {
     if (!TInstance::IsSupportVulkan())
     {
-        throw Turbo::Core::TException(TResult::UNSUPPORTED);
+        throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TEngine::VerificationInitVulkan", "Not support Vulkan");
     }
 
     this->instance = new TInstance();
