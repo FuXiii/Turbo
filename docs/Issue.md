@@ -106,11 +106,13 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 需要提供`TFilter`对应`VkFilter`
 
-- 需要提供对应`KTX`文件的支持
+- 需要提供对应`KTX`文件的支持(非核心)
 
-- 需要提供对应`gltf`文件的支持
+- 需要提供对应`gltf`文件的支持(非核心)
 
-- <font color=orange>**[ 🛠 ] now**</font> 实现纹理特性中
+- <font color=green>**[ ✓ ]2022/5/10**</font> ~~实现索引绘制~~
+
+- <font color=orange>**[ 🛠 ] now**</font> 实现纹理特性
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 

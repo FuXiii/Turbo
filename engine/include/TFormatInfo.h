@@ -333,10 +333,6 @@ class TFormatInfo : public TObject
   private:
     TFormatType formatType;
 
-    TFormatFeatureFlags linearTilingFeatures;
-    TFormatFeatureFlags optimalTilingFeatures;
-    TFormatFeatureFlags bufferFeatures;
-
   public:
     static std::vector<TFormatInfo> GetSupportFormats(TPhysicalDevice *physicalDevice);
     static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);

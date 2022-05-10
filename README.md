@@ -591,3 +591,16 @@ Turbo是渲染引擎
   >
   >* 进入调整阶段
   >* `TCommandBuffer`中有关`VkCmd...`的成员函数前面加上`Cmd...`的前缀,与`CommandBuffer::Begin()`和`CommandBuffer::End()`等非命令成员函数分开，直接告诉用户哪些会是`VkCmd...`哪些不是
+  >* `TFormatInfo`中删除有关`TFormatFeatureFlags`的成员变量，没用
+
+  * 2022/5/10 设计架构
+  >
+  >* `TBuffer`中增加`typedef enum class TIndexType`表明索引缓存的数据类型
+  >* `TCommandBuffer`中增加如下函数：
+  >
+  >```CXX
+  > void CmdBindIndexBuffer(TBuffer *buffer, TDeviceSize offset = 0, TIndexType indexType = TIndexType::UINT32);
+  > void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
+  >```
+  >
+  >用于索引渲染
