@@ -18,7 +18,6 @@ add_subdirectory(./thirdparty)
 
 add_subdirectory(./engine)
 
-add_dependencies(${PROJECT_NAME} SDL2-static)
 add_dependencies(${PROJECT_NAME} glfw)
 
 target_include_directories(${PROJECT_NAME}
