@@ -1,4 +1,5 @@
 #include "TFormatInfo.h"
+#include "TDevice.h"
 #include "TException.h"
 #include "TPhysicalDevice.h"
 
@@ -650,7 +651,7 @@ uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
     }
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlLinearFeatures(TPhysicalDevice *physicalDevice)
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetLinearFeatures(TPhysicalDevice *physicalDevice)
 {
     VkFormatProperties format_properties = {};
     format_properties.bufferFeatures = 0;
@@ -684,6 +685,21 @@ Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlBufferFeatures(TPhysi
     vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
 
     return format_properties.bufferFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetLinearFeatures(TDevice *device)
+{
+    return this->GetLinearFeatures(device->GetPhysicalDevice());
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetOptimalFeatures(TDevice *device)
+{
+    return this->GetOptimalFeatures(device->GetPhysicalDevice());
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlBufferFeatures(TDevice *device)
+{
+    return this->GetlBufferFeatures(device->GetPhysicalDevice());
 }
 
 bool Turbo::Core::TFormatInfo::operator==(const TFormatInfo &format) const

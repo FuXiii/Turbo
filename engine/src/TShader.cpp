@@ -245,6 +245,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
+        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
 
         // set and binding
         uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
@@ -274,6 +275,11 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // vector and matrices
         uint32_t vec_size = type.vecsize; // size of vec
         uint32_t colums = type.columns;   // 1 column means it's a vector.
+
+        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(shader_data_type, set, binding, count, name);
+        this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
+
+        descriptor_set_map[set].push_back(combined_image_sampler_descriptor);
     }
 
     for (spirv_cross::Resource &separate_image_item : resources.separate_images)
@@ -720,6 +726,13 @@ Turbo::Core::TShader::~TShader()
     }
 
     this->descriptorSetLayouts.clear();
+
+    for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
+    {
+        delete combined_image_sampler_descriptor_item;
+    }
+
+    this->combinedImageSamplerDescriptors.clear();
 
     for (TUniformBufferDescriptor *uniform_buffer_descriptor_item : this->uniformBufferDescriptors)
     {

@@ -607,3 +607,23 @@ Turbo是渲染引擎
   >
   >* `TAllocator`平台相关使用`Turbo.h`中定义的宏
   >* 开始整理`TException`的输出信息,和优化`TException`
+  >* `TFormatInfo`增加`Get...Features(TDevice* device)`版本成员函数
+
+  * 2022/5/11 设计架构
+  >
+  >* 开始实现纹理特性
+  >* `TDescriptor.h`中增加`TCombinedImageSamplerDescriptor`类，用于表示`VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`
+  >* `TShader.h`中增加`std::vector<TCombinedImageSamplerDescriptor *> combinedImageSamplerDescriptors`成员变量
+  >* 新增`TSampler.h`中增加`TSampler`类并增加如下枚举定义：
+  >
+  >```CXX
+  >typedef enum class TFilter;//对应VkFilter
+  >typedef enum class TMipmapMode;//对应VkSamplerMipmapMode
+  >typedef enum class TAddressMode;//对应VkSamplerAddressMode
+  >typedef enum class TBorderColor;//对应VkBorderColor
+  >```
+  >
+  >* 新增`TDescriptorSet`中增加`void BindData(uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler)`，仅用于测试
+  >* 将原先的`SDL2`窗口库换成`GLFW`窗口库,使用`SDL2`会有`main`入口函数重定向，并且终端的输出信息不显示等很奇怪的问题。
+  >* 纹理特性初步完成
+  >* `Descriptor`设计有重大逻辑漏洞，需要重构

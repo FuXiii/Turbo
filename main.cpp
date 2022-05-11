@@ -27,8 +27,10 @@
 
 #include <fstream>
 
-#include <SDL.h>
-#include <SDL_vulkan.h>
+//#include <SDL.h>
+//#include <SDL_vulkan.h>
+//#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 #include "TSurface.h"
 #include "TSwapchain.h"
@@ -37,20 +39,201 @@
 
 #undef main
 
+#include "TSampler.h"
+
+void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
+{
+    std::string save_file_path = "E:/Turbo/";
+    std::string save_file_name = name;
+
+    Turbo::Core::TImage *source_image = image;
+
+    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(image->GetDevice(), 0, Turbo::Core::TImageType::DIMENSION_2D, source_image->GetFormat(), source_image->GetWidth(), source_image->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
+
+    Turbo::Core::TCommandBuffer *temp_command_buffer = commandBufferPool->Allocate();
+
+    temp_command_buffer->Begin();
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->CmdCopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->End();
+
+    Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(image->GetDevice());
+    std::vector<Turbo::Core::TSemaphore *> gpu_copy_to_cpu_wait_semaphores;
+    std::vector<Turbo::Core::TSemaphore *> gpu_copy_to_cpu_signal_semaphores;
+
+    deviceQueue->Submit(gpu_copy_to_cpu_wait_semaphores, gpu_copy_to_cpu_signal_semaphores, temp_command_buffer, gpu_copy_to_cpu_fence);
+
+    gpu_copy_to_cpu_fence->WaitUntil();
+
+    delete gpu_copy_to_cpu_fence;
+
+    std::string filename;
+    filename.append(save_file_path);
+    filename.append(save_file_name);
+    filename.append(".ppm");
+
+    VkImageSubresource subres = {};
+    subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    subres.mipLevel = 0;
+    subres.arrayLayer = 0;
+    VkSubresourceLayout sr_layout;
+    vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+
+    char *ptr = (char *)temp_image->Map();
+
+    ptr += sr_layout.offset;
+    std::ofstream file(filename.c_str(), std::ios::binary);
+
+    file << "P6\n";
+    file << source_image->GetWidth() << " ";
+    file << source_image->GetHeight() << "\n";
+    file << 255 << "\n";
+
+    int x = 0;
+    int y = 0;
+
+    for (y = 0; y < source_image->GetHeight(); y++)
+    {
+        const int *row = (const int *)ptr;
+        int swapped;
+
+        if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
+        {
+            for (x = 0; x < source_image->GetWidth(); x++)
+            {
+                swapped = (*row & 0xff00ff00) | (*row & 0x000000ff) << 16 | (*row & 0x00ff0000) >> 16;
+                file.write((char *)&swapped, 3);
+                row++;
+            }
+        }
+        else if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
+        {
+            for (x = 0; x < source_image->GetWidth(); x++)
+            {
+                file.write((char *)row, 3);
+                row++;
+            }
+        }
+        else
+        {
+            printf("Unrecognized image format - will not write image files");
+            break;
+        }
+
+        ptr += sr_layout.rowPitch;
+    }
+
+    file.close();
+    temp_image->Unmap();
+    delete temp_image;
+    commandBufferPool->Free(temp_command_buffer);
+}
+
+bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowPitch, unsigned char *dataPtr)
+{
+    // PPM format expected from http://netpbm.sourceforge.net/doc/ppm.html
+    //  1. magic number
+    //  2. whitespace
+    //  3. width
+    //  4. whitespace
+    //  5. height
+    //  6. whitespace
+    //  7. max color value
+    //  8. whitespace
+    //  7. data
+
+    // Comments are not supported, but are detected and we kick out
+    // Only 8 bits per channel is supported
+    // If dataPtr is nullptr, only width and height are returned
+
+    // Read in values from the PPM file as characters to check for comments
+    char magicStr[3] = {}, heightStr[6] = {}, widthStr[6] = {}, formatStr[6] = {};
+
+#ifndef __ANDROID__
+    FILE *fPtr = fopen(filename, "rb");
+#else
+    FILE *fPtr = AndroidFopen(filename, "rb");
+#endif
+    if (!fPtr)
+    {
+        printf("Bad filename in read_ppm: %s\n", filename);
+        return false;
+    }
+
+    // Read the four values from file, accounting with any and all whitepace
+    int count = fscanf(fPtr, "%s %s %s %s ", magicStr, widthStr, heightStr, formatStr);
+
+    // Kick out if comments present
+    if (magicStr[0] == '#' || widthStr[0] == '#' || heightStr[0] == '#' || formatStr[0] == '#')
+    {
+        printf("Unhandled comment in PPM file\n");
+        return false;
+    }
+
+    // Only one magic value is valid
+    if (strncmp(magicStr, "P6", sizeof(magicStr)))
+    {
+        printf("Unhandled PPM magic number: %s\n", magicStr);
+        return false;
+    }
+
+    width = atoi(widthStr);
+    height = atoi(heightStr);
+
+    // Ensure we got something sane for width/height
+    static const int saneDimension = 32768; //??
+    if (width <= 0 || width > saneDimension)
+    {
+        printf("Width seems wrong.  Update read_ppm if not: %u\n", width);
+        return false;
+    }
+    if (height <= 0 || height > saneDimension)
+    {
+        printf("Height seems wrong.  Update read_ppm if not: %u\n", height);
+        return false;
+    }
+
+    if (dataPtr == nullptr)
+    {
+        // If no destination pointer, caller only wanted dimensions
+        return true;
+    }
+
+    // Now read the data
+    for (int y = 0; y < height; y++)
+    {
+        unsigned char *rowPtr = dataPtr;
+        for (int x = 0; x < width; x++)
+        {
+            count = fread(rowPtr, 3, 1, fPtr);
+            rowPtr[3] = 255; /* Alpha of 1 */
+            rowPtr += 4;
+        }
+        dataPtr += rowPitch;
+    }
+    fclose(fPtr);
+
+    return true;
+}
+
 struct Vertex
 {
     float posX, posY, posZ, posW; // Position data
     float r, g, b, a;             // Color
+    float u, v;                   // UV
 };
 
-#define XYZ1(_x_, _y_, _z_) (_x_), (_y_), (_z_), 1.f
-#define RGB(_x_, _y_, _z_) (_x_), (_y_), (_z_)
+#define _XYZ1(_x_, _y_, _z_) (_x_), (_y_), (_z_), 1.f
+#define _RGB(_x_, _y_, _z_) (_x_), (_y_), (_z_)
+#define _UV(_u_, _v_) (_u_), (_v_)
 
 static const Vertex VERTEXS_DATA[] = {
-    {XYZ1(0.5f, 0.5f, 0.0f), RGB(1.f, 0.f, 0.f)},
-    {XYZ1(-0.5f, 0.5f, 0.0f), RGB(0.f, 1.f, 0.f)},
-    {XYZ1(-0.5f, -0.5f, 0.0f), RGB(0.f, 0.f, 1.f)},
-    {XYZ1(0.5f, -0.50f, 0.0f), RGB(1.f, 1.f, 0.f)},
+    {_XYZ1(0.5f, 0.5f, 0.0f), _RGB(1.f, 0.f, 0.f), _UV(1.0f, 1.0f)},
+    {_XYZ1(-0.5f, 0.5f, 0.0f), _RGB(0.f, 1.f, 0.f), _UV(0.0f, 1.0f)},
+    {_XYZ1(-0.5f, -0.5f, 0.0f), _RGB(0.f, 0.f, 1.f), _UV(0.0f, 0.0f)},
+    {_XYZ1(0.5f, -0.50f, 0.0f), _RGB(1.f, 1.f, 0.f), _UV(1.0f, 0.0f)},
 };
 
 std::vector<uint32_t> INDICES_DATA = {0, 1, 2, 2, 3, 0};
@@ -61,17 +244,25 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "} myBufferVals;\n"
                                     "layout (location = 0) in vec4 pos;\n"
                                     "layout (location = 1) in vec4 inColor;\n"
+                                    "layout (location = 2) in vec2 inUV;"
                                     "layout (location = 0) out vec4 outColor;\n"
+                                    "layout (location = 1) out vec2 outUV;\n"
+                                    "layout (location = 2) out float outScale;\n"
                                     "void main() {\n"
                                     "   outColor = inColor;\n"
                                     "   gl_Position =vec4( myBufferVals.scale * pos.x,myBufferVals.scale * pos.y,myBufferVals.scale * pos.z,1);\n"
+                                    "   outUV = inUV;\n"
+                                    "   outScale = myBufferVals.scale;\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
+                                    "layout (set = 1, binding = 0) uniform sampler2D samplerColor;\n"
                                     "layout (location = 0) in vec4 color;\n"
+                                    "layout (location = 1) in vec2 uv;\n"
+                                    "layout (location = 2) in float scale;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
-                                    "	outColor = color;\n"
+                                    "	outColor = /*color **/ texture(samplerColor, uv);\n"
                                     "}\n";
 
 int main()
@@ -111,14 +302,20 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    SDL_Window *window = NULL;
+    // SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+    if (!glfwInit())
+        return -1;
+    // SDL_Window *window = NULL;
+    GLFWwindow *window;
     int window_width = 500;
     int window_height = 500;
-    window = SDL_CreateWindow("Turbo", 100, 100, window_width, window_height, SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
+    // window = SDL_CreateWindow("Turbo", 100, 100, window_width, window_height, /*SDL_WINDOW_SHOWN |*/ SDL_WINDOW_VULKAN);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
     VkInstance vk_instance = instance->GetVkInstance();
-    SDL_Vulkan_CreateSurface(window, vk_instance, &vk_surface_khr);
+    // SDL_Vulkan_CreateSurface(window, vk_instance, &vk_surface_khr);
+    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
     VkPhysicalDeviceFeatures vk_physical_device_features = {};
     vk_physical_device_features.sampleRateShading = VK_TRUE;
@@ -177,6 +374,93 @@ int main()
     memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA));
     index_buffer->Unmap();
 
+    Turbo::Core::TImage *texture = nullptr;
+    {
+        std::string texture_file_path = "E:/Turbo/asset/images/lunarg.ppm";
+        int texture_width = 0;
+        int texture_height = 0;
+        if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, 0, nullptr))
+        {
+            std::cout << "Could not read texture file\n";
+            exit(-1);
+        }
+
+        Turbo::Core::TFormatInfo texture_format(Turbo::Core::TFormatType::R8G8B8A8_UNORM);
+        Turbo::Core::TFormatFeatures texture_format_feature = texture_format.GetLinearFeatures(device);
+        bool is_texture_need_staging = true;
+        if ((texture_format_feature & Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT) == Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT)
+        {
+            is_texture_need_staging = false;
+        }
+
+        if (is_texture_need_staging)
+        {
+            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            Turbo::Core::TBuffer *texture_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, texture_width * texture_height * 4);
+
+            void *texture_buffer_ptr = texture_buffer->Map();
+            if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, texture_width * 4, (unsigned char *)texture_buffer_ptr))
+            {
+                std::cout << "Could not load texture file lunarg.ppm\n";
+                exit(-1);
+            }
+            texture_buffer->Unmap();
+
+            Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
+            texture_command_buffer->Begin();
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            texture_command_buffer->CmdCopyBufferToImage(texture_buffer, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, texture_width, texture_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, texture_width, texture_height, 1);
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            texture_command_buffer->End();
+            std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
+            std::vector<Turbo::Core::TSemaphore *> signal_semaphores;
+
+            Turbo::Core::TFence *texture_fence = new Turbo::Core::TFence(device);
+            queue->Submit(wait_semaphores, signal_semaphores, texture_command_buffer, texture_fence);
+            texture_fence->WaitUntil();
+
+            delete texture_fence;
+            command_pool->Free(texture_command_buffer);
+            delete texture_buffer;
+        }
+        else
+        {
+            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, Turbo::Core::TImageLayout::PREINITIALIZED);
+
+            VkSubresourceLayout layout = {};
+            VkImageSubresource subres = {};
+            subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subres.mipLevel = 0;
+            subres.arrayLayer = 0;
+            vkGetImageSubresourceLayout(device->GetVkDevice(), texture->GetVkImage(), &subres, &layout);
+
+            void *texture_ptr = texture->Map();
+            if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, layout.rowPitch, (unsigned char *)texture_ptr))
+            {
+                std::cout << "Could not load texture file lunarg.ppm\n";
+                exit(-1);
+            }
+            texture->Unmap();
+
+            Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
+            texture_command_buffer->Begin();
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::PREINITIALIZED, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            texture_command_buffer->End();
+            std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
+            std::vector<Turbo::Core::TSemaphore *> signal_semaphores;
+
+            Turbo::Core::TFence *texture_fence = new Turbo::Core::TFence(device);
+            queue->Submit(wait_semaphores, signal_semaphores, texture_command_buffer, texture_fence);
+            texture_fence->WaitUntil();
+
+            delete texture_fence;
+            command_pool->Free(texture_command_buffer);
+        }
+    }
+
+    Turbo::Core::TImageView *texture_view = new Turbo::Core::TImageView(texture, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, texture->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device);
+
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
@@ -187,22 +471,29 @@ int main()
     std::cout << fragment_shader->ToString() << std::endl;
 
     Turbo::Core::TDescriptorSize uniform_buffer_descriptor_size(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 100);
+    Turbo::Core::TDescriptorSize combined_image_sampler_descriptor_size(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 100);
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(uniform_buffer_descriptor_size);
+    descriptor_sizes.push_back(combined_image_sampler_descriptor_size);
 
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, 100, descriptor_sizes);
 
-    Turbo::Core::TDescriptorSetLayout *descriptor_set_layout = vertex_shader->GetDescriptorSetLayouts()[0];
+    Turbo::Core::TDescriptorSetLayout *vertex_shader_descriptor_set_layout = vertex_shader->GetDescriptorSetLayouts()[0];
+    Turbo::Core::TDescriptorSetLayout *fragment_shader_descriptor_set_layout = fragment_shader->GetDescriptorSetLayouts()[0];
 
-    Turbo::Core::TDescriptorSet *descriptor_set = descriptor_pool->Allocate(descriptor_set_layout);
+    Turbo::Core::TDescriptorSet *vertex_shader_descriptor_set = descriptor_pool->Allocate(vertex_shader_descriptor_set_layout);
+    Turbo::Core::TDescriptorSet *fragment_shader_descriptor_set = descriptor_pool->Allocate(fragment_shader_descriptor_set_layout);
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(scale_buffer);
-    descriptor_set->BindData(0, 0, buffers);
+    vertex_shader_descriptor_set->BindData(0, 0, buffers);
+    fragment_shader_descriptor_set->BindData(0, 0, texture_view, sampler);
 
-    Turbo::Core::TDescriptorSet *dynamic_descriptor_set = descriptor_pool->Allocate(descriptor_set_layout);
+    Turbo::Core::TDescriptorSet *vertex_shader_dynamic_descriptor_set = descriptor_pool->Allocate(vertex_shader_descriptor_set_layout);
+    Turbo::Core::TDescriptorSet *fragment_shader_dynamic_descriptor_set = descriptor_pool->Allocate(fragment_shader_descriptor_set_layout);
     std::vector<Turbo::Core::TBuffer *> buffers2;
     buffers2.push_back(dynamic_buffer);
-    dynamic_descriptor_set->BindData(0, 0, buffers2);
+    vertex_shader_dynamic_descriptor_set->BindData(0, 0, buffers2);
+    fragment_shader_dynamic_descriptor_set->BindData(0, 0, texture_view, sampler);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
@@ -222,8 +513,9 @@ int main()
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(VERTEXS_DATA[0]), Turbo::Core::TVertexRate::VERTEX);
-    vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0);  // pos
-    vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 16); // color
+    vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0);              // pos
+    vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, sizeof(float) * 4); // color
+    vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, sizeof(float) * 7);    // uv
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings{vertex_binding};
 
@@ -241,10 +533,12 @@ int main()
     Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
 
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets;
-    descriptor_sets.push_back(descriptor_set);
+    descriptor_sets.push_back(vertex_shader_descriptor_set);
+    descriptor_sets.push_back(fragment_shader_descriptor_set);
 
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets2;
-    descriptor_sets2.push_back(dynamic_descriptor_set);
+    descriptor_sets2.push_back(vertex_shader_dynamic_descriptor_set);
+    descriptor_sets2.push_back(fragment_shader_dynamic_descriptor_set);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -262,17 +556,10 @@ int main()
 
     float _time = 0;
     bool is_window_quit = false;
-    SDL_Event e;
-    while (!is_window_quit)
-    {
-        while (SDL_PollEvent(&e) != 0)
-        {
-            if (e.type == SDL_QUIT)
-            {
-                is_window_quit = true;
-            }
-        }
 
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
         float scale_data = (sin(_time) + 1) / 2.0f;
 
         void *_ptr = dynamic_buffer->Map();
@@ -345,6 +632,18 @@ int main()
         delete wait_image_ready;
         //</End Rendering>
     }
+
+    // SDL_Event e;
+    // while (!is_window_quit)
+    // {
+    //     while (SDL_PollEvent(&e) != 0)
+    //     {
+    //         if (e.type == SDL_QUIT)
+    //         {
+    //             is_window_quit = true;
+    //         }
+    //     }
+    // }
 
     {
         std::string save_file_path = "E:/Turbo/";
@@ -442,13 +741,16 @@ int main()
         delete framebuffer_item;
     }
     delete render_pass;
-    descriptor_pool->Free(descriptor_set);
-    descriptor_pool->Free(dynamic_descriptor_set);
+    descriptor_pool->Free(vertex_shader_descriptor_set);
+    descriptor_pool->Free(vertex_shader_dynamic_descriptor_set);
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;
     delete depth_image_view;
     delete depth_image;
+    delete sampler;
+    delete texture_view;
+    delete texture;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;
@@ -461,8 +763,10 @@ int main()
     delete command_pool;
     delete swapchain;
     delete surface;
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    vkDestroySurfaceKHR(instance->GetVkInstance(), vk_surface_khr, nullptr);
+    // SDL_DestroyWindow(window);
+    // SDL_Quit();
+    glfwTerminate();
     delete device;
     delete instance;
 

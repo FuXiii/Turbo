@@ -110,6 +110,15 @@ class TUniformBufferDescriptor : public TDescriptor
     TUniformBufferDescriptor(TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
     ~TUniformBufferDescriptor();
 };
+
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+class TCombinedImageSamplerDescriptor : public TDescriptor
+{
+  private:
+  public:
+    TCombinedImageSamplerDescriptor(TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TCombinedImageSamplerDescriptor();
+};
 } // namespace Core
 } // namespace Turbo
 
