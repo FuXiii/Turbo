@@ -118,7 +118,7 @@ void Turbo::Core::TDevice::InternalCreate()
     VkResult result = vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
 
     if (this->vmaAllocator != nullptr)
@@ -202,7 +202,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDevice::TDevice");
     }
 }
 
@@ -468,7 +468,7 @@ void Turbo::Core::TDevice::WaitIdle()
     VkResult result = vkDeviceWaitIdle(this->vkDevice);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::FAIL);
+        throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDevice::WaitIdle");
     }
 }
 

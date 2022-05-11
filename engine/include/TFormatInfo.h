@@ -7,6 +7,8 @@ namespace Turbo
 {
 namespace Core
 {
+class TDevice;
+
 typedef enum class TFormatType
 {
     UNDEFINED = VkFormat::VK_FORMAT_UNDEFINED,
@@ -347,9 +349,13 @@ class TFormatInfo : public TObject
 
     TFormatDataTypes GetFormatDataType();
 
-    TFormatFeatures GetlLinearFeatures(TPhysicalDevice *physicalDevice);
+    TFormatFeatures GetLinearFeatures(TPhysicalDevice *physicalDevice);
     TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
     TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
+
+    TFormatFeatures GetLinearFeatures(TDevice *device);
+    TFormatFeatures GetOptimalFeatures(TDevice *device);
+    TFormatFeatures GetlBufferFeatures(TDevice *device);
 
     // bool IsPacked();
     // uint32_t GetPackGroup();

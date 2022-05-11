@@ -25,7 +25,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
         }
         else
         {
-            throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+            throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
         }
     }
 
@@ -41,7 +41,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
     VkResult result = vkCreateDescriptorSetLayout(vk_device, &descriptorSetLayoutCreateInfo, allocator, &this->vkDescriptorSetLayout);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorSetLayout::InternalCreate::vkCreateDescriptorSetLayout");
     }
 }
 
@@ -62,7 +62,7 @@ Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TShader *shader, std::ve
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout");
     }
 }
 

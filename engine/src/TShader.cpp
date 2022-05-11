@@ -199,7 +199,7 @@ void Turbo::Core::TShader::InternalCreate()
     VkResult result = vkCreateShaderModule(vk_device, &vk_shader_module_create_info, allocator, &this->vkShaderModule);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::InternalCreate");
     }
 
     for (TDescriptorSetLayout *descriptor_set_item : this->descriptorSetLayouts)
@@ -245,6 +245,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
+        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
 
         // set and binding
         uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
@@ -274,6 +275,11 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // vector and matrices
         uint32_t vec_size = type.vecsize; // size of vec
         uint32_t colums = type.columns;   // 1 column means it's a vector.
+
+        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(shader_data_type, set, binding, count, name);
+        this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
+
+        descriptor_set_map[set].push_back(combined_image_sampler_descriptor);
     }
 
     for (spirv_cross::Resource &separate_image_item : resources.separate_images)
@@ -536,7 +542,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         bool is_initialize_process = glslang::InitializeProcess();
         if (!is_initialize_process)
         {
-            throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+            throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::TShader::glslang::InitializeProcess()");
         }
 
         TBuiltInResource resources = {};
@@ -660,7 +666,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         if (!shader_glslang.parse(&resources /*glslang::DefaultTBuiltInResource*/, 100, false, messages))
         {
             std::string log_messgae(shader_glslang.getInfoLog());
-            throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, log_messgae);
+            throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
         glslang::TProgram program;
@@ -668,7 +674,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         if (!program.link(messages))
         {
             std::string log_messgae(program.getInfoLog());
-            throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, log_messgae);
+            throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
         std::vector<uint32_t> shader_spir;
@@ -685,7 +691,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TShader::TShader");
     }
 }
 
@@ -706,7 +712,7 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, size_t size, ui
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TShader::TShader");
     }
 }
 
@@ -720,6 +726,13 @@ Turbo::Core::TShader::~TShader()
     }
 
     this->descriptorSetLayouts.clear();
+
+    for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
+    {
+        delete combined_image_sampler_descriptor_item;
+    }
+
+    this->combinedImageSamplerDescriptors.clear();
 
     for (TUniformBufferDescriptor *uniform_buffer_descriptor_item : this->uniformBufferDescriptors)
     {

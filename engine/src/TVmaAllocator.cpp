@@ -46,7 +46,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     VkResult result = vmaCreateAllocator(&vma_allocator_create_info, (VmaAllocator *)this->vmaAllocator);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED,"Turbo::Core::TVmaAllocator::InternalCreate");
     }
 }
 
@@ -66,7 +66,7 @@ Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulka
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER,"Turbo::Core::TVmaAllocator::TVmaAllocator");
     }
 }
 

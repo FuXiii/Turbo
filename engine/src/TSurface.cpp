@@ -98,12 +98,12 @@ void Turbo::Extension::TSurface::InternalCreate()
                 VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
                 if (result != VK_SUCCESS)
                 {
-                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateWin32SurfaceKHR");
                 }
             }
             else
             {
-                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
             }
         }
 #elif defined(__APPLE__)
@@ -119,7 +119,7 @@ void Turbo::Extension::TSurface::InternalCreate()
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::InternalCreate");
     }
 }
 
@@ -154,7 +154,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
     }
 }
 #elif defined(__APPLE__)
@@ -189,7 +189,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR 
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
     }
 }
 
@@ -221,7 +221,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                 }
                 else
                 {
-                    throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+                    throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
                 }
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
@@ -233,13 +233,13 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+            throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result), "Turbo::Extension::TSurface::vkGetPhysicalDeviceSurfaceSupportKHR", "this device unsupport this surface please change another device");
         }
     }
 
     if (this->supportQueueFamilys.size() == 0)
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport this surface");
     }
 }
 
@@ -265,7 +265,7 @@ void Turbo::Extension::TSurface::GetSurfaceCapabilities()
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result), "Turbo::Extension::TSurface::GetSurfaceCapabilities::vkGetPhysicalDeviceSurfaceCapabilitiesKHR", "this device unsupport this surface");
     }
 }
 
@@ -305,23 +305,23 @@ void Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats()
                 }
                 else
                 {
-                    throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+                    throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats", "this device unsupport this surface");
                 }
             }
 
             if (this->surfaceFormats.size() == 0)
             {
-                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats", "this device unsupport this surface");
             }
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats::vkGetPhysicalDeviceSurfaceFormatsKHR", "this device unsupport this surface");
         }
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats::vkGetPhysicalDeviceSurfaceFormatsKHR", "this device unsupport this surface");
     }
 }
 
@@ -368,17 +368,17 @@ void Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode()
             }
             else
             {
-                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode::vkGetPhysicalDeviceSurfacePresentModesKHR", "this device unsupport this surface");
             }
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode::vkGetPhysicalDeviceSurfacePresentModesKHR", "this device unsupport this surface");
         }
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result));
+        throw Turbo::Core::TException(Turbo::Core::VkResultToTResult(result), "Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode::vkGetPhysicalDeviceSurfacePresentModesKHR", "this device unsupport this surface");
     }
 }
 

@@ -141,7 +141,7 @@ void Turbo::Core::TImage::InternalCreate()
     VkResult result = vmaCreateImage(*vma_allocator, &vk_image_create_info, &alloc_info, &this->vkImage, (VmaAllocation *)this->vmaAllocation, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TImage::InternalCreate::vmaCreateImage");
     }
 }
 
@@ -193,7 +193,7 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TIma
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImage::TImage");
     }
 }
 

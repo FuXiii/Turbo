@@ -25,7 +25,7 @@ void Turbo::Core::TCommandBuffer::InternalCreate()
     VkResult result = vkAllocateCommandBuffers(device, &vk_command_buffer_allocate_info, &this->vkCommandBuffer);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TCommandBuffer::InternalCreate::vkAllocateCommandBuffers");
     }
 }
 
@@ -46,7 +46,7 @@ Turbo::Core::TCommandBuffer::TCommandBuffer(TCommandBufferPool *commandBufferPoo
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::TCommandBuffer");
     }
 }
 
@@ -212,7 +212,7 @@ void Turbo::Core::TCommandBuffer::CmdBindDescriptorSets(uint32_t firstSet, std::
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::CmdBindDescriptorSets");
     }
 }
 

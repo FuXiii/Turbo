@@ -12,12 +12,13 @@
             "args": [
                 "--arch x86_64"
             ],
+            "externalConsole": false,
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "build"
+            "preLaunchTask": "build",
         }
     ]
 }

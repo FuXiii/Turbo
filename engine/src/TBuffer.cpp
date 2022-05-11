@@ -27,7 +27,7 @@ void Turbo::Core::TBuffer::InternalCreate()
     VkResult result = vmaCreateBuffer(*vma_allocator, &vk_buffer_create_info, &alloc_info, &this->vkBuffer, (VmaAllocation *)this->vmaAllocation, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TBuffer::InternalCreate::vmaCreateBuffer");
     }
 }
 
@@ -52,7 +52,7 @@ Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, 
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBuffer::TBuffer");
     }
 }
 

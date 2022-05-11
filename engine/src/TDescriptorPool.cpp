@@ -141,7 +141,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
     VkResult result = vkCreateDescriptorPool(vk_device, &descriptorPoolCreateInfo, allocator, &this->vkDescriptorPool);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorPool::InternalCreate::vkCreateDescriptorPool");
     }
 }
 
@@ -292,7 +292,7 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorPool::TDescriptorPool");
     }
 }
 

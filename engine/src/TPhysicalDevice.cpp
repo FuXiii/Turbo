@@ -371,7 +371,7 @@ Turbo::Core::TPhysicalDevice::TPhysicalDevice(TInstance *instance, uint32_t inde
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPhysicalDevice::TPhysicalDevice");
     }
 }
 
@@ -486,7 +486,7 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetQueueFamilyByInde
 {
     if (queueFamilyIndex > this->info.queueFamilys.size() - 1)
     {
-        throw Turbo::Core::TException(TResult::OUT_OF_RANGE);
+        throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TPhysicalDevice::GetQueueFamilyByIndex");
     }
 
     return this->info.queueFamilys[queueFamilyIndex];
@@ -516,7 +516,7 @@ Turbo::Core::TMemoryTypeInfo Turbo::Core::TPhysicalDevice::GetMemoryTypeByIndex(
 {
     if (memoryTypeIndex > this->info.memoryTypes.size() - 1)
     {
-        throw Turbo::Core::TException(TResult::OUT_OF_RANGE);
+        throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TPhysicalDevice::GetMemoryTypeByIndex");
     }
 
     return this->info.memoryTypes[memoryTypeIndex];

@@ -121,7 +121,7 @@ void Turbo::Core::TRenderPass::InternalCreate()
     VkResult result = vkCreateRenderPass(vk_device, &vk_render_pass_create_info, allocator, &this->vkRenderPass);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TRenderPass::InternalCreate::vkCreateRenderPass");
     }
 }
 
@@ -144,7 +144,7 @@ Turbo::Core::TRenderPass::TRenderPass(TDevice *device, std::vector<TAttachment> 
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TRenderPass::TRenderPass");
     }
 }
 

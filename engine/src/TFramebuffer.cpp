@@ -34,7 +34,7 @@ void Turbo::Core::TFramebuffer::InternalCreate()
     VkResult result = vkCreateFramebuffer(vk_device, &vk_framebuffer_create_info, allocator, &this->vkFramebuffer);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TFramebuffer::InternalCreate::vkCreateFramebuffer");
     }
 }
 
@@ -55,7 +55,7 @@ Turbo::Core::TFramebuffer::TFramebuffer(TRenderPass *renderPass, std::vector<TIm
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TFramebuffer::TFramebuffer");
     }
 }
 

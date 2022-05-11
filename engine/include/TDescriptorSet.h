@@ -10,6 +10,8 @@ namespace Core
 class TDescriptorPool;
 class TDescriptorSetLayout;
 class TBuffer;
+class TImageView;
+class TSampler;
 
 class TDescriptorSet : public Turbo::Core::TVulkanHandle
 {
@@ -31,6 +33,7 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
 
     // TODO: this BindData function just for Test
     void BindData(uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> buffers);
+    void BindData(uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler);
 
   public:
     virtual std::string ToString() override;

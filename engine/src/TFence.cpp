@@ -15,7 +15,7 @@ void Turbo::Core::TFence::InternalCreate()
     VkResult result = vkCreateFence(vk_device, &vk_fence_create_info, allocator, &this->vkFence);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED);
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TFence::InternalCreate::vkCreateFence");
     }
 }
 
@@ -35,7 +35,7 @@ Turbo::Core::TFence::TFence(TDevice *device)
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TFence::TFence");
     }
 }
 

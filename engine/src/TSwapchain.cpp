@@ -16,7 +16,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         // imageCount
         if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "this minImage count out the range of [surface.minImageCount , surface.maxImageCount]");
         }
 
         // surfaceFormat
@@ -33,46 +33,46 @@ void Turbo::Extension::TSwapchain::InternalCreate()
 
         if (!is_support_surface_format)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "this swapchain.format cant not compatible with surface");
         }
 
         // width
         if ((this->surface->GetMinWidth() > this->width) || (this->surface->GetMaxWidth() < this->width))
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the extent of swapchain out range of [surface.minExtent surface.maxExtent]");
         }
 
         // height
         if ((this->surface->GetMinHeight() > this->height) || (this->surface->GetMaxHeight() < this->height))
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the extent of swapchain out range of [surface.minExtent surface.maxExtent]");
         }
 
         // arrayLayers
         if (this->surface->GetMaxImageArrayLayers() > this->imageArrayLayers)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the arrary of swapchain out range of [surface.minArrary surface.maxArrary]");
         }
 
         // usages
         Turbo::Core::TImageUsages surface_support_images_usages = this->surface->GetSupportedUsages();
         if ((surface_support_images_usages & this->usages) != this->usages)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the usage of swapchain can not compatible with surface");
         }
 
         // transform
         TSurfaceTransforms surface_support_transforms = this->surface->GetSupportedTransforms();
         if ((surface_support_transforms & this->transform) != this->transform)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the transform of swapchain can not compatible with surface");
         }
 
         // compositeAlpha
         TCompositeAlphas surface_support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
         if ((surface_support_composite_alphas & this->compositeAlpha) != this->compositeAlpha)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the composite alpha of swapchain can not compatible with surface");
         }
 
         // presentMode
@@ -89,7 +89,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
 
         if (!is_support_present_mode)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the present mode of swapchain can not compatible with surface");
         }
 
         VkSwapchainCreateInfoKHR vk_swapchain_create_info_khr = {};
@@ -122,7 +122,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         VkResult result = vkCreateSwapchainKHR(vk_device, &vk_swapchain_create_info_khr, allocator, &this->vkSwapchainKHR);
         if (result != VK_SUCCESS)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkCreateSwapchainKHR");
         }
 
         // Get VkImages
@@ -130,7 +130,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, nullptr);
         if (result != VK_SUCCESS)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkGetSwapchainImagesKHR");
         }
 
         std::vector<VkImage> vk_images;
@@ -138,7 +138,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, vk_images.data());
         if (result != VK_SUCCESS)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkGetSwapchainImagesKHR");
         }
 
         for (VkImage vk_image_item : vk_images)
@@ -149,7 +149,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::InternalCreate");
     }
 }
 
@@ -179,7 +179,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain");
     }
 }
 
@@ -199,7 +199,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         TCompositeAlphas support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
         if (!this->surface->IsSupportCompositeAlphaOpaque())
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED);
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
         }
         this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
 
@@ -225,7 +225,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
     else
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain");
     }
 }
 
@@ -278,7 +278,7 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t tim
         }
         break;
         default: {
-            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL);
+            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Turbo::Extension::TSwapchain::AcquireNextImage::vkAcquireNextImageKHR");
         }
         break;
         }

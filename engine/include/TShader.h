@@ -59,6 +59,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TInterface> inputs;
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
+    std::vector<TCombinedImageSamplerDescriptor *> combinedImageSamplerDescriptors;
 
     std::string entryPoint;
 
