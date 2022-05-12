@@ -13,7 +13,7 @@ Turbo::Core::TException::TException(TResult result, const std::string &message, 
     this->tip = tip;
     if (!this->message.empty())
     {
-        std::cout << "[Error]:" << this->message << "< " << this->tip << " >" << std::endl;
+        std::cout << "[Error]:" << this->message << "{" << this->tip << "}" << std::endl;
     }
 }
 

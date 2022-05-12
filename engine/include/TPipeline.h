@@ -12,6 +12,8 @@ namespace Core
 {
 class TDevice;
 class TShader;
+class TDescriptorSetLayout;
+class TPipelineLayout;
 
 typedef enum class TPipelineType
 {
@@ -45,7 +47,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
-    T_VULKAN_HANDLE_HANDLE VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
+    T_VULKAN_HANDLE_HANDLE TPipelineLayout *pipelineLayout = nullptr;
     T_VULKAN_HANDLE_CHILDREN std::vector<TShader *> shaders;
 
     TPipelineType type;
@@ -62,7 +64,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     ~TPipeline();
 
   public:
-    VkPipelineLayout GetVkPipelineLayout();
+    TPipelineLayout* GetPipelineLayout();
     VkPipeline GetVkPipeline();
 
     TPipelineType GetType();

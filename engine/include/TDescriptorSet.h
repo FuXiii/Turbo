@@ -31,6 +31,8 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
 
     VkDescriptorSet GetVkDescriptorSet();
 
+    uint32_t GetSet();
+
     // TODO: this BindData function just for Test
     void BindData(uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> buffers);
     void BindData(uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler);

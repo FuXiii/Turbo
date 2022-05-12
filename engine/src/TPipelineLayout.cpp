@@ -1,0 +1,78 @@
+#include "TPipelineLayout.h"
+#include "TDescriptorSetLayout.h"
+#include "TDevice.h"
+#include "TException.h"
+#include "TVulkanAllocator.h"
+
+void Turbo::Core::TPipelineLayout::InternalCreate()
+{
+    std::vector<VkDescriptorSetLayout> vk_descriptor_set_layouts;
+
+    for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
+    {
+        vk_descriptor_set_layouts.push_back(descriptor_set_layout_item->GetVkDescriptorSetLayout());
+    }
+
+    VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
+    vk_pipline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    vk_pipline_layout_create_info.pNext = nullptr;
+    vk_pipline_layout_create_info.flags = 0;
+    vk_pipline_layout_create_info.setLayoutCount = vk_descriptor_set_layouts.size();
+    vk_pipline_layout_create_info.pSetLayouts = vk_descriptor_set_layouts.data();
+    vk_pipline_layout_create_info.pushConstantRangeCount = 0;
+    vk_pipline_layout_create_info.pPushConstantRanges = nullptr;
+
+    VkDevice vk_device = this->device->GetVkDevice();
+    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    VkResult result = vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
+    }
+}
+
+void Turbo::Core::TPipelineLayout::InternalDestroy()
+{
+    VkDevice vk_device = this->device->GetVkDevice();
+    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
+}
+
+Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, std::vector<TDescriptorSetLayout *> &descriptorSetLayouts)
+{
+    if (device != nullptr)
+    {
+        this->device = device;
+        this->descriptorSetLayouts = descriptorSetLayouts;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
+    }
+}
+
+Turbo::Core::TPipelineLayout::~TPipelineLayout()
+{
+    for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
+    {
+        delete descriptor_set_layout_item;
+    }
+
+    this->InternalDestroy();
+}
+
+const std::vector<Turbo::Core::TDescriptorSetLayout *> &Turbo::Core::TPipelineLayout::GetDescriptorSetLayout()
+{
+    return this->descriptorSetLayouts;
+}
+
+VkPipelineLayout Turbo::Core::TPipelineLayout::GetVkPipelineLayout()
+{
+    return this->vkPipelineLayout;
+}
+
+std::string Turbo::Core::TPipelineLayout::ToString()
+{
+    return std::string();
+}

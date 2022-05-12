@@ -61,6 +61,11 @@ VkDescriptorSet Turbo::Core::TDescriptorSet::GetVkDescriptorSet()
     return this->vkDescriptorSet;
 }
 
+uint32_t Turbo::Core::TDescriptorSet::GetSet()
+{
+    return this->descriptorSetLayout->GetSet();
+}
+
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> buffers)
 {
     std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;

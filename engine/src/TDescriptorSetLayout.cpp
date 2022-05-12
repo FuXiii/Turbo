@@ -20,7 +20,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
             bindings[binding_index].binding = descriptor->GetBinding();
             bindings[binding_index].descriptorType = descriptor->GetVkDescriptorType();
             bindings[binding_index].descriptorCount = descriptor->GetCount();
-            bindings[binding_index].stageFlags = this->shader->GetVkShaderStageFlags();
+            bindings[binding_index].stageFlags = descriptor->GetShader()->GetVkShaderStageFlags();
             bindings[binding_index].pImmutableSamplers = nullptr;
         }
         else
@@ -36,7 +36,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
     descriptorSetLayoutCreateInfo.bindingCount = binding_count;
     descriptorSetLayoutCreateInfo.pBindings = bindings.data();
 
-    VkDevice vk_device = this->shader->GetDevice()->GetVkDevice();
+    VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     VkResult result = vkCreateDescriptorSetLayout(vk_device, &descriptorSetLayoutCreateInfo, allocator, &this->vkDescriptorSetLayout);
     if (result != VK_SUCCESS)
@@ -47,16 +47,16 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
 
 void Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout::InternalDestroy()
 {
-    VkDevice vk_device = this->shader->GetDevice()->GetVkDevice();
+    VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     vkDestroyDescriptorSetLayout(vk_device, this->vkDescriptorSetLayout, allocator);
 }
 
-Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TShader *shader, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
 {
-    if (shader != nullptr)
+    if (device != nullptr)
     {
-        this->shader = shader;
+        this->device = device;
         this->descriptors = descriptors;
         this->InternalCreate();
     }
@@ -66,8 +66,14 @@ Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TShader *shader, std::ve
     }
 }
 
+uint32_t Turbo::Core::TDescriptorSetLayout::GetSet()
+{
+    return this->descriptors[0]->GetSet();
+}
+
 Turbo::Core::TDescriptorSetLayout::~TDescriptorSetLayout()
 {
+    this->InternalDestroy();
 }
 
 VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayout()

@@ -10,8 +10,8 @@ namespace Core
 {
 
 class TDevice;
-class TDescriptorSetLayout;
-class TDescriptorSet;
+class TPipelineDescriptorSet;
+class TPipelineLayout;
 
 class TDescriptorSize : public Turbo::Core::TInfo
 {
@@ -47,8 +47,8 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     explicit TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
     ~TDescriptorPool();
 
-    TDescriptorSet *Allocate(TDescriptorSetLayout *descriptorSetLayout);
-    void Free(TDescriptorSet *descriptorSet);
+    TPipelineDescriptorSet *Allocate(TPipelineLayout *pipelineLayout);
+    void Free(TPipelineDescriptorSet *pipelineDescriptorSet);
 
     TDevice *GetDevice();
     VkDescriptorPool GetVkDescriptorPool();

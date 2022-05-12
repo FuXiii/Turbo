@@ -1,7 +1,7 @@
 #include "TDescriptorPool.h"
-#include "TDescriptorSet.h"
 #include "TDevice.h"
 #include "TException.h"
+#include "TPipelineDescriptorSet.h"
 #include "TVulkanAllocator.h"
 
 Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptorType type, uint32_t count)
@@ -302,14 +302,14 @@ Turbo::Core::TDescriptorPool::~TDescriptorPool()
     this->descriptorSizes.clear();
 }
 
-Turbo::Core::TDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TDescriptorSetLayout *descriptorSetLayout)
+Turbo::Core::TPipelineDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TPipelineLayout *pipelineLayout)
 {
-    return new Turbo::Core::TDescriptorSet(this, descriptorSetLayout);
+    return new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout);
 }
 
-void Turbo::Core::TDescriptorPool::Free(TDescriptorSet *descriptorSet)
+void Turbo::Core::TDescriptorPool::Free(TPipelineDescriptorSet *pipelineDescriptorSet)
 {
-    delete descriptorSet;
+    delete pipelineDescriptorSet;
 }
 
 Turbo::Core::TDevice *Turbo::Core::TDescriptorPool::GetDevice()

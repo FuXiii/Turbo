@@ -7,6 +7,9 @@ namespace Turbo
 {
 namespace Core
 {
+
+class TShader;
+
 typedef enum class TShaderDataType
 {
     SHADER_DATA_TYPE_UNKNOWN,
@@ -51,6 +54,8 @@ typedef enum class TDescriptorType
 class TDescriptor : public Turbo::Core::TInfo
 {
   private:
+    TShader *shader;
+
     TDescriptorType type;
     TShaderDataType dataType;
     uint32_t count;
@@ -59,7 +64,7 @@ class TDescriptor : public Turbo::Core::TInfo
     std::string name;
 
   public:
-    TDescriptor(TDescriptorType type, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TDescriptor(TShader *shader, TDescriptorType type, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
   public:
@@ -70,6 +75,8 @@ class TDescriptor : public Turbo::Core::TInfo
     uint32_t GetSet();
     uint32_t GetBinding();
     const std::string &GetName();
+
+    TShader *GetShader();
 
   public:
     virtual std::string ToString() override;
@@ -107,7 +114,7 @@ class TUniformBufferDescriptor : public TDescriptor
     std::vector<TStructMember> members;
 
   public:
-    TUniformBufferDescriptor(TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
+    TUniformBufferDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
     ~TUniformBufferDescriptor();
 };
 
@@ -116,7 +123,7 @@ class TCombinedImageSamplerDescriptor : public TDescriptor
 {
   private:
   public:
-    TCombinedImageSamplerDescriptor(TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TCombinedImageSamplerDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TCombinedImageSamplerDescriptor();
 };
 } // namespace Core

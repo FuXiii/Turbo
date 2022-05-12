@@ -114,7 +114,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/11**</font> ~~实现纹理特性~~ 引入`KTX`规范`(KTX工具库目前好像不支持MinGW编译器)`
 
-- <font color=orange>**[ 🛠 ] now**</font>c`Descriptor`设计有重大逻辑漏洞，需要重构
+- <font color=orange>**[ 🛠 ] now**</font>` Descriptor`设计有重大逻辑漏洞，需要重构
 
 - `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
 
