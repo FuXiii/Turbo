@@ -2,7 +2,6 @@
 #ifndef TSHADER_H
 #define TSHADER_H
 #include "TDescriptor.h"
-#include "TDescriptorSetLayout.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -48,7 +47,7 @@ class TShader : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkShaderModule vkShaderModule = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TDescriptorSetLayout *> descriptorSetLayouts;
+    T_VULKAN_HANDLE_CHILDREN
 
     T_VULKAN_HANDLE_DATA size_t size = 0;
     T_VULKAN_HANDLE_DATA uint32_t *code = nullptr;
@@ -76,12 +75,14 @@ class TShader : public Turbo::Core::TVulkanHandle
 
   public:
     TDevice *GetDevice();
-    std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
     VkShaderStageFlags GetVkShaderStageFlags();
     VkShaderStageFlagBits GetVkShaderStageFlagBits();
     VkShaderModule GetVkShaderModule();
 
     const std::string &GetEntryPoint();
+
+    const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors();
+    const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors();
 
     virtual std::string ToString() override;
 };

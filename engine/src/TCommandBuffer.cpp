@@ -5,6 +5,8 @@
 #include "TDeviceQueue.h"
 #include "TException.h"
 #include "TFramebuffer.h"
+#include "TPipelineDescriptorSet.h"
+#include "TPipelineLayout.h"
 #include "TRenderPass.h"
 #include "TScissor.h"
 #include "TSubpass.h"
@@ -208,12 +210,18 @@ void Turbo::Core::TCommandBuffer::CmdBindDescriptorSets(uint32_t firstSet, std::
             vk_descriptor_sets.push_back(descriptor_set_item->GetVkDescriptorSet());
         }
 
-        vkCmdBindDescriptorSets(this->vkCommandBuffer, vk_pipeline_bind_point, this->currentPipeline->GetVkPipelineLayout(), firstSet, vk_descriptor_sets.size(), vk_descriptor_sets.data(), 0, nullptr);
+        vkCmdBindDescriptorSets(this->vkCommandBuffer, vk_pipeline_bind_point, this->currentPipeline->GetPipelineLayout()->GetVkPipelineLayout(), firstSet, vk_descriptor_sets.size(), vk_descriptor_sets.data(), 0, nullptr);
     }
     else
     {
         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::CmdBindDescriptorSets");
     }
+}
+
+void Turbo::Core::TCommandBuffer::CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet)
+{
+    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
+    this->CmdBindDescriptorSets(firstSet, descriptor_sets);
 }
 
 void Turbo::Core::TCommandBuffer::CmdBindVertexBuffers(std::vector<TBuffer *> &vertexBuffers)

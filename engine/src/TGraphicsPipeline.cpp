@@ -1,6 +1,7 @@
 #include "TGraphicsPipeline.h"
 #include "TDevice.h"
 #include "TException.h"
+#include "TPipelineLayout.h"
 #include "TRenderPass.h"
 #include "TShader.h"
 #include "TVulkanAllocator.h"
@@ -292,7 +293,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_graphics_pipeline_create_info.pDepthStencilState = &vk_pipeline_depth_stencil_state_create_info;
     vk_graphics_pipeline_create_info.pColorBlendState = &vk_pipeline_color_blend_state_create_info;
     vk_graphics_pipeline_create_info.pDynamicState = &vk_pipeline_dynamic_state_create_info;
-    vk_graphics_pipeline_create_info.layout = this->GetVkPipelineLayout();
+    vk_graphics_pipeline_create_info.layout = this->GetPipelineLayout()->GetVkPipelineLayout();
     vk_graphics_pipeline_create_info.renderPass = vk_render_pass;
     vk_graphics_pipeline_create_info.subpass = this->subpass;
     vk_graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;

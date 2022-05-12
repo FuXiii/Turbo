@@ -27,9 +27,6 @@
 
 #include <fstream>
 
-//#include <SDL.h>
-//#include <SDL_vulkan.h>
-//#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include "TSurface.h"
@@ -39,6 +36,7 @@
 
 #undef main
 
+#include "TPipelineDescriptorSet.h"
 #include "TSampler.h"
 
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
@@ -302,19 +300,15 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    // SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     if (!glfwInit())
         return -1;
-    // SDL_Window *window = NULL;
     GLFWwindow *window;
     int window_width = 500;
     int window_height = 500;
-    // window = SDL_CreateWindow("Turbo", 100, 100, window_width, window_height, /*SDL_WINDOW_SHOWN |*/ SDL_WINDOW_VULKAN);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
     VkInstance vk_instance = instance->GetVkInstance();
-    // SDL_Vulkan_CreateSurface(window, vk_instance, &vk_surface_khr);
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
     VkPhysicalDeviceFeatures vk_physical_device_features = {};
@@ -478,22 +472,11 @@ int main()
 
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, 100, descriptor_sizes);
 
-    Turbo::Core::TDescriptorSetLayout *vertex_shader_descriptor_set_layout = vertex_shader->GetDescriptorSetLayouts()[0];
-    Turbo::Core::TDescriptorSetLayout *fragment_shader_descriptor_set_layout = fragment_shader->GetDescriptorSetLayouts()[0];
-
-    Turbo::Core::TDescriptorSet *vertex_shader_descriptor_set = descriptor_pool->Allocate(vertex_shader_descriptor_set_layout);
-    Turbo::Core::TDescriptorSet *fragment_shader_descriptor_set = descriptor_pool->Allocate(fragment_shader_descriptor_set_layout);
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(scale_buffer);
-    vertex_shader_descriptor_set->BindData(0, 0, buffers);
-    fragment_shader_descriptor_set->BindData(0, 0, texture_view, sampler);
 
-    Turbo::Core::TDescriptorSet *vertex_shader_dynamic_descriptor_set = descriptor_pool->Allocate(vertex_shader_descriptor_set_layout);
-    Turbo::Core::TDescriptorSet *fragment_shader_dynamic_descriptor_set = descriptor_pool->Allocate(fragment_shader_descriptor_set_layout);
     std::vector<Turbo::Core::TBuffer *> buffers2;
     buffers2.push_back(dynamic_buffer);
-    vertex_shader_dynamic_descriptor_set->BindData(0, 0, buffers2);
-    fragment_shader_dynamic_descriptor_set->BindData(0, 0, texture_view, sampler);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
@@ -532,13 +515,13 @@ int main()
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
     Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
 
-    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets;
-    descriptor_sets.push_back(vertex_shader_descriptor_set);
-    descriptor_sets.push_back(fragment_shader_descriptor_set);
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
+    pipeline_descriptor_set0->BindData(1, 0, 0, texture_view, sampler);
 
-    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets2;
-    descriptor_sets2.push_back(vertex_shader_dynamic_descriptor_set);
-    descriptor_sets2.push_back(fragment_shader_dynamic_descriptor_set);
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline2->GetPipelineLayout());
+    pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
+    pipeline_descriptor_set2->BindData(1, 0, 0, texture_view, sampler);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -582,7 +565,7 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindDescriptorSets(0, descriptor_sets);
+            command_buffer->CmdBindPipelineDescriptorSet(0, pipeline_descriptor_set0);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(viewports);
             command_buffer->CmdSetScissor(scissors);
@@ -590,7 +573,7 @@ int main()
             command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdNextSubpass();
             command_buffer->CmdBindPipeline(pipeline2);
-            command_buffer->CmdBindDescriptorSets(0, descriptor_sets2);
+            command_buffer->CmdBindPipelineDescriptorSet(0, pipeline_descriptor_set2);
             command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
@@ -632,18 +615,6 @@ int main()
         delete wait_image_ready;
         //</End Rendering>
     }
-
-    // SDL_Event e;
-    // while (!is_window_quit)
-    // {
-    //     while (SDL_PollEvent(&e) != 0)
-    //     {
-    //         if (e.type == SDL_QUIT)
-    //         {
-    //             is_window_quit = true;
-    //         }
-    //     }
-    // }
 
     {
         std::string save_file_path = "E:/Turbo/";
@@ -734,6 +705,8 @@ int main()
         command_pool->Free(temp_command_buffer);
     }
 
+    descriptor_pool->Free(pipeline_descriptor_set0);
+    descriptor_pool->Free(pipeline_descriptor_set2);
     delete pipeline;
     delete pipeline2;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
@@ -741,8 +714,7 @@ int main()
         delete framebuffer_item;
     }
     delete render_pass;
-    descriptor_pool->Free(vertex_shader_descriptor_set);
-    descriptor_pool->Free(vertex_shader_dynamic_descriptor_set);
+
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;
@@ -764,8 +736,6 @@ int main()
     delete swapchain;
     delete surface;
     vkDestroySurfaceKHR(instance->GetVkInstance(), vk_surface_khr, nullptr);
-    // SDL_DestroyWindow(window);
-    // SDL_Quit();
     glfwTerminate();
     delete device;
     delete instance;

@@ -627,3 +627,28 @@ Turbo是渲染引擎
   >* 将原先的`SDL2`窗口库换成`GLFW`窗口库,使用`SDL2`会有`main`入口函数重定向，并且终端的输出信息不显示等很奇怪的问题。
   >* 纹理特性初步完成
   >* `Descriptor`设计有重大逻辑漏洞，需要重构
+
+  * 2022/5/12 设计架构
+  >
+  >* 开始重构`Descriptor`
+  >* `TShader`中移除有关`TDescriptorSetLayout`创建相关，相关任务转移到`TPipeline`中进行，`TShader`仅用于创建`VkShaderModule`和收集`Descriptor`数据
+  >* `TDescriptorSetLayout`中移除有关`TShader`成员
+  >* `TDescriptorSetLayout`中增加`uint32_t GetSet()`成员函数
+  >* `TDescriptor`中增加`TShader*`成员变量，用于指代该描述符所属哪个`TShader`
+  >* `TShader`中增加如下函数:
+  >
+  >```CXX
+  > const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors;
+  > const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors;
+  >```
+  >
+  >目前`Turbo`只实现了这两个，更多待以后实现
+  >
+  >* （转移到`TPipelineLayout`中） 目前`TPipeline`中增加了`std::vector<TDescriptorSetLayout *> descriptorSetLayouts`成员变量，用于存储当前管线的描述符集合布局
+  >* 新增`TPipelineLayout`类
+  >* 新增`TPipeline`中开始使用`TPipelineLayout`
+  >* 新增`TPipelineDescriptorSet`类
+  >* `TDescriptorPool`适配`TPipelineDescriptorSet`
+  >* `TDescriptorSet`中增加`uint32_t GetSet()`成员函数
+  >* `TCommandBuffer`中增加`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet* pipelineDescriptorSet)`成员函数，用于适配`TPipelineDescriptorSet`
+  >* `Descriptor`目前初步重构完成

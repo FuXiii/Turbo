@@ -201,20 +201,10 @@ void Turbo::Core::TShader::InternalCreate()
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::InternalCreate");
     }
-
-    for (TDescriptorSetLayout *descriptor_set_item : this->descriptorSetLayouts)
-    {
-        descriptor_set_item->InternalCreate();
-    }
 }
 
 void Turbo::Core::TShader::InternalDestroy()
 {
-    for (TDescriptorSetLayout *descriptor_set_item : this->descriptorSetLayouts)
-    {
-        descriptor_set_item->InternalDestroy();
-    }
-
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     vkDestroyShaderModule(vk_device, this->vkShaderModule, allocator);
@@ -222,8 +212,6 @@ void Turbo::Core::TShader::InternalDestroy()
 
 void Turbo::Core::TShader::InternalParseSpirV()
 {
-    std::map<uint32_t, std::vector<TDescriptor *>> descriptor_set_map;
-
     std::vector<uint32_t> spirv;
     spirv.resize(this->size / sizeof(uint32_t));
     uint32_t *spirv_data = spirv.data();
@@ -262,24 +250,12 @@ void Turbo::Core::TShader::InternalParseSpirV()
             count = type.array[0]; // just for one dimension.
         }
 
-        // Querying structs
-        if (base_type == spirv_cross::SPIRType::BaseType::Struct)
-        {
-            for (auto &member_type_item : type.member_types)
-            {
-                spirv_cross::SPIRType member_type = glsl.get_type(member_type_item);
-                spirv_cross::SPIRType::BaseType member_base_type = member_type.basetype;
-            }
-        }
-
         // vector and matrices
         uint32_t vec_size = type.vecsize; // size of vec
         uint32_t colums = type.columns;   // 1 column means it's a vector.
 
-        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(shader_data_type, set, binding, count, name);
+        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, shader_data_type, set, binding, count, name);
         this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
-
-        descriptor_set_map[set].push_back(combined_image_sampler_descriptor);
     }
 
     for (spirv_cross::Resource &separate_image_item : resources.separate_images)
@@ -401,10 +377,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
             }
         }
 
-        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(shader_data_type, set, binding, count, name, struct_members);
+        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, shader_data_type, set, binding, count, name, struct_members);
         this->uniformBufferDescriptors.push_back(uniform_buffer_descriptor);
-
-        descriptor_set_map[set].push_back(uniform_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &push_constant_buffer_item : resources.push_constant_buffers)
@@ -517,15 +491,6 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         Turbo::Core::TInterface out_interface(location, shader_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
         this->outputs.push_back(out_interface);
-    }
-
-    // create TDescriptorSetLayout:
-    for (auto &descriptor_set_item : descriptor_set_map)
-    {
-        uint32_t set = descriptor_set_item.first;
-        std::vector<TDescriptor *> &descriptors = descriptor_set_item.second;
-        TDescriptorSetLayout *descriptor_set_layout = new TDescriptorSetLayout(this, descriptors);
-        this->descriptorSetLayouts.push_back(descriptor_set_layout);
     }
 }
 
@@ -720,13 +685,6 @@ Turbo::Core::TShader::~TShader()
 {
     this->InternalDestroy();
 
-    for (TDescriptorSetLayout *descriptor_set_item : this->descriptorSetLayouts)
-    {
-        delete descriptor_set_item;
-    }
-
-    this->descriptorSetLayouts.clear();
-
     for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
     {
         delete combined_image_sampler_descriptor_item;
@@ -784,11 +742,6 @@ VkShaderStageFlags Turbo::Core::TShader::GetVkShaderStageFlags()
     return VkShaderStageFlagBits::VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
 }
 
-std::vector<Turbo::Core::TDescriptorSetLayout *> Turbo::Core::TShader::GetDescriptorSetLayouts()
-{
-    return this->descriptorSetLayouts;
-}
-
 VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits()
 {
     switch (this->type)
@@ -830,6 +783,16 @@ VkShaderModule Turbo::Core::TShader::GetVkShaderModule()
 const std::string &Turbo::Core::TShader::GetEntryPoint()
 {
     return this->entryPoint;
+}
+
+const std::vector<Turbo::Core::TUniformBufferDescriptor *> &Turbo::Core::TShader::GetUniformBufferDescriptors()
+{
+    return this->uniformBufferDescriptors;
+}
+
+const std::vector<Turbo::Core::TCombinedImageSamplerDescriptor *> &Turbo::Core::TShader::GetCombinedImageSamplerDescriptors()
+{
+    return this->combinedImageSamplerDescriptors;
 }
 
 std::string Turbo::Core::TShader::ToString()

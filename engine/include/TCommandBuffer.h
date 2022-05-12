@@ -18,6 +18,7 @@ class TBuffer;
 class TViewport;
 class TScissor;
 class TDescriptorSet;
+class TPipelineDescriptorSet;
 
 class TCommandBuffer : public Turbo::Core::TVulkanHandle
 {
@@ -47,6 +48,7 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     void CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     void CmdBindPipeline(TPipeline *pipeline);
     void CmdBindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets);
+    void CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet);
     void CmdBindVertexBuffers(std::vector<TBuffer *> &vertexBuffers);
     void CmdSetViewport(std::vector<TViewport> &viewports);
     void CmdSetScissor(std::vector<TScissor> &scissors);

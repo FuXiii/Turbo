@@ -7,16 +7,13 @@ namespace Turbo
 {
 namespace Core
 {
-class TShader;
 class TDescriptor;
+class TDevice;
 
 class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 {
-  public:
-    friend class TShader;
-
   private:
-    T_VULKAN_HANDLE_PARENT TShader *shader = nullptr;
+    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
 
     T_VULKAN_HANDLE_DATA std::vector<TDescriptor *> descriptors;
@@ -26,9 +23,10 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TDescriptorSetLayout(TShader *shader, std::vector<TDescriptor *> &descriptors);
+    TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors);
     ~TDescriptorSetLayout();
 
+    uint32_t GetSet();
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
 
     virtual std::string ToString() override;
