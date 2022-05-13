@@ -399,16 +399,22 @@ uint32_t Turbo::Extension::TSurface::GetMaxImageCount()
 
 Turbo::Core::TExtent2D Turbo::Extension::TSurface::GetCurrentExtent()
 {
+    this->GetSurfaceCapabilities();
+
     return this->currentExtent;
 }
 
 uint32_t Turbo::Extension::TSurface::GetCurrentWidth()
 {
+    this->GetSurfaceCapabilities();
+
     return this->currentExtent.width;
 }
 
 uint32_t Turbo::Extension::TSurface::GetCurrentHeight()
 {
+    this->GetSurfaceCapabilities();
+
     return this->currentExtent.height;
 }
 
@@ -651,6 +657,8 @@ Turbo::Extension::TSurfaceTransforms Turbo::Extension::TSurface::GetSupportedTra
 
 Turbo::Extension::TSurfaceTransformBits Turbo::Extension::TSurface::GetCurrentTransform()
 {
+    this->GetSurfaceCapabilities();
+
     return this->currentTransform;
 }
 

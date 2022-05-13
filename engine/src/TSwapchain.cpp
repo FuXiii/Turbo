@@ -116,6 +116,10 @@ void Turbo::Extension::TSwapchain::InternalCreate()
             vk_swapchain_create_info_khr.clipped = VK_TRUE;
         }
         vk_swapchain_create_info_khr.oldSwapchain = nullptr;
+        if (this->oldSwapchain != nullptr)
+        {
+            vk_swapchain_create_info_khr.oldSwapchain = this->oldSwapchain->GetVkSwapchainKHR();
+        }
 
         VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
@@ -174,6 +178,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         this->compositeAlpha = compositeAlpha;
         this->presentMode = presentMode;
         this->isClipped = isClipped;
+        this->oldSwapchain = nullptr;
 
         this->InternalCreate();
     }
@@ -201,6 +206,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
         }
+
         this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
 
         if (this->surface->IsSupportPresentModeFifo())
@@ -219,8 +225,34 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         {
             this->presentMode = TPresentMode::IMMEDIATE;
         }
-        this->isClipped = isClipped;
 
+        this->isClipped = isClipped;
+        this->oldSwapchain = nullptr;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain");
+    }
+}
+
+Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
+{
+    if (oldSwapchain != nullptr)
+    {
+        this->surface = oldSwapchain->GetSurface();
+        this->minImageCount = oldSwapchain->GetMinImageCount();
+        this->format = oldSwapchain->GetFormat();
+        this->width = surface->GetCurrentWidth();
+        this->height = surface->GetCurrentHeight();
+        this->imageArrayLayers = oldSwapchain->GetImageArrayLayers();
+        this->usages = oldSwapchain->GetUsages();
+        this->transform = oldSwapchain->GetTransform();
+        this->compositeAlpha = oldSwapchain->GetCompositeAlpha();
+        this->presentMode = oldSwapchain->GetPresentMode();
+        this->isClipped = oldSwapchain->GetIsClipped();
+        this->oldSwapchain = oldSwapchain;
         this->InternalCreate();
     }
     else
@@ -232,6 +264,11 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
 Turbo::Extension::TSwapchain::~TSwapchain()
 {
     this->InternalDestroy();
+}
+
+Turbo::Extension::TSurface *Turbo::Extension::TSwapchain::GetSurface()
+{
+    return this->surface;
 }
 
 const std::vector<Turbo::Core::TImage *> &Turbo::Extension::TSwapchain::GetImages()
@@ -273,8 +310,9 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t tim
             return Turbo::Core::TResult::NOT_READY;
         }
         break;
+        case VkResult::VK_ERROR_OUT_OF_DATE_KHR:
         case VkResult::VK_SUBOPTIMAL_KHR: {
-            return Turbo::Core::TResult::SUBOPTIMAL;
+            return Turbo::Core::TResult::MISMATCH;
         }
         break;
         default: {
@@ -295,6 +333,56 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImageUntil(Turbo::
 VkSwapchainKHR Turbo::Extension::TSwapchain::GetVkSwapchainKHR()
 {
     return this->vkSwapchainKHR;
+}
+
+uint32_t Turbo::Extension::TSwapchain::GetMinImageCount()
+{
+    return this->minImageCount;
+}
+
+Turbo::Core::TFormatInfo Turbo::Extension::TSwapchain::GetFormat()
+{
+    return this->format;
+}
+
+uint32_t Turbo::Extension::TSwapchain::GetWidth()
+{
+    return this->width;
+}
+
+uint32_t Turbo::Extension::TSwapchain::GetHeight()
+{
+    return this->height;
+}
+
+uint32_t Turbo::Extension::TSwapchain::GetImageArrayLayers()
+{
+    return this->imageArrayLayers;
+}
+
+Turbo::Core::TImageUsages Turbo::Extension::TSwapchain::GetUsages()
+{
+    return this->usages;
+}
+
+Turbo::Extension::TSurfaceTransformBits Turbo::Extension::TSwapchain::GetTransform()
+{
+    return this->transform;
+}
+
+Turbo::Extension::TCompositeAlphaBits Turbo::Extension::TSwapchain::GetCompositeAlpha()
+{
+    return this->compositeAlpha;
+}
+
+Turbo::Extension::TPresentMode Turbo::Extension::TSwapchain::GetPresentMode()
+{
+    return this->presentMode;
+}
+
+bool Turbo::Extension::TSwapchain::GetIsClipped()
+{
+    return this->isClipped;
 }
 
 std::string Turbo::Extension::TSwapchain::ToString()
