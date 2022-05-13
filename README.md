@@ -652,3 +652,9 @@ Turbo是渲染引擎
   >* `TDescriptorSet`中增加`uint32_t GetSet()`成员函数
   >* `TCommandBuffer`中增加`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet* pipelineDescriptorSet)`成员函数，用于适配`TPipelineDescriptorSet`
   >* `Descriptor`目前初步重构完成
+
+  * 2022/5/13 设计架构
+  >
+  >* `TResult::SUBOPTIMAL`更改成`TResult::MISMATCH`
+  >* `TSurface`中有关获取当前大小的函数可以动态获取当前大小了，不需要`delete`之后重新`new`了
+  >* `TSwapchain`中增加`TSwapchain(TSwapchain *oldSwapchain)`构造函数，用于重新创建`TSwapchain`

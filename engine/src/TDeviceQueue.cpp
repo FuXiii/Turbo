@@ -218,8 +218,13 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapc
         }
         break;
             break;
+        case VkResult::VK_ERROR_OUT_OF_DATE_KHR:
         case VkResult::VK_SUBOPTIMAL_KHR: {
-            return Turbo::Core::TResult::SUBOPTIMAL;
+            return Turbo::Core::TResult::MISMATCH;
+        }
+        break;
+        case VkResult::VK_ERROR_DEVICE_LOST: {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Core::TDeviceQueue::Present", "Vulkan implementation is unable to make that guarantee, please recreate swapchain");
         }
         break;
         default: {

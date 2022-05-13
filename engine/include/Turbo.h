@@ -68,7 +68,7 @@ typedef enum class TResult : int32_t
     SUCCESS = 1,
     TIMEOUT = 2,
     NOT_READY = 3,
-    SUBOPTIMAL = 4
+    MISMATCH = 4
 } TResultEnum;
 
 typedef enum TMemoryFlagsBits

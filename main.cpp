@@ -254,7 +254,7 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 1, binding = 0) uniform sampler2D samplerColor;\n"
+                                    "layout (set = 0, binding = 1) uniform sampler2D samplerColor;\n"
                                     "layout (location = 0) in vec4 color;\n"
                                     "layout (location = 1) in vec2 uv;\n"
                                     "layout (location = 2) in float scale;\n"
@@ -517,11 +517,11 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set0->BindData(1, 0, 0, texture_view, sampler);
+    pipeline_descriptor_set0->BindData(0, 1, 0, texture_view, sampler);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline2->GetPipelineLayout());
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
-    pipeline_descriptor_set2->BindData(1, 0, 0, texture_view, sampler);
+    pipeline_descriptor_set2->BindData(0, 1, 0, texture_view, sampler);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -538,8 +538,6 @@ int main()
     }
 
     float _time = 0;
-    bool is_window_quit = false;
-
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -562,13 +560,23 @@ int main()
 
             // because we just have one command buffer, so we should reset the command buffer for each frame
             // If we create command buffer for each swapchain image, we don't need to reset it each frame
+
+            Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
+            Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth(), swapchain->GetHeight());
+
+            std::vector<Turbo::Core::TViewport> frame_viewports;
+            frame_viewports.push_back(frame_viewport);
+
+            std::vector<Turbo::Core::TScissor> frame_scissors;
+            frame_scissors.push_back(frame_scissor);
+
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(0, pipeline_descriptor_set0);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(viewports);
-            command_buffer->CmdSetScissor(scissors);
+            command_buffer->CmdSetViewport(frame_viewports);
+            command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdBindIndexBuffer(index_buffer);
             command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdNextSubpass();
@@ -591,19 +599,143 @@ int main()
 
             command_buffer->Reset(); // you can create an command buffer each for one swapchain image,for now just one command buffer
 
-            queue->Present(swapchain, current_image_index);
+            Turbo::Core::TResult present_result = queue->Present(swapchain, current_image_index);
+            switch (present_result)
+            {
+            case Turbo::Core::TResult::MISMATCH: {
+                // the size of the window had changed you need to recreate swapchain
+
+                // waite for idle
+                device->WaitIdle();
+
+                // destroy related resource
+                // clear old swapchain image
+                swapchain_images.clear();
+
+                // destroy swapchain image views
+                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+                {
+                    delete image_view_item;
+                }
+
+                swapchain_image_views.clear();
+
+                // destroy depth image and view
+                delete depth_image_view;
+                delete depth_image;
+
+                // destroy framebuffer
+                for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
+                {
+                    delete frame_buffer_item;
+                }
+                swpachain_framebuffers.clear();
+
+                // recreate swapchain
+                Turbo::Extension::TSwapchain *old_swapchain = swapchain;
+                Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
+                delete old_swapchain;
+
+                swapchain = new_swapchain;
+
+                // recreate swapchain image views
+                swapchain_images = swapchain->GetImages();
+                for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+                {
+                    Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                    swapchain_image_views.push_back(swapchain_view);
+                }
+
+                // recreate depth image
+                depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+                depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+
+                // recreate framebuffer
+                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+                {
+                    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
+                    swapchain_image_views.push_back(image_view_item);
+                    swapchain_image_views.push_back(depth_image_view);
+
+                    Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
+                    swpachain_framebuffers.push_back(swapchain_framebuffer);
+                }
+            }
+            break;
+            default: {
+                //
+            }
+            break;
+            }
         }
         break;
         case Turbo::Core::TResult::TIMEOUT: {
-            // you need to wait
+            // you need to wait, or do something else
         }
         break;
         case Turbo::Core::TResult::NOT_READY: {
-            // you need to wait
+            // you need to wait, or do something else
         }
         break;
-        case Turbo::Core::TResult::SUBOPTIMAL: {
+        case Turbo::Core::TResult::MISMATCH: {
             // the size of the window had changed you need to recreate swapchain
+            // the size of the window had changed you need to recreate swapchain
+
+            // waite for idle
+            device->WaitIdle();
+
+            // destroy related resource
+            // clear old swapchain image
+            swapchain_images.clear();
+
+            // destroy swapchain image views
+            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+            {
+                delete image_view_item;
+            }
+
+            swapchain_image_views.clear();
+
+            // destroy depth image and view
+            delete depth_image_view;
+            delete depth_image;
+
+            // destroy framebuffer
+            for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
+            {
+                delete frame_buffer_item;
+            }
+            swpachain_framebuffers.clear();
+
+            // recreate swapchain
+            Turbo::Extension::TSwapchain *old_swapchain = swapchain;
+            Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
+            delete old_swapchain;
+
+            swapchain = new_swapchain;
+
+            // recreate swapchain image views
+            swapchain_images = swapchain->GetImages();
+            for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+            {
+                Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                swapchain_image_views.push_back(swapchain_view);
+            }
+
+            // recreate depth image
+            depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+
+            // recreate framebuffer
+            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+            {
+                std::vector<Turbo::Core::TImageView *> swapchain_image_views;
+                swapchain_image_views.push_back(image_view_item);
+                swapchain_image_views.push_back(depth_image_view);
+
+                Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
+                swpachain_framebuffers.push_back(swapchain_framebuffer);
+            }
         }
         break;
         default: {
