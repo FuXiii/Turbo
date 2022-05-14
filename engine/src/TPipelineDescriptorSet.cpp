@@ -45,14 +45,14 @@ const std::vector<Turbo::Core::TDescriptorSet *> &Turbo::Core::TPipelineDescript
     return this->descriptorSets;
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> &buffers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
         if (descriptor_set_item->GetSet() == set)
         {
             // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, arrayElement, buffers);
+            descriptor_set_item->BindData(binding, dstArrayElement, buffers);
             return;
         }
     }
@@ -62,14 +62,48 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
         if (descriptor_set_item->GetSet() == set)
         {
             // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, arrayElement, imageView, sampler);
+            descriptor_set_item->BindData(binding, dstArrayElement, combinedImageSamplers);
+            return;
+        }
+    }
+
+    std::stringstream ss;
+    ss << "There not have TDescriptorSet set=" << set << " ,please check the number of set";
+    throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
+{
+    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    {
+        if (descriptor_set_item->GetSet() == set)
+        {
+            // TODO: to find is have the binding descriptor? throw TException
+            descriptor_set_item->BindData(binding, dstArrayElement, imageViews);
+            return;
+        }
+    }
+
+    std::stringstream ss;
+    ss << "There not have TDescriptorSet set=" << set << " ,please check the number of set";
+    throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler)
+{
+    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    {
+        if (descriptor_set_item->GetSet() == set)
+        {
+            // TODO: to find is have the binding descriptor? throw TException
+            descriptor_set_item->BindData(binding, dstArrayElement, sampler);
             return;
         }
     }

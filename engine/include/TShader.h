@@ -35,7 +35,7 @@ class TInterface : public Turbo::Core::TStructMember
     uint32_t location;
 
   public:
-    TInterface(uint32_t location, TShaderDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name);
+    TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name);
     ~TInterface();
 
   public:
@@ -59,6 +59,8 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
     std::vector<TCombinedImageSamplerDescriptor *> combinedImageSamplerDescriptors;
+    std::vector<TSampledImageDescriptor *> sampledImageDescriptors;
+    std::vector<TSamplerDescriptor *> samplerDescriptors;
 
     std::string entryPoint;
 
@@ -83,7 +85,9 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors();
     const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors();
-
+    const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors();
+    const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();
+    
     virtual std::string ToString() override;
 };
 

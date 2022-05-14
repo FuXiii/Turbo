@@ -658,3 +658,17 @@ Turbo是渲染引擎
   >* `TResult::SUBOPTIMAL`更改成`TResult::MISMATCH`
   >* `TSurface`中有关获取当前大小的函数可以动态获取当前大小了，不需要`delete`之后重新`new`了
   >* `TSwapchain`中增加`TSwapchain(TSwapchain *oldSwapchain)`构造函数，用于重新创建`TSwapchain`
+
+  * 2022/5/14 设计架构
+  >
+  >* `TDescriptor.h`中的`typedef enum class TShaderDataType`更改成`typedef enum class TDescriptorDataType`
+  >* `TDescriptor.h`中增加`class TSampledImageDescriptor`和`TSamplerDescriptor`，用于对应`VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE`和`VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER`
+  >* `TShader`中增加`std::vector<TSampledImageDescriptor *> sampledImageDescriptors`和`std::vector<TSamplerDescriptor *> samplerDescriptors`
+  >* 开始修缮`TDescriptorSet`中的`void BindData(...);`使其规范化,`TPipelineDescriptorSet`同理:
+  >
+  >```CXX
+  > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> buffers);//for uniform buffer
+  > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers);//combined image sampler
+  > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews);//sampled image
+  > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler);//sampler
+  >```

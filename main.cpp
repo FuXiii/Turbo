@@ -297,7 +297,8 @@ int main()
         }
     }
 
-    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions);
+    Turbo::Core::TVersion instance_version(1, 2, 0, 0);
+    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
@@ -322,7 +323,6 @@ int main()
         if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN)
         {
             enable_device_extensions.push_back(extension);
-            break;
         }
     }
 
@@ -515,13 +515,16 @@ int main()
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
     Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
 
+    std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>> combined_image_samplers;
+    combined_image_samplers.push_back(std::make_pair(texture_view, sampler));
+
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set0->BindData(0, 1, 0, texture_view, sampler);
+    pipeline_descriptor_set0->BindData(0, 1, 0, combined_image_samplers);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
-    pipeline_descriptor_set2->BindData(0, 1, 0, texture_view, sampler);
+    pipeline_descriptor_set2->BindData(0, 1, 0, combined_image_samplers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);

@@ -28,6 +28,20 @@ void Turbo::Core::TPipeline::InternalCreate()
             uint32_t set = combined_image_sampler_descriptor_item->GetSet();
             descriptor_set_map[set].push_back(combined_image_sampler_descriptor_item);
         }
+
+        std::vector<TSampledImageDescriptor *> sampled_image_descriptors = shader_item->GetSampledImageDescriptors();
+        for (TSampledImageDescriptor *sampled_image_descriptor_item : sampled_image_descriptors)
+        {
+            uint32_t set = sampled_image_descriptor_item->GetSet();
+            descriptor_set_map[set].push_back(sampled_image_descriptor_item);
+        }
+
+        std::vector<TSamplerDescriptor *> sampler_descriptors = shader_item->GetSamplerDescriptors();
+        for (TSamplerDescriptor *sampler_descriptor_item : sampler_descriptors)
+        {
+            uint32_t set = sampler_descriptor_item->GetSet();
+            descriptor_set_map[set].push_back(sampler_descriptor_item);
+        }
     }
 
     for (std::pair<const unsigned int, std::vector<Turbo::Core::TDescriptor *>> &descriptor_set_item : descriptor_set_map)
