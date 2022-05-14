@@ -10,30 +10,30 @@ namespace Core
 
 class TShader;
 
-typedef enum class TShaderDataType
+typedef enum class TDescriptorDataType
 {
-    SHADER_DATA_TYPE_UNKNOWN,
-    SHADER_DATA_TYPE_VOID,
-    SHADER_DATA_TYPE_BOOLEAN,
-    SHADER_DATA_TYPE_SBYTE,
-    SHADER_DATA_TYPE_UBYTE,
-    SHADER_DATA_TYPE_SHORT,
-    SHADER_DATA_TYPE_USHORT,
-    SHADER_DATA_TYPE_ATOMIC_COUNTER,
-    SHADER_DATA_TYPE_INT,
-    SHADER_DATA_TYPE_UINT,
-    SHADER_DATA_TYPE_INT64,
-    SHADER_DATA_TYPE_UINT64,
-    SHADER_DATA_TYPE_HALF,
-    SHADER_DATA_TYPE_FLOAT,
-    SHADER_DATA_TYPE_DOUBLE,
-    SHADER_DATA_TYPE_STRUCT,
-    SHADER_DATA_TYPE_IMAGE,         // texture2d or Texture2D<T> :: VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
-    SHADER_DATA_TYPE_SAMPLED_IMAGE, // sampler2d :: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-    SHADER_DATA_TYPE_SAMPLER,       // sampler or samplerState :: VK_DESCRIPTOR_TYPE_SAMPLER
-    SHADER_DATA_TYPE_ACCELERATION_STRUCTURE,
-    SHADER_DATA_TYPE_RAYQUERY,
-} TShaderDataType;
+    DESCRIPTOR_DATA_TYPE_UNKNOWN,
+    DESCRIPTOR_DATA_TYPE_VOID,
+    DESCRIPTOR_DATA_TYPE_BOOLEAN,
+    DESCRIPTOR_DATA_TYPE_SBYTE,
+    DESCRIPTOR_DATA_TYPE_UBYTE,
+    DESCRIPTOR_DATA_TYPE_SHORT,
+    DESCRIPTOR_DATA_TYPE_USHORT,
+    DESCRIPTOR_DATA_TYPE_ATOMIC_COUNTER,
+    DESCRIPTOR_DATA_TYPE_INT,
+    DESCRIPTOR_DATA_TYPE_UINT,
+    DESCRIPTOR_DATA_TYPE_INT64,
+    DESCRIPTOR_DATA_TYPE_UINT64,
+    DESCRIPTOR_DATA_TYPE_HALF,
+    DESCRIPTOR_DATA_TYPE_FLOAT,
+    DESCRIPTOR_DATA_TYPE_DOUBLE,
+    DESCRIPTOR_DATA_TYPE_STRUCT,
+    DESCRIPTOR_DATA_TYPE_IMAGE,         // texture2d or Texture2D<T> :: VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
+    DESCRIPTOR_DATA_TYPE_SAMPLED_IMAGE, // sampler2d :: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+    DESCRIPTOR_DATA_TYPE_SAMPLER,       // sampler or samplerState :: VK_DESCRIPTOR_TYPE_SAMPLER
+    DESCRIPTOR_DATA_TYPE_ACCELERATION_STRUCTURE,
+    DESCRIPTOR_DATA_TYPE_RAYQUERY,
+} TDescriptorDataType;
 
 typedef enum class TDescriptorType
 {
@@ -57,20 +57,20 @@ class TDescriptor : public Turbo::Core::TInfo
     TShader *shader;
 
     TDescriptorType type;
-    TShaderDataType dataType;
+    TDescriptorDataType dataType;
     uint32_t count;
     uint32_t set;
     uint32_t binding;
     std::string name;
 
   public:
-    TDescriptor(TShader *shader, TDescriptorType type, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
   public:
     TDescriptorType GetType();
     VkDescriptorType GetVkDescriptorType();
-    TShaderDataType GetDataType();
+    TDescriptorDataType GetDataType();
     uint32_t GetCount();
     uint32_t GetSet();
     uint32_t GetBinding();
@@ -85,7 +85,7 @@ class TDescriptor : public Turbo::Core::TInfo
 class TStructMember : public Turbo::Core::TInfo
 {
   private:
-    TShaderDataType dataType;
+    TDescriptorDataType dataType;
     uint32_t width;
     uint32_t offset;
     uint32_t vecSize;
@@ -97,7 +97,7 @@ class TStructMember : public Turbo::Core::TInfo
     std::string name;
 
   public:
-    TStructMember(TShaderDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name);
+    TStructMember(TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name);
     TStructMember(const TStructMember &object);
     ~TStructMember();
 
@@ -114,7 +114,7 @@ class TUniformBufferDescriptor : public TDescriptor
     std::vector<TStructMember> members;
 
   public:
-    TUniformBufferDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
+    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
     ~TUniformBufferDescriptor();
 };
 
@@ -123,9 +123,28 @@ class TCombinedImageSamplerDescriptor : public TDescriptor
 {
   private:
   public:
-    TCombinedImageSamplerDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TCombinedImageSamplerDescriptor();
 };
+
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
+class TSampledImageDescriptor : public TDescriptor
+{
+  private:
+  public:
+    TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TSampledImageDescriptor();
+};
+
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER
+class TSamplerDescriptor : public TDescriptor
+{
+  private:
+  public:
+    TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TSamplerDescriptor();
+};
+
 } // namespace Core
 } // namespace Turbo
 

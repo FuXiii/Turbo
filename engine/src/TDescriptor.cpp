@@ -1,7 +1,7 @@
 #include "TDescriptor.h"
 #include "TException.h"
 
-Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptorType type, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
+Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {
     if (shader != nullptr)
     {
@@ -81,7 +81,7 @@ VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
     return VkDescriptorType::VK_DESCRIPTOR_TYPE_MAX_ENUM;
 }
 
-Turbo::Core::TShaderDataType Turbo::Core::TDescriptor::GetDataType()
+Turbo::Core::TDescriptorDataType Turbo::Core::TDescriptor::GetDataType()
 {
     return this->dataType;
 }
@@ -116,7 +116,7 @@ std::string Turbo::Core::TDescriptor::ToString()
     return std::string();
 }
 
-Turbo::Core::TStructMember::TStructMember(TShaderDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TInfo()
+Turbo::Core::TStructMember::TStructMember(TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TInfo()
 {
     this->dataType = dataType;
     this->width = width;
@@ -175,7 +175,7 @@ std::string Turbo::Core::TStructMember::ToString()
     return std::string();
 }
 
-Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
 {
     this->members = members;
 }
@@ -184,9 +184,26 @@ Turbo::Core::TUniformBufferDescriptor::~TUniformBufferDescriptor()
 {
 }
 
-Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TShaderDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
+Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
 {
 }
+
 Turbo::Core::TCombinedImageSamplerDescriptor::~TCombinedImageSamplerDescriptor()
+{
+}
+
+Turbo::Core::TSampledImageDescriptor::TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLED_IMAGE, dataType, set, binding, count, name)
+{
+}
+
+Turbo::Core::TSampledImageDescriptor::~TSampledImageDescriptor()
+{
+}
+
+Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLER, dataType, set, binding, count, name)
+{
+}
+
+Turbo::Core::TSamplerDescriptor::~TSamplerDescriptor()
 {
 }

@@ -45,7 +45,9 @@
 
 - `Turbo::Core::TShader`中对于`code`的二进制数据是一直存在于内存的，对于`Vulkan`标准来说，这部分二进制数据在`VkShaderModule`创建完之后是没有意义的，目前该部分数据，仅仅是用于`ToString()`时转成`Shader`可读代码输出，无其他有用性。
 
-- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，其他类型接口留了，没实现。
+- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，`sampler2D`其他类型接口留了，没实现。
+
+- <font color=orange>**[ 🛠 ] now**</font> `Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。
 
 - `Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现
 
@@ -114,13 +116,15 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/11**</font> ~~实现纹理特性~~ 引入`KTX`规范`(KTX工具库目前好像不支持MinGW编译器)`
 
-- <font color=orange>**[ 🛠 ] now**</font>` Descriptor`设计有重大逻辑漏洞，需要重构
+- <font color=green>**[ ✓ ]2022/5/12**</font>~~`Descriptor`设计有重大逻辑漏洞，需要重构~~
 
 - `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 
 - 梳理一下`TExtensionInfo`类，最好类似`TFormatInfo`的类思想
+
+- `TSampler`的各项异性没开要和`TDevice`开启的`feature`配合
 
 - `TInstance`的`IsEnabledExtension(string)`函数中倒腾了两遍，没有必要，提供一个新的对应函数：`IsEnabledExtension(Turbo::Core::TExtensionType)`
 

@@ -66,7 +66,7 @@ uint32_t Turbo::Core::TDescriptorSet::GetSet()
     return this->descriptorSetLayout->GetSet();
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> buffers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *>& buffers)
 {
     std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
     for (TBuffer *buffer_item : buffers)
@@ -84,7 +84,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t arrayEleme
     vk_write_descriptor_set.pNext = nullptr;
     vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
     vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = arrayElement;
+    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
     vk_write_descriptor_set.descriptorCount = buffers.size();
     vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     vk_write_descriptor_set.pImageInfo = nullptr;
@@ -95,22 +95,89 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t arrayEleme
     vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
-    VkDescriptorImageInfo vk_descriptor_image_info = {};
-    vk_descriptor_image_info.sampler = sampler->GetVkSampler();
-    vk_descriptor_image_info.imageView = imageView->GetVkImageView();
-    vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
+    for (std::pair<TImageView *, TSampler *> &combined_image_sampler_item : combinedImageSamplers)
+    {
+        TImageView *image_view = combined_image_sampler_item.first;
+        TSampler *sampler = combined_image_sampler_item.second;
+
+        VkDescriptorImageInfo vk_descriptor_image_info = {};
+        vk_descriptor_image_info.sampler = sampler->GetVkSampler();
+        vk_descriptor_image_info.imageView = image_view->GetVkImageView();
+        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+    }
 
     VkWriteDescriptorSet vk_write_descriptor_set;
     vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     vk_write_descriptor_set.pNext = nullptr;
     vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
     vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = arrayElement;
-    vk_write_descriptor_set.descriptorCount = 1;
+    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+    vk_write_descriptor_set.descriptorCount = combinedImageSamplers.size();
     vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    vk_write_descriptor_set.pImageInfo = &vk_descriptor_image_info;
+    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+    vk_write_descriptor_set.pBufferInfo = nullptr;
+    vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
+    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
+{
+    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
+    for (TImageView *image_view_item : imageViews)
+    {
+        VkDescriptorImageInfo vk_descriptor_image_info = {};
+        vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+        vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
+        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+    }
+
+    VkWriteDescriptorSet vk_write_descriptor_set;
+    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    vk_write_descriptor_set.pNext = nullptr;
+    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+    vk_write_descriptor_set.dstBinding = binding;
+    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+    vk_write_descriptor_set.descriptorCount = imageViews.size();
+    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+    vk_write_descriptor_set.pBufferInfo = nullptr;
+    vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
+    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler)
+{
+    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
+    for (TSampler *sampler_item : sampler)
+    {
+        VkDescriptorImageInfo vk_descriptor_image_info = {};
+        vk_descriptor_image_info.sampler = sampler_item->GetVkSampler();
+        vk_descriptor_image_info.imageView = VK_NULL_HANDLE;
+        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+
+        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+    }
+
+    VkWriteDescriptorSet vk_write_descriptor_set;
+    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    vk_write_descriptor_set.pNext = nullptr;
+    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+    vk_write_descriptor_set.dstBinding = binding;
+    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+    vk_write_descriptor_set.descriptorCount = sampler.size();
+    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 

@@ -12,7 +12,7 @@
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
 
-Turbo::Core::TInterface::TInterface(uint32_t location, TShaderDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
+Turbo::Core::TInterface::TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
 {
     this->location = location;
 }
@@ -88,101 +88,101 @@ glslang::EShSource TShaderTypeToGlalangEShSource(Turbo::Core::TShaderLanguage la
     return glslang::EShSource::EShSourceGlsl;
 }
 
-Turbo::Core::TShaderDataType SpirvCrossSPIRTypeBaseTypeToTShaderDataType(spirv_cross::SPIRType::BaseType baseType)
+Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(spirv_cross::SPIRType::BaseType baseType)
 {
     switch (baseType)
     {
     case spirv_cross::SPIRType::BaseType::Unknown: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Void: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_VOID;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_VOID;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Boolean: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_BOOLEAN;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
     }
     break;
     case spirv_cross::SPIRType::BaseType::SByte: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SBYTE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SBYTE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UByte: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UBYTE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UBYTE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Short: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SHORT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SHORT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UShort: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_USHORT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_USHORT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Int: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_INT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UInt: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UINT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Int64: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_INT64;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT64;
     }
     break;
     case spirv_cross::SPIRType::BaseType::UInt64: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UINT64;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT64;
     }
     break;
     case spirv_cross::SPIRType::BaseType::AtomicCounter: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_ATOMIC_COUNTER;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ATOMIC_COUNTER;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Half: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_HALF;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_HALF;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Float: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_FLOAT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Double: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_DOUBLE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Struct: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_STRUCT;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_STRUCT;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Image: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_IMAGE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_IMAGE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::SampledImage: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SAMPLED_IMAGE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLED_IMAGE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::Sampler: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_SAMPLER;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLER;
     }
     break;
     case spirv_cross::SPIRType::BaseType::AccelerationStructure: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_ACCELERATION_STRUCTURE;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ACCELERATION_STRUCTURE;
     }
     break;
     case spirv_cross::SPIRType::BaseType::RayQuery: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_RAYQUERY;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_RAYQUERY;
     }
     break;
     default: {
-        return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
+        return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
     }
     break;
     }
 
-    return Turbo::Core::TShaderDataType::SHADER_DATA_TYPE_UNKNOWN;
+    return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
 void Turbo::Core::TShader::InternalCreate()
@@ -233,7 +233,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
-        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
 
         // set and binding
         uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
@@ -254,7 +254,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         uint32_t vec_size = type.vecsize; // size of vec
         uint32_t colums = type.columns;   // 1 column means it's a vector.
 
-        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, shader_data_type, set, binding, count, name);
+        TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
     }
 
@@ -266,11 +266,35 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
 
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = separate_image_item.name;
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        // vector and matrices
+        uint32_t vec_size = type.vecsize; // size of vec
+        uint32_t colums = type.columns;   // 1 column means it's a vector.
+
         if (type.image.dim == spv::DimBuffer)
         {
             // VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER
         }
+
         // VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
+        TSampledImageDescriptor *sampled_image_descriptor = new TSampledImageDescriptor(this, descriptor_data_type, set, binding, count, name);
+        this->sampledImageDescriptors.push_back(sampled_image_descriptor);
     }
 
     for (spirv_cross::Resource &storage_image_item : resources.storage_images)
@@ -297,6 +321,30 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
+
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = separate_sampler_item.name;
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        // vector and matrices
+        uint32_t vec_size = type.vecsize; // size of vec
+        uint32_t colums = type.columns;   // 1 column means it's a vector.
+
+        TSamplerDescriptor *sampler_descriptor = new TSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
+        this->samplerDescriptors.push_back(sampler_descriptor);
     }
 
     for (spirv_cross::Resource &uniform_buffers_item : resources.uniform_buffers)
@@ -307,7 +355,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
-        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
 
         // set and binding
         uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
@@ -344,7 +392,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
                 spirv_cross::SPIRType member_type = glsl.get_type(member);
                 spirv_cross::SPIRType::BaseType member_base_type = member_type.basetype;
-                Turbo::Core::TShaderDataType member_shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(member_base_type);
+                Turbo::Core::TDescriptorDataType member_descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(member_base_type);
 
                 uint32_t member_vecsize = member_type.vecsize;
                 uint32_t member_columns = member_type.columns;
@@ -372,12 +420,12 @@ void Turbo::Core::TShader::InternalParseSpirV()
                     member_matrix_stride = glsl.type_struct_member_matrix_stride(type, member_index);
                 }
 
-                TStructMember struct_member(member_shader_data_type, member_width, member_offset, member_vecsize, member_columns, member_size, member_array_count, member_array_stride, member_matrix_stride, member_name);
+                TStructMember struct_member(member_descriptor_data_type, member_width, member_offset, member_vecsize, member_columns, member_size, member_array_count, member_array_stride, member_matrix_stride, member_name);
                 struct_members.push_back(struct_member);
             }
         }
 
-        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, shader_data_type, set, binding, count, name, struct_members);
+        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, descriptor_data_type, set, binding, count, name, struct_members);
         this->uniformBufferDescriptors.push_back(uniform_buffer_descriptor);
     }
 
@@ -421,7 +469,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
-        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
 
         // set and binding
         uint32_t location = glsl.get_decoration(id, spv::DecorationLocation);
@@ -449,7 +497,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
             size = glsl.get_declared_struct_size(type);
         }
 
-        Turbo::Core::TInterface in_interface(location, shader_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
+        Turbo::Core::TInterface in_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
         this->inputs.push_back(in_interface);
     }
 
@@ -461,7 +509,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
-        Turbo::Core::TShaderDataType shader_data_type = SpirvCrossSPIRTypeBaseTypeToTShaderDataType(base_type);
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
 
         // set and binding
         uint32_t location = glsl.get_decoration(id, spv::DecorationLocation);
@@ -489,7 +537,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
             size = glsl.get_declared_struct_size(type);
         }
 
-        Turbo::Core::TInterface out_interface(location, shader_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
+        Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
         this->outputs.push_back(out_interface);
     }
 }
@@ -793,6 +841,16 @@ const std::vector<Turbo::Core::TUniformBufferDescriptor *> &Turbo::Core::TShader
 const std::vector<Turbo::Core::TCombinedImageSamplerDescriptor *> &Turbo::Core::TShader::GetCombinedImageSamplerDescriptors()
 {
     return this->combinedImageSamplerDescriptors;
+}
+
+const std::vector<Turbo::Core::TSampledImageDescriptor *> &Turbo::Core::TShader::GetSampledImageDescriptors()
+{
+    return this->sampledImageDescriptors;
+}
+
+const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetSamplerDescriptors()
+{
+    return this->samplerDescriptors;
 }
 
 std::string Turbo::Core::TShader::ToString()

@@ -34,8 +34,10 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
     uint32_t GetSet();
 
     // TODO: this BindData function just for Test
-    void BindData(uint32_t binding, uint32_t arrayElement, std::vector<TBuffer *> buffers);
-    void BindData(uint32_t binding, uint32_t arrayElement, TImageView *imageView, TSampler *sampler);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *>& buffers);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler);
 
   public:
     virtual std::string ToString() override;
