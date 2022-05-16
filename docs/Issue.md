@@ -47,13 +47,17 @@
 
 - `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，`sampler2D`其他类型接口留了，没实现。
 
-- <font color=orange>**[ 🛠 ] now**</font> `Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。
+- <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。~~
+
+- <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现~~
 
 - `Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现
 
 - <font color=green>**[ ✓ ]2022/4/28**</font> ~~`Turbo::Core::TSubpass::Add[...]AttachmentReference`中对于`VkImageLayout`的传入和`TImageView`问题一样~~
 
 - **`Note:`** `Turbo::Core::TSubpass`中的`std::vector<VkAttachmentReference> ...`保留，用起来很方便
+
+- 考虑`VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC`如何适配
 
 - <font color=green>**[ ✓ ]2022/4/29**</font> ~~`Turbo::Core::TAttachment`构造函数中对于`Vulkan`声明的数据结构依赖过多，须自定义（`VkFormat`,`VkSampleCountFlagBits`,`VkAttachmentLoadOp`,`VkAttachmentStoreOp`等）~~
 
@@ -106,11 +110,11 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 需要修缮`TExtension`，尝试分成`TInstanceExtension`和`TPhysicalDeviceExtension`
 
-- 需要提供`TFilter`对应`VkFilter`
+- <font color=orange>**[ 🛠 ] now**</font> 需要提供`TFilter`对应`VkFilter`，完善`TCommandBuffer::BlitImage(...)`
 
-- 需要提供对应`KTX`文件的支持(非核心)
+- <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`KTX`文件的支持(非核心)~~
 
-- 需要提供对应`gltf`文件的支持(非核心)
+- <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`gltf`文件的支持(非核心)~~
 
 - <font color=green>**[ ✓ ]2022/5/10**</font> ~~实现索引绘制~~
 

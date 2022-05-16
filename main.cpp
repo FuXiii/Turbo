@@ -236,6 +236,9 @@ static const Vertex VERTEXS_DATA[] = {
 
 std::vector<uint32_t> INDICES_DATA = {0, 1, 2, 2, 3, 0};
 
+//
+//
+
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
                                     "    float scale;\n"
@@ -248,19 +251,21 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 2) out float outScale;\n"
                                     "void main() {\n"
                                     "   outColor = inColor;\n"
-                                    "   gl_Position =vec4( myBufferVals.scale * pos.x,myBufferVals.scale * pos.y,myBufferVals.scale * pos.z,1);\n"
+                                    "   gl_Position =vec4(pos.xyz,1);\n"
                                     "   outUV = inUV;\n"
                                     "   outScale = myBufferVals.scale;\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 0, binding = 1) uniform sampler2D samplerColor;\n"
+                                    "layout (set = 0, binding = 1) uniform texture2D myTexture;\n"
+                                    "layout (set = 0, binding = 2) uniform sampler mySampler;\n"
                                     "layout (location = 0) in vec4 color;\n"
                                     "layout (location = 1) in vec2 uv;\n"
                                     "layout (location = 2) in float scale;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
-                                    "	outColor = /*color **/ texture(samplerColor, uv);\n"
+                                    "	float load_bias = scale * 10;\n"
+                                    "	outColor = /*color **/ texture(sampler2D(myTexture, mySampler), uv, load_bias);\n"
                                     "}\n";
 
 int main()
@@ -369,6 +374,7 @@ int main()
     index_buffer->Unmap();
 
     Turbo::Core::TImage *texture = nullptr;
+    uint32_t mip_levels = 0;
     {
         std::string texture_file_path = "E:/Turbo/asset/images/lunarg.ppm";
         int texture_width = 0;
@@ -379,6 +385,8 @@ int main()
             exit(-1);
         }
 
+        mip_levels = static_cast<uint32_t>(::floor(::log2(::fmax(texture_width, texture_height))) + 1);
+
         Turbo::Core::TFormatInfo texture_format(Turbo::Core::TFormatType::R8G8B8A8_UNORM);
         Turbo::Core::TFormatFeatures texture_format_feature = texture_format.GetLinearFeatures(device);
         bool is_texture_need_staging = true;
@@ -387,9 +395,15 @@ int main()
             is_texture_need_staging = false;
         }
 
-        if (is_texture_need_staging)
+        VkImageFormatProperties linear_properties = {};
+        vkGetPhysicalDeviceImageFormatProperties(physical_device->GetVkPhysicalDevice(), texture_format.GetVkFormat(), VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_LINEAR, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 0, &linear_properties);
+
+        VkImageFormatProperties optimal_properties = {};
+        vkGetPhysicalDeviceImageFormatProperties(physical_device->GetVkPhysicalDevice(), texture_format.GetVkFormat(), VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_OPTIMAL, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 0, &optimal_properties);
+
+        if (linear_properties.maxMipLevels < 2 || is_texture_need_staging)
         {
-            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
             Turbo::Core::TBuffer *texture_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, texture_width * texture_height * 4);
 
             void *texture_buffer_ptr = texture_buffer->Map();
@@ -402,9 +416,38 @@ int main()
 
             Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
             texture_command_buffer->Begin();
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
             texture_command_buffer->CmdCopyBufferToImage(texture_buffer, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, texture_width, texture_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, texture_width, texture_height, 1);
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+            // Transition first mip level to transfer source so we can blit(read) from it
+            // Get ready for generate mipmap
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+            // generate mipmap from n to n+1
+            for (uint32_t mip_index = 1; mip_index < mip_levels; mip_index++)
+            {
+                // Prepare current mip level as image blit destination
+                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
+
+                // Blit from previous level
+                int32_t src_mip_width = int32_t(texture_width >> (mip_index - 1));
+                int32_t src_mip_height = int32_t(texture_height >> (mip_index - 1));
+                uint32_t src_mip_level = mip_index - 1;
+
+                int32_t dst_mip_width = int32_t(texture_width >> mip_index);
+                int32_t dst_mip_height = int32_t(texture_width >> mip_index);
+                uint32_t dst_mip_level = mip_index;
+
+                // generate mipmap
+                texture_command_buffer->CmdBlitImage(texture, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, src_mip_width, src_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, src_mip_level, 0, 1, 0, 0, 0, dst_mip_width, dst_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, dst_mip_level, 0, 1);
+
+                // Prepare current mip level as image blit source for next level
+                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
+            }
+
+            // After the generation, all mipmap are in TRANSFER_SRC layout, so transition all to SHADER_READ
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
+
             texture_command_buffer->End();
             std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
             std::vector<Turbo::Core::TSemaphore *> signal_semaphores;
@@ -419,7 +462,7 @@ int main()
         }
         else
         {
-            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, Turbo::Core::TImageLayout::PREINITIALIZED);
+            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, Turbo::Core::TImageLayout::PREINITIALIZED);
 
             VkSubresourceLayout layout = {};
             VkImageSubresource subres = {};
@@ -438,7 +481,35 @@ int main()
 
             Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
             texture_command_buffer->Begin();
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::PREINITIALIZED, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            // Transition first mip level to transfer source so we can blit(read) from it
+            // Get ready for generate mipmap
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::PREINITIALIZED, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+            // generate mipmap from n to n+1
+            for (uint32_t mip_index = 1; mip_index < mip_levels; mip_index++)
+            {
+                // Prepare current mip level as image blit destination
+                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
+
+                // Blit from previous level
+                int32_t src_mip_width = int32_t(texture_width >> (mip_index - 1));
+                int32_t src_mip_height = int32_t(texture_height >> (mip_index - 1));
+                uint32_t src_mip_level = mip_index - 1;
+
+                int32_t dst_mip_width = int32_t(texture_width >> mip_index);
+                int32_t dst_mip_height = int32_t(texture_width >> mip_index);
+                uint32_t dst_mip_level = mip_index;
+
+                // generate mipmap
+                texture_command_buffer->CmdBlitImage(texture, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, src_mip_width, src_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, src_mip_level, 0, 1, 0, 0, 0, dst_mip_width, dst_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, dst_mip_level, 0, 1);
+
+                // Prepare current mip level as image blit source for next level
+                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
+            }
+
+            // After the generation, all mipmap are in TRANSFER_SRC layout, so transition all to SHADER_READ
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
+
             texture_command_buffer->End();
             std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
             std::vector<Turbo::Core::TSemaphore *> signal_semaphores;
@@ -452,8 +523,8 @@ int main()
         }
     }
 
-    Turbo::Core::TImageView *texture_view = new Turbo::Core::TImageView(texture, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, texture->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device);
+    Turbo::Core::TImageView *texture_view = new Turbo::Core::TImageView(texture, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, texture->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
+    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, mip_levels);
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, 500, 500, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
@@ -515,16 +586,21 @@ int main()
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
     Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
 
-    std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>> combined_image_samplers;
-    combined_image_samplers.push_back(std::make_pair(texture_view, sampler));
+    std::vector<Turbo::Core::TImageView *> my_textures;
+    my_textures.push_back(texture_view);
+
+    std::vector<Turbo::Core::TSampler *> my_samples;
+    my_samples.push_back(sampler);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set0->BindData(0, 1, 0, combined_image_samplers);
+    pipeline_descriptor_set0->BindData(0, 1, 0, my_textures);
+    pipeline_descriptor_set0->BindData(0, 2, 0, my_samples);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
-    pipeline_descriptor_set2->BindData(0, 1, 0, combined_image_samplers);
+    pipeline_descriptor_set2->BindData(0, 1, 0, my_textures);
+    pipeline_descriptor_set2->BindData(0, 2, 0, my_samples);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
