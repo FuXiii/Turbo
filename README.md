@@ -751,3 +751,6 @@ Turbo是渲染引擎
   * 2022/5/16 设计架构
   >
   >* `TCommandBuffer`实现`CmdBlitImage`等价于`vkCmdBlitImage`
+  >* `engine/`下新建`core`文件夹用于存放`Turbo`核心
+  >* `engine/core/include/Turbo.h`更改成`TCore.h`
+  >* `engine/core/include/Turbo.cpp`更改成`TCore.cpp`
