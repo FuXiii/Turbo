@@ -4,6 +4,7 @@
 #include "TBarrier.h"
 #include "TBuffer.h"
 #include "TPipeline.h"
+#include "TSampler.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -95,20 +96,21 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     void CmdBindIndexBuffer(TBuffer *buffer, TDeviceSize offset = 0, TIndexType indexType = TIndexType::UINT32);
     void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
 
-    void BlitImage();
+    void CmdBlitImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter = TFilter::LINEAR);
 
-    void TransferDeviceQueue();
+    void CmdResolveImage();
+    void CmdTransferDeviceQueue();
 
-    void DrawIndexedIndirect();
-    void DrawIndirect();
+    void CmdDrawIndexedIndirect();
+    void CmdDrawIndirect();
 
-    void SetLineWidth();
-    void ExecuteCommands();
+    void CmdSetLineWidth();
+    void CmdExecuteCommands();
 
-    void ClearAttachments();
+    void CmdClearAttachments();
 
-    void Dispatch();
-    void DispatchIndirect();
+    void CmdDispatch();
+    void CmdDispatchIndirect();
 
   public:
     virtual std::string ToString() override;

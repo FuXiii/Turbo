@@ -672,6 +672,43 @@ void Turbo::Core::TCommandBuffer::CmdDrawIndexed(uint32_t indexCount, uint32_t i
     vkCmdDrawIndexed(this->vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
+void Turbo::Core::TCommandBuffer::CmdBlitImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter)
+{
+    VkImageSubresourceLayers src_subresource = {};
+    src_subresource.aspectMask = srcAspects;
+    src_subresource.mipLevel = srcMipLevel;
+    src_subresource.baseArrayLayer = srcBaseArrayLayer;
+    src_subresource.layerCount = srcLayerCount;
+
+    VkImageSubresourceLayers dst_subresource = {};
+    dst_subresource.aspectMask = dstAspects;
+    dst_subresource.mipLevel = dstMipLevel;
+    dst_subresource.baseArrayLayer = dstBaseArrayLayer;
+    dst_subresource.layerCount = dstLayerCount;
+
+    VkImageBlit vk_image_blit = {};
+    vk_image_blit.srcSubresource = src_subresource;
+    vk_image_blit.srcOffsets[0].x = srcStartOffsetX;
+    vk_image_blit.srcOffsets[0].y = srcStartOffsetY;
+    vk_image_blit.srcOffsets[0].z = srcStartOffsetZ;
+    vk_image_blit.srcOffsets[1].x = srcEndOffsetX;
+    vk_image_blit.srcOffsets[1].y = srcEndOffsetY;
+    vk_image_blit.srcOffsets[1].z = srcEndOffsetZ;
+    vk_image_blit.dstSubresource = dst_subresource;
+    vk_image_blit.dstOffsets[0].x = dstStartOffsetX;
+    vk_image_blit.dstOffsets[0].y = dstStartOffsetY;
+    vk_image_blit.dstOffsets[0].z = dstStartOffsetZ;
+    vk_image_blit.dstOffsets[1].x = dstEndOffsetX;
+    vk_image_blit.dstOffsets[1].y = dstEndOffsetY;
+    vk_image_blit.dstOffsets[1].z = dstEndOffsetZ;
+
+    VkImageLayout src_image_layout = (VkImageLayout)srcLayout;
+    VkImageLayout dst_image_layout = (VkImageLayout)dstLayout;
+    VkFilter vk_filter = (VkFilter)filter;
+
+    vkCmdBlitImage(this->vkCommandBuffer, srcImage->GetVkImage(), src_image_layout, dstImage->GetVkImage(), dst_image_layout, 1, &vk_image_blit, vk_filter);
+}
+
 std::string Turbo::Core::TCommandBuffer::ToString()
 {
     return std::string();

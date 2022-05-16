@@ -2,6 +2,7 @@
 #ifndef TIMAGEVIEW_H
 #define TIMAGEVIEW_H
 #include "TFormatInfo.h"
+#include "TInfo.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo

@@ -21,6 +21,81 @@ Turbo是渲染引擎
 
 * 整理一下头文件，有点乱，去掉不必要的头文件
 
+## RoadMap
+
+2022/5/15
+
+* `Turbo` 引擎对于 `Vulkan 1.0` 的相关核心功能已初步成型，由于`Vulkan`本身的复杂性还有很多特性没有实现，在此做一下记录，记录该引擎以实现的特性和未来计划实现特性，该特性记录将会和`docs/Issue.md`文档配合使用。
+
+* `Core`核心层将会作为单独完整的库发布
+
+* `Turbo`将使用该核心继续开发高级特性
+
+### 已完成特性
+
+1.`Vulkan`核心特性的基本封装，包括：
+
+* `Turbo::Core::TLayerInfo` - `Vulkan`相关验证层信息
+* `Turbo::Core::TExtensionInfo` - `Vulkan`相关扩展信息
+* `Turbo::Core::TVersion` - 通用版本
+* `Turbo::Core::TInstance` - `VkInstance`的相关封装
+* `Turbo::Core::TPhysicalDevice` - `VkPhysicalDevice`相关封装
+* `Turbo::Core::TDevice` - `VkDevice`相关封装
+* `Turbo::Core::TDeviceQueue` - `VkQueue`相关封装
+* `Turbo::Core::TImage` - `VkImage`相关封装
+* `Turbo::Core::TImageView` - `VkImageView`相关封装
+* `Turbo::Core::TCommandBufferPool` - `VkCommandPool`相关封装
+* `Turbo::Core::TCommandBuffer` - `VkCommandBuffer`相关封装
+* `Turbo::Core::TBuffer` - `VkBuffer`相关封装
+* `Turbo::Core::TShader` - `VkShaderModule`相关封装
+* `Turbo::Core::TDescriptorPool` - `VkDescriptorPool`相关封装
+* `Turbo::Core::TSampler` - `VkSampler`相关封装
+* `Turbo::Core::TSubpass` - `Vulkan`中`Subpass`抽象
+* `Turbo::Core::TAttachment` - `Vulkan`中`Attachment`抽象
+* `Turbo::Core::TRenderPass` - `VkRenderPass`相关封装
+* `Turbo::Core::TVertexBinding` - `Vulkan`中顶点属性抽象
+* `Turbo::Core::TViewport` - `Vulkan`中`Viewport`抽象
+* `Turbo::Core::TScissor` - `Vulkan`中`Scissor`抽象
+* `Turbo::Core::TDescriptor` - `Vulkan`中各种描述符抽象
+* `Turbo::Core::TDescriptorSetLayout` - `VkDescriptorSetLayout`的相关封装
+* `Turbo::Core::TPipelineLayout` - `VkPipelineLayout`的相关封装
+* `Turbo::Core::TPipeline` - `TPipelineLayout`的相关封装,内部有`VkPipeline vkPipeline`成员变量，但创建是在其子类中创建
+* `Turbo::Core::TGraphicsPipeline` - 继承自`Turbo::Core::TPipeline`,图形渲染管线`VkPipeline`的相关封装，回去创建父类中的`Turbo::Core::TPipeline::vkPipeline`
+* `Turbo::Core::TDescriptorSet` - `VkDescriptorSet`的相关封装
+* `Turbo::Core::TPipelineDescriptorSet` - 管线所有有关描述符集的总和抽象，对应多个`Turbo::Core::TDescriptorSet`
+* `Turbo::Core::TFramebuffer` - `VkFramebuffer`相关封装
+* `Turbo::Core::TSemaphore` - `VkSemaphore`相关封装
+* `Turbo::Core::TFence` - `VkFence`相关封装
+* `Turbo::Extension::TSurface` - `VkSurfaceKHR`相关封装
+* `Turbo::Extension::TSwapchain` - `VkSwapchainKHR`相关封装
+
+### 计划完成特性
+
+* `Core` 目前以核心层为主
+  * 生成`mipmap`
+  * 计算着色器
+  * 计算管线
+  * 天空盒
+  * HDR
+  * 实例化渲染
+  * 间接渲染
+  * 细分着色器
+  * 几何着色器
+  * `Vulkan`光追标准
+  * 多线程
+
+* 非`Core`：跨平台窗口层抽象
+
+* 非`Core`：`IMGUI`
+
+* 非`Core`：延迟渲染
+
+* 非`Core`：`KTX` 和 `glTF`
+
+* 非`Core`：`FrameGraph`层
+
+* 非`Core`：`ECS`层
+
 ## Log
 
 * 2020/10/29
@@ -672,3 +747,7 @@ Turbo是渲染引擎
   > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews);//sampled image
   > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler);//sampler
   >```
+
+  * 2022/5/16 设计架构
+  >
+  >* `TCommandBuffer`实现`CmdBlitImage`等价于`vkCmdBlitImage`
