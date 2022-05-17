@@ -8,12 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_BUILD_TYPE "debug")
 
 add_subdirectory(./engine)
-
 add_subdirectory(./thirdparty)
 
 add_executable(${PROJECT_NAME} ./main.cpp)
 
 add_dependencies(${PROJECT_NAME} glfw)
+add_dependencies(${PROJECT_NAME} TCore)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./engine/core/include

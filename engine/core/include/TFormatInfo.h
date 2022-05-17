@@ -348,15 +348,7 @@ class TFormatInfo : public TObject
     VkFormat GetVkFormat();
 
     TFormatDataTypes GetFormatDataType();
-
-    TFormatFeatures GetLinearFeatures(TPhysicalDevice *physicalDevice);
-    TFormatFeatures GetOptimalFeatures(TPhysicalDevice *physicalDevice);
-    TFormatFeatures GetlBufferFeatures(TPhysicalDevice *physicalDevice);
-
-    TFormatFeatures GetLinearFeatures(TDevice *device);
-    TFormatFeatures GetOptimalFeatures(TDevice *device);
-    TFormatFeatures GetlBufferFeatures(TDevice *device);
-
+    
     // bool IsPacked();
     // uint32_t GetPackGroup();
     // uint32_t GetPackBits();

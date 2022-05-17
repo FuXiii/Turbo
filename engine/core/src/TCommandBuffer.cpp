@@ -5,6 +5,7 @@
 #include "TDeviceQueue.h"
 #include "TException.h"
 #include "TFramebuffer.h"
+#include "TPhysicalDevice.h"
 #include "TPipelineDescriptorSet.h"
 #include "TPipelineLayout.h"
 #include "TRenderPass.h"
@@ -90,7 +91,8 @@ void Turbo::Core::TCommandBuffer::CmdBeginRenderPass(TRenderPass *renderPass, TF
     for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
     {
         TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
-        TFormatFeatures format_feature = format_info.GetOptimalFeatures(physical_device);
+        TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
+        TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
 
         if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
         {

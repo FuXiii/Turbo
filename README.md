@@ -754,3 +754,22 @@ Turbo是渲染引擎
   >* `engine/`下新建`core`文件夹用于存放`Turbo`核心
   >* `engine/core/include/Turbo.h`更改成`TCore.h`
   >* `engine/core/include/Turbo.cpp`更改成`TCore.cpp`
+  >* 现在`engine/core`将会输出单独的库文件作为`Turbo`的核心
+  >* `TFormatInfo`中的`TFormatFeatures Get...Features(TPhysicalDevice *physicalDevice)`转移到了`TPhysicalDevice`中
+
+  * 2022/5/17 设计架构
+  >
+  >* `TPhysicalDevice`中增加如下函数(用于获取某一特定纹理格式的图片的限制属性)：
+  >
+  >```CXX
+  >TExtent3D GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TExtent3D GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TSampleCounts GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags); 
+  >TSampleCounts GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >```

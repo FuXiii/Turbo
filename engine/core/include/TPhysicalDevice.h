@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TPHYSICALDEVICE_H
 #define TPHYSICALDEVICE_H
+#include "TImage.h"
 #include "TPhysicalDeviceInfo.h"
 #include "TVulkanHandle.h"
 #include <map>
@@ -145,6 +146,24 @@ class TPhysicalDevice : public TVulkanHandle
     uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily);
 
     uint32_t GetAvailableQueueCount(uint32_t queueFamilyIndex);
+
+    TExtent3D GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TExtent3D GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    uint32_t GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    uint32_t GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    uint32_t GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    uint32_t GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TSampleCounts GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TSampleCounts GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+
+    TFormatFeatures GetLinearFeatures(TFormatType formatType);
+    TFormatFeatures GetLinearFeatures(TFormatInfo &format);
+    TFormatFeatures GetOptimalFeatures(TFormatType formatType);
+    TFormatFeatures GetOptimalFeatures(TFormatInfo &format);
+    TFormatFeatures GetlBufferFeatures(TFormatType formatType);
+    TFormatFeatures GetlBufferFeatures(TFormatInfo &format);
 
     virtual std::string ToString() override;
 };

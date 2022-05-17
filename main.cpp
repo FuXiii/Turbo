@@ -388,20 +388,17 @@ int main()
         mip_levels = static_cast<uint32_t>(::floor(::log2(::fmax(texture_width, texture_height))) + 1);
 
         Turbo::Core::TFormatInfo texture_format(Turbo::Core::TFormatType::R8G8B8A8_UNORM);
-        Turbo::Core::TFormatFeatures texture_format_feature = texture_format.GetLinearFeatures(device);
+        Turbo::Core::TFormatFeatures texture_format_feature = physical_device->GetLinearFeatures(texture_format);
         bool is_texture_need_staging = true;
         if ((texture_format_feature & Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT) == Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT)
         {
             is_texture_need_staging = false;
         }
 
-        VkImageFormatProperties linear_properties = {};
-        vkGetPhysicalDeviceImageFormatProperties(physical_device->GetVkPhysicalDevice(), texture_format.GetVkFormat(), VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_LINEAR, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 0, &linear_properties);
+        uint32_t linear_max_mip_levels = physical_device->GetMaxImageMipLevels(Turbo::Core::TFormatType::R8G8B8A8_UNORM, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, 0);
+        uint32_t optimal_max_mip_levels = physical_device->GetMaxImageMipLevels(Turbo::Core::TFormatType::R8G8B8A8_UNORM, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, 0);
 
-        VkImageFormatProperties optimal_properties = {};
-        vkGetPhysicalDeviceImageFormatProperties(physical_device->GetVkPhysicalDevice(), texture_format.GetVkFormat(), VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_OPTIMAL, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 0, &optimal_properties);
-
-        if (linear_properties.maxMipLevels < 2 || is_texture_need_staging)
+        if (linear_max_mip_levels < 2 || is_texture_need_staging)
         {
             texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
             Turbo::Core::TBuffer *texture_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, texture_width * texture_height * 4);
@@ -416,7 +413,7 @@ int main()
 
             Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
             texture_command_buffer->Begin();
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
             texture_command_buffer->CmdCopyBufferToImage(texture_buffer, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, texture_width, texture_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, texture_width, texture_height, 1);
 
             // Transition first mip level to transfer source so we can blit(read) from it

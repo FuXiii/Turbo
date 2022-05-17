@@ -88,7 +88,7 @@
 
 - `Second Command Buffer`目前`Turbo`不支持
 
-- 尝试重载`TSubpass`的`operator >>`用于构成渲染链，比如：
+- 尝试重载`TSubpass`的`operator >>`用于构成渲染链，比如：(也许放到FrameGraph层是个不错的选择)
 
 ```CXX
 TSubpassChain subpass_chain_1 = subpass1 >> subpass2 >> subpass3;
@@ -110,7 +110,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 需要修缮`TExtension`，尝试分成`TInstanceExtension`和`TPhysicalDeviceExtension`
 
-- <font color=orange>**[ 🛠 ] now**</font> 需要提供`TFilter`对应`VkFilter`，完善`TCommandBuffer::BlitImage(...)`
+- <font color=green>**[ ✓ ]2022/5/16**</font> ~~需要提供`TFilter`对应`VkFilter`，完善`TCommandBuffer::BlitImage(...)`~~
 
 - <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`KTX`文件的支持(非核心)~~
 

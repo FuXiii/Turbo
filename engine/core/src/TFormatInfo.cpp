@@ -651,57 +651,6 @@ uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
     }
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetLinearFeatures(TPhysicalDevice *physicalDevice)
-{
-    VkFormatProperties format_properties = {};
-    format_properties.bufferFeatures = 0;
-    format_properties.linearTilingFeatures = 0;
-    format_properties.optimalTilingFeatures = 0;
-
-    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
-
-    return format_properties.linearTilingFeatures;
-}
-
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetOptimalFeatures(TPhysicalDevice *physicalDevice)
-{
-    VkFormatProperties format_properties = {};
-    format_properties.bufferFeatures = 0;
-    format_properties.linearTilingFeatures = 0;
-    format_properties.optimalTilingFeatures = 0;
-
-    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
-
-    return format_properties.optimalTilingFeatures;
-}
-
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlBufferFeatures(TPhysicalDevice *physicalDevice)
-{
-    VkFormatProperties format_properties = {};
-    format_properties.bufferFeatures = 0;
-    format_properties.linearTilingFeatures = 0;
-    format_properties.optimalTilingFeatures = 0;
-
-    vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), this->GetVkFormat(), &format_properties);
-
-    return format_properties.bufferFeatures;
-}
-
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetLinearFeatures(TDevice *device)
-{
-    return this->GetLinearFeatures(device->GetPhysicalDevice());
-}
-
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetOptimalFeatures(TDevice *device)
-{
-    return this->GetOptimalFeatures(device->GetPhysicalDevice());
-}
-
-Turbo::Core::TFormatFeatures Turbo::Core::TFormatInfo::GetlBufferFeatures(TDevice *device)
-{
-    return this->GetlBufferFeatures(device->GetPhysicalDevice());
-}
-
 bool Turbo::Core::TFormatInfo::operator==(const TFormatInfo &format) const
 {
     if (format.formatType == this->formatType)
