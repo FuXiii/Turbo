@@ -3,20 +3,13 @@
 
 Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {
-    if (shader != nullptr)
-    {
-        this->shader = shader;
-        this->type = type;
-        this->dataType = dataType;
-        this->count = count;
-        this->set = set;
-        this->binding = binding;
-        this->name = name;
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptor::TDescriptor");
-    }
+    this->shader = shader;
+    this->type = type;
+    this->dataType = dataType;
+    this->count = count;
+    this->set = set;
+    this->binding = binding;
+    this->name = name;
 }
 
 Turbo::Core::TDescriptor::~TDescriptor()
@@ -173,6 +166,14 @@ Turbo::Core::TStructMember &Turbo::Core::TStructMember::operator=(const TStructM
 std::string Turbo::Core::TStructMember::ToString()
 {
     return std::string();
+}
+
+Turbo::Core::TNaNDescriptor::TNaNDescriptor(uint32_t set) : Turbo::Core::TDescriptor(nullptr, TDescriptorType::SAMPLER, TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN, set, 0, 1, "NaN")
+{
+}
+
+Turbo::Core::TNaNDescriptor::~TNaNDescriptor()
+{
 }
 
 Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)

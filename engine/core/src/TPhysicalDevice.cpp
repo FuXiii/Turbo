@@ -861,7 +861,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TF
     return this->GetOptimalFeatures(format.GetFormatType());
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetlBufferFeatures(TFormatType formatType)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatType formatType)
 {
     VkFormatProperties format_properties = {};
     format_properties.bufferFeatures = 0;
@@ -873,7 +873,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetlBufferFeatures(TF
     return format_properties.bufferFeatures;
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetlBufferFeatures(TFormatInfo &format)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatInfo &format)
 {
-    return this->GetlBufferFeatures(format.GetFormatType());
+    return this->GetBufferFeatures(format.GetFormatType());
 }

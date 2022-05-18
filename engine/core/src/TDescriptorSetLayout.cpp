@@ -15,12 +15,17 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
     for (uint32_t binding_index = 0; binding_index < binding_count; binding_index++)
     {
         TDescriptor *descriptor = this->descriptors[binding_index];
+        TShader *shader = descriptor->GetShader();
         if (descriptor != nullptr)
         {
             bindings[binding_index].binding = descriptor->GetBinding();
             bindings[binding_index].descriptorType = descriptor->GetVkDescriptorType();
             bindings[binding_index].descriptorCount = descriptor->GetCount();
-            bindings[binding_index].stageFlags = descriptor->GetShader()->GetVkShaderStageFlags();
+            bindings[binding_index].stageFlags = VK_SHADER_STAGE_ALL;
+            if (shader != nullptr)
+            {
+                bindings[binding_index].stageFlags = descriptor->GetShader()->GetVkShaderStageFlags();
+            }
             bindings[binding_index].pImmutableSamplers = nullptr;
         }
         else

@@ -7,11 +7,16 @@
 #include "TVulkanAllocator.h"
 #include <map>
 
+bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
+{
+    return lhs < rhs;
+}
+
 void Turbo::Core::TPipeline::InternalCreate()
 {
     std::vector<TDescriptorSetLayout *> descriptor_set_layouts;
 
-    std::map</*set*/ uint32_t, std::vector<TDescriptor *>> descriptor_set_map;
+    std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> descriptor_set_map(DescriptorSetMapCompFunction);
 
     for (TShader *shader_item : this->shaders)
     {
@@ -44,7 +49,28 @@ void Turbo::Core::TPipeline::InternalCreate()
         }
     }
 
-    for (std::pair<const unsigned int, std::vector<Turbo::Core::TDescriptor *>> &descriptor_set_item : descriptor_set_map)
+    {
+        std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> temp_descriptor_set_map = descriptor_set_map;
+        for (std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)>::iterator it = temp_descriptor_set_map.begin(); it != temp_descriptor_set_map.end(); ++it)
+        {
+            std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)>::iterator current_it = it;
+            std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)>::iterator next_it = ++current_it;
+            current_it = it;
+
+            if (next_it != temp_descriptor_set_map.end())
+            {
+                uint32_t current_set = current_it->first;
+                uint32_t next_set = next_it->first;
+                while ((current_set + 1) != next_set)
+                {
+                    current_set = current_set + 1;
+                    descriptor_set_map[current_set].push_back(new TNaNDescriptor(current_set));
+                }
+            }
+        }
+    }
+
+    for (std::pair<const uint32_t, std::vector<Turbo::Core::TDescriptor *>> &descriptor_set_item : descriptor_set_map)
     {
         // memory delete in TPipelineLayout::~TPipelineLayout()
         TDescriptorSetLayout *descriptor_set_layout = new TDescriptorSetLayout(this->device, descriptor_set_item.second);

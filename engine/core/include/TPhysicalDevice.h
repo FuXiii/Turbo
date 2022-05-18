@@ -162,8 +162,8 @@ class TPhysicalDevice : public TVulkanHandle
     TFormatFeatures GetLinearFeatures(TFormatInfo &format);
     TFormatFeatures GetOptimalFeatures(TFormatType formatType);
     TFormatFeatures GetOptimalFeatures(TFormatInfo &format);
-    TFormatFeatures GetlBufferFeatures(TFormatType formatType);
-    TFormatFeatures GetlBufferFeatures(TFormatInfo &format);
+    TFormatFeatures GetBufferFeatures(TFormatType formatType);
+    TFormatFeatures GetBufferFeatures(TFormatInfo &format);
 
     virtual std::string ToString() override;
 };

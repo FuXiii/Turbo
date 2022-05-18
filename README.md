@@ -773,3 +773,16 @@ Turbo是渲染引擎
   >TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
   >TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
   >```
+  >
+  >* `TCommandBuffer`实现如下函数
+  >
+  >```CXX
+  >void CmdResolveImage(TImage *srcImage, TImageLayout srcLayout, TImage*dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+  >void CmdSetLineWidth(float lineWidth);
+  >```
+  >
+  >* 将`TCommandBuffer`中的`void CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet);`修改成`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);`
+  >
+  * 2022/5/17 设计架构
+  >
+  >* `TDescriptor.h`中增加`class TNaNDescriptor`，用于表示无效占位描述符。

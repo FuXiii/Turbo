@@ -107,6 +107,14 @@ class TStructMember : public Turbo::Core::TInfo
     virtual std::string ToString() override;
 };
 
+// unused sets in the layout, with zero descriptors.
+class TNaNDescriptor : public TDescriptor
+{
+  public:
+    TNaNDescriptor(uint32_t set);
+    ~TNaNDescriptor();
+};
+
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
 class TUniformBufferDescriptor : public TDescriptor
 {

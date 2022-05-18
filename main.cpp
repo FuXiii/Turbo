@@ -258,14 +258,14 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 1) uniform texture2D myTexture;\n"
-                                    "layout (set = 0, binding = 2) uniform sampler mySampler;\n"
+                                    "layout (set = 2, binding = 2) uniform sampler mySampler;\n"
                                     "layout (location = 0) in vec4 color;\n"
                                     "layout (location = 1) in vec2 uv;\n"
                                     "layout (location = 2) in float scale;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
                                     "	float load_bias = scale * 10;\n"
-                                    "	outColor = /*color **/ texture(sampler2D(myTexture, mySampler), uv, load_bias);\n"
+                                    "	outColor =  texture(sampler2D(myTexture, mySampler), uv, load_bias);\n"
                                     "}\n";
 
 int main()
@@ -592,12 +592,12 @@ int main()
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
     pipeline_descriptor_set0->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set0->BindData(0, 2, 0, my_samples);
+    pipeline_descriptor_set0->BindData(2, 2, 0, my_samples);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
     pipeline_descriptor_set2->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set2->BindData(0, 2, 0, my_samples);
+    pipeline_descriptor_set2->BindData(2, 2, 0, my_samples);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -649,7 +649,7 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(0, pipeline_descriptor_set0);
+            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set0);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
@@ -657,7 +657,7 @@ int main()
             command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdNextSubpass();
             command_buffer->CmdBindPipeline(pipeline2);
-            command_buffer->CmdBindPipelineDescriptorSet(0, pipeline_descriptor_set2);
+            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set2);
             command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
             command_buffer->CmdEndRenderPass();
             command_buffer->End();

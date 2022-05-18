@@ -130,6 +130,8 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - `TSampler`的各项异性没开要和`TDevice`开启的`feature`配合
 
+- <font color=orange>**[ 🛠 ] now**</font> 整理设计有关`Vulkan`中的`ImageSubresource`
+
 - `TInstance`的`IsEnabledExtension(string)`函数中倒腾了两遍，没有必要，提供一个新的对应函数：`IsEnabledExtension(Turbo::Core::TExtensionType)`
 
 - `TImage`需要对外提供`TImageLayout GetImageLayout()`来获取当前的图像布局,或者也许应该是`TCommandBuffer`中获取当前`TImage`的`TImageLayout`，因为图片布局在`TCommandBuffer`中随意变换的，只有在`TCommanBuffer`被推送运行后，图片布局才确定下来，此时可以用于刷新真正`TImage`中的图片布局，`TCommandBuffer`命令之间的图片布局变换只是变换`TImage`的临时图片布局
