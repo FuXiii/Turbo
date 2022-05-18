@@ -783,6 +783,6 @@ Turbo是渲染引擎
   >
   >* 将`TCommandBuffer`中的`void CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet);`修改成`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);`
   >
-  * 2022/5/17 设计架构
+  * 2022/5/18 设计架构
   >
   >* `TDescriptor.h`中增加`class TNaNDescriptor`，用于表示无效占位描述符。
