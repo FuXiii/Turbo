@@ -1,2 +1,1 @@
-project(Turbo) 
-add_subdirectory(./src)
+add_subdirectory(./core)

@@ -19,12 +19,11 @@ namespace Core
 class TDevice;
 class TDeviceMemory;
 
-typedef enum TImageType
+typedef enum TImageTiling
 {
-    DIMENSION_1D = 0,
-    DIMENSION_2D = 1,
-    DIMENSION_3D = 2,
-} TImageType;
+    OPTIMAL = 0,
+    LINEAR = 1
+} TImageTiling;
 
 typedef enum TSampleCountBits
 {
@@ -38,11 +37,12 @@ typedef enum TSampleCountBits
 } TSampleCountBits;
 typedef VkFlags TSampleCounts;
 
-typedef enum TImageTiling
+typedef enum TImageType
 {
-    OPTIMAL = 0,
-    LINEAR = 1
-} TImageTiling;
+    DIMENSION_1D = 0,
+    DIMENSION_2D = 1,
+    DIMENSION_3D = 2,
+} TImageType;
 
 typedef enum TImageUsageBits
 {

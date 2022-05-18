@@ -1,9 +1,8 @@
 #pragma once
 #ifndef TOBJECT_H
 #define TOBJECT_H
-#include "Turbo.h"
+#include "TCore.h"
 #include <string>
-
 
 namespace Turbo
 {

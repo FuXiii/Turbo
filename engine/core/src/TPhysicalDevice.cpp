@@ -766,3 +766,114 @@ void Turbo::Core::TPhysicalDevice::ResetQueueCountMap()
         }
     }
 }
+
+Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    VkImageFormatProperties vk_image_format_properties = {};
+    vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    return vk_image_format_properties.maxExtent;
+}
+
+Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    return this->GetMaxImageExtent(format.GetFormatType(), imageType, tiling, usages, imageFlags);
+}
+
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    VkImageFormatProperties vk_image_format_properties = {};
+    vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    return vk_image_format_properties.maxMipLevels;
+}
+
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    return this->GetMaxImageMipLevels(format.GetFormatType(), imageType, tiling, usages, imageFlags);
+}
+
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    VkImageFormatProperties vk_image_format_properties = {};
+    vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    return vk_image_format_properties.maxArrayLayers;
+}
+
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    return this->GetMaxImageArrayLayers(format.GetFormatType(), imageType, tiling, usages, imageFlags);
+}
+
+Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    VkImageFormatProperties vk_image_format_properties = {};
+    vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    return vk_image_format_properties.sampleCounts;
+}
+
+Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    return this->GetSupportImageSampleCounts(format.GetFormatType(), imageType, tiling, usages, imageFlags);
+}
+
+Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    VkImageFormatProperties vk_image_format_properties = {};
+    vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    return vk_image_format_properties.maxResourceSize;
+}
+
+Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+{
+    return this->GetMaxImageResourceSize(format.GetFormatType(), imageType, tiling, usages, imageFlags);
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatType formatType)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+
+    return format_properties.linearTilingFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatInfo &format)
+{
+    return this->GetLinearFeatures(format.GetFormatType());
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatType formatType)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+
+    return format_properties.optimalTilingFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatInfo &format)
+{
+    return this->GetOptimalFeatures(format.GetFormatType());
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatType formatType)
+{
+    VkFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+
+    return format_properties.bufferFeatures;
+}
+
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatInfo &format)
+{
+    return this->GetBufferFeatures(format.GetFormatType());
+}

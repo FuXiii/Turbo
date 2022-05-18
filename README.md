@@ -751,3 +751,38 @@ Turbo是渲染引擎
   * 2022/5/16 设计架构
   >
   >* `TCommandBuffer`实现`CmdBlitImage`等价于`vkCmdBlitImage`
+  >* `engine/`下新建`core`文件夹用于存放`Turbo`核心
+  >* `engine/core/include/Turbo.h`更改成`TCore.h`
+  >* `engine/core/include/Turbo.cpp`更改成`TCore.cpp`
+  >* 现在`engine/core`将会输出单独的库文件作为`Turbo`的核心
+  >* `TFormatInfo`中的`TFormatFeatures Get...Features(TPhysicalDevice *physicalDevice)`转移到了`TPhysicalDevice`中
+
+  * 2022/5/17 设计架构
+  >
+  >* `TPhysicalDevice`中增加如下函数(用于获取某一特定纹理格式的图片的限制属性)：
+  >
+  >```CXX
+  >TExtent3D GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TExtent3D GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >uint32_t GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TSampleCounts GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags); 
+  >TSampleCounts GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+  >```
+  >
+  >* `TCommandBuffer`实现如下函数
+  >
+  >```CXX
+  >void CmdResolveImage(TImage *srcImage, TImageLayout srcLayout, TImage*dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+  >void CmdSetLineWidth(float lineWidth);
+  >```
+  >
+  >* 将`TCommandBuffer`中的`void CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet);`修改成`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);`
+  >
+  * 2022/5/17 设计架构
+  >
+  >* `TDescriptor.h`中增加`class TNaNDescriptor`，用于表示无效占位描述符。
