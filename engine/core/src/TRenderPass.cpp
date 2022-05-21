@@ -2,7 +2,6 @@
 #include "TAttachment.h"
 #include "TDevice.h"
 #include "TException.h"
-#include "TSubpass.h"
 #include "TVulkanAllocator.h"
 
 void Turbo::Core::TRenderPass::InternalCreate()
@@ -171,6 +170,16 @@ const std::vector<Turbo::Core::TAttachment> &Turbo::Core::TRenderPass::GetAttach
 const std::vector<Turbo::Core::TSubpass> &Turbo::Core::TRenderPass::GetSubpasses()
 {
     return this->subpasses;
+}
+
+Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass)
+{
+    if (subpass < this->subpasses.size())
+    {
+        return this->subpasses[subpass];
+    }
+
+    return Turbo::Core::TSubpass(TPipelineType::Graphics);
 }
 
 std::string Turbo::Core::TRenderPass::ToString()

@@ -97,7 +97,7 @@ void Turbo::Core::TCommandBuffer::CmdBeginRenderPass(TRenderPass *renderPass, TF
         if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
         {
             VkClearValue vk_clear_value = {};
-            vk_clear_value.depthStencil.depth = 0.0f;
+            vk_clear_value.depthStencil.depth = 1.0f;
             vk_clear_value.depthStencil.stencil = 0.0f;
 
             vk_clear_values.push_back(vk_clear_value);

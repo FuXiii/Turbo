@@ -853,6 +853,21 @@ const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetS
     return this->samplerDescriptors;
 }
 
+std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()
+{
+    return this->inputs;
+}
+
+std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs()
+{
+    return this->outputs;
+}
+
+Turbo::Core::TShaderType Turbo::Core::TShader::GetType()
+{
+    return this->type;
+}
+
 std::string Turbo::Core::TShader::ToString()
 {
     std::vector<uint32_t> spirv;

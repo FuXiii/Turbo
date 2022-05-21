@@ -54,7 +54,7 @@ class TDeviceQueue : public TVulkanHandle
 
     VkQueue GetVkQueue();
 
-    bool Submit(std::vector<TSemaphore *> &waitSemaphores, std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
+    bool Submit(std::vector<TSemaphore *> *waitSemaphores, std::vector<TSemaphore *> *signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
 
     void WaitIdle();
 

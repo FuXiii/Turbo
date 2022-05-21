@@ -3,13 +3,13 @@
 #define TRENDERPASS_H
 #include "TAttachment.h"
 #include "TVulkanHandle.h"
+#include "TSubpass.h"
 
 namespace Turbo
 {
 namespace Core
 {
 class TDevice;
-class TSubpass;
 class TFramebuffer;
 class TCommandBuffer;
 
@@ -36,6 +36,8 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     const std::vector<TAttachment> &GetAttachments();
 
     const std::vector<TSubpass> &GetSubpasses();
+
+    TSubpass GetSubpass(uint32_t subpass);
 
   public:
     virtual std::string ToString() override;

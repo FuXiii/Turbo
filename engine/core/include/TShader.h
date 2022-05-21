@@ -87,7 +87,12 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors();
     const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors();
     const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();
-    
+
+    std::vector<TInterface> GetInputs();
+    std::vector<TInterface> GetOutputs();
+
+    TShaderType GetType();
+
     virtual std::string ToString() override;
 };
 
