@@ -255,14 +255,26 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipline_color_blend_attachment_state.alphaBlendOp = VK_BLEND_OP_ADD;
     vk_pipline_color_blend_attachment_state.colorWriteMask = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
 
+    // If renderPass is not VK_NULL_HANDLE,
+    // and the pipeline is being created with fragment output interface state,
+    // and the subpass uses color attachments,
+    // the attachmentCount member of pColorBlendState must be equal to the colorAttachmentCount used to create subpass
+    TSubpass _subpass = this->renderPass->GetSubpass(this->subpass);
+    uint32_t color_blend_attachment_count = _subpass.GetColorAttachmentReferences()->size();
+    std::vector<VkPipelineColorBlendAttachmentState> vk_pipeline_color_blend_attachment_states;
+    for (uint32_t color_belnd_attachment_index = 0; color_belnd_attachment_index < color_blend_attachment_count; color_belnd_attachment_index++)
+    {
+        vk_pipeline_color_blend_attachment_states.push_back(vk_pipline_color_blend_attachment_state);
+    }
+
     VkPipelineColorBlendStateCreateInfo vk_pipeline_color_blend_state_create_info;
     vk_pipeline_color_blend_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     vk_pipeline_color_blend_state_create_info.pNext = nullptr;
     vk_pipeline_color_blend_state_create_info.flags = 0;
     vk_pipeline_color_blend_state_create_info.logicOpEnable = VK_FALSE;
     vk_pipeline_color_blend_state_create_info.logicOp = VK_LOGIC_OP_NO_OP;
-    vk_pipeline_color_blend_state_create_info.attachmentCount = 1;
-    vk_pipeline_color_blend_state_create_info.pAttachments = &vk_pipline_color_blend_attachment_state;
+    vk_pipeline_color_blend_state_create_info.attachmentCount = vk_pipeline_color_blend_attachment_states.size();
+    vk_pipeline_color_blend_state_create_info.pAttachments = vk_pipeline_color_blend_attachment_states.data();
     vk_pipeline_color_blend_state_create_info.blendConstants[0] = 1.0f;
     vk_pipeline_color_blend_state_create_info.blendConstants[1] = 1.0f;
     vk_pipeline_color_blend_state_create_info.blendConstants[2] = 1.0f;

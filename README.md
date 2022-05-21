@@ -16,6 +16,7 @@ Turbo是渲染引擎
 * 使用MarkDown书写文字和文档，使用drawio绘制设计图表
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
+* 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
 
 ## Trifles
 
@@ -27,9 +28,11 @@ Turbo是渲染引擎
 
 * `Turbo` 引擎对于 `Vulkan 1.0` 的相关核心功能已初步成型，由于`Vulkan`本身的复杂性还有很多特性没有实现，在此做一下记录，记录该引擎以实现的特性和未来计划实现特性，该特性记录将会和`docs/Issue.md`文档配合使用。
 
-* `Core`核心层将会作为单独完整的库发布
+* `Core`核心层将会作为单独完整的库发布,位于`./engine/core`中, 现在核心库已分离成单独的库，将会输出`TCore.lib`或`TCore.a`库文件
 
 * `Turbo`将使用该`Core`核心继续开发高级特性
+
+* 未来有时间录制`Vulkan教程`和`引擎开发教程`视频
 
 ### 已完成特性
 
@@ -72,7 +75,7 @@ Turbo是渲染引擎
 ### 计划完成特性
 
 * `Turbo`引擎目前以`Core`核心层为主（优先级不分先后）
-  * 生成`mipmap`
+  * **[ ✓ ]** 生成`mipmap`
   * 天空盒
   * HDR
   * 实例化渲染
@@ -83,12 +86,11 @@ Turbo是渲染引擎
   * 多线程
   * 计算着色器
   * 计算管线
+  * 延迟渲染
 
 * 非`Core`：跨平台窗口层抽象
 
 * 非`Core`：`IMGUI`
-
-* 非`Core`：延迟渲染
 
 * 非`Core`：`KTX` 和 `glTF`
 
@@ -786,3 +788,27 @@ Turbo是渲染引擎
   * 2022/5/18 设计架构
   >
   >* `TDescriptor.h`中增加`class TNaNDescriptor`，用于表示无效占位描述符。
+  >* 将`TDeviceQueue.h`中`:TDeviceQueue::Submit(...)`函数中有关`TSemaphore`数组引用改成数组指针
+  >* 从`tinygltf`库中拷贝`stb_image.h`, `stb_image_write.h`, `json.hpp` 和 `tiny_gltf.h`到`./engine/include`中
+
+  * 2022/5/19 设计架构
+  >
+  >* `TGraphicsPipeline::InternalCreate()`中增加对于多个`fragment output interface state(片元着色器的输出)`应该对应相同个数的`VkPipelineColorBlendStateCreateInfo::attachmentCount`的适配。(也许这不是最优解，blend目前未想好如何设计)
+  >* `TShader`中增加如下函数：
+  >
+  >```CXX
+  >std::vector<TInterface> GetInputs();
+  >std::vector<TInterface> GetOutputs();
+  >TShaderType GetType();
+  >```
+  >
+  
+  * 2022/5/19 设计架构
+  >
+  >* `TRenderPass`中增加`TSubpass GetSubpass(uint32_t subpass)`成员函数
+  >* 增加`glm`第三方库
+
+  * 2022/5/21 设计架构
+  >
+  >* 移除原先拷贝的`tinygltf`头文件，将`tinygltf`库加到`./thirdparty`文件夹下
+  >* 成功渲染`Suzanne`

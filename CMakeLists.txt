@@ -17,10 +17,13 @@ add_dependencies(${PROJECT_NAME} TCore)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./engine/core/include
+    PUBLIC ./engine/include/
+    PUBLIC ./thirdparty/glm/
+    PUBLIC ./thirdparty/tinygltf/
     )
 
 target_link_directories(${PROJECT_NAME} 
-PUBLIC /engine/core/include/
+PUBLIC /engine/core/
 PUBLIC /thirdparty/glfw/src/
 )
 

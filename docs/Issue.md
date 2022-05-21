@@ -114,7 +114,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`KTX`文件的支持(非核心)~~
 
-- <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`gltf`文件的支持(非核心)~~
+- <font color=orange>**[ 🛠 ] now**</font>  需要提供对应`gltf`文件的支持(非核心)
 
 - <font color=green>**[ ✓ ]2022/5/10**</font> ~~实现索引绘制~~
 
@@ -130,7 +130,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - `TSampler`的各项异性没开要和`TDevice`开启的`feature`配合
 
-- <font color=orange>**[ 🛠 ] now**</font> 整理设计有关`Vulkan`中的`ImageSubresource`
+- 整理设计有关`Vulkan`中的`ImageSubresource`
 
 - `TInstance`的`IsEnabledExtension(string)`函数中倒腾了两遍，没有必要，提供一个新的对应函数：`IsEnabledExtension(Turbo::Core::TExtensionType)`
 
