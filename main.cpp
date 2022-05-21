@@ -279,7 +279,7 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "	float load_bias = scale * 10;\n"
                                     "	float lum = max(dot(normal.xyz, normalize(sunPosition.xyz)), 0.0)*0.4f;\n"
                                     "	vec3 sun_color = vec3(1,1,1);\n"
-                                    "	outColor =  texture(sampler2D(myTexture, mySampler), uv/*, load_bias*/)* vec4((0.3 + 0.7 * lum) * sun_color, 1.0);\n"
+                                    "	outColor =  texture(sampler2D(myTexture, mySampler), uv, load_bias)* vec4((0.3 + 0.7 * lum) * sun_color, 1.0);\n"
                                     "}\n";
 
 typedef struct POSITION
