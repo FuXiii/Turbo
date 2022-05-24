@@ -119,11 +119,14 @@ class TNaNDescriptor : public TDescriptor
 class TUniformBufferDescriptor : public TDescriptor
 {
   private:
+    uint32_t size;
     std::vector<TStructMember> members;
 
   public:
-    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members);
+    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
     ~TUniformBufferDescriptor();
+
+    uint32_t GetSize();
 };
 
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -147,10 +150,16 @@ class TSampledImageDescriptor : public TDescriptor
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER
 class TSamplerDescriptor : public TDescriptor
 {
-  private:
   public:
     TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TSamplerDescriptor();
+};
+
+class TPushConstantDescriptor : public TUniformBufferDescriptor
+{
+  public:
+    TPushConstantDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
+    ~TPushConstantDescriptor();
 };
 
 } // namespace Core

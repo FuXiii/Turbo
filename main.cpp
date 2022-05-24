@@ -220,31 +220,6 @@ bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowP
     return true;
 }
 
-// struct Vertex
-// {
-//     float posX, posY, posZ, posW; // Position data
-//     float r, g, b, a;             // Color
-//     float u, v;                   // UV
-// };
-
-// #define _XYZ1(_x_, _y_, _z_) (_x_), (_y_), (_z_), 1.f
-// #define _RGB(_x_, _y_, _z_) (_x_), (_y_), (_z_)
-// #define _UV(_u_, _v_) (_u_), (_v_)
-
-// static const Vertex VERTEXS_DATA[] = {
-//     {_XYZ1(0.5f, 0.5f, 0.0f), _RGB(1.f, 0.f, 0.f), _UV(1.0f, 1.0f)},
-//     {_XYZ1(-0.5f, 0.5f, 0.0f), _RGB(0.f, 1.f, 0.f), _UV(0.0f, 1.0f)},
-//     {_XYZ1(-0.5f, -0.5f, 0.0f), _RGB(0.f, 0.f, 1.f), _UV(0.0f, 0.0f)},
-//     {_XYZ1(0.5f, -0.50f, 0.0f), _RGB(1.f, 1.f, 0.f), _UV(1.0f, 0.0f)},
-// };
-
-// std::vector<uint32_t> INDICES_DATA = {0, 1, 2, 2, 3, 0};
-
-/*
-    float lum = max(dot(normal, normalize(sun_position)), 0.0);\n\
-    color = texture(tex, texcoord) ;\n\
-*/
-
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
                                     "    float scale;\n"
@@ -275,8 +250,12 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 2) in float scale;\n"
                                     "layout (location = 3) in vec4 sunPosition;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
+                                    "layout (push_constant) uniform my_push_constants_t\n"
+                                    "{"
+                                    "   float bias;\n"
+                                    "} my_push_constants;\n"
                                     "void main() {\n"
-                                    "	float load_bias = scale * 10;\n"
+                                    "	float load_bias = my_push_constants.bias * 10;\n"
                                     "	float lum = max(dot(normal.xyz, normalize(sunPosition.xyz)), 0.0)*0.4f;\n"
                                     "	vec3 sun_color = vec3(1,1,1);\n"
                                     "	outColor =  texture(sampler2D(myTexture, mySampler), uv, load_bias)* vec4((0.3 + 0.7 * lum) * sun_color, 1.0);\n"
@@ -386,6 +365,8 @@ int main()
         }
     }
     //</gltf for Suzanne>
+
+    uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
     Turbo::Core::TLayerInfo khronos_validation;
@@ -486,32 +467,29 @@ int main()
     memcpy(scale_ptr, &scale, sizeof(scale));
     scale_buffer->Unmap();
 
-    scale = 0.5f;
-
-    Turbo::Core::TBuffer *dynamic_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    scale_ptr = dynamic_buffer->Map();
-    memcpy(scale_ptr, &scale, sizeof(scale));
-    dynamic_buffer->Unmap();
-
     Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
     void *position_buffer_ptr = position_buffer->Map();
     memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
     position_buffer->Unmap();
+    POSITION_data.clear();
 
     Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
     void *normal_buffer_ptr = normal_buffer->Map();
     memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
     normal_buffer->Unmap();
+    NORMAL_data.clear();
 
     Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
     void *texcoord_buffer_ptr = texcoord_buffer->Map();
-    memcpy(texcoord_buffer_ptr, NORMAL_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
+    memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
     texcoord_buffer->Unmap();
+    TEXCOORD_data.clear();
 
     Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
     void *index_buffer_ptr = index_buffer->Map();
     memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
     index_buffer->Unmap();
+    INDICES_data.clear();
 
     Turbo::Core::TImage *texture = nullptr;
     uint32_t mip_levels = 0;
@@ -671,22 +649,26 @@ int main()
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
 
-    Turbo::Core::TDescriptorSize uniform_buffer_descriptor_size(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 100);
-    Turbo::Core::TDescriptorSize combined_image_sampler_descriptor_size(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 100);
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
-    descriptor_sizes.push_back(uniform_buffer_descriptor_size);
-    descriptor_sizes.push_back(combined_image_sampler_descriptor_size);
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLED_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::INPUT_ATTACHMENT, 1000));
 
-    Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, 100, descriptor_sizes);
+    Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(scale_buffer);
 
     std::vector<Turbo::Core::TBuffer *> mvp_buffers;
     mvp_buffers.push_back(mvp_buffer);
-
-    std::vector<Turbo::Core::TBuffer *> buffers2;
-    buffers2.push_back(dynamic_buffer);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
@@ -695,7 +677,6 @@ int main()
 
     std::vector<Turbo::Core::TSubpass> subpasses;
     subpasses.push_back(subpass); // subpass 1
-    subpasses.push_back(subpass); // subpass 2
 
     Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment color_attachment(color_image->GetFormat(), color_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
@@ -710,10 +691,8 @@ int main()
 
     Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
     position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
-
     Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
     normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
-
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
     position_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
 
@@ -725,15 +704,8 @@ int main()
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
 
-    std::vector<Turbo::Core::TViewport> viewports;
-    viewports.push_back(viewport);
-
-    std::vector<Turbo::Core::TScissor> scissors;
-    scissors.push_back(scissor);
-
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
-    Turbo::Core::TGraphicsPipeline *pipeline2 = new Turbo::Core::TGraphicsPipeline(render_pass, 1, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, vertex_bindings, viewports, scissors, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, shaders);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders);
 
     std::vector<Turbo::Core::TImageView *> my_textures;
     my_textures.push_back(texture_view);
@@ -741,17 +713,11 @@ int main()
     std::vector<Turbo::Core::TSampler *> my_samples;
     my_samples.push_back(sampler);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set0 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set0->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set0->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set0->BindData(1, 0, 0, mvp_buffers);
-    pipeline_descriptor_set0->BindData(2, 2, 0, my_samples);
-
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set2 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set2->BindData(0, 0, 0, buffers2);
-    pipeline_descriptor_set2->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set2->BindData(1, 0, 0, mvp_buffers);
-    pipeline_descriptor_set2->BindData(2, 2, 0, my_samples);
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
+    pipeline_descriptor_set->BindData(0, 1, 0, my_textures);
+    pipeline_descriptor_set->BindData(1, 0, 0, mvp_buffers);
+    pipeline_descriptor_set->BindData(2, 2, 0, my_samples);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -774,15 +740,17 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
         float scale_data = (sin(_time) + 1) / 2.0f;
 
-        void *_ptr = dynamic_buffer->Map();
+        void *_ptr = scale_buffer->Map();
         memcpy(_ptr, &scale_data, sizeof(scale_data));
-        dynamic_buffer->Unmap();
+        scale_buffer->Unmap();
+
+        float bias = (cos(_time) + 1) / 2.0f;
 
         model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = model * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 0.0f, 1.0f));
-        // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
         mvp = projection * view * model;
 
@@ -816,16 +784,13 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set0);
+            command_buffer->CmdPushConstants(0, sizeof(bias), &bias);
+            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(INDICES_data.size(), 1, 0, 0, 0);
-            command_buffer->CmdNextSubpass();
-            command_buffer->CmdBindPipeline(pipeline2);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set2);
-            command_buffer->CmdDrawIndexed(INDICES_data.size(), 1, 0, 0, 0);
+            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
 
@@ -1010,10 +975,8 @@ int main()
     ImageSaveToPPM(swapchain_images[0], command_pool, queue, "VulkanImage");
     // ImageSaveToPPM(color_image, command_pool, queue, "ColorImage");
 
-    descriptor_pool->Free(pipeline_descriptor_set0);
-    descriptor_pool->Free(pipeline_descriptor_set2);
+    descriptor_pool->Free(pipeline_descriptor_set);
     delete pipeline;
-    delete pipeline2;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
         delete framebuffer_item;
@@ -1039,7 +1002,6 @@ int main()
     delete normal_buffer;
     delete texcoord_buffer;
     delete scale_buffer;
-    delete dynamic_buffer;
     delete mvp_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;

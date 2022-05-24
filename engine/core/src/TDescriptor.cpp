@@ -176,9 +176,15 @@ Turbo::Core::TNaNDescriptor::~TNaNDescriptor()
 {
 }
 
-Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
 {
+    this->size = size;
     this->members = members;
+}
+
+uint32_t Turbo::Core::TUniformBufferDescriptor::GetSize()
+{
+    return size;
 }
 
 Turbo::Core::TUniformBufferDescriptor::~TUniformBufferDescriptor()
@@ -206,5 +212,13 @@ Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(TShader *shader, TDescriptor
 }
 
 Turbo::Core::TSamplerDescriptor::~TSamplerDescriptor()
+{
+}
+
+Turbo::Core::TPushConstantDescriptor::TPushConstantDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TUniformBufferDescriptor(shader, dataType, UINT32_MAX, UINT32_MAX, count, name, members, size)
+{
+}
+
+Turbo::Core::TPushConstantDescriptor::~TPushConstantDescriptor()
 {
 }

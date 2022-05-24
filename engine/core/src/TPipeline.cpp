@@ -14,6 +14,8 @@ bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 
 void Turbo::Core::TPipeline::InternalCreate()
 {
+    std::vector<TPushConstantDescriptor *> pipeline_push_constant_descriptors;
+
     std::vector<TDescriptorSetLayout *> descriptor_set_layouts;
 
     std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> descriptor_set_map(DescriptorSetMapCompFunction);
@@ -47,6 +49,12 @@ void Turbo::Core::TPipeline::InternalCreate()
             uint32_t set = sampler_descriptor_item->GetSet();
             descriptor_set_map[set].push_back(sampler_descriptor_item);
         }
+
+        std::vector<TPushConstantDescriptor *> push_constant_descriptors = shader_item->GetPushConstantDescriptors();
+        for (TPushConstantDescriptor *push_constant_descriptor_item : push_constant_descriptors)
+        {
+            pipeline_push_constant_descriptors.push_back(push_constant_descriptor_item);
+        }
     }
 
     {
@@ -77,7 +85,7 @@ void Turbo::Core::TPipeline::InternalCreate()
         descriptor_set_layouts.push_back(descriptor_set_layout);
     }
 
-    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts);
+    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors);
 }
 
 void Turbo::Core::TPipeline::InternalDestroy()

@@ -425,7 +425,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
             }
         }
 
-        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, descriptor_data_type, set, binding, count, name, struct_members);
+        TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, descriptor_data_type, set, binding, count, name, struct_members, size);
         this->uniformBufferDescriptors.push_back(uniform_buffer_descriptor);
     }
 
@@ -436,7 +436,79 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::TypeID type_id = push_constant_buffer_item.type_id;
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
-        spirv_cross::SPIRType::BaseType base_type = type.basetype;
+        spirv_cross::SPIRType::BaseType base_type = type.basetype; // TShaderDataType
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = push_constant_buffer_item.name;
+
+        // vector and matrices
+        uint32_t vec_size = type.vecsize; // size of vec
+        uint32_t colums = type.columns;   // 1 column means it's a vector.
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        // Size
+        size_t size = glsl.get_declared_struct_size(type);
+
+        std::vector<TStructMember> struct_members;
+
+        // Querying structs
+        uint32_t member_totolar_size = 0;
+        if (base_type == spirv_cross::SPIRType::BaseType::Struct)
+        {
+            uint32_t member_count = type.member_types.size();
+            for (uint32_t member_index = 0; member_index < member_count; member_index++)
+            {
+                auto &member = type.member_types[member_index];
+
+                spirv_cross::SPIRType member_type = glsl.get_type(member);
+                spirv_cross::SPIRType::BaseType member_base_type = member_type.basetype;
+                Turbo::Core::TDescriptorDataType member_descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(member_base_type);
+
+                uint32_t member_vecsize = member_type.vecsize;
+                uint32_t member_columns = member_type.columns;
+                uint32_t member_width = member_type.width;
+
+                std::string member_name = glsl.get_member_name(type.self, member_index);
+
+                size_t member_offset = glsl.type_struct_member_offset(type, member_index);
+
+                size_t member_size = glsl.get_declared_struct_member_size(type, member_index);
+
+                size_t member_array_dimension = member_type.array.size(); // array dimension
+                uint32_t member_array_count = 1;
+                uint32_t member_array_stride = 0;
+                if (member_array_dimension > 0)
+                {
+                    member_array_stride = glsl.type_struct_member_array_stride(type, member_index);
+                    member_array_count = member_type.array[0]; // just for one dimension.
+                }
+
+                uint32_t member_matrix_stride = 0;
+                if (member_type.columns > 1)
+                {
+                    // Get bytes stride between columns (if column major), for float4x4 -> 16 bytes.
+                    member_matrix_stride = glsl.type_struct_member_matrix_stride(type, member_index);
+                }
+
+                TStructMember struct_member(member_descriptor_data_type, member_width, member_offset, member_vecsize, member_columns, member_size, member_array_count, member_array_stride, member_matrix_stride, member_name);
+                struct_members.push_back(struct_member);
+            }
+        }
+
+        TPushConstantDescriptor *push_constant_descriptor = new TPushConstantDescriptor(this, descriptor_data_type, count, name, struct_members, size);
+        this->pushConstantDescriptors.push_back(push_constant_descriptor);
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)
@@ -733,6 +805,13 @@ Turbo::Core::TShader::~TShader()
 {
     this->InternalDestroy();
 
+    for (TUniformBufferDescriptor *uniform_buffer_descriptor_item : this->uniformBufferDescriptors)
+    {
+        delete uniform_buffer_descriptor_item;
+    }
+
+    this->uniformBufferDescriptors.clear();
+
     for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
     {
         delete combined_image_sampler_descriptor_item;
@@ -740,12 +819,26 @@ Turbo::Core::TShader::~TShader()
 
     this->combinedImageSamplerDescriptors.clear();
 
-    for (TUniformBufferDescriptor *uniform_buffer_descriptor_item : this->uniformBufferDescriptors)
+    for (TSampledImageDescriptor *sampled_image_descriptor_item : this->sampledImageDescriptors)
     {
-        delete uniform_buffer_descriptor_item;
+        delete sampled_image_descriptor_item;
     }
 
-    this->uniformBufferDescriptors.clear();
+    this->sampledImageDescriptors.clear();
+
+    for (TSamplerDescriptor *sampler_descriptor_item : this->samplerDescriptors)
+    {
+        delete sampler_descriptor_item;
+    }
+
+    this->samplerDescriptors.clear();
+
+    for (TPushConstantDescriptor *push_constant_descriptor_item : this->pushConstantDescriptors)
+    {
+        delete push_constant_descriptor_item;
+    }
+
+    this->pushConstantDescriptors.clear();
 
     free(this->code);
     this->code = nullptr;
@@ -851,6 +944,11 @@ const std::vector<Turbo::Core::TSampledImageDescriptor *> &Turbo::Core::TShader:
 const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetSamplerDescriptors()
 {
     return this->samplerDescriptors;
+}
+
+const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TShader::GetPushConstantDescriptors()
+{
+    return this->pushConstantDescriptors;
 }
 
 std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()

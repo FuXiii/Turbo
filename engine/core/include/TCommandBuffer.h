@@ -107,6 +107,9 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
 
     void CmdSetLineWidth(float lineWidth);
 
+    void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
+    void CmdPushConstants(uint32_t offset, uint32_t size, const void *values);
+
     void CmdTransferDeviceQueue();
 
     void CmdDrawIndexedIndirect();

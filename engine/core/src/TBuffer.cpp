@@ -181,6 +181,12 @@ void Turbo::Core::TBuffer::Unmap()
     vmaUnmapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation));
 }
 
+void Turbo::Core::TBuffer::Flush(TDeviceSize offset, TDeviceSize size)
+{
+    VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
+    vmaFlushAllocation(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), offset, size);
+}
+
 std::string Turbo::Core::TBuffer::ToString()
 {
     return std::string();

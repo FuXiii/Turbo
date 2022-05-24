@@ -803,7 +803,7 @@ Turbo是渲染引擎
   >```
   >
   
-  * 2022/5/19 设计架构
+  * 2022/5/20 设计架构
   >
   >* `TRenderPass`中增加`TSubpass GetSubpass(uint32_t subpass)`成员函数
   >* 增加`glm`第三方库
@@ -812,3 +812,26 @@ Turbo是渲染引擎
   >
   >* 移除原先拷贝的`tinygltf`头文件，将`tinygltf`库加到`./thirdparty`文件夹下
   >* 成功渲染`Suzanne`
+
+  * 2022/5/22 设计架构
+  >
+  >* 将`imgui`库加到`./thirdparty`文件夹下
+  >* 将`KTX-Software`库加到`./thirdparty`文件夹下
+  >* `TDescriptor`增加`TPushConstantDescriptor`用于描述`Vulkan`的`Push Constant`
+  >* `TShader`增加`std::vector<TPushConstantDescriptor *> pushConstantDescriptors`和相应的获取函数。
+  >* `TPipelineLayout`和`TPipeline`中适配`TPushConstantDescriptors`
+  >* `TUniformBufferDescriptor`和`TPipeline`中增加`uint32_t size`成员属性和相应的获取函数，用于表示数据块大小
+  >* `TCommandBuffer`中增加`void CmdPushConstants(...)`成员函数，对应`vkCmdPushConstants(...)`
+
+  * 2022/5/23 设计架构
+  >
+  >* `TBuffer`中增加`void Flush(...)`成员函数，用于刷新数据到`GPU domain`
+  >* `TSubpass`中`GetDepthStencilAttachmentReference()`有`Bug`，现已修改完毕
+
+  * 2022/5/24 设计架构
+  >
+  >* `TGraphicsPipeline`中移除`std::vector<TViewport> &viewports`和`std::vector<TScissor> &scissors`成员，由于核心创建的`Pipeline`的`Viewport`和`Scissor`都是动态状态，`Vulkan`会忽略`VkPipelineViewportStateCreateInfo::pViewports`和`VkPipelineViewportStateCreateInfo::pScissors`
+  >* `TGraphicsPipeline`中增加`typedef enum class TCompareOp`声明，对应`VkCompareOp`
+  >* `TGraphicsPipeline`中增加`typedef enum class TStencilOp`声明，对应`VkStencilOp`
+  >* `TGraphicsPipeline`中增加对深度测试和模板测试支持
+  >* 调整`TGraphicsPipeline`构造函数的参数顺序，填入默认值
