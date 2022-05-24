@@ -166,7 +166,12 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
     vk_submit_info.signalSemaphoreCount = signal_semaphores.size();
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
-    VkFence vk_fence = fence->GetVkFence();
+    VkFence vk_fence = VK_NULL_HANDLE;
+    if (fence != nullptr)
+    {
+       vk_fence= fence->GetVkFence();
+    }
+
     VkResult result = vkQueueSubmit(this->vkQueue, 1, &vk_submit_info, vk_fence);
     if (result != VkResult::VK_SUCCESS)
     {

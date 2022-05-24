@@ -58,6 +58,8 @@ class TBuffer : public TVulkanHandle
     void *Map();
     void Unmap();
 
+    void Flush(TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
+
   public:
     TBufferUsageFlags GetBufferUsageFlags();
     bool IsTransferSource();

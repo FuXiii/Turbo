@@ -97,6 +97,30 @@ typedef enum class TFrontFace
     CLOCKWISE = 1,
 } TFrontFace;
 
+typedef enum class TCompareOp
+{
+    NEVER = 0,
+    LESS = 1,
+    EQUAL = 2,
+    LESS_OR_EQUAL = 3,
+    GREATER = 4,
+    NOT_EQUAL = 5,
+    GREATER_OR_EQUAL = 6,
+    ALWAYS = 7
+} TCompareOp;
+
+typedef enum class TStencilOp
+{
+    KEEP = 0,
+    ZERO = 1,
+    REPLACE = 2,
+    INCREMENT_AND_CLAMP = 3,
+    DECREMENT_AND_CLAMP = 4,
+    INVERT = 5,
+    INCREMENT_AND_WRAP = 6,
+    DECREMENT_AND_WRAP = 7
+} TStencilOp;
+
 class TGraphicsPipeline : public Turbo::Core::TPipeline
 {
   private:
@@ -106,9 +130,6 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     bool primitiveRestartEnable;
 
     std::vector<TVertexBinding> vertexBindings;
-
-    std::vector<TViewport> viewports;
-    std::vector<TScissor> scissors;
 
     bool depthClampEnable;
     bool rasterizerDiscardEnable;
@@ -124,6 +145,30 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     bool multisampleEnable;
     TSampleCountBits sample;
 
+    //<DepthStencilState>
+    bool depthTestEnable;
+    bool depthWriteEnable;
+    TCompareOp depthCompareOp;
+    bool depthBoundsTestEnable;
+    bool stencilTestEnable;
+    TStencilOp frontFailOp;
+    TStencilOp frontPassOp;
+    TStencilOp frontDepthFailOp;
+    TCompareOp frontCompareOp;
+    uint32_t frontCompareMask;
+    uint32_t frontWriteMask;
+    uint32_t frontReference;
+    TStencilOp backFailOp;
+    TStencilOp backPassOp;
+    TStencilOp backDepthFailOp;
+    TCompareOp backCompareOp;
+    uint32_t backCompareMask;
+    uint32_t backWriteMask;
+    uint32_t backReference;
+    float minDepthBounds;
+    float maxDepthBounds;
+    //</DepthStencilState>
+
     uint32_t subpass;
 
   protected:
@@ -131,7 +176,7 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     virtual void InternalDestroy() override;
 
   public:
-    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, std::vector<TShader *> &shaders);
+    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = VK_TRUE, bool depthWriteEnable = VK_TRUE, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0);
     ~TGraphicsPipeline();
 
     TTopologyType GetTopologyType();
@@ -139,9 +184,6 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     bool GetPrimitiveRestartEnable();
 
     const std::vector<TVertexBinding> &GetVertexBindings();
-
-    std::vector<TViewport> GetViewports();
-    std::vector<TScissor> GetScissors();
 
     bool GetDepthClampEnable();
     bool GetRasterizerDiscardEnable();

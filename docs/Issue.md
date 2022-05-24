@@ -45,7 +45,7 @@
 
 - `Turbo::Core::TShader`中对于`code`的二进制数据是一直存在于内存的，对于`Vulkan`标准来说，这部分二进制数据在`VkShaderModule`创建完之后是没有意义的，目前该部分数据，仅仅是用于`ToString()`时转成`Shader`可读代码输出，无其他有用性。
 
-- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，`sampler2D`其他类型接口留了，没实现。
+- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，`sampler2D`, `texture2D`, `sampler`, `push constant`其他类型接口留了，没实现。
 
 - <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。~~
 
@@ -75,14 +75,14 @@
 
 - `Turbo::Core::TPipeline`目前`...CreatInfo`不完整，有些数据是写死的，如：
   - ~~`VkPipelineMultisampleStateCreateInfo`~~
-  - `VkPipelineDepthStencilStateCreateInfo`
+  - <font color=green>**[ ✓ ]2022/5/24**</font>~~`VkPipelineDepthStencilStateCreateInfo`~~
   - `VkPipelineColorBlendAttachmentState`
   - `VkPipelineColorBlendStateCreateInfo`
   - `VkPipelineDynamicStateCreateInfo`
 
 - 目前只实现了`TGraphicsPipeline`中所有的`VkPipelineShaderStageCreateInfo::pName`指代的`Shader`入口函数全是`main`,考虑是否提供自定义化接口(`glslang`好像提供相关入口函数获取功能)
 
-- 目前只实现了`TGraphicsPipeline`中的`VkDynamicState`目前是写死的将`VK_DYNAMIC_STATE_VIEWPORT`和`VK_DYNAMIC_STATE_SCISSOR`加入了动态数组中
+- 目前只实现了`TGraphicsPipeline`中的`VkDynamicState`目前是写死的将`VK_DYNAMIC_STATE_VIEWPORT`、`VK_DYNAMIC_STATE_SCISSOR`和`VK_DYNAMIC_STATE_LINE_WIDTH`加入了动态数组中
 
 - `Turbo::Core::TCommandBuffer`很多指令未实现，待实现
 
@@ -112,9 +112,9 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/16**</font> ~~需要提供`TFilter`对应`VkFilter`，完善`TCommandBuffer::BlitImage(...)`~~
 
-- <font color=red>**[ 🞭 ]2022/5/15 非核心不提供支持**</font> ~~需要提供对应`KTX`文件的支持(非核心)~~
+- 需要提供对应`KTX`文件的支持(非核心)
 
-- <font color=orange>**[ 🛠 ] now**</font>  需要提供对应`gltf`文件的支持(非核心)
+- 需要提供对应`gltf`文件的支持(非核心)
 
 - <font color=green>**[ ✓ ]2022/5/10**</font> ~~实现索引绘制~~
 
@@ -122,9 +122,11 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/12**</font>~~`Descriptor`设计有重大逻辑漏洞，需要重构~~
 
-- `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
+- <font color=orange>**[ 🛠 ] now**</font> `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
+
+- `TCommandBuffer::CmdPushConstants(...)`中的`ShaderStages`进一步研究，现在写的有问题
 
 - 梳理一下`TExtensionInfo`类，最好类似`TFormatInfo`的类思想
 

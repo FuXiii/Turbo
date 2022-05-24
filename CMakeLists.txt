@@ -10,7 +10,18 @@ set(CMAKE_BUILD_TYPE "debug")
 add_subdirectory(./engine)
 add_subdirectory(./thirdparty)
 
-add_executable(${PROJECT_NAME} ./main.cpp)
+set(IMGUI_SOURCE_PATH 
+./thirdparty/imgui/imgui_demo.cpp
+./thirdparty/imgui/imgui_draw.cpp
+./thirdparty/imgui/imgui_tables.cpp
+./thirdparty/imgui/imgui_widgets.cpp
+./thirdparty/imgui/imgui.cpp
+./thirdparty/imgui/imgui.cpp
+./thirdparty/imgui/backends/imgui_impl_glfw.cpp
+./thirdparty/imgui/backends/imgui_impl_vulkan.cpp
+)
+
+add_executable(${PROJECT_NAME} ./main.cpp ${IMGUI_SOURCE_PATH})
 
 add_dependencies(${PROJECT_NAME} glfw)
 add_dependencies(${PROJECT_NAME} TCore)
@@ -20,6 +31,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ./engine/include/
     PUBLIC ./thirdparty/glm/
     PUBLIC ./thirdparty/tinygltf/
+    PUBLIC ./thirdparty/imgui/
+    PUBLIC ./thirdparty/imgui/backends/
     )
 
 target_link_directories(${PROJECT_NAME} 

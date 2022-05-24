@@ -150,29 +150,22 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     }
 
     std::vector<VkViewport> vk_viewports;
-    for (TViewport &viewport_item : this->viewports)
-    {
-        VkViewport vk_viewport = {};
-        vk_viewport.x = viewport_item.GetX();
-        vk_viewport.y = viewport_item.GetY();
-        vk_viewport.width = viewport_item.GetWidth();
-        vk_viewport.height = viewport_item.GetHeight();
-        vk_viewport.minDepth = viewport_item.GetMinDepth();
-        vk_viewport.maxDepth = viewport_item.GetMaxDepth();
-
-        vk_viewports.push_back(vk_viewport);
-    }
+    VkViewport vk_viewport = {};
+    vk_viewport.x = 0;
+    vk_viewport.y = 0;
+    vk_viewport.width = 1;
+    vk_viewport.height = 1;
+    vk_viewport.minDepth = 0;
+    vk_viewport.maxDepth = 1;
+    vk_viewports.push_back(vk_viewport);
 
     std::vector<VkRect2D> vk_scissors;
-    for (TScissor &scissors_item : this->scissors)
-    {
-        VkRect2D vk_scissor = {};
-        vk_scissor.offset.x = scissors_item.GetOffsetX();
-        vk_scissor.offset.y = scissors_item.GetOffsetY();
-        vk_scissor.extent.width = scissors_item.GetWidth();
-        vk_scissor.extent.height = scissors_item.GetHeight();
-        vk_scissors.push_back(vk_scissor);
-    }
+    VkRect2D vk_scissor = {};
+    vk_scissor.offset.x = 0;
+    vk_scissor.offset.y = 0;
+    vk_scissor.extent.width = 1;
+    vk_scissor.extent.height = 1;
+    vk_scissors.push_back(vk_scissor);
 
     VkPipelineViewportStateCreateInfo vk_pipeline_viewport_state_create_info = {};
     vk_pipeline_viewport_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -229,21 +222,43 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_depth_stencil_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     vk_pipeline_depth_stencil_state_create_info.pNext = nullptr;
     vk_pipeline_depth_stencil_state_create_info.flags = 0;
-    vk_pipeline_depth_stencil_state_create_info.depthTestEnable = VK_TRUE;
-    vk_pipeline_depth_stencil_state_create_info.depthWriteEnable = VK_TRUE;
-    vk_pipeline_depth_stencil_state_create_info.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    vk_pipeline_depth_stencil_state_create_info.depthTestEnable = VK_FALSE;
+    if (this->depthTestEnable)
+    {
+        vk_pipeline_depth_stencil_state_create_info.depthTestEnable = VK_TRUE;
+    }
+    vk_pipeline_depth_stencil_state_create_info.depthWriteEnable = VK_FALSE;
+    if (this->depthWriteEnable)
+    {
+        vk_pipeline_depth_stencil_state_create_info.depthWriteEnable = VK_TRUE;
+    }
+    vk_pipeline_depth_stencil_state_create_info.depthCompareOp = (VkCompareOp)this->depthCompareOp;
     vk_pipeline_depth_stencil_state_create_info.depthBoundsTestEnable = VK_FALSE;
+    if (this->depthBoundsTestEnable)
+    {
+        vk_pipeline_depth_stencil_state_create_info.depthBoundsTestEnable = VK_TRUE;
+    }
     vk_pipeline_depth_stencil_state_create_info.stencilTestEnable = VK_FALSE;
-    vk_pipeline_depth_stencil_state_create_info.front.failOp = VK_STENCIL_OP_KEEP;
-    vk_pipeline_depth_stencil_state_create_info.front.passOp = VK_STENCIL_OP_KEEP;
-    vk_pipeline_depth_stencil_state_create_info.front.depthFailOp = VK_STENCIL_OP_KEEP;
-    vk_pipeline_depth_stencil_state_create_info.front.compareOp = VK_COMPARE_OP_ALWAYS;
-    vk_pipeline_depth_stencil_state_create_info.front.compareMask = 0;
-    vk_pipeline_depth_stencil_state_create_info.front.writeMask = 0;
-    vk_pipeline_depth_stencil_state_create_info.front.reference = 0;
-    vk_pipeline_depth_stencil_state_create_info.back = vk_pipeline_depth_stencil_state_create_info.front;
-    vk_pipeline_depth_stencil_state_create_info.minDepthBounds = 0.0f;
-    vk_pipeline_depth_stencil_state_create_info.maxDepthBounds = 0.0f;
+    if (this->stencilTestEnable)
+    {
+        vk_pipeline_depth_stencil_state_create_info.stencilTestEnable = VK_TRUE;
+    }
+    vk_pipeline_depth_stencil_state_create_info.front.failOp = (VkStencilOp)this->frontFailOp;
+    vk_pipeline_depth_stencil_state_create_info.front.passOp = (VkStencilOp)this->frontPassOp;
+    vk_pipeline_depth_stencil_state_create_info.front.depthFailOp = (VkStencilOp)this->frontDepthFailOp;
+    vk_pipeline_depth_stencil_state_create_info.front.compareOp = (VkCompareOp)this->frontCompareOp;
+    vk_pipeline_depth_stencil_state_create_info.front.compareMask = this->frontCompareMask;
+    vk_pipeline_depth_stencil_state_create_info.front.writeMask = this->frontWriteMask;
+    vk_pipeline_depth_stencil_state_create_info.front.reference = this->frontReference;
+    vk_pipeline_depth_stencil_state_create_info.back.failOp = (VkStencilOp)this->backFailOp;
+    vk_pipeline_depth_stencil_state_create_info.back.passOp = (VkStencilOp)this->backPassOp;
+    vk_pipeline_depth_stencil_state_create_info.back.depthFailOp = (VkStencilOp)this->backDepthFailOp;
+    vk_pipeline_depth_stencil_state_create_info.back.compareOp = (VkCompareOp)this->backCompareOp;
+    vk_pipeline_depth_stencil_state_create_info.back.compareMask = this->backCompareMask;
+    vk_pipeline_depth_stencil_state_create_info.back.writeMask = this->backWriteMask;
+    vk_pipeline_depth_stencil_state_create_info.back.reference = this->backReference;
+    vk_pipeline_depth_stencil_state_create_info.minDepthBounds = this->minDepthBounds;
+    vk_pipeline_depth_stencil_state_create_info.maxDepthBounds = this->maxDepthBounds;
 
     VkPipelineColorBlendAttachmentState vk_pipline_color_blend_attachment_state = {};
     vk_pipline_color_blend_attachment_state.blendEnable = VK_FALSE;
@@ -280,7 +295,11 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_color_blend_state_create_info.blendConstants[2] = 1.0f;
     vk_pipeline_color_blend_state_create_info.blendConstants[3] = 1.0f;
 
-    std::vector<VkDynamicState> vk_dynamic_states{VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+    std::vector<VkDynamicState> vk_dynamic_states;
+    vk_dynamic_states.push_back(VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT);
+    vk_dynamic_states.push_back(VkDynamicState::VK_DYNAMIC_STATE_SCISSOR);
+    vk_dynamic_states.push_back(VkDynamicState::VK_DYNAMIC_STATE_LINE_WIDTH);
+
     VkPipelineDynamicStateCreateInfo vk_pipeline_dynamic_state_create_info;
     vk_pipeline_dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     vk_pipeline_dynamic_state_create_info.pNext = nullptr;
@@ -328,7 +347,7 @@ void Turbo::Core::TGraphicsPipeline::InternalDestroy()
     vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TTopologyType topology, bool primitiveRestartEnable, std::vector<TVertexBinding> &vertexBindings, std::vector<TViewport> &viewports, std::vector<TScissor> &scissors, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, std::vector<TShader *> &shaders) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
+Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
 {
     if (renderPass != nullptr)
     {
@@ -349,8 +368,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         // 目前为 nullptr
 
         // VkPipelineViewportStateCreateInfo
-        this->viewports = viewports;
-        this->scissors = scissors;
+        // dynamic
 
         // VkPipelineRasterizationStateCreateInfo
         this->depthClampEnable = depthClampEnable;
@@ -369,13 +387,34 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         this->sample = sample;
 
         // VkPipelineDepthStencilStateCreateInfo
-        // 目前为 VK_COMPARE_OP_ALWAYS
+
+        this->depthTestEnable = depthTestEnable;
+        this->depthWriteEnable = depthWriteEnable;
+        this->depthCompareOp = depthCompareOp;
+        this->depthBoundsTestEnable = depthBoundsTestEnable;
+        this->stencilTestEnable = stencilTestEnable;
+        this->frontFailOp = frontFailOp;
+        this->frontPassOp = frontPassOp;
+        this->frontDepthFailOp = frontDepthFailOp;
+        this->frontCompareOp = frontCompareOp;
+        this->frontCompareMask = frontCompareMask;
+        this->frontWriteMask = frontWriteMask;
+        this->frontReference = frontReference;
+        this->backFailOp = backFailOp;
+        this->backPassOp = backPassOp;
+        this->backDepthFailOp = backDepthFailOp;
+        this->backCompareOp = backCompareOp;
+        this->backCompareMask = backCompareMask;
+        this->backWriteMask = backWriteMask;
+        this->backReference = backReference;
+        this->minDepthBounds = minDepthBounds;
+        this->maxDepthBounds = maxDepthBounds;
 
         // VkPipelineColorBlendStateCreateInfo
         //  目前为 关闭
 
         // VkPipelineDynamicStateCreateInfo
-        //  目前为 空
+        //  目前为 viewport scissor linewidth
 
         // VkPipelineLayout VkGraphicsPipelineCreateInfo::layout
         //使用传进来的Shader来创建
@@ -406,16 +445,6 @@ bool Turbo::Core::TGraphicsPipeline::GetPrimitiveRestartEnable()
 const std::vector<Turbo::Core::TVertexBinding> &Turbo::Core::TGraphicsPipeline::GetVertexBindings()
 {
     return this->vertexBindings;
-}
-
-std::vector<Turbo::Core::TViewport> Turbo::Core::TGraphicsPipeline::GetViewports()
-{
-    return this->viewports;
-}
-
-std::vector<Turbo::Core::TScissor> Turbo::Core::TGraphicsPipeline::GetScissors()
-{
-    return this->scissors;
 }
 
 bool Turbo::Core::TGraphicsPipeline::GetDepthClampEnable()

@@ -9,6 +9,9 @@ Turbo::Core::TSubpass::TSubpass(TPipelineType type) : Turbo::Core::TInfo()
     this->inputs = new std::vector<VkAttachmentReference>();
     this->preserves = new std::vector<VkAttachmentReference>();
     this->depthStencil = new VkAttachmentReference();
+
+    this->depthStencil->attachment = UINT32_MAX;
+    this->depthStencil->layout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
 }
 
 Turbo::Core::TSubpass::~TSubpass()
@@ -95,7 +98,12 @@ std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetPreserveAttachment
 
 VkAttachmentReference *Turbo::Core::TSubpass::GetDepthStencilAttachmentReference()
 {
-    return this->depthStencil;
+    if (this->depthStencil->attachment != UINT32_MAX)
+    {
+        return this->depthStencil;
+    }
+
+    return nullptr;
 }
 
 void Turbo::Core::TSubpass::Clear()

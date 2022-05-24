@@ -6,7 +6,7 @@
 
 void Turbo::Core::TPipelineDescriptorSet::InternalCreate()
 {
-    std::vector<TDescriptorSetLayout *> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayout();
+    std::vector<TDescriptorSetLayout *> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
     for (TDescriptorSetLayout *descriptor_set_layout_item : descriptor_set_layouts)
     {
         descriptorSets.push_back(new TDescriptorSet(this->descriptorPool, descriptor_set_layout_item));

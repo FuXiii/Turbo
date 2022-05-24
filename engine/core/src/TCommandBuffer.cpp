@@ -1,5 +1,6 @@
 #include "TCommandBuffer.h"
 #include "TCommandBufferPool.h"
+#include "TDescriptor.h"
 #include "TDescriptorSet.h"
 #include "TDevice.h"
 #include "TDeviceQueue.h"
@@ -10,6 +11,7 @@
 #include "TPipelineLayout.h"
 #include "TRenderPass.h"
 #include "TScissor.h"
+#include "TShader.h"
 #include "TSubpass.h"
 
 void Turbo::Core::TCommandBuffer::InternalCreate()
@@ -763,6 +765,26 @@ void Turbo::Core::TCommandBuffer::CmdResolveImage(TImage *srcImage, TImageLayout
     vk_image_resolve.extent.depth = depth;
 
     vkCmdResolveImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_resolve);
+}
+
+void Turbo::Core::TCommandBuffer::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
+{
+    VkShaderStageFlags vk_shader_stage_flags = 0;
+    std::vector<TPushConstantDescriptor *> push_constant_descriptors = pipelineLayout->GetPushConstantDescriptors();
+    for (TPushConstantDescriptor *push_constant_item : push_constant_descriptors)
+    {
+        vk_shader_stage_flags |= push_constant_item->GetShader()->GetVkShaderStageFlags();
+    }
+
+    vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
+}
+
+void Turbo::Core::TCommandBuffer::CmdPushConstants(uint32_t offset, uint32_t size, const void *values)
+{
+    if (currentPipeline != nullptr)
+    {
+        this->CmdPushConstants(this->currentPipeline->GetPipelineLayout(), offset, size, values);
+    }
 }
 
 void Turbo::Core::TCommandBuffer::CmdSetLineWidth(float lineWidth)

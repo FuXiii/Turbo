@@ -86,7 +86,7 @@
         "-Wno-pragma-once-outside-header"
     ],
     "C_Cpp.formatting": "Disabled",
-    "clangd.path": "F:/LLVM/bin/clangd.exe",
+    "clangd.path": "F:/llvm-mingw-20220323-msvcrt-x86_64/bin/clangd.exe",
     "C_Cpp.clang_format_path": "F:/LLVM/bin/clang-format.exe",
     "cmake.configureOnOpen": false,
 }
