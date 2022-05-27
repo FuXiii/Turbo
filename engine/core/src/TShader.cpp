@@ -254,6 +254,35 @@ void Turbo::Core::TShader::InternalParseSpirV()
         uint32_t vec_size = type.vecsize; // size of vec
         uint32_t colums = type.columns;   // 1 column means it's a vector.
 
+        switch (type.image.dim)
+        {
+        case spv::Dim::Dim1D: {
+        }
+        break;
+        case spv::Dim::Dim2D: {
+        }
+        break;
+        case spv::Dim::Dim3D: {
+        }
+        break;
+        case spv::Dim::DimCube: {
+            //cubemap combined image
+        }
+        break;
+        case spv::Dim::DimRect: {
+        }
+        break;
+        case spv::Dim::DimBuffer: {
+        }
+        break;
+        case spv::Dim::DimSubpassData: {
+        }
+        break;
+        default: {
+        }
+        break;
+        }
+
         TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
     }

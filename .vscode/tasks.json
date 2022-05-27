@@ -13,16 +13,14 @@
             "args": [
                 "-G",
                 "MinGW Makefiles",
-                "-DCMAKE_GNUtoMS:BOOL=ON",
+                //"-DCMAKE_GNUtoMS:BOOL=ON",
                 "-DCMAKE_EXPORT_COMPILE_COMMANDS=1",
                 "-DCMAKE_CXX_COMPILER=clang++",
                 "-DCMAKE_C_COMPILER=clang",
-                "-DCMAKE_BUILD_TYPE=debug",
-                
-                // "-DKTX_FEATURE_LOADTEST_APPS=OFF",
-                // "-DKTX_FEATURE_DOC=OFF",
-                // "-DKTX_FEATURE_STATIC_LIBRARY=ON",
-                // "-DKTX_FEATURE_STATIC_LIBRARY=ON",
+                //"-DCMAKE_BUILD_TYPE=debug",
+                "-DKTX_FEATURE_LOADTEST_APPS=OFF",
+                "-DKTX_FEATURE_DOC=OFF",
+                "-DKTX_FEATURE_STATIC_LIBRARY=ON",
                 ".."
             ]
         },
