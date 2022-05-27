@@ -76,6 +76,7 @@ Turbo是渲染引擎
 
 * `Turbo`引擎目前以`Core`核心层为主（优先级不分先后）
   * **[ ✓ ]** 生成`mipmap`
+  * 混合渲染
   * 天空盒
   * HDR
   * 实例化渲染
@@ -835,3 +836,7 @@ Turbo是渲染引擎
   >* `TGraphicsPipeline`中增加`typedef enum class TStencilOp`声明，对应`VkStencilOp`
   >* `TGraphicsPipeline`中增加对深度测试和模板测试支持
   >* 调整`TGraphicsPipeline`构造函数的参数顺序，填入默认值
+
+  * 2022/5/25 设计架构
+  >
+  >* 成功渲染`KTX`纹理

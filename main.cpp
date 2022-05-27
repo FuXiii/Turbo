@@ -45,6 +45,8 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include <tiny_gltf.h>
 
+#include <ktx.h>
+
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
 {
     std::string save_file_path = "E:/Turbo/";
@@ -219,6 +221,28 @@ bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowP
 
     return true;
 }
+const std::string SKY_VERT_SHADER_STR = "#version 450\n"
+                                        "layout(set = 0, binding = 0) uniform UBO{\n"
+                                        "    mat4 mvp;\n"
+                                        "}ubo;\n"
+                                        "layout(location = 0) in vec3 inPos;\n"
+                                        "layout(location = 0) out vec3 outUVW;\n"
+                                        "void main()\n"
+                                        "{\n"
+                                        "    outUVW = inPos;\n"
+                                        "    // Convert cubemap coordinates into Vulkan coordinate space\n"
+                                        "    outUVW.xy *= -1.0;\n"
+                                        "    gl_Position = ubo.mvp * vec4(inPos.xyz, 1.0);\n"
+                                        "}\n";
+
+const std::string SKY_FRAG_SHADER_STR = "#version 450\n"
+                                        "layout(set = 0, binding = 1) uniform samplerCube samplerCubeMap;\n"
+                                        "layout(location = 0) in vec3 inUVW;\n"
+                                        "layout(location = 0) out vec4 outFragColor;\n"
+                                        "void main()\n"
+                                        "{\n"
+                                        "    outFragColor = texture(samplerCubeMap, inUVW);\n"
+                                        "}\n";
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
@@ -234,9 +258,11 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 1) out vec2 outUV;\n"
                                     "layout (location = 2) out float outScale;\n"
                                     "layout (location = 3) out vec4 outSunPosition;\n"
+                                    "layout (location = 4) out vec3 outPosition;\n"
                                     "void main() {\n"
                                     "   outNormal = mvpBufferVals.mvp * vec4(normal.xyz,1);\n"
                                     "   gl_Position =mvpBufferVals.mvp * vec4(pos.xyz,1);\n"
+                                    "   outPosition =gl_Position.xyz;\n"
                                     "   outUV = inUV;\n"
                                     "   outScale = myBufferVals.scale;\n"
                                     "   outSunPosition = mvpBufferVals.mvp * vec4(-100,-100,-100,1);\n"
@@ -244,11 +270,13 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 1) uniform texture2D myTexture;\n"
+                                    "layout (set = 1, binding = 1) uniform samplerCube samplerColor;\n"
                                     "layout (set = 2, binding = 2) uniform sampler mySampler;\n"
                                     "layout (location = 0) in vec4 normal;\n"
                                     "layout (location = 1) in vec2 uv;\n"
                                     "layout (location = 2) in float scale;\n"
                                     "layout (location = 3) in vec4 sunPosition;\n"
+                                    "layout (location = 4) in vec3 inPosition;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "layout (push_constant) uniform my_push_constants_t\n"
                                     "{"
@@ -256,9 +284,12 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "} my_push_constants;\n"
                                     "void main() {\n"
                                     "	float load_bias = my_push_constants.bias * 10;\n"
+                                    "	vec3 normalize_position = normalize(inPosition);\n"
+                                    "	vec3 reflect_dir = reflect(normalize_position, normalize(normal.xyz));\n"
+                                    "	vec4 sky_cube_color = texture(samplerColor, reflect_dir, 0);\n"
                                     "	float lum = max(dot(normal.xyz, normalize(sunPosition.xyz)), 0.0)*0.4f;\n"
                                     "	vec3 sun_color = vec3(1,1,1);\n"
-                                    "	outColor =  texture(sampler2D(myTexture, mySampler), uv, load_bias)* vec4((0.3 + 0.7 * lum) * sun_color, 1.0);\n"
+                                    "	outColor = sky_cube_color * texture(sampler2D(myTexture, mySampler), uv, 0)* vec4((0.3 +  lum) * sun_color, 1.0);\n"
                                     "}\n";
 
 typedef struct POSITION
@@ -366,6 +397,88 @@ int main()
     }
     //</gltf for Suzanne>
 
+    //<gltf for sky cube>
+    std::vector<POSITION> SKY_CUBE_POSITION_data;
+    std::vector<NORMAL> SKY_CUBE_NORMAL_data;
+    std::vector<TEXCOORD> SKY_CUBE_TEXCOORD_data;
+    std::vector<uint32_t> SKY_CUBE_INDICES_data;
+
+    {
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
+        std::string err;
+        std::string warn;
+
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:\\Turbo\\asset\\models\\cube.gltf");
+        const tinygltf::Scene &scene = model.scenes[model.defaultScene];
+        tinygltf::Node &node = model.nodes[scene.nodes[2]];
+        tinygltf::Mesh &mesh = model.meshes[node.mesh];
+        tinygltf::Primitive &primitive = mesh.primitives[0];
+        int position_accesser_index = primitive.attributes["POSITION"];
+        int normal_accesser_index = primitive.attributes["NORMAL"];
+        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
+        int indices_accesser_index = primitive.indices;
+        tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
+        tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
+        tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
+        tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
+
+        tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
+        tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
+        tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
+        tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
+
+        int position_buffer_index = position_buffer_view.buffer;
+        size_t position_buffer_byteLength = position_buffer_view.byteLength;
+        int position_buffer_byteOffset = position_buffer_view.byteOffset;
+        int position_type = position_accessor.type;
+
+        int normal_buffer_index = normal_buffer_view.buffer;
+        size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
+        int normal_buffer_byteOffset = normal_buffer_view.byteOffset;
+        int normal_type = normal_accessor.type;
+
+        int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
+        size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
+        int texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
+        int texcoord_0_type = texcoord_0_accessor.type;
+
+        int indices_buffer_index = indices_buffer_view.buffer;
+        size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
+        int indices_buffer_byteOffset = indices_buffer_view.byteOffset;
+        int indices_type = indices_accessor.type;
+
+        tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
+        tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
+        tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
+        tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
+
+        std::vector<unsigned char> &position_data = position_buffer.data;
+        std::vector<unsigned char> &normal_data = normal_buffer.data;
+        std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
+        std::vector<unsigned char> &indices_data = indices_buffer.data;
+
+        std::vector<unsigned short> temp_indices_data;
+
+        SKY_CUBE_POSITION_data.resize(position_buffer_byteLength / sizeof(POSITION));
+        SKY_CUBE_NORMAL_data.resize(normal_buffer_byteLength / sizeof(NORMAL));
+        SKY_CUBE_TEXCOORD_data.resize(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
+        temp_indices_data.resize(indices_buffer_byteLength / sizeof(unsigned short));
+
+        memcpy(SKY_CUBE_POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
+        memcpy(SKY_CUBE_NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
+        memcpy(SKY_CUBE_TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
+        memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
+
+        for (unsigned short &temp_indices_item : temp_indices_data)
+        {
+            SKY_CUBE_INDICES_data.push_back(temp_indices_item);
+        }
+    }
+    //</gltf for sky cube>
+
+    uint32_t sky_cube_indices_count = SKY_CUBE_INDICES_data.size();
+
     uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
@@ -456,11 +569,18 @@ int main()
     projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
 
     glm::mat4 mvp = projection * view * model;
+    glm::mat4 sky_cube_view = glm::mat4(glm::mat3(view));
+    glm::mat4 sky_cube_mvp = projection * sky_cube_view * glm::mat4(1.0f);
 
     Turbo::Core::TBuffer *mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(mvp));
     void *mvp_ptr = mvp_buffer->Map();
     memcpy(mvp_ptr, &mvp, sizeof(mvp));
     mvp_buffer->Unmap();
+
+    Turbo::Core::TBuffer *sky_cube_mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(sky_cube_mvp));
+    void *sky_cube_mvp_ptr = sky_cube_mvp_buffer->Map();
+    memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
+    sky_cube_mvp_buffer->Unmap();
 
     Turbo::Core::TBuffer *scale_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
     void *scale_ptr = scale_buffer->Map();
@@ -473,11 +593,23 @@ int main()
     position_buffer->Unmap();
     POSITION_data.clear();
 
+    Turbo::Core::TBuffer *sky_cube_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
+    void *sky_cube_position_buffer_ptr = sky_cube_position_buffer->Map();
+    memcpy(sky_cube_position_buffer_ptr, SKY_CUBE_POSITION_data.data(), sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
+    sky_cube_position_buffer->Unmap();
+    SKY_CUBE_POSITION_data.clear();
+
     Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
     void *normal_buffer_ptr = normal_buffer->Map();
     memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
     normal_buffer->Unmap();
     NORMAL_data.clear();
+
+    Turbo::Core::TBuffer *sky_cube_normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
+    void *sky_cube_normal_buffer_ptr = sky_cube_normal_buffer->Map();
+    memcpy(sky_cube_normal_buffer_ptr, SKY_CUBE_NORMAL_data.data(), sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
+    sky_cube_normal_buffer->Unmap();
+    SKY_CUBE_NORMAL_data.clear();
 
     Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
     void *texcoord_buffer_ptr = texcoord_buffer->Map();
@@ -485,11 +617,23 @@ int main()
     texcoord_buffer->Unmap();
     TEXCOORD_data.clear();
 
+    Turbo::Core::TBuffer *sky_cube_texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
+    void *sky_cube_texcoord_buffer_ptr = sky_cube_texcoord_buffer->Map();
+    memcpy(sky_cube_texcoord_buffer_ptr, SKY_CUBE_TEXCOORD_data.data(), sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
+    sky_cube_texcoord_buffer->Unmap();
+    SKY_CUBE_TEXCOORD_data.clear();
+
     Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
     void *index_buffer_ptr = index_buffer->Map();
     memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
     index_buffer->Unmap();
     INDICES_data.clear();
+
+    Turbo::Core::TBuffer *sky_cube_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
+    void *sky_cube_index_buffer_ptr = sky_cube_index_buffer->Map();
+    memcpy(sky_cube_index_buffer_ptr, SKY_CUBE_INDICES_data.data(), sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
+    sky_cube_index_buffer->Unmap();
+    SKY_CUBE_INDICES_data.clear();
 
     Turbo::Core::TImage *texture = nullptr;
     uint32_t mip_levels = 0;
@@ -633,9 +777,122 @@ int main()
             command_pool->Free(texture_command_buffer);
         }
     }
-
     Turbo::Core::TImageView *texture_view = new Turbo::Core::TImageView(texture, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, texture->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
-    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, mip_levels);
+
+    Turbo::Core::TImage *ktx_image = nullptr;
+    //<KTX Texture>
+    {
+        std::string ktx_filename = "E:/Turbo/asset/images/metalplate01_rgba.ktx";
+
+        ktxTexture *ktx_texture;
+        KTX_error_code ktx_result;
+
+        ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+
+        if (ktx_texture == nullptr)
+        {
+            throw std::runtime_error("Couldn't load texture");
+        }
+
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+        {
+            uint32_t copy_width = ktx_texture_width >> mip_index;
+            uint32_t copy_height = ktx_texture_height >> mip_index;
+            uint32_t copy_mip_level = mip_index;
+            ktx_size_t copy_buffer_offset = 0;
+            ktx_result = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, 0, &copy_buffer_offset);
+            ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, ktx_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, 1);
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX Texture>
+    Turbo::Core::TImageView *ktx_texture_view = new Turbo::Core::TImageView(ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_image->GetMipLevels(), 0, 1);
+    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, ktx_image->GetMipLevels());
+
+    Turbo::Core::TImage *ktx_sky_cube_image = nullptr;
+    //<KTX SkyCube Texture>
+    {
+        ktxResult result;
+        ktxTexture *ktx_texture;
+
+        result = ktxTexture_CreateFromNamedFile("E:/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        ktx_sky_cube_image = new Turbo::Core::TImage(device, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT /*for cubemap*/, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 6 /*for cubemap six faces*/, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, ktx_sky_cube_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 6 /*for cubemap six faces*/);
+        for (uint32_t face = 0; face < 6; face++)
+        {
+            for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+            {
+                uint32_t copy_width = ktx_texture_width >> mip_index;
+                uint32_t copy_height = ktx_texture_height >> mip_index;
+                uint32_t copy_mip_level = mip_index;
+                uint32_t copy_base_array_layer = face;
+                ktx_size_t copy_buffer_offset = 0;
+                KTX_error_code ret = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, face, &copy_buffer_offset);
+                assert(ret == KTX_SUCCESS);
+                ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, ktx_sky_cube_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, copy_base_array_layer, 1, 0, 0, 0, copy_width, copy_height, 1);
+            }
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, ktx_sky_cube_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 6 /*for cubemap six faces*/);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX SkyCube Texture>
+    Turbo::Core::TImageView *ktx_sky_cube_image_view = new Turbo::Core::TImageView(ktx_sky_cube_image, Turbo::Core::TImageViewType::IMAGE_VIEW_CUBE, ktx_sky_cube_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_sky_cube_image->GetMipLevels(), 0, 6 /*for cubemap six faces*/);
+    Turbo::Core::TSampler *sky_cube_sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, ktx_sky_cube_image->GetMipLevels());
 
     Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
@@ -646,8 +903,14 @@ int main()
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
+    Turbo::Core::TShader *sky_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, SKY_VERT_SHADER_STR);
+    Turbo::Core::TShader *sky_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, SKY_FRAG_SHADER_STR);
+
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
+
+    std::cout << sky_vertex_shader->ToString() << std::endl;
+    std::cout << sky_fragment_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -669,6 +932,9 @@ int main()
 
     std::vector<Turbo::Core::TBuffer *> mvp_buffers;
     mvp_buffers.push_back(mvp_buffer);
+
+    std::vector<Turbo::Core::TBuffer *> sky_cube_mvp_buffers;
+    sky_cube_mvp_buffers.push_back(sky_cube_mvp_buffer);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
@@ -705,24 +971,39 @@ int main()
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
+    std::vector<Turbo::Core::TShader *> sky_cube_shaders{sky_vertex_shader, sky_fragment_shader};
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders);
+    Turbo::Core::TGraphicsPipeline *sky_cube_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, sky_cube_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_FRONT_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false);
 
     std::vector<Turbo::Core::TImageView *> my_textures;
-    my_textures.push_back(texture_view);
+    my_textures.push_back(/*texture_view*/ ktx_texture_view);
 
     std::vector<Turbo::Core::TSampler *> my_samples;
     my_samples.push_back(sampler);
+
+    std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>> sky_cube_combined_images;
+    sky_cube_combined_images.push_back(std::make_pair(ktx_sky_cube_image_view, sky_cube_sampler));
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
     pipeline_descriptor_set->BindData(0, 1, 0, my_textures);
     pipeline_descriptor_set->BindData(1, 0, 0, mvp_buffers);
+    pipeline_descriptor_set->BindData(1, 1, 0, sky_cube_combined_images);
     pipeline_descriptor_set->BindData(2, 2, 0, my_samples);
+
+    Turbo::Core::TPipelineDescriptorSet *sky_cube_pipeline_descriptor_set = descriptor_pool->Allocate(sky_cube_pipeline->GetPipelineLayout());
+    sky_cube_pipeline_descriptor_set->BindData(0, 0, 0, sky_cube_mvp_buffers);
+    sky_cube_pipeline_descriptor_set->BindData(0, 1, 0, sky_cube_combined_images);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
     vertex_buffers.push_back(normal_buffer);
     vertex_buffers.push_back(texcoord_buffer);
+
+    std::vector<Turbo::Core::TBuffer *> sky_cube_vertex_buffers;
+    sky_cube_vertex_buffers.push_back(sky_cube_position_buffer);
+    sky_cube_vertex_buffers.push_back(sky_cube_normal_buffer);
+    sky_cube_vertex_buffers.push_back(sky_cube_texcoord_buffer);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -754,6 +1035,13 @@ int main()
         projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
         mvp = projection * view * model;
 
+        sky_cube_view = glm::mat4(glm::mat3(view));
+        sky_cube_mvp = projection * sky_cube_view * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        sky_cube_mvp_ptr = sky_cube_mvp_buffer->Map();
+        memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
+        sky_cube_mvp_buffer->Unmap();
+
         _ptr = mvp_buffer->Map();
         memcpy(_ptr, &mvp, sizeof(mvp));
         mvp_buffer->Unmap();
@@ -783,6 +1071,17 @@ int main()
 
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+
+            // sky cube
+            command_buffer->CmdBindPipeline(sky_cube_pipeline);
+            command_buffer->CmdBindPipelineDescriptorSet(sky_cube_pipeline_descriptor_set);
+            command_buffer->CmdBindVertexBuffers(sky_cube_vertex_buffers);
+            command_buffer->CmdSetViewport(frame_viewports);
+            command_buffer->CmdSetScissor(frame_scissors);
+            command_buffer->CmdBindIndexBuffer(sky_cube_index_buffer);
+            command_buffer->CmdDrawIndexed(sky_cube_indices_count, 1, 0, 0, 0);
+
+            // Suzanne
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdPushConstants(0, sizeof(bias), &bias);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
@@ -791,6 +1090,7 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdBindIndexBuffer(index_buffer);
             command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
 
@@ -976,32 +1276,48 @@ int main()
     // ImageSaveToPPM(color_image, command_pool, queue, "ColorImage");
 
     descriptor_pool->Free(pipeline_descriptor_set);
+    descriptor_pool->Free(sky_cube_pipeline_descriptor_set);
     delete pipeline;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
         delete framebuffer_item;
     }
+
+    delete sky_cube_pipeline;
+
     delete render_pass;
 
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;
+    delete sky_vertex_shader;
+    delete sky_fragment_shader;
     delete color_image_view;
     delete color_image;
     delete depth_image_view;
     delete depth_image;
     delete sampler;
+    delete sky_cube_sampler;
     delete texture_view;
     delete texture;
+    delete ktx_texture_view;
+    delete ktx_image;
+    delete ktx_sky_cube_image_view;
+    delete ktx_sky_cube_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;
     }
+    delete sky_cube_index_buffer;
+    delete sky_cube_position_buffer;
+    delete sky_cube_normal_buffer;
+    delete sky_cube_texcoord_buffer;
     delete index_buffer;
     delete position_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
     delete scale_buffer;
+    delete sky_cube_mvp_buffer;
     delete mvp_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;

@@ -33,14 +33,17 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ./thirdparty/tinygltf/
     PUBLIC ./thirdparty/imgui/
     PUBLIC ./thirdparty/imgui/backends/
+    PUBLIC ./thirdparty/KTX-Software/include/
     )
 
 target_link_directories(${PROJECT_NAME} 
 PUBLIC /engine/core/
 PUBLIC /thirdparty/glfw/src/
+PUBLIC /thirdparty/KTX-Software/
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
 TCore
 glfw
+ktx
 )
