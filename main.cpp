@@ -289,7 +289,8 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "	vec4 sky_cube_color = texture(samplerColor, reflect_dir, 0);\n"
                                     "	float lum = max(dot(normal.xyz, normalize(sunPosition.xyz)), 0.0)*0.4f;\n"
                                     "	vec3 sun_color = vec3(1,1,1);\n"
-                                    "	outColor = sky_cube_color * texture(sampler2D(myTexture, mySampler), uv, 0)* vec4((0.3 +  lum) * sun_color, 1.0);\n"
+                                    "	vec4 color_Color = sky_cube_color * texture(sampler2D(myTexture, mySampler), uv, 0)* vec4((0.3 +  lum) * sun_color, 1.0);\n"
+                                    "	outColor = vec4(color_Color.xyz,my_push_constants.bias);\n"
                                     "}\n";
 
 typedef struct POSITION
@@ -972,7 +973,7 @@ int main()
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
     std::vector<Turbo::Core::TShader *> sky_cube_shaders{sky_vertex_shader, sky_fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TGraphicsPipeline *sky_cube_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, sky_cube_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_FRONT_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false);
 
     std::vector<Turbo::Core::TImageView *> my_textures;

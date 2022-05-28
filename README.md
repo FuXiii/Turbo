@@ -4,13 +4,18 @@ Turbo是渲染引擎
 
 ## Version
 
+---
 当前版本 0.0.0.12
 
 ## State
 
+---
+
 * 开发中
 
 ## Document
+
+---
 
 * 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
 * 使用MarkDown书写文字和文档，使用drawio绘制设计图表
@@ -20,19 +25,24 @@ Turbo是渲染引擎
 
 ## Trifles
 
+---
+
 * 整理一下头文件，有点乱，去掉不必要的头文件
 
 ## RoadMap
 
+---
 2022/5/15
 
-* `Turbo` 引擎对于 `Vulkan 1.0` 的相关核心功能已初步成型，由于`Vulkan`本身的复杂性还有很多特性没有实现，在此做一下记录，记录该引擎以实现的特性和未来计划实现特性，该特性记录将会和`docs/Issue.md`文档配合使用。
+>* `Turbo` 引擎对于 `Vulkan 1.0` 的相关核心功能已初步成型，由于`Vulkan`本身的复杂性还有很多特性没有实现，在此做一下记录，记录该引擎以实现的特性和未来计划实现特性，该特性记录将会和`docs/Issue.md`文档配合使用。
+>* `Core`核心层将会作为单独完整的库发布,位于`./engine/core`中, 现在核心库已分离成单独的库，将会输出`TCore.lib`或`TCore.a`库文件
+>* `Turbo`将使用该`Core`核心继续开发高级特性
+>* 未来有时间录制`Vulkan教程`和`引擎开发教程`视频
 
-* `Core`核心层将会作为单独完整的库发布,位于`./engine/core`中, 现在核心库已分离成单独的库，将会输出`TCore.lib`或`TCore.a`库文件
+2022/5/28
 
-* `Turbo`将使用该`Core`核心继续开发高级特性
-
-* 未来有时间录制`Vulkan教程`和`引擎开发教程`视频
+>* 实现完`Vulkan`的`input attachment`也就完成了延迟渲染相关工作，`Turbo`核心现在对于图形的核心封装设计基本上接近尾声，延迟渲染之后将会开展`FrameGraph`相关设计实现工作
+>* `FrameGraph`将会是`Turbo`引擎实现高级特性的重点，`ECS（Entity Component System）`或者`EC（Entity Component）`之类管理场景的相关技术不是`Turbo`引擎的重点，`Turbo`引擎目前的重点目标是不依赖任何窗口库（用户自定义），不依赖任何场景结构技术（用户自己实现自己的场景结构），`Turbo`可以很轻松的嵌入其中。
 
 ### 已完成特性
 
@@ -76,9 +86,9 @@ Turbo是渲染引擎
 
 * `Turbo`引擎目前以`Core`核心层为主（优先级不分先后）
   * **[ ✓ ]** 生成`mipmap`
-  * 混合渲染
-  * 天空盒
-  * HDR
+  * **[ ✓ ]** 混合渲染
+  * **[ ✓ ]** 天空盒
+  * HDR（应该算是延迟渲染的一部分）
   * 实例化渲染
   * 间接渲染
   * 细分着色器
@@ -100,6 +110,8 @@ Turbo是渲染引擎
 * 非`Core`：`ECS`层
 
 ## Log
+
+---
 
 * 2020/10/29
     >
@@ -844,3 +856,8 @@ Turbo是渲染引擎
   * 2022/5/27 设计架构
   >
   >* 成功渲染`KTX`的`Cubemap`纹理
+  >* 开始适配几何管线的`Blend`  
+  >* `TGraphicsPipeline`中增加`typedef enum class TLogicOp`  声明，对应`VkLogicOp`
+  >* `TGraphicsPipeline`中增加`typedef enum class TBlendFactor`  声明，对应`VkBlendFactor`
+  >* `TGraphicsPipeline`中增加`typedef enum class TBlendOp`  声明，对应`VkBlendOp`
+  >* `TGraphicsPipeline`构造函数中增加混合相关参数

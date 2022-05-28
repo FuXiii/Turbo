@@ -45,13 +45,15 @@
 
 - `Turbo::Core::TShader`中对于`code`的二进制数据是一直存在于内存的，对于`Vulkan`标准来说，这部分二进制数据在`VkShaderModule`创建完之后是没有意义的，目前该部分数据，仅仅是用于`ToString()`时转成`Shader`可读代码输出，无其他有用性。
 
-- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，只支持`UniformBuffer`，`sampler2D`, `texture2D`, `sampler`, `push constant`其他类型接口留了，没实现。
+- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，目前还缺少对于`storage image`, `subpass input(input attachemnt)`和`storage buffer`
+
+- <font color=orange>**[ 🛠 ] now**</font> 实现 `subpass input(input attachemnt)`相关特性，完成延迟渲染相关功能
 
 - <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。~~
 
 - <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现~~
 
-- `Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现
+- <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TDescriptorSet`中对于`Turbo::Core::TDescriptorSet::BindData()`函数只是用来测试的，只支持`VkWriteDescriptor`和`UniformBuffer`，其他的待实现~~
 
 - <font color=green>**[ ✓ ]2022/4/28**</font> ~~`Turbo::Core::TSubpass::Add[...]AttachmentReference`中对于`VkImageLayout`的传入和`TImageView`问题一样~~
 
@@ -71,14 +73,12 @@
 
 - <font color=green>**[ ✓ ]2022/5/1**</font> ~~`Turbo::Core::TPipeline`目前构造函数直接写入的是`Graphic`管线数据，该设计有问题，`Graphic`图形管线和计算管线`Compute`创建参数不同，相关功能和创建应该放到具体的子类中，`TPipeline`只提供虚基类~~
 
-- 计算管线`Compute`未实现
-
-- `Turbo::Core::TPipeline`目前`...CreatInfo`不完整，有些数据是写死的，如：
+- <font color=green>**[ ✓ ]2022/5/27**</font> ~~`Turbo::Core::TPipeline`目前`...CreatInfo`不完整，有些数据是写死的，如：~~
   - ~~`VkPipelineMultisampleStateCreateInfo`~~
-  - <font color=green>**[ ✓ ]2022/5/24**</font>~~`VkPipelineDepthStencilStateCreateInfo`~~
-  - `VkPipelineColorBlendAttachmentState`
-  - `VkPipelineColorBlendStateCreateInfo`
-  - `VkPipelineDynamicStateCreateInfo`
+  - ~~`VkPipelineDepthStencilStateCreateInfo`~~
+  - ~~`VkPipelineColorBlendAttachmentState`~~
+  - ~~`VkPipelineColorBlendStateCreateInfo`~~
+  - ~~`VkPipelineDynamicStateCreateInfo`~~
 
 - 目前只实现了`TGraphicsPipeline`中所有的`VkPipelineShaderStageCreateInfo::pName`指代的`Shader`入口函数全是`main`,考虑是否提供自定义化接口(`glslang`好像提供相关入口函数获取功能)
 
@@ -122,7 +122,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/12**</font>~~`Descriptor`设计有重大逻辑漏洞，需要重构~~
 
-- <font color=orange>**[ 🛠 ] now**</font> `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
+- `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 

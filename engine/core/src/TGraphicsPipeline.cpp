@@ -262,12 +262,16 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
 
     VkPipelineColorBlendAttachmentState vk_pipline_color_blend_attachment_state = {};
     vk_pipline_color_blend_attachment_state.blendEnable = VK_FALSE;
-    vk_pipline_color_blend_attachment_state.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    vk_pipline_color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    vk_pipline_color_blend_attachment_state.colorBlendOp = VK_BLEND_OP_ADD;
-    vk_pipline_color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    vk_pipline_color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    vk_pipline_color_blend_attachment_state.alphaBlendOp = VK_BLEND_OP_ADD;
+    if (this->blendEnable)
+    {
+        vk_pipline_color_blend_attachment_state.blendEnable = VK_TRUE;
+    }
+    vk_pipline_color_blend_attachment_state.srcColorBlendFactor = (VkBlendFactor)this->srcColorBlendFactor;
+    vk_pipline_color_blend_attachment_state.dstColorBlendFactor = (VkBlendFactor)this->dstColorBlendFactor;
+    vk_pipline_color_blend_attachment_state.colorBlendOp = (VkBlendOp)this->colorBlendOp;
+    vk_pipline_color_blend_attachment_state.srcAlphaBlendFactor = (VkBlendFactor)this->srcAlphaBlendFactor;
+    vk_pipline_color_blend_attachment_state.dstAlphaBlendFactor = (VkBlendFactor)this->dstAlphaBlendFactor;
+    vk_pipline_color_blend_attachment_state.alphaBlendOp = (VkBlendOp)this->alphaBlendOp;
     vk_pipline_color_blend_attachment_state.colorWriteMask = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
 
     // If renderPass is not VK_NULL_HANDLE,
@@ -287,13 +291,17 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_color_blend_state_create_info.pNext = nullptr;
     vk_pipeline_color_blend_state_create_info.flags = 0;
     vk_pipeline_color_blend_state_create_info.logicOpEnable = VK_FALSE;
-    vk_pipeline_color_blend_state_create_info.logicOp = VK_LOGIC_OP_NO_OP;
+    if (this->logicOpEnable)
+    {
+        vk_pipeline_color_blend_state_create_info.logicOpEnable = VK_TRUE;
+    }
+    vk_pipeline_color_blend_state_create_info.logicOp = (VkLogicOp)this->logicOp;
     vk_pipeline_color_blend_state_create_info.attachmentCount = vk_pipeline_color_blend_attachment_states.size();
     vk_pipeline_color_blend_state_create_info.pAttachments = vk_pipeline_color_blend_attachment_states.data();
-    vk_pipeline_color_blend_state_create_info.blendConstants[0] = 1.0f;
-    vk_pipeline_color_blend_state_create_info.blendConstants[1] = 1.0f;
-    vk_pipeline_color_blend_state_create_info.blendConstants[2] = 1.0f;
-    vk_pipeline_color_blend_state_create_info.blendConstants[3] = 1.0f;
+    vk_pipeline_color_blend_state_create_info.blendConstants[0] = this->constantR;
+    vk_pipeline_color_blend_state_create_info.blendConstants[1] = this->constantG;
+    vk_pipeline_color_blend_state_create_info.blendConstants[2] = this->constantB;
+    vk_pipeline_color_blend_state_create_info.blendConstants[3] = this->constantA;
 
     std::vector<VkDynamicState> vk_dynamic_states;
     vk_dynamic_states.push_back(VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT);
@@ -347,7 +355,7 @@ void Turbo::Core::TGraphicsPipeline::InternalDestroy()
     vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
+Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
 {
     if (renderPass != nullptr)
     {
@@ -387,7 +395,6 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         this->sample = sample;
 
         // VkPipelineDepthStencilStateCreateInfo
-
         this->depthTestEnable = depthTestEnable;
         this->depthWriteEnable = depthWriteEnable;
         this->depthCompareOp = depthCompareOp;
@@ -411,7 +418,19 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         this->maxDepthBounds = maxDepthBounds;
 
         // VkPipelineColorBlendStateCreateInfo
-        //  目前为 关闭
+        this->logicOpEnable = logicOpEnable;
+        this->logicOp = logicOp;
+        this->blendEnable = blendEnable;
+        this->srcColorBlendFactor = srcColorBlendFactor;
+        this->dstColorBlendFactor = dstColorBlendFactor;
+        this->colorBlendOp = colorBlendOp;
+        this->srcAlphaBlendFactor = srcAlphaBlendFactor;
+        this->dstAlphaBlendFactor = dstAlphaBlendFactor;
+        this->alphaBlendOp = alphaBlendOp;
+        this->constantR = constantR;
+        this->constantG = constantG;
+        this->constantB = constantB;
+        this->constantA = constantA;
 
         // VkPipelineDynamicStateCreateInfo
         //  目前为 viewport scissor linewidth
