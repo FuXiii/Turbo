@@ -4,18 +4,13 @@ Turbo是渲染引擎
 
 ## Version
 
----
 当前版本 0.0.0.12
 
 ## State
 
----
-
 * 开发中
 
 ## Document
-
----
 
 * 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
 * 使用MarkDown书写文字和文档，使用drawio绘制设计图表
@@ -25,13 +20,10 @@ Turbo是渲染引擎
 
 ## Trifles
 
----
-
 * 整理一下头文件，有点乱，去掉不必要的头文件
 
 ## RoadMap
 
----
 2022/5/15
 
 >* `Turbo` 引擎对于 `Vulkan 1.0` 的相关核心功能已初步成型，由于`Vulkan`本身的复杂性还有很多特性没有实现，在此做一下记录，记录该引擎以实现的特性和未来计划实现特性，该特性记录将会和`docs/Issue.md`文档配合使用。
@@ -41,7 +33,7 @@ Turbo是渲染引擎
 
 2022/5/28
 
->* 实现完`Vulkan`的`input attachment`也就完成了延迟渲染相关工作，`Turbo`核心现在对于图形的核心封装设计基本上接近尾声，延迟渲染之后将会开展`FrameGraph`相关设计实现工作
+>* 实现完`Vulkan`的`input attachment`也就是完成了延迟渲染相关工作，`Turbo`核心现在对于图形的核心封装设计基本上接近尾声，延迟渲染之后将会开展`FrameGraph`相关设计实现工作。有关几何着色器，细分着色器，光线追踪等将会在`Turbo`的核心继续展开
 >* `FrameGraph`将会是`Turbo`引擎实现高级特性的重点，`ECS（Entity Component System）`或者`EC（Entity Component）`之类管理场景的相关技术不是`Turbo`引擎的重点，`Turbo`引擎目前的重点目标是不依赖任何窗口库（用户自定义），不依赖任何场景结构技术（用户自己实现自己的场景结构），`Turbo`可以很轻松的嵌入其中。
 
 ### 已完成特性
@@ -110,8 +102,6 @@ Turbo是渲染引擎
 * 非`Core`：`ECS`层
 
 ## Log
-
----
 
 * 2020/10/29
     >
