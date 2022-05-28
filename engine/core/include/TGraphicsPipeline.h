@@ -121,6 +121,58 @@ typedef enum class TStencilOp
     DECREMENT_AND_WRAP = 7
 } TStencilOp;
 
+typedef enum class TLogicOp
+{
+    CLEAR = 0,
+    AND = 1,
+    AND_REVERSE = 2,
+    COPY = 3,
+    AND_INVERTED = 4,
+    NO_OP = 5,
+    XOR = 6,
+    OR = 7,
+    NOR = 8,
+    EQUIVALENT = 9,
+    INVERT = 10,
+    OR_REVERSE = 11,
+    COPY_INVERTED = 12,
+    OR_INVERTED = 13,
+    NAND = 14,
+    SET = 15,
+} TLogicOp;
+
+typedef enum class TBlendFactor
+{
+    ZERO = 0,
+    ONE = 1,
+    SRC_COLOR = 2,
+    ONE_MINUS_SRC_COLOR = 3,
+    DST_COLOR = 4,
+    ONE_MINUS_DST_COLOR = 5,
+    SRC_ALPHA = 6,
+    ONE_MINUS_SRC_ALPHA = 7,
+    DST_ALPHA = 8,
+    ONE_MINUS_DST_ALPHA = 9,
+    CONSTANT_COLOR = 10,
+    ONE_MINUS_CONSTANT_COLOR = 11,
+    CONSTANT_ALPHA = 12,
+    ONE_MINUS_CONSTANT_ALPHA = 13,
+    SRC_ALPHA_SATURATE = 14,
+    SRC1_COLOR = 15,
+    ONE_MINUS_SRC1_COLOR = 16,
+    SRC1_ALPHA = 17,
+    ONE_MINUS_SRC1_ALPHA = 18,
+} TBlendFactor;
+
+typedef enum class TBlendOp
+{
+    ADD = 0,
+    SUBTRACT = 1,
+    REVERSE_SUBTRACT = 2,
+    MIN = 3,
+    MAX = 4,
+} TBlendOp;
+
 class TGraphicsPipeline : public Turbo::Core::TPipeline
 {
   private:
@@ -169,6 +221,22 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     float maxDepthBounds;
     //</DepthStencilState>
 
+    //<Blend>
+    bool logicOpEnable;
+    TLogicOp logicOp;
+    bool blendEnable;
+    TBlendFactor srcColorBlendFactor;
+    TBlendFactor dstColorBlendFactor;
+    TBlendOp colorBlendOp;
+    TBlendFactor srcAlphaBlendFactor;
+    TBlendFactor dstAlphaBlendFactor;
+    TBlendOp alphaBlendOp;
+    float constantR;
+    float constantG;
+    float constantB;
+    float constantA;
+    //</Blend>
+
     uint32_t subpass;
 
   protected:
@@ -176,7 +244,7 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     virtual void InternalDestroy() override;
 
   public:
-    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = true, bool depthWriteEnable = true, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0);
+    TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TShader *> &shaders, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = true, bool depthWriteEnable = true, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0, bool logicOpEnable = false, TLogicOp logicOp = TLogicOp::NO_OP, bool blendEnable = false, TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO, TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO, TBlendOp colorBlendOp = TBlendOp::ADD, TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO, TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO, TBlendOp alphaBlendOp = TBlendOp::ADD, float constantR = 1, float constantG = 1, float constantB = 1, float constantA = 1);
     ~TGraphicsPipeline();
 
     TTopologyType GetTopologyType();
