@@ -851,3 +851,7 @@ Turbo是渲染引擎
   >* `TGraphicsPipeline`中增加`typedef enum class TBlendFactor`  声明，对应`VkBlendFactor`
   >* `TGraphicsPipeline`中增加`typedef enum class TBlendOp`  声明，对应`VkBlendOp`
   >* `TGraphicsPipeline`构造函数中增加混合相关参数
+
+  * 2022/5/28 设计架构
+  >
+  >* 使用`Turbo`核心成功渲染`IMGUI`
