@@ -36,6 +36,10 @@ Turbo是渲染引擎
 >* 实现完`Vulkan`的`input attachment`也就是完成了延迟渲染相关工作，`Turbo`核心现在对于图形的核心封装设计基本上接近尾声，延迟渲染之后将会开展`FrameGraph`相关设计实现工作。有关几何着色器，细分着色器，光线追踪等将会在`Turbo`的核心继续展开
 >* `FrameGraph`将会是`Turbo`引擎实现高级特性的重点，`ECS（Entity Component System）`或者`EC（Entity Component）`之类管理场景的相关技术不是`Turbo`引擎的重点，`Turbo`引擎目前的重点目标是不依赖任何窗口库（用户自定义），不依赖任何场景结构技术（用户自己实现自己的场景结构），`Turbo`可以很轻松的嵌入其中。
 
+2022/5/30 设计架构
+
+>* `Turbo`核心基本实现完成，接下来开始`FrameGraph`的设计开发。敬请期待。
+
 ### 已完成特性
 
 1.`Vulkan`核心特性的基本封装，包括：
@@ -855,3 +859,17 @@ Turbo是渲染引擎
   * 2022/5/28 设计架构
   >
   >* 使用`Turbo`核心成功渲染`IMGUI`
+
+  * 2022/5/29 设计架构
+  >
+  >* 开始适配`input attachment`
+
+  * 2022/5/30 设计架构
+  >
+  >* `TDescriptor`中增加`class TInputAttachmentDescriptor` 对应`VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT`
+  >* `TShader`中增加`std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;` 用于存`input attachment`，并增加`const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();`成员函数用于获取相关数据
+  >* `TShader`中增加对于`input attachment`的解析
+  >* `TPipeline`中增加对于`input attachment`的解析
+  >* `TPipelineDescriptorSet::BindData(...)`中增加对于`input attachment`的适配
+  >* `TDescriptorSetLayout`中增加`TDescriptorType GetDescriptorType(uint32_t binding)`成员函数,用于获取特性`binding`对应的描述符类型
+  >* `input attachment`基本适配完成

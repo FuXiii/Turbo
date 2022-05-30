@@ -222,3 +222,17 @@ Turbo::Core::TPushConstantDescriptor::TPushConstantDescriptor(TShader *shader, T
 Turbo::Core::TPushConstantDescriptor::~TPushConstantDescriptor()
 {
 }
+
+Turbo::Core::TInputAttachmentDescriptor::TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::INPUT_ATTACHMENT, dataType, set, binding, count, name)
+{
+    this->index = index;
+}
+
+Turbo::Core::TInputAttachmentDescriptor::~TInputAttachmentDescriptor()
+{
+}
+
+uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex()
+{
+    return this->index;
+}

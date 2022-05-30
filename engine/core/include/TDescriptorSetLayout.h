@@ -1,13 +1,14 @@
 #pragma once
 #ifndef TDESCRIPTORSETLAYOUT_H
 #define TDESCRIPTORSETLAYOUT_H
+#include "TDescriptor.h"
 #include "TVulkanHandle.h"
+
 
 namespace Turbo
 {
 namespace Core
 {
-class TDescriptor;
 class TDevice;
 
 class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
@@ -28,6 +29,8 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
     uint32_t GetSet();
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
+
+    TDescriptorType GetDescriptorType(uint32_t binding);
 
     virtual std::string ToString() override;
 };

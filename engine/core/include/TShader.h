@@ -62,6 +62,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TSampledImageDescriptor *> sampledImageDescriptors;
     std::vector<TSamplerDescriptor *> samplerDescriptors;
     std::vector<TPushConstantDescriptor *> pushConstantDescriptors;
+    std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;
 
     std::string entryPoint;
 
@@ -89,6 +90,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors();
     const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
+    const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();
 
     std::vector<TInterface> GetInputs();
     std::vector<TInterface> GetOutputs();

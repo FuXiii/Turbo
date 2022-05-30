@@ -162,6 +162,19 @@ class TPushConstantDescriptor : public TUniformBufferDescriptor
     ~TPushConstantDescriptor();
 };
 
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+class TInputAttachmentDescriptor : public TDescriptor
+{
+  private:
+    uint32_t index;
+
+  public:
+    TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TInputAttachmentDescriptor();
+
+    uint32_t GetIndex();
+};
+
 } // namespace Core
 } // namespace Turbo
 
