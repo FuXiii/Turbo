@@ -266,7 +266,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         }
         break;
         case spv::Dim::DimCube: {
-            //cubemap combined image
+            // cubemap combined image
         }
         break;
         case spv::Dim::DimRect: {
@@ -549,7 +549,31 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
 
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = subpass_input_item.name;
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        // vector and matrices
+        uint32_t vec_size = type.vecsize; // size of vec
+        uint32_t colums = type.columns;   // 1 column means it's a vector.
+
         uint32_t attachment_index = glsl.get_decoration(id, spv::DecorationInputAttachmentIndex);
+
+        TInputAttachmentDescriptor *input_attachment_descriptor = new TInputAttachmentDescriptor(attachment_index, this, descriptor_data_type, set, binding, count, name);
+        this->inputAttachmentDescriptors.push_back(input_attachment_descriptor);
     }
 
     for (spirv_cross::Resource &storage_buffer_item : resources.storage_buffers)
@@ -838,36 +862,37 @@ Turbo::Core::TShader::~TShader()
     {
         delete uniform_buffer_descriptor_item;
     }
-
     this->uniformBufferDescriptors.clear();
 
     for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
     {
         delete combined_image_sampler_descriptor_item;
     }
-
     this->combinedImageSamplerDescriptors.clear();
 
     for (TSampledImageDescriptor *sampled_image_descriptor_item : this->sampledImageDescriptors)
     {
         delete sampled_image_descriptor_item;
     }
-
     this->sampledImageDescriptors.clear();
 
     for (TSamplerDescriptor *sampler_descriptor_item : this->samplerDescriptors)
     {
         delete sampler_descriptor_item;
     }
-
     this->samplerDescriptors.clear();
 
     for (TPushConstantDescriptor *push_constant_descriptor_item : this->pushConstantDescriptors)
     {
         delete push_constant_descriptor_item;
     }
-
     this->pushConstantDescriptors.clear();
+
+    for (TInputAttachmentDescriptor *input_attachment_descriptor_item : this->inputAttachmentDescriptors)
+    {
+        delete input_attachment_descriptor_item;
+    }
+    this->inputAttachmentDescriptors.clear();
 
     free(this->code);
     this->code = nullptr;
@@ -978,6 +1003,11 @@ const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetS
 const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TShader::GetPushConstantDescriptors()
 {
     return this->pushConstantDescriptors;
+}
+
+const std::vector<Turbo::Core::TInputAttachmentDescriptor *> &Turbo::Core::TShader::GetInputAttachmentDescriptors()
+{
+    return this->inputAttachmentDescriptors;
 }
 
 std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()

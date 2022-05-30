@@ -55,6 +55,13 @@ void Turbo::Core::TPipeline::InternalCreate()
         {
             pipeline_push_constant_descriptors.push_back(push_constant_descriptor_item);
         }
+
+        std::vector<TInputAttachmentDescriptor *> input_attachment_descriptors = shader_item->GetInputAttachmentDescriptors();
+        for (TInputAttachmentDescriptor *input_attachment_descriptor_item : input_attachment_descriptors)
+        {
+            uint32_t set = input_attachment_descriptor_item->GetSet();
+            descriptor_set_map[set].push_back(input_attachment_descriptor_item);
+        }
     }
 
     {

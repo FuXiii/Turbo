@@ -252,9 +252,11 @@ const std::string IMGUI_FRAG_SHADER_STR = "#version 450\n"
                                           "layout (location = 0) in vec2 inUV;\n"
                                           "layout (location = 1) in vec4 inColor;\n"
                                           "layout (location = 0) out vec4 outColor;\n"
+                                          "layout (location = 1) out vec4 outCustomColor;\n"
                                           "void main() \n"
                                           "{\n"
                                           "	outColor = inColor * texture(fontSampler, inUV);\n"
+                                          "	outCustomColor = outColor;\n"
                                           "}";
 
 const std::string SKY_VERT_SHADER_STR = "#version 450\n"
@@ -275,9 +277,11 @@ const std::string SKY_FRAG_SHADER_STR = "#version 450\n"
                                         "layout(set = 0, binding = 1) uniform samplerCube samplerCubeMap;\n"
                                         "layout(location = 0) in vec3 inUVW;\n"
                                         "layout(location = 0) out vec4 outFragColor;\n"
+                                        "layout (location = 1) out vec4 outCustomColor;\n"
                                         "void main()\n"
                                         "{\n"
                                         "    outFragColor = texture(samplerCubeMap, inUVW);\n"
+                                        "    outCustomColor = outFragColor;\n"
                                         "}\n";
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
@@ -314,20 +318,52 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 3) in vec4 sunPosition;\n"
                                     "layout (location = 4) in vec3 inPosition;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
+                                    "layout (location = 1) out vec4 outCustomColor;\n"
                                     "layout (push_constant) uniform my_push_constants_t\n"
                                     "{"
-                                    "   float bias;\n"
+                                    "   float alpha;\n"
                                     "} my_push_constants;\n"
                                     "void main() {\n"
-                                    "	float load_bias = my_push_constants.bias * 10;\n"
+                                    "	float load_bias = my_push_constants.alpha * 10;\n"
                                     "	vec3 normalize_position = normalize(inPosition);\n"
                                     "	vec3 reflect_dir = reflect(normalize_position, normalize(normal.xyz));\n"
                                     "	vec4 sky_cube_color = texture(samplerColor, reflect_dir, 0);\n"
                                     "	float lum = max(dot(normal.xyz, normalize(sunPosition.xyz)), 0.0)*0.4f;\n"
                                     "	vec3 sun_color = vec3(1,1,1);\n"
                                     "	vec4 _outColor = sky_cube_color * texture(sampler2D(myTexture, mySampler), uv, 0)* vec4((0.3 +  lum) * sun_color, 1.0);\n"
-                                    "	outColor = vec4(_outColor.xyz,scale);\n"
+                                    "   outColor = vec4(_outColor.xyz,my_push_constants.alpha);\n"
+                                    "   outCustomColor = outColor;\n"
                                     "}\n";
+
+const std::string INPUT_ATTACHMENT_VERT_SHADER_STR = "#version 450\n"
+                                                     "out gl_PerVertex {\n"
+                                                     "	vec4 gl_Position;\n"
+                                                     "};\n"
+                                                     "void main() \n"
+                                                     "{\n"
+                                                     "	gl_Position = vec4(vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2) * 2.0f - 1.0f, 0.0f, 1.0f);\n"
+                                                     "}";
+
+const std::string INPUT_ATTACHMENT_FRAG_SHADER_STR = "#version 450\n"
+                                                     "layout (input_attachment_index = 0, set = 0, binding = 0) uniform subpassInput inputColor;\n"
+                                                     "layout (input_attachment_index = 1, set = 0, binding = 1) uniform subpassInput inputDepth;\n"
+                                                     "layout (push_constant) uniform my_push_constants_t\n"
+                                                     "{"
+                                                     "   int isOutputDepth;\n"
+                                                     "} my_push_constants;\n"
+                                                     "layout (location = 0) out vec4 outColor;\n"
+                                                     "void main() {\n"
+                                                     "    if(my_push_constants.isOutputDepth == 0)\n"
+                                                     "    {\n"
+                                                     "        outColor=subpassLoad(inputColor).rgba;\n"
+                                                     "    }\n"
+                                                     "    else\n"
+                                                     "    { \n"
+                                                     "        float alpha=subpassLoad(inputColor).a;\n"
+                                                     "        float depth=subpassLoad(inputDepth).r;\n"
+                                                     "        outColor=vec4(depth,depth,depth,alpha);\n"
+                                                     "    }\n"
+                                                     "}\n";
 
 typedef struct POSITION
 {
@@ -351,7 +387,8 @@ typedef struct TEXCOORD
 
 int main()
 {
-    float scale = 1.0f;
+    float value = -10.0f;
+    float alpha = 1.0;
 
     //<gltf for Suzanne>
     std::vector<POSITION> POSITION_data;
@@ -619,10 +656,10 @@ int main()
     memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
     sky_cube_mvp_buffer->Unmap();
 
-    Turbo::Core::TBuffer *scale_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    void *scale_ptr = scale_buffer->Map();
-    memcpy(scale_ptr, &scale, sizeof(scale));
-    scale_buffer->Unmap();
+    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    void *value_ptr = value_buffer->Map();
+    memcpy(value_ptr, &value, sizeof(value));
+    value_buffer->Unmap();
 
     Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
     void *position_buffer_ptr = position_buffer->Map();
@@ -931,14 +968,17 @@ int main()
     Turbo::Core::TImageView *ktx_sky_cube_image_view = new Turbo::Core::TImageView(ktx_sky_cube_image, Turbo::Core::TImageViewType::IMAGE_VIEW_CUBE, ktx_sky_cube_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_sky_cube_image->GetMipLevels(), 0, 6 /*for cubemap six faces*/);
     Turbo::Core::TSampler *sky_cube_sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, ktx_sky_cube_image->GetMipLevels());
 
-    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImage *color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetWidth(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
+
+    Turbo::Core::TShader *input_attachment_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, INPUT_ATTACHMENT_VERT_SHADER_STR);
+    Turbo::Core::TShader *input_attachment_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, INPUT_ATTACHMENT_FRAG_SHADER_STR);
 
     Turbo::Core::TShader *sky_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, SKY_VERT_SHADER_STR);
     Turbo::Core::TShader *sky_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, SKY_FRAG_SHADER_STR);
@@ -965,7 +1005,7 @@ int main()
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     std::vector<Turbo::Core::TBuffer *> buffers;
-    buffers.push_back(scale_buffer);
+    buffers.push_back(value_buffer);
 
     std::vector<Turbo::Core::TBuffer *> mvp_buffers;
     mvp_buffers.push_back(mvp_buffer);
@@ -978,8 +1018,14 @@ int main()
     subpass.AddColorAttachmentReference(1, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // custom color image
     subpass.SetDepthStencilAttachmentReference(2, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
+    Turbo::Core::TSubpass subpass1(Turbo::Core::TPipelineType::Graphics);
+    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL); // swapchain color image
+    subpass1.AddInputAttachmentReference(1, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL); // custom color image, input attachment
+    subpass1.AddInputAttachmentReference(2, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL); // depth image, input attachment
+
     std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass); // subpass 1
+    subpasses.push_back(subpass);  // subpass 0
+    subpasses.push_back(subpass1); // subpass 1
 
     Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment color_attachment(color_image->GetFormat(), color_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
@@ -1009,8 +1055,10 @@ int main()
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
     std::vector<Turbo::Core::TShader *> sky_cube_shaders{sky_vertex_shader, sky_fragment_shader};
+    std::vector<Turbo::Core::TShader *> input_attachment_shaders{input_attachment_vertex_shader, input_attachment_fragment_shader};
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TGraphicsPipeline *sky_cube_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, sky_cube_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_FRONT_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false);
+    Turbo::Core::TGraphicsPipeline *input_attachment_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, vertex_bindings, input_attachment_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL);
 
     std::vector<Turbo::Core::TImageView *> my_textures;
     my_textures.push_back(/*texture_view*/ ktx_texture_view);
@@ -1020,6 +1068,12 @@ int main()
 
     std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>> sky_cube_combined_images;
     sky_cube_combined_images.push_back(std::make_pair(ktx_sky_cube_image_view, sky_cube_sampler));
+
+    std::vector<Turbo::Core::TImageView *> input_attachment_colors;
+    input_attachment_colors.push_back(color_image_view);
+
+    std::vector<Turbo::Core::TImageView *> input_attachment_depths;
+    input_attachment_depths.push_back(depth_image_view);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
@@ -1031,6 +1085,10 @@ int main()
     Turbo::Core::TPipelineDescriptorSet *sky_cube_pipeline_descriptor_set = descriptor_pool->Allocate(sky_cube_pipeline->GetPipelineLayout());
     sky_cube_pipeline_descriptor_set->BindData(0, 0, 0, sky_cube_mvp_buffers);
     sky_cube_pipeline_descriptor_set->BindData(0, 1, 0, sky_cube_combined_images);
+
+    Turbo::Core::TPipelineDescriptorSet *input_attachment_pipeline_descriptor_set = descriptor_pool->Allocate(input_attachment_pipeline->GetPipelineLayout());
+    input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, input_attachment_colors);
+    input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, input_attachment_depths);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -1067,8 +1125,8 @@ int main()
 
     Turbo::Core::TVertexBinding imgui_vertex_binding(0, sizeof(ImDrawVert), Turbo::Core::TVertexRate::VERTEX);
     imgui_vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, pos));  // position
-    imgui_vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, uv));   // position
-    imgui_vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R8G8B8A8_UNORM, IM_OFFSETOF(ImDrawVert, col)); // position
+    imgui_vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, uv));   // uv
+    imgui_vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R8G8B8A8_UNORM, IM_OFFSETOF(ImDrawVert, col)); // color
 
     std::vector<Turbo::Core::TShader *> imgui_shaders;
     imgui_shaders.push_back(imgui_vertex_shader);
@@ -1077,7 +1135,7 @@ int main()
     std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
     imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     unsigned char *imgui_font_pixels;
     int imgui_font_width, imgui_font_height;
@@ -1121,22 +1179,21 @@ int main()
     //</IMGUI>
 
     bool show_demo_window = true;
-    bool show_another_window = false;
+    bool is_shouw_depth = false;
 
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
-        void *_ptr = scale_buffer->Map();
-        memcpy(_ptr, &scale, sizeof(scale));
-        scale_buffer->Unmap();
-
-        float bias = (cos(_time) + 1) / 2.0f;
+        void *_ptr = value_buffer->Map();
+        memcpy(_ptr, &value, sizeof(value));
+        value_buffer->Unmap();
 
         model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = model * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 0.0f, 1.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100000.0f);
+        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, value));
+        projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 30.0f);
         mvp = projection * view * model;
 
         sky_cube_view = glm::mat4(glm::mat3(view));
@@ -1229,7 +1286,6 @@ int main()
             }
 
             ImGui::NewFrame();
-            ImGui::ShowDemoWindow(&show_demo_window);
 
             {
                 static float f = 0.0f;
@@ -1238,10 +1294,10 @@ int main()
                 ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
                 ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-                ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-                ImGui::Checkbox("Another Window", &show_another_window);
 
-                ImGui::SliderFloat("float", &scale, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::Checkbox("Is show depth", &is_shouw_depth);
+                ImGui::SliderFloat("alpha", &alpha, 0.0f, 1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &value, -10.0f, 0.0f); // Edit 1 float using a slider from 0.0f to 1.0f
 
                 if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;
@@ -1249,15 +1305,6 @@ int main()
                 ImGui::Text("counter = %d", counter);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-                ImGui::End();
-            }
-
-            if (show_another_window)
-            {
-                ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-                ImGui::Text("Hello from another window!");
-                if (ImGui::Button("Close Me"))
-                    show_another_window = false;
                 ImGui::End();
             }
             //</IMGUI Update>
@@ -1285,13 +1332,30 @@ int main()
 
             // Suzanne
             command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdPushConstants(0, sizeof(bias), &bias);
+            command_buffer->CmdPushConstants(0, sizeof(alpha), &alpha);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdBindIndexBuffer(index_buffer);
             command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+
+            command_buffer->CmdNextSubpass();
+
+            command_buffer->CmdBindPipeline(input_attachment_pipeline);
+            int is_out_put_depth = 0;
+            if (is_shouw_depth)
+            {
+                is_out_put_depth = 1;
+                command_buffer->CmdPushConstants(0, sizeof(is_out_put_depth), &is_out_put_depth);
+            }
+            else
+            {
+                is_out_put_depth = 0;
+                command_buffer->CmdPushConstants(0, sizeof(is_out_put_depth), &is_out_put_depth);
+            }
+            command_buffer->CmdBindPipelineDescriptorSet(input_attachment_pipeline_descriptor_set);
+            command_buffer->CmdDraw(3, 1, 0, 0);
 
             //<IMGUI Rendering>
             ImGui::Render();
@@ -1437,7 +1501,7 @@ int main()
                     }
                 }
             }
-            //<IMGUI Rendering>
+            //</IMGUI Rendering>
 
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
@@ -1506,11 +1570,11 @@ int main()
                 }
 
                 // recreate color image and view
-                color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+                color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
                 color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
                 // recreate depth image and view
-                depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+                depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
                 depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
                 // recreate framebuffer
@@ -1524,6 +1588,15 @@ int main()
                     Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                     swpachain_framebuffers.push_back(swapchain_framebuffer);
                 }
+
+                std::vector<Turbo::Core::TImageView *> temp_input_attachment_colors;
+                temp_input_attachment_colors.push_back(color_image_view);
+
+                std::vector<Turbo::Core::TImageView *> temp_input_attachment_depths;
+                temp_input_attachment_depths.push_back(depth_image_view);
+
+                input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, temp_input_attachment_colors);
+                input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, temp_input_attachment_depths);
             }
             break;
             default: {
@@ -1590,11 +1663,11 @@ int main()
             }
 
             // recreate color image and view
-            color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
             color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
             // recreate depth image and view
-            depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
             depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
             // recreate framebuffer
@@ -1608,6 +1681,15 @@ int main()
                 Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                 swpachain_framebuffers.push_back(swapchain_framebuffer);
             }
+
+            std::vector<Turbo::Core::TImageView *> temp_input_attachment_colors;
+            temp_input_attachment_colors.push_back(color_image_view);
+
+            std::vector<Turbo::Core::TImageView *> temp_input_attachment_depths;
+            temp_input_attachment_depths.push_back(depth_image_view);
+
+            input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, temp_input_attachment_colors);
+            input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, temp_input_attachment_depths);
         }
         break;
         default: {
@@ -1621,7 +1703,7 @@ int main()
     }
 
     ImageSaveToPPM(swapchain_images[0], command_pool, queue, "VulkanImage");
-    // ImageSaveToPPM(color_image, command_pool, queue, "ColorImage");
+    ImageSaveToPPM(color_image, command_pool, queue, "ColorImage");
 
     if (imgui_vertex_buffer != nullptr)
     {
@@ -1641,6 +1723,8 @@ int main()
 
     descriptor_pool->Free(pipeline_descriptor_set);
     descriptor_pool->Free(sky_cube_pipeline_descriptor_set);
+    descriptor_pool->Free(input_attachment_pipeline_descriptor_set);
+    delete input_attachment_pipeline;
     delete pipeline;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
@@ -1656,6 +1740,8 @@ int main()
     delete fragment_shader;
     delete sky_vertex_shader;
     delete sky_fragment_shader;
+    delete input_attachment_vertex_shader;
+    delete input_attachment_fragment_shader;
     delete color_image_view;
     delete color_image;
     delete depth_image_view;
@@ -1680,7 +1766,7 @@ int main()
     delete position_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
-    delete scale_buffer;
+    delete value_buffer;
     delete sky_cube_mvp_buffer;
     delete mvp_buffer;
     command_pool->Free(command_buffer);

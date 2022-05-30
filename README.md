@@ -855,3 +855,16 @@ Turbo是渲染引擎
   * 2022/5/28 设计架构
   >
   >* 使用`Turbo`核心成功渲染`IMGUI`
+
+  * 2022/5/29 设计架构
+  >
+  >* 开始适配`input attachment`
+
+  * 2022/5/30 设计架构
+  >
+  >* `TDescriptor`中增加`class TInputAttachmentDescriptor` 对应`VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT`
+  >* `TShader`中增加`std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;` 用于存`input attachment`，并增加`const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();`成员函数用于获取相关数据
+  >* `TShader`中增加对于`input attachment`的解析
+  >* `TPipeline`中增加对于`input attachment`的解析
+  >* `TPipelineDescriptorSet::BindData(...)`中增加对于`input attachment`的适配
+  >* `TDescriptorSetLayout`中增加`TDescriptorType GetDescriptorType(uint32_t binding)`成员函数,用于获取特性`binding`对应的描述符类型

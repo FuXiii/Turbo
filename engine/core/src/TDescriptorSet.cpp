@@ -66,7 +66,7 @@ uint32_t Turbo::Core::TDescriptorSet::GetSet()
     return this->descriptorSetLayout->GetSet();
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *>& buffers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers)
 {
     std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
     for (TBuffer *buffer_item : buffers)
@@ -140,6 +140,20 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
         vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
     }
 
+    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
+    switch (descriptor_type)
+    {
+    case Turbo::Core::TDescriptorType::SAMPLED_IMAGE:
+    case Turbo::Core::TDescriptorType::INPUT_ATTACHMENT: {
+        // nothing to do
+    }
+    break;
+    default: {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSet::BindData", "this descriptor binding type not compatible current layout binding type");
+    }
+    break;
+    }
+
     VkWriteDescriptorSet vk_write_descriptor_set;
     vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     vk_write_descriptor_set.pNext = nullptr;
@@ -147,7 +161,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.dstBinding = binding;
     vk_write_descriptor_set.dstArrayElement = dstArrayElement;
     vk_write_descriptor_set.descriptorCount = imageViews.size();
-    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    vk_write_descriptor_set.descriptorType = (VkDescriptorType)descriptor_type;
     vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;

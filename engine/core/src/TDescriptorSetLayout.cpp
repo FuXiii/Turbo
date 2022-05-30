@@ -86,6 +86,19 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding)
+{
+    for (TDescriptor *dscriptor_item : this->descriptors)
+    {
+        if (dscriptor_item->GetBinding() == binding)
+        {
+            return dscriptor_item->GetType();
+        }
+    }
+
+    throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");
+}
+
 std::string Turbo::Core::TDescriptorSetLayout::ToString()
 {
     return std::string();
