@@ -402,7 +402,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:\\Turbo\\asset\\models\\Suzanne.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/Suzanne.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -483,7 +483,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:\\Turbo\\asset\\models\\cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -708,150 +708,6 @@ int main()
     memcpy(sky_cube_index_buffer_ptr, SKY_CUBE_INDICES_data.data(), sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
     sky_cube_index_buffer->Unmap();
     SKY_CUBE_INDICES_data.clear();
-
-    Turbo::Core::TImage *texture = nullptr;
-    uint32_t mip_levels = 0;
-    {
-        std::string texture_file_path = "E:/Turbo/asset/images/lunarg.ppm";
-        int texture_width = 0;
-        int texture_height = 0;
-        if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, 0, nullptr))
-        {
-            std::cout << "Could not read texture file\n";
-            exit(-1);
-        }
-
-        mip_levels = static_cast<uint32_t>(::floor(::log2(::fmax(texture_width, texture_height))) + 1);
-
-        Turbo::Core::TFormatInfo texture_format(Turbo::Core::TFormatType::R8G8B8A8_UNORM);
-        Turbo::Core::TFormatFeatures texture_format_feature = physical_device->GetLinearFeatures(texture_format);
-        bool is_texture_need_staging = true;
-        if ((texture_format_feature & Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT) == Turbo::Core::TFormatFeatureBits::FEATURE_SAMPLED_IMAGE_BIT)
-        {
-            is_texture_need_staging = false;
-        }
-
-        uint32_t linear_max_mip_levels = physical_device->GetMaxImageMipLevels(Turbo::Core::TFormatType::R8G8B8A8_UNORM, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, 0);
-        uint32_t optimal_max_mip_levels = physical_device->GetMaxImageMipLevels(Turbo::Core::TFormatType::R8G8B8A8_UNORM, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, 0);
-
-        if (linear_max_mip_levels < 2 || is_texture_need_staging)
-        {
-            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-            Turbo::Core::TBuffer *texture_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, texture_width * texture_height * 4);
-
-            void *texture_buffer_ptr = texture_buffer->Map();
-            if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, texture_width * 4, (unsigned char *)texture_buffer_ptr))
-            {
-                std::cout << "Could not load texture file lunarg.ppm\n";
-                exit(-1);
-            }
-            texture_buffer->Unmap();
-
-            Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
-            texture_command_buffer->Begin();
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-            texture_command_buffer->CmdCopyBufferToImage(texture_buffer, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, texture_width, texture_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, texture_width, texture_height, 1);
-
-            // Transition first mip level to transfer source so we can blit(read) from it
-            // Get ready for generate mipmap
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-            // generate mipmap from n to n+1
-            for (uint32_t mip_index = 1; mip_index < mip_levels; mip_index++)
-            {
-                // Prepare current mip level as image blit destination
-                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
-
-                // Blit from previous level
-                int32_t src_mip_width = int32_t(texture_width >> (mip_index - 1));
-                int32_t src_mip_height = int32_t(texture_height >> (mip_index - 1));
-                uint32_t src_mip_level = mip_index - 1;
-
-                int32_t dst_mip_width = int32_t(texture_width >> mip_index);
-                int32_t dst_mip_height = int32_t(texture_width >> mip_index);
-                uint32_t dst_mip_level = mip_index;
-
-                // generate mipmap
-                texture_command_buffer->CmdBlitImage(texture, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, src_mip_width, src_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, src_mip_level, 0, 1, 0, 0, 0, dst_mip_width, dst_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, dst_mip_level, 0, 1);
-
-                // Prepare current mip level as image blit source for next level
-                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
-            }
-
-            // After the generation, all mipmap are in TRANSFER_SRC layout, so transition all to SHADER_READ
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
-
-            texture_command_buffer->End();
-
-            Turbo::Core::TFence *texture_fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, texture_command_buffer, texture_fence);
-            texture_fence->WaitUntil();
-
-            delete texture_fence;
-            command_pool->Free(texture_command_buffer);
-            delete texture_buffer;
-        }
-        else
-        {
-            texture = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, texture_width, texture_height, 1, mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, Turbo::Core::TImageLayout::PREINITIALIZED);
-
-            VkSubresourceLayout layout = {};
-            VkImageSubresource subres = {};
-            subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            subres.mipLevel = 0;
-            subres.arrayLayer = 0;
-            vkGetImageSubresourceLayout(device->GetVkDevice(), texture->GetVkImage(), &subres, &layout);
-
-            void *texture_ptr = texture->Map();
-            if (!read_ppm(texture_file_path.c_str(), texture_width, texture_height, layout.rowPitch, (unsigned char *)texture_ptr))
-            {
-                std::cout << "Could not load texture file lunarg.ppm\n";
-                exit(-1);
-            }
-            texture->Unmap();
-
-            Turbo::Core::TCommandBuffer *texture_command_buffer = command_pool->Allocate();
-            texture_command_buffer->Begin();
-            // Transition first mip level to transfer source so we can blit(read) from it
-            // Get ready for generate mipmap
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::PREINITIALIZED, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-            // generate mipmap from n to n+1
-            for (uint32_t mip_index = 1; mip_index < mip_levels; mip_index++)
-            {
-                // Prepare current mip level as image blit destination
-                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
-
-                // Blit from previous level
-                int32_t src_mip_width = int32_t(texture_width >> (mip_index - 1));
-                int32_t src_mip_height = int32_t(texture_height >> (mip_index - 1));
-                uint32_t src_mip_level = mip_index - 1;
-
-                int32_t dst_mip_width = int32_t(texture_width >> mip_index);
-                int32_t dst_mip_height = int32_t(texture_width >> mip_index);
-                uint32_t dst_mip_level = mip_index;
-
-                // generate mipmap
-                texture_command_buffer->CmdBlitImage(texture, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, src_mip_width, src_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, src_mip_level, 0, 1, 0, 0, 0, dst_mip_width, dst_mip_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, dst_mip_level, 0, 1);
-
-                // Prepare current mip level as image blit source for next level
-                texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, mip_index, 1, 0, 1);
-            }
-
-            // After the generation, all mipmap are in TRANSFER_SRC layout, so transition all to SHADER_READ
-            texture_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, texture, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
-
-            texture_command_buffer->End();
-
-            Turbo::Core::TFence *texture_fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, texture_command_buffer, texture_fence);
-            texture_fence->WaitUntil();
-
-            delete texture_fence;
-            command_pool->Free(texture_command_buffer);
-        }
-    }
-    Turbo::Core::TImageView *texture_view = new Turbo::Core::TImageView(texture, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, texture->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, mip_levels, 0, 1);
 
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
@@ -1748,8 +1604,6 @@ int main()
     delete depth_image;
     delete sampler;
     delete sky_cube_sampler;
-    delete texture_view;
-    delete texture;
     delete ktx_texture_view;
     delete ktx_image;
     delete ktx_sky_cube_image_view;

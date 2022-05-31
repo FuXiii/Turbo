@@ -18,6 +18,52 @@ Turbo是渲染引擎
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 * 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
 
+## Build
+
+* 首先您需要知道的：
+  * `Turbo`引擎被设计成各种模块，有`Core`核心模块, 有`FrameGraph`模块等。
+  * 目前`Turbo`的核心模块基本完成(未完成部分和相关问题请参考下面的`RoadMap`章节和`docs/Issue.md`文档)
+  * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，您可以直接将他拷贝出来放到自己的工程中
+  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。（将来会专门开设一个`sample`文件夹用于存放各种例子）
+  * 核心会用到的第三方库为：
+    * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
+    * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
+    * `VulkanMemoryAllocator` : 用于分配`Vulkan`资源内存
+  * 本人对于`CMake`并不是非常精通，有关核心是如何寻找`Vulkan`库的，我直接配置的绝对路径，请修改`engine/core/CMakeLists.txt`中的此行代码：
+    >
+    > ```CMake
+    > set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
+    > ```
+    >
+    请将该行修改成您电脑上的`Vulkan`库目录。
+    该问题将会在不远的未来通过动态加载库文件得到解决。┗|｀O′|┛ 嗷~~
+
+  * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
+    * `glfw` :窗口库
+    * `glm` : 用于向量矩阵等运算
+    * `imgui` : 用于绘制界面UI
+    * `KTX-Sofware` : `Khronos Texture`通用纹理标准
+    * `tinygltf` : 读取`gltf`文件库
+
+* 如何编译`Turbo`
+  * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
+  * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
+  * 如果您想直接编译`Turbo`
+    1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
+    2. 请安装`python`。第三方库很多`CMake`使用`Python`脚本运行，安装完后请确保`Python`的`{Python的安装目录}/Python{版本号}/`目录和`{Python的安装目录}/Python{版本号}/Scripts`目录加入到了环境变量中
+    3. 请修改`engine/core/CMakeLists.txt`中的`Vulkan`库目录为您自己的目录
+    4. 之后使用`./CMakeLists.txt`即可
+    5. 设置相关`CMake`参数如下：
+
+        ```CPP
+        KTX_FEATURE_LOADTEST_APPS=OFF//如果您想加载KTX测试，请设置ON
+        KTX_FEATURE_DOC=OFF//如果您想生成KTX文档，请设置ON
+        KTX_FEATURE_STATIC_LIBRARY=ON //目前Turbo按照静态库使用KTX
+        ```
+
+* 如何运行
+    1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是绝对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`:/`字符，替换成自己的目录即可。
+
 ## Trifles
 
 * 整理一下头文件，有点乱，去掉不必要的头文件
@@ -93,7 +139,7 @@ Turbo是渲染引擎
   * 多线程
   * 计算着色器
   * 计算管线
-  * 延迟渲染
+  * **[ ✓ ]** 延迟渲染
 
 * 非`Core`：跨平台窗口层抽象
 
@@ -102,6 +148,8 @@ Turbo是渲染引擎
 * 非`Core`：`KTX` 和 `glTF`
 
 * 非`Core`：`FrameGraph`层
+
+* 非`Core`：`FrameGraph`层实现`PBR`
 
 * 非`Core`：`ECS`层
 
