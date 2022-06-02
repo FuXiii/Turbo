@@ -384,12 +384,12 @@ Turbo是渲染引擎
     >* `TShader`中`virtual void InternalParseSpirV()`完成`spirv_cross::SPIRType`到`VkDescriptorType`的映射
     >* <font color=yellow> 未完待续 </font>
 
-  * 2022/4/13 设计架构
+* 2022/4/13 设计架构
   >
   >* 解决了`TShader`中使用`spirv-cross`运行时的崩溃
   >* `TShader`<font color=yellow> 未完待续 </font>
 
-  * 2022/4/14 设计架构
+* 2022/4/14 设计架构
   >
   >* 继续`TShader`中使用`spirv-cross`对于`Shader`的解析，在`TShader`中应提供类似如下成员变量：
   >
@@ -403,7 +403,7 @@ Turbo是渲染引擎
   >
   > 这需要`Turbo`中声明`TUniformBufferDescriptor`等类。
 
-  * 2022/4/15 设计架构
+* 2022/4/15 设计架构
   >
   >* 解决了`TDescriptor.h`中增加了`TUniformBufferDescriptor`和`TStructMember`类
   >
@@ -411,35 +411,35 @@ Turbo是渲染引擎
   >   * `TUniformBufferDescriptor`用于表示`UniformBuffer`描述符,
   >   * `TStructMember`用于表示`TUniformBufferDescriptor`中的数据结构
 
-  * 2022/4/16 设计架构
+* 2022/4/16 设计架构
   >
   >* 继续`TUniformBufferDescriptor`
 
-  * 2022/4/17 设计架构
+* 2022/4/17 设计架构
   >
   >* `TShader.cpp`中增加`Turbo::Core::TShaderDataType SpirvCrossSPIRTypeBaseTypeToTShaderDataType(spirv_cross::SPIRType::BaseType baseType)`函数，将`spirv_cross::SPIRType::BaseType`类型转换成`Turbo::Core::TShaderDataType`类型
   >* `TShader.cpp`中对`UniformBuffer`的解析基本完成
   >* `TShader.cpp`中对`TInterface`将改成继承自`Turbo::Core::TStructMember`
 
-  * 2022/4/18 设计架构
+* 2022/4/18 设计架构
   >
   >* `TShader.cpp`中对`TInterface`的`input`和`output`的解析基本完成
   >* `Turbo::Core::TDescriptor`代表`Vulkan`的`VkDescriptorSetLayoutBinding`
   >* `Turbo::Core::TUniformBufferDescriptor`代表`Vulkan`的`VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER`
   >* 需要创建`TDescriptorSet`类继承自`Turbo::Core::TVulkanHandle`用于涵盖多个`Turbo::Core::TDescriptor`并创建`VkDescriptorSetLayout`（考虑是否创建`VkDescriptorSet`）
 
-  * 2022/4/19 设计架构
+* 2022/4/19 设计架构
   >
   >* 创建`TDescriptorSet`类，构造函数为`Turbo::Core::TDescriptorSet::TDescriptorSet(TShader *shader, std::vector<TDescriptor *> &descriptors)`，其中的`std::vector<TDescriptor *> &descriptors`需要在外部`new`完传进来，该任务属于`Turbo`范畴（处理好`TDescriptorSet`和`TDescriptor`之间的联系）
   >
   >* 对于`throw Turbo::Core::TException(TResult，std::string);`对于`std::string`变量，`Turbo`没有使用上，需补上
 
-  * 2022/4/20 设计架构
+* 2022/4/20 设计架构
   >
   >* 开始将`std::vector<T[XXX]Descriptor *>`向`std::vector<TDescriptorSet *> descriptorSets`中写入，`TShader`维护`std::vector<T[XXX]Descriptor *>`中的内存，当`TShader`销毁时`std::vector<T[XXX]Descriptor *>`数组中`T[XXX]Descriptor *`所指向的指针也会销毁。<font color=yellow> 未完待续 </font>
   >* ~~`TShader`中增加`void AddDescriptorToDescriptorSets(TDescriptor *descriptor)`内部函数，当每次`new`一个`TDescriptor`之后，会将刚`new`的`TDescriptor`通过`AddDescriptorToDescriptorSets`函数加入`std::vector<TDescriptorSet *> descriptorSets`中<font color=yellow> 未完待续 </font>~~ 遗弃(不符合`Turbo`统一设计思想)
 
-  * 2022/4/21 设计架构
+* 2022/4/21 设计架构
   > *目前`TShader`中只实现了`TUniformBufferDescriptor`,将来待实现如下：
   >
   >```CXX
@@ -459,6 +459,7 @@ Turbo是渲染引擎
   >TComputePipeline
   > ```
   >
+
 * 2022/4/22 设计架构
   >
   >* 新增`TViewport`类
@@ -491,12 +492,12 @@ Turbo是渲染引擎
   >* 创建`TFrameBuffer`类
   >* `TCommandBuffer`中添加`TFrameBuffer`成员变量，当用户调用`Turbo::Core::TCommandBuffer::BeginRenderPass()`时会`new`出一个`TFrameBuffer`对象，当用户调用`Turbo::Core::TCommandBuffer::EndRenderPass()`时会`delete`销毁该对象。所以`BeginRenderPass()`和`EndRenderPass()`两个函数必须配合使用
 
-  * 2022/4/24 设计架构
+* 2022/4/24 设计架构
   >
   >* 将`TFrameBuffer`修改成`TFramebuffer`
   >* `TShader`,`TDescriptor`,`TDescriptorSet`,`TPipeline`,`TSubpass`,`TAttachemt`,`TRenderPass`，`TFramebuffer`之间设计不合理，需要重构。尝试是否能够按照`Vulkan`标准规范设计
 
-  * 2022/4/25 设计架构
+* 2022/4/25 设计架构
   >
   >* 将原先`TShader`中的`TDescriptorSet`改成了`TDescriptorSetLayout`
   >* 创建`TDescriptorSet`用于表示`VkDescriptorSet`，现在就不会出现`TDescriptorSetLayout`和`TDescriptorSet`命名歧义了
@@ -506,7 +507,7 @@ Turbo是渲染引擎
   >* `TSubpass`新增`TAttachmentReference`类
   >* 创建`TDescriptorPool`、`TDescriptorSize`类
 
-  * 2022/4/26 设计架构
+* 2022/4/26 设计架构
   >
   >* `TSubpass`移除`TAttachmentReference`类，用起来不方便
   >* `TPipeline`,`TSubpass`,`TAttachemt`,`TRenderPass`，`TFramebuffer`基本重构完成，但还不完善。需进一步完善
@@ -519,12 +520,12 @@ Turbo是渲染引擎
   >* 新增`TSemaphore`类
   >* `TDeviceQueue`中新增`bool Submit(std::vector<TSemaphore *> &waitSemaphores, std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)`函数，用于提交指令。
 
-  * 2022/4/27 设计架构
+* 2022/4/27 设计架构
   >
   >* 发布至`GitHub`和`Gitee`上
   >* 提炼`issue`
 
-  * 2022/4/28 设计架构
+* 2022/4/28 设计架构
 
   >* `TBuffer`中增加`typedef enum TBufferUsageBits`枚举，与`Vulkan`标准一致
   >* `TBuffer`中增加`typedef VkFlags TBufferUsages`声明,用于声明`TBuffer`的`uage`，与`Vulkan`标准一致
@@ -543,7 +544,7 @@ Turbo是渲染引擎
   >* `TAttachment`中增加`typedef enum TStoreOp`声明,用于`TAttachment`的构造函数中,与`Vulkan`标准一致
   >
 
-  * 2022/4/29 设计架构
+* 2022/4/29 设计架构
   >
   >* `TAttachment`中重命名`typedef enum TStoreOp`声明,成`typedef enum class TStoreOp`,优化枚举内命名
   >* `TAttachment`中重命名`typedef enum TLoadOp`声明,成`typedef enum class TLoadOp`,优化枚举内命名
@@ -558,13 +559,13 @@ Turbo是渲染引擎
   >* `TImage`增加`TSampleCountBits GetSampleCountBits()`函数，用于获取采样数
   >* `VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`基本描述框图`TurboDesign.drawwio`整理完成
 
-  * 2022/4/30 设计架构
+* 2022/4/30 设计架构
   >
   >* `TPipeline.h`中增加`TVertexAttribute`，`TVertexBinding`类，分别用于表示`VkVertexInputAttributeDescription`和`VkVertexInputBindingDescription`
   >* `TPipeline.h`中增加`typedef enum class TVertexRate`类，用于表示`VkVertexInputRate`
   >* `TPipeline.h`中剔除`VkVertexInputBindingDescription`和`VkVertexInputAttributeDescription`的使用，改为使用`TVertexAttribute`，`TVertexBinding`
 
-  * 2022/5/1 设计架构
+* 2022/5/1 设计架构
   >
   >* `TFormatInfo.h`中,构造函数声明去掉`explicit`，使得可直接使用`TFormatType`进行隐示类型转换到`TFormatInfo`
   >* `TPipeline.h`中增加`typedef enum class TTopologyType`用于对应`VkPrimitiveTopology`
@@ -578,12 +579,12 @@ Turbo是渲染引擎
   >* `TPipeline.h`中对于`VkFrontFace`替换成使用`TFrontFace`
   >* 创建`TGraphicsPipeline`继承自`TPipeline`,将原先`TPipeline`中有关图形管线的内容搬到了`TGraphicsPipeline`中
 
-  * 2022/5/2 设计架构
+* 2022/5/2 设计架构
   >
   >* `TGraphicsPipeline`中增加`bool multisampleEnable`和`TSampleCountBits sample`的成员变量，提供对`Multisample`特性的支持
   >* `TCommandBuffer`中增加`TRenderPass *currentRenderPass`和`TPipeline *currentPipeline`的成员变量，提供对当前使用的`RenderPass`和`Pipeline`的引用
 
-  * 2022/5/3 设计架构
+* 2022/5/3 设计架构
   >
   >* `TCommandBuffer`中实现了`void Turbo::Core::TCommandBuffer::NextSubpass()`的成员函数，提供对`vkCmdNextSubpass(...)`特性的支持
   >* `Turbo`核心现已支持多`Subpass`渲染
@@ -592,7 +593,7 @@ Turbo是渲染引擎
   >* `Turbo.h`中新增`typedef enum TAccessBits`和`typedef VkFlags TAccess`，对应`Vulkan`的`VkAccessFlagBits`和`VkAccessFlags`
   >* 新增`TBarrier.h`和`TBarrier.cpp`，用于实现`VkMemoryBarrier`、`VkBufferMemoryBarrier`、`VkImageMemoryBarrier`<font color=yellow> 未完待续 </font>
 
-  * 2022/5/4 设计架构
+* 2022/5/4 设计架构
   >
   >* `TBarrier.h`中增加了`TBarrier`、`TMemoryBarrier`、`TBufferMemoryBarrier`、`TImageMemoryBarrier`的成员函数，提供对`VkMemoryBarrier`、`VkBufferMemoryBarrier`、`VkImageMemoryBarrier`特性的支持
   >* `TImageView`中增加了获取成员变量的方法
@@ -608,7 +609,7 @@ Turbo是渲染引擎
   >```
   >
   
-  * 2022/5/5 设计架构
+* 2022/5/5 设计架构
   >
   >* `TCommandBuffer`中增加并实现如下
   >
@@ -634,7 +635,7 @@ Turbo是渲染引擎
   >* `TFormatInfo.h`中将`typedef enum TFormatDataType`修改成`typedef enum TFormatDataTypeBits`、增加`typedef VkFlags TFormatDataTypes`声明
   >* `TFormatInfo`中增加`TFormatDataTypes GetFormatDataType()`成员函数，用于获取格式所对应的的数据类型（主要用于`ClearColor`中）
 
-  * 2022/5/6 设计架构
+* 2022/5/6 设计架构
   >
   >* `TFormatInfo`增加`typedef enum TFormatFeatureBits`和`typedef VkFlags TFormatFeatures`用于对应`VkFormatFeatureFlagBits`和`VkFormatFeatureFlags`
   >* `TFormatInfo`增加如下函数:
@@ -678,7 +679,7 @@ Turbo是渲染引擎
   >* `Turbo`中新增`Turbo::Extension`命名空间
   >* 开始修缮`TSurface.h`将其加入`Turbo::Extension`命名空间中<font color=yellow> 未完待续 </font>
 
-  * 2022/5/7 设计架构
+* 2022/5/7 设计架构
   >
   >* `TSurface.h`中`Turbo::Core::TImageUsageFlags TSurface::GetSupportedUsageFlags()`修改成`Turbo::Core::TImageUsages GetSupportedUsages()`
   >* `TSurface.h`中增加如下：
@@ -706,7 +707,8 @@ Turbo是渲染引擎
   >* `main.cpp`中将`GPU`图片拷贝到`CPU`的纯`Vulkan`代码改成`Turbo`规范
   >* 有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`<font color=yellow> 未完待续 </font>
   >
-  * 2022/5/8 设计架构
+
+* 2022/5/8 设计架构
   >
   >* 之前 `TSwapchain`对外部提供的`VkSurfaceKHR`的接口改成由`TSurface`提供，`TSwapchain`统一使用`TSurface`
   >* `TSwapchain`修缮完毕
@@ -719,13 +721,13 @@ Turbo是渲染引擎
   >* `TDeviceQueue`中增加`TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)`函数用于调用`vkQueuePresentKHR`
   >* `TDeviceQueue`中增加`bool IsSupportSurface(Turbo::Extension::TSurface *surface)`判断该队列是否支持该`TSurface`
 
-  * 2022/5/9 设计架构
+* 2022/5/9 设计架构
   >
   >* 进入调整阶段
   >* `TCommandBuffer`中有关`VkCmd...`的成员函数前面加上`Cmd...`的前缀,与`CommandBuffer::Begin()`和`CommandBuffer::End()`等非命令成员函数分开，直接告诉用户哪些会是`VkCmd...`哪些不是
   >* `TFormatInfo`中删除有关`TFormatFeatureFlags`的成员变量，没用
 
-  * 2022/5/10 设计架构
+* 2022/5/10 设计架构
   >
   >* `TBuffer`中增加`typedef enum class TIndexType`表明索引缓存的数据类型
   >* `TCommandBuffer`中增加如下函数：
@@ -741,7 +743,7 @@ Turbo是渲染引擎
   >* 开始整理`TException`的输出信息,和优化`TException`
   >* `TFormatInfo`增加`Get...Features(TDevice* device)`版本成员函数
 
-  * 2022/5/11 设计架构
+* 2022/5/11 设计架构
   >
   >* 开始实现纹理特性
   >* `TDescriptor.h`中增加`TCombinedImageSamplerDescriptor`类，用于表示`VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`
@@ -760,7 +762,7 @@ Turbo是渲染引擎
   >* 纹理特性初步完成
   >* `Descriptor`设计有重大逻辑漏洞，需要重构
 
-  * 2022/5/12 设计架构
+* 2022/5/12 设计架构
   >
   >* 开始重构`Descriptor`
   >* `TShader`中移除有关`TDescriptorSetLayout`创建相关，相关任务转移到`TPipeline`中进行，`TShader`仅用于创建`VkShaderModule`和收集`Descriptor`数据
@@ -785,13 +787,13 @@ Turbo是渲染引擎
   >* `TCommandBuffer`中增加`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet* pipelineDescriptorSet)`成员函数，用于适配`TPipelineDescriptorSet`
   >* `Descriptor`目前初步重构完成
 
-  * 2022/5/13 设计架构
+* 2022/5/13 设计架构
   >
   >* `TResult::SUBOPTIMAL`更改成`TResult::MISMATCH`
   >* `TSurface`中有关获取当前大小的函数可以动态获取当前大小了，不需要`delete`之后重新`new`了
   >* `TSwapchain`中增加`TSwapchain(TSwapchain *oldSwapchain)`构造函数，用于重新创建`TSwapchain`
 
-  * 2022/5/14 设计架构
+* 2022/5/14 设计架构
   >
   >* `TDescriptor.h`中的`typedef enum class TShaderDataType`更改成`typedef enum class TDescriptorDataType`
   >* `TDescriptor.h`中增加`class TSampledImageDescriptor`和`TSamplerDescriptor`，用于对应`VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE`和`VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER`
@@ -805,7 +807,7 @@ Turbo是渲染引擎
   > void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler);//sampler
   >```
 
-  * 2022/5/16 设计架构
+* 2022/5/16 设计架构
   >
   >* `TCommandBuffer`实现`CmdBlitImage`等价于`vkCmdBlitImage`
   >* `engine/`下新建`core`文件夹用于存放`Turbo`核心
@@ -814,7 +816,7 @@ Turbo是渲染引擎
   >* 现在`engine/core`将会输出单独的库文件作为`Turbo`的核心
   >* `TFormatInfo`中的`TFormatFeatures Get...Features(TPhysicalDevice *physicalDevice)`转移到了`TPhysicalDevice`中
 
-  * 2022/5/17 设计架构
+* 2022/5/17 设计架构
   >
   >* `TPhysicalDevice`中增加如下函数(用于获取某一特定纹理格式的图片的限制属性)：
   >
@@ -840,13 +842,14 @@ Turbo是渲染引擎
   >
   >* 将`TCommandBuffer`中的`void CmdBindPipelineDescriptorSet(uint32_t firstSet, TPipelineDescriptorSet *pipelineDescriptorSet);`修改成`void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);`
   >
-  * 2022/5/18 设计架构
+
+* 2022/5/18 设计架构
   >
   >* `TDescriptor.h`中增加`class TNaNDescriptor`，用于表示无效占位描述符。
   >* 将`TDeviceQueue.h`中`:TDeviceQueue::Submit(...)`函数中有关`TSemaphore`数组引用改成数组指针
   >* 从`tinygltf`库中拷贝`stb_image.h`, `stb_image_write.h`, `json.hpp` 和 `tiny_gltf.h`到`./engine/include`中
 
-  * 2022/5/19 设计架构
+* 2022/5/19 设计架构
   >
   >* `TGraphicsPipeline::InternalCreate()`中增加对于多个`fragment output interface state(片元着色器的输出)`应该对应相同个数的`VkPipelineColorBlendStateCreateInfo::attachmentCount`的适配。(也许这不是最优解，blend目前未想好如何设计)
   >* `TShader`中增加如下函数：
@@ -858,17 +861,17 @@ Turbo是渲染引擎
   >```
   >
   
-  * 2022/5/20 设计架构
+* 2022/5/20 设计架构
   >
   >* `TRenderPass`中增加`TSubpass GetSubpass(uint32_t subpass)`成员函数
   >* 增加`glm`第三方库
 
-  * 2022/5/21 设计架构
+* 2022/5/21 设计架构
   >
   >* 移除原先拷贝的`tinygltf`头文件，将`tinygltf`库加到`./thirdparty`文件夹下
   >* 成功渲染`Suzanne`
 
-  * 2022/5/22 设计架构
+* 2022/5/22 设计架构
   >
   >* 将`imgui`库加到`./thirdparty`文件夹下
   >* 将`KTX-Software`库加到`./thirdparty`文件夹下
@@ -878,12 +881,12 @@ Turbo是渲染引擎
   >* `TUniformBufferDescriptor`和`TPipeline`中增加`uint32_t size`成员属性和相应的获取函数，用于表示数据块大小
   >* `TCommandBuffer`中增加`void CmdPushConstants(...)`成员函数，对应`vkCmdPushConstants(...)`
 
-  * 2022/5/23 设计架构
+* 2022/5/23 设计架构
   >
   >* `TBuffer`中增加`void Flush(...)`成员函数，用于刷新数据到`GPU domain`
   >* `TSubpass`中`GetDepthStencilAttachmentReference()`有`Bug`，现已修改完毕
 
-  * 2022/5/24 设计架构
+* 2022/5/24 设计架构
   >
   >* `TGraphicsPipeline`中移除`std::vector<TViewport> &viewports`和`std::vector<TScissor> &scissors`成员，由于核心创建的`Pipeline`的`Viewport`和`Scissor`都是动态状态，`Vulkan`会忽略`VkPipelineViewportStateCreateInfo::pViewports`和`VkPipelineViewportStateCreateInfo::pScissors`
   >* `TGraphicsPipeline`中增加`typedef enum class TCompareOp`声明，对应`VkCompareOp`
@@ -891,11 +894,11 @@ Turbo是渲染引擎
   >* `TGraphicsPipeline`中增加对深度测试和模板测试支持
   >* 调整`TGraphicsPipeline`构造函数的参数顺序，填入默认值
 
-  * 2022/5/25 设计架构
+* 2022/5/25 设计架构
   >
   >* 成功渲染`KTX`纹理
 
-  * 2022/5/27 设计架构
+* 2022/5/27 设计架构
   >
   >* 成功渲染`KTX`的`Cubemap`纹理
   >* 开始适配几何管线的`Blend`  
@@ -904,15 +907,15 @@ Turbo是渲染引擎
   >* `TGraphicsPipeline`中增加`typedef enum class TBlendOp`  声明，对应`VkBlendOp`
   >* `TGraphicsPipeline`构造函数中增加混合相关参数
 
-  * 2022/5/28 设计架构
+* 2022/5/28 设计架构
   >
   >* 使用`Turbo`核心成功渲染`IMGUI`
 
-  * 2022/5/29 设计架构
+* 2022/5/29 设计架构
   >
   >* 开始适配`input attachment`
 
-  * 2022/5/30 设计架构
+* 2022/5/30 设计架构
   >
   >* `TDescriptor`中增加`class TInputAttachmentDescriptor` 对应`VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT`
   >* `TShader`中增加`std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;` 用于存`input attachment`，并增加`const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();`成员函数用于获取相关数据
@@ -921,3 +924,11 @@ Turbo是渲染引擎
   >* `TPipelineDescriptorSet::BindData(...)`中增加对于`input attachment`的适配
   >* `TDescriptorSetLayout`中增加`TDescriptorType GetDescriptorType(uint32_t binding)`成员函数,用于获取特性`binding`对应的描述符类型
   >* `input attachment`基本适配完成
+
+* 2022/6/1 设计架构
+  >
+  >* 开始`FrameGraph`的设计，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+
+* 2022/6/2 设计架构
+  >
+  >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
