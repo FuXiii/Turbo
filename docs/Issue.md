@@ -126,6 +126,10 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 
+- 当前`DescriptorSet`设计总感觉不合理，会冗余，应该搞个池子
+
+- 使用加载动态库的方式加载`Vulkan`库
+
 - `TCommandBuffer::CmdPushConstants(...)`中的`ShaderStages`进一步研究，现在写的有问题
 
 - 梳理一下`TExtensionInfo`类，最好类似`TFormatInfo`的类思想
