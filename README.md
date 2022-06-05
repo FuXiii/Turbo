@@ -82,7 +82,7 @@ Turbo是渲染引擎
 >* 实现完`Vulkan`的`input attachment`也就是完成了延迟渲染相关工作，`Turbo`核心现在对于图形的核心封装设计基本上接近尾声，延迟渲染之后将会开展`FrameGraph`相关设计实现工作。有关几何着色器，细分着色器，光线追踪等将会在`Turbo`的核心继续展开
 >* `FrameGraph`将会是`Turbo`引擎实现高级特性的重点，`ECS（Entity Component System）`或者`EC（Entity Component）`之类管理场景的相关技术不是`Turbo`引擎的重点，`Turbo`引擎目前的重点目标是不依赖任何窗口库（用户自定义），不依赖任何场景结构技术（用户自己实现自己的场景结构），`Turbo`可以很轻松的嵌入其中。
 
-2022/5/30 设计架构
+2022/5/30
 
 >* `Turbo`核心基本实现完成，接下来开始`FrameGraph`的设计开发。敬请期待。
 
@@ -930,5 +930,17 @@ Turbo是渲染引擎
   >* 开始`FrameGraph`的设计，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
 
 * 2022/6/2 设计架构
+  >
+  >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+
+* 2022/6/3 设计架构
+  >
+  >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+
+* 2022/6/4 设计架构
+  >
+  >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+
+* 2022/6/5 设计架构
   >
   >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
