@@ -1,3 +1,6 @@
 [submodule "thirdparty/tinygltf"]
 	path = thirdparty/tinygltf
 	url = git@github.com:syoyo/tinygltf.git
+[submodule "thirdparty/glfw"]
+	path = thirdparty/glfw
+	url = git@github.com:glfw/glfw.git
