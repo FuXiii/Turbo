@@ -945,3 +945,11 @@ Turbo是渲染引擎
   >
   >* 设计`FrameGraph`，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
   >* 最基本的`FrameGraph`初步设计完成，具体请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+
+* 2022/6/6 设计架构
+  >
+  >* 开始实现`FrameGraph`，详细设计请参看`./docs/TurboDesign.drawio:FrameGraph`章节
+  >* `FrameGraph`，将会是一个独立的模块，不会依赖任何第三方库，甚至是`Turbo`，按照常见的标准容器实现。
+  >* `engine`文件夹下创建`/framegraph`文件夹，`FrameGraph`相关代码将会在这里实现
+  >* `FrameGraph`将会在`Turbo::FrameGraph`命名空间下实现
+  >* 增加`TFrameGraph.h`和`TFrameGraph.cpp`
