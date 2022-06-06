@@ -4,3 +4,6 @@
 [submodule "thirdparty/glfw"]
 	path = thirdparty/glfw
 	url = git@github.com:glfw/glfw.git
+[submodule "thirdparty/glm"]
+	path = thirdparty/glm
+	url = git@github.com:Groovounet/glm.git
