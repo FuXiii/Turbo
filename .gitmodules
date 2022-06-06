@@ -10,6 +10,3 @@
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = git@github.com:ocornut/imgui.git
-[submodule "thirdparty/KTX-Software"]
-	path = thirdparty/KTX-Software
-	url = git@github.com:KhronosGroup/KTX-Software.git
