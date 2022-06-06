@@ -21,6 +21,7 @@
                 "-DKTX_FEATURE_LOADTEST_APPS=OFF",
                 "-DKTX_FEATURE_DOC=OFF",
                 "-DKTX_FEATURE_STATIC_LIBRARY=ON",
+                "-DGLM_TEST_ENABLE=OFF",
                 ".."
             ]
         },

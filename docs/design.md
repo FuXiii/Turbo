@@ -64,3 +64,9 @@
 - ".rcall": "rcall", // for a ray callable shader
 - ".mesh": "mesh", // for a mesh shader
 - ".task": "task" // for a task shader
+
+# FrameGraph
+
+- 不依赖任何第三方，包括`Turbo`，按照独立的一个模块实现，类似于一个容器
+
+- 单一头文件包括`FrameGraph`的所有声明和定义
