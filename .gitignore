@@ -2,3 +2,4 @@ build/
 *.ppm
 *.cache/
 ./vscode
+imgui.ini

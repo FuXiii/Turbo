@@ -86,6 +86,10 @@ Turbo是渲染引擎
 
 >* `Turbo`核心基本实现完成，接下来开始`FrameGraph`的设计开发。敬请期待。
 
+2022/6/7
+
+>* `FrameGraph`完成之后计划会写一系列的使用案例。
+
 ### 已完成特性
 
 1.`Vulkan`核心特性的基本封装，包括：
@@ -949,7 +953,14 @@ Turbo是渲染引擎
 * 2022/6/6 设计架构
   >
   >* 开始实现`FrameGraph`，详细设计请参看`./docs/TurboDesign.drawio:FrameGraph`章节
-  >* `FrameGraph`，将会是一个独立的模块，不会依赖任何第三方库，甚至是`Turbo`，按照常见的标准容器实现。
+  >* `FrameGraph`，将会是一个独立的模块，不会依赖任何第三方库，甚至是`Turbo`，按照常见的标准容器实现。将会输出名为`TFrameGraph`的静态库文件
   >* `engine`文件夹下创建`/framegraph`文件夹，`FrameGraph`相关代码将会在这里实现
   >* `FrameGraph`将会在`Turbo::FrameGraph`命名空间下实现
   >* 增加`TFrameGraph.h`和`TFrameGraph.cpp`
+
+* 2022/6/7 设计架构
+  >
+  >* 将第三方库配置成`Submodule`,`glm`库好像有问题，`MVP`矩阵好像不对导致渲染结果有问题，应该不是核心的问题，该问题先忽略，等到`FrameGraph`写完，开始写例子的时候再统一解决，加入`Issue`中
+  >* 创建`./Turbo/samples`文件夹，用于存放示例代码。
+  >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Compile()`未实现待实现
+  >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Execute()`未实现待实现
