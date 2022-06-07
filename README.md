@@ -24,7 +24,7 @@ Turbo是渲染引擎
   * `Turbo`引擎被设计成各种模块，有`Core`核心模块, 有`FrameGraph`模块等。
   * 目前`Turbo`的核心模块基本完成(未完成部分和相关问题请参考下面的`RoadMap`章节和`docs/Issue.md`文档)
   * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，您可以直接将他拷贝出来放到自己的工程中
-  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。（将来会专门开设一个`sample`文件夹用于存放各种例子）
+  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。
   * 核心会用到的第三方库为：
     * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
     * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
@@ -88,7 +88,12 @@ Turbo是渲染引擎
 
 2022/6/7
 
->* `FrameGraph`完成之后计划会写一系列的使用案例。
+>* 已开始写系列的使用示例。
+
+### 已完成示例
+
+* `HelloTriangle` - 将会使用核心绘制`IMGUI`和三角形
+* `PureHelloTriangle` - 将会使用核心绘制三角形
 
 ### 已完成特性
 
@@ -964,3 +969,6 @@ Turbo是渲染引擎
   >* 创建`./Turbo/samples`文件夹，用于存放示例代码。
   >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Compile()`未实现待实现
   >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Execute()`未实现待实现
+  >* `./Turbo/samples`种增加`HelloTriangle`示例
+  >* `./Turbo/samples`种增加`PureHelloTriangle`示例
+  >* `./Turbo/samples`种增加`FrameGraph`测试示例
