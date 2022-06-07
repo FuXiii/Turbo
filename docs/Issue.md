@@ -126,6 +126,8 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
 
+- 第三方库`glm`对于`MVP`矩阵异常的问题
+
 - 当前`DescriptorSet`设计总感觉不合理，会冗余，应该搞个池子
 
 - 使用加载动态库的方式加载`Vulkan`库
