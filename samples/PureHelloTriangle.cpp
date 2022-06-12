@@ -37,6 +37,9 @@
 #include "TPipelineDescriptorSet.h"
 #include "TSampler.h"
 
+#include<memory>
+#include<stdio.h>
+#include<string.h>
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
 {
     std::string save_file_path = "./";
@@ -125,92 +128,92 @@ void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool 
     commandBufferPool->Free(temp_command_buffer);
 }
 
-bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowPitch, unsigned char *dataPtr)
-{
-    // PPM format expected from http://netpbm.sourceforge.net/doc/ppm.html
-    //  1. magic number
-    //  2. whitespace
-    //  3. width
-    //  4. whitespace
-    //  5. height
-    //  6. whitespace
-    //  7. max color value
-    //  8. whitespace
-    //  7. data
+// bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowPitch, unsigned char *dataPtr)
+// {
+//     // PPM format expected from http://netpbm.sourceforge.net/doc/ppm.html
+//     //  1. magic number
+//     //  2. whitespace
+//     //  3. width
+//     //  4. whitespace
+//     //  5. height
+//     //  6. whitespace
+//     //  7. max color value
+//     //  8. whitespace
+//     //  7. data
 
-    // Comments are not supported, but are detected and we kick out
-    // Only 8 bits per channel is supported
-    // If dataPtr is nullptr, only width and height are returned
+//     // Comments are not supported, but are detected and we kick out
+//     // Only 8 bits per channel is supported
+//     // If dataPtr is nullptr, only width and height are returned
 
-    // Read in values from the PPM file as characters to check for comments
-    char magicStr[3] = {}, heightStr[6] = {}, widthStr[6] = {}, formatStr[6] = {};
+//     // Read in values from the PPM file as characters to check for comments
+//     char magicStr[3] = {}, heightStr[6] = {}, widthStr[6] = {}, formatStr[6] = {};
 
-#ifndef __ANDROID__
-    FILE *fPtr = fopen(filename, "rb");
-#else
-    FILE *fPtr = AndroidFopen(filename, "rb");
-#endif
-    if (!fPtr)
-    {
-        printf("Bad filename in read_ppm: %s\n", filename);
-        return false;
-    }
+// #ifndef __ANDROID__
+//     FILE *fPtr = fopen(filename, "rb");
+// #else
+//     FILE *fPtr = AndroidFopen(filename, "rb");
+// #endif
+//     if (!fPtr)
+//     {
+//         printf("Bad filename in read_ppm: %s\n", filename);
+//         return false;
+//     }
 
-    // Read the four values from file, accounting with any and all whitepace
-    int count = fscanf(fPtr, "%s %s %s %s ", magicStr, widthStr, heightStr, formatStr);
+//     // Read the four values from file, accounting with any and all whitepace
+//     int count = fscanf(fPtr, "%s %s %s %s ", magicStr, widthStr, heightStr, formatStr);
 
-    // Kick out if comments present
-    if (magicStr[0] == '#' || widthStr[0] == '#' || heightStr[0] == '#' || formatStr[0] == '#')
-    {
-        printf("Unhandled comment in PPM file\n");
-        return false;
-    }
+//     // Kick out if comments present
+//     if (magicStr[0] == '#' || widthStr[0] == '#' || heightStr[0] == '#' || formatStr[0] == '#')
+//     {
+//         printf("Unhandled comment in PPM file\n");
+//         return false;
+//     }
 
-    // Only one magic value is valid
-    if (strncmp(magicStr, "P6", sizeof(magicStr)))
-    {
-        printf("Unhandled PPM magic number: %s\n", magicStr);
-        return false;
-    }
+//     // Only one magic value is valid
+//     if (strncmp(magicStr, "P6", sizeof(magicStr)))
+//     {
+//         printf("Unhandled PPM magic number: %s\n", magicStr);
+//         return false;
+//     }
 
-    width = atoi(widthStr);
-    height = atoi(heightStr);
+//     width = atoi(widthStr);
+//     height = atoi(heightStr);
 
-    // Ensure we got something sane for width/height
-    static const int saneDimension = 32768; //??
-    if (width <= 0 || width > saneDimension)
-    {
-        printf("Width seems wrong.  Update read_ppm if not: %u\n", width);
-        return false;
-    }
-    if (height <= 0 || height > saneDimension)
-    {
-        printf("Height seems wrong.  Update read_ppm if not: %u\n", height);
-        return false;
-    }
+//     // Ensure we got something sane for width/height
+//     static const int saneDimension = 32768; //??
+//     if (width <= 0 || width > saneDimension)
+//     {
+//         printf("Width seems wrong.  Update read_ppm if not: %u\n", width);
+//         return false;
+//     }
+//     if (height <= 0 || height > saneDimension)
+//     {
+//         printf("Height seems wrong.  Update read_ppm if not: %u\n", height);
+//         return false;
+//     }
 
-    if (dataPtr == nullptr)
-    {
-        // If no destination pointer, caller only wanted dimensions
-        return true;
-    }
+//     if (dataPtr == nullptr)
+//     {
+//         // If no destination pointer, caller only wanted dimensions
+//         return true;
+//     }
 
-    // Now read the data
-    for (int y = 0; y < height; y++)
-    {
-        unsigned char *rowPtr = dataPtr;
-        for (int x = 0; x < width; x++)
-        {
-            count = fread(rowPtr, 3, 1, fPtr);
-            rowPtr[3] = 255; /* Alpha of 1 */
-            rowPtr += 4;
-        }
-        dataPtr += rowPitch;
-    }
-    fclose(fPtr);
+//     // Now read the data
+//     for (int y = 0; y < height; y++)
+//     {
+//         unsigned char *rowPtr = dataPtr;
+//         for (int x = 0; x < width; x++)
+//         {
+//             count = fread(rowPtr, 3, 1, fPtr);
+//             rowPtr[3] = 255; /* Alpha of 1 */
+//             rowPtr += 4;
+//         }
+//         dataPtr += rowPitch;
+//     }
+//     fclose(fPtr);
 
-    return true;
-}
+//     return true;
+// }
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
@@ -303,12 +306,22 @@ int main()
         else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
         }
     }
 
     Turbo::Core::TVersion instance_version(1, 0, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
-    Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    //Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = instance->GetPhysicalDevice(0);
 
     if (!glfwInit())
         return -1;

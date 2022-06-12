@@ -239,7 +239,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
 
     if (this->supportQueueFamilys.size() == 0)
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport this surface");
+        //throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport this surface");
     }
 }
 

@@ -10,19 +10,35 @@
                 "cwd": "${workspaceFolder}/build"
             },
             "command": "cmake",
-            "args": [
-                "-G",
-                "MinGW Makefiles",
-                //"-DCMAKE_GNUtoMS:BOOL=ON",
-                "-DCMAKE_EXPORT_COMPILE_COMMANDS=1",
-                "-DCMAKE_CXX_COMPILER=clang++",
-                "-DCMAKE_C_COMPILER=clang",
-                "-DCMAKE_BUILD_TYPE=debug",
-                "-DKTX_FEATURE_LOADTEST_APPS=OFF",
-                "-DKTX_FEATURE_DOC=OFF",
-                "-DKTX_FEATURE_STATIC_LIBRARY=ON",
-                ".."
-            ]
+            "windows": {
+                "args": [
+                    "-G",
+                    "MinGW Makefiles",
+                    //"-DCMAKE_GNUtoMS:BOOL=ON",
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=1",
+                    "-DCMAKE_CXX_COMPILER=clang++",
+                    "-DCMAKE_C_COMPILER=clang",
+                    "-DCMAKE_BUILD_TYPE=debug",
+                    "-DKTX_FEATURE_LOADTEST_APPS=OFF",
+                    "-DKTX_FEATURE_DOC=OFF",
+                    "-DKTX_FEATURE_STATIC_LIBRARY=ON",
+                    ".."
+                ]
+            },
+            "linux": {
+                "args": [
+                    "-G",
+                    "Unix Makefiles",
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=1",
+                    "-DCMAKE_CXX_COMPILER=clang++",
+                    "-DCMAKE_C_COMPILER=clang",
+                    "-DCMAKE_BUILD_TYPE=debug",
+                    "-DKTX_FEATURE_LOADTEST_APPS=OFF",
+                    "-DKTX_FEATURE_DOC=OFF",
+                    "-DKTX_FEATURE_STATIC_LIBRARY=ON",
+                    ".."
+                ]
+            }
         },
         {
             "label": "make",
@@ -30,7 +46,12 @@
             "options": {
                 "cwd": "${workspaceFolder}/build"
             },
-            "command": "mingw32-make",
+            "windows": {
+                "command": "mingw32-make",
+            },
+            "linux": {
+                "command": "make",
+            },
             "args": []
         },
         {

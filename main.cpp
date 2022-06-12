@@ -54,7 +54,7 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
 {
-    std::string save_file_path = "E:/Turbo/";
+    std::string save_file_path = "./";
     std::string save_file_name = name;
 
     Turbo::Core::TImage *source_image = image;
@@ -402,7 +402,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/Suzanne.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/Suzanne.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -483,7 +483,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -581,12 +581,22 @@ int main()
         else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
         }
     }
 
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
-    Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    //Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = instance->GetPhysicalDevice(0);
 
     if (!glfwInit())
         return -1;
@@ -712,7 +722,7 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "E:/Turbo/asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = "/data/home/FuXii/Projects/Turbo/asset/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -774,7 +784,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("E:/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile("/data/home/FuXii/Projects/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;

@@ -65,6 +65,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_realloc(pOriginal, size, alignment);
 #endif
+return realloc(pOriginal,size);
 }
 
 void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)

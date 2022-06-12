@@ -5,7 +5,13 @@
             "name": "(gdb) Launch",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Turbo.exe",
+            "windows": {
+                "program": "${workspaceFolder}/build/Turbo.exe",
+            },
+            "linux": {
+                //"program": "${workspaceFolder}/build/samples/PureHelloTriangle",
+                "program": "${workspaceFolder}/build/Turbo",
+            },
             "args": [
                 "--arch x86_64"
             ],
