@@ -581,13 +581,16 @@ int main()
         else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
-        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
-        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
-        }else if(extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
         {
             enable_instance_extensions.push_back(extension);
         }
@@ -595,8 +598,7 @@ int main()
 
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
-    //Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
-    Turbo::Core::TPhysicalDevice *physical_device = instance->GetPhysicalDevice(0);
+    Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
         return -1;
@@ -628,8 +630,11 @@ int main()
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
+    uint32_t min_image_count = surface->GetMinImageCount();
 
-    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, max_image_count - 1, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
+
+    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
     std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
 

@@ -14,10 +14,10 @@ void Turbo::Extension::TSwapchain::InternalCreate()
     if (device != nullptr && vk_device != VK_NULL_HANDLE && device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
     {
         // imageCount
-        // if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
-        // {
-        //     throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "this minImage count out the range of [surface.minImageCount , surface.maxImageCount]");
-        // }
+        if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "this minImage count out the range of [surface.minImageCount , surface.maxImageCount]");
+        }
 
         // surfaceFormat
         std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = this->surface->GetSurfaceFormats();

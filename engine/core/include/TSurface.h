@@ -14,6 +14,17 @@
 #elif defined(TURBO_PLATFORM_ANDROID)
 #include "vulkan_android.h"
 #elif defined(TURBO_PLATFORM_LINUX)
+#include <wayland-client.h>
+
+#include <vulkan/vulkan_wayland.h>
+
+#include <xcb/xcb.h>
+
+#include <vulkan/vulkan_xcb.h>
+
+#include <X11/Xlib.h>
+
+#include <vulkan/vulkan_xlib.h>
 #elif defined(TURBO_PLATFORM_UNIX)
 #endif
 
@@ -138,7 +149,18 @@ class TSurface : public Turbo::Core::TVulkanHandle
     HWND hwnd;
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
-#elif defined(__linux) || defined(__linux__)
+#elif defined(TURBO_PLATFORM_LINUX)
+    // wayland
+    struct wl_display *waylandDisplay = nullptr;
+    struct wl_surface *waylandSurface = nullptr;
+
+    // xcb
+    xcb_connection_t *xcbConnection = nullptr;
+    xcb_window_t xcbWindow;
+
+    // xlib
+    Display *xlibDpy = nullptr;
+    Window xlibWindow;
 #elif defined(__unix) || defined(__unix__)
 #else
 #endif
@@ -160,8 +182,10 @@ class TSurface : public Turbo::Core::TVulkanHandle
     explicit TSurface(...);
 #elif defined(ANDROID) || defined(__ANDROID__)
     explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window);
-#elif defined(__linux) || defined(__linux__)
-    explicit TSurface(...);
+#elif defined(TURBO_PLATFORM_LINUX)
+    explicit TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface);
+    explicit TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window);
+    explicit TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window);
 #elif defined(__unix) || defined(__unix__)
     explicit TSurface(...);
 #else

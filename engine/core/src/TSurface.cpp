@@ -4,6 +4,7 @@
 #include "TInstance.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
+#include <cstddef>
 
 Turbo::Extension::TColorSpace::TColorSpace(TColorSpaceType colorSpaceType)
 {
@@ -81,10 +82,10 @@ void Turbo::Extension::TSurface::InternalCreate()
     Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
     if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE)
     {
-
-#if defined(TURBO_PLATFORM_WINDOWS)
         if (!this->isExternalHandle)
         {
+#if defined(TURBO_PLATFORM_WINDOWS)
+
             if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE))
             {
                 VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
@@ -105,13 +106,66 @@ void Turbo::Extension::TSurface::InternalCreate()
             {
                 throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
             }
-        }
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
-#elif defined(__linux) || defined(__linux__)
+#elif defined(TURBO_PLATFORM_LINUX)
+            if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
+            {
+                VkWaylandSurfaceCreateInfoKHR wayland_surface_create_info = {};
+                wayland_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+                wayland_surface_create_info.pNext = nullptr;
+                wayland_surface_create_info.flags = 0;
+                wayland_surface_create_info.display = this->waylandDisplay;
+                wayland_surface_create_info.surface = this->waylandSurface;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = vkCreateWaylandSurfaceKHR(instance->GetVkInstance(), &wayland_surface_create_info, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateWaylandSurfaceKHR");
+                }
+            }
+            else if (this->xcbConnection != nullptr)
+            {
+                VkXcbSurfaceCreateInfoKHR xcb_surface_create_info = {};
+                xcb_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+                xcb_surface_create_info.pNext = nullptr;
+                xcb_surface_create_info.flags = 0;
+                xcb_surface_create_info.connection = this->xcbConnection;
+                xcb_surface_create_info.window = this->xcbWindow;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = vkCreateXcbSurfaceKHR(instance->GetVkInstance(), &xcb_surface_create_info, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateXcbSurfaceKHR");
+                }
+            }
+            else if (this->xlibDpy != nullptr)
+            {
+                VkXlibSurfaceCreateInfoKHR xlib_surface_create_info = {};
+                xlib_surface_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+                xlib_surface_create_info.pNext = nullptr;
+                xlib_surface_create_info.flags = 0;
+                xlib_surface_create_info.dpy = this->xlibDpy;
+                xlib_surface_create_info.window = this->xlibWindow;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = vkCreateXlibSurfaceKHR(instance->GetVkInstance(), &xlib_surface_create_info, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateXlibSurfaceKHR");
+                }
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::InternalCreate", "The parameter invalid please check wayland, xcb or xlib parameter");
+            }
 #elif defined(__unix) || defined(__unix__)
 #else
 #endif
+        }
+
         this->GetSurfaceSupportQueueFamilys();
         this->GetSurfaceCapabilities();
         this->GetSurfaceSupportSurfaceFormats();
@@ -162,14 +216,59 @@ Turbo::Extension::TSurface::TSurface(...)
 {
 }
 #elif defined(ANDROID) || defined(__ANDROID__)
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window){...}
+#elif defined(TURBO_PLATFORM_LINUX)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)
 {
-    ...
+    if (device != nullptr)
+    {
+        this->isExternalHandle = false;
+        this->device = device;
+        this->waylandDisplay = display;
+        this->waylandSurface = surface;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
+    }
 }
-#elif defined(__linux) || defined(__linux__)
-Turbo::Extension::TSurface::TSurface(...)
+
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window)
 {
+    if (device != nullptr)
+    {
+        this->isExternalHandle = false;
+        this->device = device;
+        this->xcbConnection = connection;
+        this->xcbWindow = window;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
+    }
 }
+
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window)
+{
+    if (device != nullptr)
+    {
+        this->isExternalHandle = false;
+        this->device = device;
+        this->xlibDpy = dpy;
+        this->xlibWindow = window;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
+    }
+}
+
 #elif defined(__unix) || defined(__unix__)
 Turbo::Extension::TSurface::TSurface(...)
 {
@@ -213,22 +312,70 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
         {
             if (is_support_surface == VK_TRUE)
             {
+                if (!this->isExternalHandle)
+                {
 #if defined(TURBO_PLATFORM_WINDOWS)
-                VkBool32 is_support_win32_presentation = vkGetPhysicalDeviceWin32PresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex());
-                if (is_support_win32_presentation == VK_TRUE)
-                {
-                    this->supportQueueFamilys.push_back(queue_family);
-                }
-                else
-                {
-                    throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
-                }
+                    VkBool32 is_support_win32_presentation = vkGetPhysicalDeviceWin32PresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex());
+                    if (is_support_win32_presentation == VK_TRUE)
+                    {
+                        this->supportQueueFamilys.push_back(queue_family);
+                    }
+                    else
+                    {
+                        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
+                    }
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
-#elif defined(__linux) || defined(__linux__)
+#elif defined(TURBO_PLATFORM_LINUX)
+                    if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
+                    {
+                        VkBool32 is_support_wayland_presentation = vkGetPhysicalDeviceWaylandPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->waylandDisplay);
+                        if (is_support_wayland_presentation == VK_TRUE)
+                        {
+                            this->supportQueueFamilys.push_back(queue_family);
+                        }
+                        else
+                        {
+                            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
+                        }
+                    }
+                    else if (this->xcbConnection != nullptr)
+                    {
+                        VkBool32 is_support_xcb_presentation = vkGetPhysicalDeviceXcbPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xcbConnection, this->xcbWindow);
+                        if (is_support_xcb_presentation == VK_TRUE)
+                        {
+                            this->supportQueueFamilys.push_back(queue_family);
+                        }
+                        else
+                        {
+                            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
+                        }
+                    }
+                    else if (this->xlibDpy != nullptr)
+                    {
+                        VkBool32 is_support_xlib_presentation = vkGetPhysicalDeviceXlibPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xlibDpy, this->xlibWindow);
+                        if (is_support_xlib_presentation == VK_TRUE)
+                        {
+                            this->supportQueueFamilys.push_back(queue_family);
+                        }
+                        else
+                        {
+                            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
+                        }
+                    }
+                    else
+                    {
+                        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "The parameter invalid please check wayland, xcb or xlib parameter");
+                    }
+
 #elif defined(__unix) || defined(__unix__)
 #else
 #endif
+                }
+                else
+                {
+                    this->supportQueueFamilys.push_back(queue_family);
+                }
             }
         }
         else
@@ -239,7 +386,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
 
     if (this->supportQueueFamilys.size() == 0)
     {
-        //throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport this surface");
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport this surface");
     }
 }
 
@@ -253,6 +400,10 @@ void Turbo::Extension::TSurface::GetSurfaceCapabilities()
     {
         this->minImageCount = surface_capanilities.minImageCount;
         this->maxImageCount = surface_capanilities.maxImageCount;
+        if (this->maxImageCount < this->minImageCount)
+        {
+            this->maxImageCount = this->minImageCount;
+        }
         this->currentExtent = surface_capanilities.currentExtent;
         this->minImageExtent = surface_capanilities.minImageExtent;
         this->maxImageExtent = surface_capanilities.maxImageExtent;
