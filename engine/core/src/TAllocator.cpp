@@ -8,7 +8,7 @@
 #include <AvailabilityMacros.h>
 #endif
 #else
-//#include <malloc.h>
+// #include <malloc.h>
 #include <cstdlib>
 #endif
 
@@ -54,6 +54,8 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
     return nullptr;
 #elif defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_malloc(size, alignment);
+#elif defined(TURBO_PLATFORM_LINUX)
+    return aligned_alloc(alignment, size);
 #else
     return aligned_alloc(alignment, size);
 #endif
@@ -65,6 +67,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_realloc(pOriginal, size, alignment);
 #endif
+    return realloc(pOriginal, size);
 }
 
 void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)

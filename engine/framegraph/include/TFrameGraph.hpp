@@ -1,7 +1,7 @@
 #pragma once
 #ifndef TFRAMEGRAPH_H
 #define TFRAMEGRAPH_H
-#include <concepts>
+//#include <concepts>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -207,7 +207,7 @@ inline const Data &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &na
     TPassNode &pass_node = this->CreatePassNode(name, pass_agency);
 
     TBuilder builder(*this, pass_node);
-    std::invoke(setup, builder, pass_agency->GetData());
+    //std::invoke(setup, builder, pass_agency->GetData());
     return pass_agency->GetData();
 }
 
