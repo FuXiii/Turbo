@@ -94,6 +94,7 @@ Turbo是渲染引擎
 
 * `HelloTriangle` - 将会使用核心绘制`IMGUI`和三角形
 * `PureHelloTriangle` - 将会使用核心绘制三角形
+* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用CombinedImageSampler对纹理采样
 
 ### 已完成特性
 
