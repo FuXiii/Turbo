@@ -46,7 +46,6 @@ target_include_directories(FrameGraphSample PUBLIC ${INCLUDE_PARTH})
 target_link_directories(FrameGraphSample PUBLIC ${LINK_PARTH})
 target_link_libraries(FrameGraphSample PUBLIC ${LIBS})
 
-
 add_executable(HelloTriangle ./HelloTriangle.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(HelloTriangle PUBLIC ${INCLUDE_PARTH})
 target_link_directories(HelloTriangle PUBLIC ${LINK_PARTH})
@@ -56,3 +55,8 @@ add_executable(PureHelloTriangle ./PureHelloTriangle.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(PureHelloTriangle PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PureHelloTriangle PUBLIC ${LINK_PARTH})
 target_link_libraries(PureHelloTriangle PUBLIC ${LIBS})
+
+add_executable(PureCombinedImageSampler ./PureCombinedImageSampler.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PureCombinedImageSampler PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PureCombinedImageSampler PUBLIC ${LINK_PARTH})
+target_link_libraries(PureCombinedImageSampler PUBLIC ${LIBS})
