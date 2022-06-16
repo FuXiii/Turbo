@@ -24,7 +24,7 @@ Turbo是渲染引擎
   * `Turbo`引擎被设计成各种模块，有`Core`核心模块, 有`FrameGraph`模块等。
   * 目前`Turbo`的核心模块基本完成(未完成部分和相关问题请参考下面的`RoadMap`章节和`docs/Issue.md`文档)
   * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，您可以直接将他拷贝出来放到自己的工程中
-  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。（将来会专门开设一个`sample`文件夹用于存放各种例子）
+  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。
   * 核心会用到的第三方库为：
     * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
     * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
@@ -88,7 +88,13 @@ Turbo是渲染引擎
 
 2022/6/7
 
->* `FrameGraph`完成之后计划会写一系列的使用案例。
+>* 已开始写系列的使用示例。
+
+### 已完成示例
+
+* `HelloTriangle` - 将会使用核心绘制`IMGUI`和三角形
+* `PureHelloTriangle` - 将会使用核心绘制三角形
+* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用CombinedImageSampler对纹理采样
 
 ### 已完成特性
 
@@ -964,3 +970,45 @@ Turbo是渲染引擎
   >* 创建`./Turbo/samples`文件夹，用于存放示例代码。
   >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Compile()`未实现待实现
   >* `FrameGraph`的`void Turbo::FrameGraph::TFrameGraph::Execute()`未实现待实现
+  >* `./Turbo/samples`种增加`HelloTriangle`示例
+  >* `./Turbo/samples`种增加`PureHelloTriangle`示例
+  >* `./Turbo/samples`种增加`FrameGraph`测试示例
+
+* 2022/6/13 设计架构
+  >* 适配`Linux`系统（基于`Deepin`）
+  >* `Turbo::Core::TAllocator::Allocate(...)`中增加对于`Linux`的内存分配支持
+  >* `TSurface`中增加对于`Linux`的支持：
+  >```CXX
+  >//for wayland
+  >#include <wayland-client.h>
+  >#include <vulkan/vulkan_wayland.h>
+  >
+  >//for xcb
+  >#include <xcb/xcb.h>
+  >#include <vulkan/vulkan_xcb.h>
+  >
+  >//for xlib
+  >#include <X11/Xlib.h>
+  >#include <vulkan/vulkan_xlib.h>
+  >  ```
+  >  `TSurface`中增加`TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)`构造函数，用于适配`wayland`
+  >  `TSurface`中`InternalCreate()`适配`Linux`的`wayland`
+  >  `TSurface`中`GetSurfaceSupportQueueFamilys()`适配`Linux`的`wayland`
+
+* 2022/6/15 设计架构
+  >* 适配`TSurface`基于`xcb`
+  >* `TSurface`中增加`xcb_connection_t *connection`和`xcb_window_t window`成员变量，用于适配`xcb`
+  >* `TSurface`中增加适配`xcb`相应的构造函数
+  >* `TSurface`的`InternalCreate(...)`中通过`vkCreateXcbSurfaceKHR(...)`适配`xcb`
+  >* 适配`TSurface`基于`xlib`
+  >* `TSurface`中增加`Display *xlibDpy = nullptr`和`Window xlibWindow`成员变量，用于适配`xlib`
+  >* `TSurface`中增加适配`xlib`相应的构造函数
+  >* `TSurface`的`InternalCreate(...)`中通过`vkCreateXlibSurfaceKHR(...)`适配`xlib`
+  >* `TSwapchain`的`InternalCreate(...)`中会去判断当前给的图片数量是否合法（判断数量是否在[最小值，最大值]之间），但是有些显卡设备返回的最小值为有效数据，最大值为`0`,比如`Intel(R) HD Graphics 6000 (BDW GT3)`集显设备就是出现最小值为`3`，最大值为`0`的情况，由此适配修改`Turbo::Extension::TSurface::GetSurfaceCapabilities()`函数
+  >* 适配修改`Turbo::Extension::TSurface::GetSurfaceCapabilities()`函数，对应修改`maxImageCount`
+  >* 修改`Turbo`中对于物理设备的计分算法，最好的图形设备没有返回预计的显卡，而返回了一个`CPU`,`void Turbo::Core::TPhysicalDevice::CalculatePerformanceScore()`中对于`CPU`的分值给的太高了，减小
+
+* 2022/6/16 设计架构
+  >* 修改`./samples`下的示例，使其适配`Linux`
+  >* `./samples`中增加`PureCombinedImageSampler.cpp`例子，用于演示带有纹理图片的采样器
+

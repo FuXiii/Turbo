@@ -91,7 +91,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the present mode of swapchain can not compatible with surface");
         }
-
+this->minImageCount=3;
         VkSwapchainCreateInfoKHR vk_swapchain_create_info_khr = {};
         vk_swapchain_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         vk_swapchain_create_info_khr.pNext = nullptr;

@@ -54,7 +54,7 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
 {
-    std::string save_file_path = "E:/Turbo/";
+    std::string save_file_path = "./";
     std::string save_file_name = name;
 
     Turbo::Core::TImage *source_image = image;
@@ -402,7 +402,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/Suzanne.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/Suzanne.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -483,7 +483,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "E:/Turbo/asset/models/cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -582,6 +582,18 @@ int main()
         {
             enable_instance_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }
     }
 
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
@@ -618,8 +630,11 @@ int main()
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
+    uint32_t min_image_count = surface->GetMinImageCount();
 
-    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, max_image_count - 1, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
+
+    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
     std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
 
@@ -712,7 +727,7 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "E:/Turbo/asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = "/data/home/FuXii/Projects/Turbo/asset/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -774,7 +789,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("E:/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile("/data/home/FuXii/Projects/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
@@ -899,7 +914,7 @@ int main()
     Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
     normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    position_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
     vertex_bindings.push_back(position_binding);

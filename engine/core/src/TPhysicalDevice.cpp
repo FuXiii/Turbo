@@ -24,7 +24,7 @@ void Turbo::Core::TPhysicalDevice::CalculatePerformanceScore()
         this->performanceScore += 6;
         break;
     case Turbo::Core::TPhysicalDeviceType::CPU:
-        this->performanceScore += 7;
+        this->performanceScore += 1;
         break;
     default:
         break;
@@ -331,7 +331,7 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
 
     this->vkPhysicalDevice = vk_physical_devices[this->index];
 
-    //枚举各种属性：
+    // 枚举各种属性：
     this->EnumerateProperties();
     this->EnumerateSupportLayerAndExtension();
     this->EnumerateQueueFamily();
