@@ -1022,3 +1022,4 @@ Turbo是渲染引擎
   >* `FrameGraph`将会转至`c++20`标准，将会尝试使用`concept`和`metaTemplate`方式编写
   >* `samples`中添加`PureSeparateImageSampler`示例，用于展示分离式纹理采样器的使用
   >* 对于资源的读写将会改用相对路径
+  >* `samples`中添加`PureIndexDraw`示例，用于展示索引渲染
