@@ -975,9 +975,11 @@ Turbo是渲染引擎
   >* `./Turbo/samples`种增加`FrameGraph`测试示例
 
 * 2022/6/13 设计架构
+  >
   >* 适配`Linux`系统（基于`Deepin`）
   >* `Turbo::Core::TAllocator::Allocate(...)`中增加对于`Linux`的内存分配支持
   >* `TSurface`中增加对于`Linux`的支持：
+  >
   >```CXX
   >//for wayland
   >#include <wayland-client.h>
@@ -991,11 +993,13 @@ Turbo是渲染引擎
   >#include <X11/Xlib.h>
   >#include <vulkan/vulkan_xlib.h>
   >  ```
+  >
   >  `TSurface`中增加`TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)`构造函数，用于适配`wayland`
   >  `TSurface`中`InternalCreate()`适配`Linux`的`wayland`
   >  `TSurface`中`GetSurfaceSupportQueueFamilys()`适配`Linux`的`wayland`
 
 * 2022/6/15 设计架构
+  >
   >* 适配`TSurface`基于`xcb`
   >* `TSurface`中增加`xcb_connection_t *connection`和`xcb_window_t window`成员变量，用于适配`xcb`
   >* `TSurface`中增加适配`xcb`相应的构造函数
@@ -1009,6 +1013,12 @@ Turbo是渲染引擎
   >* 修改`Turbo`中对于物理设备的计分算法，最好的图形设备没有返回预计的显卡，而返回了一个`CPU`,`void Turbo::Core::TPhysicalDevice::CalculatePerformanceScore()`中对于`CPU`的分值给的太高了，减小
 
 * 2022/6/16 设计架构
+  >
   >* 修改`./samples`下的示例，使其适配`Linux`
   >* `./samples`中增加`PureCombinedImageSampler.cpp`例子，用于演示带有纹理图片的采样器
 
+* 2022/6/29 设计架构
+  >
+  >* `FrameGraph`将会转至`c++20`标准，将会尝试使用`concept`和`metaTemplate`方式编写
+  >* `samples`中添加`PureSeparateImageSampler`示例，用于展示分离式纹理采样器的使用
+  >* 对于资源的读写将会改用相对路径

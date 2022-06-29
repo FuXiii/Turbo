@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 add_library(vulkan STATIC IMPORTED GLOBAL)
-set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION /vulkan/1.3.211.0/x86_64/lib/libvulkan.so)
+set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
 
 aux_source_directory(./src/ SRCS)
 

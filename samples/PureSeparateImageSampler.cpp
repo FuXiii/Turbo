@@ -149,13 +149,14 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 0, binding = 1) uniform sampler2D mySampler;\n"
+                                    "layout (set = 0, binding = 1) uniform texture2D myTexture;\n"
+                                    "layout (set = 0, binding = 2) uniform sampler mySampler;\n"
                                     "layout (location = 3) in vec2 inUV;\n"
                                     "layout (location = 4) in vec3 inColor;\n"
                                     "layout (location = 5) in float inValue;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
-                                    "   outColor = vec4(inColor,1)*texture(mySampler, inUV);\n"
+                                    "   outColor = vec4(inColor,1)*texture(sampler2D(myTexture, mySampler), inUV, 0);\n"
                                     "}\n";
 
 typedef struct POSITION
@@ -415,6 +416,12 @@ int main()
     attachemts.push_back(swapchain_color_attachment);
     attachemts.push_back(depth_attachment);
 
+    std::vector<Turbo::Core::TImageView *> textures;
+    textures.push_back(ktx_texture_view);
+
+    std::vector<Turbo::Core::TSampler *> samplers;
+    samplers.push_back(sampler);
+
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_COLOR_UV), Turbo::Core::TVertexRate::VERTEX);
@@ -433,7 +440,8 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, combined_image_samplers);
+    pipeline_descriptor_set->BindData(0, 1, 0, textures);
+    pipeline_descriptor_set->BindData(0, 2, 0, samplers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
