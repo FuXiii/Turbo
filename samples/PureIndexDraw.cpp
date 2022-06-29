@@ -149,13 +149,14 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "}\n";
 
 const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 0, binding = 1) uniform sampler2D mySampler;\n"
+                                    "layout (set = 0, binding = 1) uniform texture2D myTexture;\n"
+                                    "layout (set = 0, binding = 2) uniform sampler mySampler;\n"
                                     "layout (location = 3) in vec2 inUV;\n"
                                     "layout (location = 4) in vec3 inColor;\n"
                                     "layout (location = 5) in float inValue;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
                                     "void main() {\n"
-                                    "   outColor = vec4(inColor,1)*texture(mySampler, inUV);\n"
+                                    "   outColor = vec4(inColor,1)*texture(sampler2D(myTexture, mySampler), inUV, 0);\n"
                                     "}\n";
 
 typedef struct POSITION
@@ -198,12 +199,17 @@ typedef struct POSITION_COLOR_UV
     TEXCOORD uv;
 } POSITION_COLOR_UV;
 
+using INDICE = uint32_t;
+
 int main()
 {
     std::vector<POSITION_COLOR_UV> POSITION_COLOR_UV_DATA;
-    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}, {0.5f, 1.0f}});
-    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}, {1.0f, 0.0f}});
-    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}, {0.0f, 0.0f}});
+    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{0.5f, 0.5f, 0.0f}, {1.f, 0.f, 0.f}, {1.f, 1.0f}});
+    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{-0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}, {0.0f, 1.0f}});
+    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{-0.5f, -0.5f, 0.0f}, {0.f, 0.f, 1.f}, {0.0f, 0.0f}});
+    POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{0.5f, -0.5f, 0.0f}, {1.f, 1.f, 0.f}, {1.0f, 0.0f}});
+
+    std::vector<INDICE> INDICES_DATA = {0, 1, 2, 2, 3, 0};
 
     float value = -10.0f;
 
@@ -312,6 +318,11 @@ int main()
     vertex_buffer->Unmap();
     POSITION_COLOR_UV_DATA.clear();
 
+    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDICES_DATA));
+    void *index_buffer_ptr = index_buffer->Map();
+    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA) * INDICES_DATA.size());
+    index_buffer->Unmap();
+
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
@@ -415,6 +426,12 @@ int main()
     attachemts.push_back(swapchain_color_attachment);
     attachemts.push_back(depth_attachment);
 
+    std::vector<Turbo::Core::TImageView *> textures;
+    textures.push_back(ktx_texture_view);
+
+    std::vector<Turbo::Core::TSampler *> samplers;
+    samplers.push_back(sampler);
+
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_COLOR_UV), Turbo::Core::TVertexRate::VERTEX);
@@ -433,7 +450,8 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, combined_image_samplers);
+    pipeline_descriptor_set->BindData(0, 1, 0, textures);
+    pipeline_descriptor_set->BindData(0, 2, 0, samplers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
@@ -484,13 +502,14 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
-            // Triangle
+            // Square
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdBindIndexBuffer(index_buffer);
+            command_buffer->CmdDrawIndexed(INDICES_DATA.size(), 1, 0, 0, 0);
 
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
@@ -678,6 +697,7 @@ int main()
     {
         delete image_view_item;
     }
+    delete index_buffer;
     delete vertex_buffer;
     delete value_buffer;
     command_pool->Free(command_buffer);

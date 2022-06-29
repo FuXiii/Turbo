@@ -60,3 +60,15 @@ add_executable(PureCombinedImageSampler ./PureCombinedImageSampler.cpp ${IMGUI_S
 target_include_directories(PureCombinedImageSampler PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PureCombinedImageSampler PUBLIC ${LINK_PARTH})
 target_link_libraries(PureCombinedImageSampler PUBLIC ${LIBS})
+
+add_executable(PureSeparateImageSampler ./PureSeparateImageSampler.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PureSeparateImageSampler PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PureSeparateImageSampler PUBLIC ${LINK_PARTH})
+target_link_libraries(PureSeparateImageSampler PUBLIC ${LIBS})
+
+add_executable(PureIndexDraw ./PureIndexDraw.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PureIndexDraw PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PureIndexDraw PUBLIC ${LINK_PARTH})
+target_link_libraries(PureIndexDraw PUBLIC ${LIBS})
+
+
