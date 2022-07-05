@@ -94,7 +94,10 @@ Turbo是渲染引擎
 
 * `HelloTriangle` - 将会使用核心绘制`IMGUI`和三角形
 * `PureHelloTriangle` - 将会使用核心绘制三角形
-* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用CombinedImageSampler对纹理采样
+* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用`纹理采样器一体式`对纹理采样
+* `PureSeparateImageSampler` - 将会使用核心绘制三角形,在此基础上使用`纹理采样器分离式`对纹理采样
+* `PureIndexDraw` - 将会使用核心，基于索引渲染绘制一个方形面片，并在此基础上使用`纹理采样器分离式`对纹理采样
+* `FrameGraphSample` - `FrameGraph`的示例，目前该示例仅供测试（`FrameGraph`未实现完成），您可以通过该示例了解`FrameGraph`的基本流程
 
 ### 已完成特性
 
@@ -1023,3 +1026,28 @@ Turbo是渲染引擎
   >* `samples`中添加`PureSeparateImageSampler`示例，用于展示分离式纹理采样器的使用
   >* 对于资源的读写将会改用相对路径
   >* `samples`中添加`PureIndexDraw`示例，用于展示索引渲染
+
+* 2022/6/30 设计架构
+  >
+  >* `TFrameGraph`中的`拷贝构造/赋值`和`移动构造/赋值`的相关函数使用`delete`声明去掉
+  >* `TFrameGraph::AdddPass(...)`中对于模板形参`Setup`,`Execute`做出限制，限制为可调用实体，对`Execute`的大小作出限制，最大为`EXECUTE_MAX_LOAD`
+  >* `TFrameGraph::TPassAgency(...)`中对于形参和模板形参`Execute`，由于是右值万能引用，所以使用`std::forward(...)`来完美转发
+  >* `TFrameGraph::CreatePassNode(...)`中`TAgency*`模板参数修改为`std::unique_ptr<TAgency>&& agency`
+  >* `TPassNode`中`TAgency*`相成员修改为`std::unique_ptr<TAgency>`
+  >* 去掉`TPassNode`中析构函数的实现，使用编译器默认生成的
+  >* `TFrameGraph::AddPass(...)`中增加如下代码,调用初始化入口函数：
+  >
+  >```CXX
+  >std::invoke(setup, builder, pass_agency->GetData())
+  >```
+  >
+  >* 增加`TAgency`的构造/析构函数
+
+* 2022/7/4 设计架构
+  >
+  >* `FrameGraph`设计参考`Filement`做出的修改意见目前写在各行的注释中（`//*...`），考虑是否采纳，之后需要同步修改`FrameGraph`的设计文档
+  >* 将`Filament`的`FrameGraph`结构分析加入`FrameGraph`文档，作为参考，与`c++`新标准的模板元编程和`concept`结合设计
+
+* 2022/7/5 设计架构
+  >
+  >* 开始解析`Filament 1.9.9`的`FrameGraph`(截止2022/7/5 `filament`的最新版本为`1.24`对于`FrameGraph`做了很多更新，但总体思路没变),请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看（注：重点过程被标注为橘黄色）

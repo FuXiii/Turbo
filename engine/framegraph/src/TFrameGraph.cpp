@@ -12,15 +12,8 @@ const std::string &Turbo::FrameGraph::TNode::GetName()
     return this->name;
 }
 
-Turbo::FrameGraph::TPassNode::TPassNode(const std::string &name, TPass pass, TAgency *agency) : TNode(name)
+Turbo::FrameGraph::TPassNode::TPassNode(const std::string &name, TPass pass, std::unique_ptr<TAgency> &&agency) : TNode(name), pass{pass}, agency{std::move(agency)}
 {
-    this->pass = pass;
-    this->agency = agency;
-}
-
-Turbo::FrameGraph::TPassNode::~TPassNode()
-{
-    delete this->agency;
 }
 
 Turbo::FrameGraph::TResource Turbo::FrameGraph::TPassNode::AddCreate(TResource resource)
@@ -145,11 +138,11 @@ Turbo::FrameGraph::TFrameGraph::~TFrameGraph()
     delete this->agencys;
 }
 
-Turbo::FrameGraph::TPassNode &Turbo::FrameGraph::TFrameGraph::CreatePassNode(const std::string &name, TAgency *agency)
+Turbo::FrameGraph::TPassNode &Turbo::FrameGraph::TFrameGraph::CreatePassNode(const std::string &name, std::unique_ptr<TAgency> &&agency)
 {
     TPass pass;
     pass.id = static_cast<uint32_t>(this->passNodes->size());
-    return this->passNodes->emplace_back(TPassNode(name, pass, agency));
+    return this->passNodes->emplace_back(TPassNode(name, pass, std::move(agency)));
 };
 
 Turbo::FrameGraph::TResourceNode &Turbo::FrameGraph::TFrameGraph::CreateResourceNode(const std::string &name, uint32_t agencyID)
