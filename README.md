@@ -1051,3 +1051,7 @@ Turbo是渲染引擎
 * 2022/7/5 设计架构
   >
   >* 开始解析`Filament 1.9.9`的`FrameGraph`(截止2022/7/5 `filament`的最新版本为`1.24`对于`FrameGraph`做了很多更新，但总体思路没变),请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看（注：重点过程被标注为橘黄色）
+
+* 2022/7/6 设计架构
+  >
+  >* 开始解析`Filament`的`FrameGraph::compile()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
