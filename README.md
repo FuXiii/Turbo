@@ -1055,3 +1055,7 @@ Turbo是渲染引擎
 * 2022/7/6 设计架构
   >
   >* 开始解析`Filament`的`FrameGraph::compile()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+
+* 2022/7/7 设计架构
+  >
+  >* 开始解析`Filament`的`FrameGraph::execute()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
