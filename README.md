@@ -1059,3 +1059,9 @@ Turbo是渲染引擎
 * 2022/7/7 设计架构
   >
   >* 开始解析`Filament`的`FrameGraph::execute()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+
+* 2022/7/8 设计架构
+  >
+  >* 解析`Filament`的`FrameGraph::execute()`阶段,`reset()`函数调用位置标错了，修改回来。
+  >* 开始解析`Filament`的`FrameGraph::execute()`阶段的`resources.get(data.rt);`，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+  >* 至此`Filament`的`FrameGraph`核心解析完毕，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
