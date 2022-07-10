@@ -24,12 +24,12 @@ struct CustomTexture
 
     CustomTexture() = default;
 
-    void create(const Descriptor &, void *)
+    void Create(const std::string &name, const Descriptor &)
     {
         // custom create
     }
 
-    void destroy(const Descriptor &, void *)
+    void Destroy()
     {
         // custom destroy
     }
@@ -52,7 +52,7 @@ int test0()
             std::cout << "CustomPassData::Setup::" << data.bar.id << std::endl;
             std::cout << "CustomPassData::Setup::" << data.foo.id << std::endl;
         },
-        [=](const CustomPassData &data, TResources &resources, void *context) {
+        [=](const CustomPassData &data, const TResources &resources, void *context) {
 
         });
 
@@ -75,7 +75,7 @@ int test1()
             data.bar = builder.Create<CustomTexture>("bar", {256, 256, CustomTexture::Depth});
             data.bar = builder.Write(data.bar);
         },
-        [=](const CustomPassData &data, TResources &resources, void *context) {
+        [=](const CustomPassData &data, const TResources &resources, void *context) {
             int32_t foo_value = resources.Get<CustomTexture>(data.foo).value;
             int32_t bar_value = resources.Get<CustomTexture>(data.bar).value;
         });
@@ -88,5 +88,7 @@ int test1()
 
 int main()
 {
-    return test0();
+    // test0();
+    test1();
+    return 0;
 }

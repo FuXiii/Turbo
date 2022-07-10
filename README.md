@@ -1065,3 +1065,67 @@ Turbo是渲染引擎
   >* 解析`Filament`的`FrameGraph::execute()`阶段,`reset()`函数调用位置标错了，修改回来。
   >* 开始解析`Filament`的`FrameGraph::execute()`阶段的`resources.get(data.rt);`，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
   >* 至此`Filament`的`FrameGraph`核心解析完毕，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+  >* `TFrameGraph.hpp`中增加如下,用于表示无效ID，并用该值初始化所有ID：
+  >
+  >```CXX
+  >constexpr uint32_t TURBO_NVALID_ID = std::numeric_limits<uint32_t>::max();
+  >```
+  >
+  >* `TFrameGraph::AddPass(name, setup, execute)`中的`execute`回调中`TResources`使用`const`声明，对应的`TBuilder::Get(...)`等函数需要适配，碰到再改
+  >* `TFrameGraph::TBuilder::Create(...)`中的`Virtualizable`模板形参改回`T`
+  >* `TFrameGraph::Create(...)`中的`Virtualizable`模板形参改回`T`
+  
+* 2022/7/9 设计架构
+  >
+  >* 修缮`TFrameGraph::TBuilder::Create(...)`函数
+  >* `TFrameGraph::TResourceAgency(...)`中的`Virtualizable`模板形参改回`T`
+  >* `TFrameGraph::TResourceAgency(...)`中增加`std::string name`属性，用于存储资源名称
+  >* `TFrameGraph::TResourceAgency`中的`T *resource`改为`T resource`
+  >* 新增`TVirtualResourceAgency`类继承自`TAgency`，将`TResourceAgency`改为继承自`T TVirtualResourceAgency`
+  >* 将`TFrameGraph::std::vector<TAgency *> *agencys`成员变量改成`TFrameGraph::std::vector<TVirtualResourceAgency *> *agencys`
+  >* 将`TNode`中的`name`成员变量移动到`TPassNode`中，`TResourceNoded`的名称位于其资源代理中
+  >* 将`TResourceNode`中的`TAgencyID agencyID`成员变量换成`TVirtualResourceAgency*`指向对应的资源代理
+  >* 将`TResourceNode`中的`TAgencyID agencyID`成员变量换成`TVirtualResourceAgency*`指向对应的资源代理
+  >* 将`TFrameGraph::TBuilder::Create(...)`函数基本修缮完成
+  >* 修缮`TFrameGraph::TBuilder::Write(...)`函数
+  >* `TFrameGraph`中增加`TResourceNode &GetResourceNode(TResource resource)`函数
+  >* `TVirtualResourceAgency`中增加`TVersion version`成员变量，并增加相应的`Set/Get`函数
+  >* `TResourceNode`中增加`TVirtualResourceAgency *GetResourceAgency()`函数
+  >* 遗弃`TFrameGraph`中的`CloneResourceNode(...)`函数
+  >* 遗弃`TFrameGraph`中的`GetResourceAgency(...)`函数
+  >* `TFrameGraph`中增加`bool IsValid(TPass pass)`函数
+  >* `TFrameGraph::TBuilder::Write(...)`函数基本修缮完成
+  >* 修缮`TResources::Get(TResource resource)`函数
+  >* `TResourceNode`中增加`TPass writer`成员变量，用与表示资源的写入者
+
+* 2022/7/10 设计架构
+  >
+  >* `TVirtualResourceAgency`类中增加`TPass firstUser`和`TPass lastUser`用于表示第一次和最后一次使用该资源的使用者
+  >* `TVirtualResourceAgency`类中增加如下,用于表示该PassNode运行时需要创建和销毁的资源：
+  >
+  >```CXX
+  >std::vector<TVirtualResourceAgency*> devirtualizes;
+  >std::vector<TVirtualResourceAgency*> destroies;
+  >```
+  >
+  >* `TVirtualResourceAgency`增加如下成员函数：
+  >
+  >```CXX
+  >virtual void Create() = 0;
+  >virtual void Destroy() = 0;
+  >```
+  >
+  >* `TResourceAgency`增加如下成员函数：
+  >
+  >```CXX
+  >virtual void Create() override;
+  >virtual void Destroy() override;
+  >```
+  >
+  >* 增加`class TPassExecutorAgency`类，用于定义`pass`代理的`Executor(...)`的虚函数回调
+  >* 修改`class TPassAgency`类，继承自`TPassExecutorAgency`，并实现`Executor(...)`虚函数回调
+  >* 将`TPassNode`类中的`std::unique_ptr<TAgency> agency`修改成`std::unique_ptr<TPassExecutorAgency> agency;`
+  >* 将`TFrameGraph`类中的`void Execute();成员函数`修改成`void Execute(void *context);`
+  >* 修改`TFrameGraph::CreatePassNode(...)`适配新的`TPassExecutorAgency`类
+  >* 修改`TPassNode`构造函数，适配新的`TPassExecutorAgency`类
+  >* `TFrameGraph`大框架基本上写完了，剩下的就是`Resource`和`PassNode`等特化和引擎提供的特性资源类，比如`PresentNode(PassNode的特化，有PresentData)`和`Texture(纹理资源)，DepthTexture(深度纹理)，ColorTexture(颜色纹理)`等
