@@ -1129,3 +1129,13 @@ Turbo是渲染引擎
   >* 修改`TFrameGraph::CreatePassNode(...)`适配新的`TPassExecutorAgency`类
   >* 修改`TPassNode`构造函数，适配新的`TPassExecutorAgency`类
   >* `TFrameGraph`大框架基本上写完了，剩下的就是`Resource`和`PassNode`等特化和引擎提供的特性资源类，比如`PresentNode(PassNode的特化，有PresentData)`和`Texture(纹理资源)，DepthTexture(深度纹理)，ColorTexture(颜色纹理)`等
+  >* 接下来需要实现`TFrameGraph`的`Blackboard`特性
+  
+* 2022/7/11 设计架构
+  >
+  >* 实现`FrameGraph`的`Blackboard`特性
+  >* 实现`TFrameGraph`中增加`TBlackboard`类
+  >* `TFrameGraph`中增加`TBlackboard`类成员变量
+  >* `TFrameGraph`中增加`TBlackboard &GetBlackboard()`成员函数
+  >* 需要特化`PresentPassNode`，显示节点一般作为结束节点，但是`FrameGraph`演讲中并没有显示的给出显示阶段往哪个资源身上写入，所以目前显示节点没有写入，也就是没有出度，没有出度在`FrameGraph::Compile()`阶段就会被剔除，这也许会造成一连串的剔除，所以需要专门特化一个`PresentPassNode`或是采用`SideEffect`解决(目前`TFrameGraph`并没有引入`SideEffect`特性)
+  >* `TFrameGraph`还需要经过测试，目前还没有严格测试
