@@ -88,18 +88,18 @@ int test1()
 }
 
 /*
-Depth Pass
+[Depth Pass]
     ↓
-Depth Texture.
+Depth Texture
     ↓
-    ↓        ↗ Depth Texture. ↘
-GBuffer Pass → Normal Texture. → Lighting Pass → Light Texture.
-             ↘ Color Texture. ↗                       ↓
-                                                   Post Pass
+    ↓          ↗ Depth Texture ↘
+[GBuffer Pass] → Normal Texture → [Lighting Pass] → Light Texture
+               ↘ Color Texture ↗                       ↓
+                                                   [Post Pass]
                                                        ↓
-                                                RenderTarget Texture.
+                                                RenderTarget Texture
                                                        ↓
-                                                  Present Pass
+                                                  [Present Pass]
 */
 int test2()
 {
@@ -122,6 +122,7 @@ int test2()
             CustomTexture &depth_texture = resources.Get<CustomTexture>(data.depthTexture);
             uint32_t depth_texture_value = depth_texture.value;
 
+            std::cout << "Depth Pass Execute" << std::endl;
             /*Some Rendering Command...*/
         });
 
@@ -145,6 +146,7 @@ int test2()
             data.colorTexture = builder.Create<CustomTexture>("Normal Texture", {128, 128, CustomTexture::Color});
             data.colorTexture = builder.Write(data.colorTexture);
 
+            fg.GetBlackboard()["Depth Texture"] = data.depthTexture;
             fg.GetBlackboard()["Normal Texture"] = data.normalTexture;
             fg.GetBlackboard()["Color Texture"] = data.colorTexture;
         },
@@ -155,6 +157,8 @@ int test2()
             uint32_t depth_texture_value = depth_texture.value;
             uint32_t normal_texture_value = normal_texture.value;
             uint32_t color_texture_value = color_texture.value;
+
+            std::cout << "GBuffer Pass Execute" << std::endl;
 
             /*Some Rendering Command...*/
         });
@@ -185,7 +189,14 @@ int test2()
             fg.GetBlackboard()["Light Texture"] = data.lightTexture;
         },
         [=](const LightPassData &data, const TResources &resources, void *context) {
+            CustomTexture &depth_texture = resources.Get<CustomTexture>(data.depthTexture);
+            CustomTexture &light_texture = resources.Get<CustomTexture>(data.lightTexture);
+            CustomTexture &color_texture = resources.Get<CustomTexture>(data.colorTexture);
+            CustomTexture &normal_texture = resources.Get<CustomTexture>(data.normalTexture);
 
+            std::cout << "Light Pass Execute" << std::endl;
+
+            /*Some Renderring Command...*/
         });
 
     struct PostPassData
@@ -206,7 +217,12 @@ int test2()
             fg.GetBlackboard()["RenderTarget Texture"] = data.renderTargetTexture;
         },
         [=](const PostPassData &data, const TResources &resources, void *context) {
+            CustomTexture &light_texture = resources.Get<CustomTexture>(data.lightTexture);
+            CustomTexture &render_target_texture = resources.Get<CustomTexture>(data.renderTargetTexture);
 
+            std::cout << "Post Pass Execute" << std::endl;
+
+            /*Some Renderring Command...*/
         });
 
     struct PresentPassData
@@ -221,7 +237,11 @@ int test2()
             data.renderTargetTexture = builder.Read(data.renderTargetTexture);
         },
         [=](const PresentPassData &data, const TResources &resources, void *context) {
+            CustomTexture &render_target_texture = resources.Get<CustomTexture>(data.renderTargetTexture);
 
+            std::cout << "Present Pass Execute" << std::endl;
+
+            /*Some Renderring Command...*/
         });
 
     fg.Compile();
@@ -233,6 +253,7 @@ int test2()
 int main()
 {
     // test0();
-    test1();
+    // test1();
+    test2();
     return 0;
 }
