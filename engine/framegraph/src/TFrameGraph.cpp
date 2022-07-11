@@ -334,3 +334,8 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
         }
     }
 }
+
+Turbo::FrameGraph::TBlackboard &Turbo::FrameGraph::TFrameGraph::GetBlackboard()
+{
+    return this->blackboard;
+}

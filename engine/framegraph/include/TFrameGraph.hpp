@@ -5,8 +5,8 @@
 #include <assert.h>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
 
 #include <concepts>
 #include <memory>
@@ -202,12 +202,34 @@ class TResourceNode : public TNode
     const std::string &GetName();
 };
 
+class TBlackboard
+{
+  private:
+    std::unordered_map<std::string, TResource> blackboardMap;
+
+  public:
+    TBlackboard() = default;
+    ~TBlackboard() = default;
+
+    auto &operator[](std::string const &name)
+    {
+        if (this->blackboardMap.find(name) != blackboardMap.end())
+        {
+            return this->blackboardMap[name];
+        }
+
+        return this->blackboardMap[name] = TResource{};
+    }
+};
+
 class TFrameGraph
 {
   private:
     std::vector<TPassNode> *passNodes;
     std::vector<TResourceNode> *resourceNodes;
     std::vector<TVirtualResourceAgency *> *resourceAgencys;
+
+    TBlackboard blackboard;
 
   private:
     TPassNode &CreatePassNode(const std::string &name, std::unique_ptr<TPassExecutorAgency> &&agency);
@@ -252,6 +274,8 @@ class TFrameGraph
 
     void Compile();
     void Execute(void *context = nullptr);
+
+    TBlackboard &GetBlackboard();
 };
 
 class TResources
