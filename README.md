@@ -1137,5 +1137,6 @@ Turbo是渲染引擎
   >* 实现`TFrameGraph`中增加`TBlackboard`类
   >* `TFrameGraph`中增加`TBlackboard`类成员变量
   >* `TFrameGraph`中增加`TBlackboard &GetBlackboard()`成员函数
-  >* 需要特化`PresentPassNode`，显示节点一般作为结束节点，但是`FrameGraph`演讲中并没有显示的给出显示阶段往哪个资源身上写入，所以目前显示节点没有写入，也就是没有出度，没有出度在`FrameGraph::Compile()`阶段就会被剔除，这也许会造成一连串的剔除，所以需要专门特化一个`PresentPassNode`或是采用`SideEffect`解决(目前`TFrameGraph`并没有引入`SideEffect`特性)
+  >* ~~需要特化`PresentPassNode`，显示节点一般作为结束节点，但是`FrameGraph`演讲中并没有显示的给出显示阶段往哪个资源身上写入，所以目前显示节点没有写入，也就是没有出度，没有出度在`FrameGraph::Compile()`阶段就会被剔除，这也许会造成一连串的剔除，所以需要专门特化一个`PresentPassNode`或是采用`SideEffect`解决(目前`TFrameGraph`并没有引入`SideEffect`特性)~~
+  当前的算法正常并不会剔除`PresentPass`，`FrameGraph`目前的剔除算法首先基于资源引用数进行的剔除，目前显示节点不向任何资源写入，只是读取资源，正常不会发生递归性的一连串剔除
   >* `TFrameGraph`还需要经过测试，目前还没有严格测试
