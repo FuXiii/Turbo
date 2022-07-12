@@ -1140,3 +1140,13 @@ Turbo是渲染引擎
   >* ~~需要特化`PresentPassNode`，显示节点一般作为结束节点，但是`FrameGraph`演讲中并没有显示的给出显示阶段往哪个资源身上写入，所以目前显示节点没有写入，也就是没有出度，没有出度在`FrameGraph::Compile()`阶段就会被剔除，这也许会造成一连串的剔除，所以需要专门特化一个`PresentPassNode`或是采用`SideEffect`解决(目前`TFrameGraph`并没有引入`SideEffect`特性)~~
   当前的算法正常并不会剔除`PresentPass`，`FrameGraph`目前的剔除算法首先基于资源引用数进行的剔除，目前显示节点不向任何资源写入，只是读取资源，正常不会发生递归性的一连串剔除
   >* `TFrameGraph`还需要经过测试，目前还没有严格测试
+
+* 2022/7/11 设计架构
+  >
+  >* 修复Bug:`TFrameGraph::Compile()`中计算资源的创建者和销毁者时，`FrameGraph`的所有资源可能会被全部剔除，造成空图，这会导致资源的创建者和销毁者为无效节点（比如强制`PresentPass`往资源中写入，由于`PresentPass`为结束节点，正常不应该再写入资源，这时该写入的资源没有出度，也就是没有人使用该节点，这时`Compile()`阶段会发生资源剔除，导致一连串的资源剔除，最坏的情况会剔除成空图，这时资源的创建者和销毁者不会被赋值，从而导致创建者和销毁者的节点`id`无效非法）
+  >
+  >* 有关`TFrameGraph`如何使用和测试，请参考`./samples/FrameGraphSample.cpp`
+  >* `TFrameGraph::Execute(...)`中增加对`PassNode`的引用数的判断，如果引用数大于零，说明该节点有使用者，运行节点的`Executor`回调，否则没有使用，不去调用回调。(注意：这将会导致`PresentNode`的运行回调不会被调用，考虑使用`SideEffect`特性强制驱动，如果一个`PassNode`有`SideEffect`特性，说明在节点不会被剔除)
+  >* `TPassNode`中增加`bool sideEffect`成员变量
+  >* `TFrameGraph::TBuilder`中增加`TBuilder &SideEffect();`成员函数，用于设置`PassNode`的`sideEffect`成员
+  >* `TFrameGraph::Execute()`中增加对于`sideEffect`的判断
