@@ -169,6 +169,8 @@ class TPassNode : public TNode
     std::vector<TVirtualResourceAgency *> devirtualizes;
     std::vector<TVirtualResourceAgency *> destroies;
 
+    bool sideEffect = false;
+
   public:
     TPassNode(const std::string &name, TPass pass, std::unique_ptr<TPassExecutorAgency> &&agency);
     TResource AddCreate(TResource resource);
@@ -250,6 +252,8 @@ class TFrameGraph
         [[nodiscard]] TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
         TResource Read(TResource resource);
         TResource Write(TResource resource);
+
+        TBuilder &SideEffect();
     };
 
   public:

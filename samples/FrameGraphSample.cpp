@@ -25,14 +25,19 @@ struct CustomTexture
 
     CustomTexture() = default;
 
+    std::string name;
+
     void Create(const std::string &name, const Descriptor &)
     {
         // custom create
+        std::cout << "CustomTexture::Create::" << name << std::endl;
+        this->name = name;
     }
 
     void Destroy()
     {
         // custom destroy
+        std::cout << "CustomTexture::Destroy::" << name << std::endl;
     }
 };
 
@@ -143,7 +148,7 @@ int test2()
             data.normalTexture = builder.Create<CustomTexture>("Normal Texture", {128, 128, CustomTexture::Normal});
             data.normalTexture = builder.Write(data.normalTexture);
 
-            data.colorTexture = builder.Create<CustomTexture>("Normal Texture", {128, 128, CustomTexture::Color});
+            data.colorTexture = builder.Create<CustomTexture>("Color Texture", {128, 128, CustomTexture::Color});
             data.colorTexture = builder.Write(data.colorTexture);
 
             fg.GetBlackboard()["Depth Texture"] = data.depthTexture;
@@ -228,6 +233,8 @@ int test2()
     struct PresentPassData
     {
         TResource renderTargetTexture;
+
+        // TResource testTexture;
     };
 
     fg.AddPass<PresentPassData>(
@@ -235,6 +242,10 @@ int test2()
         [&](TFrameGraph::TBuilder &builder, PresentPassData &data) {
             data.renderTargetTexture = fg.GetBlackboard()["RenderTarget Texture"];
             data.renderTargetTexture = builder.Read(data.renderTargetTexture);
+
+            builder.SideEffect();
+            // data.testTexture = builder.Create<CustomTexture>("Test Texture", {128, 128, CustomTexture::Color});
+            // data.testTexture = builder.Write(data.testTexture);
         },
         [=](const PresentPassData &data, const TResources &resources, void *context) {
             CustomTexture &render_target_texture = resources.Get<CustomTexture>(data.renderTargetTexture);

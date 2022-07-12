@@ -148,6 +148,12 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
     return this->passNode.AddWrite(new_resource);
 }
 
+Turbo::FrameGraph::TFrameGraph::TBuilder &Turbo::FrameGraph::TFrameGraph::TBuilder::SideEffect()
+{
+    this->passNode.sideEffect = true;
+    return *this;
+}
+
 Turbo::FrameGraph::TFrameGraph::TFrameGraph()
 {
     this->passNodes = new std::vector<TPassNode>();
@@ -307,11 +313,15 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
     {
         TPass first_user = virtual_resource_agency_item->firstUser;
         TPass last_user = virtual_resource_agency_item->lastUser;
-        TPassNode &first_user_pass_node = this->passNodes->at(first_user.id);
-        TPassNode &last_user_pass_node = this->passNodes->at(last_user.id);
 
-        first_user_pass_node.devirtualizes.push_back(virtual_resource_agency_item);
-        last_user_pass_node.destroies.push_back(virtual_resource_agency_item);
+        if (first_user.id != TURBO_NVALID_ID && last_user.id != TURBO_NVALID_ID)
+        {
+            TPassNode &first_user_pass_node = this->passNodes->at(first_user.id);
+            TPassNode &last_user_pass_node = this->passNodes->at(last_user.id);
+
+            first_user_pass_node.devirtualizes.push_back(virtual_resource_agency_item);
+            last_user_pass_node.destroies.push_back(virtual_resource_agency_item);
+        }
     }
 }
 
@@ -319,6 +329,7 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
 {
     for (TPassNode &pass_node_item : *this->passNodes)
     {
+
         TResources resources(*this, pass_node_item);
 
         for (TVirtualResourceAgency *virtual_resource_item : pass_node_item.devirtualizes)
@@ -326,7 +337,10 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
             virtual_resource_item->Create();
         }
 
-        pass_node_item.agency->Executor(resources, context);
+        if (pass_node_item.refCount > 0 || pass_node_item.sideEffect)
+        {
+            pass_node_item.agency->Executor(resources, context);
+        }
 
         for (TVirtualResourceAgency *virtual_resource_item : pass_node_item.destroies)
         {
