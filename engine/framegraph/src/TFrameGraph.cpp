@@ -84,11 +84,6 @@ Turbo::FrameGraph::TVersion Turbo::FrameGraph::TVirtualResourceAgency::GetVersio
     return this->version;
 }
 
-void Turbo::FrameGraph::TVirtualResourceAgency::SetVersion(TVersion version)
-{
-    this->version = version;
-}
-
 Turbo::FrameGraph::TResourceNode::TResourceNode(TResource resource, TVirtualResourceAgency *resourceAgency, uint32_t version) : TNode(), resource(resource), resourceAgency(resourceAgency), version(version)
 {
 }
@@ -139,9 +134,7 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
     TResourceNode &resource_node = this->frameGraph.GetResourceNode(resource);
 
     TVirtualResourceAgency *resource_agency = resource_node.GetResourceAgency();
-    TVersion resource_agency_version = resource_agency->GetVersion();
-    ++resource_agency_version;
-    resource_agency->SetVersion(resource_agency_version);
+    resource_agency->version += 1;
 
     TResourceNode &new_resource_node = this->frameGraph.CreateResourceNode(resource_agency);
     TResource new_resource = new_resource_node.GetResource();
@@ -226,6 +219,10 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
     for (TPassNode &pass_node_item : *this->passNodes)
     {
         pass_node_item.refCount = pass_node_item.writes.size();
+        if (pass_node_item.sideEffect)
+        {
+            pass_node_item.refCount += 1;
+        }
 
         for (TResource resource_item : pass_node_item.reads)
         {
@@ -337,7 +334,7 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
             virtual_resource_item->Create();
         }
 
-        if (pass_node_item.refCount > 0 || pass_node_item.sideEffect)
+        if (pass_node_item.refCount > 0)
         {
             pass_node_item.agency->Executor(resources, context);
         }
