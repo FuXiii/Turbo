@@ -116,7 +116,6 @@ class TVirtualResourceAgency : public TAgency
     const std::string &GetName();
 
     TVersion GetVersion();
-    void SetVersion(TVersion version);
 
     virtual void Create() = 0;
     virtual void Destroy() = 0;

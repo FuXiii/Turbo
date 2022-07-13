@@ -1150,3 +1150,9 @@ Turbo是渲染引擎
   >* `TPassNode`中增加`bool sideEffect`成员变量
   >* `TFrameGraph::TBuilder`中增加`TBuilder &SideEffect();`成员函数，用于设置`PassNode`的`sideEffect`成员
   >* `TFrameGraph::Execute()`中增加对于`sideEffect`的判断
+
+* 2022/7/13 设计架构
+  >
+  >* 修改`SideEffect`强制不剔除`PassNode`，应该修改其`refCount`
+  >* 移除`TVirtualResourceAgency::SetVersion(...)`函数，通过直接修改成员变量完成
+  >* 至此最基础的`FrameGraph`实现完成，接下来将会于`./engine/include`和`./engine/src`中实现更高级的资源和特性(比如`Surface`,`Material`和各种`Resource`等)
