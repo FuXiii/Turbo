@@ -39,6 +39,7 @@
 
 #include <glm/ext.hpp>
 
+#include "TVulkanLoader.h"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -387,6 +388,9 @@ typedef struct TEXCOORD
 
 int main()
 {
+
+    std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+
     float value = -10.0f;
     float alpha = 1.0;
 
@@ -402,7 +406,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/Suzanne.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../asset/models/Suzanne.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -483,7 +487,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "/data/home/FuXii/Projects/Turbo/asset/models/cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../asset/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -615,7 +619,6 @@ int main()
     vk_physical_device_features.sampleRateShading = VK_TRUE;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    physical_device->GetSupportExtensions();
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
@@ -727,7 +730,7 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "/data/home/FuXii/Projects/Turbo/asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = "../asset/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -789,7 +792,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("/data/home/FuXii/Projects/Turbo/asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile("../asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;

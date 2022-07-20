@@ -62,7 +62,7 @@ Turbo是渲染引擎
         ```
 
 * 如何运行
-    1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是绝对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`:/`字符，替换成自己的目录即可。
+    1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是相对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`asset`字符，替换成自己的目录即可。
 
 ## Trifles
 
@@ -165,6 +165,8 @@ Turbo是渲染引擎
 * 非`Core`：`FrameGraph`层实现`PBR`
 
 * 非`Core`：`ECS`层
+
+* 2022/7/13 搞了个`鸿蒙OS(Harmony OS)`系统的手机，有时间适配一下鸿蒙设备。
 
 ## Log
 
@@ -1156,3 +1158,74 @@ Turbo是渲染引擎
   >* 修改`SideEffect`强制不剔除`PassNode`，应该修改其`refCount`
   >* 移除`TVirtualResourceAgency::SetVersion(...)`函数，通过直接修改成员变量完成
   >* 至此最基础的`FrameGraph`实现完成，接下来将会于`./engine/include`和`./engine/src`中实现更高级的资源和特性(比如`Surface`,`Material`和各种`Resource`等)
+
+* 2022/7/16 设计架构
+  >
+  >* 修改`./main.cpp`中的绝对路径修改到相对路径
+  >* 开始尝试动态加载`Vulkan`库来获取函数
+  >* 核心中添加`TVulkanLoader`类用于实现`Vulkan`的`Loader`
+  >* 核心中添加`TCore::TResult`中增加`UNIMPLEMENTED`用于表示`引擎未实现先关定义，请实现`
+
+* 2022/7/17 设计架构
+  >
+  >* `TVulkanLoader`中增加如下私有函数，用于加载`Vulkan API`的函数：
+  >
+  >```CXX
+  >template <TLoaderType type, typename Function>
+  >Function LoadAll(void *context, const char*name);
+  >```
+  >
+  >* `TVulkanLoader`中增加如下函数：
+  >
+  >```CXX
+  >void Load(TInstance *instance);
+  >void LoadAllInstanceFunctions(TInstance *instance);
+  >void LoadAllDeviceFunctions(TInstance *instance);
+  >
+  >template <typename Function>
+  >Function LoadInstanceFunsction(TInstance *instance, const char *name);
+  >template <typename Function>
+  >Function LoadInstanceFunsction(VkInstance instance, const char *name);
+  >template <typename Function>
+  >Function LoadDeviceFunsction(TInstance*instance, const char*name);
+  >template <typename Function>
+  >Function LoadDeviceFunsction(VkInstance instance, const char*name);
+  >TVersion GetVulkanVersion();
+  >```
+  >
+  >* `TInstance::InternalCreate()`中增加对于`TVulkanLoader`的相关调用，用于加载`Vulkan API`函数
+  >* `TInstance::InternalCreate()`中对于`vkCreateInstance`的相关调用，更改成`Turbo::Core::vkCreateInstance`调用，并在之后调用`TVulkanLoader::Instance()->LoadAll(this);`用于获取所有`Vulkan API`函数
+  >* `TInstance::IsSupportVulkan()`中对于`vkCreateInstance`的相关调用，更改成使用`TVulkanLoader`调用
+  >* `TInstance::GetVulkanInstanceVersion()`中对于`vkEnumerateInstanceVersion`的相关调用，更改成使用`TVulkanLoader`调用
+
+* 2022/7/18 设计架构
+  >
+  >* `TLayerInfo`中使用`TVulkanLoader`调用相应函数
+  >* `TExtensionInfo`中使用`TVulkanLoader`调用相应函数
+
+* 2022/7/20 设计架构
+  >
+  >* `TVulkanLoader`加载`vkEnumeratePhysicalDevices`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceProperties`函数
+  >* `TVulkanLoader`加载`vkEnumerateDeviceLayerProperties`函数
+  >* `TVulkanLoader`加载`vkEnumerateDeviceExtensionProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceQueueFamilyProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceFeatures`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceMemoryProperties`函数
+  >* `TPhysicalDevice::InternalCreate()`使用`Turbo::Core::vkEnumeratePhysicalDevices(...)`函数
+  >* `TFormatInfo::GetSupportFormats`使用`TVulkanLoader`获取函数
+  >* `TVulkanLoader`加载`vkCreateDevice`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceFormatProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceImageFormatProperties`函数
+  >* `TDevice::InternalCreate()`使用`TVulkanLoader`获取函数
+  >* `TVulkanLoader`增加如下成员函数：
+  >
+  >```CXX
+  >template <typename Function>
+  >Function LoadDeviceFunsction(TDevice *device, const char *name);
+  >template <typename Function>
+  >Function LoadDeviceFunsction(VkDevice device, const char *name);
+  >```
+  >
+  >* `TVulkanLoader`提供专门`TDevice/VkDevice`设备的特定实现函数版本获取
+  >* `TVulkanLoader`加载`vkDestroyDevice`函数

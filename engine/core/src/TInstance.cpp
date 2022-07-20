@@ -3,6 +3,7 @@
 #include "TException.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 size_t Turbo::Core::TInstance::GetEnabledLayerCount()
 {
@@ -172,7 +173,7 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
 
     uint32_t physical_device_count = 0;
-    result = vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
+    result = Turbo::Core::vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS || physical_device_count == 0)
     {
         return result;
@@ -226,6 +227,8 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysica
 
 void Turbo::Core::TInstance::InternalCreate()
 {
+    TVulkanLoader::Instance();
+
     size_t enable_layer_count = this->enabledLayers.size();
     std::vector<const char *> enable_layer_names(enable_layer_count);
     for (uint32_t enable_layer_index = 0; enable_layer_index < enable_layer_count; enable_layer_index++)
@@ -261,11 +264,13 @@ void Turbo::Core::TInstance::InternalCreate()
     instance_create_info.ppEnabledExtensionNames = enable_extension_names.data();
 
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateInstance(&instance_create_info, allocator, &this->vkInstance);
+    VkResult result = Turbo::Core::vkCreateInstance(&instance_create_info, allocator, &this->vkInstance);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::InternalCreate::vkCreateInstance");
     }
+
+    TVulkanLoader::Instance()->LoadAll(this);
 
     this->supportLayers = TLayerInfo::GetInstanceLayers();
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
@@ -296,8 +301,9 @@ void Turbo::Core::TInstance::InternalDestroy()
 
 bool Turbo::Core::TInstance::IsSupportVulkan()
 {
-    VkApplicationInfo application_info = {};
+    TVulkanLoader::Instance();
 
+    VkApplicationInfo application_info = {};
     application_info.sType = VkStructureType::VK_STRUCTURE_TYPE_APPLICATION_INFO;
     application_info.pNext = nullptr;
     application_info.pApplicationName = nullptr;
@@ -320,11 +326,12 @@ bool Turbo::Core::TInstance::IsSupportVulkan()
 
     VkAllocationCallbacks *allocation_call_back = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-    VkResult result = vkCreateInstance(&vkinstance_create_info, allocation_call_back, &instance);
+    VkResult result = Turbo::Core::vkCreateInstance(&vkinstance_create_info, allocation_call_back, &instance);
 
     if (result == VkResult::VK_SUCCESS)
     {
-        vkDestroyInstance(instance, allocation_call_back);
+        PFN_vkDestroyInstance pfn_vk_destroy_instance = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkDestroyInstance>(instance, "vkDestroyInstance");
+        pfn_vk_destroy_instance(instance, allocation_call_back);
         return true;
     }
 
@@ -333,18 +340,7 @@ bool Turbo::Core::TInstance::IsSupportVulkan()
 
 Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanInstanceVersion()
 {
-    uint32_t version = 0;
-    PFN_vkEnumerateInstanceVersion pfn_enumerate_instance_version = (PFN_vkEnumerateInstanceVersion)vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
-    if (pfn_enumerate_instance_version != nullptr && pfn_enumerate_instance_version(&version) == VK_SUCCESS)
-    {
-        return Turbo::Core::TVersion(VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version), 0);
-    }
-    else
-    {
-        return Turbo::Core::TVersion(1, 0, 0, 0);
-    }
-
-    return Turbo::Core::TVersion(0, 0, 0, 0);
+    return TVulkanLoader::Instance()->GetVulkanVersion();
 }
 
 std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions()

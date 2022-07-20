@@ -2,16 +2,19 @@
 #include "TException.h"
 #include "TInstance.h"
 #include "TPhysicalDevice.h"
+#include "TVulkanLoader.h"
 #include <sstream>
 
 size_t Turbo::Core::TLayerInfo::GetInstanceLayerCount()
 {
+    TVulkanLoader::Instance();
+
     uint32_t layer_count = 0;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
 
     do
     {
-        result = vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+        result = Turbo::Core::vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
         if (result == VkResult::VK_SUCCESS)
         {
@@ -24,6 +27,8 @@ size_t Turbo::Core::TLayerInfo::GetInstanceLayerCount()
 
 std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers()
 {
+    TVulkanLoader::Instance();
+
     std::vector<Turbo::Core::TLayerInfo> layers;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
 
@@ -34,7 +39,7 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers(
         {
             std::vector<VkLayerProperties> layer_propertiess;
             layer_propertiess.resize(layer_count);
-            result = vkEnumerateInstanceLayerProperties(&layer_count, layer_propertiess.data());
+            result = Turbo::Core::vkEnumerateInstanceLayerProperties(&layer_count, layer_propertiess.data());
 
             if (result == VkResult::VK_SUCCESS)
             {
@@ -85,10 +90,11 @@ size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(TPhysicalDevice *phy
     if (physicalDevice != nullptr && (physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE))
     {
         VkResult result = VkResult::VK_ERROR_UNKNOWN;
+        PFN_vkEnumerateDeviceLayerProperties pfn_vk_enumerate_device_layer_properties = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkEnumerateDeviceLayerProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceLayerProperties");
 
         do
         {
-            result = vkEnumerateDeviceLayerProperties(physicalDevice->GetVkPhysicalDevice(), &layer_count, nullptr);
+            result = pfn_vk_enumerate_device_layer_properties(physicalDevice->GetVkPhysicalDevice(), &layer_count, nullptr);
 
             if (result == VkResult::VK_SUCCESS)
             {
@@ -105,6 +111,8 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceL
     std::vector<Turbo::Core::TLayerInfo> layers;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
 
+    PFN_vkEnumerateDeviceLayerProperties pfn_vk_enumerate_device_layer_properties = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkEnumerateDeviceLayerProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceLayerProperties");
+
     do
     {
         uint32_t layer_count = static_cast<uint32_t>(TLayerInfo::GetPhysicalDeviceLayerCount(physicalDevice));
@@ -113,7 +121,7 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceL
         {
             std::vector<VkLayerProperties> layer_propertiess;
             layer_propertiess.resize(layer_count);
-            result = vkEnumerateDeviceLayerProperties(physicalDevice->GetVkPhysicalDevice(), &layer_count, layer_propertiess.data());
+            result = pfn_vk_enumerate_device_layer_properties(physicalDevice->GetVkPhysicalDevice(), &layer_count, layer_propertiess.data());
 
             if (result == VkResult::VK_SUCCESS)
             {
