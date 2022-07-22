@@ -122,6 +122,8 @@ void Turbo::Core::TDevice::InternalCreate()
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
 
+    // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
+
     if (this->vmaAllocator != nullptr)
     {
         this->vmaAllocator->InternalCreate();

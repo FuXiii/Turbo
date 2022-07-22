@@ -1183,13 +1183,13 @@ Turbo是渲染引擎
   >void LoadAllDeviceFunctions(TInstance *instance);
   >
   >template <typename Function>
-  >Function LoadInstanceFunsction(TInstance *instance, const char *name);
+  >Function LoadInstanceFunction(TInstance *instance, const char *name);
   >template <typename Function>
-  >Function LoadInstanceFunsction(VkInstance instance, const char *name);
+  >Function LoadInstanceFunction(VkInstance instance, const char *name);
   >template <typename Function>
-  >Function LoadDeviceFunsction(TInstance*instance, const char*name);
+  >Function LoadDeviceFunction(TInstance*instance, const char*name);
   >template <typename Function>
-  >Function LoadDeviceFunsction(VkInstance instance, const char*name);
+  >Function LoadDeviceFunction(VkInstance instance, const char*name);
   >TVersion GetVulkanVersion();
   >```
   >
@@ -1222,10 +1222,146 @@ Turbo是渲染引擎
   >
   >```CXX
   >template <typename Function>
-  >Function LoadDeviceFunsction(TDevice *device, const char *name);
+  >Function LoadDeviceFunction(TDevice *device, const char *name);
   >template <typename Function>
-  >Function LoadDeviceFunsction(VkDevice device, const char *name);
+  >Function LoadDeviceFunction(VkDevice device, const char *name);
   >```
   >
   >* `TVulkanLoader`提供专门`TDevice/VkDevice`设备的特定实现函数版本获取
   >* `TVulkanLoader`加载`vkDestroyDevice`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceSparseImageFormatProperties`函数
+  >* `TVulkanLoader`加载如下设备函数:
+  >
+  >```CXX
+  >extern VULKAN_DEVICE_API PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkAllocateMemory vkAllocateMemory;
+  >extern VULKAN_DEVICE_API PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkBindBufferMemory vkBindBufferMemory;
+  >extern VULKAN_DEVICE_API PFN_vkBindImageMemory vkBindImageMemory;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBeginQuery vkCmdBeginQuery;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindPipeline vkCmdBindPipeline;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBlitImage vkCmdBlitImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearAttachments vkCmdClearAttachments;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearColorImage vkCmdClearColorImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearDepthStencilImage vkCmdClearDepthStencilImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyBuffer vkCmdCopyBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyImage vkCmdCopyImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyQueryPoolResults vkCmdCopyQueryPoolResults;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDispatch vkCmdDispatch;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDispatchIndirect vkCmdDispatchIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDraw vkCmdDraw;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndexed vkCmdDrawIndexed;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndexedIndirect vkCmdDrawIndexedIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndirect vkCmdDrawIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdEndQuery vkCmdEndQuery;
+  >extern VULKAN_DEVICE_API PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdExecuteCommands vkCmdExecuteCommands;
+  >extern VULKAN_DEVICE_API PFN_vkCmdFillBuffer vkCmdFillBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdNextSubpass vkCmdNextSubpass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier;
+  >extern VULKAN_DEVICE_API PFN_vkCmdPushConstants vkCmdPushConstants;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResetEvent vkCmdResetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResetQueryPool vkCmdResetQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResolveImage vkCmdResolveImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetBlendConstants vkCmdSetBlendConstants;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetDepthBias vkCmdSetDepthBias;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetDepthBounds vkCmdSetDepthBounds;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetEvent vkCmdSetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetLineWidth vkCmdSetLineWidth;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetScissor vkCmdSetScissor;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilCompareMask vkCmdSetStencilCompareMask;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilReference vkCmdSetStencilReference;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilWriteMask vkCmdSetStencilWriteMask;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetViewport vkCmdSetViewport;
+  >extern VULKAN_DEVICE_API PFN_vkCmdUpdateBuffer vkCmdUpdateBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdWaitEvents vkCmdWaitEvents;
+  >extern VULKAN_DEVICE_API PFN_vkCmdWriteTimestamp vkCmdWriteTimestamp;
+  >extern VULKAN_DEVICE_API PFN_vkCreateBuffer vkCreateBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCreateBufferView vkCreateBufferView;
+  >extern VULKAN_DEVICE_API PFN_vkCreateCommandPool vkCreateCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateComputePipelines vkCreateComputePipelines;
+  >extern VULKAN_DEVICE_API PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+  >extern VULKAN_DEVICE_API PFN_vkCreateEvent vkCreateEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCreateFence vkCreateFence;
+  >extern VULKAN_DEVICE_API PFN_vkCreateFramebuffer vkCreateFramebuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+  >extern VULKAN_DEVICE_API PFN_vkCreateImage vkCreateImage;
+  >extern VULKAN_DEVICE_API PFN_vkCreateImageView vkCreateImageView;
+  >extern VULKAN_DEVICE_API PFN_vkCreatePipelineCache vkCreatePipelineCache;
+  >extern VULKAN_DEVICE_API PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+  >extern VULKAN_DEVICE_API PFN_vkCreateQueryPool vkCreateQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateRenderPass vkCreateRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCreateSampler vkCreateSampler;
+  >extern VULKAN_DEVICE_API PFN_vkCreateSemaphore vkCreateSemaphore;
+  >extern VULKAN_DEVICE_API PFN_vkCreateShaderModule vkCreateShaderModule;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyBuffer vkDestroyBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyBufferView vkDestroyBufferView;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyCommandPool vkDestroyCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDevice vkDestroyDevice;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyEvent vkDestroyEvent;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyFence vkDestroyFence;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyImage vkDestroyImage;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyImageView vkDestroyImageView;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipeline vkDestroyPipeline;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipelineCache vkDestroyPipelineCache;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyQueryPool vkDestroyQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyRenderPass vkDestroyRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkDestroySampler vkDestroySampler;
+  >extern VULKAN_DEVICE_API PFN_vkDestroySemaphore vkDestroySemaphore;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyShaderModule vkDestroyShaderModule;
+  >extern VULKAN_DEVICE_API PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+  >extern VULKAN_DEVICE_API PFN_vkEndCommandBuffer vkEndCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges;
+  >extern VULKAN_DEVICE_API PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkFreeDescriptorSets vkFreeDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkFreeMemory vkFreeMemory;
+  >extern VULKAN_DEVICE_API PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetDeviceMemoryCommitment vkGetDeviceMemoryCommitment;
+  >extern VULKAN_DEVICE_API PFN_vkGetDeviceQueue vkGetDeviceQueue;
+  >extern VULKAN_DEVICE_API PFN_vkGetEventStatus vkGetEventStatus;
+  >extern VULKAN_DEVICE_API PFN_vkGetFenceStatus vkGetFenceStatus;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageSparseMemoryRequirements vkGetImageSparseMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageSubresourceLayout vkGetImageSubresourceLayout;
+  >extern VULKAN_DEVICE_API PFN_vkGetPhysicalDeviceSparseImageFormatProperties vkGetPhysicalDeviceSparseImageFormatProperties;
+  >extern VULKAN_DEVICE_API PFN_vkGetPipelineCacheData vkGetPipelineCacheData;
+  >extern VULKAN_DEVICE_API PFN_vkGetQueryPoolResults vkGetQueryPoolResults;
+  >extern VULKAN_DEVICE_API PFN_vkGetRenderAreaGranularity vkGetRenderAreaGranularity;
+  >extern VULKAN_DEVICE_API PFN_vkInvalidateMappedMemoryRanges vkInvalidateMappedMemoryRanges;
+  >extern VULKAN_DEVICE_API PFN_vkMapMemory vkMapMemory;
+  >extern VULKAN_DEVICE_API PFN_vkMergePipelineCaches vkMergePipelineCaches;
+  >extern VULKAN_DEVICE_API PFN_vkQueueBindSparse vkQueueBindSparse;
+  >extern VULKAN_DEVICE_API PFN_vkQueueSubmit vkQueueSubmit;
+  >extern VULKAN_DEVICE_API PFN_vkQueueWaitIdle vkQueueWaitIdle;
+  >extern VULKAN_DEVICE_API PFN_vkResetCommandBuffer vkResetCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkResetCommandPool vkResetCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkResetDescriptorPool vkResetDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkResetEvent vkResetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkResetFences vkResetFences;
+  >extern VULKAN_DEVICE_API PFN_vkSetEvent vkSetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkUnmapMemory vkUnmapMemory;
+  >extern VULKAN_DEVICE_API PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkWaitForFences vkWaitForFences;
+  >```
+
+* 2022/7/22 设计架构
+  >
+  >* `TVulkanLoader`中只提供`Vulkan_Core`的函数函数声明和获取，也就是说`TVulkanLoader.h`中只存在`Vulkan`核心函数声明和获取，有关`Vulkan`的属于扩展范围的函数，需要在相应的扩展模块使用`TVulkanLoader`自定义加载相应的函数
+  >* `TVulkanLoader.h`中增加如下声明用来标识函数是`Vulkan`的核心函数还是扩展函数
+  >
+  >```CXX
+  >#define VULKAN_CORE
+  >#define VULKAN_EXTENSION
+  >```

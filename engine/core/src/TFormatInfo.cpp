@@ -11,7 +11,7 @@ std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormat
     std::vector<TFormatInfo> formats;
     if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
     {
-        PFN_vkGetPhysicalDeviceFormatProperties pfn_vk_get_physical_device_format_properties = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkGetPhysicalDeviceFormatProperties>(physicalDevice->GetInstance(), "vkGetPhysicalDeviceFormatProperties");
+        PFN_vkGetPhysicalDeviceFormatProperties pfn_vk_get_physical_device_format_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties>(physicalDevice->GetInstance(), "vkGetPhysicalDeviceFormatProperties");
 
         size_t all_formats_count = TAllFormats.size();
         for (size_t format_index = 0; format_index < all_formats_count; format_index++)

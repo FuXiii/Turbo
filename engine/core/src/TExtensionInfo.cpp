@@ -89,7 +89,7 @@ size_t Turbo::Core::TExtensionInfo::GetPhysicalDeviceExtensionCount(TPhysicalDev
     {
         VkResult result = VkResult::VK_ERROR_UNKNOWN;
 
-        PFN_vkEnumerateDeviceExtensionProperties pfn_vk_enumerate_device_extension_properties = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkEnumerateDeviceExtensionProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceExtensionProperties");
+        PFN_vkEnumerateDeviceExtensionProperties pfn_vk_enumerate_device_extension_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkEnumerateDeviceExtensionProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceExtensionProperties");
 
         do
         {
@@ -117,7 +117,7 @@ std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TExtensionInfo::GetPhysica
     std::vector<TExtensionInfo> extensions;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
 
-    PFN_vkEnumerateDeviceExtensionProperties pfn_vk_enumerate_device_extension_properties = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkEnumerateDeviceExtensionProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceExtensionProperties");
+    PFN_vkEnumerateDeviceExtensionProperties pfn_vk_enumerate_device_extension_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkEnumerateDeviceExtensionProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceExtensionProperties");
 
     do
     {

@@ -330,7 +330,7 @@ bool Turbo::Core::TInstance::IsSupportVulkan()
 
     if (result == VkResult::VK_SUCCESS)
     {
-        PFN_vkDestroyInstance pfn_vk_destroy_instance = TVulkanLoader::Instance()->LoadInstanceFunsction<PFN_vkDestroyInstance>(instance, "vkDestroyInstance");
+        PFN_vkDestroyInstance pfn_vk_destroy_instance = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroyInstance>(instance, "vkDestroyInstance");
         pfn_vk_destroy_instance(instance, allocation_call_back);
         return true;
     }
