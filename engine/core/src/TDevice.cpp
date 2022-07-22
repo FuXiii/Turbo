@@ -6,6 +6,7 @@
 #include "TQueueFamilyInfo.h"
 #include "TVmaAllocator.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
 {
@@ -115,11 +116,13 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_device_create_info.pEnabledFeatures = &this->enabledFeatures;
 
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
+    VkResult result = Turbo::Core::vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
+
+    // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
 
     if (this->vmaAllocator != nullptr)
     {
@@ -151,7 +154,7 @@ void Turbo::Core::TDevice::InternalDestroy()
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     if (this->vkDevice != VK_NULL_HANDLE)
     {
-        vkDestroyDevice(this->vkDevice, allocator);
+        Turbo::Core::vkDestroyDevice(this->vkDevice, allocator);
         this->vkDevice = VK_NULL_HANDLE;
     }
 }

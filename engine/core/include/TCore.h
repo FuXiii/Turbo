@@ -48,6 +48,7 @@ typedef VkDeviceSize TDeviceSize;
 
 typedef enum class TResult : int32_t
 {
+    UNIMPLEMENTED = -17,
     SHADER_LINK_FAILED = -16,
     SHADER_PARSE_FAILED = -15,
     RESOURCE_STARVATION = -14,
