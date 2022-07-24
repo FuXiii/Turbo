@@ -1,5 +1,4 @@
 #include "TVulkanLoader.h"
-
 #ifdef TURBO_PLATFORM_WINDOWS
 #include <Windows.h>
 #endif
@@ -382,6 +381,135 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     }
 
     return TVersion(0, 0, 0, 0);
+}
+
+Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
+{
+    TDeviceDriver device_driver = {};
+#if defined(VK_VERSION_1_0)
+    device_driver.vkDestroyDevice = this->LoadDeviceFunction<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
+    device_driver.vkAllocateCommandBuffers = this->LoadDeviceFunction<PFN_vkAllocateCommandBuffers>(device, "vkAllocateCommandBuffers");
+    device_driver.vkAllocateDescriptorSets = this->LoadDeviceFunction<PFN_vkAllocateDescriptorSets>(device, "vkAllocateDescriptorSets");
+    device_driver.vkAllocateMemory = this->LoadDeviceFunction<PFN_vkAllocateMemory>(device, "vkAllocateMemory");
+    device_driver.vkBeginCommandBuffer = this->LoadDeviceFunction<PFN_vkBeginCommandBuffer>(device, "vkBeginCommandBuffer");
+    device_driver.vkBindBufferMemory = this->LoadDeviceFunction<PFN_vkBindBufferMemory>(device, "vkBindBufferMemory");
+    device_driver.vkBindImageMemory = this->LoadDeviceFunction<PFN_vkBindImageMemory>(device, "vkBindImageMemory");
+    device_driver.vkCmdBeginQuery = this->LoadDeviceFunction<PFN_vkCmdBeginQuery>(device, "vkCmdBeginQuery");
+    device_driver.vkCmdBeginRenderPass = this->LoadDeviceFunction<PFN_vkCmdBeginRenderPass>(device, "vkCmdBeginRenderPass");
+    device_driver.vkCmdBindDescriptorSets = this->LoadDeviceFunction<PFN_vkCmdBindDescriptorSets>(device, "vkCmdBindDescriptorSets");
+    device_driver.vkCmdBindIndexBuffer = this->LoadDeviceFunction<PFN_vkCmdBindIndexBuffer>(device, "vkCmdBindIndexBuffer");
+    device_driver.vkCmdBindPipeline = this->LoadDeviceFunction<PFN_vkCmdBindPipeline>(device, "vkCmdBindPipeline");
+    device_driver.vkCmdBindVertexBuffers = this->LoadDeviceFunction<PFN_vkCmdBindVertexBuffers>(device, "vkCmdBindVertexBuffers");
+    device_driver.vkCmdBlitImage = this->LoadDeviceFunction<PFN_vkCmdBlitImage>(device, "vkCmdBlitImage");
+    device_driver.vkCmdClearAttachments = this->LoadDeviceFunction<PFN_vkCmdClearAttachments>(device, "vkCmdClearAttachments");
+    device_driver.vkCmdClearColorImage = this->LoadDeviceFunction<PFN_vkCmdClearColorImage>(device, "vkCmdClearColorImage");
+    device_driver.vkCmdClearDepthStencilImage = this->LoadDeviceFunction<PFN_vkCmdClearDepthStencilImage>(device, "vkCmdClearDepthStencilImage");
+    device_driver.vkCmdCopyBuffer = this->LoadDeviceFunction<PFN_vkCmdCopyBuffer>(device, "vkCmdCopyBuffer");
+    device_driver.vkCmdCopyBufferToImage = this->LoadDeviceFunction<PFN_vkCmdCopyBufferToImage>(device, "vkCmdCopyBufferToImage");
+    device_driver.vkCmdCopyImage = this->LoadDeviceFunction<PFN_vkCmdCopyImage>(device, "vkCmdCopyImage");
+    device_driver.vkCmdCopyImageToBuffer = this->LoadDeviceFunction<PFN_vkCmdCopyImageToBuffer>(device, "vkCmdCopyImageToBuffer");
+    device_driver.vkCmdCopyQueryPoolResults = this->LoadDeviceFunction<PFN_vkCmdCopyQueryPoolResults>(device, "vkCmdCopyQueryPoolResults");
+    device_driver.vkCmdDispatch = this->LoadDeviceFunction<PFN_vkCmdDispatch>(device, "vkCmdDispatch");
+    device_driver.vkCmdDispatchIndirect = this->LoadDeviceFunction<PFN_vkCmdDispatchIndirect>(device, "vkCmdDispatchIndirect");
+    device_driver.vkCmdDraw = this->LoadDeviceFunction<PFN_vkCmdDraw>(device, "vkCmdDraw");
+    device_driver.vkCmdDrawIndexed = this->LoadDeviceFunction<PFN_vkCmdDrawIndexed>(device, "vkCmdDrawIndexed");
+    device_driver.vkCmdDrawIndexedIndirect = this->LoadDeviceFunction<PFN_vkCmdDrawIndexedIndirect>(device, "vkCmdDrawIndexedIndirect");
+    device_driver.vkCmdDrawIndirect = this->LoadDeviceFunction<PFN_vkCmdDrawIndirect>(device, "vkCmdDrawIndirect");
+    device_driver.vkCmdEndQuery = this->LoadDeviceFunction<PFN_vkCmdEndQuery>(device, "vkCmdEndQuery");
+    device_driver.vkCmdEndRenderPass = this->LoadDeviceFunction<PFN_vkCmdEndRenderPass>(device, "vkCmdEndRenderPass");
+    device_driver.vkCmdExecuteCommands = this->LoadDeviceFunction<PFN_vkCmdExecuteCommands>(device, "vkCmdExecuteCommands");
+    device_driver.vkCmdFillBuffer = this->LoadDeviceFunction<PFN_vkCmdFillBuffer>(device, "vkCmdFillBuffer");
+    device_driver.vkCmdNextSubpass = this->LoadDeviceFunction<PFN_vkCmdNextSubpass>(device, "vkCmdNextSubpass");
+    device_driver.vkCmdPipelineBarrier = this->LoadDeviceFunction<PFN_vkCmdPipelineBarrier>(device, "vkCmdPipelineBarrier");
+    device_driver.vkCmdPushConstants = this->LoadDeviceFunction<PFN_vkCmdPushConstants>(device, "vkCmdPushConstants");
+    device_driver.vkCmdResetEvent = this->LoadDeviceFunction<PFN_vkCmdResetEvent>(device, "vkCmdResetEvent");
+    device_driver.vkCmdResetQueryPool = this->LoadDeviceFunction<PFN_vkCmdResetQueryPool>(device, "vkCmdResetQueryPool");
+    device_driver.vkCmdResolveImage = this->LoadDeviceFunction<PFN_vkCmdResolveImage>(device, "vkCmdResolveImage");
+    device_driver.vkCmdSetBlendConstants = this->LoadDeviceFunction<PFN_vkCmdSetBlendConstants>(device, "vkCmdSetBlendConstants");
+    device_driver.vkCmdSetDepthBias = this->LoadDeviceFunction<PFN_vkCmdSetDepthBias>(device, "vkCmdSetDepthBias");
+    device_driver.vkCmdSetDepthBounds = this->LoadDeviceFunction<PFN_vkCmdSetDepthBounds>(device, "vkCmdSetDepthBounds");
+    device_driver.vkCmdSetEvent = this->LoadDeviceFunction<PFN_vkCmdSetEvent>(device, "vkCmdSetEvent");
+    device_driver.vkCmdSetLineWidth = this->LoadDeviceFunction<PFN_vkCmdSetLineWidth>(device, "vkCmdSetLineWidth");
+    device_driver.vkCmdSetScissor = this->LoadDeviceFunction<PFN_vkCmdSetScissor>(device, "vkCmdSetScissor");
+    device_driver.vkCmdSetStencilCompareMask = this->LoadDeviceFunction<PFN_vkCmdSetStencilCompareMask>(device, "vkCmdSetStencilCompareMask");
+    device_driver.vkCmdSetStencilReference = this->LoadDeviceFunction<PFN_vkCmdSetStencilReference>(device, "vkCmdSetStencilReference");
+    device_driver.vkCmdSetStencilWriteMask = this->LoadDeviceFunction<PFN_vkCmdSetStencilWriteMask>(device, "vkCmdSetStencilWriteMask");
+    device_driver.vkCmdSetViewport = this->LoadDeviceFunction<PFN_vkCmdSetViewport>(device, "vkCmdSetViewport");
+    device_driver.vkCmdUpdateBuffer = this->LoadDeviceFunction<PFN_vkCmdUpdateBuffer>(device, "vkCmdUpdateBuffer");
+    device_driver.vkCmdWaitEvents = this->LoadDeviceFunction<PFN_vkCmdWaitEvents>(device, "vkCmdWaitEvents");
+    device_driver.vkCmdWriteTimestamp = this->LoadDeviceFunction<PFN_vkCmdWriteTimestamp>(device, "vkCmdWriteTimestamp");
+    device_driver.vkCreateBuffer = this->LoadDeviceFunction<PFN_vkCreateBuffer>(device, "vkCreateBuffer");
+    device_driver.vkCreateBufferView = this->LoadDeviceFunction<PFN_vkCreateBufferView>(device, "vkCreateBufferView");
+    device_driver.vkCreateCommandPool = this->LoadDeviceFunction<PFN_vkCreateCommandPool>(device, "vkCreateCommandPool");
+    device_driver.vkCreateComputePipelines = this->LoadDeviceFunction<PFN_vkCreateComputePipelines>(device, "vkCreateComputePipelines");
+    device_driver.vkCreateDescriptorPool = this->LoadDeviceFunction<PFN_vkCreateDescriptorPool>(device, "vkCreateDescriptorPool");
+    device_driver.vkCreateDescriptorSetLayout = this->LoadDeviceFunction<PFN_vkCreateDescriptorSetLayout>(device, "vkCreateDescriptorSetLayout");
+    device_driver.vkCreateEvent = this->LoadDeviceFunction<PFN_vkCreateEvent>(device, "vkCreateEvent");
+    device_driver.vkCreateFence = this->LoadDeviceFunction<PFN_vkCreateFence>(device, "vkCreateFence");
+    device_driver.vkCreateFramebuffer = this->LoadDeviceFunction<PFN_vkCreateFramebuffer>(device, "vkCreateFramebuffer");
+    device_driver.vkCreateGraphicsPipelines = this->LoadDeviceFunction<PFN_vkCreateGraphicsPipelines>(device, "vkCreateGraphicsPipelines");
+    device_driver.vkCreateImage = this->LoadDeviceFunction<PFN_vkCreateImage>(device, "vkCreateImage");
+    device_driver.vkCreateImageView = this->LoadDeviceFunction<PFN_vkCreateImageView>(device, "vkCreateImageView");
+    device_driver.vkCreatePipelineCache = this->LoadDeviceFunction<PFN_vkCreatePipelineCache>(device, "vkCreatePipelineCache");
+    device_driver.vkCreatePipelineLayout = this->LoadDeviceFunction<PFN_vkCreatePipelineLayout>(device, "vkCreatePipelineLayout");
+    device_driver.vkCreateQueryPool = this->LoadDeviceFunction<PFN_vkCreateQueryPool>(device, "vkCreateQueryPool");
+    device_driver.vkCreateRenderPass = this->LoadDeviceFunction<PFN_vkCreateRenderPass>(device, "vkCreateRenderPass");
+    device_driver.vkCreateSampler = this->LoadDeviceFunction<PFN_vkCreateSampler>(device, "vkCreateSampler");
+    device_driver.vkCreateSemaphore = this->LoadDeviceFunction<PFN_vkCreateSemaphore>(device, "vkCreateSemaphore");
+    device_driver.vkCreateShaderModule = this->LoadDeviceFunction<PFN_vkCreateShaderModule>(device, "vkCreateShaderModule");
+    device_driver.vkDestroyBuffer = this->LoadDeviceFunction<PFN_vkDestroyBuffer>(device, "vkDestroyBuffer");
+    device_driver.vkDestroyBufferView = this->LoadDeviceFunction<PFN_vkDestroyBufferView>(device, "vkDestroyBufferView");
+    device_driver.vkDestroyCommandPool = this->LoadDeviceFunction<PFN_vkDestroyCommandPool>(device, "vkDestroyCommandPool");
+    device_driver.vkDestroyDescriptorPool = this->LoadDeviceFunction<PFN_vkDestroyDescriptorPool>(device, "vkDestroyDescriptorPool");
+    device_driver.vkDestroyDescriptorSetLayout = this->LoadDeviceFunction<PFN_vkDestroyDescriptorSetLayout>(device, "vkDestroyDescriptorSetLayout");
+    device_driver.vkDestroyEvent = this->LoadDeviceFunction<PFN_vkDestroyEvent>(device, "vkDestroyEvent");
+    device_driver.vkDestroyFence = this->LoadDeviceFunction<PFN_vkDestroyFence>(device, "vkDestroyFence");
+    device_driver.vkDestroyFramebuffer = this->LoadDeviceFunction<PFN_vkDestroyFramebuffer>(device, "vkDestroyFramebuffer");
+    device_driver.vkDestroyImage = this->LoadDeviceFunction<PFN_vkDestroyImage>(device, "vkDestroyImage");
+    device_driver.vkDestroyImageView = this->LoadDeviceFunction<PFN_vkDestroyImageView>(device, "vkDestroyImageView");
+    device_driver.vkDestroyPipeline = this->LoadDeviceFunction<PFN_vkDestroyPipeline>(device, "vkDestroyPipeline");
+    device_driver.vkDestroyPipelineCache = this->LoadDeviceFunction<PFN_vkDestroyPipelineCache>(device, "vkDestroyPipelineCache");
+    device_driver.vkDestroyPipelineLayout = this->LoadDeviceFunction<PFN_vkDestroyPipelineLayout>(device, "vkDestroyPipelineLayout");
+    device_driver.vkDestroyQueryPool = this->LoadDeviceFunction<PFN_vkDestroyQueryPool>(device, "vkDestroyQueryPool");
+    device_driver.vkDestroyRenderPass = this->LoadDeviceFunction<PFN_vkDestroyRenderPass>(device, "vkDestroyRenderPass");
+    device_driver.vkDestroySampler = this->LoadDeviceFunction<PFN_vkDestroySampler>(device, "vkDestroySampler");
+    device_driver.vkDestroySemaphore = this->LoadDeviceFunction<PFN_vkDestroySemaphore>(device, "vkDestroySemaphore");
+    device_driver.vkDestroyShaderModule = this->LoadDeviceFunction<PFN_vkDestroyShaderModule>(device, "vkDestroyShaderModule");
+    device_driver.vkDeviceWaitIdle = this->LoadDeviceFunction<PFN_vkDeviceWaitIdle>(device, "vkDeviceWaitIdle");
+    device_driver.vkEndCommandBuffer = this->LoadDeviceFunction<PFN_vkEndCommandBuffer>(device, "vkEndCommandBuffer");
+    device_driver.vkFlushMappedMemoryRanges = this->LoadDeviceFunction<PFN_vkFlushMappedMemoryRanges>(device, "vkFlushMappedMemoryRanges");
+    device_driver.vkFreeCommandBuffers = this->LoadDeviceFunction<PFN_vkFreeCommandBuffers>(device, "vkFreeCommandBuffers");
+    device_driver.vkFreeDescriptorSets = this->LoadDeviceFunction<PFN_vkFreeDescriptorSets>(device, "vkFreeDescriptorSets");
+    device_driver.vkFreeMemory = this->LoadDeviceFunction<PFN_vkFreeMemory>(device, "vkFreeMemory");
+    device_driver.vkGetBufferMemoryRequirements = this->LoadDeviceFunction<PFN_vkGetBufferMemoryRequirements>(device, "vkGetBufferMemoryRequirements");
+    device_driver.vkGetDeviceMemoryCommitment = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryCommitment>(device, "vkGetDeviceMemoryCommitment");
+    device_driver.vkGetDeviceQueue = this->LoadDeviceFunction<PFN_vkGetDeviceQueue>(device, "vkGetDeviceQueue");
+    device_driver.vkGetEventStatus = this->LoadDeviceFunction<PFN_vkGetEventStatus>(device, "vkGetEventStatus");
+    device_driver.vkGetFenceStatus = this->LoadDeviceFunction<PFN_vkGetFenceStatus>(device, "vkGetFenceStatus");
+    device_driver.vkGetImageMemoryRequirements = this->LoadDeviceFunction<PFN_vkGetImageMemoryRequirements>(device, "vkGetImageMemoryRequirements");
+    device_driver.vkGetImageSparseMemoryRequirements = this->LoadDeviceFunction<PFN_vkGetImageSparseMemoryRequirements>(device, "vkGetImageSparseMemoryRequirements");
+    device_driver.vkGetImageSubresourceLayout = this->LoadDeviceFunction<PFN_vkGetImageSubresourceLayout>(device, "vkGetImageSubresourceLayout");
+    device_driver.vkGetPipelineCacheData = this->LoadDeviceFunction<PFN_vkGetPipelineCacheData>(device, "vkGetPipelineCacheData");
+    device_driver.vkGetQueryPoolResults = this->LoadDeviceFunction<PFN_vkGetQueryPoolResults>(device, "vkGetQueryPoolResults");
+    device_driver.vkGetRenderAreaGranularity = this->LoadDeviceFunction<PFN_vkGetRenderAreaGranularity>(device, "vkGetRenderAreaGranularity");
+    device_driver.vkInvalidateMappedMemoryRanges = this->LoadDeviceFunction<PFN_vkInvalidateMappedMemoryRanges>(device, "vkInvalidateMappedMemoryRanges");
+    device_driver.vkMapMemory = this->LoadDeviceFunction<PFN_vkMapMemory>(device, "vkMapMemory");
+    device_driver.vkMergePipelineCaches = this->LoadDeviceFunction<PFN_vkMergePipelineCaches>(device, "vkMergePipelineCaches");
+    device_driver.vkQueueBindSparse = this->LoadDeviceFunction<PFN_vkQueueBindSparse>(device, "vkQueueBindSparse");
+    device_driver.vkQueueSubmit = this->LoadDeviceFunction<PFN_vkQueueSubmit>(device, "vkQueueSubmit");
+    device_driver.vkQueueWaitIdle = this->LoadDeviceFunction<PFN_vkQueueWaitIdle>(device, "vkQueueWaitIdle");
+    device_driver.vkResetCommandBuffer = this->LoadDeviceFunction<PFN_vkResetCommandBuffer>(device, "vkResetCommandBuffer");
+    device_driver.vkResetCommandPool = this->LoadDeviceFunction<PFN_vkResetCommandPool>(device, "vkResetCommandPool");
+    device_driver.vkResetDescriptorPool = this->LoadDeviceFunction<PFN_vkResetDescriptorPool>(device, "vkResetDescriptorPool");
+    device_driver.vkResetEvent = this->LoadDeviceFunction<PFN_vkResetEvent>(device, "vkResetEvent");
+    device_driver.vkResetFences = this->LoadDeviceFunction<PFN_vkResetFences>(device, "vkResetFences");
+    device_driver.vkSetEvent = this->LoadDeviceFunction<PFN_vkSetEvent>(device, "vkSetEvent");
+    device_driver.vkUnmapMemory = this->LoadDeviceFunction<PFN_vkUnmapMemory>(device, "vkUnmapMemory");
+    device_driver.vkUpdateDescriptorSets = this->LoadDeviceFunction<PFN_vkUpdateDescriptorSets>(device, "vkUpdateDescriptorSets");
+    device_driver.vkWaitForFences = this->LoadDeviceFunction<PFN_vkWaitForFences>(device, "vkWaitForFences");
+#endif
+
+    return device_driver;
 }
 
 std::string Turbo::Core::TVulkanLoader::ToString()

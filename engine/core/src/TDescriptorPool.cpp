@@ -3,6 +3,7 @@
 #include "TException.h"
 #include "TPipelineDescriptorSet.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptorType type, uint32_t count)
 {
@@ -138,7 +139,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateDescriptorPool(vk_device, &descriptorPoolCreateInfo, allocator, &this->vkDescriptorPool);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateDescriptorPool(vk_device, &descriptorPoolCreateInfo, allocator, &this->vkDescriptorPool);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorPool::InternalCreate::vkCreateDescriptorPool");
@@ -149,7 +150,7 @@ void Turbo::Core::TDescriptorPool::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyDescriptorPool(vk_device, this->vkDescriptorPool, allocator);
+    this->device->GetDeviceDriver()->vkDestroyDescriptorPool(vk_device, this->vkDescriptorPool, allocator);
 }
 
 Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()

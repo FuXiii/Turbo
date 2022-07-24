@@ -3,6 +3,7 @@
 #include "TException.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TSampler::InternalCreate()
 {
@@ -32,7 +33,7 @@ void Turbo::Core::TSampler::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateSampler(vk_device, &vk_sampler_create_info, allocator, &this->vkSampler);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateSampler(vk_device, &vk_sampler_create_info, allocator, &this->vkSampler);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TSampler::InternalCreate::vkCreateSampler");
@@ -43,7 +44,7 @@ void Turbo::Core::TSampler::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroySampler(vk_device, this->vkSampler, allocator);
+    this->device->GetDeviceDriver()->vkDestroySampler(vk_device, this->vkSampler, allocator);
 }
 
 Turbo::Core::TSampler::TSampler(TDevice *device, TFilter minFilter, TFilter magFilter, TMipmapMode mipmapMode, TAddressMode addressModeU, TAddressMode addressModeV, TAddressMode addressModeW, TBorderColor borderColor, float mipLodBias, float minLod, float maxLod)

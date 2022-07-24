@@ -140,6 +140,11 @@ std::vector<Turbo::Core::TShader *> Turbo::Core::TPipeline::GetShaders()
     return this->shaders;
 }
 
+Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()
+{
+    return this->device;
+}
+
 std::string Turbo::Core::TPipeline::ToString()
 {
     return std::string();

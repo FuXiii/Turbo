@@ -4,6 +4,7 @@
 #include "TDeviceQueue.h"
 #include "TException.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 #include <stdint.h>
 
 void Turbo::Core::TCommandBufferPool::AddChildHandle(TCommandBuffer *commandBuffer)
@@ -19,7 +20,8 @@ Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::RemoveChildHandle(
 
 void Turbo::Core::TCommandBufferPool::InternalCreate()
 {
-    VkDevice vk_device = this->deviceQueue->GetDevice()->GetVkDevice();
+    TDevice *device = this->deviceQueue->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
 
     VkCommandPoolCreateInfo command_pool_create_info = {};
     command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -29,7 +31,7 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
 
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-    VkResult result = vkCreateCommandPool(vk_device, &command_pool_create_info, allocator, &this->vkCommandPool);
+    VkResult result = device->GetDeviceDriver()->vkCreateCommandPool(vk_device, &command_pool_create_info, allocator, &this->vkCommandPool);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TCommandBufferPool::InternalCreate::vkCreateCommandPool");
@@ -50,10 +52,11 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
         command_buffer_item->InternalDestroy();
     }
 
-    VkDevice device = this->deviceQueue->GetDevice()->GetVkDevice();
+    TDevice *device = this->deviceQueue->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-    vkDestroyCommandPool(device, this->vkCommandPool, allocator);
+    device->GetDeviceDriver()->vkDestroyCommandPool(vk_device, this->vkCommandPool, allocator);
 }
 
 Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) : Turbo::Core::TPool<TCommandBuffer>(UINT32_MAX), Turbo::Core::TVulkanHandle()

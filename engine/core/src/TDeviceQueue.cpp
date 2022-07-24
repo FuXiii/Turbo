@@ -10,6 +10,7 @@
 #include "TSurface.h"
 #include "TSwapchain.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TDeviceQueue::AddChildHandle(TCommandBufferPool *commandBufferPool)
 {
@@ -50,7 +51,7 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
     VkDevice vk_device = this->device->GetVkDevice();
     uint32_t queue_family_index = this->queueFamily.GetIndex();
 
-    vkGetDeviceQueue(vk_device, queue_family_index, this->index, &this->vkQueue);
+    this->device->GetDeviceDriver()->vkGetDeviceQueue(vk_device, queue_family_index, this->index, &this->vkQueue);
 
     for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
     {
@@ -169,10 +170,10 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
     VkFence vk_fence = VK_NULL_HANDLE;
     if (fence != nullptr)
     {
-       vk_fence= fence->GetVkFence();
+        vk_fence = fence->GetVkFence();
     }
 
-    VkResult result = vkQueueSubmit(this->vkQueue, 1, &vk_submit_info, vk_fence);
+    VkResult result = this->device->GetDeviceDriver()->vkQueueSubmit(this->vkQueue, 1, &vk_submit_info, vk_fence);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDeviceQueue::Submit::vkQueueSubmit");
@@ -183,7 +184,7 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
 
 void Turbo::Core::TDeviceQueue::WaitIdle()
 {
-    VkResult result = vkQueueWaitIdle(this->vkQueue);
+    VkResult result = this->device->GetDeviceDriver()->vkQueueWaitIdle(this->vkQueue);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDeviceQueue::WaitIdle");
@@ -221,6 +222,7 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapc
         vk_present_info_khr.pImageIndices = &image_index;
         vk_present_info_khr.pResults = nullptr;
 
+        // TODO: load vkQueuePresentKHR(...) by TVulkanLoader
         VkResult result = vkQueuePresentKHR(this->vkQueue, &vk_present_info_khr);
         switch (result)
         {

@@ -2,6 +2,7 @@
 #include "TDevice.h"
 #include "TException.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TFence::InternalCreate()
 {
@@ -12,7 +13,7 @@ void Turbo::Core::TFence::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateFence(vk_device, &vk_fence_create_info, allocator, &this->vkFence);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateFence(vk_device, &vk_fence_create_info, allocator, &this->vkFence);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TFence::InternalCreate::vkCreateFence");
@@ -23,7 +24,7 @@ void Turbo::Core::TFence::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyFence(vk_device, this->vkFence, allocator);
+    this->device->GetDeviceDriver()->vkDestroyFence(vk_device, this->vkFence, allocator);
 }
 
 Turbo::Core::TFence::TFence(TDevice *device)
@@ -52,7 +53,7 @@ VkFence Turbo::Core::TFence::GetVkFence()
 Turbo::Core::TResult Turbo::Core::TFence::Wait(uint64_t timeout)
 {
     VkDevice vk_device = this->device->GetVkDevice();
-    VkResult result = vkWaitForFences(vk_device, 1, &this->vkFence, VK_TRUE, timeout);
+    VkResult result = this->device->GetDeviceDriver()->vkWaitForFences(vk_device, 1, &this->vkFence, VK_TRUE, timeout);
     if (result != VkResult::VK_SUCCESS)
     {
         return TResult::TIMEOUT;
@@ -67,7 +68,7 @@ void Turbo::Core::TFence::WaitUntil()
     VkResult result;
     do
     {
-        result = vkWaitForFences(vk_device, 1, &this->vkFence, VK_TRUE, UINT64_MAX);
+        result = this->device->GetDeviceDriver()->vkWaitForFences(vk_device, 1, &this->vkFence, VK_TRUE, UINT64_MAX);
     } while (result == VK_TIMEOUT);
 }
 

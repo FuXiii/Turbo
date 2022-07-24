@@ -7,6 +7,7 @@
 #include "TImageView.h"
 #include "TSampler.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TDescriptorSet::InternalCreate()
 {
@@ -21,8 +22,9 @@ void Turbo::Core::TDescriptorSet::InternalCreate()
     decriptor_set_allocate_info.descriptorSetCount = 1;
     decriptor_set_allocate_info.pSetLayouts = &vk_descriptor_set_layout;
 
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
-    VkResult result = vkAllocateDescriptorSets(vk_device, &decriptor_set_allocate_info, &this->vkDescriptorSet);
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkResult result = device->GetDeviceDriver()->vkAllocateDescriptorSets(vk_device, &decriptor_set_allocate_info, &this->vkDescriptorSet);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorSet::InternalCreate::vkAllocateDescriptorSets");
@@ -31,10 +33,11 @@ void Turbo::Core::TDescriptorSet::InternalCreate()
 
 void Turbo::Core::TDescriptorSet::InternalDestroy()
 {
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkDescriptorPool vk_descriptor_pool = this->descriptorPool->GetVkDescriptorPool();
 
-    vkFreeDescriptorSets(vk_device, vk_descriptor_pool, 1, &this->vkDescriptorSet);
+    device->GetDeviceDriver()->vkFreeDescriptorSets(vk_device, vk_descriptor_pool, 1, &this->vkDescriptorSet);
 }
 
 Turbo::Core::TDescriptorSet::TDescriptorSet(TDescriptorPool *descriptorPool, TDescriptorSetLayout *descriptorSetLayout) : Turbo::Core::TVulkanHandle()
@@ -91,8 +94,9 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.pBufferInfo = vk_descriptor_buffer_infos.data();
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
-    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
@@ -123,8 +127,9 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
-    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
@@ -166,8 +171,9 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
-    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler)
@@ -195,8 +201,9 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 
-    VkDevice vk_device = this->descriptorPool->GetDevice()->GetVkDevice();
-    vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
 std::string Turbo::Core::TDescriptorSet::ToString()

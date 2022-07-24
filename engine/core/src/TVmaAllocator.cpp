@@ -4,6 +4,7 @@
 #include "TInstance.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 //#define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -14,26 +15,28 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     TInstance *instance = physical_device->GetInstance();
     Turbo::Core::TVersion vulkan_version = instance->GetVulkanVersion();
 
+    const TDeviceDriver *driver = this->device->GetDeviceDriver();
+
     VmaVulkanFunctions vulkanFunctions = {};
-    vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
-    vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
-    vulkanFunctions.vkGetPhysicalDeviceProperties = &vkGetPhysicalDeviceProperties;
-    vulkanFunctions.vkGetPhysicalDeviceMemoryProperties = &vkGetPhysicalDeviceMemoryProperties;
-    vulkanFunctions.vkAllocateMemory = &vkAllocateMemory;
-    vulkanFunctions.vkFreeMemory = &vkFreeMemory;
-    vulkanFunctions.vkMapMemory = &vkMapMemory;
-    vulkanFunctions.vkUnmapMemory = &vkUnmapMemory;
-    vulkanFunctions.vkFlushMappedMemoryRanges = &vkFlushMappedMemoryRanges;
-    vulkanFunctions.vkInvalidateMappedMemoryRanges = &vkInvalidateMappedMemoryRanges;
-    vulkanFunctions.vkBindBufferMemory = &vkBindBufferMemory;
-    vulkanFunctions.vkBindImageMemory = &vkBindImageMemory;
-    vulkanFunctions.vkGetBufferMemoryRequirements = &vkGetBufferMemoryRequirements;
-    vulkanFunctions.vkGetImageMemoryRequirements = &vkGetImageMemoryRequirements;
-    vulkanFunctions.vkCreateBuffer = &vkCreateBuffer;
-    vulkanFunctions.vkCreateImage = &vkCreateImage;
-    vulkanFunctions.vkDestroyBuffer = &vkDestroyBuffer;
-    vulkanFunctions.vkDestroyImage = &vkDestroyImage;
-    vulkanFunctions.vkCmdCopyBuffer = &vkCmdCopyBuffer;
+    vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::vkGetInstanceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = Turbo::Core::vkGetDeviceProcAddr;
+    vulkanFunctions.vkGetPhysicalDeviceProperties = Turbo::Core::vkGetPhysicalDeviceProperties;
+    vulkanFunctions.vkGetPhysicalDeviceMemoryProperties = Turbo::Core::vkGetPhysicalDeviceMemoryProperties;
+    vulkanFunctions.vkAllocateMemory = driver->vkAllocateMemory;
+    vulkanFunctions.vkFreeMemory = driver->vkFreeMemory;
+    vulkanFunctions.vkMapMemory = driver->vkMapMemory;
+    vulkanFunctions.vkUnmapMemory = driver->vkUnmapMemory;
+    vulkanFunctions.vkFlushMappedMemoryRanges = driver->vkFlushMappedMemoryRanges;
+    vulkanFunctions.vkInvalidateMappedMemoryRanges = driver->vkInvalidateMappedMemoryRanges;
+    vulkanFunctions.vkBindBufferMemory = driver->vkBindBufferMemory;
+    vulkanFunctions.vkBindImageMemory = driver->vkBindImageMemory;
+    vulkanFunctions.vkGetBufferMemoryRequirements = driver->vkGetBufferMemoryRequirements;
+    vulkanFunctions.vkGetImageMemoryRequirements = driver->vkGetImageMemoryRequirements;
+    vulkanFunctions.vkCreateBuffer = driver->vkCreateBuffer;
+    vulkanFunctions.vkCreateImage = driver->vkCreateImage;
+    vulkanFunctions.vkDestroyBuffer = driver->vkDestroyBuffer;
+    vulkanFunctions.vkDestroyImage = driver->vkDestroyImage;
+    vulkanFunctions.vkCmdCopyBuffer = driver->vkCmdCopyBuffer;
 
     VmaAllocatorCreateInfo vma_allocator_create_info = {};
     vma_allocator_create_info.instance = instance->GetVkInstance();
@@ -46,7 +49,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     VkResult result = vmaCreateAllocator(&vma_allocator_create_info, (VmaAllocator *)this->vmaAllocator);
     if (result != VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED,"Turbo::Core::TVmaAllocator::InternalCreate");
+        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TVmaAllocator::InternalCreate");
     }
 }
 
@@ -66,7 +69,7 @@ Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulka
     }
     else
     {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER,"Turbo::Core::TVmaAllocator::TVmaAllocator");
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TVmaAllocator::TVmaAllocator");
     }
 }
 

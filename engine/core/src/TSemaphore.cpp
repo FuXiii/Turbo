@@ -2,6 +2,7 @@
 #include "TDevice.h"
 #include "TException.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TSemaphore::InternalCreate()
 {
@@ -12,7 +13,7 @@ void Turbo::Core::TSemaphore::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateSemaphore(vk_device, &vk_semaphore_create_info, allocator, &this->vkSemaphore);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateSemaphore(vk_device, &vk_semaphore_create_info, allocator, &this->vkSemaphore);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TSemaphore::InternalCreate::vkCreateSemaphore");
@@ -23,7 +24,7 @@ void Turbo::Core::TSemaphore::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroySemaphore(vk_device, this->vkSemaphore, allocator);
+    this->device->GetDeviceDriver()->vkDestroySemaphore(vk_device, this->vkSemaphore, allocator);
 }
 
 Turbo::Core::TSemaphore::TSemaphore(TDevice *device, VkPipelineStageFlags waitDstStageMask)

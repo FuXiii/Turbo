@@ -3,6 +3,7 @@
 #include "TDevice.h"
 #include "TException.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TRenderPass::InternalCreate()
 {
@@ -117,7 +118,7 @@ void Turbo::Core::TRenderPass::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateRenderPass(vk_device, &vk_render_pass_create_info, allocator, &this->vkRenderPass);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateRenderPass(vk_device, &vk_render_pass_create_info, allocator, &this->vkRenderPass);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TRenderPass::InternalCreate::vkCreateRenderPass");
@@ -128,7 +129,7 @@ void Turbo::Core::TRenderPass::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyRenderPass(vk_device, this->vkRenderPass, allocator);
+    this->device->GetDeviceDriver()->vkDestroyRenderPass(vk_device, this->vkRenderPass, allocator);
 }
 
 Turbo::Core::TRenderPass::TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()

@@ -16,6 +16,9 @@ class TExtensionInfo;
 class TVmaAllocator;
 enum class TExtensionType;
 
+struct TDeviceFunctionTable;
+using TDeviceDriver = TDeviceFunctionTable;
+
 class TDevice : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -34,6 +37,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA std::vector<TLayerInfo> enabledLayers;
     T_VULKAN_HANDLE_DATA std::vector<TExtensionInfo> enabledExtensions;
     T_VULKAN_HANDLE_DATA VkPhysicalDeviceFeatures enabledFeatures;
+
+    TDeviceDriver *deviceDriver = nullptr;
 
   protected:
     virtual void AddChildHandle(TDeviceQueue *deviceQueue);
@@ -72,6 +77,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     TDeviceQueue *GetBestProtectedQueue();
 
     void WaitIdle();
+
+    const TDeviceDriver *GetDeviceDriver();
 
     virtual std::string ToString() override;
 };
