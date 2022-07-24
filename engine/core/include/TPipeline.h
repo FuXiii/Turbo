@@ -64,11 +64,13 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     ~TPipeline();
 
   public:
-    TPipelineLayout* GetPipelineLayout();
+    TPipelineLayout *GetPipelineLayout();
     VkPipeline GetVkPipeline();
 
     TPipelineType GetType();
     std::vector<TShader *> GetShaders();
+
+    TDevice *GetDevice();
 
   public:
     virtual std::string ToString() override;

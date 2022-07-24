@@ -1365,3 +1365,33 @@ Turbo是渲染引擎
   >#define VULKAN_CORE
   >#define VULKAN_EXTENSION
   >```
+
+* 2022/7/23 设计架构
+  >
+  >* `TVulkanLoader`中增加`struct TDeviceFunctionTable`内部有设备相关函数声明，并用`TDeviceDriver`重命名
+  >* `TVulkanLoader`中增加`TDeviceDriver LoadDeviceDriver(TDevice *device)`用于返回特定设备函数实现版本
+  >* `TDevice`中增加`TDeviceDriver *deviceDriver;`用于创建设备函数表
+  >* `TDevice::InternalCreate()`中增加对`TDeviceDriver *deviceDriver;`的初始化
+  >* `TDevice`中增加`const TDeviceDriver *GetDeviceDriver();`函数，用于返回设备指定实现函数表（驱动）
+  >* `~TDevice`中增加`vkDeviceWaitIdle(...)`调用使用`driver`替换调用
+  >* 开始将`TVmaAllocator`中使用`TDeviceDriver`调用使适配
+
+* 2022/7/24 设计架构
+  >
+  >* 开始将`TDeviceQueue`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TCommandBuffer`中使用`TDeviceDriver`调用使适配
+  >* `TPipeline`中增加`TDevice* GetDevice()`成员函数
+  >* 开始将`TCommandBufferPool`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorPool`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorSet`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorSetLayout`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TFence`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TFramebuffer`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TGraphicsPipeline`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TImageView`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TPipelineLayout`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TRenderPass`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TSampler`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TSemaphore`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TShader`中使用`TDeviceDriver`调用使适配
+

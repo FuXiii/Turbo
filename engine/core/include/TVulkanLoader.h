@@ -24,7 +24,6 @@ extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties 
 extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
 
 extern VULKAN_INSTANCE_API VULKAN_CORE PFN_vkDestroyInstance vkDestroyInstance;
-extern VULKAN_INSTANCE_API VULKAN_CORE PFN_vkDestroyInstance vkDestroyInstance;
 extern VULKAN_INSTANCE_API VULKAN_CORE PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
 extern VULKAN_INSTANCE_API VULKAN_CORE PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
 extern VULKAN_INSTANCE_API VULKAN_CORE PFN_vkEnumerateDeviceLayerProperties vkEnumerateDeviceLayerProperties;
@@ -165,6 +164,134 @@ extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
 extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
 #endif
 
+struct TDeviceFunctionTable
+{
+#if defined(VK_VERSION_1_0)
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyDevice vkDestroyDevice;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkAllocateMemory vkAllocateMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkBindBufferMemory vkBindBufferMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkBindImageMemory vkBindImageMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginQuery vkCmdBeginQuery;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBindPipeline vkCmdBindPipeline;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBlitImage vkCmdBlitImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdClearAttachments vkCmdClearAttachments;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdClearColorImage vkCmdClearColorImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdClearDepthStencilImage vkCmdClearDepthStencilImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdCopyBuffer vkCmdCopyBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdCopyImage vkCmdCopyImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdCopyQueryPoolResults vkCmdCopyQueryPoolResults;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDispatch vkCmdDispatch;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDispatchIndirect vkCmdDispatchIndirect;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDraw vkCmdDraw;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDrawIndexed vkCmdDrawIndexed;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDrawIndexedIndirect vkCmdDrawIndexedIndirect;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDrawIndirect vkCmdDrawIndirect;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndQuery vkCmdEndQuery;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdExecuteCommands vkCmdExecuteCommands;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdFillBuffer vkCmdFillBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdNextSubpass vkCmdNextSubpass;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdPushConstants vkCmdPushConstants;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdResetEvent vkCmdResetEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdResetQueryPool vkCmdResetQueryPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdResolveImage vkCmdResolveImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetBlendConstants vkCmdSetBlendConstants;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetDepthBias vkCmdSetDepthBias;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetDepthBounds vkCmdSetDepthBounds;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetEvent vkCmdSetEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetLineWidth vkCmdSetLineWidth;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetScissor vkCmdSetScissor;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetStencilCompareMask vkCmdSetStencilCompareMask;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetStencilReference vkCmdSetStencilReference;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetStencilWriteMask vkCmdSetStencilWriteMask;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetViewport vkCmdSetViewport;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdUpdateBuffer vkCmdUpdateBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdWaitEvents vkCmdWaitEvents;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdWriteTimestamp vkCmdWriteTimestamp;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateBuffer vkCreateBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateBufferView vkCreateBufferView;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateCommandPool vkCreateCommandPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateComputePipelines vkCreateComputePipelines;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateEvent vkCreateEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateFence vkCreateFence;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateFramebuffer vkCreateFramebuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateImage vkCreateImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateImageView vkCreateImageView;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreatePipelineCache vkCreatePipelineCache;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateQueryPool vkCreateQueryPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateRenderPass vkCreateRenderPass;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateSampler vkCreateSampler;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateSemaphore vkCreateSemaphore;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCreateShaderModule vkCreateShaderModule;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyBuffer vkDestroyBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyBufferView vkDestroyBufferView;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyCommandPool vkDestroyCommandPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyEvent vkDestroyEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyFence vkDestroyFence;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyImage vkDestroyImage;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyImageView vkDestroyImageView;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyPipeline vkDestroyPipeline;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyPipelineCache vkDestroyPipelineCache;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyQueryPool vkDestroyQueryPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyRenderPass vkDestroyRenderPass;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroySampler vkDestroySampler;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroySemaphore vkDestroySemaphore;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDestroyShaderModule vkDestroyShaderModule;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkEndCommandBuffer vkEndCommandBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkFreeDescriptorSets vkFreeDescriptorSets;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkFreeMemory vkFreeMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceMemoryCommitment vkGetDeviceMemoryCommitment;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceQueue vkGetDeviceQueue;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetEventStatus vkGetEventStatus;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetFenceStatus vkGetFenceStatus;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetImageSparseMemoryRequirements vkGetImageSparseMemoryRequirements;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetImageSubresourceLayout vkGetImageSubresourceLayout;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceSparseImageFormatProperties vkGetPhysicalDeviceSparseImageFormatProperties;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetPipelineCacheData vkGetPipelineCacheData;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetQueryPoolResults vkGetQueryPoolResults;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetRenderAreaGranularity vkGetRenderAreaGranularity;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkInvalidateMappedMemoryRanges vkInvalidateMappedMemoryRanges;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkMapMemory vkMapMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkMergePipelineCaches vkMergePipelineCaches;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkQueueBindSparse vkQueueBindSparse;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkQueueSubmit vkQueueSubmit;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkQueueWaitIdle vkQueueWaitIdle;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkResetCommandBuffer vkResetCommandBuffer;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkResetCommandPool vkResetCommandPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkResetDescriptorPool vkResetDescriptorPool;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkResetEvent vkResetEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkResetFences vkResetFences;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkSetEvent vkSetEvent;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkUnmapMemory vkUnmapMemory;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
+#endif
+};
+using TDeviceDriver = TDeviceFunctionTable;
+
 class TDevice;
 
 class TVulkanLoader : public TObject
@@ -213,6 +340,8 @@ class TVulkanLoader : public TObject
     Function LoadDeviceFunction(VkDevice device, const char *name);
 
     TVersion GetVulkanVersion();
+
+    TDeviceDriver LoadDeviceDriver(TDevice *device);
 
     virtual std::string ToString() override;
 };

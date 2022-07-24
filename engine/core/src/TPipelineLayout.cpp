@@ -5,6 +5,7 @@
 #include "TException.h"
 #include "TShader.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TPipelineLayout::InternalCreate()
 {
@@ -36,7 +37,7 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
+    VkResult result = this->device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
@@ -47,7 +48,7 @@ void Turbo::Core::TPipelineLayout::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
+    this->device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
 }
 
 Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)

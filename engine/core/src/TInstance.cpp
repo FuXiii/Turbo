@@ -294,7 +294,7 @@ void Turbo::Core::TInstance::InternalDestroy()
     if (this->vkInstance != VK_NULL_HANDLE)
     {
         VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        vkDestroyInstance(this->vkInstance, allocator);
+        Turbo::Core::vkDestroyInstance(this->vkInstance, allocator);
         this->vkInstance = VK_NULL_HANDLE;
     }
 }

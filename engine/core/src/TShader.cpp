@@ -2,6 +2,7 @@
 #include "TDevice.h"
 #include "TException.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 #include <fstream>
 
@@ -196,7 +197,7 @@ void Turbo::Core::TShader::InternalCreate()
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateShaderModule(vk_device, &vk_shader_module_create_info, allocator, &this->vkShaderModule);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateShaderModule(vk_device, &vk_shader_module_create_info, allocator, &this->vkShaderModule);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TShader::InternalCreate");
@@ -207,7 +208,7 @@ void Turbo::Core::TShader::InternalDestroy()
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyShaderModule(vk_device, this->vkShaderModule, allocator);
+    this->device->GetDeviceDriver()->vkDestroyShaderModule(vk_device, this->vkShaderModule, allocator);
 }
 
 void Turbo::Core::TShader::InternalParseSpirV()
