@@ -157,6 +157,6 @@ TRenderPass render_pass_2(subpass_chain_2);
 - `TVulkanLoader`中`Destroy()`目前未被调用，应该在`TInstance`析构函数中调用，用于卸载`Vulkan`动态库
 
 - `Turbo`中未完全覆盖`TVulkanLoader`获取的函数调用
-  - `Turbo::Core::TDeviceQueue::Present(...)::vkQueuePresentKHR(...)`未覆盖
+  - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`Turbo::Core::TDeviceQueue::Present(...)::vkQueuePresentKHR(...)`未覆盖~~
   - `TSurface`未覆盖
   - `TSwapchain`未覆盖

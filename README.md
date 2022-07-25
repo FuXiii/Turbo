@@ -1394,4 +1394,19 @@ Turbo是渲染引擎
   >* 开始将`TSampler`中使用`TDeviceDriver`调用使适配
   >* 开始将`TSemaphore`中使用`TDeviceDriver`调用使适配
   >* 开始将`TShader`中使用`TDeviceDriver`调用使适配
-
+  
+* 2022/7/25 设计架构
+  >
+  >* `TDeviceQueue::InternalCreate()`中使用`TVulkanLoader`加载`vkQueuePresentKHR`函数
+  >* `TDeviceQueue::Present(...)`中使用`TVulkanLoader`加载的`vkQueuePresentKHR`函数进行调用
+  >* 将如下定义从`TVulkanLoader.h`中移动到`TCore.h`中：
+  >
+  >```CXX
+  >#define VULKAN_GLOBAL_API
+  >#define VULKAN_INSTANCE_API
+  >#define VULKAN_DEVICE_API
+  >#define VULKAN_CORE
+  ># efine VULKAN_EXTENSION
+  >```
+  >
+  >* 开始将`TSurface`中使用`TDeviceDriver`调用使适配

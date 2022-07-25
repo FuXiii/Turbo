@@ -4,6 +4,7 @@
 #include "TInstance.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 #include <cstddef>
 
 Turbo::Extension::TColorSpace::TColorSpace(TColorSpaceType colorSpaceType)
@@ -85,7 +86,6 @@ void Turbo::Extension::TSurface::InternalCreate()
         if (!this->isExternalHandle)
         {
 #if defined(TURBO_PLATFORM_WINDOWS)
-
             if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE))
             {
                 VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
@@ -96,7 +96,7 @@ void Turbo::Extension::TSurface::InternalCreate()
                 win32_surface_create_info.hwnd = this->hwnd;
 
                 VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-                VkResult result = vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
+                VkResult result = this->vkCreateWin32SurfaceKHR(instance->GetVkInstance(), &win32_surface_create_info, allocator, &this->vkSurfaceKHR);
                 if (result != VK_SUCCESS)
                 {
                     throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateWin32SurfaceKHR");
@@ -119,7 +119,7 @@ void Turbo::Extension::TSurface::InternalCreate()
                 wayland_surface_create_info.surface = this->waylandSurface;
 
                 VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-                VkResult result = vkCreateWaylandSurfaceKHR(instance->GetVkInstance(), &wayland_surface_create_info, allocator, &this->vkSurfaceKHR);
+                VkResult result = this->vkCreateWaylandSurfaceKHR(instance->GetVkInstance(), &wayland_surface_create_info, allocator, &this->vkSurfaceKHR);
                 if (result != VK_SUCCESS)
                 {
                     throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateWaylandSurfaceKHR");
@@ -135,7 +135,7 @@ void Turbo::Extension::TSurface::InternalCreate()
                 xcb_surface_create_info.window = this->xcbWindow;
 
                 VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-                VkResult result = vkCreateXcbSurfaceKHR(instance->GetVkInstance(), &xcb_surface_create_info, allocator, &this->vkSurfaceKHR);
+                VkResult result = this->vkCreateXcbSurfaceKHR(instance->GetVkInstance(), &xcb_surface_create_info, allocator, &this->vkSurfaceKHR);
                 if (result != VK_SUCCESS)
                 {
                     throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateXcbSurfaceKHR");
@@ -151,7 +151,7 @@ void Turbo::Extension::TSurface::InternalCreate()
                 xlib_surface_create_info.window = this->xlibWindow;
 
                 VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-                VkResult result = vkCreateXlibSurfaceKHR(instance->GetVkInstance(), &xlib_surface_create_info, allocator, &this->vkSurfaceKHR);
+                VkResult result = this->vkCreateXlibSurfaceKHR(instance->GetVkInstance(), &xlib_surface_create_info, allocator, &this->vkSurfaceKHR);
                 if (result != VK_SUCCESS)
                 {
                     throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateXlibSurfaceKHR");
@@ -188,7 +188,7 @@ void Turbo::Extension::TSurface::InternalDestroy()
 
             if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
             {
-                vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
+                this->vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
             }
         }
     }
@@ -203,6 +203,16 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
         this->device = device;
         this->hinstance = hinstance;
         this->hwnd = hwnd;
+
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        this->vkCreateWin32SurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateWin32SurfaceKHR>(instance, "vkCreateWin32SurfaceKHR");
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+        this->vkGetPhysicalDeviceWin32PresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR>(instance, "vkGetPhysicalDeviceWin32PresentationSupportKHR");
+
+        this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
 
         this->InternalCreate();
     }
@@ -227,6 +237,16 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *d
         this->waylandDisplay = display;
         this->waylandSurface = surface;
 
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        this->vkCreateWaylandSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateWaylandSurfaceKHR>(instance, "vkCreateWaylandSurfaceKHR");
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+        this->vkGetPhysicalDeviceWaylandPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR>(instance, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
+
+        this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+
         this->InternalCreate();
     }
     else
@@ -244,6 +264,16 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connectio
         this->xcbConnection = connection;
         this->xcbWindow = window;
 
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        this->vkCreateXcbSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateXcbSurfaceKHR>(instance, "vkCreateXcbSurfaceKHR");
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+        this->vkGetPhysicalDeviceXcbPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR>(instance, "vkGetPhysicalDeviceXcbPresentationSupportKHR");
+
+        this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+
         this->InternalCreate();
     }
     else
@@ -260,6 +290,16 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, Display *dpy,
         this->device = device;
         this->xlibDpy = dpy;
         this->xlibWindow = window;
+
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        this->vkCreateXlibSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateXlibSurfaceKHR>(instance, "vkCreateXlibSurfaceKHR");
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+        this->vkGetPhysicalDeviceXlibPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR>(instance, "vkGetPhysicalDeviceXlibPresentationSupportKHR");
+
+        this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
 
         this->InternalCreate();
     }
@@ -284,6 +324,12 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR 
         this->device = device;
         this->vkSurfaceKHR = vkSurfaceKHR;
 
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+
         this->InternalCreate();
     }
     else
@@ -307,7 +353,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
 
         VkBool32 is_support_surface = VK_FALSE;
 
-        VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->vkSurfaceKHR, &is_support_surface);
+        VkResult result = this->vkGetPhysicalDeviceSurfaceSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->vkSurfaceKHR, &is_support_surface);
         if (result == VK_SUCCESS)
         {
             if (is_support_surface == VK_TRUE)
@@ -315,7 +361,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                 if (!this->isExternalHandle)
                 {
 #if defined(TURBO_PLATFORM_WINDOWS)
-                    VkBool32 is_support_win32_presentation = vkGetPhysicalDeviceWin32PresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex());
+                    VkBool32 is_support_win32_presentation = this->vkGetPhysicalDeviceWin32PresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex());
                     if (is_support_win32_presentation == VK_TRUE)
                     {
                         this->supportQueueFamilys.push_back(queue_family);
@@ -329,7 +375,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
 #elif defined(TURBO_PLATFORM_LINUX)
                     if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
                     {
-                        VkBool32 is_support_wayland_presentation = vkGetPhysicalDeviceWaylandPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->waylandDisplay);
+                        VkBool32 is_support_wayland_presentation = this->vkGetPhysicalDeviceWaylandPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->waylandDisplay);
                         if (is_support_wayland_presentation == VK_TRUE)
                         {
                             this->supportQueueFamilys.push_back(queue_family);
@@ -341,7 +387,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                     }
                     else if (this->xcbConnection != nullptr)
                     {
-                        VkBool32 is_support_xcb_presentation = vkGetPhysicalDeviceXcbPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xcbConnection, this->xcbWindow);
+                        VkBool32 is_support_xcb_presentation = this->vkGetPhysicalDeviceXcbPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xcbConnection, this->xcbWindow);
                         if (is_support_xcb_presentation == VK_TRUE)
                         {
                             this->supportQueueFamilys.push_back(queue_family);
@@ -353,7 +399,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                     }
                     else if (this->xlibDpy != nullptr)
                     {
-                        VkBool32 is_support_xlib_presentation = vkGetPhysicalDeviceXlibPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xlibDpy, this->xlibWindow);
+                        VkBool32 is_support_xlib_presentation = this->vkGetPhysicalDeviceXlibPresentationSupportKHR(physical_device->GetVkPhysicalDevice(), queue_family.GetIndex(), this->xlibDpy, this->xlibWindow);
                         if (is_support_xlib_presentation == VK_TRUE)
                         {
                             this->supportQueueFamilys.push_back(queue_family);
@@ -395,7 +441,7 @@ void Turbo::Extension::TSurface::GetSurfaceCapabilities()
     Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
     VkSurfaceCapabilitiesKHR surface_capanilities;
-    VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_capanilities);
+    VkResult result = this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_capanilities);
     if (result == VK_SUCCESS)
     {
         this->minImageCount = surface_capanilities.minImageCount;
@@ -425,13 +471,13 @@ void Turbo::Extension::TSurface::GetSurfaceSupportSurfaceFormats()
     Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
     uint32_t surface_format_count = 0;
-    VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, nullptr);
+    VkResult result = this->vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, nullptr);
     if (result == VK_SUCCESS && surface_format_count > 0)
     {
         std::vector<VkSurfaceFormatKHR> surface_formats;
         surface_formats.resize(surface_format_count);
 
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, surface_formats.data());
+        result = this->vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &surface_format_count, surface_formats.data());
         if (result == VK_SUCCESS)
         {
             std::vector<Turbo::Core::TFormatInfo> support_formats = physical_device->GetSupportFormats();
@@ -481,14 +527,14 @@ void Turbo::Extension::TSurface::GetSurfaceSupportPresentationMode()
     Turbo::Core::TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
     uint32_t present_mode_count = 0;
-    VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, nullptr);
+    VkResult result = this->vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, nullptr);
     if (result == VK_SUCCESS)
     {
         if (present_mode_count > 0)
         {
             std::vector<VkPresentModeKHR> vk_present_mode_khrs;
             vk_present_mode_khrs.resize(present_mode_count);
-            result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, vk_present_mode_khrs.data());
+            result = this->vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->GetVkPhysicalDevice(), this->vkSurfaceKHR, &present_mode_count, vk_present_mode_khrs.data());
             if (result == VK_SUCCESS)
             {
                 for (size_t present_mode_index = 0; present_mode_index < present_mode_count; present_mode_index++)

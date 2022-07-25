@@ -3,7 +3,7 @@
 int main()
 {
     std::string pass_node_name = "custom_pass_node";
-    
+
     Turbo::FrameGraph::TPass pass;
     pass.id = 0;
 
