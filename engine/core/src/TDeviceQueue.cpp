@@ -53,6 +53,9 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
 
     this->device->GetDeviceDriver()->vkGetDeviceQueue(vk_device, queue_family_index, this->index, &this->vkQueue);
 
+    // TODO: load vkQueuePresentKHR function
+    this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
+
     for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
     {
         command_buffer_pool_item->InternalCreate();
@@ -223,7 +226,7 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapc
         vk_present_info_khr.pResults = nullptr;
 
         // TODO: load vkQueuePresentKHR(...) by TVulkanLoader
-        VkResult result = vkQueuePresentKHR(this->vkQueue, &vk_present_info_khr);
+        VkResult result = this->vkQueuePresentKHR(this->vkQueue, &vk_present_info_khr);
         switch (result)
         {
         case VkResult::VK_SUCCESS: {

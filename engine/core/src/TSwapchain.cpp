@@ -6,6 +6,7 @@
 #include "TSemaphore.h"
 #include "TSurface.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Extension::TSwapchain::InternalCreate()
 {
@@ -91,7 +92,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the present mode of swapchain can not compatible with surface");
         }
-this->minImageCount=3;
+        this->minImageCount = 3;
         VkSwapchainCreateInfoKHR vk_swapchain_create_info_khr = {};
         vk_swapchain_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         vk_swapchain_create_info_khr.pNext = nullptr;
@@ -123,7 +124,7 @@ this->minImageCount=3;
 
         VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-        VkResult result = vkCreateSwapchainKHR(vk_device, &vk_swapchain_create_info_khr, allocator, &this->vkSwapchainKHR);
+        VkResult result = this->vkCreateSwapchainKHR(vk_device, &vk_swapchain_create_info_khr, allocator, &this->vkSwapchainKHR);
         if (result != VK_SUCCESS)
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkCreateSwapchainKHR");
@@ -131,7 +132,7 @@ this->minImageCount=3;
 
         // Get VkImages
         uint32_t image_count;
-        result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, nullptr);
+        result = this->vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, nullptr);
         if (result != VK_SUCCESS)
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkGetSwapchainImagesKHR");
@@ -139,7 +140,7 @@ this->minImageCount=3;
 
         std::vector<VkImage> vk_images;
         vk_images.resize(image_count);
-        result = vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, vk_images.data());
+        result = this->vkGetSwapchainImagesKHR(vk_device, this->vkSwapchainKHR, &image_count, vk_images.data());
         if (result != VK_SUCCESS)
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSwapchain::InternalCreate::vkGetSwapchainImagesKHR");
@@ -160,13 +161,19 @@ this->minImageCount=3;
 void Turbo::Extension::TSwapchain::InternalDestroy()
 {
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
+    this->vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
 }
 
 Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
 {
     if (surface != nullptr)
     {
+        Turbo::Core::TDevice *device = surface->GetDevice();
+        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+
         this->surface = surface;
         this->minImageCount = minImageCount;
         this->format = format;
@@ -192,6 +199,12 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
 {
     if (surface != nullptr)
     {
+        Turbo::Core::TDevice *device = surface->GetDevice();
+        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+
         this->surface = surface;
         this->minImageCount = minImageCount;
         this->format = format;
@@ -241,6 +254,12 @@ Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
 {
     if (oldSwapchain != nullptr)
     {
+        Turbo::Core::TDevice *device = oldSwapchain->GetSurface()->GetDevice();
+        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+
         this->surface = oldSwapchain->GetSurface();
         this->minImageCount = oldSwapchain->GetMinImageCount();
         this->format = oldSwapchain->GetFormat();
@@ -295,7 +314,7 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t tim
 
         Turbo::Core::TDevice *device = this->surface->GetDevice();
         VkDevice vk_device = device->GetVkDevice();
-        VkResult result = vkAcquireNextImageKHR(vk_device, this->vkSwapchainKHR, timeout, signal_semaphore, signal_fence, index);
+        VkResult result = this->vkAcquireNextImageKHR(vk_device, this->vkSwapchainKHR, timeout, signal_semaphore, signal_fence, index);
         switch (result)
         {
         case VkResult::VK_SUCCESS: {

@@ -1394,4 +1394,25 @@ Turbo是渲染引擎
   >* 开始将`TSampler`中使用`TDeviceDriver`调用使适配
   >* 开始将`TSemaphore`中使用`TDeviceDriver`调用使适配
   >* 开始将`TShader`中使用`TDeviceDriver`调用使适配
+  
+* 2022/7/25 设计架构
+  >
+  >* `TDeviceQueue::InternalCreate()`中使用`TVulkanLoader`加载`vkQueuePresentKHR`函数
+  >* `TDeviceQueue::Present(...)`中使用`TVulkanLoader`加载的`vkQueuePresentKHR`函数进行调用
+  >* 将如下定义从`TVulkanLoader.h`中移动到`TCore.h`中：
+  >
+  >```CXX
+  >#define VULKAN_GLOBAL_API
+  >#define VULKAN_INSTANCE_API
+  >#define VULKAN_DEVICE_API
+  >#define VULKAN_CORE
+  ># efine VULKAN_EXTENSION
+  >```
+  >
+  >* 开始将`TSurface`中使用`TDeviceDriver`调用使适配
 
+* 2022/7/27 设计架构
+  >
+  >* 开始将`TSwapchain`中使用`TDeviceDriver`调用使适配
+  >* 有小伙伴提出在单独使用`Turbo`的`TCore`核心库的时候，需要手动链接`TCore`库的依赖库，经过检验确实如此，这不是`TCore`库发布的初衷，有关该问题的细节请参阅`./docs/issue.md::Turbo核心生成的TCore库...`，由于本人`CMake`并不是很精通，目前正在研究中...
+  >* `TCore`中有关`Vulkan`函数的动态加载目前基本结束，接下来陆续撤走`CMake`中需要硬编码指定`vulkan-1.lib`目录的配置，计划将`vulkan/vulkan.h`头文件加入`TCore`中

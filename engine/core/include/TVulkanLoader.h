@@ -10,13 +10,6 @@ namespace Turbo
 {
 namespace Core
 {
-#define VULKAN_GLOBAL_API
-#define VULKAN_INSTANCE_API
-#define VULKAN_DEVICE_API
-
-#define VULKAN_CORE
-#define VULKAN_EXTENSION
-
 #if defined(VK_VERSION_1_0)
 extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
 extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance;
@@ -363,7 +356,11 @@ Function Turbo::Core::TVulkanLoader::Load(void *context, const char *name)
         break;
     }
 
-    assert(result && name);
+    if (!result)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Core::TVulkanLoader::Load(...)",name);
+    }
+    
     return result;
 }
 

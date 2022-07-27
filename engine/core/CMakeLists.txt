@@ -15,7 +15,6 @@ add_subdirectory(./thirdparty)
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./include
     PUBLIC ./thirdparty/SPIRV-Cross
-    PUBLIC ./thirdparty/glfw/include/
     )
 
 target_link_directories(${PROJECT_NAME} 
@@ -30,14 +29,14 @@ PUBLIC ./thirdparty/glslang/SPIRV
 PUBLIC ./thirdparty/SPIRV-Cross
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC 
-vulkan
-VulkanMemoryAllocator
-glslang
-OGLCompiler
-OSDependent
-SPIRV
-spirv-cross-core
-spirv-cross-glsl
-spirv-cross-hlsl
+target_link_libraries(${PROJECT_NAME}  
+PUBLIC vulkan
+PUBLIC VulkanMemoryAllocator
+PUBLIC glslang
+PUBLIC OGLCompiler
+PUBLIC OSDependent
+PUBLIC SPIRV
+PUBLIC spirv-cross-core
+PUBLIC spirv-cross-glsl
+PUBLIC spirv-cross-hlsl
 )

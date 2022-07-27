@@ -40,6 +40,11 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
 
     std::vector<Turbo::Core::TImage *> images;
 
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
+
   private:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
