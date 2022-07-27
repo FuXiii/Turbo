@@ -29,14 +29,16 @@ Turbo是渲染引擎
     * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
     * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
     * `VulkanMemoryAllocator` : 用于分配`Vulkan`资源内存
-  * 本人对于`CMake`并不是非常精通，有关核心是如何寻找`Vulkan`库的，我直接配置的绝对路径，请修改`engine/core/CMakeLists.txt`中的此行代码：
+  * ~~本人对于`CMake`并不是非常精通，有关核心是如何寻找`Vulkan`库的，我直接配置的绝对路径，请修改`engine/core/CMakeLists.txt`中的此行代码：~~
     >
     > ```CMake
-    > set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
+    > #已遗弃
+    > ##set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
     > ```
     >
-    请将该行修改成您电脑上的`Vulkan`库目录。
-    该问题将会在不远的未来通过动态加载库文件得到解决。┗|｀O′|┛ 嗷~~
+    ~~请将该行修改成您电脑上的`Vulkan`库目录。
+    该问题将会在不远的未来通过动态加载库文件得到解决。~~
+    >┗|｀O′|┛oO 2022/7/27 该问题已修改完成，详情请参考下面的`如何编译Turbo`章节的`注`
 
   * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
     * `glfw` :窗口库
@@ -47,6 +49,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，`Vulkan SDK`目前对于`Turbo`不是必需品，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
@@ -1416,3 +1419,7 @@ Turbo是渲染引擎
   >* 开始将`TSwapchain`中使用`TDeviceDriver`调用使适配
   >* 有小伙伴提出在单独使用`Turbo`的`TCore`核心库的时候，需要手动链接`TCore`库的依赖库，经过检验确实如此，这不是`TCore`库发布的初衷，有关该问题的细节请参阅`./docs/issue.md::Turbo核心生成的TCore库...`，由于本人`CMake`并不是很精通，目前正在研究中...
   >* `TCore`中有关`Vulkan`函数的动态加载目前基本结束，接下来陆续撤走`CMake`中需要硬编码指定`vulkan-1.lib`目录的配置，计划将`vulkan/vulkan.h`头文件加入`TCore`中
+  >* 将`Vulkan SDK 1.3.204.1`中的`Include`文件夹下的内容拷贝到了`./engine/core/include/vulkan`目录下
+  >* 修改`TCore.h`中对于`#include <vulkan/vulkan.h>`的引用,修改成`#include "vulkan/vulkan.h"`
+  >* 修改`TSurface.h`中对于`Vulkan`头文件的引用,修改成本地`vulkan`头文件
+  >* 移除`TCore`的`CMake`中对于`Vulkan`目录配置的硬编码
