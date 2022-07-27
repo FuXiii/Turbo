@@ -3,9 +3,6 @@ project(TCore)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
-add_library(vulkan STATIC IMPORTED GLOBAL)
-set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
-
 aux_source_directory(./src/ SRCS)
 
 add_library(${PROJECT_NAME} STATIC ${SRCS})
@@ -30,7 +27,6 @@ PUBLIC ./thirdparty/SPIRV-Cross
 )
 
 target_link_libraries(${PROJECT_NAME}  
-PUBLIC vulkan
 PUBLIC VulkanMemoryAllocator
 PUBLIC glslang
 PUBLIC OGLCompiler
