@@ -152,11 +152,17 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/5/8**</font> ~~**(该功能转移至`TSurface`中)** 提供`Swapchain`,有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`~~
 
-- `TVulkanLoader`中提供类似获取`struct DeviceFunctionTable`类型的函数，用于获取`VkDevice`特定的函数实现版本
+- <font color=green>**[ ✓ ]2022/7/23**</font> ~~`TVulkanLoader`中提供类似获取`struct DeviceFunctionTable`类型的函数，用于获取`VkDevice`特定的函数实现版本~~
 
 - `TVulkanLoader`中`Destroy()`目前未被调用，应该在`TInstance`析构函数中调用，用于卸载`Vulkan`动态库
 
 - `Turbo`中未完全覆盖`TVulkanLoader`获取的函数调用
   - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`Turbo::Core::TDeviceQueue::Present(...)::vkQueuePresentKHR(...)`未覆盖~~
-  - `TSurface`未覆盖
+  - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`TSurface`未覆盖~~
   - `TSwapchain`未覆盖
+
+- `TCore`中`CMakeLists.txt`中有些库应该是`PRIVATE`
+
+- `TCore`中`CMakeLists.txt`对于库的创建应该取消现有的设成静态库的配置，转成用户自定义生成静态库还是动态库
+
+- `Turbo`核心生成的`TCore`库,照常理应该在`Visual Studio`中链接时不需要再次链接核心的依赖库，但是目前测试，在`Visual Studio`还是需要链接比如`vma`,`glslang`等核心依赖库才能链接到`TCore`库中否则报未定义相关函数实现的错误，初步怀疑是`CMake`的`target_link_libraries`中的`PUBLIC`和`PRIVATE`的区别，但是改成`PRIVATE`好像并不能解决以上问题。如果使用`ar.exe`之类的库合并工具需要写自定义`CMake`指令，`Visual Studio`的库合并工具是官方的`lib.exe`，但是，但是使用库合并工具应该不是最好的解决方案。研究中...

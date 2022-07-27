@@ -1410,3 +1410,9 @@ Turbo是渲染引擎
   >```
   >
   >* 开始将`TSurface`中使用`TDeviceDriver`调用使适配
+
+* 2022/7/27 设计架构
+  >
+  >* 开始将`TSwapchain`中使用`TDeviceDriver`调用使适配
+  >* 有小伙伴提出在单独使用`Turbo`的`TCore`核心库的时候，需要手动链接`TCore`库的依赖库，经过检验确实如此，这不是`TCore`库发布的初衷，有关该问题的细节请参阅`./docs/issue.md::Turbo核心生成的TCore库...`，由于本人`CMake`并不是很精通，目前正在研究中...
+  >* `TCore`中有关`Vulkan`函数的动态加载目前基本结束，接下来陆续撤走`CMake`中需要硬编码指定`vulkan-1.lib`目录的配置，计划将`vulkan/vulkan.h`头文件加入`TCore`中
