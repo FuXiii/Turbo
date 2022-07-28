@@ -54,7 +54,7 @@ Turbo是渲染引擎
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
     2. 请安装`python`。第三方库很多`CMake`使用`Python`脚本运行，安装完后请确保`Python`的`{Python的安装目录}/Python{版本号}/`目录和`{Python的安装目录}/Python{版本号}/Scripts`目录加入到了环境变量中
-    3. 请修改`engine/core/CMakeLists.txt`中的`Vulkan`库目录为您自己的目录
+    3. ~~请修改`engine/core/CMakeLists.txt`中的`Vulkan`库目录为您自己的目录~~
     4. 之后使用`./CMakeLists.txt`即可
     5. 设置相关`CMake`参数如下：
 
