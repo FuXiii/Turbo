@@ -17,8 +17,6 @@ set(IMGUI_SOURCE_PATH
 ./thirdparty/imgui/imgui_tables.cpp
 ./thirdparty/imgui/imgui_widgets.cpp
 ./thirdparty/imgui/imgui.cpp
-./thirdparty/imgui/backends/imgui_impl_glfw.cpp
-./thirdparty/imgui/backends/imgui_impl_vulkan.cpp
 )
 
 add_executable(${PROJECT_NAME} ./main.cpp ${IMGUI_SOURCE_PATH})

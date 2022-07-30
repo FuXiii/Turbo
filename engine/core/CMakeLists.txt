@@ -5,34 +5,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 aux_source_directory(./src/ SRCS)
 
-add_library(${PROJECT_NAME} STATIC ${SRCS})
-
 add_subdirectory(./thirdparty)
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC ./include
-    PUBLIC ./thirdparty/SPIRV-Cross
-    )
-
-target_link_directories(${PROJECT_NAME} 
-PUBLIC ./thirdparty/VulkanMemoryAllocator/src
-PUBLIC ./thirdparty/glslang/glslang
-PUBLIC ./thirdparty/glslang/glslang/OSDependent
-
-PUBLIC ./thirdparty/glslang/hlsl
-PUBLIC ./thirdparty/glslang/OGLCompilersDLL
-PUBLIC ./thirdparty/glslang/SPIRV
-
-PUBLIC ./thirdparty/SPIRV-Cross
+add_library(${PROJECT_NAME} STATIC
+$<TARGET_OBJECTS:VulkanMemoryAllocator>
+$<TARGET_OBJECTS:MachineIndependent>
+$<TARGET_OBJECTS:glslang>
+$<TARGET_OBJECTS:OGLCompiler>
+$<TARGET_OBJECTS:OSDependent>
+$<TARGET_OBJECTS:GenericCodeGen>
+$<TARGET_OBJECTS:SPIRV>
+$<TARGET_OBJECTS:spirv-cross-core>
+$<TARGET_OBJECTS:spirv-cross-glsl>
+$<TARGET_OBJECTS:spirv-cross-hlsl>
+${SRCS} 
 )
 
-target_link_libraries(${PROJECT_NAME}  
-PUBLIC VulkanMemoryAllocator
-PUBLIC glslang
-PUBLIC OGLCompiler
-PUBLIC OSDependent
-PUBLIC SPIRV
-PUBLIC spirv-cross-core
-PUBLIC spirv-cross-glsl
-PUBLIC spirv-cross-hlsl
+target_include_directories(${PROJECT_NAME}
+PUBLIC ./include
+PRIVATE ./thirdparty/VulkanMemoryAllocator/include
+PRIVATE ./thirdparty/SPIRV-Cross
+PRIVATE ./thirdparty/glslang
 )

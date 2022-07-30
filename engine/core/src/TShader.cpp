@@ -11,7 +11,7 @@
 
 #include <glslang/Include/BaseTypes.h>
 #include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
+#include <SPIRV/GlslangToSpv.h>
 
 Turbo::Core::TInterface::TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
 {

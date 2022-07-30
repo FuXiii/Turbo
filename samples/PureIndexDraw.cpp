@@ -37,6 +37,8 @@
 #include "TPipelineDescriptorSet.h"
 #include "TSampler.h"
 
+#include "TVulkanLoader.h"
+
 #include <ktx.h>
 
 #include <memory>
@@ -79,7 +81,7 @@ void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool 
     subres.mipLevel = 0;
     subres.arrayLayer = 0;
     VkSubresourceLayout sr_layout;
-    vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
 
     char *ptr = (char *)temp_image->Map();
 
@@ -318,9 +320,9 @@ int main()
     vertex_buffer->Unmap();
     POSITION_COLOR_UV_DATA.clear();
 
-    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDICES_DATA));
+    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDICE) * INDICES_DATA.size());
     void *index_buffer_ptr = index_buffer->Map();
-    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICES_DATA) * INDICES_DATA.size());
+    memcpy(index_buffer_ptr, INDICES_DATA.data(), sizeof(INDICE) * INDICES_DATA.size());
     index_buffer->Unmap();
 
     Turbo::Core::TImage *ktx_image = nullptr;
@@ -704,7 +706,8 @@ int main()
     delete command_pool;
     delete swapchain;
     delete surface;
-    vkDestroySurfaceKHR(instance->GetVkInstance(), vk_surface_khr, nullptr);
+    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+    pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
     delete device;
     delete instance;

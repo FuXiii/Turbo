@@ -49,7 +49,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
-    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，`Vulkan SDK`目前对于`Turbo`不是必需品，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
@@ -62,6 +62,10 @@ Turbo是渲染引擎
         KTX_FEATURE_LOADTEST_APPS=OFF//如果您想加载KTX测试，请设置ON
         KTX_FEATURE_DOC=OFF//如果您想生成KTX文档，请设置ON
         KTX_FEATURE_STATIC_LIBRARY=ON //目前Turbo按照静态库使用KTX
+
+        //2022/7/30 关于解决Turbo核心库的依赖库问题解决，核心库对于VulkanMemoryAllocator使用动态加载Vulkan API方式，这也是Turbo引擎加载Vulkan API的方式
+        VMA_STATIC_VULKAN_FUNCTIONS=0
+        VMA_DYNAMIC_VULKAN_FUNCTIONS=1
         ```
 
 * 如何运行
@@ -1423,3 +1427,30 @@ Turbo是渲染引擎
   >* 修改`TCore.h`中对于`#include <vulkan/vulkan.h>`的引用,修改成`#include "vulkan/vulkan.h"`
   >* 修改`TSurface.h`中对于`Vulkan`头文件的引用,修改成本地`vulkan`头文件
   >* 移除`TCore`的`CMake`中对于`Vulkan`目录配置的硬编码
+
+* 2022/7/28 设计架构
+  >
+  >* 调整`Turbo`核心的`CMakeLists.txt`
+  >* 移除`Turbo`核心的`vk_mem_alloc.h`,使用第三方库中的头文件
+  >* 尝试解决`TCore`的依赖库问题
+  >* 修改`PureIndexDraw`例子中的`IndexBuffer`大小的`bug`，感谢`会翔`提供的反馈
+
+* 2022/7/30 设计架构
+  >
+  >* 调整`./engine/core/CMakeLists.txt`,尝试解决`TCore`的依赖库问题
+  >* 调整`TShader.cpp`中对于`glslang`中`GlslangToSpv.h`头文件引用层级
+  >* 调整`./main.cpp`中对于`vkGetImageSubresourceLayout(...)`的调用，改成`Turbo::Core::vkGetImageSubresourceLayout(...)`
+  >* 调整`./main.cpp`中对于`vkDestroySurfaceKHR(...)`的调用，改成使用`TVulkanLoader`获取调用
+  >* 将`./CMakeLists.txt`中对于`imgui_impl_glfw.cpp`和`imgui_impl_vulkan.cpp`的引用去掉，用不上
+  >* 同理将`./samples/CMakeLists.txt`中对于`imgui_impl_glfw.cpp`和`imgui_impl_vulkan.cpp`的引用去掉，用不上
+  >* `./samples`中的示例将适配`TVulkanLoader`
+  >* **注：[VulkanMemoryAllocator]：If you fetch pointers to all Vulkan functions in a custom way**, e.g. using some loader like[Volk](https://github.com/zeux/volk)
+  >   * Define `VMA_STATIC_VULKAN_FUNCTIONS` and `VMA_DYNAMIC_VULKAN_FUNCTIONS` to 0.
+  >   * Pass these pointers via structure #VmaVulkanFunctions.
+  >* 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
+  >* `TVmaAllocator`目前对于`Vulkan API`的获取，使用`VulkanMemoryAllocator`内部自动获取。
+  >   * If you want VMA to fetch pointers to Vulkan functions dynamically using vkGetInstanceProcAddr, vkGetDeviceProcAddr (this is the option presented in the example below):
+  >     1. Define VMA_STATIC_VULKAN_FUNCTIONS to 0, VMA_DYNAMIC_VULKAN_FUNCTIONS to 1.
+  >     2. Provide pointers to these two functions via VmaVulkanFunctions::vkGetInstanceProcAddr, VmaVulkanFunctions::vkGetDeviceProcAddr.
+  >     3. The library will fetch pointers to all other functions it needs internally.
+  >* 至此`Turbo`核心库`TCore`依赖库问题已解决，感谢`会翔`提供的问题反馈
