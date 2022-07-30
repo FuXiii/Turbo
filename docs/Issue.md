@@ -161,12 +161,16 @@ TRenderPass render_pass_2(subpass_chain_2);
   - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`TSurface`未覆盖~~
   - <font color=green>**[ ✓ ]2022/7/27**</font> ~~`TSwapchain`未覆盖~~
 
-- `TCore`中`CMakeLists.txt`中有些库应该是`PRIVATE`
+- <font color=green>**[ ✓ ]2022/7/30**</font> ~~`TCore`中`CMakeLists.txt`中有些库应该是`PRIVATE`~~
 
 - `TCore`中`CMakeLists.txt`对于库的创建应该取消现有的设成静态库的配置，转成用户自定义生成静态库还是动态库
 
-- `Turbo`核心生成的`TCore`库,照常理应该在`Visual Studio`中链接时不需要再次链接核心的依赖库，但是目前测试，在`Visual Studio`还是需要链接比如`vma`,`glslang`等核心依赖库才能链接到`TCore`库中否则报未定义相关函数实现的错误，初步怀疑是`CMake`的`target_link_libraries`中的`PUBLIC`和`PRIVATE`的区别，但是改成`PRIVATE`好像并不能解决以上问题。如果使用`ar.exe`之类的库合并工具需要写自定义`CMake`指令，`Visual Studio`的库合并工具是官方的`lib.exe`，但是，但是使用库合并工具应该不是最好的解决方案。研究中...
+- <font color=green>**[ ✓ ]2022/7/30**</font> ~~`Turbo`核心生成的`TCore`库,照常理应该在`Visual Studio`中链接时不需要再次链接核心的依赖库，但是目前测试，在`Visual Studio`还是需要链接比如`vma`,`glslang`等核心依赖库才能链接到`TCore`库中否则报未定义相关函数实现的错误，初步怀疑是`CMake`的`target_link_libraries`中的`PUBLIC`和`PRIVATE`的区别，但是改成`PRIVATE`好像并不能解决以上问题。如果使用`ar.exe`之类的库合并工具需要写自定义`CMake`指令，`Visual Studio`的库合并工具是官方的`lib.exe`，但是，但是使用库合并工具应该不是最好的解决方案。研究中...~~
 
 - `Turbo`中目前还有很多跨平台的内容没有填补，正常没有实现的需要抛出`throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED,...)`异常,帮助跨平台开发提示
 
 - `TVulkanLoader`需要适配`Linux`系统
+
+- 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
+
+- `Turbo`引擎中对于`Vulkan`的扩展支持不全，新版的`Vulkan`扩展比如`1.3`的一些新扩展没有，有时间添加

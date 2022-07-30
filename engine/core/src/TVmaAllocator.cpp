@@ -7,7 +7,7 @@
 #include "TVulkanLoader.h"
 
 //#define VMA_IMPLEMENTATION
-#include "vk_mem_alloc.h"
+#include <vk_mem_alloc.h>
 
 void Turbo::Core::TVmaAllocator::InternalCreate()
 {
@@ -20,23 +20,6 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = Turbo::Core::vkGetDeviceProcAddr;
-    vulkanFunctions.vkGetPhysicalDeviceProperties = Turbo::Core::vkGetPhysicalDeviceProperties;
-    vulkanFunctions.vkGetPhysicalDeviceMemoryProperties = Turbo::Core::vkGetPhysicalDeviceMemoryProperties;
-    vulkanFunctions.vkAllocateMemory = driver->vkAllocateMemory;
-    vulkanFunctions.vkFreeMemory = driver->vkFreeMemory;
-    vulkanFunctions.vkMapMemory = driver->vkMapMemory;
-    vulkanFunctions.vkUnmapMemory = driver->vkUnmapMemory;
-    vulkanFunctions.vkFlushMappedMemoryRanges = driver->vkFlushMappedMemoryRanges;
-    vulkanFunctions.vkInvalidateMappedMemoryRanges = driver->vkInvalidateMappedMemoryRanges;
-    vulkanFunctions.vkBindBufferMemory = driver->vkBindBufferMemory;
-    vulkanFunctions.vkBindImageMemory = driver->vkBindImageMemory;
-    vulkanFunctions.vkGetBufferMemoryRequirements = driver->vkGetBufferMemoryRequirements;
-    vulkanFunctions.vkGetImageMemoryRequirements = driver->vkGetImageMemoryRequirements;
-    vulkanFunctions.vkCreateBuffer = driver->vkCreateBuffer;
-    vulkanFunctions.vkCreateImage = driver->vkCreateImage;
-    vulkanFunctions.vkDestroyBuffer = driver->vkDestroyBuffer;
-    vulkanFunctions.vkDestroyImage = driver->vkDestroyImage;
-    vulkanFunctions.vkCmdCopyBuffer = driver->vkCmdCopyBuffer;
 
     VmaAllocatorCreateInfo vma_allocator_create_info = {};
     vma_allocator_create_info.instance = instance->GetVkInstance();

@@ -37,6 +37,8 @@
 #include "TPipelineDescriptorSet.h"
 #include "TSampler.h"
 
+#include "TVulkanLoader.h"
+
 #include <ktx.h>
 
 #include <memory>
@@ -79,7 +81,7 @@ void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool 
     subres.mipLevel = 0;
     subres.arrayLayer = 0;
     VkSubresourceLayout sr_layout;
-    vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
 
     char *ptr = (char *)temp_image->Map();
 
@@ -684,7 +686,8 @@ int main()
     delete command_pool;
     delete swapchain;
     delete surface;
-    vkDestroySurfaceKHR(instance->GetVkInstance(), vk_surface_khr, nullptr);
+    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+    pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
     delete device;
     delete instance;
