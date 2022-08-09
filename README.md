@@ -1454,3 +1454,11 @@ Turbo是渲染引擎
   >     2. Provide pointers to these two functions via VmaVulkanFunctions::vkGetInstanceProcAddr, VmaVulkanFunctions::vkGetDeviceProcAddr.
   >     3. The library will fetch pointers to all other functions it needs internally.
   >* 至此`Turbo`核心库`TCore`依赖库问题已解决，感谢`会翔`提供的问题反馈
+
+* 2022/8/4 设计架构
+  >
+  >* `./samples`中增加`PBRTest.cpp`,用于`physically based rendering`与`BSDF`研究
+
+* 2022/8/7 设计架构
+  >
+  >* `./samples`中`PBRTest.cpp`,对于`physically based rendering`与`BSDF`初步调试成功。看样子渲染结果应该是对的`（○｀ 3′○）`
