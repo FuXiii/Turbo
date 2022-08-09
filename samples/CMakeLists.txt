@@ -69,4 +69,14 @@ target_include_directories(PureIndexDraw PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PureIndexDraw PUBLIC ${LINK_PARTH})
 target_link_libraries(PureIndexDraw PUBLIC ${LIBS})
 
+add_executable(TurboTest ./TurboTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(TurboTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(TurboTest PUBLIC ${LINK_PARTH})
+target_link_libraries(TurboTest PUBLIC ${LIBS})
+
+add_executable(PBRTest ./PBRTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PBRTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PBRTest PUBLIC ${LINK_PARTH})
+target_link_libraries(PBRTest PUBLIC ${LIBS})
+
 
