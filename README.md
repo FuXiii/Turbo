@@ -50,6 +50,8 @@ Turbo是渲染引擎
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
     * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
+      >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
+      In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
@@ -96,6 +98,10 @@ Turbo是渲染引擎
 2022/6/7
 
 >* 已开始写系列的使用示例。
+
+2022/8/10
+
+>* 开始设计实现`engine`层
 
 ### 已完成示例
 
@@ -1462,3 +1468,11 @@ Turbo是渲染引擎
 * 2022/8/7 设计架构
   >
   >* `./samples`中`PBRTest.cpp`,对于`physically based rendering`与`BSDF`初步调试成功。看样子渲染结果应该是对的`（○｀ 3′○）`
+  >
+* 2022/8/10 设计架构
+  >
+  >* 开始`engine`层面的设计和实现，`engine`层的相关设计将会位于`./docs/TurboDesign.drawio::Engine`章节中，`engine`层的相关实现将会放入`./engine/include`和`./engine/src`中
+
+* 2022/8/10 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中创建`纲要`
