@@ -1473,7 +1473,15 @@ Turbo是渲染引擎
   >
   >* 开始`engine`层面的设计和实现，`engine`层的相关设计将会位于`./docs/TurboDesign.drawio::Engine`章节中，`engine`层的相关实现将会放入`./engine/include`和`./engine/src`中
 
-* 2022/8/10 设计架构
+* 2022/8/11 设计架构
   >
   >* `./docs/TurboDesign.drawio::Engine`章节中创建`纲要`
   >* 修正`./docs/TurboDesign.drawio::Engine`章节中`Subapss`的问题
+
+* 2022/8/13 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中创建`概要设计`
+
+* 2022/8/15 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中完善`概要设计`设计思路
