@@ -174,3 +174,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
 
 - `Turbo`引擎中对于`Vulkan`的扩展支持不全，新版的`Vulkan`扩展比如`1.3`的一些新扩展没有，有时间添加
+
+- `Turbo`的`Core`中有个`TEngine`类，该类提供的功能顶多算一个辅助信息获取，没有这个类也是可以的，有时间将其剔出去
