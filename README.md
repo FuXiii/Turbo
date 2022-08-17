@@ -1493,3 +1493,4 @@ Turbo是渲染引擎
 * 2022/8/17 设计架构
   >
   >* `./docs/TurboDesign.drawio::Engine`章节中`概要设计`设计增加对于`CommandBuffer相关`的设计思路
+  >* `./docs/TurboDesign.drawio::Engine`章节中`概要设计`设计增加对于`对象字子父级管理相关`的设计思路
