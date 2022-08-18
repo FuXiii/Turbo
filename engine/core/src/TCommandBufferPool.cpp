@@ -9,12 +9,12 @@
 
 void Turbo::Core::TCommandBufferPool::AddChildHandle(TCommandBuffer *commandBuffer)
 {
-    // Nothing to do, this is duty of TPool
+    // Nothing to do, this is duty to Allocate()
 }
 
 Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::RemoveChildHandle(TCommandBuffer *commandBuffer)
 {
-    // Nothing to do, this is duty of TPool
+    // Nothing to do, this is duty to TPool
     return nullptr;
 }
 
@@ -37,8 +37,7 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TCommandBufferPool::InternalCreate::vkCreateCommandPool");
     }
 
-    std::vector<TCommandBuffer *> command_buffers = this->GetPool();
-    for (TCommandBuffer *command_buffer_item : command_buffers)
+    for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
     {
         command_buffer_item->InternalCreate();
     }
@@ -46,8 +45,7 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
 
 void Turbo::Core::TCommandBufferPool::InternalDestroy()
 {
-    std::vector<TCommandBuffer *> command_buffers = this->GetPool();
-    for (TCommandBuffer *command_buffer_item : command_buffers)
+    for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
     {
         command_buffer_item->InternalDestroy();
     }
@@ -59,7 +57,28 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyCommandPool(vk_device, this->vkCommandPool, allocator);
 }
 
-Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) : Turbo::Core::TPool<TCommandBuffer>(UINT32_MAX), Turbo::Core::TVulkanHandle()
+void Turbo::Core::TCommandBufferPool::Free(TCommandBufferBase *commandBufferBase)
+{
+    uint32_t index = 0;
+    bool is_found = false;
+    for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
+    {
+        if (command_buffer_item == commandBufferBase)
+        {
+            is_found = true;
+            break;
+        }
+        index = index + 1;
+    }
+
+    if (is_found)
+    {
+        delete this->commandBuffers[index];
+        this->commandBuffers.erase(this->commandBuffers.begin() + index);
+    }
+}
+
+Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) : Turbo::Core::TVulkanHandle()
 {
     if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
     {
@@ -79,11 +98,10 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
 {
     this->deviceQueue->RemoveChildHandle(this);
 
-    const std::vector<TCommandBuffer *> &command_buffers = this->GetPool();
-
-    for (; command_buffers.size() > 0;)
+    for (; this->commandBuffers.size() > 0;)
     {
-        this->Free(command_buffers[0]);
+        TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
+        this->Free(command_buffer_base);
     }
 
     this->InternalDestroy();
@@ -91,7 +109,26 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
 
 Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::Allocate()
 {
-    return TPool<TCommandBuffer>::Allocate(this);
+    Turbo::Core::TCommandBuffer *command_buffer = new TCommandBuffer(this);
+    this->commandBuffers.push_back(command_buffer);
+    return command_buffer;
+}
+
+void Turbo::Core::TCommandBufferPool::Free(TCommandBuffer *commandBuffer)
+{
+    this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
+}
+
+Turbo::Core::TSecondaryCommandBuffer *Turbo::Core::TCommandBufferPool::AllocateSecondary()
+{
+    Turbo::Core::TSecondaryCommandBuffer *secondary_command_buffer = new TSecondaryCommandBuffer(this);
+    this->commandBuffers.push_back(secondary_command_buffer);
+    return secondary_command_buffer;
+}
+
+void Turbo::Core::TCommandBufferPool::Free(TSecondaryCommandBuffer *secondaryCommandBuffer)
+{
+    this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
 }
 
 Turbo::Core::TDeviceQueue *Turbo::Core::TCommandBufferPool::GetDeviceQueue()
