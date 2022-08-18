@@ -79,4 +79,9 @@ target_include_directories(PBRTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PBRTest PUBLIC ${LINK_PARTH})
 target_link_libraries(PBRTest PUBLIC ${LIBS})
 
+add_executable(SecondaryCommandBufferTest ./SecondaryCommandBufferTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(SecondaryCommandBufferTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(SecondaryCommandBufferTest PUBLIC ${LINK_PARTH})
+target_link_libraries(SecondaryCommandBufferTest PUBLIC ${LIBS})
+
 

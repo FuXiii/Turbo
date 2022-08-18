@@ -1493,3 +1493,26 @@ Turbo是渲染引擎
 * 2022/8/17 设计架构
   >
   >* `./docs/TurboDesign.drawio::Engine`章节中`概要设计`设计增加对于`CommandBuffer相关`的设计思路
+  >* `./docs/TurboDesign.drawio::Engine`章节中增加`详细设计`
+  >* `Turbo`核心`TCommandBuffer`中新增`TSecondaryCommandBuffer`类，用于表示二级指令缓冲
+  >* `Turbo`核心`TCommandBuffer`中新增`TCommandBufferBase`类，用于表示指令缓冲的基类，用于实现指令。该类为虚基类
+  >* `Turbo`核心`TCommandBuffer`中`TCommandBufferBase`类，增加`TCommandBufferLevel GetLevel();`函数，用于获取指令缓冲等级
+  >* `Turbo`核心`TCommandBuffer`中新增`TCommandBufferLevel`枚举，用于表示指令缓冲的的级别
+  >* `Turbo`核心`TCommandBuffer`中将`TCommandBuffer`修改成继承自`TCommandBufferBase`
+  >* `Turbo`核心修改`TCommandBufferPool`中将取消继承自`Turbo::Core::TPool<TCommandBuffer>`
+  >* `Turbo`核心`TCommandBufferPool`中增加`void Free(TCommandBufferBase *commandBufferBase);`用于统一回收一级、二级指令缓冲
+  >* `Turbo`核心`TCommandBufferPool`中增加`TSecondaryCommandBuffer *AllocateSecondary();`和`void Free(TSecondaryCommandBuffer *secondaryCommandBuffer);`用于创建和回收二级指令缓冲
+  >* `Turbo`核心`TCommandBuffer`中应该实现`void CmdExecuteCommand(...);`函数，用于一级指令缓冲调度二级指令缓冲。今天太晚了，明天再弄。
+  
+* 2022/8/18 设计架构
+  >
+  >* `Turbo`核心`TCommandBuffer`中增加`TCommandBufferPool* GetCommandBufferPool();`函数
+  >* `Turbo`核心`TCommandBuffer`中实现`void CmdExecuteCommand(...);`函数
+  >* `Turbo`核心`TCommandBufferBase`中增加`VkCommandBufferInheritanceInfo *vkCommandBufferInheritanceInfo = nullptr`成员变量，用于二级指令缓冲的继承信息
+  >* `Turbo`核心`TCommandBufferBase`中增加`uint32_t currentSubpass = 0;`成员变量，表示当前的`Subpass`
+  >* `Turbo`核心`TCommandBufferBase`中增加`TFramebuffer *currentFramebuffer = nullptr;`成员变量，表示当前的`Framebuffer`
+  >* `Turbo`核心`TSecondaryCommandBuffer`中删除`void Begin() = delete`成员函数调用，转而使用`void Begin(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t subpass);`成员函数
+  >* `Turbo`核心`TCommandBuffer.h`中增加`typedef enum class TSubpassContents`枚举，用于对应`VkSubpassContents`
+  >* `Turbo`核心`TCommandBufferBase`中将`void CmdBeginRenderPass(...)`的形参增加一个`TSubpassContents`参数
+  >* `Turbo`核心`TCommandBufferBase::Begin()`中将`vk_command_buffer_begin_info.flags`设置成`VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT`为适应二级指令缓冲
+  >* `./samples`中增加`SecondaryCommandBufferTest`例子，用于测试二级指令缓冲
