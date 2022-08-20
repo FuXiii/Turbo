@@ -1516,3 +1516,19 @@ Turbo是渲染引擎
   >* `Turbo`核心`TCommandBufferBase`中将`void CmdBeginRenderPass(...)`的形参增加一个`TSubpassContents`参数
   >* `Turbo`核心`TCommandBufferBase::Begin()`中将`vk_command_buffer_begin_info.flags`设置成`VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT`为适应二级指令缓冲
   >* `./samples`中增加`SecondaryCommandBufferTest`例子，用于测试二级指令缓冲
+
+* 2022/8/18 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计`设计,细化具体资源
+
+* 2022/8/19 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`系统设计`中增加文件加载层相关
+  >* `./asset/models/`增加`material_sphere.gltf`文件
+  >* `./samples/PBRTest.cpp`例子中将读取的模型改为`material_sphere.gltf`文件
+
+* 2022/8/20 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计`中增加`Material`设计思路
+  >* `./samples`中增加`MultiDrawTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系
+  >* `./samples`中增加`SubpassTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系

@@ -84,4 +84,14 @@ target_include_directories(SecondaryCommandBufferTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(SecondaryCommandBufferTest PUBLIC ${LINK_PARTH})
 target_link_libraries(SecondaryCommandBufferTest PUBLIC ${LIBS})
 
+add_executable(MultiDrawTest ./MultiDrawTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(MultiDrawTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(MultiDrawTest PUBLIC ${LINK_PARTH})
+target_link_libraries(MultiDrawTest PUBLIC ${LIBS})
+
+add_executable(SubpassTest ./SubpassTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(SubpassTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(SubpassTest PUBLIC ${LINK_PARTH})
+target_link_libraries(SubpassTest PUBLIC ${LIBS})
+
 
