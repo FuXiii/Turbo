@@ -1532,3 +1532,7 @@ Turbo是渲染引擎
   >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计`中增加`Material`设计思路
   >* `./samples`中增加`MultiDrawTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系
   >* `./samples`中增加`SubpassTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系
+
+* 2022/8/21 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计::Material`设计思路,有设计问题，进一步设计完善
