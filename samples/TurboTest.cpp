@@ -157,6 +157,10 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 4) in vec3 inColor;\n"
                                     "layout (location = 5) in float inValue;\n"
                                     "layout (location = 0) out vec4 outColor;\n"
+                                    "layout (push_constant) uniform my_push_constants_t\n"
+                                    "{"
+                                    "   float value;\n"
+                                    "} my_push_constants;\n"
                                     "void main() {\n"
                                     "   vec3 line_color=inColor;\n"
                                     "   line_color.r<=0.04045?line_color.r=inColor.r/12.92 : line_color.r=pow((inColor.r+0.055)/1.055,2.4);\n"
@@ -207,6 +211,11 @@ typedef struct POSITION_COLOR_UV
 
 using INDICE = uint32_t;
 
+struct PUSH_CONSTANT_DATA
+{
+    float value;
+};
+
 int main()
 {
     std::vector<POSITION_COLOR_UV> POSITION_COLOR_UV_DATA;
@@ -218,6 +227,8 @@ int main()
     std::vector<INDICE> INDICES_DATA = {0, 1, 2, 2, 3, 0};
 
     float value = -10.0f;
+
+    PUSH_CONSTANT_DATA push_constant_data = {};
 
     Turbo::Core::TEngine engine;
 
@@ -634,6 +645,8 @@ int main()
         memcpy(_ptr, &value, sizeof(value));
         value_buffer->Unmap();
 
+        push_constant_data.value = (std::sin(_time)+1)/2.0f;
+
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
         Turbo::Core::TSemaphore *wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -660,6 +673,7 @@ int main()
 
             // Square
             command_buffer->CmdBindPipeline(pipeline);
+            command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
