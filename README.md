@@ -1536,3 +1536,8 @@ Turbo是渲染引擎
 * 2022/8/21 设计架构
   >
   >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计::Material`设计思路,有设计问题，进一步设计完善
+
+* 2022/8/25 知会
+  >
+  >* 现在`Turbo::Engine`层面的设计多少都有些问题，比如：如果用户想要调配使用`FrameGraph`就需要对渲染有过硬的理解，目前看了[`Filament`](https://github.com/google/filament)，[`LegitEngine`](https://github.com/Raikiri/LegitEngine),[`FrameGraph-Example`](https://github.com/skaarj1989/FrameGraph-Example)等相关引擎对于`FrameGraph`亦或是`RenderGraph`的封装设计，这些引擎都会提供一套固定的`FrameGraph`，用于一套已经定义好了的渲染流程，这些流程多是`GBuffer`流程，用户提供`Renderable`结构数据，引擎将其塞入特定的`PassNode`中，这个塞入工作并不是用户自定义的，而是引擎完成的，这就会导致用户（对图形学不是很熟悉）需要按照引擎先前定好的流程渲染，渲染出有限的效果（大部分情况下这个有限的效果是够用的），除非用户对于图形学和`FrameGraph`有比较深刻的理解，则可自己使用`FrameGraph`配置自定义渲染流程。
+  >* 从现在开始要全力备考了，再写代码我妈要打死我了，不管考得上，还是考不上，明年引擎都将继续，回见~
