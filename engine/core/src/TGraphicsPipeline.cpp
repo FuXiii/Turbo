@@ -313,7 +313,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     vk_pipeline_dynamic_state_create_info.pNext = nullptr;
     vk_pipeline_dynamic_state_create_info.flags = 0;
-    vk_pipeline_dynamic_state_create_info.dynamicStateCount = 2;
+    vk_pipeline_dynamic_state_create_info.dynamicStateCount = vk_dynamic_states.size();
     vk_pipeline_dynamic_state_create_info.pDynamicStates = vk_dynamic_states.data();
 
     VkRenderPass vk_render_pass = this->renderPass->GetVkRenderPass();

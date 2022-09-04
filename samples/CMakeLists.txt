@@ -94,4 +94,9 @@ target_include_directories(SubpassTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(SubpassTest PUBLIC ${LINK_PARTH})
 target_link_libraries(SubpassTest PUBLIC ${LIBS})
 
+add_executable(LineAndLineWidth ./LineAndLineWidth.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(LineAndLineWidth PUBLIC ${INCLUDE_PARTH})
+target_link_directories(LineAndLineWidth PUBLIC ${LINK_PARTH})
+target_link_libraries(LineAndLineWidth PUBLIC ${LIBS})
+
 
