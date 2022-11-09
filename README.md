@@ -1549,3 +1549,7 @@ Turbo是渲染引擎
 * 2022/10/16 设计架构
   >
   >* `./samples`中增加`InstancedDrawTest`示例，用于示例`实例化渲染`
+
+* 2022/11/7 设计架构
+>
+>* `./samples`中增加`PerlinWorleyNoiseTest`示例，用于尝试生成`Perlin-Woley噪音`

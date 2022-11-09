@@ -291,7 +291,6 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "    float camX;\n"
                                     "    float camY;\n"
                                     "    float camZ;\n"
-                                    "    float scale;\n"
                                     "} myBufferVals;\n"
                                     "layout (set = 1, binding = 0) uniform mvpBuffer {\n"
                                     "    mat4 mvp;\n"
@@ -307,7 +306,7 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 4) out vec3 outPosition;\n"
                                     "layout (location = 5) out vec4 outCamPos;\n"
                                     "void main() {\n"
-                                    "   gl_Position =mvpBufferVals.mvp * vec4(myBufferVals.scale*pos.xyz,1);\n"
+                                    "   gl_Position =mvpBufferVals.mvp * vec4(pos.xyz,1);\n"
                                     "   outNormal = mvpBufferVals.m * vec4(normal.xyz,1);\n"
                                     "   outPosition =(mvpBufferVals.m * vec4(pos.xyz,1)).xyz;\n"
                                     "   outUV = inUV;\n"
@@ -403,16 +402,18 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "   vec3 ambient = materialcolor()*0.02/**texture(sampler2D(myTexture, mySampler), uv, 0).xyz*/;\n"
                                     "   vec3 _color = ambient + Lo;\n"
                                     "   _color = pow(_color, vec3(0.4545));\n"
-                                    "   outCustomColor = vec4(_color,my_push_constants.alpha);\n"
+                                    "   outCustomColor = vec4(_color,1.0);\n"
                                     "}\n";
 
 const std::string INPUT_ATTACHMENT_VERT_SHADER_STR = "#version 450\n"
                                                      "out gl_PerVertex {\n"
                                                      "	vec4 gl_Position;\n"
                                                      "};\n"
+                                                     "layout (location = 0) out vec2 uv;\n"
                                                      "void main() \n"
                                                      "{\n"
-                                                     "	gl_Position = vec4(vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2) * 2.0f - 1.0f, 0.0f, 1.0f);\n"
+                                                     "  uv = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);\n"
+                                                     "	gl_Position = vec4(uv* 2.0f - 1.0f, 0.0f, 1.0f);\n"
                                                      "}";
 
 const std::string INPUT_ATTACHMENT_FRAG_SHADER_STR = "#version 450\n"
@@ -421,12 +422,125 @@ const std::string INPUT_ATTACHMENT_FRAG_SHADER_STR = "#version 450\n"
                                                      "layout (push_constant) uniform my_push_constants_t\n"
                                                      "{"
                                                      "   int isOutputDepth;\n"
+                                                     "   int slice;\n"
+                                                     "   float coverage;\n"
                                                      "} my_push_constants;\n"
+                                                     "layout (location = 0) in vec2 uv;\n"
                                                      "layout (location = 0) out vec4 outColor;\n"
+                                                     "#define UI0 1597334673U\n"
+                                                     "#define UI1 3812015801U\n"
+                                                     "#define UI2 uvec2(UI0, UI1)\n"
+                                                     "#define UI3 uvec3(UI0, UI1, 2798796415U)\n"
+                                                     "#define UIF (1.0 / float(0xffffffffU))\n"
+                                                     "vec3 hash33(vec3 p)\n"
+                                                     "{\n"
+                                                     "	uvec3 q = uvec3(ivec3(p)) * UI3;\n"
+                                                     "	q = (q.x ^ q.y ^ q.z)*UI3;\n"
+                                                     "	return -1. + 2. * vec3(q) * UIF;\n"
+                                                     "}\n"
+                                                     "float remap(float x, float a, float b, float c, float d)\n"
+                                                     "{\n"
+                                                     "    return (((x - a) / (b - a)) * (d - c)) + c;\n"
+                                                     "}\n"
+                                                     "// Gradient noise by iq (modified to be tileable)\n"
+                                                     "float gradientNoise(vec3 x, float freq)\n"
+                                                     "{\n"
+                                                     "    // grid\n"
+                                                     "    vec3 p = floor(x);\n"
+                                                     "    vec3 w = fract(x);\n"
+                                                     "    // quintic interpolant\n"
+                                                     "    vec3 u = w * w * w * (w * (w * 6. - 15.) + 10.);\n"
+                                                     "    // gradients\n"
+                                                     "    vec3 ga = hash33(mod(p + vec3(0., 0., 0.), freq));\n"
+                                                     "    vec3 gb = hash33(mod(p + vec3(1., 0., 0.), freq));\n"
+                                                     "    vec3 gc = hash33(mod(p + vec3(0., 1., 0.), freq));\n"
+                                                     "    vec3 gd = hash33(mod(p + vec3(1., 1., 0.), freq));\n"
+                                                     "    vec3 ge = hash33(mod(p + vec3(0., 0., 1.), freq));\n"
+                                                     "    vec3 gf = hash33(mod(p + vec3(1., 0., 1.), freq));\n"
+                                                     "    vec3 gg = hash33(mod(p + vec3(0., 1., 1.), freq));\n"
+                                                     "    vec3 gh = hash33(mod(p + vec3(1., 1., 1.), freq));\n"
+                                                     "    // projections\n"
+                                                     "    float va = dot(ga, w - vec3(0., 0., 0.));\n"
+                                                     "    float vb = dot(gb, w - vec3(1., 0., 0.));\n"
+                                                     "    float vc = dot(gc, w - vec3(0., 1., 0.));\n"
+                                                     "    float vd = dot(gd, w - vec3(1., 1., 0.));\n"
+                                                     "    float ve = dot(ge, w - vec3(0., 0., 1.));\n"
+                                                     "    float vf = dot(gf, w - vec3(1., 0., 1.));\n"
+                                                     "    float vg = dot(gg, w - vec3(0., 1., 1.));\n"
+                                                     "    float vh = dot(gh, w - vec3(1., 1., 1.));\n"
+                                                     "    // interpolation\n"
+                                                     "    return va + \n"
+                                                     "           u.x * (vb - va) + \n"
+                                                     "           u.y * (vc - va) + \n"
+                                                     "           u.z * (ve - va) + \n"
+                                                     "           u.x * u.y * (va - vb - vc + vd) + \n"
+                                                     "           u.y * u.z * (va - vc - ve + vg) + \n"
+                                                     "           u.z * u.x * (va - vb - ve + vf) + \n"
+                                                     "           u.x * u.y * u.z * (-va + vb + vc - vd + ve - vf - vg + vh);             \n"
+                                                     "}\n"
+                                                     "// Tileable 3D worley noise\n"
+                                                     "float worleyNoise(vec3 uv, float freq)\n"
+                                                     "{    \n"
+                                                     "    vec3 id = floor(uv);\n"
+                                                     "    vec3 p = fract(uv);\n"
+                                                     "    \n"
+                                                     "    float minDist = 10000.;\n"
+                                                     "    for (float x = -1.; x <= 1.; ++x)\n"
+                                                     "    {\n"
+                                                     "        for(float y = -1.; y <= 1.; ++y)\n"
+                                                     "        {\n"
+                                                     "            for(float z = -1.; z <= 1.; ++z)\n"
+                                                     "            {\n"
+                                                     "                vec3 offset = vec3(x, y, z);\n"
+                                                     "            	vec3 h = hash33(mod(id + offset, vec3(freq))) * .5 + .5;\n"
+                                                     "    			h += offset;\n"
+                                                     "            	vec3 d = p - h;\n"
+                                                     "           		minDist = min(minDist, dot(d, d));\n"
+                                                     "            }\n"
+                                                     "        }\n"
+                                                     "    }\n"
+                                                     "    \n"
+                                                     "    // inverted worley noise\n"
+                                                     "    return 1. - minDist;\n"
+                                                     "}\n"
+                                                     "// Fbm for Perlin noise based on iq's blog\n"
+                                                     "float perlinfbm(vec3 p, float freq, int octaves)\n"
+                                                     "{\n"
+                                                     "    float G = exp2(-.85);\n"
+                                                     "    float amp = 1.;\n"
+                                                     "    float noise = 0.;\n"
+                                                     "    for (int i = 0; i < octaves; ++i)\n"
+                                                     "    {\n"
+                                                     "        noise += amp * gradientNoise(p * freq, freq);\n"
+                                                     "        freq *= 2.;\n"
+                                                     "        amp *= G;\n"
+                                                     "    }\n"
+                                                     "    return noise;   \n"
+                                                     "}\n"
+                                                     "float worleyFbm(vec3 p, float freq)\n"
+                                                     "{\n"
+                                                     "    return worleyNoise(p*freq, freq) * .625 +\n"
+                                                     "        	 worleyNoise(p*freq*2., freq*2.) * .25 +\n"
+                                                     "        	 worleyNoise(p*freq*4., freq*4.) * .125;\n"
+                                                     "}\n"
                                                      "void main() {\n"
                                                      "    if(my_push_constants.isOutputDepth == 0)\n"
                                                      "    {\n"
                                                      "        outColor=subpassLoad(inputColor).rgba;\n"
+                                                     "        float norm_slice=my_push_constants.slice/128.;\n"
+                                                     "        float perlin_fbm = mix(1., perlinfbm(vec3(uv,norm_slice ), 4.0, 7), 0.5);\n"
+                                                     "        perlin_fbm = abs(perlin_fbm * 2. - 1.); // billowy perlin noise;\n"
+                                                     "        float freq = 4.;\n"
+                                                     "        float one_freq_worly_fbm = worleyFbm(vec3(uv, norm_slice), freq);\n"
+                                                     "        float two_freq_worly_fbm = worleyFbm(vec3(uv, norm_slice), freq*2.);\n"
+                                                     "        float three_freq_worly_fbm = worleyFbm(vec3(uv, norm_slice), freq*4.);\n"
+                                                     "        float perlin_worley = remap(perlin_fbm, 0., 1., one_freq_worly_fbm, 1.);\n"
+                                                     "        float worley_fbm = one_freq_worly_fbm * .625 +\n"
+                                                     "                           two_freq_worly_fbm * .125 +\n"
+                                                     "                           three_freq_worly_fbm * .25; \n"
+                                                     "        float cloud = remap(perlin_worley, worley_fbm - 1., 1., 0., 1.);\n"
+                                                     "        cloud = remap(cloud, 1-my_push_constants.coverage, 1., 0., 1.);\n"
+                                                     "        outColor=vec4(cloud,cloud,cloud,1);\n"
                                                      "    }\n"
                                                      "    else\n"
                                                      "    { \n"
@@ -468,7 +582,6 @@ struct MY_BUFFER_DATA
 {
     float value;
     POSITION camPos;
-    float scale;
 };
 
 struct MVP_BUFFER_DATA
@@ -477,105 +590,26 @@ struct MVP_BUFFER_DATA
     glm::mat4 m;
 };
 
+struct MY_INPUT_ATTACHMENT_DATA
+{
+    int isOutputDepth;
+    int slice;
+    float coverage;
+};
+
 int main()
 {
 
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
-    // float value = -10.0f;
-
     PUSH_CONSTANT_DATA push_constant_data = {};
     push_constant_data.alpha = 1;
     push_constant_data.intensity = 20;
-    push_constant_data.metallic = 1;
-    push_constant_data.roughness = 0.5;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.value = -5;
-    my_buffer_data.scale = 1.0f;
 
     MVP_BUFFER_DATA mvp_buffer_data = {};
-
-    //<gltf for Suzanne>
-    std::vector<POSITION> POSITION_data;
-    std::vector<NORMAL> NORMAL_data;
-    std::vector<TEXCOORD> TEXCOORD_data;
-    std::vector<uint32_t> INDICES_data;
-
-    {
-        tinygltf::Model model;
-        tinygltf::TinyGLTF loader;
-        std::string err;
-        std::string warn;
-
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
-        const tinygltf::Scene &scene = model.scenes[model.defaultScene];
-        tinygltf::Node &node = model.nodes[scene.nodes[0]];
-        tinygltf::Mesh &mesh = model.meshes[node.mesh];
-        tinygltf::Primitive &primitive = mesh.primitives[0];
-        int mode = primitive.mode;                                          // 4 is triangle
-        int position_accesser_index = primitive.attributes["POSITION"];     // 0
-        int normal_accesser_index = primitive.attributes["NORMAL"];         // 1
-        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"]; // 2
-        int indices_accesser_index = primitive.indices;                     // 3
-        tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
-        tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
-        tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
-        tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
-
-        tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
-        tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
-        tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
-        tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
-
-        int position_buffer_index = position_buffer_view.buffer;
-        size_t position_buffer_byteLength = position_buffer_view.byteLength;
-        int position_buffer_byteOffset = position_buffer_view.byteOffset;
-        int position_type = position_accessor.type;
-
-        int normal_buffer_index = normal_buffer_view.buffer;
-        size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
-        int normal_buffer_byteOffset = normal_buffer_view.byteOffset;
-        int normal_type = normal_accessor.type;
-
-        int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
-        size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
-        int texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
-        int texcoord_0_type = texcoord_0_accessor.type;
-
-        int indices_buffer_index = indices_buffer_view.buffer;
-        size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
-        int indices_buffer_byteOffset = indices_buffer_view.byteOffset;
-        int indices_type = indices_accessor.type;
-
-        tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
-        tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
-        tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
-        tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
-
-        std::vector<unsigned char> &position_data = position_buffer.data;
-        std::vector<unsigned char> &normal_data = normal_buffer.data;
-        std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
-        std::vector<unsigned char> &indices_data = indices_buffer.data;
-
-        std::vector<unsigned short> temp_indices_data;
-
-        POSITION_data.resize(position_buffer_byteLength / sizeof(POSITION));
-        NORMAL_data.resize(normal_buffer_byteLength / sizeof(NORMAL));
-        TEXCOORD_data.resize(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
-        temp_indices_data.resize(indices_buffer_byteLength / sizeof(unsigned short));
-
-        memcpy(POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
-        memcpy(NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
-        memcpy(TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
-        memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
-
-        for (unsigned short &temp_indices_item : temp_indices_data)
-        {
-            INDICES_data.push_back(temp_indices_item);
-        }
-    }
-    //</gltf for Suzanne>
 
     //<gltf for sky cube>
     std::vector<POSITION> SKY_CUBE_POSITION_data;
@@ -659,7 +693,6 @@ int main()
 
     uint32_t sky_cube_indices_count = SKY_CUBE_INDICES_data.size();
 
-    uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
     Turbo::Core::TLayerInfo khronos_validation;
@@ -784,28 +817,11 @@ int main()
     memcpy(value_ptr, &my_buffer_data, sizeof(my_buffer_data));
     value_buffer->Unmap();
 
-    Turbo::Core::TBuffer *value_buffer1 = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    void *value_buffer1_ptr = value_buffer1->Map();
-    memcpy(value_ptr, &my_buffer_data, sizeof(my_buffer_data));
-    value_buffer1->Unmap();
-
-    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
-    void *position_buffer_ptr = position_buffer->Map();
-    memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
-    position_buffer->Unmap();
-    POSITION_data.clear();
-
     Turbo::Core::TBuffer *sky_cube_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
     void *sky_cube_position_buffer_ptr = sky_cube_position_buffer->Map();
     memcpy(sky_cube_position_buffer_ptr, SKY_CUBE_POSITION_data.data(), sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
     sky_cube_position_buffer->Unmap();
     SKY_CUBE_POSITION_data.clear();
-
-    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
-    void *normal_buffer_ptr = normal_buffer->Map();
-    memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
-    normal_buffer->Unmap();
-    NORMAL_data.clear();
 
     Turbo::Core::TBuffer *sky_cube_normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
     void *sky_cube_normal_buffer_ptr = sky_cube_normal_buffer->Map();
@@ -813,23 +829,11 @@ int main()
     sky_cube_normal_buffer->Unmap();
     SKY_CUBE_NORMAL_data.clear();
 
-    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
-    void *texcoord_buffer_ptr = texcoord_buffer->Map();
-    memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
-    texcoord_buffer->Unmap();
-    TEXCOORD_data.clear();
-
     Turbo::Core::TBuffer *sky_cube_texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
     void *sky_cube_texcoord_buffer_ptr = sky_cube_texcoord_buffer->Map();
     memcpy(sky_cube_texcoord_buffer_ptr, SKY_CUBE_TEXCOORD_data.data(), sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
     sky_cube_texcoord_buffer->Unmap();
     SKY_CUBE_TEXCOORD_data.clear();
-
-    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
-    void *index_buffer_ptr = index_buffer->Map();
-    memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
-    index_buffer->Unmap();
-    INDICES_data.clear();
 
     Turbo::Core::TBuffer *sky_cube_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
     void *sky_cube_index_buffer_ptr = sky_cube_index_buffer->Map();
@@ -973,6 +977,8 @@ int main()
     std::cout << sky_vertex_shader->ToString() << std::endl;
     std::cout << sky_fragment_shader->ToString() << std::endl;
 
+    std::cout << input_attachment_fragment_shader->ToString() << std::endl;
+
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
@@ -990,9 +996,6 @@ int main()
 
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(value_buffer);
-
-    std::vector<Turbo::Core::TBuffer *> buffers1;
-    buffers1.push_back(value_buffer1);
 
     std::vector<Turbo::Core::TBuffer *> mvp_buffers;
     mvp_buffers.push_back(mvp_buffer);
@@ -1043,7 +1046,7 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
     std::vector<Turbo::Core::TShader *> sky_cube_shaders{sky_vertex_shader, sky_fragment_shader};
     std::vector<Turbo::Core::TShader *> input_attachment_shaders{input_attachment_vertex_shader, input_attachment_fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::ONE, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TGraphicsPipeline *sky_cube_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, sky_cube_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_FRONT_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false);
     Turbo::Core::TGraphicsPipeline *input_attachment_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, vertex_bindings, input_attachment_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL);
 
@@ -1069,13 +1072,6 @@ int main()
     pipeline_descriptor_set->BindData(1, 1, 0, sky_cube_combined_images);
     pipeline_descriptor_set->BindData(2, 2, 0, my_samples);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set1 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set1->BindData(0, 0, 0, buffers1);
-    pipeline_descriptor_set1->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set1->BindData(1, 0, 0, mvp_buffers);
-    pipeline_descriptor_set1->BindData(1, 1, 0, sky_cube_combined_images);
-    pipeline_descriptor_set1->BindData(2, 2, 0, my_samples);
-
     Turbo::Core::TPipelineDescriptorSet *sky_cube_pipeline_descriptor_set = descriptor_pool->Allocate(sky_cube_pipeline->GetPipelineLayout());
     sky_cube_pipeline_descriptor_set->BindData(0, 0, 0, sky_cube_mvp_buffers);
     sky_cube_pipeline_descriptor_set->BindData(0, 1, 0, sky_cube_combined_images);
@@ -1083,11 +1079,6 @@ int main()
     Turbo::Core::TPipelineDescriptorSet *input_attachment_pipeline_descriptor_set = descriptor_pool->Allocate(input_attachment_pipeline->GetPipelineLayout());
     input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, input_attachment_colors);
     input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, input_attachment_depths);
-
-    std::vector<Turbo::Core::TBuffer *> vertex_buffers;
-    vertex_buffers.push_back(position_buffer);
-    vertex_buffers.push_back(normal_buffer);
-    vertex_buffers.push_back(texcoord_buffer);
 
     std::vector<Turbo::Core::TBuffer *> sky_cube_vertex_buffers;
     sky_cube_vertex_buffers.push_back(sky_cube_position_buffer);
@@ -1174,11 +1165,14 @@ int main()
 
     bool show_demo_window = true;
     bool is_shouw_depth = false;
+    int imgui_interface_slice = 1;
+    MY_INPUT_ATTACHMENT_DATA my_input_attachment_data;
+    my_input_attachment_data.isOutputDepth = 0;
+    my_input_attachment_data.slice = 1;
+    my_input_attachment_data.coverage = 0.85;
 
     float angle = 180;
     float _time = glfwGetTime();
-
-    float __scale = 1;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -1187,15 +1181,9 @@ int main()
         my_buffer_data.camPos.y = 0;
         my_buffer_data.camPos.z = -my_buffer_data.value;
 
-        my_buffer_data.scale = 1;
         void *_ptr = value_buffer->Map();
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
         value_buffer->Unmap();
-
-        my_buffer_data.scale = __scale;
-        _ptr = value_buffer1->Map();
-        memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
-        value_buffer1->Unmap();
 
         model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -1305,7 +1293,9 @@ int main()
 
                 ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
 
-                ImGui::Checkbox("Is show depth", &is_shouw_depth);
+                ImGui::Checkbox("Is show depth", &(is_shouw_depth));
+                ImGui::SliderInt("slice", &imgui_interface_slice, 1, 128);
+                ImGui::SliderFloat("coverage", &(my_input_attachment_data.coverage), 0, 1);
 
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);                               // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("alpha", &push_constant_data.alpha, 0.0f, 1.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
@@ -1313,7 +1303,6 @@ int main()
                 ImGui::SliderFloat("metallic", &push_constant_data.metallic, 0.0f, 1.0f);     // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("roughness", &push_constant_data.roughness, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("scale", &__scale, 0.0f, 1.0f);                            // Edit 1 float using a slider from 0.0f to 1.0f
 
                 if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;
@@ -1346,40 +1335,20 @@ int main()
             command_buffer->CmdBindIndexBuffer(sky_cube_index_buffer);
             command_buffer->CmdDrawIndexed(sky_cube_indices_count, 1, 0, 0, 0);
 
-            // Suzanne
-            // first draw
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(frame_viewports);
-            command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
-
-            // second draw
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set1);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(frame_viewports);
-            command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
-
             command_buffer->CmdNextSubpass();
 
             command_buffer->CmdBindPipeline(input_attachment_pipeline);
-            int is_out_put_depth = 0;
             if (is_shouw_depth)
             {
-                is_out_put_depth = 1;
-                command_buffer->CmdPushConstants(0, sizeof(is_out_put_depth), &is_out_put_depth);
+                my_input_attachment_data.isOutputDepth = 1;
+                my_input_attachment_data.slice = imgui_interface_slice;
+                command_buffer->CmdPushConstants(0, sizeof(MY_INPUT_ATTACHMENT_DATA), &my_input_attachment_data);
             }
             else
             {
-                is_out_put_depth = 0;
-                command_buffer->CmdPushConstants(0, sizeof(is_out_put_depth), &is_out_put_depth);
+                my_input_attachment_data.isOutputDepth = 0;
+                my_input_attachment_data.slice = imgui_interface_slice;
+                command_buffer->CmdPushConstants(0, sizeof(MY_INPUT_ATTACHMENT_DATA), &my_input_attachment_data);
             }
             command_buffer->CmdBindPipelineDescriptorSet(input_attachment_pipeline_descriptor_set);
             command_buffer->CmdDraw(3, 1, 0, 0);
@@ -1749,7 +1718,6 @@ int main()
     delete imgui_sampler;
 
     descriptor_pool->Free(pipeline_descriptor_set);
-    descriptor_pool->Free(pipeline_descriptor_set1);
     descriptor_pool->Free(sky_cube_pipeline_descriptor_set);
     descriptor_pool->Free(input_attachment_pipeline_descriptor_set);
     delete input_attachment_pipeline;
@@ -1788,12 +1756,7 @@ int main()
     delete sky_cube_position_buffer;
     delete sky_cube_normal_buffer;
     delete sky_cube_texcoord_buffer;
-    delete index_buffer;
-    delete position_buffer;
-    delete normal_buffer;
-    delete texcoord_buffer;
     delete value_buffer;
-    delete value_buffer1;
     delete sky_cube_mvp_buffer;
     delete mvp_buffer;
     command_pool->Free(command_buffer);
