@@ -291,7 +291,6 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "    float camX;\n"
                                     "    float camY;\n"
                                     "    float camZ;\n"
-                                    "    float scale;\n"
                                     "} myBufferVals;\n"
                                     "layout (set = 1, binding = 0) uniform mvpBuffer {\n"
                                     "    mat4 mvp;\n"
@@ -300,6 +299,7 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 0) in vec3 pos;\n"
                                     "layout (location = 1) in vec3 normal;\n"
                                     "layout (location = 2) in vec2 inUV;\n"
+                                    "layout (location = 3) in vec3 inInstancedPositionOffset;\n" // Instanceed Position
                                     "layout (location = 0) out vec4 outNormal;\n"
                                     "layout (location = 1) out vec2 outUV;\n"
                                     "layout (location = 2) out float outValue;\n"
@@ -307,9 +307,9 @@ const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (location = 4) out vec3 outPosition;\n"
                                     "layout (location = 5) out vec4 outCamPos;\n"
                                     "void main() {\n"
-                                    "   gl_Position =mvpBufferVals.mvp * vec4(myBufferVals.scale*pos.xyz,1);\n"
+                                    "   gl_Position =mvpBufferVals.mvp * vec4(inInstancedPositionOffset+pos.xyz,1);\n"
                                     "   outNormal = mvpBufferVals.m * vec4(normal.xyz,1);\n"
-                                    "   outPosition =(mvpBufferVals.m * vec4(pos.xyz,1)).xyz;\n"
+                                    "   outPosition =(mvpBufferVals.m * vec4(inInstancedPositionOffset+pos.xyz,1)).xyz;\n"
                                     "   outUV = inUV;\n"
                                     "   outValue = myBufferVals.value;\n"
                                     "   outSunPosition = /*mvpBufferVals.m **/vec4(-10,-10,-10,1);\n"
@@ -403,7 +403,7 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "   vec3 ambient = materialcolor()*0.02/**texture(sampler2D(myTexture, mySampler), uv, 0).xyz*/;\n"
                                     "   vec3 _color = ambient + Lo;\n"
                                     "   _color = pow(_color, vec3(0.4545));\n"
-                                    "   outCustomColor = vec4(_color,my_push_constants.alpha);\n"
+                                    "   outCustomColor = vec4(_color,1.0);\n"
                                     "}\n";
 
 const std::string INPUT_ATTACHMENT_VERT_SHADER_STR = "#version 450\n"
@@ -468,7 +468,6 @@ struct MY_BUFFER_DATA
 {
     float value;
     POSITION camPos;
-    float scale;
 };
 
 struct MVP_BUFFER_DATA
@@ -479,22 +478,40 @@ struct MVP_BUFFER_DATA
 
 int main()
 {
-
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
-    // float value = -10.0f;
-
     PUSH_CONSTANT_DATA push_constant_data = {};
-    push_constant_data.alpha = 1;
-    push_constant_data.intensity = 20;
-    push_constant_data.metallic = 1;
-    push_constant_data.roughness = 0.5;
+    push_constant_data.alpha = 1.0f;
+    push_constant_data.metallic = 0.6f;
+    push_constant_data.roughness = 0.25f;
+    push_constant_data.intensity = 20.0f;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.value = -5;
-    my_buffer_data.scale = 1.0f;
 
     MVP_BUFFER_DATA mvp_buffer_data = {};
+
+    //<Instanced Position Offset Data>
+    uint32_t INSTANCE_COUNT = 10000;
+    std::vector<POSITION> POSITION_OFFSET_data;
+    for (uint32_t index = 0; index < INSTANCE_COUNT; index++)
+    {
+        uint32_t RANDOM_DIR_MAX = 10000;
+        POSITION random_dir;
+        random_dir.x = (((rand() % RANDOM_DIR_MAX) / float(RANDOM_DIR_MAX)) * 2) - 1;
+        random_dir.y = (((rand() % RANDOM_DIR_MAX) / float(RANDOM_DIR_MAX)) * 2) - 1;
+        random_dir.z = (((rand() % RANDOM_DIR_MAX) / float(RANDOM_DIR_MAX)) * 2) - 1;
+
+        uint32_t RANDOM_RADIUS_MAX = 100;
+        float random_radius = rand() % RANDOM_RADIUS_MAX;
+
+        POSITION position_offset;
+        position_offset.x = random_dir.x * random_radius;
+        position_offset.y = random_dir.y * random_radius;
+        position_offset.z = random_dir.z * random_radius;
+        POSITION_OFFSET_data.push_back(position_offset);
+    }
+    //</Instanced Position Offset Data>
 
     //<gltf for Suzanne>
     std::vector<POSITION> POSITION_data;
@@ -508,7 +525,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -784,10 +801,11 @@ int main()
     memcpy(value_ptr, &my_buffer_data, sizeof(my_buffer_data));
     value_buffer->Unmap();
 
-    Turbo::Core::TBuffer *value_buffer1 = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    void *value_buffer1_ptr = value_buffer1->Map();
-    memcpy(value_ptr, &my_buffer_data, sizeof(my_buffer_data));
-    value_buffer1->Unmap();
+    Turbo::Core::TBuffer *instanced_position_offset_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_OFFSET_data.size());
+    void *instanced_position_offset_buffer_ptr = instanced_position_offset_buffer->Map();
+    memcpy(instanced_position_offset_buffer_ptr, POSITION_OFFSET_data.data(), sizeof(POSITION) * POSITION_OFFSET_data.size());
+    instanced_position_offset_buffer->Unmap();
+    POSITION_OFFSET_data.clear();
 
     Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
     void *position_buffer_ptr = position_buffer->Map();
@@ -991,9 +1009,6 @@ int main()
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(value_buffer);
 
-    std::vector<Turbo::Core::TBuffer *> buffers1;
-    buffers1.push_back(value_buffer1);
-
     std::vector<Turbo::Core::TBuffer *> mvp_buffers;
     mvp_buffers.push_back(mvp_buffer);
 
@@ -1031,11 +1046,19 @@ int main()
     normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
     texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    Turbo::Core::TVertexBinding instanced_position_offset_binding(3, sizeof(POSITION), Turbo::Core::TVertexRate::INSTANCE);
+    instanced_position_offset_binding.AddAttribute(3, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // instanced position offset
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
     vertex_bindings.push_back(position_binding);
     vertex_bindings.push_back(normal_binding);
     vertex_bindings.push_back(texcoord_binding);
+
+    std::vector<Turbo::Core::TVertexBinding> instance_draw_vertex_bindings;
+    instance_draw_vertex_bindings.push_back(position_binding);
+    instance_draw_vertex_bindings.push_back(normal_binding);
+    instance_draw_vertex_bindings.push_back(texcoord_binding);
+    instance_draw_vertex_bindings.push_back(instanced_position_offset_binding);
 
     Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
     Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
@@ -1043,7 +1066,7 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
     std::vector<Turbo::Core::TShader *> sky_cube_shaders{sky_vertex_shader, sky_fragment_shader};
     std::vector<Turbo::Core::TShader *> input_attachment_shaders{input_attachment_vertex_shader, input_attachment_fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::ONE, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, instance_draw_vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TGraphicsPipeline *sky_cube_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, sky_cube_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_FRONT_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false);
     Turbo::Core::TGraphicsPipeline *input_attachment_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, vertex_bindings, input_attachment_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL);
 
@@ -1069,13 +1092,6 @@ int main()
     pipeline_descriptor_set->BindData(1, 1, 0, sky_cube_combined_images);
     pipeline_descriptor_set->BindData(2, 2, 0, my_samples);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set1 = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set1->BindData(0, 0, 0, buffers1);
-    pipeline_descriptor_set1->BindData(0, 1, 0, my_textures);
-    pipeline_descriptor_set1->BindData(1, 0, 0, mvp_buffers);
-    pipeline_descriptor_set1->BindData(1, 1, 0, sky_cube_combined_images);
-    pipeline_descriptor_set1->BindData(2, 2, 0, my_samples);
-
     Turbo::Core::TPipelineDescriptorSet *sky_cube_pipeline_descriptor_set = descriptor_pool->Allocate(sky_cube_pipeline->GetPipelineLayout());
     sky_cube_pipeline_descriptor_set->BindData(0, 0, 0, sky_cube_mvp_buffers);
     sky_cube_pipeline_descriptor_set->BindData(0, 1, 0, sky_cube_combined_images);
@@ -1088,6 +1104,7 @@ int main()
     vertex_buffers.push_back(position_buffer);
     vertex_buffers.push_back(normal_buffer);
     vertex_buffers.push_back(texcoord_buffer);
+    vertex_buffers.push_back(instanced_position_offset_buffer);
 
     std::vector<Turbo::Core::TBuffer *> sky_cube_vertex_buffers;
     sky_cube_vertex_buffers.push_back(sky_cube_position_buffer);
@@ -1177,8 +1194,6 @@ int main()
 
     float angle = 180;
     float _time = glfwGetTime();
-
-    float __scale = 1;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -1187,15 +1202,9 @@ int main()
         my_buffer_data.camPos.y = 0;
         my_buffer_data.camPos.z = -my_buffer_data.value;
 
-        my_buffer_data.scale = 1;
         void *_ptr = value_buffer->Map();
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
         value_buffer->Unmap();
-
-        my_buffer_data.scale = __scale;
-        _ptr = value_buffer1->Map();
-        memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
-        value_buffer1->Unmap();
 
         model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -1312,8 +1321,7 @@ int main()
                 ImGui::SliderFloat("intensity", &push_constant_data.intensity, 0.0f, 100.0f); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("metallic", &push_constant_data.metallic, 0.0f, 1.0f);     // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("roughness", &push_constant_data.roughness, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("scale", &__scale, 0.0f, 1.0f);                            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &my_buffer_data.value, -200.0f, 0.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
 
                 if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;
@@ -1347,7 +1355,6 @@ int main()
             command_buffer->CmdDrawIndexed(sky_cube_indices_count, 1, 0, 0, 0);
 
             // Suzanne
-            // first draw
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
@@ -1355,17 +1362,7 @@ int main()
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
-
-            // second draw
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set1);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(frame_viewports);
-            command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+            command_buffer->CmdDrawIndexed(indices_count, INSTANCE_COUNT, 0, 0, 0);
 
             command_buffer->CmdNextSubpass();
 
@@ -1749,7 +1746,6 @@ int main()
     delete imgui_sampler;
 
     descriptor_pool->Free(pipeline_descriptor_set);
-    descriptor_pool->Free(pipeline_descriptor_set1);
     descriptor_pool->Free(sky_cube_pipeline_descriptor_set);
     descriptor_pool->Free(input_attachment_pipeline_descriptor_set);
     delete input_attachment_pipeline;
@@ -1789,11 +1785,11 @@ int main()
     delete sky_cube_normal_buffer;
     delete sky_cube_texcoord_buffer;
     delete index_buffer;
+    delete instanced_position_offset_buffer;
     delete position_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
     delete value_buffer;
-    delete value_buffer1;
     delete sky_cube_mvp_buffer;
     delete mvp_buffer;
     command_pool->Free(command_buffer);

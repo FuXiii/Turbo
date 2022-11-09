@@ -1544,4 +1544,12 @@ Turbo是渲染引擎
 
 * 2022/9/4 设计架构
   >
-  >* 感谢`会翔`提供的反馈。`修复`TCommandBufferBase::CmdSetLineWidth(...)`时程序报错的问题，原因是`TGraphicsPipeline::InternalCreate()`在创建管线时`VkPipelineDynamicStateCreateInfo::dynamicStateCount`给个固定数值`2`,导致`VkDynamicState::VK_DYNAMIC_STATE_LINE_WIDTH`并不会加入动态状态中。
+  >* 感谢`会翔`提供的反馈。修复`TCommandBufferBase::CmdSetLineWidth(...)`时程序报错的问题，原因是`TGraphicsPipeline::InternalCreate()`在创建管线时`VkPipelineDynamicStateCreateInfo::dynamicStateCount`给个固定数值`2`,导致`VkDynamicState::VK_DYNAMIC_STATE_LINE_WIDTH`并不会加入动态状态中。
+
+* 2022/10/16 设计架构
+  >
+  >* `./samples`中增加`InstancedDrawTest`示例，用于示例`实例化渲染`
+
+* 2022/11/7 设计架构
+>
+>* `./samples`中增加`PerlinWorleyNoiseTest`示例，用于尝试生成`Perlin-Woley噪音`

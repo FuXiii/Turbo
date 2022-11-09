@@ -99,4 +99,17 @@ target_include_directories(LineAndLineWidth PUBLIC ${INCLUDE_PARTH})
 target_link_directories(LineAndLineWidth PUBLIC ${LINK_PARTH})
 target_link_libraries(LineAndLineWidth PUBLIC ${LIBS})
 
+add_executable(InstancedDrawTest ./InstancedDrawTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(InstancedDrawTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(InstancedDrawTest PUBLIC ${LINK_PARTH})
+target_link_libraries(InstancedDrawTest PUBLIC ${LIBS})
 
+add_executable(CppStandardTest ./CppStandardTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(CppStandardTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(CppStandardTest PUBLIC ${LINK_PARTH})
+target_link_libraries(CppStandardTest PUBLIC ${LIBS})
+
+add_executable(PerlinWorleyNoiseTest ./PerlinWorleyNoiseTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PerlinWorleyNoiseTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PerlinWorleyNoiseTest PUBLIC ${LINK_PARTH})
+target_link_libraries(PerlinWorleyNoiseTest PUBLIC ${LIBS})

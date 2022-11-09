@@ -178,3 +178,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - `Turbo`的`Core`中有个`TEngine`类，该类提供的功能顶多算一个辅助信息获取，没有这个类也是可以的，有时间将其剔出去
 
 - `Turbo`的`Core`中`TCommandBuffer`类中，`vkBeginCommandBuffer`中对于二级指令缓冲需要指定`VkCommandBufferUsageFlags`。`vkCmdBeginRenderPass(...)`中对于二级指令缓冲需要指定`VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS`
+
+- `void Turbo::Core::TPipelineLayout::InternalCreate()`中对于`VkPushConstantRange`的数据`offset`的解析可能有问题
