@@ -135,22 +135,32 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (TImageView *image_view_item : imageViews)
-    {
-        VkDescriptorImageInfo vk_descriptor_image_info = {};
-        vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
-        vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
-        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
-    }
 
     Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
     switch (descriptor_type)
     {
     case Turbo::Core::TDescriptorType::SAMPLED_IMAGE:
     case Turbo::Core::TDescriptorType::INPUT_ATTACHMENT: {
-        // nothing to do
+        for (TImageView *image_view_item : imageViews)
+        {
+            VkDescriptorImageInfo vk_descriptor_image_info = {};
+            vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+            vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
+            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            
+            vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+        }
+    }
+    case Turbo::Core::TDescriptorType::STORAGE_IMAGE: {
+        for (TImageView *image_view_item : imageViews)
+        {
+            VkDescriptorImageInfo vk_descriptor_image_info = {};
+            vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+            vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
+            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+            vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+        }
     }
     break;
     default: {

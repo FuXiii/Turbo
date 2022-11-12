@@ -903,6 +903,19 @@ void Turbo::Core::TCommandBufferBase::CmdPushConstants(uint32_t offset, uint32_t
     }
 }
 
+void Turbo::Core::TCommandBufferBase::CmdDispatch(uint32_t workGroupsX, uint32_t workGroupsY, uint32_t workGroupsZ)
+{
+    if (this->currentPipeline->GetType() == TPipelineType::Compute)
+    {
+        TDevice *device = this->currentPipeline->GetDevice();
+        device->GetDeviceDriver()->vkCmdDispatch(this->vkCommandBuffer, workGroupsX, workGroupsY, workGroupsZ);
+    }
+    else
+    {
+        // TODO: throw some alarm?
+    }
+}
+
 void Turbo::Core::TCommandBufferBase::CmdSetLineWidth(float lineWidth)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();

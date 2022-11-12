@@ -9,9 +9,9 @@
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 
+#include <SPIRV/GlslangToSpv.h>
 #include <glslang/Include/BaseTypes.h>
 #include <glslang/Public/ShaderLang.h>
-#include <SPIRV/GlslangToSpv.h>
 
 Turbo::Core::TInterface::TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
 {
@@ -335,12 +335,30 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
 
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = storage_image_item.name;
+
         if (type.image.dim == spv::DimBuffer)
         {
             // VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER
         }
 
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
         // VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
+        TStorageImageDescriptor *storage_image_descriptor = new TStorageImageDescriptor(this, descriptor_data_type, set, binding, count, name);
+        this->storageImageDescriptors.push_back(storage_image_descriptor);
     }
 
     for (spirv_cross::Resource &separate_sampler_item : resources.separate_samplers)
@@ -895,6 +913,12 @@ Turbo::Core::TShader::~TShader()
     }
     this->inputAttachmentDescriptors.clear();
 
+    for (TStorageImageDescriptor *storage_image_descriptor_item : this->storageImageDescriptors)
+    {
+        delete storage_image_descriptor_item;
+    }
+    this->storageImageDescriptors.clear();
+
     free(this->code);
     this->code = nullptr;
     this->size = 0;
@@ -1011,6 +1035,11 @@ const std::vector<Turbo::Core::TInputAttachmentDescriptor *> &Turbo::Core::TShad
     return this->inputAttachmentDescriptors;
 }
 
+const std::vector<Turbo::Core::TStorageImageDescriptor *> &Turbo::Core::TShader::GetStorageImageDescriptors()
+{
+    return this->storageImageDescriptors;
+}
+
 std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()
 {
     return this->inputs;
@@ -1038,4 +1067,28 @@ std::string Turbo::Core::TShader::ToString()
     opts.vulkan_semantics = true;
     glsl.set_common_options(opts);
     return glsl.compile();
+}
+
+Turbo::Core::TVertexShader::TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, entryPoint)
+{
+}
+
+Turbo::Core::TVertexShader::TVertexShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TFragmentShader::TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, language, code, entryPoint)
+{
+}
+
+Turbo::Core::TFragmentShader::TFragmentShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TComputeShader::TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, language, code, entryPoint)
+{
+}
+
+Turbo::Core::TComputeShader::TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, size, code, entryPoint)
+{
 }
