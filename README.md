@@ -10,6 +10,12 @@ Turbo是渲染引擎
 
 * 开发中
 
+## Sponsor
+
+想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为，如果赞助完真有困难可以退回，**未成年人禁止投喂！！！**
+
+![Sponsor](./docs/Aifadian/aifadian.jpg)
+
 ## Document
 
 * 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
@@ -157,14 +163,14 @@ Turbo是渲染引擎
   * **[ ✓ ]** 混合渲染
   * **[ ✓ ]** 天空盒
   * HDR（应该算是延迟渲染的一部分）
-  * 实例化渲染
+  * **[ ✓ ]** 实例化渲染
   * 间接渲染
   * 细分着色器
   * 几何着色器
   * `Vulkan`光追标准
   * 多线程
-  * 计算着色器
-  * 计算管线
+  * **[ ✓ ]** 计算着色器
+  * **[ ✓ ]** 计算管线
   * **[ ✓ ]** 延迟渲染
 
 * 非`Core`：跨平台窗口层抽象
@@ -1572,7 +1578,7 @@ Turbo是渲染引擎
   >* `./samples`中增加[`Octagrams`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/tlVGDt)上看到的，感觉挺有意思，就搬过来了。
   >* `./samples`中增加[`ProteanClouds`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/3l23Rh)上看到的，感觉挺有意思，就搬过来了。
   >* 开始实现`Core`中`TCommandBufferBase`中的`void CmdDispatch(...)`函数，用于调用执行计算着色器的计算管线
-  >* `samples`中增加`ComputePipelineTest`测试示例，用于测试计算着色器和计算管线是否正确有效
+  >* `./samples`中增加`ComputePipelineTest`测试示例，用于测试计算着色器和计算管线是否正确有效
   >* 引擎中目前没有`storage image`相关的解析，现进行实现。
   >* `TDescriptor`中增加`TStorageImageDescriptor`类，继承自`TDescriptor`,并实现
   >* `TShader`中增加`TStorageImageDescriptor`类的数组使用：声明`std::vector<TStorageImageDescriptor *> storageImageDescriptors`成员变量。
@@ -1580,3 +1586,7 @@ Turbo是渲染引擎
   >* `TShader`的`InternalParseSpirV()`成员函数中对`storage image`进行解析构建,并在`TShader`析构时销毁。
   >* `TPipeline`的`InternalCreate()`成员函数中对`storage image`进行解析添加。
   >* 在`TDescriptorSet`的`BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)`成员函数中增加对`storage image`的支持。
+
+* 2022/11/12 设计架构
+  >
+  >* 加了个`爱发电`赞助，感谢投喂。
