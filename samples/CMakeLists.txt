@@ -113,3 +113,23 @@ add_executable(PerlinWorleyNoiseTest ./PerlinWorleyNoiseTest.cpp ${IMGUI_SOURCE_
 target_include_directories(PerlinWorleyNoiseTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PerlinWorleyNoiseTest PUBLIC ${LINK_PARTH})
 target_link_libraries(PerlinWorleyNoiseTest PUBLIC ${LIBS})
+
+add_executable(CineShaderLava ./CineShaderLava.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(CineShaderLava PUBLIC ${INCLUDE_PARTH})
+target_link_directories(CineShaderLava PUBLIC ${LINK_PARTH})
+target_link_libraries(CineShaderLava PUBLIC ${LIBS})
+
+add_executable(Octagrams ./Octagrams.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(Octagrams PUBLIC ${INCLUDE_PARTH})
+target_link_directories(Octagrams PUBLIC ${LINK_PARTH})
+target_link_libraries(Octagrams PUBLIC ${LIBS})
+
+add_executable(ProteanClouds ./ProteanClouds.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ProteanClouds PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ProteanClouds PUBLIC ${LINK_PARTH})
+target_link_libraries(ProteanClouds PUBLIC ${LIBS})
+
+add_executable(ComputePipelineTest ./ComputePipelineTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ComputePipelineTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ComputePipelineTest PUBLIC ${LINK_PARTH})
+target_link_libraries(ComputePipelineTest PUBLIC ${LIBS})

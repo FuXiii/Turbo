@@ -1551,5 +1551,32 @@ Turbo是渲染引擎
   >* `./samples`中增加`InstancedDrawTest`示例，用于示例`实例化渲染`
 
 * 2022/11/7 设计架构
->
->* `./samples`中增加`PerlinWorleyNoiseTest`示例，用于尝试生成`Perlin-Woley噪音`
+  >
+  >* `./samples`中增加`PerlinWorleyNoiseTest`示例，用于尝试生成`Perlin-Woley噪音`
+
+* 2022/11/9 设计架构
+  >
+  >* `core`中创建`TComputerPipeline`类
+
+* 2022/11/10 设计架构
+  >
+  >* `TurboDesign`中`Core`章节增加`Pipeline与Shader分支箭头（非常大的黄色箭头）`
+  >* `TShader`中增加`TVertexShader`、`TFragmentShader`、`TComputeShader`并在`TShader.cpp`中实现（目前先实现这几个，剩下等有时间的）
+  >* `TPipeline`中增加图形管线的构造函数`TPipeline(TDevice *device, TVertexShader* vertexShader,TFragmentShader* fragmentShader);`和计算管线的构造函数`TPipeline(TDevice *device, TComputeShader *computeShader);`。老的构造函数将会声明置成弃用函数。
+  >* `TGraphicsPipeline`中增加使用`TVertxShader`和`TFragmentShader`的构造函数。老的构造函数将会声明置成弃用函数。
+  >* 实现`TComputerPipeline`中并在其中调用`vkCreateComputePipelines`创建计算管线的`VkPipeline`
+  >* `./samples`中增加[`CineShaderLava`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/3sySRK)上看到的，感觉挺有意思，想试试使用`Turbo`渲染，就搬过来了。
+
+* 2022/11/11 设计架构
+  >
+  >* `./samples`中增加[`Octagrams`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/tlVGDt)上看到的，感觉挺有意思，就搬过来了。
+  >* `./samples`中增加[`ProteanClouds`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/3l23Rh)上看到的，感觉挺有意思，就搬过来了。
+  >* 开始实现`Core`中`TCommandBufferBase`中的`void CmdDispatch(...)`函数，用于调用执行计算着色器的计算管线
+  >* `samples`中增加`ComputePipelineTest`测试示例，用于测试计算着色器和计算管线是否正确有效
+  >* 引擎中目前没有`storage image`相关的解析，现进行实现。
+  >* `TDescriptor`中增加`TStorageImageDescriptor`类，继承自`TDescriptor`,并实现
+  >* `TShader`中增加`TStorageImageDescriptor`类的数组使用：声明`std::vector<TStorageImageDescriptor *> storageImageDescriptors`成员变量。
+  >* `TShader`中增加`const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors()`成员函数。
+  >* `TShader`的`InternalParseSpirV()`成员函数中对`storage image`进行解析构建,并在`TShader`析构时销毁。
+  >* `TPipeline`的`InternalCreate()`成员函数中对`storage image`进行解析添加。
+  >* 在`TDescriptorSet`的`BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)`成员函数中增加对`storage image`的支持。

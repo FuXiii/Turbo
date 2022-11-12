@@ -132,6 +132,8 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
     void CmdPushConstants(uint32_t offset, uint32_t size, const void *values);
 
+    void CmdDispatch(uint32_t workGroupsX, uint32_t workGroupsY, uint32_t workGroupsZ);
+
     void CmdTransferDeviceQueue();
 
     void CmdDrawIndexedIndirect();
@@ -139,7 +141,6 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 
     void CmdClearAttachments();
 
-    void CmdDispatch();
     void CmdDispatchIndirect();
 };
 

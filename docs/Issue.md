@@ -180,3 +180,11 @@ TRenderPass render_pass_2(subpass_chain_2);
 - `Turbo`的`Core`中`TCommandBuffer`类中，`vkBeginCommandBuffer`中对于二级指令缓冲需要指定`VkCommandBufferUsageFlags`。`vkCmdBeginRenderPass(...)`中对于二级指令缓冲需要指定`VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS`
 
 - `void Turbo::Core::TPipelineLayout::InternalCreate()`中对于`VkPushConstantRange`的数据`offset`的解析可能有问题
+
+- 创建`Pipeline`时可以在`VkPipelineShaderStageCreateInfo`指定`VkSpecializationInfo`数据，目前没有支持该功能，需要支持。
+
+- 创建`TComputePipeline`和`TGraphicsPipeline`时，指定的都是`TShader`，可能会构成困扰，将`TShader`派生出`TVertexShader`、`TFragmentShader`、`TComputeShader`等。
+
+- 优化`TComputePipeline`、`TGraphicsPipeline`和`TShader`之间的结构关系，现在的有点杂乱敷衍
+
+- 派生了`TShader`的一些子类，父类中的一些应该属于子类的属性应该挪到子类中。

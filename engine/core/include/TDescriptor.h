@@ -175,6 +175,14 @@ class TInputAttachmentDescriptor : public TDescriptor
     uint32_t GetIndex();
 };
 
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
+class TStorageImageDescriptor : public TDescriptor
+{
+  private:
+  public:
+    TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TStorageImageDescriptor();
+};
 } // namespace Core
 } // namespace Turbo
 
