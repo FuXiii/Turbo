@@ -1572,12 +1572,12 @@ Turbo是渲染引擎
   >* `TPipeline`中增加图形管线的构造函数`TPipeline(TDevice *device, TVertexShader* vertexShader,TFragmentShader* fragmentShader);`和计算管线的构造函数`TPipeline(TDevice *device, TComputeShader *computeShader);`。老的构造函数将会声明置成弃用函数。
   >* `TGraphicsPipeline`中增加使用`TVertxShader`和`TFragmentShader`的构造函数。老的构造函数将会声明置成弃用函数。
   >* 实现`TComputerPipeline`中并在其中调用`vkCreateComputePipelines`创建计算管线的`VkPipeline`
-  >* `./samples`中增加[`CineShaderLava`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/3sySRK)上看到的，感觉挺有意思，想试试使用`Turbo`渲染，就搬过来了。
+  >* `./samples`中增加`CineShaderLava`示例，在[`ShaderToy`](https://www.shadertoy.com/view/3sySRK)上看到的，感觉挺有意思，想试试使用`Turbo`渲染，就搬过来了。
 
 * 2022/11/11 设计架构
   >
-  >* `./samples`中增加[`Octagrams`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/tlVGDt)上看到的，感觉挺有意思，就搬过来了。
-  >* `./samples`中增加[`ProteanClouds`]示例，在[`ShaderToy`](https://www.shadertoy.com/view/3l23Rh)上看到的，感觉挺有意思，就搬过来了。
+  >* `./samples`中增加`Octagrams`示例，在[`ShaderToy`](https://www.shadertoy.com/view/tlVGDt)上看到的，感觉挺有意思，就搬过来了。
+  >* `./samples`中增加`ProteanClouds`示例，在[`ShaderToy`](https://www.shadertoy.com/view/3l23Rh)上看到的，感觉挺有意思，就搬过来了。
   >* 开始实现`Core`中`TCommandBufferBase`中的`void CmdDispatch(...)`函数，用于调用执行计算着色器的计算管线
   >* `./samples`中增加`ComputePipelineTest`测试示例，用于测试计算着色器和计算管线是否正确有效
   >* 引擎中目前没有`storage image`相关的解析，现进行实现。
@@ -1591,3 +1591,5 @@ Turbo是渲染引擎
 * 2022/11/12 设计架构
   >
   >* 加了个`爱发电`赞助，感谢投喂。
+  >* `./samples`中增加`Auroras`示例，在[`ShaderToy`](https://www.shadertoy.com/view/XtGGRt)上看到的，太漂亮了没忍住，又搬过来了。
+  >* `./samples`中`ProteanClouds`示例中增加对应的鼠标位置数据
