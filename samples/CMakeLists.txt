@@ -138,3 +138,8 @@ add_executable(Auroras ./Auroras.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(Auroras PUBLIC ${INCLUDE_PARTH})
 target_link_directories(Auroras PUBLIC ${LINK_PARTH})
 target_link_libraries(Auroras PUBLIC ${LIBS})
+
+add_executable(ComputerPipelineGeneratePerlinWorley ./ComputerPipelineGeneratePerlinWorley.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ComputerPipelineGeneratePerlinWorley PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ComputerPipelineGeneratePerlinWorley PUBLIC ${LINK_PARTH})
+target_link_libraries(ComputerPipelineGeneratePerlinWorley PUBLIC ${LIBS})
