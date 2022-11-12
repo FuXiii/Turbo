@@ -133,3 +133,8 @@ add_executable(ComputePipelineTest ./ComputePipelineTest.cpp ${IMGUI_SOURCE_PATH
 target_include_directories(ComputePipelineTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ComputePipelineTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ComputePipelineTest PUBLIC ${LIBS})
+
+add_executable(Auroras ./Auroras.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(Auroras PUBLIC ${INCLUDE_PARTH})
+target_link_directories(Auroras PUBLIC ${LINK_PARTH})
+target_link_libraries(Auroras PUBLIC ${LIBS})
