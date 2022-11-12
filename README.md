@@ -1593,3 +1593,7 @@ Turbo是渲染引擎
   >* 加了个`爱发电`赞助，感谢投喂。
   >* `./samples`中增加`Auroras`示例，在[`ShaderToy`](https://www.shadertoy.com/view/XtGGRt)上看到的，太漂亮了没忍住，又搬过来了。
   >* `./samples`中`ProteanClouds`示例中增加对应的鼠标位置数据
+
+* 2022/11/13 设计架构
+  >
+  >* `./samples`中增加`ComputerPipelineGeneratePerlinWorley`示例。用于使用计算着色器生成128×128×128的3维`PerlinWorley噪音`，之后再使用图形管线显示。
