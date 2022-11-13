@@ -143,3 +143,8 @@ add_executable(ComputerPipelineGeneratePerlinWorley ./ComputerPipelineGeneratePe
 target_include_directories(ComputerPipelineGeneratePerlinWorley PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ComputerPipelineGeneratePerlinWorley PUBLIC ${LINK_PARTH})
 target_link_libraries(ComputerPipelineGeneratePerlinWorley PUBLIC ${LIBS})
+
+add_executable(ComputerPipelineGenerateWorley ./ComputerPipelineGenerateWorley.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ComputerPipelineGenerateWorley PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ComputerPipelineGenerateWorley PUBLIC ${LINK_PARTH})
+target_link_libraries(ComputerPipelineGenerateWorley PUBLIC ${LIBS})

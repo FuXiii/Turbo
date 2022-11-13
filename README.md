@@ -1,5 +1,11 @@
 # Turbo
 
+[![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
+[![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
+[![QQ Group](https://img.shields.io/badge/QQ%20Group--deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![WeChat](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
+
 Turbo是渲染引擎
 
 ## Version
@@ -13,9 +19,8 @@ Turbo是渲染引擎
 ## Sponsor
 
 想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为，如果赞助完真有困难可以退回，**未成年人禁止投喂！！！**  
-[爱发电Turbo引擎](https://afdian.net/a/TurboEngine)
-
-![Sponsor](./docs/Aifadian/aifadian.jpg)
+[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
+![爱发电Turbo引擎](./docs/Aifadian/aifadian.jpg)
 
 ## Document
 
@@ -1597,3 +1602,4 @@ Turbo是渲染引擎
 * 2022/11/13 设计架构
   >
   >* `./samples`中增加`ComputerPipelineGeneratePerlinWorley`示例。用于使用计算着色器生成128×128×128的3维`PerlinWorley噪音`，之后再使用图形管线显示。
+  >* `./samples`中增加`ComputerPipelineGenerateWorley`示例。用于使用计算着色器生成32×32×32的3维`Worley噪音`，之后使用图形管线显示。
