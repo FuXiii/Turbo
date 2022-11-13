@@ -1603,3 +1603,5 @@ Turbo是渲染引擎
   >
   >* `./samples`中增加`ComputerPipelineGeneratePerlinWorley`示例。用于使用计算着色器生成128×128×128的3维`PerlinWorley噪音`，之后再使用图形管线显示。
   >* `./samples`中增加`ComputerPipelineGenerateWorley`示例。用于使用计算着色器生成32×32×32的3维`Worley噪音`，之后使用图形管线显示。
+  >* `./samples`中增加`IspGlassball11Mix`示例。在[`ShaderToy`](https://www.shadertoy.com/view/NscXRj)上看到的，进行了一些魔改，没有进行降噪，原版代码好像是用的前一帧的数据进行降噪的，具体没咋看(主要是懒的写代码)。
+  >* 接下来计划重点实现`Volumetric cloud`，之前一直想尝试实现体积云，该体积云将会写较为详细的实现文档，敬请期待。
