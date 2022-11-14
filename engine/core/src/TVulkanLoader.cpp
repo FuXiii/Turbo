@@ -1,6 +1,9 @@
 #include "TVulkanLoader.h"
+#include <dlfcn.h>
 #ifdef TURBO_PLATFORM_WINDOWS
 #include <Windows.h>
+
+#elif defined(TURBO_PLATFORM_LINUX)
 #endif
 
 #if defined(VK_VERSION_1_0)
@@ -163,6 +166,21 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 
     // loader
     Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
+    assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
+#elif defined(TURBO_PLATFORM_LINUX)
+    void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+    if (!library)
+    {
+        library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
+    }
+
+    if (!library)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Core::TVulkanLoader::TVulkanLoader", "Not found Vulkan Loader, please download and install Vulkan Runtime");
+    }
+
+    //loader
+    Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
     assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 #else
     throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader", "Please implement this platform definition");

@@ -1616,3 +1616,6 @@ Turbo是渲染引擎
   >* `./asset/shaders`中增加`post_processing.vert`顶点着色器文件
   >* `./asset/shaders`中增加`post_processing_voulmetric_cloud.frag`片元着色器文件
   >* `./docs`中增加`VolumetricCloud.md`用于书写体积云的实现说明文档
+  >* `TVulkanLoader`中增加`Linux`平台的支持
+  >* `Deepin`环境好像不支持`C++20`和`c++17`，现已退回到`c++11`版本
+  >* 由于退回到`c++11`版本，`TFrameGraph`中的一些`c++`新特性将会退回老版本，目前`TFrameGraph`不成熟，有待完善或重构，目前不是非常重要。

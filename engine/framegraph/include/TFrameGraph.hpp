@@ -1,14 +1,15 @@
 #pragma once
 #ifndef TFRAMEGRAPH_H
 #define TFRAMEGRAPH_H
-//#include <concepts>
+// #include <concepts>
 #include <assert.h>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <concepts>
+// #include <concepts>
+#include <limits>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -18,28 +19,28 @@ namespace Turbo
 namespace FrameGraph
 {
 //<Test>
-template <class T>
-concept Integral = std::is_integral<T>::value;
+// template <class T>
+// concept Integral = std::is_integral<T>::value;
 
-template <class T>
-concept SignedIntegral = Integral<T> && std::is_signed<T>::value;
+// template <class T>
+// concept SignedIntegral = Integral<T> && std::is_signed<T>::value;
 
-template <class T>
-concept UnsignedIntegral = Integral<T> && std::is_unsigned<T>::value;
+// template <class T>
+// concept UnsignedIntegral = Integral<T> && std::is_unsigned<T>::value;
 
-template <typename T>
-concept Virtualizable = requires(T t)
-{
-    requires std::is_default_constructible_v<T> and std::is_move_constructible_v<T>;
+// template <typename T>
+// concept Virtualizable = requires(T t)
+// {
+//     requires std::is_default_constructible_v<T> and std::is_move_constructible_v<T>;
 
-    typename T::Desc;
-    {
-        t.create(typename T::Desc{}, (void *)nullptr)
-        } -> std::same_as<void>;
-    {
-        t.destroy(typename T::Desc{}, (void *)nullptr)
-        } -> std::same_as<void>;
-};
+//     typename T::Desc;
+//     {
+//         t.create(typename T::Desc{}, (void *)nullptr)
+//         } -> std::same_as<void>;
+//     {
+//         t.destroy(typename T::Desc{}, (void *)nullptr)
+//         } -> std::same_as<void>;
+// };
 //</Test>
 
 constexpr size_t EXECUTE_MAX_LOAD = 1024;
@@ -212,7 +213,7 @@ class TBlackboard
     TBlackboard() = default;
     ~TBlackboard() = default;
 
-    auto &operator[](std::string const &name)
+    TResource &operator[](std::string const &name)
     {
         if (this->blackboardMap.find(name) != blackboardMap.end())
         {
@@ -347,15 +348,16 @@ inline TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Create(const std::str
 template <typename Data, typename Setup, typename Execute>
 inline const Data &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &name, Setup &&setup, Execute &&execute)
 {
-    static_assert(std::is_invocable<Setup, TFrameGraph::TBuilder &, Data &>::value, "Invalid Setup");
-    static_assert(std::is_invocable<Execute, const Data &, const TResources &, void *>::value, "Invalid Execute");
+    //static_assert(std::is_invocable<Setup, TFrameGraph::TBuilder &, Data &>::value, "Invalid Setup");
+    //static_assert(std::is_invocable<Execute, const Data &, const TResources &, void *>::value, "Invalid Execute");
     static_assert(sizeof(Execute) < EXECUTE_MAX_LOAD, "Execute overload");
 
     TPassAgency<Data, Execute> *pass_agency = new TPassAgency<Data, Execute>(std::forward<Execute>(execute));
     TPassNode &pass_node = TFrameGraph::CreatePassNode(name, std::unique_ptr<TPassExecutorAgency>(pass_agency));
 
     TBuilder builder(*this, pass_node);
-    std::invoke(setup, builder, pass_agency->GetData());
+    // std::invoke(setup, builder, pass_agency->GetData());//deepin linux don't support c++ 17
+    setup(builder, pass_agency->GetData());
     return pass_agency->GetData();
 }
 
