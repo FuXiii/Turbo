@@ -153,3 +153,8 @@ add_executable(IspGlassball11Mix ./IspGlassball11Mix.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(IspGlassball11Mix PUBLIC ${INCLUDE_PARTH})
 target_link_directories(IspGlassball11Mix PUBLIC ${LINK_PARTH})
 target_link_libraries(IspGlassball11Mix PUBLIC ${LIBS})
+
+add_executable(VolumetricCloud ./VolumetricCloud.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VolumetricCloud PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VolumetricCloud PUBLIC ${LINK_PARTH})
+target_link_libraries(VolumetricCloud PUBLIC ${LIBS})
