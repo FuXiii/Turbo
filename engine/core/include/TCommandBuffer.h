@@ -21,7 +21,19 @@ class TScissor;
 class TDescriptorSet;
 class TPipelineDescriptorSet;
 
-class TCommandBuffer : public Turbo::Core::TVulkanHandle
+typedef enum class TCommandBufferLevel
+{
+    PRIMARY = 0,
+    SECONDARY = 1
+} TCommandBufferLevelEnum;
+
+typedef enum class TSubpassContents
+{
+    INLINE = 0,
+    SECONDARY_COMMAND_BUFFERS = 1,
+} TSubpassContentsEnum;
+
+class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 {
   public:
     friend class TCommandBufferPool;
@@ -31,22 +43,32 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_HANDLE VkCommandBuffer vkCommandBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN; //???
 
+    TCommandBufferLevel level;
+    VkCommandBufferInheritanceInfo *vkCommandBufferInheritanceInfo = nullptr;
+
+  protected:
     TRenderPass *currentRenderPass = nullptr;
     TPipeline *currentPipeline = nullptr;
+    uint32_t currentSubpass = 0;
+    TFramebuffer *currentFramebuffer = nullptr;
 
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    TCommandBuffer(TCommandBufferPool *commandBufferPool);
-    ~TCommandBuffer();
+    TCommandBufferBase(TCommandBufferPool *commandBufferPool, TCommandBufferLevel level);
+    ~TCommandBufferBase();
 
     VkCommandBuffer GetVkCommandBuffer();
 
+    TCommandBufferLevel GetLevel();
+
+    TCommandBufferPool *GetCommandBufferPool();
+
   public:
     bool Begin();
-    void CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
+    void CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     void CmdBindPipeline(TPipeline *pipeline);
     void CmdBindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets);
     void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);
@@ -110,17 +132,46 @@ class TCommandBuffer : public Turbo::Core::TVulkanHandle
     void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
     void CmdPushConstants(uint32_t offset, uint32_t size, const void *values);
 
+    void CmdDispatch(uint32_t workGroupsX, uint32_t workGroupsY, uint32_t workGroupsZ);
+
     void CmdTransferDeviceQueue();
 
     void CmdDrawIndexedIndirect();
     void CmdDrawIndirect();
 
-    void CmdExecuteCommands();
-
     void CmdClearAttachments();
 
-    void CmdDispatch();
     void CmdDispatchIndirect();
+};
+
+class TSecondaryCommandBuffer : public Turbo::Core::TCommandBufferBase
+{
+  public:
+    friend class TCommandBufferPool;
+
+  public:
+    TSecondaryCommandBuffer(TCommandBufferPool *commandBufferPool);
+    ~TSecondaryCommandBuffer();
+
+  public:
+    void Begin() = delete;
+    void Begin(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t subpass);
+
+  public:
+    virtual std::string ToString() override;
+};
+
+class TCommandBuffer : public Turbo::Core::TCommandBufferBase
+{
+  public:
+    friend class TCommandBufferPool;
+
+  public:
+    TCommandBuffer(TCommandBufferPool *commandBufferPool);
+    ~TCommandBuffer();
+
+  public:
+    void CmdExecuteCommand(TSecondaryCommandBuffer *secondaryCommandBuffer);
 
   public:
     virtual std::string ToString() override;

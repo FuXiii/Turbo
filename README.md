@@ -1,5 +1,11 @@
 # Turbo
 
+[![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
+[![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
+[![QQ Group](https://img.shields.io/badge/QQ%20Group--deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![WeChat](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
+
 Turbo是渲染引擎
 
 ## Version
@@ -9,6 +15,12 @@ Turbo是渲染引擎
 ## State
 
 * 开发中
+
+## Sponsor
+
+想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为，如果赞助完真有困难可以退回，**未成年人禁止投喂！！！**  
+[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
+![爱发电Turbo引擎](./docs/Aifadian/aifadian.jpg)
 
 ## Document
 
@@ -29,14 +41,16 @@ Turbo是渲染引擎
     * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
     * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
     * `VulkanMemoryAllocator` : 用于分配`Vulkan`资源内存
-  * 本人对于`CMake`并不是非常精通，有关核心是如何寻找`Vulkan`库的，我直接配置的绝对路径，请修改`engine/core/CMakeLists.txt`中的此行代码：
+  * ~~本人对于`CMake`并不是非常精通，有关核心是如何寻找`Vulkan`库的，我直接配置的绝对路径，请修改`engine/core/CMakeLists.txt`中的此行代码：~~
     >
     > ```CMake
-    > set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
+    > #已遗弃
+    > ##set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION F:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib)
     > ```
     >
-    请将该行修改成您电脑上的`Vulkan`库目录。
-    该问题将会在不远的未来通过动态加载库文件得到解决。┗|｀O′|┛ 嗷~~
+    ~~请将该行修改成您电脑上的`Vulkan`库目录。
+    该问题将会在不远的未来通过动态加载库文件得到解决。~~
+    >┗|｀O′|┛oO 2022/7/27 该问题已修改完成，详情请参考下面的`如何编译Turbo`章节的`注`
 
   * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
     * `glfw` :窗口库
@@ -47,11 +61,14 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
+      >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
+      In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
     2. 请安装`python`。第三方库很多`CMake`使用`Python`脚本运行，安装完后请确保`Python`的`{Python的安装目录}/Python{版本号}/`目录和`{Python的安装目录}/Python{版本号}/Scripts`目录加入到了环境变量中
-    3. 请修改`engine/core/CMakeLists.txt`中的`Vulkan`库目录为您自己的目录
+    3. ~~请修改`engine/core/CMakeLists.txt`中的`Vulkan`库目录为您自己的目录~~
     4. 之后使用`./CMakeLists.txt`即可
     5. 设置相关`CMake`参数如下：
 
@@ -59,10 +76,14 @@ Turbo是渲染引擎
         KTX_FEATURE_LOADTEST_APPS=OFF//如果您想加载KTX测试，请设置ON
         KTX_FEATURE_DOC=OFF//如果您想生成KTX文档，请设置ON
         KTX_FEATURE_STATIC_LIBRARY=ON //目前Turbo按照静态库使用KTX
+
+        //2022/7/30 关于解决Turbo核心库的依赖库问题解决，核心库对于VulkanMemoryAllocator使用动态加载Vulkan API方式，这也是Turbo引擎加载Vulkan API的方式
+        VMA_STATIC_VULKAN_FUNCTIONS=0
+        VMA_DYNAMIC_VULKAN_FUNCTIONS=1
         ```
 
 * 如何运行
-    1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是绝对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`:/`字符，替换成自己的目录即可。
+    1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是相对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`asset`字符，替换成自己的目录即可。
 
 ## Trifles
 
@@ -90,11 +111,18 @@ Turbo是渲染引擎
 
 >* 已开始写系列的使用示例。
 
+2022/8/10
+
+>* 开始设计实现`engine`层
+
 ### 已完成示例
 
 * `HelloTriangle` - 将会使用核心绘制`IMGUI`和三角形
 * `PureHelloTriangle` - 将会使用核心绘制三角形
-* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用CombinedImageSampler对纹理采样
+* `PureCombinedImageSampler` - 将会使用核心绘制三角形,在此基础上使用`纹理采样器一体式`对纹理采样
+* `PureSeparateImageSampler` - 将会使用核心绘制三角形,在此基础上使用`纹理采样器分离式`对纹理采样
+* `PureIndexDraw` - 将会使用核心，基于索引渲染绘制一个方形面片，并在此基础上使用`纹理采样器分离式`对纹理采样
+* `FrameGraphSample` - `FrameGraph`的示例，目前该示例仅供测试（`FrameGraph`未实现完成），您可以通过该示例了解`FrameGraph`的基本流程
 
 ### 已完成特性
 
@@ -141,14 +169,14 @@ Turbo是渲染引擎
   * **[ ✓ ]** 混合渲染
   * **[ ✓ ]** 天空盒
   * HDR（应该算是延迟渲染的一部分）
-  * 实例化渲染
+  * **[ ✓ ]** 实例化渲染
   * 间接渲染
   * 细分着色器
   * 几何着色器
   * `Vulkan`光追标准
   * 多线程
-  * 计算着色器
-  * 计算管线
+  * **[ ✓ ]** 计算着色器
+  * **[ ✓ ]** 计算管线
   * **[ ✓ ]** 延迟渲染
 
 * 非`Core`：跨平台窗口层抽象
@@ -162,6 +190,8 @@ Turbo是渲染引擎
 * 非`Core`：`FrameGraph`层实现`PBR`
 
 * 非`Core`：`ECS`层
+
+* 2022/7/13 搞了个`鸿蒙OS(Harmony OS)`系统的手机，有时间适配一下鸿蒙设备。
 
 ## Log
 
@@ -975,9 +1005,11 @@ Turbo是渲染引擎
   >* `./Turbo/samples`种增加`FrameGraph`测试示例
 
 * 2022/6/13 设计架构
+  >
   >* 适配`Linux`系统（基于`Deepin`）
   >* `Turbo::Core::TAllocator::Allocate(...)`中增加对于`Linux`的内存分配支持
   >* `TSurface`中增加对于`Linux`的支持：
+  >
   >```CXX
   >//for wayland
   >#include <wayland-client.h>
@@ -991,11 +1023,13 @@ Turbo是渲染引擎
   >#include <X11/Xlib.h>
   >#include <vulkan/vulkan_xlib.h>
   >  ```
+  >
   >  `TSurface`中增加`TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)`构造函数，用于适配`wayland`
   >  `TSurface`中`InternalCreate()`适配`Linux`的`wayland`
   >  `TSurface`中`GetSurfaceSupportQueueFamilys()`适配`Linux`的`wayland`
 
 * 2022/6/15 设计架构
+  >
   >* 适配`TSurface`基于`xcb`
   >* `TSurface`中增加`xcb_connection_t *connection`和`xcb_window_t window`成员变量，用于适配`xcb`
   >* `TSurface`中增加适配`xcb`相应的构造函数
@@ -1009,6 +1043,576 @@ Turbo是渲染引擎
   >* 修改`Turbo`中对于物理设备的计分算法，最好的图形设备没有返回预计的显卡，而返回了一个`CPU`,`void Turbo::Core::TPhysicalDevice::CalculatePerformanceScore()`中对于`CPU`的分值给的太高了，减小
 
 * 2022/6/16 设计架构
+  >
   >* 修改`./samples`下的示例，使其适配`Linux`
   >* `./samples`中增加`PureCombinedImageSampler.cpp`例子，用于演示带有纹理图片的采样器
 
+* 2022/6/29 设计架构
+  >
+  >* `FrameGraph`将会转至`c++20`标准，将会尝试使用`concept`和`metaTemplate`方式编写
+  >* `samples`中添加`PureSeparateImageSampler`示例，用于展示分离式纹理采样器的使用
+  >* 对于资源的读写将会改用相对路径
+  >* `samples`中添加`PureIndexDraw`示例，用于展示索引渲染
+
+* 2022/6/30 设计架构
+  >
+  >* `TFrameGraph`中的`拷贝构造/赋值`和`移动构造/赋值`的相关函数使用`delete`声明去掉
+  >* `TFrameGraph::AdddPass(...)`中对于模板形参`Setup`,`Execute`做出限制，限制为可调用实体，对`Execute`的大小作出限制，最大为`EXECUTE_MAX_LOAD`
+  >* `TFrameGraph::TPassAgency(...)`中对于形参和模板形参`Execute`，由于是右值万能引用，所以使用`std::forward(...)`来完美转发
+  >* `TFrameGraph::CreatePassNode(...)`中`TAgency*`模板参数修改为`std::unique_ptr<TAgency>&& agency`
+  >* `TPassNode`中`TAgency*`相成员修改为`std::unique_ptr<TAgency>`
+  >* 去掉`TPassNode`中析构函数的实现，使用编译器默认生成的
+  >* `TFrameGraph::AddPass(...)`中增加如下代码,调用初始化入口函数：
+  >
+  >```CXX
+  >std::invoke(setup, builder, pass_agency->GetData())
+  >```
+  >
+  >* 增加`TAgency`的构造/析构函数
+
+* 2022/7/4 设计架构
+  >
+  >* `FrameGraph`设计参考`Filement`做出的修改意见目前写在各行的注释中（`//*...`），考虑是否采纳，之后需要同步修改`FrameGraph`的设计文档
+  >* 将`Filament`的`FrameGraph`结构分析加入`FrameGraph`文档，作为参考，与`c++`新标准的模板元编程和`concept`结合设计
+
+* 2022/7/5 设计架构
+  >
+  >* 开始解析`Filament 1.9.9`的`FrameGraph`(截止2022/7/5 `filament`的最新版本为`1.24`对于`FrameGraph`做了很多更新，但总体思路没变),请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看（注：重点过程被标注为橘黄色）
+
+* 2022/7/6 设计架构
+  >
+  >* 开始解析`Filament`的`FrameGraph::compile()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+
+* 2022/7/7 设计架构
+  >
+  >* 开始解析`Filament`的`FrameGraph::execute()`阶段，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+
+* 2022/7/8 设计架构
+  >
+  >* 解析`Filament`的`FrameGraph::execute()`阶段,`reset()`函数调用位置标错了，修改回来。
+  >* 开始解析`Filament`的`FrameGraph::execute()`阶段的`resources.get(data.rt);`，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+  >* 至此`Filament`的`FrameGraph`核心解析完毕，请在`./docs/TurboDesign.drawio::FrameGraph`的右侧查看
+  >* `TFrameGraph.hpp`中增加如下,用于表示无效ID，并用该值初始化所有ID：
+  >
+  >```CXX
+  >constexpr uint32_t TURBO_NVALID_ID = std::numeric_limits<uint32_t>::max();
+  >```
+  >
+  >* `TFrameGraph::AddPass(name, setup, execute)`中的`execute`回调中`TResources`使用`const`声明，对应的`TBuilder::Get(...)`等函数需要适配，碰到再改
+  >* `TFrameGraph::TBuilder::Create(...)`中的`Virtualizable`模板形参改回`T`
+  >* `TFrameGraph::Create(...)`中的`Virtualizable`模板形参改回`T`
+  
+* 2022/7/9 设计架构
+  >
+  >* 修缮`TFrameGraph::TBuilder::Create(...)`函数
+  >* `TFrameGraph::TResourceAgency(...)`中的`Virtualizable`模板形参改回`T`
+  >* `TFrameGraph::TResourceAgency(...)`中增加`std::string name`属性，用于存储资源名称
+  >* `TFrameGraph::TResourceAgency`中的`T *resource`改为`T resource`
+  >* 新增`TVirtualResourceAgency`类继承自`TAgency`，将`TResourceAgency`改为继承自`T TVirtualResourceAgency`
+  >* 将`TFrameGraph::std::vector<TAgency *> *agencys`成员变量改成`TFrameGraph::std::vector<TVirtualResourceAgency *> *agencys`
+  >* 将`TNode`中的`name`成员变量移动到`TPassNode`中，`TResourceNoded`的名称位于其资源代理中
+  >* 将`TResourceNode`中的`TAgencyID agencyID`成员变量换成`TVirtualResourceAgency*`指向对应的资源代理
+  >* 将`TResourceNode`中的`TAgencyID agencyID`成员变量换成`TVirtualResourceAgency*`指向对应的资源代理
+  >* 将`TFrameGraph::TBuilder::Create(...)`函数基本修缮完成
+  >* 修缮`TFrameGraph::TBuilder::Write(...)`函数
+  >* `TFrameGraph`中增加`TResourceNode &GetResourceNode(TResource resource)`函数
+  >* `TVirtualResourceAgency`中增加`TVersion version`成员变量，并增加相应的`Set/Get`函数
+  >* `TResourceNode`中增加`TVirtualResourceAgency *GetResourceAgency()`函数
+  >* 遗弃`TFrameGraph`中的`CloneResourceNode(...)`函数
+  >* 遗弃`TFrameGraph`中的`GetResourceAgency(...)`函数
+  >* `TFrameGraph`中增加`bool IsValid(TPass pass)`函数
+  >* `TFrameGraph::TBuilder::Write(...)`函数基本修缮完成
+  >* 修缮`TResources::Get(TResource resource)`函数
+  >* `TResourceNode`中增加`TPass writer`成员变量，用与表示资源的写入者
+
+* 2022/7/10 设计架构
+  >
+  >* `TVirtualResourceAgency`类中增加`TPass firstUser`和`TPass lastUser`用于表示第一次和最后一次使用该资源的使用者
+  >* `TVirtualResourceAgency`类中增加如下,用于表示该PassNode运行时需要创建和销毁的资源：
+  >
+  >```CXX
+  >std::vector<TVirtualResourceAgency*> devirtualizes;
+  >std::vector<TVirtualResourceAgency*> destroies;
+  >```
+  >
+  >* `TVirtualResourceAgency`增加如下成员函数：
+  >
+  >```CXX
+  >virtual void Create() = 0;
+  >virtual void Destroy() = 0;
+  >```
+  >
+  >* `TResourceAgency`增加如下成员函数：
+  >
+  >```CXX
+  >virtual void Create() override;
+  >virtual void Destroy() override;
+  >```
+  >
+  >* 增加`class TPassExecutorAgency`类，用于定义`pass`代理的`Executor(...)`的虚函数回调
+  >* 修改`class TPassAgency`类，继承自`TPassExecutorAgency`，并实现`Executor(...)`虚函数回调
+  >* 将`TPassNode`类中的`std::unique_ptr<TAgency> agency`修改成`std::unique_ptr<TPassExecutorAgency> agency;`
+  >* 将`TFrameGraph`类中的`void Execute();成员函数`修改成`void Execute(void *context);`
+  >* 修改`TFrameGraph::CreatePassNode(...)`适配新的`TPassExecutorAgency`类
+  >* 修改`TPassNode`构造函数，适配新的`TPassExecutorAgency`类
+  >* `TFrameGraph`大框架基本上写完了，剩下的就是`Resource`和`PassNode`等特化和引擎提供的特性资源类，比如`PresentNode(PassNode的特化，有PresentData)`和`Texture(纹理资源)，DepthTexture(深度纹理)，ColorTexture(颜色纹理)`等
+  >* 接下来需要实现`TFrameGraph`的`Blackboard`特性
+  
+* 2022/7/11 设计架构
+  >
+  >* 实现`FrameGraph`的`Blackboard`特性
+  >* 实现`TFrameGraph`中增加`TBlackboard`类
+  >* `TFrameGraph`中增加`TBlackboard`类成员变量
+  >* `TFrameGraph`中增加`TBlackboard &GetBlackboard()`成员函数
+  >* ~~需要特化`PresentPassNode`，显示节点一般作为结束节点，但是`FrameGraph`演讲中并没有显示的给出显示阶段往哪个资源身上写入，所以目前显示节点没有写入，也就是没有出度，没有出度在`FrameGraph::Compile()`阶段就会被剔除，这也许会造成一连串的剔除，所以需要专门特化一个`PresentPassNode`或是采用`SideEffect`解决(目前`TFrameGraph`并没有引入`SideEffect`特性)~~
+  当前的算法正常并不会剔除`PresentPass`，`FrameGraph`目前的剔除算法首先基于资源引用数进行的剔除，目前显示节点不向任何资源写入，只是读取资源，正常不会发生递归性的一连串剔除
+  >* `TFrameGraph`还需要经过测试，目前还没有严格测试
+
+* 2022/7/12 设计架构
+  >
+  >* 修复Bug:`TFrameGraph::Compile()`中计算资源的创建者和销毁者时，`FrameGraph`的所有资源可能会被全部剔除，造成空图，这会导致资源的创建者和销毁者为无效节点（比如强制`PresentPass`往资源中写入，由于`PresentPass`为结束节点，正常不应该再写入资源，这时该写入的资源没有出度，也就是没有人使用该节点，这时`Compile()`阶段会发生资源剔除，导致一连串的资源剔除，最坏的情况会剔除成空图，这时资源的创建者和销毁者不会被赋值，从而导致创建者和销毁者的节点`id`无效非法）
+  >
+  >* 有关`TFrameGraph`如何使用和测试，请参考`./samples/FrameGraphSample.cpp`
+  >* `TFrameGraph::Execute(...)`中增加对`PassNode`的引用数的判断，如果引用数大于零，说明该节点有使用者，运行节点的`Executor`回调，否则没有使用，不去调用回调。(注意：这将会导致`PresentNode`的运行回调不会被调用，考虑使用`SideEffect`特性强制驱动，如果一个`PassNode`有`SideEffect`特性，说明在节点不会被剔除)
+  >* `TPassNode`中增加`bool sideEffect`成员变量
+  >* `TFrameGraph::TBuilder`中增加`TBuilder &SideEffect();`成员函数，用于设置`PassNode`的`sideEffect`成员
+  >* `TFrameGraph::Execute()`中增加对于`sideEffect`的判断
+
+* 2022/7/13 设计架构
+  >
+  >* 修改`SideEffect`强制不剔除`PassNode`，应该修改其`refCount`
+  >* 移除`TVirtualResourceAgency::SetVersion(...)`函数，通过直接修改成员变量完成
+  >* 至此最基础的`FrameGraph`实现完成，接下来将会于`./engine/include`和`./engine/src`中实现更高级的资源和特性(比如`Surface`,`Material`和各种`Resource`等)
+
+* 2022/7/16 设计架构
+  >
+  >* 修改`./main.cpp`中的绝对路径修改到相对路径
+  >* 开始尝试动态加载`Vulkan`库来获取函数
+  >* 核心中添加`TVulkanLoader`类用于实现`Vulkan`的`Loader`
+  >* 核心中添加`TCore::TResult`中增加`UNIMPLEMENTED`用于表示`引擎未实现先关定义，请实现`
+
+* 2022/7/17 设计架构
+  >
+  >* `TVulkanLoader`中增加如下私有函数，用于加载`Vulkan API`的函数：
+  >
+  >```CXX
+  >template <TLoaderType type, typename Function>
+  >Function LoadAll(void *context, const char*name);
+  >```
+  >
+  >* `TVulkanLoader`中增加如下函数：
+  >
+  >```CXX
+  >void Load(TInstance *instance);
+  >void LoadAllInstanceFunctions(TInstance *instance);
+  >void LoadAllDeviceFunctions(TInstance *instance);
+  >
+  >template <typename Function>
+  >Function LoadInstanceFunction(TInstance *instance, const char *name);
+  >template <typename Function>
+  >Function LoadInstanceFunction(VkInstance instance, const char *name);
+  >template <typename Function>
+  >Function LoadDeviceFunction(TInstance*instance, const char*name);
+  >template <typename Function>
+  >Function LoadDeviceFunction(VkInstance instance, const char*name);
+  >TVersion GetVulkanVersion();
+  >```
+  >
+  >* `TInstance::InternalCreate()`中增加对于`TVulkanLoader`的相关调用，用于加载`Vulkan API`函数
+  >* `TInstance::InternalCreate()`中对于`vkCreateInstance`的相关调用，更改成`Turbo::Core::vkCreateInstance`调用，并在之后调用`TVulkanLoader::Instance()->LoadAll(this);`用于获取所有`Vulkan API`函数
+  >* `TInstance::IsSupportVulkan()`中对于`vkCreateInstance`的相关调用，更改成使用`TVulkanLoader`调用
+  >* `TInstance::GetVulkanInstanceVersion()`中对于`vkEnumerateInstanceVersion`的相关调用，更改成使用`TVulkanLoader`调用
+
+* 2022/7/18 设计架构
+  >
+  >* `TLayerInfo`中使用`TVulkanLoader`调用相应函数
+  >* `TExtensionInfo`中使用`TVulkanLoader`调用相应函数
+
+* 2022/7/20 设计架构
+  >
+  >* `TVulkanLoader`加载`vkEnumeratePhysicalDevices`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceProperties`函数
+  >* `TVulkanLoader`加载`vkEnumerateDeviceLayerProperties`函数
+  >* `TVulkanLoader`加载`vkEnumerateDeviceExtensionProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceQueueFamilyProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceFeatures`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceMemoryProperties`函数
+  >* `TPhysicalDevice::InternalCreate()`使用`Turbo::Core::vkEnumeratePhysicalDevices(...)`函数
+  >* `TFormatInfo::GetSupportFormats`使用`TVulkanLoader`获取函数
+  >* `TVulkanLoader`加载`vkCreateDevice`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceFormatProperties`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceImageFormatProperties`函数
+  >* `TDevice::InternalCreate()`使用`TVulkanLoader`获取函数
+  >* `TVulkanLoader`增加如下成员函数：
+  >
+  >```CXX
+  >template <typename Function>
+  >Function LoadDeviceFunction(TDevice *device, const char *name);
+  >template <typename Function>
+  >Function LoadDeviceFunction(VkDevice device, const char *name);
+  >```
+  >
+  >* `TVulkanLoader`提供专门`TDevice/VkDevice`设备的特定实现函数版本获取
+  >* `TVulkanLoader`加载`vkDestroyDevice`函数
+  >* `TVulkanLoader`加载`vkGetPhysicalDeviceSparseImageFormatProperties`函数
+  >* `TVulkanLoader`加载如下设备函数:
+  >
+  >```CXX
+  >extern VULKAN_DEVICE_API PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkAllocateMemory vkAllocateMemory;
+  >extern VULKAN_DEVICE_API PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkBindBufferMemory vkBindBufferMemory;
+  >extern VULKAN_DEVICE_API PFN_vkBindImageMemory vkBindImageMemory;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBeginQuery vkCmdBeginQuery;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindPipeline vkCmdBindPipeline;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkCmdBlitImage vkCmdBlitImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearAttachments vkCmdClearAttachments;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearColorImage vkCmdClearColorImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdClearDepthStencilImage vkCmdClearDepthStencilImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyBuffer vkCmdCopyBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyImage vkCmdCopyImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdCopyQueryPoolResults vkCmdCopyQueryPoolResults;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDispatch vkCmdDispatch;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDispatchIndirect vkCmdDispatchIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDraw vkCmdDraw;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndexed vkCmdDrawIndexed;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndexedIndirect vkCmdDrawIndexedIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdDrawIndirect vkCmdDrawIndirect;
+  >extern VULKAN_DEVICE_API PFN_vkCmdEndQuery vkCmdEndQuery;
+  >extern VULKAN_DEVICE_API PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdExecuteCommands vkCmdExecuteCommands;
+  >extern VULKAN_DEVICE_API PFN_vkCmdFillBuffer vkCmdFillBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdNextSubpass vkCmdNextSubpass;
+  >extern VULKAN_DEVICE_API PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier;
+  >extern VULKAN_DEVICE_API PFN_vkCmdPushConstants vkCmdPushConstants;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResetEvent vkCmdResetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResetQueryPool vkCmdResetQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkCmdResolveImage vkCmdResolveImage;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetBlendConstants vkCmdSetBlendConstants;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetDepthBias vkCmdSetDepthBias;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetDepthBounds vkCmdSetDepthBounds;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetEvent vkCmdSetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetLineWidth vkCmdSetLineWidth;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetScissor vkCmdSetScissor;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilCompareMask vkCmdSetStencilCompareMask;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilReference vkCmdSetStencilReference;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetStencilWriteMask vkCmdSetStencilWriteMask;
+  >extern VULKAN_DEVICE_API PFN_vkCmdSetViewport vkCmdSetViewport;
+  >extern VULKAN_DEVICE_API PFN_vkCmdUpdateBuffer vkCmdUpdateBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCmdWaitEvents vkCmdWaitEvents;
+  >extern VULKAN_DEVICE_API PFN_vkCmdWriteTimestamp vkCmdWriteTimestamp;
+  >extern VULKAN_DEVICE_API PFN_vkCreateBuffer vkCreateBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCreateBufferView vkCreateBufferView;
+  >extern VULKAN_DEVICE_API PFN_vkCreateCommandPool vkCreateCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateComputePipelines vkCreateComputePipelines;
+  >extern VULKAN_DEVICE_API PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+  >extern VULKAN_DEVICE_API PFN_vkCreateEvent vkCreateEvent;
+  >extern VULKAN_DEVICE_API PFN_vkCreateFence vkCreateFence;
+  >extern VULKAN_DEVICE_API PFN_vkCreateFramebuffer vkCreateFramebuffer;
+  >extern VULKAN_DEVICE_API PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+  >extern VULKAN_DEVICE_API PFN_vkCreateImage vkCreateImage;
+  >extern VULKAN_DEVICE_API PFN_vkCreateImageView vkCreateImageView;
+  >extern VULKAN_DEVICE_API PFN_vkCreatePipelineCache vkCreatePipelineCache;
+  >extern VULKAN_DEVICE_API PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+  >extern VULKAN_DEVICE_API PFN_vkCreateQueryPool vkCreateQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkCreateRenderPass vkCreateRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkCreateSampler vkCreateSampler;
+  >extern VULKAN_DEVICE_API PFN_vkCreateSemaphore vkCreateSemaphore;
+  >extern VULKAN_DEVICE_API PFN_vkCreateShaderModule vkCreateShaderModule;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyBuffer vkDestroyBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyBufferView vkDestroyBufferView;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyCommandPool vkDestroyCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyDevice vkDestroyDevice;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyEvent vkDestroyEvent;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyFence vkDestroyFence;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyImage vkDestroyImage;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyImageView vkDestroyImageView;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipeline vkDestroyPipeline;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipelineCache vkDestroyPipelineCache;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyQueryPool vkDestroyQueryPool;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyRenderPass vkDestroyRenderPass;
+  >extern VULKAN_DEVICE_API PFN_vkDestroySampler vkDestroySampler;
+  >extern VULKAN_DEVICE_API PFN_vkDestroySemaphore vkDestroySemaphore;
+  >extern VULKAN_DEVICE_API PFN_vkDestroyShaderModule vkDestroyShaderModule;
+  >extern VULKAN_DEVICE_API PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+  >extern VULKAN_DEVICE_API PFN_vkEndCommandBuffer vkEndCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges;
+  >extern VULKAN_DEVICE_API PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+  >extern VULKAN_DEVICE_API PFN_vkFreeDescriptorSets vkFreeDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkFreeMemory vkFreeMemory;
+  >extern VULKAN_DEVICE_API PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetDeviceMemoryCommitment vkGetDeviceMemoryCommitment;
+  >extern VULKAN_DEVICE_API PFN_vkGetDeviceQueue vkGetDeviceQueue;
+  >extern VULKAN_DEVICE_API PFN_vkGetEventStatus vkGetEventStatus;
+  >extern VULKAN_DEVICE_API PFN_vkGetFenceStatus vkGetFenceStatus;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageSparseMemoryRequirements vkGetImageSparseMemoryRequirements;
+  >extern VULKAN_DEVICE_API PFN_vkGetImageSubresourceLayout vkGetImageSubresourceLayout;
+  >extern VULKAN_DEVICE_API PFN_vkGetPhysicalDeviceSparseImageFormatProperties vkGetPhysicalDeviceSparseImageFormatProperties;
+  >extern VULKAN_DEVICE_API PFN_vkGetPipelineCacheData vkGetPipelineCacheData;
+  >extern VULKAN_DEVICE_API PFN_vkGetQueryPoolResults vkGetQueryPoolResults;
+  >extern VULKAN_DEVICE_API PFN_vkGetRenderAreaGranularity vkGetRenderAreaGranularity;
+  >extern VULKAN_DEVICE_API PFN_vkInvalidateMappedMemoryRanges vkInvalidateMappedMemoryRanges;
+  >extern VULKAN_DEVICE_API PFN_vkMapMemory vkMapMemory;
+  >extern VULKAN_DEVICE_API PFN_vkMergePipelineCaches vkMergePipelineCaches;
+  >extern VULKAN_DEVICE_API PFN_vkQueueBindSparse vkQueueBindSparse;
+  >extern VULKAN_DEVICE_API PFN_vkQueueSubmit vkQueueSubmit;
+  >extern VULKAN_DEVICE_API PFN_vkQueueWaitIdle vkQueueWaitIdle;
+  >extern VULKAN_DEVICE_API PFN_vkResetCommandBuffer vkResetCommandBuffer;
+  >extern VULKAN_DEVICE_API PFN_vkResetCommandPool vkResetCommandPool;
+  >extern VULKAN_DEVICE_API PFN_vkResetDescriptorPool vkResetDescriptorPool;
+  >extern VULKAN_DEVICE_API PFN_vkResetEvent vkResetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkResetFences vkResetFences;
+  >extern VULKAN_DEVICE_API PFN_vkSetEvent vkSetEvent;
+  >extern VULKAN_DEVICE_API PFN_vkUnmapMemory vkUnmapMemory;
+  >extern VULKAN_DEVICE_API PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+  >extern VULKAN_DEVICE_API PFN_vkWaitForFences vkWaitForFences;
+  >```
+
+* 2022/7/22 设计架构
+  >
+  >* `TVulkanLoader`中只提供`Vulkan_Core`的函数函数声明和获取，也就是说`TVulkanLoader.h`中只存在`Vulkan`核心函数声明和获取，有关`Vulkan`的属于扩展范围的函数，需要在相应的扩展模块使用`TVulkanLoader`自定义加载相应的函数
+  >* `TVulkanLoader.h`中增加如下声明用来标识函数是`Vulkan`的核心函数还是扩展函数
+  >
+  >```CXX
+  >#define VULKAN_CORE
+  >#define VULKAN_EXTENSION
+  >```
+
+* 2022/7/23 设计架构
+  >
+  >* `TVulkanLoader`中增加`struct TDeviceFunctionTable`内部有设备相关函数声明，并用`TDeviceDriver`重命名
+  >* `TVulkanLoader`中增加`TDeviceDriver LoadDeviceDriver(TDevice *device)`用于返回特定设备函数实现版本
+  >* `TDevice`中增加`TDeviceDriver *deviceDriver;`用于创建设备函数表
+  >* `TDevice::InternalCreate()`中增加对`TDeviceDriver *deviceDriver;`的初始化
+  >* `TDevice`中增加`const TDeviceDriver *GetDeviceDriver();`函数，用于返回设备指定实现函数表（驱动）
+  >* `~TDevice`中增加`vkDeviceWaitIdle(...)`调用使用`driver`替换调用
+  >* 开始将`TVmaAllocator`中使用`TDeviceDriver`调用使适配
+
+* 2022/7/24 设计架构
+  >
+  >* 开始将`TDeviceQueue`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TCommandBuffer`中使用`TDeviceDriver`调用使适配
+  >* `TPipeline`中增加`TDevice* GetDevice()`成员函数
+  >* 开始将`TCommandBufferPool`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorPool`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorSet`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TDescriptorSetLayout`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TFence`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TFramebuffer`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TGraphicsPipeline`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TImageView`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TPipelineLayout`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TRenderPass`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TSampler`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TSemaphore`中使用`TDeviceDriver`调用使适配
+  >* 开始将`TShader`中使用`TDeviceDriver`调用使适配
+  
+* 2022/7/25 设计架构
+  >
+  >* `TDeviceQueue::InternalCreate()`中使用`TVulkanLoader`加载`vkQueuePresentKHR`函数
+  >* `TDeviceQueue::Present(...)`中使用`TVulkanLoader`加载的`vkQueuePresentKHR`函数进行调用
+  >* 将如下定义从`TVulkanLoader.h`中移动到`TCore.h`中：
+  >
+  >```CXX
+  >#define VULKAN_GLOBAL_API
+  >#define VULKAN_INSTANCE_API
+  >#define VULKAN_DEVICE_API
+  >#define VULKAN_CORE
+  ># efine VULKAN_EXTENSION
+  >```
+  >
+  >* 开始将`TSurface`中使用`TDeviceDriver`调用使适配
+
+* 2022/7/27 设计架构
+  >
+  >* 开始将`TSwapchain`中使用`TDeviceDriver`调用使适配
+  >* 有小伙伴提出在单独使用`Turbo`的`TCore`核心库的时候，需要手动链接`TCore`库的依赖库，经过检验确实如此，这不是`TCore`库发布的初衷，有关该问题的细节请参阅`./docs/issue.md::Turbo核心生成的TCore库...`，由于本人`CMake`并不是很精通，目前正在研究中...
+  >* `TCore`中有关`Vulkan`函数的动态加载目前基本结束，接下来陆续撤走`CMake`中需要硬编码指定`vulkan-1.lib`目录的配置，计划将`vulkan/vulkan.h`头文件加入`TCore`中
+  >* 将`Vulkan SDK 1.3.204.1`中的`Include`文件夹下的内容拷贝到了`./engine/core/include/vulkan`目录下
+  >* 修改`TCore.h`中对于`#include <vulkan/vulkan.h>`的引用,修改成`#include "vulkan/vulkan.h"`
+  >* 修改`TSurface.h`中对于`Vulkan`头文件的引用,修改成本地`vulkan`头文件
+  >* 移除`TCore`的`CMake`中对于`Vulkan`目录配置的硬编码
+
+* 2022/7/28 设计架构
+  >
+  >* 调整`Turbo`核心的`CMakeLists.txt`
+  >* 移除`Turbo`核心的`vk_mem_alloc.h`,使用第三方库中的头文件
+  >* 尝试解决`TCore`的依赖库问题
+  >* 修改`PureIndexDraw`例子中的`IndexBuffer`大小的`bug`，感谢`会翔`提供的反馈
+
+* 2022/7/30 设计架构
+  >
+  >* 调整`./engine/core/CMakeLists.txt`,尝试解决`TCore`的依赖库问题
+  >* 调整`TShader.cpp`中对于`glslang`中`GlslangToSpv.h`头文件引用层级
+  >* 调整`./main.cpp`中对于`vkGetImageSubresourceLayout(...)`的调用，改成`Turbo::Core::vkGetImageSubresourceLayout(...)`
+  >* 调整`./main.cpp`中对于`vkDestroySurfaceKHR(...)`的调用，改成使用`TVulkanLoader`获取调用
+  >* 将`./CMakeLists.txt`中对于`imgui_impl_glfw.cpp`和`imgui_impl_vulkan.cpp`的引用去掉，用不上
+  >* 同理将`./samples/CMakeLists.txt`中对于`imgui_impl_glfw.cpp`和`imgui_impl_vulkan.cpp`的引用去掉，用不上
+  >* `./samples`中的示例将适配`TVulkanLoader`
+  >* **注：[VulkanMemoryAllocator]：If you fetch pointers to all Vulkan functions in a custom way**, e.g. using some loader like[Volk](https://github.com/zeux/volk)
+  >   * Define `VMA_STATIC_VULKAN_FUNCTIONS` and `VMA_DYNAMIC_VULKAN_FUNCTIONS` to 0.
+  >   * Pass these pointers via structure #VmaVulkanFunctions.
+  >* 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
+  >* `TVmaAllocator`目前对于`Vulkan API`的获取，使用`VulkanMemoryAllocator`内部自动获取。
+  >   * If you want VMA to fetch pointers to Vulkan functions dynamically using vkGetInstanceProcAddr, vkGetDeviceProcAddr (this is the option presented in the example below):
+  >     1. Define VMA_STATIC_VULKAN_FUNCTIONS to 0, VMA_DYNAMIC_VULKAN_FUNCTIONS to 1.
+  >     2. Provide pointers to these two functions via VmaVulkanFunctions::vkGetInstanceProcAddr, VmaVulkanFunctions::vkGetDeviceProcAddr.
+  >     3. The library will fetch pointers to all other functions it needs internally.
+  >* 至此`Turbo`核心库`TCore`依赖库问题已解决，感谢`会翔`提供的问题反馈
+
+* 2022/8/4 设计架构
+  >
+  >* `./samples`中增加`PBRTest.cpp`,用于`physically based rendering`与`BSDF`研究
+
+* 2022/8/7 设计架构
+  >
+  >* `./samples`中`PBRTest.cpp`,对于`physically based rendering`与`BSDF`初步调试成功。看样子渲染结果应该是对的`（○｀ 3′○）`
+  >
+* 2022/8/10 设计架构
+  >
+  >* 开始`engine`层面的设计和实现，`engine`层的相关设计将会位于`./docs/TurboDesign.drawio::Engine`章节中，`engine`层的相关实现将会放入`./engine/include`和`./engine/src`中
+
+* 2022/8/11 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中创建`纲要`
+  >* 修正`./docs/TurboDesign.drawio::Engine`章节中`Subapss`的问题
+
+* 2022/8/13 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中创建`概要设计`
+
+* 2022/8/15 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中完善`概要设计`设计思路
+
+* 2022/8/16 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`概要设计`设计增加对于`FrameGraph`结合的设计思路
+
+* 2022/8/17 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`概要设计`设计增加对于`CommandBuffer相关`的设计思路
+  >* `./docs/TurboDesign.drawio::Engine`章节中增加`详细设计`
+  >* `Turbo`核心`TCommandBuffer`中新增`TSecondaryCommandBuffer`类，用于表示二级指令缓冲
+  >* `Turbo`核心`TCommandBuffer`中新增`TCommandBufferBase`类，用于表示指令缓冲的基类，用于实现指令。该类为虚基类
+  >* `Turbo`核心`TCommandBuffer`中`TCommandBufferBase`类，增加`TCommandBufferLevel GetLevel();`函数，用于获取指令缓冲等级
+  >* `Turbo`核心`TCommandBuffer`中新增`TCommandBufferLevel`枚举，用于表示指令缓冲的的级别
+  >* `Turbo`核心`TCommandBuffer`中将`TCommandBuffer`修改成继承自`TCommandBufferBase`
+  >* `Turbo`核心修改`TCommandBufferPool`中将取消继承自`Turbo::Core::TPool<TCommandBuffer>`
+  >* `Turbo`核心`TCommandBufferPool`中增加`void Free(TCommandBufferBase *commandBufferBase);`用于统一回收一级、二级指令缓冲
+  >* `Turbo`核心`TCommandBufferPool`中增加`TSecondaryCommandBuffer *AllocateSecondary();`和`void Free(TSecondaryCommandBuffer *secondaryCommandBuffer);`用于创建和回收二级指令缓冲
+  >* `Turbo`核心`TCommandBuffer`中应该实现`void CmdExecuteCommand(...);`函数，用于一级指令缓冲调度二级指令缓冲。今天太晚了，明天再弄。
+  
+* 2022/8/18 设计架构
+  >
+  >* `Turbo`核心`TCommandBuffer`中增加`TCommandBufferPool* GetCommandBufferPool();`函数
+  >* `Turbo`核心`TCommandBuffer`中实现`void CmdExecuteCommand(...);`函数
+  >* `Turbo`核心`TCommandBufferBase`中增加`VkCommandBufferInheritanceInfo *vkCommandBufferInheritanceInfo = nullptr`成员变量，用于二级指令缓冲的继承信息
+  >* `Turbo`核心`TCommandBufferBase`中增加`uint32_t currentSubpass = 0;`成员变量，表示当前的`Subpass`
+  >* `Turbo`核心`TCommandBufferBase`中增加`TFramebuffer *currentFramebuffer = nullptr;`成员变量，表示当前的`Framebuffer`
+  >* `Turbo`核心`TSecondaryCommandBuffer`中删除`void Begin() = delete`成员函数调用，转而使用`void Begin(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t subpass);`成员函数
+  >* `Turbo`核心`TCommandBuffer.h`中增加`typedef enum class TSubpassContents`枚举，用于对应`VkSubpassContents`
+  >* `Turbo`核心`TCommandBufferBase`中将`void CmdBeginRenderPass(...)`的形参增加一个`TSubpassContents`参数
+  >* `Turbo`核心`TCommandBufferBase::Begin()`中将`vk_command_buffer_begin_info.flags`设置成`VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT`为适应二级指令缓冲
+  >* `./samples`中增加`SecondaryCommandBufferTest`例子，用于测试二级指令缓冲
+
+* 2022/8/18 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计`设计,细化具体资源
+
+* 2022/8/19 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`系统设计`中增加文件加载层相关
+  >* `./asset/models/`增加`material_sphere.gltf`文件
+  >* `./samples/PBRTest.cpp`例子中将读取的模型改为`material_sphere.gltf`文件
+
+* 2022/8/20 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计`中增加`Material`设计思路
+  >* `./samples`中增加`MultiDrawTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系
+  >* `./samples`中增加`SubpassTest.cpp`文件，用于探究`Subpass`和`MutilDraw`之间的联系
+
+* 2022/8/21 设计架构
+  >
+  >* `./docs/TurboDesign.drawio::Engine`章节中`详细设计::Material`设计思路,有设计问题，进一步设计完善
+
+* 2022/8/25 知会
+  >
+  >* 现在`Turbo::Engine`层面的设计多少都有些问题，比如：如果用户想要调配使用`FrameGraph`就需要对渲染有过硬的理解，目前看了[`Filament`](https://github.com/google/filament)，[`LegitEngine`](https://github.com/Raikiri/LegitEngine),[`FrameGraph-Example`](https://github.com/skaarj1989/FrameGraph-Example)等相关引擎对于`FrameGraph`亦或是`RenderGraph`的封装设计，这些引擎都会提供一套固定的`FrameGraph`，用于一套已经定义好了的渲染流程，这些流程多是`GBuffer`流程，用户提供`Renderable`结构数据，引擎将其塞入特定的`PassNode`中，这个塞入工作并不是用户自定义的，而是引擎完成的，这就会导致用户（对图形学不是很熟悉）需要按照引擎先前定好的流程渲染，渲染出有限的效果（大部分情况下这个有限的效果是够用的），除非用户对于图形学和`FrameGraph`有比较深刻的理解，则可自己使用`FrameGraph`配置自定义渲染流程。
+  >* 从现在开始要全力备考了，再写代码我妈要打死我了，不管考得上，还是考不上，明年引擎都将继续，回见~
+
+* 2022/9/4 设计架构
+  >
+  >* 感谢`会翔`提供的反馈。修复`TCommandBufferBase::CmdSetLineWidth(...)`时程序报错的问题，原因是`TGraphicsPipeline::InternalCreate()`在创建管线时`VkPipelineDynamicStateCreateInfo::dynamicStateCount`给个固定数值`2`,导致`VkDynamicState::VK_DYNAMIC_STATE_LINE_WIDTH`并不会加入动态状态中。
+
+* 2022/10/16 设计架构
+  >
+  >* `./samples`中增加`InstancedDrawTest`示例，用于示例`实例化渲染`
+
+* 2022/11/7 设计架构
+  >
+  >* `./samples`中增加`PerlinWorleyNoiseTest`示例，用于尝试生成`Perlin-Woley噪音`
+
+* 2022/11/9 设计架构
+  >
+  >* `core`中创建`TComputerPipeline`类
+
+* 2022/11/10 设计架构
+  >
+  >* `TurboDesign`中`Core`章节增加`Pipeline与Shader分支箭头（非常大的黄色箭头）`
+  >* `TShader`中增加`TVertexShader`、`TFragmentShader`、`TComputeShader`并在`TShader.cpp`中实现（目前先实现这几个，剩下等有时间的）
+  >* `TPipeline`中增加图形管线的构造函数`TPipeline(TDevice *device, TVertexShader* vertexShader,TFragmentShader* fragmentShader);`和计算管线的构造函数`TPipeline(TDevice *device, TComputeShader *computeShader);`。老的构造函数将会声明置成弃用函数。
+  >* `TGraphicsPipeline`中增加使用`TVertxShader`和`TFragmentShader`的构造函数。老的构造函数将会声明置成弃用函数。
+  >* 实现`TComputerPipeline`中并在其中调用`vkCreateComputePipelines`创建计算管线的`VkPipeline`
+  >* `./samples`中增加`CineShaderLava`示例，在[`ShaderToy`](https://www.shadertoy.com/view/3sySRK)上看到的，感觉挺有意思，想试试使用`Turbo`渲染，就搬过来了。
+
+* 2022/11/11 设计架构
+  >
+  >* `./samples`中增加`Octagrams`示例，在[`ShaderToy`](https://www.shadertoy.com/view/tlVGDt)上看到的，感觉挺有意思，就搬过来了。
+  >* `./samples`中增加`ProteanClouds`示例，在[`ShaderToy`](https://www.shadertoy.com/view/3l23Rh)上看到的，感觉挺有意思，就搬过来了。
+  >* 开始实现`Core`中`TCommandBufferBase`中的`void CmdDispatch(...)`函数，用于调用执行计算着色器的计算管线
+  >* `./samples`中增加`ComputePipelineTest`测试示例，用于测试计算着色器和计算管线是否正确有效
+  >* 引擎中目前没有`storage image`相关的解析，现进行实现。
+  >* `TDescriptor`中增加`TStorageImageDescriptor`类，继承自`TDescriptor`,并实现
+  >* `TShader`中增加`TStorageImageDescriptor`类的数组使用：声明`std::vector<TStorageImageDescriptor *> storageImageDescriptors`成员变量。
+  >* `TShader`中增加`const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors()`成员函数。
+  >* `TShader`的`InternalParseSpirV()`成员函数中对`storage image`进行解析构建,并在`TShader`析构时销毁。
+  >* `TPipeline`的`InternalCreate()`成员函数中对`storage image`进行解析添加。
+  >* 在`TDescriptorSet`的`BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)`成员函数中增加对`storage image`的支持。
+
+* 2022/11/12 设计架构
+  >
+  >* 加了个`爱发电`赞助，感谢投喂。
+  >* `./samples`中增加`Auroras`示例，在[`ShaderToy`](https://www.shadertoy.com/view/XtGGRt)上看到的，太漂亮了没忍住，又搬过来了。
+  >* `./samples`中`ProteanClouds`示例中增加对应的鼠标位置数据
+
+* 2022/11/13 设计架构
+  >
+  >* `./samples`中增加`ComputerPipelineGeneratePerlinWorley`示例。用于使用计算着色器生成128×128×128的3维`PerlinWorley噪音`，之后再使用图形管线显示。
+  >* `./samples`中增加`ComputerPipelineGenerateWorley`示例。用于使用计算着色器生成32×32×32的3维`Worley噪音`，之后使用图形管线显示。
+  >* `./samples`中增加`IspGlassball11Mix`示例。在[`ShaderToy`](https://www.shadertoy.com/view/NscXRj)上看到的，进行了一些魔改，没有进行降噪，原版代码好像是用的前一帧的数据进行降噪的，具体没咋看(主要是懒的写代码)。
+  >* 接下来计划重点实现`Volumetric Cloud`，之前一直想尝试实现体积云，该体积云将会写较为详细的实现文档，敬请期待。
+
+* 2022/11/14 设计架构
+  >
+  >* `./samples`中增加`VolumetricCloud`示例。用于尝试实现体积云
+  >* `./asset/shaders`中增加`imgui.vert`顶点着色器文件
+  >* `./asset/shaders`中增加`imgui.frag`片元着色器文件
+  >* `./asset/shaders`中增加`perlin-worley.comp`计算着色器文件
+  >* `./asset/shaders`中增加`worley.comp`计算着色器文件
+  >* `./asset/shaders`中增加`post_processing.vert`顶点着色器文件
+  >* `./asset/shaders`中增加`post_processing_voulmetric_cloud.frag`片元着色器文件
+  >* `./docs`中增加`VolumetricCloud.md`用于书写体积云的实现说明文档

@@ -12,6 +12,9 @@ namespace Core
 {
 class TDevice;
 class TShader;
+class TVertexShader;
+class TFragmentShader;
+class TComputeShader;
 class TDescriptorSetLayout;
 class TPipelineLayout;
 
@@ -60,15 +63,21 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders);
+    [[deprecated]]TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders);
+    TPipeline(TDevice *device, TVertexShader* vertexShader,TFragmentShader* fragmentShader);//for graphics Pipeline
+    //TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
+    //TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
+    TPipeline(TDevice *device, TComputeShader *computeShader); // for compute pipeline
     ~TPipeline();
 
   public:
-    TPipelineLayout* GetPipelineLayout();
+    TPipelineLayout *GetPipelineLayout();
     VkPipeline GetVkPipeline();
 
     TPipelineType GetType();
     std::vector<TShader *> GetShaders();
+
+    TDevice *GetDevice();
 
   public:
     virtual std::string ToString() override;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Turbo)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 set(CMAKE_BUILD_TYPE "debug")
@@ -17,8 +17,6 @@ set(IMGUI_SOURCE_PATH
 ./thirdparty/imgui/imgui_tables.cpp
 ./thirdparty/imgui/imgui_widgets.cpp
 ./thirdparty/imgui/imgui.cpp
-./thirdparty/imgui/backends/imgui_impl_glfw.cpp
-./thirdparty/imgui/backends/imgui_impl_vulkan.cpp
 )
 
 add_executable(${PROJECT_NAME} ./main.cpp ${IMGUI_SOURCE_PATH})

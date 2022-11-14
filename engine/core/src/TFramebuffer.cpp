@@ -6,6 +6,7 @@
 #include "TImageView.h"
 #include "TRenderPass.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TFramebuffer::InternalCreate()
 {
@@ -29,9 +30,10 @@ void Turbo::Core::TFramebuffer::InternalCreate()
     this->width = vk_framebuffer_create_info.width;
     this->height = vk_framebuffer_create_info.height;
 
-    VkDevice vk_device = this->renderPass->GetDevice()->GetVkDevice();
+    TDevice *device = this->renderPass->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateFramebuffer(vk_device, &vk_framebuffer_create_info, allocator, &this->vkFramebuffer);
+    VkResult result = device->GetDeviceDriver()->vkCreateFramebuffer(vk_device, &vk_framebuffer_create_info, allocator, &this->vkFramebuffer);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TFramebuffer::InternalCreate::vkCreateFramebuffer");
@@ -40,9 +42,10 @@ void Turbo::Core::TFramebuffer::InternalCreate()
 
 void Turbo::Core::TFramebuffer::InternalDestroy()
 {
-    VkDevice vk_device = this->renderPass->GetDevice()->GetVkDevice();
+    TDevice *device = this->renderPass->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyFramebuffer(vk_device, this->vkFramebuffer, allocator);
+    device->GetDeviceDriver()->vkDestroyFramebuffer(vk_device, this->vkFramebuffer, allocator);
 }
 
 Turbo::Core::TFramebuffer::TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments) : Turbo::Core::TVulkanHandle()

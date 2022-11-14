@@ -3,6 +3,7 @@
 #include "TException.h"
 #include "TImage.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TImageView::InternalCreate()
 {
@@ -29,9 +30,10 @@ void Turbo::Core::TImageView::InternalCreate()
     vk_image_view_create_info.components = vk_component_mapping;
     vk_image_view_create_info.subresourceRange = vk_image_subresource_range;
 
-    VkDevice vk_device = this->image->GetDevice()->GetVkDevice();
+    TDevice *device = this->image->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateImageView(vk_device, &vk_image_view_create_info, allocator, &this->vkImageView);
+    VkResult result = device->GetDeviceDriver()->vkCreateImageView(vk_device, &vk_image_view_create_info, allocator, &this->vkImageView);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TImageView::InternalCreate::vkCreateImageView");
@@ -40,9 +42,10 @@ void Turbo::Core::TImageView::InternalCreate()
 
 void Turbo::Core::TImageView::InternalDestroy()
 {
-    VkDevice vk_device = this->image->GetDevice()->GetVkDevice();
+    TDevice *device = this->image->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    vkDestroyImageView(vk_device, this->vkImageView, allocator);
+    device->GetDeviceDriver()->vkDestroyImageView(vk_device, this->vkImageView, allocator);
     this->vkImageView = VK_NULL_HANDLE;
 }
 

@@ -62,6 +62,13 @@ void Turbo::Core::TPipeline::InternalCreate()
             uint32_t set = input_attachment_descriptor_item->GetSet();
             descriptor_set_map[set].push_back(input_attachment_descriptor_item);
         }
+
+        std::vector<TStorageImageDescriptor *> storage_image_descriptors = shader_item->GetStorageImageDescriptors();
+        for (TStorageImageDescriptor *storage_image_descriptors_item : storage_image_descriptors)
+        {
+            uint32_t set = storage_image_descriptors_item->GetSet();
+            descriptor_set_map[set].push_back(storage_image_descriptors_item);
+        }
     }
 
     {
@@ -115,6 +122,37 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vect
     }
 }
 
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader) : Turbo::Core::TVulkanHandle()
+{
+    if (device != nullptr && vertexShader != nullptr && fragmentShader != nullptr)
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaders.push_back(vertexShader);
+        this->shaders.push_back(fragmentShader);
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader) : Turbo::Core::TVulkanHandle()
+{
+    if (device != nullptr && computeShader != nullptr)
+    {
+        this->device = device;
+        this->type = TPipelineType::Compute;
+        this->shaders.push_back(computeShader);
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
 Turbo::Core::TPipeline::~TPipeline()
 {
     this->InternalDestroy();
@@ -138,6 +176,11 @@ Turbo::Core::TPipelineType Turbo::Core::TPipeline::GetType()
 std::vector<Turbo::Core::TShader *> Turbo::Core::TPipeline::GetShaders()
 {
     return this->shaders;
+}
+
+Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()
+{
+    return this->device;
 }
 
 std::string Turbo::Core::TPipeline::ToString()

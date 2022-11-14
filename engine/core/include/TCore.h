@@ -4,7 +4,8 @@
 
 #include <utility>
 #include <vector>
-#include <vulkan/vulkan.h>
+
+#include "vulkan/vulkan.h"
 //<Test Delete>
 #include <iostream>
 //</Test Delete>
@@ -44,10 +45,18 @@ namespace Core
 #define TURBO_ENGINE_VERSION_0_0 TURBO_MAKE_VERSION(0, 0, 0)
 #define TYRBO_DEFAULT_SHADER_ENTRY_POINT "main"
 
+#define VULKAN_GLOBAL_API
+#define VULKAN_INSTANCE_API
+#define VULKAN_DEVICE_API
+
+#define VULKAN_CORE
+#define VULKAN_EXTENSION
+
 typedef VkDeviceSize TDeviceSize;
 
 typedef enum class TResult : int32_t
 {
+    UNIMPLEMENTED = -17,
     SHADER_LINK_FAILED = -16,
     SHADER_PARSE_FAILED = -15,
     RESOURCE_STARVATION = -14,

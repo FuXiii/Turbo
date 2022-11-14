@@ -38,6 +38,8 @@ class TDeviceQueue : public TVulkanHandle
     T_VULKAN_HANDLE_DATA TQueueFamilyInfo queueFamily;
     T_VULKAN_HANDLE_DATA uint32_t index;
 
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkQueuePresentKHR vkQueuePresentKHR = nullptr;
+
   protected:
     virtual void AddChildHandle(TCommandBufferPool *commandBufferPool);
     virtual TCommandBufferPool *RemoveChildHandle(TCommandBufferPool *commandBufferPool);

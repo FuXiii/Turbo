@@ -236,3 +236,11 @@ uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex()
 {
     return this->index;
 }
+
+Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_IMAGE, dataType, set, binding, count, name)
+{
+}
+
+Turbo::Core::TStorageImageDescriptor::~TStorageImageDescriptor()
+{
+}

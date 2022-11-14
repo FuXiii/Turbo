@@ -63,6 +63,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TSamplerDescriptor *> samplerDescriptors;
     std::vector<TPushConstantDescriptor *> pushConstantDescriptors;
     std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;
+    std::vector<TStorageImageDescriptor *> storageImageDescriptors;
 
     std::string entryPoint;
 
@@ -91,6 +92,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
     const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();
+    const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors();
 
     std::vector<TInterface> GetInputs();
     std::vector<TInterface> GetOutputs();
@@ -98,6 +100,27 @@ class TShader : public Turbo::Core::TVulkanHandle
     TShaderType GetType();
 
     virtual std::string ToString() override;
+};
+
+class TVertexShader : public Turbo::Core::TShader
+{
+  public:
+    TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TVertexShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TFragmentShader : public Turbo::Core::TShader
+{
+  public:
+    TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TFragmentShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TComputeShader : public Turbo::Core::TShader
+{
+  public:
+    TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
 } // namespace Core

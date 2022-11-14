@@ -6,6 +6,7 @@
 #include "TQueueFamilyInfo.h"
 #include "TVmaAllocator.h"
 #include "TVulkanAllocator.h"
+#include "TVulkanLoader.h"
 
 void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
 {
@@ -115,11 +116,15 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_device_create_info.pEnabledFeatures = &this->enabledFeatures;
 
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
+    VkResult result = Turbo::Core::vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
+
+    // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
+    this->deviceDriver = new TDeviceDriver();
+    *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this);
 
     if (this->vmaAllocator != nullptr)
     {
@@ -151,8 +156,10 @@ void Turbo::Core::TDevice::InternalDestroy()
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     if (this->vkDevice != VK_NULL_HANDLE)
     {
-        vkDestroyDevice(this->vkDevice, allocator);
+        this->deviceDriver->vkDestroyDevice(this->vkDevice, allocator);
         this->vkDevice = VK_NULL_HANDLE;
+
+        delete this->deviceDriver;
     }
 }
 
@@ -210,7 +217,7 @@ Turbo::Core::TDevice::~TDevice()
 {
     if (this->vkDevice != VK_NULL_HANDLE)
     {
-        vkDeviceWaitIdle(this->vkDevice);
+        this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
 
         delete this->vmaAllocator;
         this->vmaAllocator = nullptr;
@@ -465,11 +472,16 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
 
 void Turbo::Core::TDevice::WaitIdle()
 {
-    VkResult result = vkDeviceWaitIdle(this->vkDevice);
+    VkResult result = this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TDevice::WaitIdle");
     }
+}
+
+const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
+{
+    return this->deviceDriver;
 }
 
 std::string Turbo::Core::TDevice::ToString()

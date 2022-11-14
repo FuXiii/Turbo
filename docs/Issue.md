@@ -151,3 +151,40 @@ TRenderPass render_pass_2(subpass_chain_2);
 - <font color=green>**[ ✓ ]2022/5/2**</font>  ~~`Turbo`目前只支持单采样，多采样未捣鼓。对于多采样是`TSubpassPass`的功能，在`TSubpass`中指定多采样附件，根据`Vulkan`标准，规定`ResolveAttachment`中的多采样附件如果有的话，数量一定等于`ColorAttachment`(要不就都是多采样，要不就都是单采样),`TPipeline`中也有`VkPipelineMultisampleStateCreateInfo`~~
 
 - <font color=green>**[ ✓ ]2022/5/8**</font> ~~**(该功能转移至`TSurface`中)** 提供`Swapchain`,有些窗口库创建完窗口直接返回`VkSurfaceKHR`,所以`TSwapchain`需要对外提供一个接口构造函数`TSwapchain(TDevice* device, VkSurfaceKHR)`用于接收外部创建好的`VkSurfaceKHR`~~
+
+- <font color=green>**[ ✓ ]2022/7/23**</font> ~~`TVulkanLoader`中提供类似获取`struct DeviceFunctionTable`类型的函数，用于获取`VkDevice`特定的函数实现版本~~
+
+- `TVulkanLoader`中`Destroy()`目前未被调用，应该在`TInstance`析构函数中调用，用于卸载`Vulkan`动态库
+
+- <font color=green>**[ ✓ ]2022/7/27**</font> ~~`Turbo`中未完全覆盖`TVulkanLoader`获取的函数调用~~
+  - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`Turbo::Core::TDeviceQueue::Present(...)::vkQueuePresentKHR(...)`未覆盖~~
+  - <font color=green>**[ ✓ ]2022/7/25**</font> ~~`TSurface`未覆盖~~
+  - <font color=green>**[ ✓ ]2022/7/27**</font> ~~`TSwapchain`未覆盖~~
+
+- <font color=green>**[ ✓ ]2022/7/30**</font> ~~`TCore`中`CMakeLists.txt`中有些库应该是`PRIVATE`~~
+
+- `TCore`中`CMakeLists.txt`对于库的创建应该取消现有的设成静态库的配置，转成用户自定义生成静态库还是动态库
+
+- <font color=green>**[ ✓ ]2022/7/30**</font> ~~`Turbo`核心生成的`TCore`库,照常理应该在`Visual Studio`中链接时不需要再次链接核心的依赖库，但是目前测试，在`Visual Studio`还是需要链接比如`vma`,`glslang`等核心依赖库才能链接到`TCore`库中否则报未定义相关函数实现的错误，初步怀疑是`CMake`的`target_link_libraries`中的`PUBLIC`和`PRIVATE`的区别，但是改成`PRIVATE`好像并不能解决以上问题。如果使用`ar.exe`之类的库合并工具需要写自定义`CMake`指令，`Visual Studio`的库合并工具是官方的`lib.exe`，但是，但是使用库合并工具应该不是最好的解决方案。研究中...~~
+
+- `Turbo`中目前还有很多跨平台的内容没有填补，正常没有实现的需要抛出`throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED,...)`异常,帮助跨平台开发提示
+
+- `TVulkanLoader`需要适配`Linux`系统
+
+- 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
+
+- `Turbo`引擎中对于`Vulkan`的扩展支持不全，新版的`Vulkan`扩展比如`1.3`的一些新扩展没有，有时间添加
+
+- `Turbo`的`Core`中有个`TEngine`类，该类提供的功能顶多算一个辅助信息获取，没有这个类也是可以的，有时间将其剔出去
+
+- `Turbo`的`Core`中`TCommandBuffer`类中，`vkBeginCommandBuffer`中对于二级指令缓冲需要指定`VkCommandBufferUsageFlags`。`vkCmdBeginRenderPass(...)`中对于二级指令缓冲需要指定`VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS`
+
+- `void Turbo::Core::TPipelineLayout::InternalCreate()`中对于`VkPushConstantRange`的数据`offset`的解析可能有问题
+
+- 创建`Pipeline`时可以在`VkPipelineShaderStageCreateInfo`指定`VkSpecializationInfo`数据，目前没有支持该功能，需要支持。
+
+- 创建`TComputePipeline`和`TGraphicsPipeline`时，指定的都是`TShader`，可能会构成困扰，将`TShader`派生出`TVertexShader`、`TFragmentShader`、`TComputeShader`等。
+
+- 优化`TComputePipeline`、`TGraphicsPipeline`和`TShader`之间的结构关系，现在的有点杂乱敷衍
+
+- 派生了`TShader`的一些子类，父类中的一些应该属于子类的属性应该挪到子类中。

@@ -9,22 +9,22 @@
 #if defined(TURBO_PLATFORM_WINDOWS)
 #include <windows.h>
 
-#include <vulkan/vulkan_win32.h>
+#include "vulkan/vulkan_win32.h"
 #elif defined(TURBO_PLATFORM_APPLE)
 #elif defined(TURBO_PLATFORM_ANDROID)
 #include "vulkan_android.h"
 #elif defined(TURBO_PLATFORM_LINUX)
 #include <wayland-client.h>
 
-#include <vulkan/vulkan_wayland.h>
+#include "vulkan/vulkan_wayland.h"
 
 #include <xcb/xcb.h>
 
-#include <vulkan/vulkan_xcb.h>
+#include "vulkan/vulkan_xcb.h"
 
 #include <X11/Xlib.h>
 
-#include <vulkan/vulkan_xlib.h>
+#include "vulkan/vulkan_xlib.h"
 #elif defined(TURBO_PLATFORM_UNIX)
 #endif
 
@@ -147,6 +147,9 @@ class TSurface : public Turbo::Core::TVulkanHandle
 #if defined(TURBO_PLATFORM_WINDOWS)
     HINSTANCE hinstance;
     HWND hwnd;
+
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR vkGetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
 #elif defined(__APPLE__)
 #elif defined(ANDROID) || defined(__ANDROID__)
 #elif defined(TURBO_PLATFORM_LINUX)
@@ -154,16 +157,31 @@ class TSurface : public Turbo::Core::TVulkanHandle
     struct wl_display *waylandDisplay = nullptr;
     struct wl_surface *waylandSurface = nullptr;
 
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateWaylandSurfaceKHR vkCreateWaylandSurfaceKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR vkGetPhysicalDeviceWaylandPresentationSupportKHR = nullptr;
+
     // xcb
     xcb_connection_t *xcbConnection = nullptr;
     xcb_window_t xcbWindow;
 
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateXcbSurfaceKHR vkCreateXcbSurfaceKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR vkGetPhysicalDeviceXcbPresentationSupportKHR = nullptr;
+
     // xlib
     Display *xlibDpy = nullptr;
     Window xlibWindow;
+
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateXlibSurfaceKHR vkCreateXlibSurfaceKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR vkGetPhysicalDeviceXlibPresentationSupportKHR = nullptr;
+
 #elif defined(__unix) || defined(__unix__)
 #else
 #endif
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceSurfacePresentModesKHR vkGetPhysicalDeviceSurfacePresentModesKHR = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR = nullptr;
 
   private:
     void GetSurfaceSupportQueueFamilys();
