@@ -1,7 +1,7 @@
 # 体积云
 
 * [GPU Pro 7 体积云](https://zhuanlan.zhihu.com/p/580168048):该篇主要讲云体建模和大致思路。云体光照讲的相对较少。  
-* `Revision 2013 - Real-time Volumetric Rendering Course Notes` 翻译中，该篇主要是将云体光照计算的，如果等不及的话可以看[Clouds physically-based II](https://www.shadertoy.com/view/ldlXzM)，该示例算法与`Revision 2013`的文章相符
+* `Revision 2013 - Real-time Volumetric Rendering Course Notes` 翻译中，该篇主要是讲云体光照计算的，如果等不及的话可以看[Clouds physically-based II](https://www.shadertoy.com/view/ldlXzM)，该示例算法与`Revision 2013`的文章相符
 
 ## 更新日志
 
@@ -52,7 +52,7 @@
 
 ### 0.3 光线步进（Raymarch）
 
-光线步进，并不等价于光线追踪，简单来说光线步进是光线追踪的简化版，光线步进算法是通过从某一点，沿着某一方向，一步步的前进，每走完一步都会在该处计算关照，一般这样的位置叫做采样点，最后将所有走过的采样点加在一起，就是此束光的光照结果。
+光线步进，并不等价于光线追踪，简单来说光线步进是光线追踪的简化版，光线步进算法是通过从某一点出发，沿着某一方向，一步步的前进，每走完一步都会在该处计算关照，一般这样的位置叫做采样点，最后将所有走过的采样点加在一起，就是此束光的光照结果。
 
 最常见的光线步进在后处理阶段的片元着色器中进行（[ShaderToy](https://www.shadertoy.com/)上的大部分代码都是基于此方法进行的），从相机的位置开始，向每个像素发一条射线，沿着该射线方向步进进行计算。
 
