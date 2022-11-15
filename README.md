@@ -1624,3 +1624,4 @@ Turbo是渲染引擎
   >
   >* 修改`TVulkanLoader`中增加`Linux`头文件`dlfcn.h`忘添加平台宏限制的Bug
   >* 修改`CppStandardTest.cpp`中代码，由于退回到了`C++11`
+  >* `PerlinWorleyNoiseTest.cpp`中向着色器传递增加一个`float h`数据，用于控制噪音算法的赫斯特指数（Hurst Exponent）

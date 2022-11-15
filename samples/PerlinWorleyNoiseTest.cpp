@@ -424,6 +424,7 @@ const std::string INPUT_ATTACHMENT_FRAG_SHADER_STR = "#version 450\n"
                                                      "   int isOutputDepth;\n"
                                                      "   int slice;\n"
                                                      "   float coverage;\n"
+                                                     "   float h;\n"
                                                      "} my_push_constants;\n"
                                                      "layout (location = 0) in vec2 uv;\n"
                                                      "layout (location = 0) out vec4 outColor;\n"
@@ -506,7 +507,7 @@ const std::string INPUT_ATTACHMENT_FRAG_SHADER_STR = "#version 450\n"
                                                      "// Fbm for Perlin noise based on iq's blog\n"
                                                      "float perlinfbm(vec3 p, float freq, int octaves)\n"
                                                      "{\n"
-                                                     "    float G = exp2(-.85);\n"
+                                                     "    float G = exp2(-my_push_constants.h);\n"
                                                      "    float amp = 1.;\n"
                                                      "    float noise = 0.;\n"
                                                      "    for (int i = 0; i < octaves; ++i)\n"
@@ -595,6 +596,7 @@ struct MY_INPUT_ATTACHMENT_DATA
     int isOutputDepth;
     int slice;
     float coverage;
+    float h;
 };
 
 int main()
@@ -1170,6 +1172,7 @@ int main()
     my_input_attachment_data.isOutputDepth = 0;
     my_input_attachment_data.slice = 1;
     my_input_attachment_data.coverage = 0.85;
+    my_input_attachment_data.h = 0.85;
 
     float angle = 180;
     float _time = glfwGetTime();
@@ -1296,13 +1299,14 @@ int main()
                 ImGui::Checkbox("Is show depth", &(is_shouw_depth));
                 ImGui::SliderInt("slice", &imgui_interface_slice, 1, 128);
                 ImGui::SliderFloat("coverage", &(my_input_attachment_data.coverage), 0, 1);
+                ImGui::SliderFloat("h", &(my_input_attachment_data.h), 0, 1);
 
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                               // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("alpha", &push_constant_data.alpha, 0.0f, 1.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("intensity", &push_constant_data.intensity, 0.0f, 100.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("metallic", &push_constant_data.metallic, 0.0f, 1.0f);     // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("roughness", &push_constant_data.roughness, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("angle", &angle, 0.0f, 360);                               // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("alpha", &push_constant_data.alpha, 0.0f, 1.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("intensity", &push_constant_data.intensity, 0.0f, 100.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("metallic", &push_constant_data.metallic, 0.0f, 1.0f);     // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("roughness", &push_constant_data.roughness, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
+                // ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
 
                 if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;
