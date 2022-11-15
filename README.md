@@ -1619,3 +1619,7 @@ Turbo是渲染引擎
   >* `TVulkanLoader`中增加`Linux`平台的支持
   >* `Deepin`环境好像不支持`C++20`和`c++17`，现已退回到`c++11`版本
   >* 由于退回到`c++11`版本，`TFrameGraph`中的一些`c++`新特性将会退回老版本，目前`TFrameGraph`不成熟，有待完善或重构，目前不是非常重要。
+
+* 2022/11/14 设计架构
+  >
+  >* 修改`TVulkanLoader`中增加`Linux`头文件`dlfcn.h`忘添加平台宏限制的Bug

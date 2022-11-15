@@ -1,9 +1,9 @@
 #include "TVulkanLoader.h"
-#include <dlfcn.h>
-#ifdef TURBO_PLATFORM_WINDOWS
-#include <Windows.h>
 
-#elif defined(TURBO_PLATFORM_LINUX)
+#if defined(TURBO_PLATFORM_LINUX)
+#include <dlfcn.h>
+#elif defined(TURBO_PLATFORM_WINDOWS)
+#include <Windows.h>
 #endif
 
 #if defined(VK_VERSION_1_0)
@@ -179,7 +179,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
         throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Core::TVulkanLoader::TVulkanLoader", "Not found Vulkan Loader, please download and install Vulkan Runtime");
     }
 
-    //loader
+    // loader
     Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
     assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 #else
