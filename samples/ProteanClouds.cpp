@@ -266,7 +266,10 @@ int main()
     }
 
     std::vector<Turbo::Core::TLayerInfo> enable_layer;
-    enable_layer.push_back(khronos_validation);
+    if (khronos_validation.GetLayerType() != Turbo::Core::TLayerType::UNDEFINED)
+    {
+        enable_layer.push_back(khronos_validation);
+    }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_instance_extensions;
     std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions = engine.GetInstance().GetSupportExtensions();

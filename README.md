@@ -1630,3 +1630,6 @@ Turbo是渲染引擎
   >* 修改`CppStandardTest.cpp`中代码，由于退回到了`C++11`
   >* `PerlinWorleyNoiseTest.cpp`中向着色器传递增加一个`float h`数据，用于控制噪音算法的赫斯特指数（Hurst Exponent）
   >* `README`中`赞助`栏目增加`体积云项目`
+  >* 修改`TSwapchain.cpp`中`InternalCreate()`中`vk_swapchain_create_info_khr.oldSwapchain=nullptr`改成`vk_swapchain_create_info_khr.oldSwapchain=VK_NULL_HANDLE`，`Visual Studio 2017`中赋`nullptr`报错
+  >* 修改`TFrameGraph.hpp`中`Execute`的相关声明，声明成`TExecute`,在使用`Visual Studio 2017`编译`Turbo`时会有报`error C2244 无法将函数定义与现有的声明匹配`，估计是名称和微软的库冲突了，换了名。`TFrameGraph`有时间要大修
+  >* 修改所有示例中有关寻找是否支持`VK_LAYER_KHRONOS_VALIDATION`验证层相关代码。如果设备支持将该验证层加入`TInstance`的激活数组中，有个Bug是当电脑不支持时或`engine.GetInstance().GetSupportLayers()`返回数据有问题，将会造成不应该添加`Turbo::Core::TLayerInfo khronos_validation`(此时`khronos_validation`还是未赋值状态，内部类型为`TLayerType::UNDEFINED`)到最后还是会调用`enable_layer.push_back(khronos_validation)`增加这个内部类型为`TLayerType::UNDEFINED`的验证层，导致在创建`TInstance`时不识别该验证层，返回异常。
