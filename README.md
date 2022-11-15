@@ -24,7 +24,7 @@ Turbo是渲染引擎
 
 ### 赞助项目
 >
->* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览`./VolumetricCloud.md`（进行中）
+>* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）
 
 ## Document
 
