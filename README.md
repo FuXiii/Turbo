@@ -22,6 +22,10 @@ Turbo是渲染引擎
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 ![爱发电Turbo引擎](./docs/Aifadian/aifadian.jpg)
 
+### 赞助项目
+>
+>* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览`./VolumetricCloud.md`（进行中）
+
 ## Document
 
 * 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
@@ -1625,3 +1629,4 @@ Turbo是渲染引擎
   >* 修改`TVulkanLoader`中增加`Linux`头文件`dlfcn.h`忘添加平台宏限制的Bug
   >* 修改`CppStandardTest.cpp`中代码，由于退回到了`C++11`
   >* `PerlinWorleyNoiseTest.cpp`中向着色器传递增加一个`float h`数据，用于控制噪音算法的赫斯特指数（Hurst Exponent）
+  >* `README`中`赞助`栏目增加`体积云项目`
