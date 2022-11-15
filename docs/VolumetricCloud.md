@@ -19,13 +19,14 @@
   >* 创建`0.3 光线步进（Raymarch）`章节
   >* 创建`1 云体建模`章节
 
-* 2022/11/14
+* 2022/11/15
   >
   >* `0.2.1 分形布朗运动（Fractal Brownian Motion，简称FBM）`新增说明
   >* 优化`0.3 光线步进`章节
   >* 优化`1.1.1 柏林噪音`章节
   >* 创建`1.1.2 FBM算法`章节
   >* 创建`1.1.3 柏林FBM噪音`章节
+  >* 更改`1.1.3 柏林FBM噪音`中对`exp2`的解释，之前解释错误，修正
 
 ## 概述
 
@@ -185,7 +186,7 @@ float fbm( in vecN x, in float H )
 //柏林FBM，其中p为采样点坐标，freq为频率，octaves为要增加的八度
 float perlinfbm(vec3 p, float freq, int octaves)
 {
-    //这里使用了以e为底数，特指为-0.85的赫斯特指数
+    //exp2(x)表示2的x次方，该项为赫斯特指数
     float G = exp2(-.85);
     //一开始的赫斯特指数影响系数为1
     float amp = 1.;
