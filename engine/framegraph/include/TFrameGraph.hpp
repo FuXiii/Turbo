@@ -265,8 +265,8 @@ class TFrameGraph
     TFrameGraph &operator=(const TFrameGraph &) = delete;
     TFrameGraph &operator=(TFrameGraph &&) noexcept = delete;
 
-    template <typename Data, typename Setup, typename Execute>
-    const Data &AddPass(const std::string &name, Setup &&setup, Execute &&execute); // *filament返回的是PassAgency
+    template <typename Data, typename Setup, typename TExecute>
+    const Data &AddPass(const std::string &name, Setup &&setup, TExecute &&execute); // *filament返回的是PassAgency
 
     template <typename T>
     TResource Create(const std::string &name, typename T::Descriptor &&descriptor); // *filament接收的是descriptor的左值引用，非右值

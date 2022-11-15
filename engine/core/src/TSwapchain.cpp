@@ -116,7 +116,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         {
             vk_swapchain_create_info_khr.clipped = VK_TRUE;
         }
-        vk_swapchain_create_info_khr.oldSwapchain = nullptr;
+        vk_swapchain_create_info_khr.oldSwapchain = VK_NULL_HANDLE;
         if (this->oldSwapchain != nullptr)
         {
             vk_swapchain_create_info_khr.oldSwapchain = this->oldSwapchain->GetVkSwapchainKHR();
