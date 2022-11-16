@@ -1223,7 +1223,7 @@ int main()
                 memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
                 sky_cube_mvp_buffer->Unmap();
 
-                _ptr = mvp_buffer->Map();
+                _ptr = mvp_buffer->Map(); 
                 memcpy(_ptr, &mvp, sizeof(mvp));
                 mvp_buffer->Unmap();
             }
