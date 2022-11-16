@@ -1640,3 +1640,4 @@ Turbo是渲染引擎
   >
   >* `./doc/images`增加`Hurst_Exponent.gif`文件，用于体积云说明
   >* 更新`./docs/VolumetricCloud.md`文件
+  >* `./docs/images`增加`base_cloud.png`文件和`detail_cloud.png`文件
