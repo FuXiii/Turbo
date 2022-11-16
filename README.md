@@ -1641,3 +1641,5 @@ Turbo是渲染引擎
   >* `./doc/images`增加`Hurst_Exponent.gif`文件，用于体积云说明
   >* 更新`./docs/VolumetricCloud.md`文件
   >* `./docs/images`增加`base_cloud.png`文件和`detail_cloud.png`文件
+  >* `./samples`增加`RayMarchingTest`示例，展示一个基本的光线步进示例
+  >* `./asset/shaders`增加`base_ray_marching.frag`着色器，用于基本光线步进。

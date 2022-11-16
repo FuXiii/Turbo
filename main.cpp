@@ -40,6 +40,8 @@
 #include <glm/ext.hpp>
 
 #include "TVulkanLoader.h"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/fwd.hpp"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -915,9 +917,9 @@ int main()
     Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
     position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
     Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
-    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
+    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0);   // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0);    // texcoord/uv
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
     vertex_bindings.push_back(position_binding);
@@ -1055,6 +1057,15 @@ int main()
     bool show_demo_window = true;
     bool is_shouw_depth = false;
 
+    glm::vec3 camera_position = glm::vec3(0, 0, 0);
+    glm::vec3 look_forward = glm::vec3(0, 0, 1);
+
+    float horizontal_angle = 0;
+    float vertical_angle = 0;
+
+    glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
+    glm::vec2 current_mouse_pos = glm::vec2(0, 0);
+
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -1065,21 +1076,7 @@ int main()
         value_buffer->Unmap();
 
         model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = model * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 0.0f, 1.0f));
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, value));
-        projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
-        mvp = projection * view * model;
-
-        sky_cube_view = glm::mat4(glm::mat3(view));
-        sky_cube_mvp = projection * sky_cube_view * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        sky_cube_mvp_ptr = sky_cube_mvp_buffer->Map();
-        memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
-        sky_cube_mvp_buffer->Unmap();
-
-        _ptr = mvp_buffer->Map();
-        memcpy(_ptr, &mvp, sizeof(mvp));
-        mvp_buffer->Unmap();
+        // model = model * glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 0.0f, 1.0f));
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
@@ -1159,13 +1156,85 @@ int main()
                 }
             }
 
+            // UpdateKeyboard
+            {
+                ImVec2 mouse_pos = io.MousePos;
+                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
+                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
+                previous_mouse_pos = current_mouse_pos;
+                mouse_pos_delte.y = -mouse_pos_delte.y;
+
+                horizontal_angle += mouse_pos_delte.x;
+                vertical_angle += mouse_pos_delte.y;
+
+                // look_forward = glm::normalize(glm::vec3(glm::sin(horizontal_angle), glm::sin(vertical_angle), glm::cos(horizontal_angle)));
+
+                float delte_time = io.DeltaTime;
+                float speed = 1;
+
+                glm::vec3 forward_dir = look_forward;                  // 向前向量
+                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
+                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
+                up_dir = glm::cross(right_dir, forward_dir);
+
+                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
+                if (key_W_state == GLFW_PRESS)
+                {
+                    // TODO: 向前
+                    camera_position += forward_dir * speed * delte_time;
+                }
+
+                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
+                if (key_A_state == GLFW_PRESS)
+                {
+                    // TODO: 向左
+                    camera_position += -right_dir * speed * delte_time;
+                }
+
+                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
+                if (key_S_state == GLFW_PRESS)
+                {
+                    // TODO: 向后
+                    camera_position += -forward_dir * speed * delte_time;
+                }
+
+                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
+                if (key_D_state == GLFW_PRESS)
+                {
+                    // TODO: 向右
+                    camera_position += right_dir * speed * delte_time;
+                }
+
+                int key_LEFT_ALT_state = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
+                if (key_LEFT_ALT_state == GLFW_PRESS)
+                {
+                    // TODO: press LEFT_ALT
+                    // std::cout << "LEFT_ALT::PRESS" << std::endl;
+                }
+
+                view = glm::lookAt(camera_position, glm::vec3(0, 0, 0), up_dir);
+                projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
+                mvp = projection * view * model;
+
+                sky_cube_view = glm::mat4(glm::mat3(view));
+                sky_cube_mvp = projection * sky_cube_view /** glm::rotate(glm::mat4(1.0f), glm::radians(_time * 3), glm::vec3(0.0f, 1.0f, 0.0f))*/;
+
+                sky_cube_mvp_ptr = sky_cube_mvp_buffer->Map();
+                memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
+                sky_cube_mvp_buffer->Unmap();
+
+                _ptr = mvp_buffer->Map();
+                memcpy(_ptr, &mvp, sizeof(mvp));
+                mvp_buffer->Unmap();
+            }
+
             ImGui::NewFrame();
 
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin("Hello, world!");            // Create a window called "Hello, world!" and append into it.
 
                 ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
 
@@ -1173,7 +1242,7 @@ int main()
                 ImGui::SliderFloat("alpha", &alpha, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("value", &value, -10.0f, 0.0f); // Edit 1 float using a slider from 0.0f to 1.0f
 
-                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+                if (ImGui::Button("Button"))                       // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;
                 ImGui::SameLine();
                 ImGui::Text("counter = %d", counter);
