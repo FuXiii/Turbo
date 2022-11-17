@@ -284,9 +284,9 @@ int main()
     Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
     position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
     Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
-    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0);   // normal
+    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0);    // texcoord/uv
+    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
 
@@ -479,17 +479,35 @@ int main()
                 previous_mouse_pos = current_mouse_pos;
                 mouse_pos_delte.y = -mouse_pos_delte.y;
 
-                horizontal_angle += mouse_pos_delte.x;
-                vertical_angle += mouse_pos_delte.y;
+                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+                if (state == GLFW_PRESS)
+                {
+                    horizontal_angle += mouse_pos_delte.x * 0.2;
+                    vertical_angle += mouse_pos_delte.y * 0.2;
 
-                look_forward = glm::normalize(glm::vec3(glm::sin(horizontal_angle), glm::sin(vertical_angle), glm::cos(horizontal_angle)));
+                    if (vertical_angle > 90)
+                    {
+                        vertical_angle = 90;
+                    }
+
+                    if (vertical_angle < -90)
+                    {
+                        vertical_angle = -90;
+                    }
+                }
 
                 float delte_time = io.DeltaTime;
                 float speed = 1;
 
-                glm::vec3 forward_dir = look_forward;                  // 向前向量
+                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
+                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(vertical_angle), glm::vec3(1, 0, 0));
+
+                look_forward = forward_rotate_mat * glm::vec4(forward_axis, 0);
+
+                glm::vec3 forward_dir = glm::normalize(look_forward);  // 向前向量
                 glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
-                glm::vec3 right_dir = glm::cross(up_dir, forward_dir); // 向右向量
+                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
                 up_dir = glm::cross(right_dir, forward_dir);
 
                 int key_W_state = glfwGetKey(window, GLFW_KEY_W);
@@ -527,8 +545,7 @@ int main()
                     // std::cout << "LEFT_ALT::PRESS" << std::endl;
                 }
 
-                std::cout << "Camera::"
-                          << "(" << camera_position.x << "," << camera_position.y << "," << camera_position.z << ")" << std::endl;
+                glm::vec3 look_point = camera_position + forward_dir;
             }
 
             ImGui::NewFrame();

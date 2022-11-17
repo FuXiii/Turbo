@@ -1230,8 +1230,8 @@ int main()
                     // std::cout << "LEFT_ALT::PRESS" << std::endl;
                 }
 
-                glm::vec3 eye = camera_position + forward_dir;
-                view = glm::lookAt(camera_position, eye, up_dir);
+                glm::vec3 look_point = camera_position + forward_dir;
+                view = glm::lookAt(camera_position, look_point, up_dir);
                 projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
                 mvp = projection * view * model;
 
