@@ -1641,5 +1641,9 @@ Turbo是渲染引擎
   >* `./doc/images`增加`Hurst_Exponent.gif`文件，用于体积云说明
   >* 更新`./docs/VolumetricCloud.md`文件
   >* `./docs/images`增加`base_cloud.png`文件和`detail_cloud.png`文件
-  >* `./samples`增加`RayMarchingTest`示例，展示一个基本的光线步进示例
+  >* `./samples`增加`RayMarchingTest`示例，展示一个基本的光线步进示例，该示例未完成。
   >* `./asset/shaders`增加`base_ray_marching.frag`着色器，用于基本光线步进。
+
+* 2022/11/17 设计架构
+  >
+  >* 修改`main.cpp`使其输出的`Turbo.exe`。在当运行时按下键盘`W`、`A`、`S`、`D`后可以移动相机，按住鼠标`右键`可以俯仰相机。
