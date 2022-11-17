@@ -158,3 +158,8 @@ add_executable(VolumetricCloud ./VolumetricCloud.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(VolumetricCloud PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VolumetricCloud PUBLIC ${LINK_PARTH})
 target_link_libraries(VolumetricCloud PUBLIC ${LIBS})
+
+add_executable(RayMarchingTest ./RayMarchingTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(RayMarchingTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(RayMarchingTest PUBLIC ${LINK_PARTH})
+target_link_libraries(RayMarchingTest PUBLIC ${LIBS})
