@@ -538,13 +538,6 @@ int main()
                     camera_position += right_dir * speed * delte_time;
                 }
 
-                int key_LEFT_ALT_state = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
-                if (key_LEFT_ALT_state == GLFW_PRESS)
-                {
-                    // TODO: press LEFT_ALT
-                    // std::cout << "LEFT_ALT::PRESS" << std::endl;
-                }
-
                 glm::vec3 look_point = camera_position + forward_dir;
             }
 
