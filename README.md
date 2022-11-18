@@ -57,11 +57,11 @@ Turbo是渲染引擎
     >┗|｀O′|┛oO 2022/7/27 该问题已修改完成，详情请参考下面的`如何编译Turbo`章节的`注`
 
   * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
-    * `glfw` :窗口库
-    * `glm` : 用于向量矩阵等运算
-    * `imgui` : 用于绘制界面UI
-    * `KTX-Sofware` : `Khronos Texture`通用纹理标准
-    * `tinygltf` : 读取`gltf`文件库
+    * [`glfw`](https://github.com/glfw/glfw) :窗口库
+    * [`glm`](https://github.com/g-truc/glm) : 用于向量矩阵等运算
+    * [`imgui`](https://github.com/ocornut/imgui) : 用于绘制界面UI
+    * [`KTX-Software`](https://github.com/KhronosGroup/KTX-Software) : `Khronos Texture`通用纹理标准
+    * [`tinygltf`](https://github.com/syoyo/tinygltf) : 读取`gltf`文件库
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
@@ -1652,3 +1652,5 @@ Turbo是渲染引擎
 * 2022/11/18 设计架构
   >
   >* 完成`./sample`下的`RayMarchingTest`示例
+  >* `./docs`下增加`compile_env.png`，此为`Windows`环境下编译`Turbo`的环境对照表。`KTX-Software`很早之前的[`Issue`](https://github.com/KhronosGroup/KTX-Software/pull/574)，一直存在，可能`GNU`标准的`clang/clang++`不是这么用的吧。
+  >* 增加`README.txt`中第三方库的链接。`glm`有个历史遗留库，我下错好几次了。
