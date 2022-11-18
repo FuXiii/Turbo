@@ -1654,3 +1654,4 @@ Turbo是渲染引擎
   >* 完成`./sample`下的`RayMarchingTest`示例
   >* `./docs`下增加`compile_env.png`，此为`Windows`环境下编译`Turbo`的环境对照表。`KTX-Software`很早之前的[`Issue`](https://github.com/KhronosGroup/KTX-Software/pull/574)，一直存在，可能`GNU`标准的`clang/clang++`不是这么用的吧。
   >* 增加`README.txt`中第三方库的链接。`glm`有个历史遗留库，我下错好几次了。
+  >* 更新`VolumetricCloud`文章
