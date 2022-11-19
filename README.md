@@ -1662,4 +1662,5 @@ Turbo是渲染引擎
   >* `./docs`增加`camera_relative_pos.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`camera_pixel_pos.png.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`ndc.png`。用于`VolumetricCloud.md`文章说明
+  >* `./docs`增加`base_ray_marching.gif`。用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
