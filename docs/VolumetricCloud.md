@@ -56,6 +56,7 @@
   >* 增加`2.1.2.1 光线`章节
   >* 增加`2.1.2.1.1 其他光线算法`章节
   >* 增加`2.1.2.2 步进循环`章节
+  >* 增加`2.1.2.1 光线`章节中的代码
 
 ## 概述
 
@@ -516,6 +517,73 @@ $aspect=\frac{height}{height}$
 $halfHeight=halfWidth\times aspect$
 
 至此，使用片元着色器遍历所有的像素即可算出所有像素的光线方向`rayDir`
+
+大致代码如下：
+
+```CXX
+layout(push_constant) uniform my_push_constants_t//CPU传入GPU的数据
+{
+    float time;
+    float resolutionX;//窗口分辨率宽
+    float resolutionY;//窗口分辨率高
+
+    float cameraPosX;//相机位置世界坐标的x分量
+    float cameraPosY;//相机位置世界坐标的y分量
+    float cameraPosZ;//相机位置世界坐标的z分量
+
+    float lookForwardDirX;//相机看向的向量在世界坐标系下的x分量
+    float lookForwardDirY;//相机看向的向量在世界坐标系下的y分量
+    float lookForwardDirZ;//相机看向的向量在世界坐标系下的z分量
+}my_push_constants;
+
+#define PI 3.1415926
+
+void main()
+{
+    float iTime = my_push_constants.time;
+    vec2 iResolution = vec2(my_push_constants.resolutionX, my_push_constants.resolutionY);
+    vec2 fragCoord = vec2(uv.x * iResolution.x, uv.y * iResolution.y);
+    vec3 cameraPos = vec3(my_push_constants.cameraPosX,my_push_constants.cameraPosY,my_push_constants.cameraPosZ);
+    vec3 lookForwardDir = vec3(my_push_constants.lookForwardDirX,my_push_constants.lookForwardDirY,my_push_constants.lookForwardDirZ);
+
+    vec3 forwardDir = vec3(my_push_constants.lookForwardDirX,my_push_constants.lookForwardDirY,my_push_constants.lookForwardDirZ);
+    vec3 upDir=vec3(0,1,0);//虚的向上向量
+    vec3 rightDir=cross(forwardDir,upDir);//计算相机向右的向量
+    upDir=cross(rightDir,forwardDir);//计算相机向上的向量
+
+    forwardDir=normalize(forwardDir);//归一化
+    rightDir=normalize(rightDir);//归一化
+    upDir=normalize(upDir);//归一化
+
+    vec2 screen_ndc = vec2(uv.x,1-uv.y)*2-1;//将uv映射到归一化设备坐标系（Normalized Device Corrdinate<NDC>）:[-1,1]
+
+    float near = 0.1;//近截平面的距离
+    float aspect= iResolution.y/iResolution.x;//视界的高宽比：aspect=height/width
+    float horizontalFov= PI/3.0;//fov为60度
+
+    float screenHalfWidth=near*tan(horizontalFov/2.0);//计算近截平面宽度的一半
+    float screenHalfHeight=screenHalfWidth*aspect;//计算近截平面高度的一半
+
+    //从相机位置出发
+    vec3 pixel_pos = cameraPos;
+    //向前移动近截平面near的长度，到近截平面上
+    pixel_pos += forwardDir * near;
+    //在近截平面上根据像素坐标偏移、NDC坐标和对应方向向量做偏移
+    pixel_pos += rightDir * screen_ndc.x * screenHalfWidth + upDir * screen_ndc.y*screenHalfHeight;
+
+    //射线方向=像素位置-摄像机位置
+    vec3 rayDir = pixel_pos-cameraPos;
+    rayDir = normalize(rayDir);
+
+    //从camerPos为起点，向rayDir方向进行步进循环
+    vec3 color = RayMarch(cameraPos,rayDir);
+    outColor = vec4(color, 1.0);
+}
+```
+
+具体的示例可参考`Turbo`引擎的`RaymarchingTest`示例
+
+![base_ray_marching](./images/base_ray_marching.gif)
 
 ###### 2.1.2.1.1 其他光线算法
 
