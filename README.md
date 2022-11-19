@@ -1655,3 +1655,11 @@ Turbo是渲染引擎
   >* `./docs`下增加`compile_env.png`，此为`Windows`环境下编译`Turbo`的环境对照表。`KTX-Software`很早之前的[`Issue`](https://github.com/KhronosGroup/KTX-Software/pull/574)，一直存在，可能`GNU`标准的`clang/clang++`不是这么用的吧。
   >* 增加`README.txt`中第三方库的链接。`glm`有个历史遗留库，我下错好几次了。
   >* 更新`VolumetricCloud`文章
+
+* 2022/11/19 设计架构
+  >
+  >* `./docs`增加`camera_coordinate.png`。用于`VolumetricCloud.md`文章说明
+  >* `./docs`增加`camera_relative_pos.png`。用于`VolumetricCloud.md`文章说明
+  >* `./docs`增加`camera_pixel_pos.png.png`。用于`VolumetricCloud.md`文章说明
+  >* `./docs`增加`ndc.png`。用于`VolumetricCloud.md`文章说明
+  >* 更新`VolumetricCloud`文章

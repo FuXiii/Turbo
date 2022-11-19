@@ -50,6 +50,13 @@
   >* 创建`2.1.1 后处理（Post Processing）`章节
   >* 创建`2.1.2 光线步进原理`章节
 
+* 2022/11/19
+  >
+  >* 完善`2.1.2 光线步进原理`章节
+  >* 增加`2.1.2.1 光线`章节
+  >* 增加`2.1.2.1.1 其他光线算法`章节
+  >* 增加`2.1.2.2 步进循环`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -403,11 +410,13 @@ vec3 WorleyFBM3DNoise(vec3 uv)
 
 #### 2.1.2 光线步进原理
 
+##### 2.1.2.1 光线
+
 光线步进，是从一个起点出发，向某个方向，前进某个距离。如果以相机位置为起点，向每个像素发射一条光线，这样跟着每根光线进入场景与场景进行交互计算，我们最终可以计算出该像素的颜色信息。而后处理会遍历每一个像素，这正好满足我们的需求和直觉。  
 
 ![ray from camera](./images/ray_from_camera.png)
 
-为了计算出这些射线，我们需要如下参数：
+为了计算出这些射线，我们已知如下参数（CPU传递给GPU的）：
 
 1. 相机的世界坐标：cameraPos
 2. 相机看向的方向：forwardDir
@@ -416,6 +425,154 @@ vec3 WorleyFBM3DNoise(vec3 uv)
 5. 近截平面(或是视界窗口)的横纵比或纵横比: aspect
 
 注：计算光线步进的射线方向，有很多取巧的方式（比如插值等），这里将会使用最通俗易懂的那个方式计算（通俗易懂有时并不是最优解），有关取巧的方式将会在后文讲解。
+
+如下示意图所示：
+
+![camera corrdinate](./images/camera_coordinate.png)
+
+* `眼睛图标`处为相机起点，相机的世界坐标：cameraPos
+* 橘色向量为相机看向的方向：forwardDir（注：下文对于forwardDir都是单位向量）
+* 橘色向量虚线部分的长度为近截平面的长度（AB的长度）：near
+* 底部紫色弧线为相机水平视场角（这里我们使用水平的，当然您也可以使用纵向的）：fov
+* 近截平面上侧的紫色双向箭头为进阶平面的宽度（用于计算aspect）：width
+* 近截平面左侧的紫色双向箭头为进阶平面的高度（用于计算aspect）：height
+
+为了计算出每个向外发射的光线向量，我们只需要知道每个`像素的世界坐标`和`相机的世界坐标`，将`像素的世界坐标`减去`相机的世界坐标`就是光线的向量了。
+
+$rayDir=pixelWorldPos-cameraWorldPos$
+
+而`像素的世界坐标`为：从`相机的世界坐标A`点出发走到`B（近截面中心点）`点，再从`B`点走向`近截平面上像素相对于相机的坐标`（世界坐标系下的）。
+
+$pixelWorldPos=\vec{AB}+ \vec{pixelRelativeCameraWorldPos}$
+
+$ \vec{AB}=cameraPos+forwardDir \times |near|$
+
+而`近截平面上像素相对于相机的坐标`意思是，以相机坐标为起点，以相机`向前`、`向上`和`向右`的三个向量作为正交基(三个向量，两两垂直)，表示的像素坐标。
+
+如下图为从相机位置看向近截平面的示意图：
+
+![camera relative pos](./images/camera_relative_pos.png)
+
+* `cameraRightDir`是相机向右的世界坐标向量
+* `cameraUpDir`是相机向上的世界坐标向量
+* `w`为像素点`p`的横坐标
+* `h`为像素点`p`的纵坐标
+* `p`点坐标为`近截平面上像素相对于相机的坐标`，即`pixelRelativeCameraWorldPos`
+
+则`pixelRelativeCameraWorldPos`计算公式为：
+
+$ \vec{pixelRelativeCameraWorldPos}=\vec{camerRightDir} \times w +\vec{camerUpDir} \times h$
+
+我们目前手头只有一个`相机看向的方向：forwardDir`，如何才能求出`相机向右：cameraRightDir`和`相机向上：cameraUpDir`呢？答案是:使用`叉乘`。
+
+`叉乘`可以计算出与两个向量都垂直的那个向量。
+
+首先相机向前的向量与一个虚向上的向量做叉乘，这个虚向量一般为`upDir(0,1,0)`
+
+$cameraRightDir=forwardDir \times upDir$
+
+之后`相机看向的方向：forwardDir`再与`相机向右：cameraRightDir`做叉乘，就可算出`相机向上：cameraUpDir`
+
+$cameraUpDir=cameraRightDir \times forwardDir$
+
+这样相机的`向前`、`向上`和`向右`的三个正交基都得到了。
+
+接下来，原式中还有`h`和`w`两个坐标参数，该如何计算呢？这就需要用到`fov`、`near`、`aspect`和`NDC`了
+
+在计算`h`和`w`之前我们先来介绍一下`归一化设备坐标系（Normalized Device Coordinates）`简称`NDC`，简单来说NDC是坐标范围被限制在了在[-1,1]内的坐标空间，一般用于坐标映射。当在屏幕上的映射时NDC一般理解成二维的，NDC空间的（0,0）点代表窗口（视界）中心，（1,1）点代表窗口右上角，（-1，-1）代表左下角，以此类推。
+
+如下图所示：
+
+![ndc](./images/ndc.png)
+
+而对于构建这个坐标系非常的简单，由于在片元着色器中对传入纹理的采样坐标`uv`正好遍历整个视界上的所有像素。而且`uv`的每个分量的范围都在[0,1]之内，只要进行乘2减1的操作即可映射到NDC坐标系中。
+
+$NDCp=(fragUV\times 2)-1$
+
+这样我们就将近截平面上的点都映射到了[-1,1]的NDC空间中。之后只要对NDC空间坐标进行横向和纵向的缩放（近截面的一半宽和一半高）就可以很轻松的计算出像近截平面上像素的坐标。
+
+$p.w=NDCp.NDCw\times(\frac{width}{2})$
+
+$p.h=NDCp.NDCw\times(\frac{height}{2})$
+
+而对于近截面的宽和高，如下图所示：
+
+![camera pixel pos](./images/camera_pixel_pos.png)
+
+* `halfWidth`为半宽
+* `halfHeight`为半高
+* `near`为相机到近截平面的距离
+
+这样`halfWidth`为：
+
+$halfWidth=near\times tan(\frac{fov}{2})$
+
+而我们已经知道了`aspect`（CPU传入GPU的）
+
+$aspect=\frac{height}{height}$
+
+所以`halfHeight`为：
+
+$halfHeight=halfWidth\times aspect$
+
+至此，使用片元着色器遍历所有的像素即可算出所有像素的光线方向`rayDir`
+
+###### 2.1.2.1.1 其他光线算法
+
+有一个非常巧妙的方法来简化计算，就是使用顶点着色器传入片元着色器中，在光栅化阶段GPU设备会进行插值的特性。
+当将在顶点着色器中传入近截平面的四个角的坐标等数据时，只需要顺便在顶点属性中增加每个顶点对于的射线方向（在CPU端计算，只需要算一个角即可，剩下三个就是对称，对称再对称），这样传入GPU的顶点属性就包括了每个顶点（每个角）的射线向量，之后直接将传入的顶点着色器的射线向量传入片元着色器中得到的对应向量数据就是该像素的光线方向向量。
+
+大致代码如下
+
+```CXX
+//CPU
+struct VertexData
+{
+    vec3 pos;
+    vec2 uv;
+    vec3 rayDir;
+    ...
+}
+
+vec3 corner0_ray_dir = cal_ray(...);
+vec3 corner1_ray_dir = symmetric(corner0_ray_dir,...);
+vec3 corner2_ray_dir = symmetric(corner0_ray_dir,...);
+vec3 corner3_ray_dir = symmetric(corner0_ray_dir,...);
+
+vector<VertexData> vertex_datas;
+vertex_datas.push_back({...,corner0_ray_dir});
+vertex_datas.push_back({...,corner1_ray_dir});
+vertex_datas.push_back({...,corner2_ray_dir});
+vertex_datas.push_back({...,corner3_ray_dir});
+
+context.bindVertexBuffer(vertex_datas);
+```
+
+```CXX
+//GPU
+//vertex shader
+layout(...) in vec3 pos;
+layout(...) in vec2 uv;
+layout(...) in vec3 rayDir;
+
+layout(...) out vec3 RayDir;
+void VertexShader()
+{
+    RayDir = rayDir;
+}
+
+//fragment shader
+layout(...) in vec3 RayDir
+void FragmentShader()
+{
+    //每个像素的射线向量
+    vec3 pixel_ray_dir = RayDir;
+}
+```
+
+##### 2.1.2.2 步进循环
+
+现在光线方向`rayDir`有了，光线起点`cameraPos`也有了。接下来就可以进入光线步进循环了
 
 ---
 
