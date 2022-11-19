@@ -445,7 +445,7 @@ $rayDir=pixelWorldPos-cameraWorldPos$
 
 $pixelWorldPos=\vec{AB}+ \vec{pixelRelativeCameraWorldPos}$
 
-$ \vec{AB}=cameraPos+forwardDir \times |near|$
+$\vec{AB}=cameraPos+forwardDir \times \mid near \mid$
 
 而`近截平面上像素相对于相机的坐标`意思是，以相机坐标为起点，以相机`向前`、`向上`和`向右`的三个向量作为正交基(三个向量，两两垂直)，表示的像素坐标。
 
@@ -461,7 +461,7 @@ $ \vec{AB}=cameraPos+forwardDir \times |near|$
 
 则`pixelRelativeCameraWorldPos`计算公式为：
 
-$ \vec{pixelRelativeCameraWorldPos}=\vec{camerRightDir} \times w +\vec{camerUpDir} \times h$
+$\vec{pixelRelativeCameraWorldPos}=\vec{camerRightDir} \times w +\vec{camerUpDir} \times h$
 
 我们目前手头只有一个`相机看向的方向：forwardDir`，如何才能求出`相机向右：cameraRightDir`和`相机向上：cameraUpDir`呢？答案是:使用`叉乘`。
 
