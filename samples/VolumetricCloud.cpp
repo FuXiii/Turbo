@@ -41,6 +41,9 @@
 #include <glm/ext.hpp>
 
 #include "TVulkanLoader.h"
+#include "glm/fwd.hpp"
+#include "glm/geometric.hpp"
+#include "glm/trigonometric.hpp"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -102,12 +105,9 @@ const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-// For generate Perlin-Worley noise 3D noise texture
-const std::string MY_PERLIN_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
-
 const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing_voulmetric_cloud.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/volumetric_cloud.frag");
 
 typedef struct POSITION
 {
@@ -134,8 +134,14 @@ struct MY_PUSH_CONSTANTS_DATA
     float time;
     float resolutionX;
     float resolutionY;
-    float slice;
-    float coverage;
+
+    float cameraPosX;
+    float cameraPosY;
+    float cameraPosZ;
+
+    float lookForwardDirX;
+    float lookForwardDirY;
+    float lookForwardDirZ;
 };
 
 int main()
@@ -242,19 +248,11 @@ int main()
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    uint32_t perlin_worly_noise_3d_image_width = 128;
-    uint32_t perlin_worly_noise_3d_image_height = 128;
-    uint32_t perlin_worly_noise_3d_image_depth = 128;
-    Turbo::Core::TImage *perlin_worly_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, perlin_worly_noise_3d_image_width, perlin_worly_noise_3d_image_height, perlin_worly_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-    Turbo::Core::TImageView *perlin_worly_noise_3d_image_view = new Turbo::Core::TImageView(perlin_worly_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, perlin_worly_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
     Turbo::Core::TVertexShader *my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
     Turbo::Core::TFragmentShader *my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
-    Turbo::Core::TComputeShader *my_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_PERLIN_WORLEY_COMPUTE_SHADER_STR);
 
     std::cout << my_vertex_shader->ToString() << std::endl;
     std::cout << my_fragment_shader->ToString() << std::endl;
-    std::cout << my_computer_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -294,9 +292,9 @@ int main()
     Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
     position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
     Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
-    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
+    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0);   // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0);    // texcoord/uv
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
 
@@ -305,22 +303,6 @@ int main()
 
     Turbo::Core::TGraphicsPipeline *graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TPipelineDescriptorSet *graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
-
-    std::vector<Turbo::Core::TImageView *> graphics_pipeline_image_views;
-    graphics_pipeline_image_views.push_back(perlin_worly_noise_3d_image_view);
-    graphics_pipeline_descriptor_set->BindData(0, 0, 0, graphics_pipeline_image_views);
-
-    Turbo::Core::TSampler *graphics_pipeline_sampler = new Turbo::Core::TSampler(device);
-    std::vector<Turbo::Core::TSampler *> graphics_pipeline_samplers;
-    graphics_pipeline_samplers.push_back(graphics_pipeline_sampler);
-    graphics_pipeline_descriptor_set->BindData(0, 1, 0, graphics_pipeline_samplers);
-
-    Turbo::Core::TComputePipeline *compute_pipeline = new Turbo::Core::TComputePipeline(my_computer_shader);
-
-    std::vector<Turbo::Core::TImageView *> compute_pipeline_image_views;
-    compute_pipeline_image_views.push_back(perlin_worly_noise_3d_image_view);
-    Turbo::Core::TPipelineDescriptorSet *compute_pipeline_descriptor_set = descriptor_pool->Allocate(compute_pipeline->GetPipelineLayout());
-    compute_pipeline_descriptor_set->BindData(0, 0, 0, compute_pipeline_image_views);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -404,27 +386,21 @@ int main()
     my_push_constants_data.time = 0;
     my_push_constants_data.resolutionX = 1;
     my_push_constants_data.resolutionY = 1;
-    my_push_constants_data.slice = 0;
-    my_push_constants_data.coverage = 0.15;
+    my_push_constants_data.cameraPosX = 0;
+    my_push_constants_data.cameraPosY = 0;
+    my_push_constants_data.cameraPosZ = 0;
+    my_push_constants_data.lookForwardDirX = 0;
+    my_push_constants_data.lookForwardDirY = 0;
+    my_push_constants_data.lookForwardDirZ = 0;
 
-    // before we show the Perlin-Worly 3D texture with graphics pipeline we use compute pipeline to finish the calculation
-    Turbo::Core::TCommandBuffer *compute_command_buffer = command_pool->Allocate();
+    glm::vec3 camera_position = glm::vec3(0, 0, 0);
+    glm::vec3 look_forward = glm::vec3(0, 0, 1);
 
-    compute_command_buffer->Begin();
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, perlin_worly_noise_3d_image_view);
-    // Compute Pipeline calculate Perlin-Worley Noise into 3D texture
-    compute_command_buffer->CmdBindPipeline(compute_pipeline);
-    compute_command_buffer->CmdBindPipelineDescriptorSet(compute_pipeline_descriptor_set);
-    compute_command_buffer->CmdDispatch(perlin_worly_noise_3d_image_width, perlin_worly_noise_3d_image_height, perlin_worly_noise_3d_image_depth);
+    float horizontal_angle = 0;
+    float vertical_angle = 0;
 
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, perlin_worly_noise_3d_image_view);
-    compute_command_buffer->End();
-
-    Turbo::Core::TFence *compute_fence = new Turbo::Core::TFence(device);
-    queue->Submit(nullptr, nullptr, compute_command_buffer, compute_fence);
-    compute_fence->WaitUntil();
-    command_pool->Free(compute_command_buffer);
-    delete compute_fence;
+    glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
+    glm::vec2 current_mouse_pos = glm::vec2(0, 0);
 
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
@@ -509,23 +485,84 @@ int main()
                 }
             }
 
+            // UpdateKeyboard
+            {
+                ImVec2 mouse_pos = io.MousePos;
+                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
+                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
+                previous_mouse_pos = current_mouse_pos;
+                mouse_pos_delte.y = -mouse_pos_delte.y;
+
+                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+                if (state == GLFW_PRESS)
+                {
+                    horizontal_angle += mouse_pos_delte.x * 0.2;
+                    vertical_angle += mouse_pos_delte.y * 0.2;
+
+                    if (vertical_angle > 90)
+                    {
+                        vertical_angle = 90;
+                    }
+
+                    if (vertical_angle < -90)
+                    {
+                        vertical_angle = -90;
+                    }
+                }
+
+                float delte_time = io.DeltaTime;
+                float speed = 1;
+
+                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
+                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
+
+                look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
+                look_forward = glm::normalize(look_forward);
+
+                glm::vec3 forward_dir = look_forward;                  // 向前向量
+                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
+                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
+                up_dir = glm::cross(right_dir, forward_dir);
+
+                right_dir = glm::normalize(right_dir);
+                up_dir = glm::normalize(up_dir);
+
+                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
+                if (key_W_state == GLFW_PRESS)
+                {
+                    // TODO: 向前
+                    camera_position += forward_dir * speed * delte_time;
+                }
+
+                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
+                if (key_A_state == GLFW_PRESS)
+                {
+                    // TODO: 向左
+                    camera_position += -right_dir * speed * delte_time;
+                }
+
+                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
+                if (key_S_state == GLFW_PRESS)
+                {
+                    // TODO: 向后
+                    camera_position += -forward_dir * speed * delte_time;
+                }
+
+                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
+                if (key_D_state == GLFW_PRESS)
+                {
+                    // TODO: 向右
+                    camera_position += right_dir * speed * delte_time;
+                }
+            }
+
             ImGui::NewFrame();
 
             {
-                static float f = 0.0f;
-                static int counter = 0;
-
                 ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
-                ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-                ImGui::SliderFloat("Slice", &my_push_constants_data.slice, 0, 1);
-                ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
-
-                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-                    counter++;
                 ImGui::SameLine();
-                ImGui::Text("counter = %d", counter);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -552,6 +589,12 @@ int main()
             my_push_constants_data.time = _time;
             my_push_constants_data.resolutionX = swapchain->GetWidth();
             my_push_constants_data.resolutionY = swapchain->GetHeight();
+            my_push_constants_data.cameraPosX = camera_position.x;
+            my_push_constants_data.cameraPosY = camera_position.y;
+            my_push_constants_data.cameraPosZ = camera_position.z;
+            my_push_constants_data.lookForwardDirX = look_forward.x;
+            my_push_constants_data.lookForwardDirY = look_forward.y;
+            my_push_constants_data.lookForwardDirZ = look_forward.z;
             command_buffer->CmdPushConstants(0, sizeof(my_push_constants_data), &my_push_constants_data);
             command_buffer->CmdDraw(3, 1, 0, 0);
 
@@ -874,7 +917,6 @@ int main()
     {
         delete imgui_index_buffer;
     }
-    descriptor_pool->Free(compute_pipeline_descriptor_set);
     descriptor_pool->Free(graphics_pipeline_descriptor_set);
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     delete imgui_font_image_view;
@@ -884,10 +926,7 @@ int main()
     delete imgui_fragment_shader;
     delete imgui_sampler;
 
-    delete graphics_pipeline_sampler;
-
     delete graphics_pipeline;
-    delete compute_pipeline;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
         delete framebuffer_item;
@@ -898,11 +937,8 @@ int main()
     delete descriptor_pool;
     delete my_vertex_shader;
     delete my_fragment_shader;
-    delete my_computer_shader;
     delete depth_image_view;
     delete depth_image;
-    delete perlin_worly_noise_3d_image_view;
-    delete perlin_worly_noise_3d_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;

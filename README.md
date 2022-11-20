@@ -1664,3 +1664,10 @@ Turbo是渲染引擎
   >* `./docs`增加`ndc.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`base_ray_marching.gif`。用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
+  >* `./asset/shaders`增加`volumetric_cloud.frag`并对应修改`VolumetricCloud`示例。计划用于实现`体积云`，将会随着`VolumetricCloud.md`文章的进度完善
+
+* 2022/11/20 设计架构
+  >
+  >* `./samples`增加`RayMarchingBoundingBoxTest`。用于`VolumetricCloud`的碰撞包围盒(为什么会有一圈圈的、类似摩尔纹的东西？光追噪音吗？)。
+  >* `./asset/shaders`增加`ray_marching_bounding_box.frag`着色器。
+  >* `RayMarchingTest`实例增加界面文字操作提示。
