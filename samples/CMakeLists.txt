@@ -163,3 +163,8 @@ add_executable(RayMarchingTest ./RayMarchingTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(RayMarchingTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(RayMarchingTest PUBLIC ${LINK_PARTH})
 target_link_libraries(RayMarchingTest PUBLIC ${LIBS})
+
+add_executable(RayMarchingBoundingBoxTest ./RayMarchingBoundingBoxTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(RayMarchingBoundingBoxTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(RayMarchingBoundingBoxTest PUBLIC ${LINK_PARTH})
+target_link_libraries(RayMarchingBoundingBoxTest PUBLIC ${LIBS})

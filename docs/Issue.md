@@ -190,3 +190,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 派生了`TShader`的一些子类，父类中的一些应该属于子类的属性应该挪到子类中。
 
 - 在`Windows11`下，英伟达驱动`472.91`，显卡型号`RTX3070`下`std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers()`将会返回空数组，`Vulkan`运行时此时找不到支持的验证层。
+
+- 在`RayMarchingBoundingBoxTest`中使用纯数学，光线向量与包围盒求交，会有一圈圈的纹路，不知为啥，光追噪音？还是代码理论哪里出现了问题？

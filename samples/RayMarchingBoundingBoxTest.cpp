@@ -107,7 +107,7 @@ const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/base_ray_marching.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/ray_marching_bounding_box.frag");
 
 typedef struct POSITION
 {
@@ -142,6 +142,19 @@ struct MY_PUSH_CONSTANTS_DATA
     float lookForwardDirX;
     float lookForwardDirY;
     float lookForwardDirZ;
+
+    // bounding box
+    float boxPosX;
+    float boxPosY;
+    float boxPosZ;
+
+    float boxForwardDirX;
+    float boxForwardDirY;
+    float boxForwardDirZ;
+
+    float boxHalfDiagonalVectorX;
+    float boxHalfDiagonalVectorY;
+    float boxHalfDiagonalVectorZ;
 };
 
 int main()
@@ -381,6 +394,21 @@ int main()
     Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
     //</IMGUI>
 
+    float bounding_box_forward_dir[3];
+    bounding_box_forward_dir[0] = 0;
+    bounding_box_forward_dir[1] = 0;
+    bounding_box_forward_dir[2] = 1;
+
+    float bounding_box_pos[3];
+    bounding_box_pos[0] = 0;
+    bounding_box_pos[1] = 0;
+    bounding_box_pos[2] = 0;
+
+    float bounding_box_half_diagonal_vector[3];
+    bounding_box_half_diagonal_vector[0] = 1;
+    bounding_box_half_diagonal_vector[1] = 1;
+    bounding_box_half_diagonal_vector[2] = 1;
+
     bool show_demo_window = true;
     MY_PUSH_CONSTANTS_DATA my_push_constants_data;
     my_push_constants_data.time = 0;
@@ -392,6 +420,15 @@ int main()
     my_push_constants_data.lookForwardDirX = 0;
     my_push_constants_data.lookForwardDirY = 0;
     my_push_constants_data.lookForwardDirZ = 0;
+    my_push_constants_data.boxPosX = 0;
+    my_push_constants_data.boxPosY = 0;
+    my_push_constants_data.boxPosZ = 0;
+    my_push_constants_data.boxForwardDirX = 0;
+    my_push_constants_data.boxForwardDirY = 0;
+    my_push_constants_data.boxForwardDirZ = 1;
+    my_push_constants_data.boxHalfDiagonalVectorX = 1;
+    my_push_constants_data.boxHalfDiagonalVectorY = 1;
+    my_push_constants_data.boxHalfDiagonalVectorZ = 1;
 
     glm::vec3 camera_position = glm::vec3(0, 0, 0);
     glm::vec3 look_forward = glm::vec3(0, 0, 1);
@@ -560,9 +597,14 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("Hello, world!");
+                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
+
+                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -10, 10);
+                ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
+                ImGui::SliderFloat3("BoundingBox half diagonal vector", bounding_box_half_diagonal_vector, 0, 20);
+
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -594,6 +636,15 @@ int main()
             my_push_constants_data.lookForwardDirX = look_forward.x;
             my_push_constants_data.lookForwardDirY = look_forward.y;
             my_push_constants_data.lookForwardDirZ = look_forward.z;
+            my_push_constants_data.boxPosX = bounding_box_pos[0];
+            my_push_constants_data.boxPosY = bounding_box_pos[1];
+            my_push_constants_data.boxPosZ = bounding_box_pos[2];
+            my_push_constants_data.boxForwardDirX = bounding_box_forward_dir[0];
+            my_push_constants_data.boxForwardDirY = bounding_box_forward_dir[1];
+            my_push_constants_data.boxForwardDirZ = bounding_box_forward_dir[2];
+            my_push_constants_data.boxHalfDiagonalVectorX = bounding_box_half_diagonal_vector[0];
+            my_push_constants_data.boxHalfDiagonalVectorY = bounding_box_half_diagonal_vector[1];
+            my_push_constants_data.boxHalfDiagonalVectorZ = bounding_box_half_diagonal_vector[2];
             command_buffer->CmdPushConstants(0, sizeof(my_push_constants_data), &my_push_constants_data);
             command_buffer->CmdDraw(3, 1, 0, 0);
 
