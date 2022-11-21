@@ -124,7 +124,7 @@ BoundingBoxSize GetBoundingBoxSize(BoundingBox boundingBox)
 }
 
 //获得包围盒的正交基
-BoudingBoxOrthogonalBasis GetBoundingBoxForwardDir(BoundingBox boundingBox)
+BoudingBoxOrthogonalBasis GetBoundingBoxOrthogonalBasis(BoundingBox boundingBox)
 {
     BoudingBoxOrthogonalBasis result;
 
@@ -145,7 +145,7 @@ BoudingBoxSurfaces GetBoundingBoxSurfaces(BoundingBox boundingBox)
 {
     BoudingBoxSurfaces result;
 
-    BoudingBoxOrthogonalBasis bouding_box_orthogonal_basis = GetBoundingBoxForwardDir(boundingBox);
+    BoudingBoxOrthogonalBasis bouding_box_orthogonal_basis = GetBoundingBoxOrthogonalBasis(boundingBox);
     BoundingBoxSize bounding_box_size = GetBoundingBoxSize(boundingBox);
 
     vec3 bounding_box_pos = boundingBox.position;
@@ -203,7 +203,7 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
     vec3 bounding_box_pos = boundingBox.position;
     vec3 bounding_box_to_point_vector = point - bounding_box_pos;
 
-    BoudingBoxOrthogonalBasis bounding_box_orthogonal_basis = GetBoundingBoxForwardDir(boundingBox);
+    BoudingBoxOrthogonalBasis bounding_box_orthogonal_basis = GetBoundingBoxOrthogonalBasis(boundingBox);
     BoundingBoxSize bounding_box_size = GetBoundingBoxSize(boundingBox);
 
     vec3 bounding_box_forward = bounding_box_orthogonal_basis.forward;
@@ -214,17 +214,27 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
     float project_bounding_box_up_length = abs(dot(bounding_box_to_point_vector, bounding_box_up));
     float project_bounding_box_right_length = abs(dot(bounding_box_to_point_vector, bounding_box_right));
 
-    if (project_bounding_box_forward_length > (bounding_box_size.width / 2.0))
+    float bounding_box_half_width = bounding_box_size.width / 2.0;
+    float bounding_box_half_height = bounding_box_size.height / 2.0;
+    float bounding_box_half_strip = bounding_box_size.strip / 2.0;
+
+    float little_compensate = 0.0005;
+
+    bounding_box_half_width += little_compensate;
+    bounding_box_half_height += little_compensate;
+    bounding_box_half_strip += little_compensate;
+
+    if (project_bounding_box_forward_length > bounding_box_half_width)
     {
         return false;
     }
 
-    if (project_bounding_box_up_length > (bounding_box_size.height / 2.0))
+    if (project_bounding_box_up_length > bounding_box_half_height)
     {
         return false;
     }
 
-    if (project_bounding_box_right_length > (bounding_box_size.strip / 2.0))
+    if (project_bounding_box_right_length > bounding_box_half_strip)
     {
         return false;
     }
@@ -235,8 +245,6 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
 //光线与包围盒求交，并返回所有交点
 bool BoundingBoxIntersect(vec3 origin, vec3 dir, BoundingBox boundingBox, out BoundingBoxIntersections intersections)
 {
-    bool is_intersect = false;
-
     BoudingBoxSurfaces bounding_box_surface = GetBoundingBoxSurfaces(boundingBox);
 
     float ray_origin_to_positive_forward_surface_distance = 0;
@@ -426,8 +434,7 @@ bool BoundingBoxIntersect(vec3 origin, vec3 dir, BoundingBox boundingBox, out Bo
         return false;
     }
 
-    is_intersect = false;
-    return is_intersect;
+    return false;
 }
 
 void main()
