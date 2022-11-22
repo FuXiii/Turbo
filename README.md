@@ -1676,3 +1676,10 @@ Turbo是渲染引擎
   >
   >* `./asset/shaders`中将`ray_marching_bounding_box.frag`的`BoudingBoxOrthogonalBasis GetBoundingBoxForwardDir(...)`函数修改成`GetBoundingBoxOrthogonalBasis(...)`，之前名字起错了
   >* `./asset/shaders`中通过修改`ray_marching_bounding_box.frag`的`bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)`函数，增加一小点包围盒长宽高，用于补偿浮点数计算精度，进而改善了噪点，之前的精度太高了，导致生成了噪点
+
+* 2022/11/22 设计架构
+  >
+  >* `./asset/shaders`增加`compiler_env_version.png`用于标识编译环境，`Windows`系统中，该环境在`LLVM`新版本下编译不了，需要导成`Visual Studio`能够顺利编译，`Linux`不变
+  >* `./docs`增加`raymarching.png`。用于`VolumetricCloud.md`文章说明
+  >* `./docs`增加`ray_surface_intersect.png`。用于`VolumetricCloud.md`文章说明
+  >* 更新`VolumetricCloud`文章

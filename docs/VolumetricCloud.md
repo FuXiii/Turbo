@@ -63,6 +63,13 @@
   >* 修改`1.1.1 柏林噪音`的错别字
   >* 修改`2.1.2.1.1 其他光线算法`的错别字
 
+* 2022/11/20
+  >
+  >* 完善`2.1.2.2 步进循环`章节
+  >* 增加`2.1.3 包围盒`章节
+  >* 增加`2.1.3.1 描述包围盒`章节
+  >* 增加`2.1.3.2 包围盒中步进的起点和终点`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -645,8 +652,80 @@ void FragmentShader()
 
 ##### 2.1.2.2 步进循环
 
-现在光线方向`rayDir`有了，光线起点`cameraPos`也有了。接下来就可以进入光线步进循环了
+现在光线方向`rayDir`有了，光线起点`cameraPos`也有了。接下来就可以进入光线步进循环了。
+
+步进循环本质上并不复杂，基本思路就是沿着光线方向向前走，每走一次就是一次步进循环。
+
+大致代码如下：
+
+```CXX
+SomeResult RayMarch(vec3 origin,vec3 dir)
+{
+    SomeResult result;
+
+    const int maxstep = MAX_STEP_COUNT;//最大走几步
+    float step = STEP_LENGTH; //一步迈多远
+    float distance = 0;//走了多远
+    for (int i = 0; i < maxstep; ++i) {
+        // 从原点origin，向dir方向，走distance这么长的距离
+        vec3 p = origin + dir * distance; 
+        //...在p点做一些事情，比如采样之类的，并累积结果
+       result += do_something_at_point(p);
+        //继续向前迈一步
+        distance += step;
+    }
+    //返回结果
+    return result;
+}
+```
+
+![camera pixel pos](./images/raymarching.png)
+
+当然步进循环不一定非要是这样的，根据不同的需求，步进循环可以多种多样。
+
+但是有一个最常用的步进循环，就是使用包围盒。包围盒一般会使用一个四方体盒子，在这个盒子内部进行光线步进循环。
+
+还有一种比较常见的是使用一个包围球进行步进循环。在体积云渲染中，为了模拟云层蔓延到地平线，使用了两个球心相同，半径不同的两个包围球来模拟地球大气层的基本形状，并在其中进行光线步进循环。此种包围体我们后面也会介绍。
+
+![camera pixel pos](./images/bounding_sphere.png)
 
 ---
+
+#### 2.1.3 包围盒
+
+包围盒就是个四方体，光线将会在包围盒内部进行步进。随之而来的问题就是，如何描述该包围盒呢？光线在包围盒内进行步进，那在盒子内部步进的起点和终点在哪呢？
+
+##### 2.1.3.1 描述包围盒
+
+* 包围盒是个四方体，必然会有长、宽、高。  
+  * 对于描述四方体的长、宽、高，则使用从四方体中心点为起点，以斜对角线上的一个角为终点的向量`halfDiagonal`“半斜向量”，该向量的每个分量分别作为包围盒的半长`halfStrip`、半宽`halfWidth`、半高`halfHeight`。
+
+    注：这里`长`起名叫`strip`，是为了和着色器内置函数`length()`作区分，和示例代码中`长`命名`strip`保持一致
+* 盒子会有位置`position`
+* 盒子会有姿态，会有一个向量描述其朝向`forward`
+
+![camera pixel pos](./images/bounding_box.png)
+
+这样，我们就可以描述一个包围盒了。
+
+代码如下：
+
+```CXX
+struct BoundingBox
+{
+    vec3 position;
+    vec3 forwardDir;
+    vec3 halfDiagonalVector;
+};
+```
+
+##### 2.1.3.2 包围盒中步进的起点和终点
+
+首先能想到的是，起点和终点会在光线与盒子的交点处，求交点，最终回到了，如何求射线与平面的交点问题
+
+> 射线与平面求交
+
+如下图所示：  
+![camera pixel pos](./images/ray_surface_intersect.png)
 
 ## 未完待续
