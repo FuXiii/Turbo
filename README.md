@@ -1688,3 +1688,4 @@ Turbo是渲染引擎
   >
   >* 修改`TFrameGraph.hpp`中的`Execute`命名，在`Visual Studio`编译器下会冲突，改成`TExecute`，
   >* 修改`TFrameGraph.hpp`中`C++17`的`[[nodiscard]]`目前`Turbo`使用`C++11`
+  >* `/.gitignore`中增加忽略`install/`文件夹
