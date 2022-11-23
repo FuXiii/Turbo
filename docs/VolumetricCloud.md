@@ -70,6 +70,11 @@
   >* 增加`2.1.3.1 描述包围盒`章节
   >* 增加`2.1.3.2 包围盒中步进的起点和终点`章节
 
+* 2022/11/23
+  >
+  >* 完善`2.1.3.2 包围盒中步进的起点和终点`中`射线与平面求交`章节
+  >* 增加`2.1.3.2 包围盒中步进的起点和终点`中`点是否在包围盒内`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -725,7 +730,200 @@ struct BoundingBox
 
 > 射线与平面求交
 
+* 射线：一个起点，一个方向
+* 平面：一个平面上的点，一个平面法线（点法式）
+
 如下图所示：  
 ![camera pixel pos](./images/ray_surface_intersect.png)
+
+* 射线：`o`点为射线起点`rayOrigin`,向量 $\vec{r}$ 为射线方向`rayDir`。
+* 平面：`p`点为平面上一点`point`,向量 $\vec{n}$ 为平面法线`normal`。
+* 交点：`i`点为平面与射线的交点
+
+首先刨除当 $\vec{r}$ 和 $\vec{n}$垂直的情况，也就是射线方向平行于平面，将永远不会有交点
+
+由于交点`i`在平面上，所以可知 $\vec{pi}$ 与 $\vec{n}$ 垂直，这样可知：  
+① $\vec{pi}* \vec{n}=0$ 注：点乘
+
+又因为点`i`在过射线，加入射线从`o`点出发，沿着向量 $\vec{r}$ 走了 $l$ 距离到达`i`点，这样可知：  
+② $i=p+\vec{r}* l$
+
+这样①和②式子联立：
+$$
+\left\{
+\begin{array}{c}
+    \vec{pi}*\vec{n}=0 \\
+    i=p+\vec{r}* l \\
+\end{array}
+\right.
+$$
+
+首先将②式展开：  
+$i=(o_x+r_x l, o_y+r_y l,o_z+r_z l)$  
+
+再将 $\vec{pi}$ 展开  
+$\vec{pi}=(i_x-p_x, i_y-p_y, i_z-p_z)$  
+
+其中  
+$i_x=o_x+r_x l$  
+$i_y=o_y+r_y l$  
+$i_z=o_z+r_z l$  
+
+这样$\vec{pi}$ 可展开成③式  
+③ $\vec{pi}=(o_x+r_x l-p_x, o_y+r_y l-p_y, o_z+r_z l-p_z)$  
+
+之后③再与 $\vec{n}$ 求点乘等于零进行展开：  
+$\vec{pi}*\vec{n}=(o_x+r_x l-p_x)\times n_x+(o_y+r_y l-p_y)\times n_y+(o_z+r_z l-p_z)\times n_z=0$  
+
+最终整理得：  
+
+$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$为`p`点坐标，$\vec{o}$为`o`点坐标，`*`为点乘
+
+知道了 $l$ 就可以由②式求出交点 $i$ 了。
+
+代码如下：
+
+```CXX
+//结构体：点法式平面
+struct Surface
+{
+    vec3 point;
+    vec3 normal;
+};
+
+bool CalRaySurafaceIntersectDistance(vec3 rayOrigin, vec3 rayDir, vec3 surfacePoint, vec3 surfaceNormal, out float distance)
+{
+    //如果射线方向和平面平行（与平面法线垂直），则永远没有交点
+    if (dot(rayDir, surfaceNormal) == 0)
+    {
+        return false;
+    }
+    vec3 surface_normal = normalize(surfaceNormal);
+    vec3 ray_dir = normalize(rayDir);
+    distance = (dot(surfacePoint, surface_normal) - dot(rayOrigin, surface_normal)) / dot(ray_dir, surface_normal);
+    return true;
+}
+```
+
+好了，现在我们能够求出任意平面与射线的交点了，又有个问题，平面无限大，交点可以遍布整个平面，而包围盒的面只是一个平面的很小一部分，该如何判断交点是否在包围盒对应平面内呢？
+
+对于这个问题，可以换个问法：空间中任意一点，如何判断此点是否在包围盒内（包括包围盒面上的点，也算在包围盒）？
+
+> 点是否在包围盒内
+
+这个问题其实很好解决，我们有包围盒的位置和向前的向量，使用向前的向量就可以构建包围盒的正交基（注：同前文计算相机的正交基原理一样），有了正交基，计算以包围盒位置为起点，空间中任一点为终点，计算出一个向量，该向量分别对包围盒的正交基做投影，这样就可以知道该向量在每个轴投影的长，宽，高，只要其中一个分量大于对应的长度或宽度或高度，则该点不在包围盒内，反之则位于包围盒内。
+
+首先计算包围盒的正交基（原理同前文的相机正交基，这里就不再赘述）：
+
+```CXX
+//结构体：包围盒的正交基
+struct BoudingBoxOrthogonalBasis
+{
+    vec3 forward;
+    vec3 up;
+    vec3 right;
+};
+
+//获得包围盒的正交基
+BoudingBoxOrthogonalBasis GetBoundingBoxOrthogonalBasis(BoundingBox boundingBox)
+{
+    BoudingBoxOrthogonalBasis result;
+
+    vec3 forward = boundingBox.forwardDir;
+    vec3 up = vec3(0, 1, 0);
+    vec3 right = cross(forward, up);
+    up = cross(right, forward);
+
+    result.forward = normalize(forward);
+    result.up = normalize(up);
+    result.right = normalize(right);
+
+    return result;
+}
+```
+
+之后计算包围盒的长宽高，方便后续计算：
+
+```CXX
+//结构体：包围盒的尺寸（长宽高）
+struct BoundingBoxSize
+{
+    float strip; // length（length名称和GLSL的length(...)函数重名了，导致报错，改成strip）
+    float width;
+    float height;
+};
+
+//获得包围盒的长宽高
+BoundingBoxSize GetBoundingBoxSize(BoundingBox boundingBox)
+{
+    BoundingBoxSize result;
+
+    vec3 half_diagonal_vector = boundingBox.halfDiagonalVector;
+
+    result.strip = abs(half_diagonal_vector.x) * 2;
+    result.width = abs(half_diagonal_vector.z) * 2;
+    result.height = abs(half_diagonal_vector.y) * 2;
+
+    return result;
+}
+```
+
+之后判断点是否在包围盒内
+
+```CXX
+bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
+{
+    //包围盒的位置
+    vec3 bounding_box_pos = boundingBox.position;
+    //包围盒到Point点的向量
+    vec3 bounding_box_to_point_vector = point - bounding_box_pos;
+    //获得包围盒的正交基
+    BoudingBoxOrthogonalBasis bounding_box_orthogonal_basis = GetBoundingBoxOrthogonalBasis(boundingBox);
+    //获得包围盒的长、宽、高
+    BoundingBoxSize bounding_box_size = GetBoundingBoxSize(boundingBox);
+
+    vec3 bounding_box_forward = bounding_box_orthogonal_basis.forward;
+    vec3 bounding_box_up = bounding_box_orthogonal_basis.up;
+    vec3 bounding_box_right = bounding_box_orthogonal_basis.right;
+
+    //目标向量分别向正交基的每个基向量做投影
+    float project_bounding_box_forward_length = abs(dot(bounding_box_to_point_vector, bounding_box_forward));
+    float project_bounding_box_up_length = abs(dot(bounding_box_to_point_vector, bounding_box_up));
+    float project_bounding_box_right_length = abs(dot(bounding_box_to_point_vector, bounding_box_right));
+
+    //计算包围盒半长用于比较
+    float bounding_box_half_width = bounding_box_size.width / 2.0;
+    float bounding_box_half_height = bounding_box_size.height / 2.0;
+    float bounding_box_half_strip = bounding_box_size.strip / 2.0;
+
+    //注意：这里是降噪的关键，GPU浮点计算精度太高，不进行精度降低会有大量噪点
+    //没有降噪：https://www.bilibili.com/video/BV1MG4y1Z7jy/?spm_id_from=333.999.0.0
+    //降噪矫正：https://www.bilibili.com/video/BV1224y117Nt/?spm_id_from=333.999.0.0
+    float little_compensate = 0.0005;
+    bounding_box_half_width += little_compensate;
+    bounding_box_half_height += little_compensate;
+    bounding_box_half_strip += little_compensate;
+
+    //判断是否超出范围，超出了，则返回false
+    if (project_bounding_box_forward_length > bounding_box_half_width)
+    {
+        return false;
+    }
+
+    if (project_bounding_box_up_length > bounding_box_half_height)
+    {
+        return false;
+    }
+
+    if (project_bounding_box_right_length > bounding_box_half_strip)
+    {
+        return false;
+    }
+    //在盒子内返回true
+    return true;
+}
+```
+
+---
 
 ## 未完待续
