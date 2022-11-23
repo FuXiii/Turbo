@@ -84,15 +84,15 @@ class TPassExecutorAgency : public TAgency
     virtual void Executor(const TResources &resources, void *context) = 0;
 };
 
-template <typename Data, typename Execute>
+template <typename Data, typename TExecute>
 class TPassAgency : public TPassExecutorAgency
 {
   private:
     Data data{};
-    Execute execute;
+    TExecute execute;
 
   public:
-    TPassAgency(Execute &&execute);
+    TPassAgency(TExecute &&execute);
     ~TPassAgency() = default;
     Data &GetData();
 
@@ -249,7 +249,7 @@ class TFrameGraph
 
       public:
         template <typename T>
-        [[nodiscard]] TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
+        /*[[nodiscard]]*/ TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
         TResource Read(TResource resource);
         TResource Write(TResource resource);
 
@@ -298,19 +298,19 @@ class TResources
     // const typename Virtualizable::Descriptor &getDescriptor(TResource resource);
 };
 
-template <typename Data, typename Execute>
-inline Turbo::FrameGraph::TPassAgency<Data, Execute>::TPassAgency(Execute &&execute) : execute{std::forward<Execute>(execute) /*or std::move()? in filament*/}
+template <typename Data, typename TExecute>
+inline Turbo::FrameGraph::TPassAgency<Data, TExecute>::TPassAgency(TExecute &&execute) : execute{std::forward<TExecute>(execute) /*or std::move()? in filament*/}
 {
 }
 
-template <typename Data, typename Execute>
-inline Data &Turbo::FrameGraph::TPassAgency<Data, Execute>::GetData()
+template <typename Data, typename TExecute>
+inline Data &Turbo::FrameGraph::TPassAgency<Data, TExecute>::GetData()
 {
     return this->data;
 }
 
-template <typename Data, typename Execute>
-inline void Turbo::FrameGraph::TPassAgency<Data, Execute>::Executor(const TResources &resources, void *context)
+template <typename Data, typename TExecute>
+inline void Turbo::FrameGraph::TPassAgency<Data, TExecute>::Executor(const TResources &resources, void *context)
 {
     this->execute(this->data, resources, context);
 }
@@ -345,14 +345,14 @@ inline TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Create(const std::str
     return this->passNode.AddCreate(resource);
 }
 
-template <typename Data, typename Setup, typename Execute>
-inline const Data &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &name, Setup &&setup, Execute &&execute)
+template <typename Data, typename Setup, typename TExecute>
+inline const Data &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &name, Setup &&setup, TExecute &&execute)
 {
     //static_assert(std::is_invocable<Setup, TFrameGraph::TBuilder &, Data &>::value, "Invalid Setup");
     //static_assert(std::is_invocable<Execute, const Data &, const TResources &, void *>::value, "Invalid Execute");
-    static_assert(sizeof(Execute) < EXECUTE_MAX_LOAD, "Execute overload");
+    static_assert(sizeof(TExecute) < EXECUTE_MAX_LOAD, "Execute overload");
 
-    TPassAgency<Data, Execute> *pass_agency = new TPassAgency<Data, Execute>(std::forward<Execute>(execute));
+    TPassAgency<Data, TExecute> *pass_agency = new TPassAgency<Data, TExecute>(std::forward<TExecute>(execute));
     TPassNode &pass_node = TFrameGraph::CreatePassNode(name, std::unique_ptr<TPassExecutorAgency>(pass_agency));
 
     TBuilder builder(*this, pass_node);

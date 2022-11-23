@@ -1683,3 +1683,8 @@ Turbo是渲染引擎
   >* `./docs`增加`raymarching.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`ray_surface_intersect.png`。用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
+
+* 2022/11/23 设计架构
+  >
+  >* 修改`TFrameGraph.hpp`中的`Execute`命名，在`Visual Studio`编译器下会冲突，改成`TExecute`，
+  >* 修改`TFrameGraph.hpp`中`C++17`的`[[nodiscard]]`目前`Turbo`使用`C++11`
