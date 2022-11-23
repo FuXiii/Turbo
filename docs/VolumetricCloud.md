@@ -777,7 +777,7 @@ $\vec{pi}*\vec{n}=(o_x+r_x l-p_x)\times n_x+(o_y+r_y l-p_y)\times n_y+(o_z+r_z l
 
 最终整理得：  
 
-$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$为`p`点坐标，$\vec{o}$为`o`点坐标，`*`为点乘
+$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$ 为`p`点坐标，$\vec{o}$为`o`点坐标，`*`为点乘
 
 知道了 $l$ 就可以由②式求出交点 $i$ 了。
 
