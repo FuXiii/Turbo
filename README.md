@@ -1693,3 +1693,4 @@ Turbo是渲染引擎
 * 2022/11/24 设计架构
   >
   >* 更新`VolumetricCloud`文章
+  >* 更改`./samples`下的`VolumetricCloud`，使其将`ComputerPipelineGeneratePerlinWorley`和`RayMarchingBoundingBoxTest`相结合
