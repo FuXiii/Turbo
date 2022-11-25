@@ -496,15 +496,14 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
         int max_step = 128;
         float step = abs(length(end_pos - start_pos)) / max_step;
-        float result_delte = 1 / max_step;
-
         float T = 1.;
+
         vec3 radiance = vec3(1, 1, 1);
 
         vec3 point = start_pos;
         for (int i = 0; i < max_step; ++i)
         {
-            vec3 point = start_pos + dir * step * i;
+            point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
             vec3 sample_point = GetSamplePointPosition(point, boundingBox);
 
             vec4 fbm = texture(sampler3D(perlinWorleyNoise, mySampler), sample_point, 0);
