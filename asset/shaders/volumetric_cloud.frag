@@ -37,6 +37,11 @@ layout(set = 0, binding = 1) uniform sampler mySampler;
 
 #define PI 3.1415926
 
+float hash(float n)
+{
+    return fract(sin(n) * 43758.5453);
+}
+
 float remap(float x, float a, float b, float c, float d)
 {
     return (((x - a) / (b - a)) * (d - c)) + c;
@@ -496,6 +501,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         float T = 1.;
         vec3 radiance = vec3(1, 1, 1);
 
+        vec3 point = start_pos;
         for (int i = 0; i < max_step; ++i)
         {
             vec3 point = start_pos + dir * step * i;
@@ -508,9 +514,9 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
             cloud = remap(cloud, 1 - coverage, 1., 0., 1.); // coverage
 
-            //magic~
+            // magic~
             T *= exp(-cloud * step);
-            result += T * radiance/cloud;
+            result += T * radiance / cloud;
         }
         return result;
     }
