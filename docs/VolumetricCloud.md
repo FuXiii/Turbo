@@ -75,6 +75,10 @@
   >* 完善`2.1.3.2 包围盒中步进的起点和终点`中`射线与平面求交`章节
   >* 增加`2.1.3.2 包围盒中步进的起点和终点`中`点是否在包围盒内`章节
 
+* 2022/11/25
+  >
+  >* 增加`2.1.3.2 包围盒中步进的起点和终点`中`射线与包围盒交点`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -777,7 +781,7 @@ $\vec{pi}*\vec{n}=(o_x+r_x l-p_x)\times n_x+(o_y+r_y l-p_y)\times n_y+(o_z+r_z l
 
 最终整理得：  
 
-$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$ 为`p`点坐标，$\vec{o}$为`o`点坐标，`*`为点乘
+$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$ 为`p`点坐标，$\vec{o}$ 为`o`点坐标，`*`为点乘
 
 知道了 $l$ 就可以由②式求出交点 $i$ 了。
 
@@ -923,6 +927,352 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
     return true;
 }
 ```
+
+现在求平面上交点有了，求点是否在平面范围内也有了，接下来就整合在一起，进行射线与包围盒求交
+
+> 射线与包围盒交点
+
+首先是获取包围盒六个面的表，基本思想就是沿着包围盒的正交基的每个轴计算每个面的点和法线。
+
+```CXX
+//结构体：包围盒的六个面
+struct BoudingBoxSurfaces
+{
+    Surface positiveForwardSurface;
+    Surface negativeForwardSurface;
+
+    Surface positiveUpSurface;
+    Surface negativeUpSurface;
+
+    Surface positiveRightSurface;
+    Surface negativeRightSurface;
+};
+
+//获得包围盒的六个面
+BoudingBoxSurfaces GetBoundingBoxSurfaces(BoundingBox boundingBox)
+{
+    BoudingBoxSurfaces result;
+
+    BoudingBoxOrthogonalBasis bouding_box_orthogonal_basis = GetBoundingBoxOrthogonalBasis(boundingBox);
+    BoundingBoxSize bounding_box_size = GetBoundingBoxSize(boundingBox);
+
+    vec3 bounding_box_pos = boundingBox.position;
+
+    float strip = bounding_box_size.strip;
+    float width = bounding_box_size.width;
+    float height = bounding_box_size.height;
+
+    vec3 forward = bouding_box_orthogonal_basis.forward;
+    vec3 up = bouding_box_orthogonal_basis.up;
+    vec3 right = bouding_box_orthogonal_basis.right;
+
+    vec3 positive_forward_surface_normal = forward;
+    vec3 positive_forward_surface_point = bounding_box_pos + positive_forward_surface_normal * (width / 2.0);
+
+    vec3 negative_forward_surface_normal = -positive_forward_surface_normal;
+    vec3 negative_forward_surface_point = bounding_box_pos + negative_forward_surface_normal * (width / 2.0);
+
+    vec3 positive_up_surface_normal = up;
+    vec3 positive_up_surface_point = bounding_box_pos + positive_up_surface_normal * (height / 2.0);
+
+    vec3 negative_up_surface_normal = -positive_up_surface_normal;
+    vec3 negative_up_surface_point = bounding_box_pos + negative_up_surface_normal * (height / 2.0);
+
+    vec3 positive_right_surface_normal = right;
+    vec3 positive_right_surface_point = bounding_box_pos + positive_right_surface_normal * (strip / 2.0);
+
+    vec3 negative_right_surface_normal = -positive_right_surface_normal;
+    vec3 negative_right_surface_point = bounding_box_pos + negative_right_surface_normal * (strip / 2.0);
+
+    result.positiveForwardSurface.point = positive_forward_surface_point;
+    result.positiveForwardSurface.normal = positive_forward_surface_normal;
+
+    result.negativeForwardSurface.point = negative_forward_surface_point;
+    result.negativeForwardSurface.normal = negative_forward_surface_normal;
+
+    result.positiveUpSurface.point = positive_up_surface_point;
+    result.positiveUpSurface.normal = positive_up_surface_normal;
+
+    result.negativeUpSurface.point = negative_up_surface_point;
+    result.negativeUpSurface.normal = negative_up_surface_normal;
+
+    result.positiveRightSurface.point = positive_right_surface_point;
+    result.positiveRightSurface.normal = positive_right_surface_normal;
+
+    result.negativeRightSurface.point = negative_right_surface_point;
+    result.negativeRightSurface.normal = negative_right_surface_normal;
+
+    return result;
+}
+```
+
+现在六个面有了，对这六个面，每个面进行求交运算得出交点，之后判断该交点是否属于包围盒内部，属于包围盒内部的话则保留并进行之后的运算，如果不属于包围盒范围则直接返回，结束计算。
+
+我们的最终目的是求出一条射线在包围盒内步进的启点和终点。
+
+而一条直线与包围盒求交有三种情况
+
+1. 没有交点：此种情况直接结束计算
+2. 有一个交点，这种情况只会发生在包围盒的边缘：此种情况直接结束计算。
+3. 有两个交点，而有两个交点的情况又分三种
+
+$$
+两个交点
+\left\{
+\begin{array}{c}
+    两个交点都在相机前方 \\
+    一个点在相机后方，一个点在相机前方 \\
+    两个点都在相机后方 \\
+\end{array}
+\right.
+$$
+
+如下图为相机在包围盒外你，面对包围盒
+
+![camera pixel pos](./images/intersect_case_out_box_forward.png)
+
+* A点为起点，B点为终点，为两个交点情况,此时La，Lb均为正数
+* C为一个交点情况，Lc为正数，此种情况直接结束计算并返回
+
+如下图相机在包围盒内
+
+![camera pixel pos](./images/intersect_case_in_box.png)
+
+其中A，B两点为交点，相交于A点的交点由于其La是负值，说明在相机背后，如果交点到相机的距离量为负值，则将负值的那个交点丢弃，换成射线的起点C作为与包围盒的起点，点B作为终点。
+
+如下图相机在包围盒外，背对包围盒
+
+![camera pixel pos](./images/intersect_case_out_box_backward.png)
+
+此时A，B两个交点都在相机背后。La和Lb的长度都为负数，此时表示没有交点，直接结束计算即可。
+
+代码大致如下：
+
+```CXX
+//结构体：射线与包围盒交点信息
+struct BoundingBoxIntersections
+{
+    vec3 firstInterectionPos;
+    vec3 secondInterectionPos;
+};
+
+
+//光线与包围盒求交，并返回所有交点
+bool BoundingBoxIntersect(vec3 origin, vec3 dir, BoundingBox boundingBox, out BoundingBoxIntersections intersections)
+{
+    //获取包围盒的六个面
+    BoudingBoxSurfaces bounding_box_surface = GetBoundingBoxSurfaces(boundingBox);
+
+    //计算六个面，每个面是否相交，相交的话将返回交点到射线起点的距离
+    //注意：这个返回的距离有正，负的区别
+    //正数表示交点在相机前方，负数表示交点在相机后方
+    float ray_origin_to_positive_forward_surface_distance = 0;
+    bool is_positive_forward_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.positiveForwardSurface, ray_origin_to_positive_forward_surface_distance);
+
+    float ray_origin_to_negative_forward_surface_distance = 0;
+    bool is_negative_forward_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.negativeForwardSurface, ray_origin_to_negative_forward_surface_distance);
+
+    float ray_origin_to_positive_up_surface_distance = 0;
+    bool is_positive_up_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.positiveUpSurface, ray_origin_to_positive_up_surface_distance);
+
+    float ray_origin_to_negative_up_surface_distance = 0;
+    bool is_negative_up_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.negativeUpSurface, ray_origin_to_negative_up_surface_distance);
+
+    float ray_origin_to_positive_right_surface_distance = 0;
+    bool is_positive_right_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.positiveRightSurface, ray_origin_to_positive_right_surface_distance);
+
+    float ray_origin_to_negative_right_surface_distance = 0;
+    bool is_negative_right_surface_intersect = CalRaySurafaceIntersectDistance(origin, dir, bounding_box_surface.negativeRightSurface, ray_origin_to_negative_right_surface_distance);
+
+    //查看是否有交点
+    vec3 positive_forward_surface_intersection = vec3(0, 0, 0);
+    if (is_positive_forward_surface_intersect)
+    {
+        //计算交点位置
+        positive_forward_surface_intersection = origin + dir * ray_origin_to_positive_forward_surface_distance;
+        //查看交点是否在包围盒范围内
+        bool is_point_in_bounding_box = IsPointInBoundingBox(positive_forward_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            //如果不在包围盒内部，说明没相交，将相交状态置成false
+            is_positive_forward_surface_intersect = false;
+        }
+    }
+    //下同 略
+    vec3 negative_forward_surface_intersection = vec3(0, 0, 0);
+    if (is_negative_forward_surface_intersect)
+    {
+        negative_forward_surface_intersection = origin + dir * ray_origin_to_negative_forward_surface_distance;
+        bool is_point_in_bounding_box = IsPointInBoundingBox(negative_forward_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            is_negative_forward_surface_intersect = false;
+        }
+    }
+
+    vec3 positive_up_surface_intersection = vec3(0, 0, 0);
+    if (is_positive_up_surface_intersect)
+    {
+        positive_up_surface_intersection = origin + dir * ray_origin_to_positive_up_surface_distance;
+        bool is_point_in_bounding_box = IsPointInBoundingBox(positive_up_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            is_positive_up_surface_intersect = false;
+        }
+    }
+
+    vec3 negative_up_surface_intersection = vec3(0, 0, 0);
+    if (is_negative_up_surface_intersect)
+    {
+        negative_up_surface_intersection = origin + dir * ray_origin_to_negative_up_surface_distance;
+        bool is_point_in_bounding_box = IsPointInBoundingBox(negative_up_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            is_negative_up_surface_intersect = false;
+        }
+    }
+
+    vec3 positive_right_surface_intersection = vec3(0, 0, 0);
+    if (is_positive_right_surface_intersect)
+    {
+        positive_right_surface_intersection = origin + dir * ray_origin_to_positive_right_surface_distance;
+        bool is_point_in_bounding_box = IsPointInBoundingBox(positive_right_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            is_positive_right_surface_intersect = false;
+        }
+    }
+
+    vec3 negative_right_surface_intersection = vec3(0, 0, 0);
+    if (is_negative_right_surface_intersect)
+    {
+        negative_right_surface_intersection = origin + dir * ray_origin_to_negative_right_surface_distance;
+        bool is_point_in_bounding_box = IsPointInBoundingBox(negative_right_surface_intersection, boundingBox);
+        if (!is_point_in_bounding_box)
+        {
+            is_negative_right_surface_intersect = false;
+        }
+    }
+
+    //统计交点个数
+    uint intersection_count = 0;
+    if (is_positive_forward_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    if (is_negative_forward_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    if (is_positive_up_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    if (is_negative_up_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    if (is_positive_right_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    if (is_negative_right_surface_intersect)
+    {
+        intersection_count = intersection_count + 1;
+    }
+
+    //如果没有交点，直接返回，结束计算
+    if (intersection_count == 0)
+    {
+        return false;
+    }
+
+    //如果交点个数为1，说明在包围盒边缘相交，直接返回，结束计算
+    if (intersection_count == 1)
+    {
+        return false;
+    }
+
+    //如果有两个交点
+    if (intersection_count == 2)
+    {
+        //统计两个交点到射线起点的距离量
+        float origin_to_surface_distance[2];
+        uint index = 0;
+        if (is_positive_forward_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_positive_forward_surface_distance;
+            index = index + 1;
+        }
+
+        if (is_negative_forward_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_negative_forward_surface_distance;
+            index = index + 1;
+        }
+
+        if (is_positive_up_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_positive_up_surface_distance;
+            index = index + 1;
+        }
+
+        if (is_negative_up_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_negative_up_surface_distance;
+            index = index + 1;
+        }
+
+        if (is_positive_right_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_positive_right_surface_distance;
+            index = index + 1;
+        }
+
+        if (is_negative_right_surface_intersect)
+        {
+            origin_to_surface_distance[index] = ray_origin_to_negative_right_surface_distance;
+            index = index + 1;
+        }
+
+        //得到距离量之间的最小值，和最大值。
+        float min_distance = min(origin_to_surface_distance[0], origin_to_surface_distance[1]);
+        float max_distance = max(origin_to_surface_distance[0], origin_to_surface_distance[1]);
+
+        //如果两个距离量都大于零，说明交点在相机前方
+        if (min_distance > 0 && max_distance > 0)
+        {
+            intersections.firstInterectionPos = origin + dir * min_distance;
+            intersections.secondInterectionPos = origin + dir * max_distance;
+
+            return true;
+        }
+
+        //如果一个小于零，一个大于零，说明相机在包围盒内部，将起点设置成射线起点
+        if (min_distance < 0 && max_distance > 0)
+        {
+            intersections.firstInterectionPos = origin;
+            intersections.secondInterectionPos = origin + dir * max_distance;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+```
+
+至此，我们就计算出基于包围盒的光线步进的起点和终点了`BoundingBoxIntersections`，接下来就在包围盒内进行光线步进即可。  
+详情可参考`Turbo`引擎的`RayMarchingBoundingBoxTest`示例。
+
+![camera pixel pos](./images/ray_marching_bounding_box.gif)
 
 ---
 

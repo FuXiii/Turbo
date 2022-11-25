@@ -1694,3 +1694,11 @@ Turbo是渲染引擎
   >
   >* 更新`VolumetricCloud`文章
   >* 更改`./samples`下的`VolumetricCloud`，使其将`ComputerPipelineGeneratePerlinWorley`和`RayMarchingBoundingBoxTest`相结合
+
+* 2022/11/25 设计架构
+  >
+  >* `./docs/images`增加`intersect_case_out_box_forward.png`用于`VolumetricCloud.md`文章说明
+  >* `./docs/images`增加`intersect_case_in_box.png`用于`VolumetricCloud.md`文章说明
+  >* `./docs/images`增加`intersect_case_out_box_backward.png`用于`VolumetricCloud.md`文章说明
+  >* `./docs/images`增加`ray_marching_bounding_box.gif`用于`VolumetricCloud.md`文章说明
+  >* 更新`VolumetricCloud`文章
