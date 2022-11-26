@@ -79,6 +79,11 @@
   >
   >* 增加`2.1.3.2 包围盒中步进的起点和终点`中`射线与包围盒交点`章节
 
+* 2022/11/26
+  >
+  >* 增加`2.1.4 包围盒内光线步进`章节
+  >* 增加`2.1.4.1 包围盒内三维纹理采样`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -1273,6 +1278,117 @@ bool BoundingBoxIntersect(vec3 origin, vec3 dir, BoundingBox boundingBox, out Bo
 详情可参考`Turbo`引擎的`RayMarchingBoundingBoxTest`示例。
 
 ![camera pixel pos](./images/ray_marching_bounding_box.gif)
+
+#### 2.1.4 包围盒内光线步进
+
+现在我们已经知道了光线步进循环要计算的起点和终点，现在我们就可以在其包围盒中进行光线步进计算了。
+
+大致代码如下：
+
+```CXX
+vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox)
+{
+    //声明返回结果
+    vec3 result = vec3(0, 0, 0);
+    BoundingBoxIntersections intersections;
+    //判断是否相交并获取交点intersections
+    bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
+
+    //如果有交点，进行光线步进循环
+    if (is_intersect)
+    {
+        //开始位置
+        vec3 start_pos = intersections.firstInterectionPos;
+        //结束位置
+        vec3 end_pos = intersections.secondInterectionPos;
+        //最大步数，该值可根据性能调整
+        int max_step = 128;
+        //计算迈一步需要多长
+        float step = abs(length(end_pos - start_pos)) / max_step;
+        //起始位置设置成开始位置
+        vec3 point = start_pos;
+        //开始包围盒内的光线步进循环
+        for (int i = 0; i < max_step; ++i)
+        {
+            //计算当前采样点位置
+            point = start_pos + dir * step * i ;
+
+            //<待定，用于在采样点处做计算>
+            //...
+            //</待定，用于在采样点处做计算>
+        }
+        return result;
+    }
+
+    return result;
+}
+```
+
+光线步进的重头戏就在`<待定，用于在采样点处做计算>`标签之间，这之间是在步进采样点`point`上做的一系列计算。
+
+在这里我们目前主要是使用`point`到之前生成的三维噪音纹理中采样，而对于三维噪音纹理采样，采样点的范围为[0,1]，所以需要将`point`点坐标映射到[0,1]范围内。而映射算法也很简单，获得`point`对应于包围盒各正交基轴，投影的长宽高，与包围盒的长宽高分别相除即可。为了方便计算我们使用包围盒的右下角为采样坐标系坐标原点，包围盒`forward`的相反向量作为为采样坐标系的`z`轴，包围盒`right`的相反向量作为为采样坐标系的`x`轴，包围盒`up`的量作为为采样坐标系的`y`轴。如下图所示。
+
+![camera pixel pos](./images/bounding_box_sample_space.png)
+
+代码大致如下
+
+```CXX
+// 获取盒子内点相对三维噪音纹理采样点
+vec3 GetSamplePointPosition(vec3 point, BoundingBox boundingBox)
+{
+    vec3 result = vec3(0, 0, 0);
+
+    vec3 bounding_box_pos = boundingBox.position;
+    BoundingBoxSize bounding_box_size = GetBoundingBoxSize(boundingBox);
+    BoudingBoxOrthogonalBasis bounding_box_orthogonal_basis = GetBoundingBoxOrthogonalBasis(boundingBox);
+
+    vec3 bounding_box_forward = bounding_box_orthogonal_basis.forward;
+    vec3 bounding_box_up = bounding_box_orthogonal_basis.up;
+    vec3 bounding_box_right = bounding_box_orthogonal_basis.right;
+
+    //计算包围盒左下角位置，作为纹理采样的原点
+    vec3 lower_right_corner_pos = bounding_box_pos + bounding_box_forward * (bounding_box_size.width / 2) + bounding_box_up * (-bounding_box_size.height / 2) + bounding_box_right * (bounding_box_size.strip / 2);
+
+    //计算包围盒左下角到采样点的向量lower_right_corner_to_point
+    vec3 lower_right_corner_to_point = point - lower_right_corner_pos;
+
+    //计算采样空间的坐标轴
+    vec3 lower_right_corner_strip_dir = normalize(bounding_box_right * (-1));
+    vec3 lower_right_corner_up_dir = normalize(bounding_box_up * (1));
+    vec3 lower_right_corner_width_dir = normalize(bounding_box_forward * (-1));
+
+    //计算lower_right_corner_to_point向量到每个采样空间各个正交基的轴的长度，与之前计算点是否在包围盒内原理相同
+    float project_strip = dot(lower_right_corner_to_point, lower_right_corner_strip_dir);
+    float project_height = dot(lower_right_corner_to_point, lower_right_corner_up_dir);
+    float project_width = dot(lower_right_corner_to_point, lower_right_corner_width_dir);
+
+    //分别除以长、宽、高对应对应长度将采样点分为映射到[0,1]
+    //注：非绝对[0,1]，其实这里映射到[0,1]的限制很宽松，可以跑出[0,1]范围
+    result = vec3(project_strip / bounding_box_size.strip, project_height / bounding_box_size.height, project_width / bounding_box_size.width);
+    return result;
+}
+```
+
+这样就可以计算出盒子中一点的三维纹理采样坐标了。
+
+如果将之前的`<待定，用于在采样点处做计算>`之间的代码改成如下：
+
+将采样点坐标作为颜色值输出
+
+```CXX
+vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+return sample_point;
+```
+
+将会得到如下结果：
+
+注：色块抖动是`GIF`转换对录像处理了的结果
+
+![camera pixel pos](./images/ray_marching_bounding_box_sample_space.gif)
+
+现在光线步进循环有了，采样点也有了，接下来就是对噪音纹理进行采样了
+
+##### 2.1.4.1 包围盒内三维纹理采样
 
 ---
 
