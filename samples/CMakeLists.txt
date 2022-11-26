@@ -168,3 +168,8 @@ add_executable(RayMarchingBoundingBoxTest ./RayMarchingBoundingBoxTest.cpp ${IMG
 target_include_directories(RayMarchingBoundingBoxTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(RayMarchingBoundingBoxTest PUBLIC ${LINK_PARTH})
 target_link_libraries(RayMarchingBoundingBoxTest PUBLIC ${LIBS})
+
+add_executable(RayMarchingPerlinWorleyNoise ./RayMarchingPerlinWorleyNoise.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(RayMarchingPerlinWorleyNoise PUBLIC ${INCLUDE_PARTH})
+target_link_directories(RayMarchingPerlinWorleyNoise PUBLIC ${LINK_PARTH})
+target_link_libraries(RayMarchingPerlinWorleyNoise PUBLIC ${LIBS})
