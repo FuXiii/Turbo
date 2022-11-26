@@ -1702,3 +1702,10 @@ Turbo是渲染引擎
   >* `./docs/images`增加`intersect_case_out_box_backward.png`用于`VolumetricCloud.md`文章说明
   >* `./docs/images`增加`ray_marching_bounding_box.gif`用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
+
+* 2022/11/26 设计架构
+  >
+  >* `./docs/images`增加`bounding_box_sample_space.png`用于`VolumetricCloud.md`文章说明
+  >* `./docs/images`增加`ray_marching_bounding_box_sample_space.gif`用于`VolumetricCloud.md`文章说明
+  >* `./samples`下的`VolumetricCloud`实例中增加`delete my_computer_shader`。
+  >* 更新`VolumetricCloud`文章

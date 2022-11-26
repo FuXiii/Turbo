@@ -1039,6 +1039,7 @@ int main()
     delete render_pass;
 
     delete descriptor_pool;
+    delete my_computer_shader;
     delete my_vertex_shader;
     delete my_fragment_shader;
     delete depth_image_view;
