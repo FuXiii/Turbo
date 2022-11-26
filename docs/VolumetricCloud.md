@@ -1390,6 +1390,100 @@ return sample_point;
 
 ##### 2.1.4.1 包围盒内三维纹理采样
 
+我们目前主要是对之前计算的柏林-沃利噪音进行采样。  
+将`<待定，用于在采样点处做计算>`之间的代码改成如下：
+
+```CXX
+//外部传入计算好的柏林-沃利三维噪音
+layout(set = 0, binding = 0) uniform texture3D perlinWorleyNoise;
+//外部传入的三维纹理采样器
+layout(set = 0, binding = 1) uniform sampler mySampler;
+
+//计算采样坐标
+vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+//进行采样
+vec4 fbm = texture(sampler3D(perlinWorleyNoise, mySampler), sample_point, 0);
+
+//其中
+//fbm.x为柏林-沃利噪音值
+//fbm.yzw分别为不同频率的沃利噪音
+float perlin_worley = fbm.x;
+vec3 worleys = fbm.yzw;
+
+//叠加FBM
+float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
+float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
+//计算云的基础形状
+//coverage 为外部传给着色器的范围在[0,1]，用于控制云体覆盖率
+cloud = remap(cloud, 1 - coverage, 1., 0., 1.);
+```
+
+渲染结果如下：
+
+![camera pixel pos](./images/ray_marching_bounding_box_sample_3d_noise.gif)
+
+你会发现会有生硬的一圈圈的条纹状结果，之所以会出现这种现象是因为采样步长都是定长，这就会导致上一步和下一步之间的过渡数据被完全忽略，为了解决此问题，只需要在采样点临域内随机做个位移即可，宏观上看就是采样点随机“抖动”。（还有一种方案是“抖动"射线的起点或者是射线的方向，无论是什么方式，最终都是随机偏移采样点）
+
+我们使用之前的`hash(...)`函数生成一个随机值，以此来抖动采样点。
+
+```CXX
+//使用hash(...)函数抖动采样点
+//其中vec3(12.256, 2.646, 6.356)随便写的，也可以是其他的
+point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
+vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+```
+
+渲染结果如下：
+
+![camera pixel pos](./images/ray_marching_bounding_box_sample_3d_noise_erase_strip.gif)
+
+完整渲染代码如下：
+
+```CXX
+vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage)
+{
+    vec3 result = vec3(0, 0, 0);
+    BoundingBoxIntersections intersections;
+    bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
+
+    if (is_intersect)
+    {
+        vec3 start_pos = intersections.firstInterectionPos;
+        vec3 end_pos = intersections.secondInterectionPos;
+
+        int max_step = 128;
+        float step = abs(length(end_pos - start_pos)) / max_step;
+        //光衰系数
+        float T = 1.;
+        //辐射亮度
+        vec3 radiance = vec3(1, 1, 1);
+
+        vec3 point = start_pos;
+        for (int i = 0; i < max_step; ++i)
+        {
+            point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
+            vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+
+            vec4 fbm = texture(sampler3D(perlinWorleyNoise, mySampler), sample_point, 0);
+            float perlin_worley = fbm.x;
+            vec3 worleys = fbm.yzw;
+            float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
+            float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
+            cloud = remap(cloud, 1 - coverage, 1., 0., 1.);
+
+            // 魔法函数，用于简化计算光衰
+            T *= exp(-cloud * step);
+            result += T * radiance / cloud;
+        }
+        return result;
+    }
+
+    return result;
+}
+```
+
+完整工程请参考`Turbo`的`RayMarchingPerlinWorleyNoise`示例
+
 ---
 
 ## 未完待续

@@ -1709,3 +1709,5 @@ Turbo是渲染引擎
   >* `./docs/images`增加`ray_marching_bounding_box_sample_space.gif`用于`VolumetricCloud.md`文章说明
   >* `./samples`下的`VolumetricCloud`实例中增加`delete my_computer_shader`。
   >* 更新`VolumetricCloud`文章
+  >* `./samples`下增加`RayMarchingPerlinWorleyNoise`实例，用于展示光线步进中基于包围盒对柏林沃利噪音的采样。
+  >* `./asset/shaders`下增加`ray_marching_perlin_worley_noise.frag`片元着色器，并使用于`RayMarchingPerlinWorleyNoise`实例中
