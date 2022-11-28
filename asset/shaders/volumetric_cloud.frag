@@ -27,6 +27,8 @@ layout(push_constant) uniform my_push_constants_t
     float boxHalfDiagonalVectorZ;
 
     float coverage;
+
+    float power;
 }
 my_push_constants;
 layout(location = 0) in vec2 uv;
@@ -493,7 +495,7 @@ float GetPerlinWorleyCloudDensity(vec3 point, float coverage, BoundingBox boundi
     vec3 worleys = fbm.yzw;
     float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
     float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
-    //cloud = pow(cloud, 0.3 + 1.5 * smoothstep(0.2, 0.5, sample_point.y));
+    cloud = pow(cloud, 0.3 + 1.5 * smoothstep(0.2, 0.5, sample_point.y));
     float density = remap(cloud, 1 - coverage, 1., 0., 1.); // coverage
     return density;
 }
@@ -562,6 +564,11 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         {
             point = start_pos + dir * step * j;
             float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+            if (density <= 0.0)
+            {
+                break;
+            }
+
             light_ray_density += density;
         }
 
@@ -576,7 +583,6 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
 const vec3 albedo = vec3(0.85, 0.82, 0.90);
 const vec3 sun_dir = normalize(vec3(1000, 1000, 1000));
 const vec3 sunLightColour = vec3(1, 1, 1);
-const float sun_power = 20.;
 
 vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage, float time)
 {
@@ -597,9 +603,9 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         vec3 T = vec3(1, 1, 1);
 
         float mu = dot(sun_dir, dir);
-        float phase_function = HenyeyGreensteinPhaseFunction(0.5, sun_dir, dir); //相函数计算
+        float phase_function = HenyeyGreensteinPhaseFunction(0.5, sun_dir, dir); // 相函数计算
 
-        vec3 sunLight = sunLightColour * sun_power;
+        vec3 sunLight = sunLightColour * my_push_constants.power;
 
         vec3 radiance = vec3(1, 1, 1);
 
@@ -612,14 +618,14 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             vec3 sigmaS = vec3(1.);               /*散射系数*/
             vec3 sigmaA = vec3(0.);               /*吸收系数*/
             vec3 sigmaE = (sigmaS + sigmaA);      /*消亡系数*/
-            vec3 sampleSigmaS = sigmaS * density; //采样点的散射
-            vec3 sampleSigmaE = sigmaE * density; //采样点的消亡
+            vec3 sampleSigmaS = sigmaS * density; // 采样点的散射
+            vec3 sampleSigmaE = sigmaE * density; // 采样点的消亡
             //<光照>
             if (density > 0.0)
             {
-                vec3 ambient = sunLightColour;
+                vec3 ambient = vec3(0.412, 0.513, 0.607);
 
-                vec3 luminance = 0.1 * ambient + sunLight * phase_function /** LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox)*/;
+                vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox);
                 luminance *= sampleSigmaS;
                 vec3 transmittance = exp(-sampleSigmaE * step);
                 color += T * (luminance - luminance * transmittance) / sampleSigmaE;

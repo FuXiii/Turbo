@@ -159,6 +159,8 @@ struct MY_PUSH_CONSTANTS_DATA
     float boxHalfDiagonalVectorZ;
 
     float coverage;
+
+    float power;
 };
 
 int main()
@@ -430,13 +432,13 @@ int main()
 
     float bounding_box_pos[3];
     bounding_box_pos[0] = 0;
-    bounding_box_pos[1] = 0;
+    bounding_box_pos[1] = 20;
     bounding_box_pos[2] = 0;
 
     float bounding_box_half_diagonal_vector[3];
-    bounding_box_half_diagonal_vector[0] = 1;
-    bounding_box_half_diagonal_vector[1] = 1;
-    bounding_box_half_diagonal_vector[2] = 1;
+    bounding_box_half_diagonal_vector[0] = 20;
+    bounding_box_half_diagonal_vector[1] = 20;
+    bounding_box_half_diagonal_vector[2] = 20;
 
     bool show_demo_window = true;
     MY_PUSH_CONSTANTS_DATA my_push_constants_data;
@@ -450,15 +452,16 @@ int main()
     my_push_constants_data.lookForwardDirY = 0;
     my_push_constants_data.lookForwardDirZ = 0;
     my_push_constants_data.boxPosX = 0;
-    my_push_constants_data.boxPosY = 0;
+    my_push_constants_data.boxPosY = 20;
     my_push_constants_data.boxPosZ = 0;
     my_push_constants_data.boxForwardDirX = 0;
     my_push_constants_data.boxForwardDirY = 0;
     my_push_constants_data.boxForwardDirZ = 1;
-    my_push_constants_data.boxHalfDiagonalVectorX = 1;
-    my_push_constants_data.boxHalfDiagonalVectorY = 1;
-    my_push_constants_data.boxHalfDiagonalVectorZ = 1;
+    my_push_constants_data.boxHalfDiagonalVectorX = 20;
+    my_push_constants_data.boxHalfDiagonalVectorY = 20;
+    my_push_constants_data.boxHalfDiagonalVectorZ = 20;
     my_push_constants_data.coverage = 0.15f;
+    my_push_constants_data.power = 30;
 
     glm::vec3 camera_position = glm::vec3(0, 0, 0);
     glm::vec3 look_forward = glm::vec3(0, 0, 1);
@@ -650,10 +653,11 @@ int main()
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 
-                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -10, 10);
+                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -20, 20);
                 ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
                 ImGui::SliderFloat3("BoundingBox half diagonal vector", bounding_box_half_diagonal_vector, 0, 20);
                 ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
+                ImGui::SliderFloat("Power", &my_push_constants_data.power, 0, 200);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
