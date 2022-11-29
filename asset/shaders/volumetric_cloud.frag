@@ -509,7 +509,7 @@ float GetPerlinWorleyCloudDensity(vec3 point, float coverage, BoundingBox boundi
     {
         vec3 high_frequency_worly_noise = texture(sampler3D(worleyNoise, mySampler), sample_point * 0.1, 0).rgb;
         float high_freq_FBM = (high_frequency_worly_noise.r * 0.625) + (high_frequency_worly_noise.g * 0.25) + (high_frequency_worly_noise.b * 0.125);
-        float high_freq_noise_modifier = high_freq_FBM; // mix(high_freq_FBM, 1.0 - high_freq_FBM, clamp(point.y * 10.0, 0, 1));
+        float high_freq_noise_modifier = mix(high_freq_FBM, 1.0 - high_freq_FBM, clamp(point.y * 10.0, 0, 1));
 
         final_cloud = remap(base_cloud_with_coverage, high_freq_noise_modifier * 0.2, 1.0, 0.0, 1.0);
     }
@@ -573,7 +573,7 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         vec3 end_pos = intersections.secondInterectionPos;
 
         int max_step = 6;
-        float step = abs(length(end_pos - start_pos)/3) / max_step;
+        float step = abs(length(end_pos - start_pos) / 3) / max_step;
         float light_ray_density = 0.0;
 
         vec3 point = start_pos;
