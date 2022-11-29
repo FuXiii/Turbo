@@ -46,7 +46,7 @@ void main()
     vec3 color = vec3(0.0, 0.0, 0.0);
     vec3 uv = vec3(gl_GlobalInvocationID.x / 32., gl_GlobalInvocationID.y / 32., gl_GlobalInvocationID.z / 32.);
     ivec3 texelCoord = ivec3(gl_GlobalInvocationID.xyz);
-    float freq = 4;
+    float freq = 8;
     color.r += worleyFbm(uv, freq);
     color.g += worleyFbm(uv, freq * 2.);
     color.b += worleyFbm(uv, freq * 4.);

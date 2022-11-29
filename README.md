@@ -1711,3 +1711,8 @@ Turbo是渲染引擎
   >* 更新`VolumetricCloud`文章
   >* `./samples`下增加`RayMarchingPerlinWorleyNoise`实例，用于展示光线步进中基于包围盒对柏林沃利噪音的采样。
   >* `./asset/shaders`下增加`ray_marching_perlin_worley_noise.frag`片元着色器，并使用于`RayMarchingPerlinWorleyNoise`实例中
+
+* 2022/11/29 设计架构
+  >
+  >* `./samples`中`VolumetricCloud`中增加`power`、`absorption`、`outScattering`传输变量，用于体积云渲染
+  >* `./samples`中`VolumetricCloud`中增加对高频沃利纹理的采样

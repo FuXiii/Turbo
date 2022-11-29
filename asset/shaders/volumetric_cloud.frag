@@ -29,13 +29,19 @@ layout(push_constant) uniform my_push_constants_t
     float coverage;
 
     float power;
+
+    float absorption;
+    float outScattering;
+
+    bool isHighFreq;
 }
 my_push_constants;
 layout(location = 0) in vec2 uv;
 layout(location = 0) out vec4 outColor;
 
 layout(set = 0, binding = 0) uniform texture3D perlinWorleyNoise;
-layout(set = 0, binding = 1) uniform sampler mySampler;
+layout(set = 0, binding = 1) uniform texture3D worleyNoise;
+layout(set = 0, binding = 2) uniform sampler mySampler;
 
 #define PI 3.1415926
 
@@ -235,7 +241,7 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
     float bounding_box_half_height = bounding_box_size.height / 2.0;
     float bounding_box_half_strip = bounding_box_size.strip / 2.0;
 
-    float little_compensate = 0.0005;
+    float little_compensate = 0.000005;
 
     bounding_box_half_width += little_compensate;
     bounding_box_half_height += little_compensate;
@@ -494,10 +500,21 @@ float GetPerlinWorleyCloudDensity(vec3 point, float coverage, BoundingBox boundi
     float perlin_worley = fbm.x;
     vec3 worleys = fbm.yzw;
     float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
-    float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
-    cloud = pow(cloud, 0.3 + 1.5 * smoothstep(0.2, 0.5, sample_point.y));
-    float density = remap(cloud, 1 - coverage, 1., 0., 1.); // coverage
-    return density;
+    float base_cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
+    base_cloud = pow(base_cloud, 0.3 + 1.5 * smoothstep(0.2, 0.5, sample_point.y));
+    float base_cloud_with_coverage = remap(base_cloud, 1 - coverage, 1., 0., 1.); // coverage
+
+    float final_cloud = base_cloud_with_coverage;
+    if (my_push_constants.isHighFreq)
+    {
+        vec3 high_frequency_worly_noise = texture(sampler3D(worleyNoise, mySampler), sample_point * 0.1, 0).rgb;
+        float high_freq_FBM = (high_frequency_worly_noise.r * 0.625) + (high_frequency_worly_noise.g * 0.25) + (high_frequency_worly_noise.b * 0.125);
+        float high_freq_noise_modifier = high_freq_FBM; // mix(high_freq_FBM, 1.0 - high_freq_FBM, clamp(point.y * 10.0, 0, 1));
+
+        final_cloud = remap(base_cloud_with_coverage, high_freq_noise_modifier * 0.2, 1.0, 0.0, 1.0);
+    }
+
+    return final_cloud;
 }
 
 float HenyeyGreensteinPhaseFunction(float g, vec3 sunDir, vec3 viewDir)
@@ -556,7 +573,7 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         vec3 end_pos = intersections.secondInterectionPos;
 
         int max_step = 6;
-        float step = abs(length(end_pos - start_pos)) / max_step;
+        float step = abs(length(end_pos - start_pos)/3) / max_step;
         float light_ray_density = 0.0;
 
         vec3 point = start_pos;
@@ -615,11 +632,11 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
             float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
 
-            vec3 sigmaS = vec3(1.);               /*散射系数*/
-            vec3 sigmaA = vec3(0.);               /*吸收系数*/
-            vec3 sigmaE = (sigmaS + sigmaA);      /*消亡系数*/
-            vec3 sampleSigmaS = sigmaS * density; // 采样点的散射
-            vec3 sampleSigmaE = sigmaE * density; // 采样点的消亡
+            vec3 sigmaS = vec3(my_push_constants.outScattering); /*散射系数*/
+            vec3 sigmaA = vec3(my_push_constants.absorption);    /*吸收系数*/
+            vec3 sigmaE = (sigmaS + sigmaA);                     /*消亡系数*/
+            vec3 sampleSigmaS = sigmaS * density;                // 采样点的散射
+            vec3 sampleSigmaE = sigmaE * density;                // 采样点的消亡
             //<光照>
             if (density > 0.0)
             {
