@@ -485,7 +485,7 @@ int main()
     my_push_constants_data.boxHalfDiagonalVectorX = 20;
     my_push_constants_data.boxHalfDiagonalVectorY = 20;
     my_push_constants_data.boxHalfDiagonalVectorZ = 20;
-    my_push_constants_data.coverage = 0.15f;
+    my_push_constants_data.coverage = 0.048f;
     my_push_constants_data.power = 30;
     my_push_constants_data.absorption = 0;
     my_push_constants_data.outScattering = 1;
