@@ -105,7 +105,9 @@ const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string MY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+const std::string MY_PERLIN_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+
+const std::string MY_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/worley.comp");
 
 const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
 
@@ -159,6 +161,13 @@ struct MY_PUSH_CONSTANTS_DATA
     float boxHalfDiagonalVectorZ;
 
     float coverage;
+
+    float power;
+
+    float absorption;
+    float outScattering;
+
+    bool isHighFreq;
 };
 
 int main()
@@ -265,18 +274,26 @@ int main()
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    uint32_t perlin_worly_noise_3d_image_width = 128;
-    uint32_t perlin_worly_noise_3d_image_height = 128;
-    uint32_t perlin_worly_noise_3d_image_depth = 128;
-    Turbo::Core::TImage *perlin_worly_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, perlin_worly_noise_3d_image_width, perlin_worly_noise_3d_image_height, perlin_worly_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-    Turbo::Core::TImageView *perlin_worly_noise_3d_image_view = new Turbo::Core::TImageView(perlin_worly_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, perlin_worly_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    uint32_t perlin_worley_noise_3d_image_width = 128;
+    uint32_t perlin_worley_noise_3d_image_height = 128;
+    uint32_t perlin_worley_noise_3d_image_depth = 128;
+    Turbo::Core::TImage *perlin_worley_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, perlin_worley_noise_3d_image_width, perlin_worley_noise_3d_image_height, perlin_worley_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImageView *perlin_worley_noise_3d_image_view = new Turbo::Core::TImageView(perlin_worley_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, perlin_worley_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TComputeShader *my_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_COMPUTE_SHADER_STR);
+    uint32_t worley_noise_3d_image_width = 64;
+    uint32_t worley_noise_3d_image_height = 64;
+    uint32_t worley_noise_3d_image_depth = 64;
+    Turbo::Core::TImage *worley_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, worley_noise_3d_image_width, worley_noise_3d_image_height, worley_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImageView *worley_noise_3d_image_view = new Turbo::Core::TImageView(worley_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, worley_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+    Turbo::Core::TComputeShader *my_perlin_worley_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_PERLIN_WORLEY_COMPUTE_SHADER_STR);
+    Turbo::Core::TComputeShader *my_worley_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_WORLEY_COMPUTE_SHADER_STR);
 
     Turbo::Core::TVertexShader *my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
     Turbo::Core::TFragmentShader *my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
 
-    std::cout << my_computer_shader->ToString() << std::endl;
+    std::cout << my_perlin_worley_computer_shader->ToString() << std::endl;
+    std::cout << my_worley_computer_shader->ToString() << std::endl;
     std::cout << my_vertex_shader->ToString() << std::endl;
     std::cout << my_fragment_shader->ToString() << std::endl;
 
@@ -330,21 +347,31 @@ int main()
     Turbo::Core::TGraphicsPipeline *graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
     Turbo::Core::TPipelineDescriptorSet *graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
 
-    std::vector<Turbo::Core::TImageView *> graphics_pipeline_image_views;
-    graphics_pipeline_image_views.push_back(perlin_worly_noise_3d_image_view);
-    graphics_pipeline_descriptor_set->BindData(0, 0, 0, graphics_pipeline_image_views);
+    std::vector<Turbo::Core::TImageView *> graphics_pipeline_perlin_worley_image_views;
+    graphics_pipeline_perlin_worley_image_views.push_back(perlin_worley_noise_3d_image_view);
+    graphics_pipeline_descriptor_set->BindData(0, 0, 0, graphics_pipeline_perlin_worley_image_views);
+
+    std::vector<Turbo::Core::TImageView *> graphics_pipeline_worley_image_views;
+    graphics_pipeline_worley_image_views.push_back(worley_noise_3d_image_view);
+    graphics_pipeline_descriptor_set->BindData(0, 1, 0, graphics_pipeline_worley_image_views);
 
     Turbo::Core::TSampler *graphics_pipeline_sampler = new Turbo::Core::TSampler(device);
     std::vector<Turbo::Core::TSampler *> graphics_pipeline_samplers;
     graphics_pipeline_samplers.push_back(graphics_pipeline_sampler);
-    graphics_pipeline_descriptor_set->BindData(0, 1, 0, graphics_pipeline_samplers);
+    graphics_pipeline_descriptor_set->BindData(0, 2, 0, graphics_pipeline_samplers);
 
-    Turbo::Core::TComputePipeline *compute_pipeline = new Turbo::Core::TComputePipeline(my_computer_shader);
+    Turbo::Core::TComputePipeline *perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_perlin_worley_computer_shader);
+    Turbo::Core::TComputePipeline *worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_worley_computer_shader);
 
-    std::vector<Turbo::Core::TImageView *> compute_pipeline_image_views;
-    compute_pipeline_image_views.push_back(perlin_worly_noise_3d_image_view);
-    Turbo::Core::TPipelineDescriptorSet *compute_pipeline_descriptor_set = descriptor_pool->Allocate(compute_pipeline->GetPipelineLayout());
-    compute_pipeline_descriptor_set->BindData(0, 0, 0, compute_pipeline_image_views);
+    std::vector<Turbo::Core::TImageView *> perlin_worley_compute_pipeline_image_views;
+    perlin_worley_compute_pipeline_image_views.push_back(perlin_worley_noise_3d_image_view);
+    Turbo::Core::TPipelineDescriptorSet *perlin_worley_compute_pipeline_descriptor_set = descriptor_pool->Allocate(perlin_worley_compute_pipeline->GetPipelineLayout());
+    perlin_worley_compute_pipeline_descriptor_set->BindData(0, 0, 0, perlin_worley_compute_pipeline_image_views);
+
+    std::vector<Turbo::Core::TImageView *> worley_compute_pipeline_image_views;
+    worley_compute_pipeline_image_views.push_back(worley_noise_3d_image_view);
+    Turbo::Core::TPipelineDescriptorSet *worley_compute_pipeline_descriptor_set = descriptor_pool->Allocate(worley_compute_pipeline->GetPipelineLayout());
+    worley_compute_pipeline_descriptor_set->BindData(0, 0, 0, worley_compute_pipeline_image_views);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -430,13 +457,13 @@ int main()
 
     float bounding_box_pos[3];
     bounding_box_pos[0] = 0;
-    bounding_box_pos[1] = 0;
+    bounding_box_pos[1] = 20;
     bounding_box_pos[2] = 0;
 
     float bounding_box_half_diagonal_vector[3];
-    bounding_box_half_diagonal_vector[0] = 1;
-    bounding_box_half_diagonal_vector[1] = 1;
-    bounding_box_half_diagonal_vector[2] = 1;
+    bounding_box_half_diagonal_vector[0] = 20;
+    bounding_box_half_diagonal_vector[1] = 20;
+    bounding_box_half_diagonal_vector[2] = 20;
 
     bool show_demo_window = true;
     MY_PUSH_CONSTANTS_DATA my_push_constants_data;
@@ -450,15 +477,19 @@ int main()
     my_push_constants_data.lookForwardDirY = 0;
     my_push_constants_data.lookForwardDirZ = 0;
     my_push_constants_data.boxPosX = 0;
-    my_push_constants_data.boxPosY = 0;
+    my_push_constants_data.boxPosY = 20;
     my_push_constants_data.boxPosZ = 0;
     my_push_constants_data.boxForwardDirX = 0;
     my_push_constants_data.boxForwardDirY = 0;
     my_push_constants_data.boxForwardDirZ = 1;
-    my_push_constants_data.boxHalfDiagonalVectorX = 1;
-    my_push_constants_data.boxHalfDiagonalVectorY = 1;
-    my_push_constants_data.boxHalfDiagonalVectorZ = 1;
-    my_push_constants_data.coverage = 0.15f;
+    my_push_constants_data.boxHalfDiagonalVectorX = 20;
+    my_push_constants_data.boxHalfDiagonalVectorY = 20;
+    my_push_constants_data.boxHalfDiagonalVectorZ = 20;
+    my_push_constants_data.coverage = 0.048f;
+    my_push_constants_data.power = 30;
+    my_push_constants_data.absorption = 0;
+    my_push_constants_data.outScattering = 1;
+    my_push_constants_data.isHighFreq = true;
 
     glm::vec3 camera_position = glm::vec3(0, 0, 0);
     glm::vec3 look_forward = glm::vec3(0, 0, 1);
@@ -473,13 +504,19 @@ int main()
     Turbo::Core::TCommandBuffer *compute_command_buffer = command_pool->Allocate();
 
     compute_command_buffer->Begin();
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, perlin_worly_noise_3d_image_view);
+    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, perlin_worley_noise_3d_image_view);
+    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, worley_noise_3d_image_view);
     // Compute Pipeline calculate Perlin-Worley Noise into 3D texture
-    compute_command_buffer->CmdBindPipeline(compute_pipeline);
-    compute_command_buffer->CmdBindPipelineDescriptorSet(compute_pipeline_descriptor_set);
-    compute_command_buffer->CmdDispatch(perlin_worly_noise_3d_image_width, perlin_worly_noise_3d_image_height, perlin_worly_noise_3d_image_depth);
+    compute_command_buffer->CmdBindPipeline(perlin_worley_compute_pipeline);
+    compute_command_buffer->CmdBindPipelineDescriptorSet(perlin_worley_compute_pipeline_descriptor_set);
+    compute_command_buffer->CmdDispatch(perlin_worley_noise_3d_image_width, perlin_worley_noise_3d_image_height, perlin_worley_noise_3d_image_depth);
 
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, perlin_worly_noise_3d_image_view);
+    compute_command_buffer->CmdBindPipeline(worley_compute_pipeline);
+    compute_command_buffer->CmdBindPipelineDescriptorSet(worley_compute_pipeline_descriptor_set);
+    compute_command_buffer->CmdDispatch(worley_noise_3d_image_width, worley_noise_3d_image_height, worley_noise_3d_image_depth);
+
+    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, perlin_worley_noise_3d_image_view);
+    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, worley_noise_3d_image_view);
     compute_command_buffer->End();
 
     Turbo::Core::TFence *compute_fence = new Turbo::Core::TFence(device);
@@ -650,10 +687,14 @@ int main()
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 
-                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -10, 10);
+                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -20, 20);
                 ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
                 ImGui::SliderFloat3("BoundingBox half diagonal vector", bounding_box_half_diagonal_vector, 0, 20);
                 ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
+                ImGui::SliderFloat("Power", &my_push_constants_data.power, 0, 750);
+                ImGui::SliderFloat("Absorption", &my_push_constants_data.absorption, 0, 1);
+                ImGui::SliderFloat("Out scattering", &my_push_constants_data.outScattering, 0, 1);
+                ImGui::Checkbox("Is high frequence", &my_push_constants_data.isHighFreq);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -1018,7 +1059,7 @@ int main()
         delete imgui_index_buffer;
     }
     descriptor_pool->Free(graphics_pipeline_descriptor_set);
-    descriptor_pool->Free(compute_pipeline_descriptor_set);
+    descriptor_pool->Free(perlin_worley_compute_pipeline_descriptor_set);
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     delete imgui_font_image_view;
     delete imgui_font_image;
@@ -1027,7 +1068,8 @@ int main()
     delete imgui_fragment_shader;
     delete imgui_sampler;
 
-    delete compute_pipeline;
+    delete worley_compute_pipeline;
+    delete perlin_worley_compute_pipeline;
     delete graphics_pipeline;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
@@ -1039,14 +1081,18 @@ int main()
     delete render_pass;
 
     delete descriptor_pool;
-    delete my_computer_shader;
+    delete my_worley_computer_shader;
+    delete my_perlin_worley_computer_shader;
     delete my_vertex_shader;
     delete my_fragment_shader;
     delete depth_image_view;
     delete depth_image;
 
-    delete perlin_worly_noise_3d_image_view;
-    delete perlin_worly_noise_3d_image;
+    delete worley_noise_3d_image_view;
+    delete worley_noise_3d_image;
+
+    delete perlin_worley_noise_3d_image_view;
+    delete perlin_worley_noise_3d_image;
 
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {

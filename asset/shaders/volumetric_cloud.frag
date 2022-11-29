@@ -27,13 +27,21 @@ layout(push_constant) uniform my_push_constants_t
     float boxHalfDiagonalVectorZ;
 
     float coverage;
+
+    float power;
+
+    float absorption;
+    float outScattering;
+
+    bool isHighFreq;
 }
 my_push_constants;
 layout(location = 0) in vec2 uv;
 layout(location = 0) out vec4 outColor;
 
 layout(set = 0, binding = 0) uniform texture3D perlinWorleyNoise;
-layout(set = 0, binding = 1) uniform sampler mySampler;
+layout(set = 0, binding = 1) uniform texture3D worleyNoise;
+layout(set = 0, binding = 2) uniform sampler mySampler;
 
 #define PI 3.1415926
 
@@ -233,7 +241,7 @@ bool IsPointInBoundingBox(vec3 point, BoundingBox boundingBox)
     float bounding_box_half_height = bounding_box_size.height / 2.0;
     float bounding_box_half_strip = bounding_box_size.strip / 2.0;
 
-    float little_compensate = 0.0005;
+    float little_compensate = 0.000005;
 
     bounding_box_half_width += little_compensate;
     bounding_box_half_height += little_compensate;
@@ -483,9 +491,79 @@ vec3 GetSamplePointPosition(vec3 point, BoundingBox boundingBox)
     return result;
 }
 
-vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage)
+vec3 move = vec3(0, 0, 0);
+
+float GetPerlinWorleyCloudDensity(vec3 point, float coverage, BoundingBox boundingBox)
 {
-    vec3 result = vec3(0, 0, 0);
+    vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+    vec4 fbm = texture(sampler3D(perlinWorleyNoise, mySampler), sample_point + move, 0);
+    float perlin_worley = fbm.x;
+    vec3 worleys = fbm.yzw;
+    float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
+    float base_cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
+    base_cloud = pow(base_cloud, 0.3 + 1.5 * smoothstep(0.2, 0.5, sample_point.y));
+    float base_cloud_with_coverage = remap(base_cloud, 1 - coverage, 1., 0., 1.); // coverage
+
+    float final_cloud = base_cloud_with_coverage;
+    if (my_push_constants.isHighFreq)
+    {
+        vec3 high_frequency_worly_noise = texture(sampler3D(worleyNoise, mySampler), sample_point * 0.1, 0).rgb;
+        float high_freq_FBM = (high_frequency_worly_noise.r * 0.625) + (high_frequency_worly_noise.g * 0.25) + (high_frequency_worly_noise.b * 0.125);
+        float high_freq_noise_modifier = mix(high_freq_FBM, 1.0 - high_freq_FBM, clamp(point.y * 10.0, 0, 1));
+
+        final_cloud = remap(base_cloud_with_coverage, high_freq_noise_modifier * 0.2, 1.0, 0.0, 1.0);
+    }
+
+    return final_cloud;
+}
+
+float HenyeyGreensteinPhaseFunction(float g, vec3 sunDir, vec3 viewDir)
+{
+    float mu = dot(sunDir, viewDir);
+    float gSqr = g * g;
+    float oofp = 1.0 / (4.0 * 3.141592);
+    return oofp * (1.0 - gSqr) / pow(1.0 - 2.0 * g * mu + gSqr, 1.5);
+}
+
+float HenyeyGreensteinPhaseFunction(float g, float mu)
+{
+    float gSqr = g * g;
+    float oofp = 1.0 / (4.0 * 3.141592);
+    return oofp * (1.0 - gSqr) / pow(1.0 - 2.0 * g * mu + gSqr, 1.5);
+}
+
+vec3 MultipleOctaves(float density, float mu, float stepL, vec3 sigmaExtinction)
+{
+    vec3 luminance = vec3(0);
+    const float octaves = 1.0;
+
+    // Attenuation
+    float a = 1.0;
+    // Contribution
+    float b = 1.0;
+    // Phase attenuation
+    float c = 1.0;
+
+    float phase;
+
+    for (float i = 0.0; i < octaves; i++)
+    {
+        // Two-lobed HG
+        phase = mix(HenyeyGreensteinPhaseFunction(-0.3 * c, mu), HenyeyGreensteinPhaseFunction(0.3 * c, mu), 0.7);
+        luminance += b * phase * exp(-stepL * density * sigmaExtinction * a);
+        // Lower is brighter
+        a *= 0.2;
+        // Higher is brighter
+        b *= 0.5;
+        c *= 0.5;
+    }
+    return luminance;
+}
+
+vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float coverage, BoundingBox boundingBox)
+{
+    vec3 result = vec3(1, 1, 1);
+
     BoundingBoxIntersections intersections;
     bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
 
@@ -494,9 +572,57 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
+        int max_step = 6;
+        float step = abs(length(end_pos - start_pos) / 3) / max_step;
+        float light_ray_density = 0.0;
+
+        vec3 point = start_pos;
+        for (int j = 0; j < max_step; j++)
+        {
+            point = start_pos + dir * step * j;
+            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+            if (density <= 0.0)
+            {
+                break;
+            }
+
+            light_ray_density += density;
+        }
+
+        vec3 beers_law = MultipleOctaves(light_ray_density, mu, step, sigmaExtinction);
+
+        return mix(beers_law * 2.0 * (1.0 - (exp(-step * light_ray_density * 2.0 * sigmaExtinction))), beers_law, 0.5 + 0.5 * mu);
+    }
+
+    return result;
+}
+
+const vec3 albedo = vec3(0.85, 0.82, 0.90);
+const vec3 sun_dir = normalize(vec3(1000, 1000, 1000));
+const vec3 sunLightColour = vec3(1, 1, 1);
+
+vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage, float time)
+{
+    vec3 color = vec3(0, 0, 0);
+    BoundingBoxIntersections intersections;
+    bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
+
+    float speed = 0.01;
+    move = move + vec3(speed * time, 0, 0);
+
+    if (is_intersect)
+    {
+        vec3 start_pos = intersections.firstInterectionPos;
+        vec3 end_pos = intersections.secondInterectionPos;
+
         int max_step = 128;
         float step = abs(length(end_pos - start_pos)) / max_step;
-        float T = 1.;
+        vec3 T = vec3(1, 1, 1);
+
+        float mu = dot(sun_dir, dir);
+        float phase_function = HenyeyGreensteinPhaseFunction(0.5, sun_dir, dir); // 相函数计算
+
+        vec3 sunLight = sunLightColour * my_push_constants.power;
 
         vec3 radiance = vec3(1, 1, 1);
 
@@ -504,23 +630,34 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         for (int i = 0; i < max_step; ++i)
         {
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
-            vec3 sample_point = GetSamplePointPosition(point, boundingBox);
+            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
 
-            vec4 fbm = texture(sampler3D(perlinWorleyNoise, mySampler), sample_point, 0);
-            float perlin_worley = fbm.x;
-            vec3 worleys = fbm.yzw;
-            float worly_fbm = worleys.x * 0.625 + worleys.y * 0.125 + worleys.z * 0.25;
-            float cloud = remap(perlin_worley, worly_fbm - 1., 1., 0., 1.);
-            cloud = remap(cloud, 1 - coverage, 1., 0., 1.); // coverage
+            vec3 sigmaS = vec3(my_push_constants.outScattering); /*散射系数*/
+            vec3 sigmaA = vec3(my_push_constants.absorption);    /*吸收系数*/
+            vec3 sigmaE = (sigmaS + sigmaA);                     /*消亡系数*/
+            vec3 sampleSigmaS = sigmaS * density;                // 采样点的散射
+            vec3 sampleSigmaE = sigmaE * density;                // 采样点的消亡
+            //<光照>
+            if (density > 0.0)
+            {
+                vec3 ambient = vec3(0.412, 0.513, 0.607);
 
-            // magic~
-            T *= exp(-cloud * step);
-            result += T * radiance / cloud;
+                vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox);
+                luminance *= sampleSigmaS;
+                vec3 transmittance = exp(-sampleSigmaE * step);
+                color += T * (luminance - luminance * transmittance) / sampleSigmaE;
+                T *= transmittance;
+                if (length(T) < 0.01)
+                {
+                    break;
+                }
+            }
+            //</光照>
         }
-        return result;
+        return color;
     }
 
-    return result;
+    return color;
 }
 
 void main()
@@ -565,7 +702,7 @@ void main()
     vec3 rayDir = pixel_pos - cameraPos;
     rayDir = normalize(rayDir);
 
-    vec3 color = RayMarchingBoundingBox(cameraPos, rayDir, bounding_box, coverage);
+    vec3 color = RayMarchingBoundingBox(cameraPos, rayDir, bounding_box, coverage, iTime);
 
     outColor = vec4(color, 1.0);
 }
