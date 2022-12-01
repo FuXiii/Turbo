@@ -24,7 +24,7 @@ Turbo是渲染引擎
 
 ### 赞助项目
 >
->* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）
+>* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）<研究光照散射中>
 
 ## Document
 
@@ -1716,3 +1716,10 @@ Turbo是渲染引擎
   >
   >* `./samples`中`VolumetricCloud`中增加`power`、`absorption`、`outScattering`传输变量，用于体积云渲染
   >* `./samples`中`VolumetricCloud`中增加对高频沃利纹理的采样
+
+* 2022/12/1 设计架构
+  >
+  >* 目前`VolumetricCloud`体积云渲染正在研究光照散射传输，研究周期可能会较长，先重构`FrameGraph`
+  >* 对于`Deepin`环境下`C++17/20`的支持一直没有很好的解决方式，有可能`LLVM`环境没有配对，研究研究。
+  >* 将`TFrameGraph`下的`*Agency`重命名成`*Proxy`
+

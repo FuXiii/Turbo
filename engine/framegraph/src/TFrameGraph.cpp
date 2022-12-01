@@ -6,7 +6,7 @@ Turbo::FrameGraph::TNode::TNode()
 {
 }
 
-Turbo::FrameGraph::TPassNode::TPassNode(const std::string &name, TPass pass, std::unique_ptr<TPassExecutorAgency> &&agency) : TNode(), name(name), pass(pass), agency(std::move(agency))
+Turbo::FrameGraph::TPassNode::TPassNode(const std::string &name, TPass pass, std::unique_ptr<TPassExecutorProxy> &&passExecutorProxy) : TNode(), name(name), pass(pass), passExecutorProxy(std::move(passExecutorProxy))
 {
 }
 
@@ -70,21 +70,21 @@ const std::string &Turbo::FrameGraph::TPassNode::GetName()
     return this->name;
 }
 
-Turbo::FrameGraph::TVirtualResourceAgency::TVirtualResourceAgency(const std::string &name) : TAgency(), name(name)
+Turbo::FrameGraph::TVirtualResourceProxy::TVirtualResourceProxy(const std::string &name) : TProxy(), name(name)
 {
 }
 
-const std::string &Turbo::FrameGraph::TVirtualResourceAgency::GetName()
+const std::string &Turbo::FrameGraph::TVirtualResourceProxy::GetName()
 {
     return this->name;
 }
 
-Turbo::FrameGraph::TVersion Turbo::FrameGraph::TVirtualResourceAgency::GetVersion()
+Turbo::FrameGraph::TVersion Turbo::FrameGraph::TVirtualResourceProxy::GetVersion()
 {
     return this->version;
 }
 
-Turbo::FrameGraph::TResourceNode::TResourceNode(TResource resource, TVirtualResourceAgency *resourceAgency, uint32_t version) : TNode(), resource(resource), resourceAgency(resourceAgency), version(version)
+Turbo::FrameGraph::TResourceNode::TResourceNode(TResource resource, TVirtualResourceProxy *virtualResourceProxy, uint32_t version) : TNode(), resource(resource), virtualResourceProxy(virtualResourceProxy), version(version)
 {
 }
 
@@ -93,15 +93,15 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TResourceNode::GetResource()
     return this->resource;
 }
 
-Turbo::FrameGraph::TVirtualResourceAgency *Turbo::FrameGraph::TResourceNode::GetResourceAgency()
+Turbo::FrameGraph::TVirtualResourceProxy *Turbo::FrameGraph::TResourceNode::GetResourceProxy()
 {
-    return this->resourceAgency;
+    return this->virtualResourceProxy;
 }
 
 const std::string &Turbo::FrameGraph::TResourceNode::GetName()
 {
-    assert(this->resourceAgency != nullptr);
-    return this->resourceAgency->GetName();
+    assert(this->virtualResourceProxy != nullptr);
+    return this->virtualResourceProxy->GetName();
 }
 
 uint32_t Turbo::FrameGraph::TResourceNode::GetVersion()
@@ -133,10 +133,10 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
 
     TResourceNode &resource_node = this->frameGraph.GetResourceNode(resource);
 
-    TVirtualResourceAgency *resource_agency = resource_node.GetResourceAgency();
-    resource_agency->version += 1;
+    TVirtualResourceProxy *resource_proxy = resource_node.GetResourceProxy();
+    resource_proxy->version += 1;
 
-    TResourceNode &new_resource_node = this->frameGraph.CreateResourceNode(resource_agency);
+    TResourceNode &new_resource_node = this->frameGraph.CreateResourceNode(resource_proxy);
     TResource new_resource = new_resource_node.GetResource();
     return this->passNode.AddWrite(new_resource);
 }
@@ -151,7 +151,7 @@ Turbo::FrameGraph::TFrameGraph::TFrameGraph()
 {
     this->passNodes = new std::vector<TPassNode>();
     this->resourceNodes = new std::vector<TResourceNode>();
-    this->resourceAgencys = new std::vector<TVirtualResourceAgency *>();
+    this->resourceProxys = new std::vector<TVirtualResourceProxy *>();
 }
 
 Turbo::FrameGraph::TFrameGraph::~TFrameGraph()
@@ -159,26 +159,26 @@ Turbo::FrameGraph::TFrameGraph::~TFrameGraph()
     delete this->passNodes;
     delete this->resourceNodes;
 
-    for (TVirtualResourceAgency *virtual_resourceagency_item : *this->resourceAgencys)
+    for (TVirtualResourceProxy *virtual_resource_proxy_item : *this->resourceProxys)
     {
-        delete virtual_resourceagency_item;
+        delete virtual_resource_proxy_item;
     }
 
-    delete this->resourceAgencys;
+    delete this->resourceProxys;
 }
 
-Turbo::FrameGraph::TPassNode &Turbo::FrameGraph::TFrameGraph::CreatePassNode(const std::string &name, std::unique_ptr<TPassExecutorAgency> &&agency)
+Turbo::FrameGraph::TPassNode &Turbo::FrameGraph::TFrameGraph::CreatePassNode(const std::string &name, std::unique_ptr<TPassExecutorProxy> &&passExecutorProxy)
 {
     TPass pass;
     pass.id = static_cast<uint32_t>(this->passNodes->size());
-    return this->passNodes->emplace_back(TPassNode(name, pass, std::move(agency)));
+    return this->passNodes->emplace_back(TPassNode(name, pass, std::move(passExecutorProxy)));
 };
 
-Turbo::FrameGraph::TResourceNode &Turbo::FrameGraph::TFrameGraph::CreateResourceNode(TVirtualResourceAgency *virtualResourceAgency)
+Turbo::FrameGraph::TResourceNode &Turbo::FrameGraph::TFrameGraph::CreateResourceNode(TVirtualResourceProxy *virtualResourceProxy)
 {
     TResource resource;
     resource.id = static_cast<uint32_t>(this->resourceNodes->size());
-    TResourceNode resource_node(resource, virtualResourceAgency, virtualResourceAgency->GetVersion());
+    TResourceNode resource_node(resource, virtualResourceProxy, virtualResourceProxy->GetVersion());
     return this->resourceNodes->emplace_back(resource_node);
 }
 
@@ -288,7 +288,7 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
             for (TResource &read_resource_item : pass_node_item.reads)
             {
                 TResourceNode &resource_node = this->resourceNodes->at(read_resource_item.id);
-                TVirtualResourceAgency *virtual_resource = resource_node.resourceAgency;
+                TVirtualResourceProxy *virtual_resource = resource_node.virtualResourceProxy;
 
                 virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_NVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
                 virtual_resource->lastUser = pass_node_item.pass;
@@ -297,7 +297,7 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
             for (TResource &write_resource_item : pass_node_item.writes)
             {
                 TResourceNode &resource_node = this->resourceNodes->at(write_resource_item.id);
-                TVirtualResourceAgency *virtual_resource = resource_node.resourceAgency;
+                TVirtualResourceProxy *virtual_resource = resource_node.virtualResourceProxy;
 
                 virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_NVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
                 virtual_resource->lastUser = pass_node_item.pass;
@@ -306,18 +306,18 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
     }
 
     // compile the resource creater and destorier
-    for (TVirtualResourceAgency *virtual_resource_agency_item : *this->resourceAgencys)
+    for (TVirtualResourceProxy *virtual_resource_proxy_item : *this->resourceProxys)
     {
-        TPass first_user = virtual_resource_agency_item->firstUser;
-        TPass last_user = virtual_resource_agency_item->lastUser;
+        TPass first_user = virtual_resource_proxy_item->firstUser;
+        TPass last_user = virtual_resource_proxy_item->lastUser;
 
         if (first_user.id != TURBO_NVALID_ID && last_user.id != TURBO_NVALID_ID)
         {
             TPassNode &first_user_pass_node = this->passNodes->at(first_user.id);
             TPassNode &last_user_pass_node = this->passNodes->at(last_user.id);
 
-            first_user_pass_node.devirtualizes.push_back(virtual_resource_agency_item);
-            last_user_pass_node.destroies.push_back(virtual_resource_agency_item);
+            first_user_pass_node.devirtualizes.push_back(virtual_resource_proxy_item);
+            last_user_pass_node.destroies.push_back(virtual_resource_proxy_item);
         }
     }
 }
@@ -329,17 +329,17 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
 
         TResources resources(*this, pass_node_item);
 
-        for (TVirtualResourceAgency *virtual_resource_item : pass_node_item.devirtualizes)
+        for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.devirtualizes)
         {
             virtual_resource_item->Create();
         }
 
         if (pass_node_item.refCount > 0)
         {
-            pass_node_item.agency->Executor(resources, context);
+            pass_node_item.passExecutorProxy->Executor(resources, context);
         }
 
-        for (TVirtualResourceAgency *virtual_resource_item : pass_node_item.destroies)
+        for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.destroies)
         {
             virtual_resource_item->Destroy();
         }
