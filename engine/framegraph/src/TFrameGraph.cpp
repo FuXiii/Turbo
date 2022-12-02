@@ -70,7 +70,7 @@ const std::string &Turbo::FrameGraph::TPassNode::GetName()
     return this->name;
 }
 
-Turbo::FrameGraph::TVirtualResourceProxy::TVirtualResourceProxy(const std::string &name) : TProxy(), name(name)
+Turbo::FrameGraph::TVirtualResourceProxy::TVirtualResourceProxy(const std::string &name) : TProxy(), name(name), version(0)
 {
 }
 
@@ -115,6 +115,8 @@ Turbo::FrameGraph::TFrameGraph::TBuilder::TBuilder(TFrameGraph &frameGraph, TPas
 
 Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Read(TResource resource)
 {
+    // FIXME: 同TFrameGraph::TBuilder::Write(...)问题
+    // FIXME: 详情见Issue文档
     assert(this->frameGraph.IsValid(resource));
     return this->passNode.AddRead(resource);
 }
@@ -131,6 +133,11 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
         return this->passNode.AddWrite(resource);
     }
 
+    // FIXME: 运行到此处说明resource对应的资源不是当前Pass创建的，需要找是否已经创建
+    // FIXME: 此处的前提是resource已经通过TFrameGraph::TBuilder::Create(...)被创建（别的Pass创建的）
+    // FIXME: 此时resource在当前pass中还没有创建，应该看一下Fg中是否有该资源节点:this->frameGraph.GetResourceNode(resource)
+    // FIXME: this->frameGraph.GetResourceNode(resource)中也没找到该资源节点的话，说明资源未被创建，应有的策略是直接终止程序
+    // FIXME: 详情见Issue文档
     TResourceNode &resource_node = this->frameGraph.GetResourceNode(resource);
 
     TVirtualResourceProxy *resource_proxy = resource_node.GetResourceProxy();
@@ -212,7 +219,6 @@ Turbo::FrameGraph::TResources::TResources(TFrameGraph &frameGraph, TPassNode &pa
 {
 }
 
-#include <iostream>
 void Turbo::FrameGraph::TFrameGraph::Compile()
 {
     // compute passes and resource reference counts
@@ -290,7 +296,7 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
                 TResourceNode &resource_node = this->resourceNodes->at(read_resource_item.id);
                 TVirtualResourceProxy *virtual_resource = resource_node.virtualResourceProxy;
 
-                virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_NVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
+                virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_INVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
                 virtual_resource->lastUser = pass_node_item.pass;
             }
 
@@ -299,7 +305,7 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
                 TResourceNode &resource_node = this->resourceNodes->at(write_resource_item.id);
                 TVirtualResourceProxy *virtual_resource = resource_node.virtualResourceProxy;
 
-                virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_NVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
+                virtual_resource->firstUser = virtual_resource->firstUser.id != TURBO_INVALID_ID ? virtual_resource->firstUser : pass_node_item.pass;
                 virtual_resource->lastUser = pass_node_item.pass;
             }
         }
@@ -311,7 +317,7 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
         TPass first_user = virtual_resource_proxy_item->firstUser;
         TPass last_user = virtual_resource_proxy_item->lastUser;
 
-        if (first_user.id != TURBO_NVALID_ID && last_user.id != TURBO_NVALID_ID)
+        if (first_user.id != TURBO_INVALID_ID && last_user.id != TURBO_INVALID_ID)
         {
             TPassNode &first_user_pass_node = this->passNodes->at(first_user.id);
             TPassNode &last_user_pass_node = this->passNodes->at(last_user.id);
@@ -326,7 +332,6 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
 {
     for (TPassNode &pass_node_item : *this->passNodes)
     {
-
         TResources resources(*this, pass_node_item);
 
         for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.devirtualizes)
@@ -341,6 +346,8 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
 
         for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.destroies)
         {
+            // FIXME: 此处不应该真的去销毁相应的资源，正常应该标记对应资源需要被回收，进而异步的回收资源
+            // FIXME: 详情见Issue文档
             virtual_resource_item->Destroy();
         }
     }

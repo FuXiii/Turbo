@@ -192,3 +192,13 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 在`Windows11`下，英伟达驱动`472.91`，显卡型号`RTX3070`下`std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers()`将会返回空数组，`Vulkan`运行时此时找不到支持的验证层。
 
 - 在`RayMarchingBoundingBoxTest`中使用纯数学，光线向量与包围盒求交，会有一圈圈的纹路，不知为啥，光追噪音？还是代码理论哪里出现了问题？
+
+- 在`engine\framegraph\include\TFrameGraph.hpp`中类`template <typename T> class TResourceProxy`中的成员变量`T resource;`，这样声明可能会有问题，用户不一定会指定带有无参默认构造函数的类。这里改成指针可能会更好。
+
+- 在`engine\framegraph\include\TFrameGraph.hpp`中`Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TResource resource)`中，如果此时`resource`在当前`pass`中还没有创建，应该看一下`Fg`中是否有该资源节点:`this->frameGraph.GetResourceNode(resource)`，如果`this->frameGraph.GetResourceNode(resource)`中也没找到该资源节点的话，说明资源未被创建，应有的策略是直接终止程序，而终止程序是在`this->frameGraph.GetResourceNode(resource)`中使用`assert(this->IsValid(resource))`，这在`Release`模式下会失效。正常应该返回异常（考虑是否使用`Turbo::Core`中的异常）
+
+- 在`engine\framegraph\include\TFrameGraph.hpp`中`Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Read(TResource resource)`中，同上一条`...::Write(TResource resource)`中相同的问题
+
+- 在`engine\framegraph\include\TFrameGraph.hpp`中`void Turbo::FrameGraph::TFrameGraph::Execute(void *context)`中，在运行结束时会去销毁对应得资源文件，正常此时应该将资源标记为待回收，并进行异步回收。
+
+- 由于`TFrameGraph`中的资源回收属于异步回收（见上一条目），则需要一个异步回收器，在结束一帧的工作后进行异步回收。

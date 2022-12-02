@@ -41,8 +41,8 @@ class AAA
             this->value1 = obj.value1;
             this->value2 = obj.value2;
 
-            obj.value1=0;
-            obj.value2=0;
+            obj.value1 = 0;
+            obj.value2 = 0;
         }
         std::cout << "AAA(AAA &&)" << std::endl;
     }
@@ -99,6 +99,11 @@ int main()
 
     std::cout << "value1:" << aaa4.GetValue1() << " value2:" << aaa4.GetValue2() << std::endl;
     std::cout << "end" << std::endl;
+
+    std::cout << __cplusplus << std::endl;
+
+    int *nullptr_point = nullptr;
+    delete nullptr_point;
 
     return 0;
 }

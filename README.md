@@ -1723,3 +1723,9 @@ Turbo是渲染引擎
   >* 对于`Deepin`环境下`C++17/20`的支持一直没有很好的解决方式，有可能`LLVM`环境没有配对，研究研究。
   >* 将`TFrameGraph`下的`*Agency`重命名成`*Proxy`
 
+* 2022/12/2 设计架构
+  >
+  >* 将`TFrameGraph`下的`TURBO_NVALID_ID`重命名成`TURBO_INVALID_ID`
+  >* 将`TFrameGraph`下的`Data`重命名成`TData`
+  >* 将`TFrameGraph`下的`Setup`重命名成`TSetup`
+  >* 修缮`TFrameGraph`

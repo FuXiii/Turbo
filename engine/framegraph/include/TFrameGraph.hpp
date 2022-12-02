@@ -1,9 +1,9 @@
 #pragma once
 #ifndef TFRAMEGRAPH_H
 #define TFRAMEGRAPH_H
-// #include <concepts>
 #include <assert.h>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -18,39 +18,14 @@ namespace Turbo
 {
 namespace FrameGraph
 {
-//<Test>
-// template <class T>
-// concept Integral = std::is_integral<T>::value;
-
-// template <class T>
-// concept SignedIntegral = Integral<T> && std::is_signed<T>::value;
-
-// template <class T>
-// concept UnsignedIntegral = Integral<T> && std::is_unsigned<T>::value;
-
-// template <typename T>
-// concept Virtualizable = requires(T t)
-// {
-//     requires std::is_default_constructible_v<T> and std::is_move_constructible_v<T>;
-
-//     typename T::Desc;
-//     {
-//         t.create(typename T::Desc{}, (void *)nullptr)
-//         } -> std::same_as<void>;
-//     {
-//         t.destroy(typename T::Desc{}, (void *)nullptr)
-//         } -> std::same_as<void>;
-// };
-//</Test>
-
 constexpr size_t EXECUTE_MAX_LOAD = 1024;
-constexpr uint32_t TURBO_NVALID_ID = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t TURBO_INVALID_ID = std::numeric_limits<uint32_t>::max();
 using ID = uint32_t;
 using TVersion = uint32_t;
 
 struct TNodeHandle
 {
-    ID id = TURBO_NVALID_ID;
+    ID id = TURBO_INVALID_ID;
 };
 
 struct TPass : public TNodeHandle
@@ -84,17 +59,17 @@ class TPassExecutorProxy : public TProxy
     virtual void Executor(const TResources &resources, void *context) = 0;
 };
 
-template <typename Data, typename TExecute>
+template <typename TData, typename TExecute>
 class TPassProxy : public TPassExecutorProxy
 {
   private:
-    Data data{};
+    TData data{};
     TExecute execute;
 
   public:
     TPassProxy(TExecute &&execute);
     ~TPassProxy() = default;
-    Data &GetData();
+    TData &GetData();
 
     virtual void Executor(const TResources &resources, void *context) override;
 };
@@ -128,7 +103,7 @@ class TResourceProxy : public TVirtualResourceProxy
   private:
     uint32_t id;
     typename T::Descriptor descriptor;
-    T resource;
+    T resource; //FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
 
   public:
     TResourceProxy(const std::string &name, uint32_t id, typename T::Descriptor &&descriptor);
@@ -249,7 +224,7 @@ class TFrameGraph
 
       public:
         template <typename T>
-        /*[[nodiscard]]*/ TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
+        TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
         TResource Read(TResource resource);
         TResource Write(TResource resource);
 
@@ -265,8 +240,8 @@ class TFrameGraph
     TFrameGraph &operator=(const TFrameGraph &) = delete;
     TFrameGraph &operator=(TFrameGraph &&) noexcept = delete;
 
-    template <typename Data, typename Setup, typename TExecute>
-    const Data &AddPass(const std::string &name, Setup &&setup, TExecute &&execute); // *filament返回的是PassProxy
+    template <typename TData, typename TSetup, typename TExecute>
+    const TData &AddPass(const std::string &name, TSetup &&setup, TExecute &&execute); // *filament返回的是PassProxy
 
     template <typename T>
     TResource Create(const std::string &name, typename T::Descriptor &&descriptor); // *filament接收的是descriptor的左值引用，非右值
@@ -298,19 +273,19 @@ class TResources
     // const typename Virtualizable::Descriptor &getDescriptor(TResource resource);
 };
 
-template <typename Data, typename TExecute>
-inline Turbo::FrameGraph::TPassProxy<Data, TExecute>::TPassProxy(TExecute &&execute) : execute{std::forward<TExecute>(execute) /*or std::move()? in filament*/}
+template <typename TData, typename TExecute>
+inline Turbo::FrameGraph::TPassProxy<TData, TExecute>::TPassProxy(TExecute &&execute) : execute{std::forward<TExecute>(execute) /*or std::move()? in filament*/}
 {
 }
 
-template <typename Data, typename TExecute>
-inline Data &Turbo::FrameGraph::TPassProxy<Data, TExecute>::GetData()
+template <typename TData, typename TExecute>
+inline TData &Turbo::FrameGraph::TPassProxy<TData, TExecute>::GetData()
 {
     return this->data;
 }
 
-template <typename Data, typename TExecute>
-inline void Turbo::FrameGraph::TPassProxy<Data, TExecute>::Executor(const TResources &resources, void *context)
+template <typename TData, typename TExecute>
+inline void Turbo::FrameGraph::TPassProxy<TData, TExecute>::Executor(const TResources &resources, void *context)
 {
     this->execute(this->data, resources, context);
 }
@@ -345,14 +320,14 @@ inline TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Create(const std::str
     return this->passNode.AddCreate(resource);
 }
 
-template <typename Data, typename Setup, typename TExecute>
-inline const Data &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &name, Setup &&setup, TExecute &&execute)
+template <typename TData, typename TSetup, typename TExecute>
+inline const TData &Turbo::FrameGraph::TFrameGraph::AddPass(const std::string &name, TSetup &&setup, TExecute &&execute)
 {
-    // static_assert(std::is_invocable<Setup, TFrameGraph::TBuilder &, Data &>::value, "Invalid Setup");
-    // static_assert(std::is_invocable<Execute, const Data &, const TResources &, void *>::value, "Invalid Execute");
+    // static_assert(std::is_invocable<TSetup, TFrameGraph::TBuilder &, TData &>::value, "Invalid Setup");//deepin linux don't support c++ 17
+    // static_assert(std::is_invocable<Execute, const TData &, const TResources &, void *>::value, "Invalid Execute");//deepin linux don't support c++ 17
     static_assert(sizeof(TExecute) < EXECUTE_MAX_LOAD, "Execute overload");
 
-    TPassProxy<Data, TExecute> *pass_proxy = new TPassProxy<Data, TExecute>(std::forward<TExecute>(execute));
+    TPassProxy<TData, TExecute> *pass_proxy = new TPassProxy<TData, TExecute>(std::forward<TExecute>(execute));
     TPassNode &pass_node = TFrameGraph::CreatePassNode(name, std::unique_ptr<TPassExecutorProxy>(pass_proxy));
 
     TBuilder builder(*this, pass_node);
@@ -366,19 +341,19 @@ inline TResource Turbo::FrameGraph::TFrameGraph::Create(const std::string &name,
 {
     const uint32_t resource_proxy_id = static_cast<uint32_t>(this->resourceProxys->size());
     TResourceProxy<T> *resource_proxy = new TResourceProxy<T>(name, resource_proxy_id, std::forward<typename T::Descriptor>(descriptor)); //* filament中name是属于资源代理的，描述是左值引用，资源代理有个优先级参数
-                                                                                                                                            //* filament中资源代理继承结构：VirtualResource -> ResourceEntryBase -> ResourceEntry
-                                                                                                                                            //* VirtualResource: 1.PassNode* first;第一次使用该资源的Pass，将会实例化资源
-                                                                                                                                            //                   2.PassNode* last;最后一个使用该资源的Pass，将会销毁该资源
-                                                                                                                                            //* ResourceEntryBase: 1.char* name;名称
-                                                                                                                                            //*                    2.uint16_t id;标识号
-                                                                                                                                            //*                    3.bool imported;是否为外部引入
-                                                                                                                                            //*                    4.uint8_t priority;优先级
-                                                                                                                                            //*                    5.uint8_t version;资源版本，由builder更新，概念与当前架构相同
-                                                                                                                                            //*                    6.uint32_t refs; ;资源索引数（读取当前资源数），compile()阶段计算
-                                                                                                                                            //*                    7.uint32_t refs; ;资源索引数（读取当前资源数），compile()阶段计算
-                                                                                                                                            //*                    8.bool discardStart = true;未知
-                                                                                                                                            //*                    9.bool discardEnd = false;未知
-                                                                                                                                            //* ResourceEntry：1.T resource;容器，用户指定的资源
+                                                                                                                                          //* filament中资源代理继承结构：VirtualResource -> ResourceEntryBase -> ResourceEntry
+                                                                                                                                          //* VirtualResource: 1.PassNode* first;第一次使用该资源的Pass，将会实例化资源
+                                                                                                                                          //                   2.PassNode* last;最后一个使用该资源的Pass，将会销毁该资源
+                                                                                                                                          //* ResourceEntryBase: 1.char* name;名称
+                                                                                                                                          //*                    2.uint16_t id;标识号
+                                                                                                                                          //*                    3.bool imported;是否为外部引入
+                                                                                                                                          //*                    4.uint8_t priority;优先级
+                                                                                                                                          //*                    5.uint8_t version;资源版本，由builder更新，概念与当前架构相同
+                                                                                                                                          //*                    6.uint32_t refs; ;资源索引数（读取当前资源数），compile()阶段计算
+                                                                                                                                          //*                    7.uint32_t refs; ;资源索引数（读取当前资源数），compile()阶段计算
+                                                                                                                                          //*                    8.bool discardStart = true;未知
+                                                                                                                                          //*                    9.bool discardEnd = false;未知
+                                                                                                                                          //* ResourceEntry：1.T resource;容器，用户指定的资源
     this->resourceProxys->emplace_back(resource_proxy);
     TResourceNode &resource_node = TFrameGraph::CreateResourceNode(resource_proxy);
     return resource_node.GetResource();
