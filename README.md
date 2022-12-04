@@ -1737,3 +1737,6 @@ Turbo是渲染引擎
 * 2022/12/4 设计架构
   >
   >* `./docs/Desgin`下`FrameGraphAdvance.md`基本完成，之后新的设计都会在此文档中增加
+  >* 将`./docs/TurboDesign`中的`Engine`模块重命名成`Render`(考虑到将来可能会集成实现`ECS`)
+  >* `./engine`下新建`render`文件夹，并在`render`文件夹下创建`include`和`src`文件夹
+  >* `./engine/render`下创建`TImage`类

@@ -1,5 +1,16 @@
 # Turbo引擎使用FrameGraph驱动设计
 
+最终会映射到`./docs/TurboDesign:Render`设计中
+
+## 更新日志
+
+* 2022/12/4
+  >
+  >* 结束琐碎设计文档化
+  >* 创建`Turbo驱动设计`章节，用于开始`Turbo`引擎`Engine`层面与`FrameGraph`配合的设计
+
+---
+
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
 
 > `Unity`中的一个材质就可以看成对应`fg`的一个`PassNode`，多个可渲染物体绑定同一个材质是，其实就是在当前的`Material`所对应的的那个`PassNode`内渲染绑定的`Mesh`，换句话说就是多个`DrawableObject`如果绑定了同一个`Material`，就在`Material`对应的`PassNode`下渲染多个`DrawableObject`
@@ -473,3 +484,142 @@ Image 2;
 ```
 
 **解释**：每一帧都会等待上次用到自己(图片0,1,2)的那一帧结束后再使用自己，每一帧等待上次结束是回收资源的好时候，可能的行为：唤醒资源回收线程等。
+
+---
+
+## Turbo驱动设计
+
+主要有两种资源`Image`和`Buffer`，每个资源内部都有一个`Descriptor`的结构体，用于创建时描述该资源。  
+>`Image`派生有：
+>
+>* ColorImage
+>* DepthImage
+>* StencilImage
+>* DepthStencilImage
+>
+>`ColorImage`派生有：
+>
+>* ColorImage1D（这个可能用处不多）
+>* ColorImage2D
+>* ColorImage3D
+>
+>`DepthImage`派生有：
+>
+>* DepthImage2D (二维的Depth纹理比较常用)
+>
+>`StencilImage`派生有：
+>
+>* StencilImage2D
+>
+>`DepthStencilImage`派生有：
+>
+>* DepthStencilImage2D
+
+>`Buffer`派生有：
+>
+>* VertexBuffer
+>* IndexBuffer
+
+```CXX
+typedef uint32_t TFlags;
+
+enum TImageType
+{
+    1D,
+    2D,
+    3D
+};
+
+enum TFormat
+{...};
+
+enum TUsageFlagsBits
+{
+    TRANSFER，
+    SAMPLED，
+    STORAGE，
+    COLOR_ATTACHMENT，
+    DEPTH_STENCIL，
+    INPUT_ATTACHMENT，
+};
+typedef TFlags TUsages;
+
+enum TCreateFlagsBits
+{
+    CUBE//用于天空盒
+};
+
+class Image{
+    struct Image::Descriptor
+    {
+        TImageType type;
+        TFormat format;
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels;
+        uint32_t layers;
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+
+void Create(const std::string &name, const Image::Descriptor &descriptor);
+void Destroy();
+};
+
+class ColorImage: public Image
+{
+    struct ColorImage::Descriptor
+    {
+        TImageType type;
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels;
+        uint32_t layers;
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+
+class ColorImage2D: public Image
+{
+    struct ColorImage2D::Descriptor
+    {
+        //TImageType type; //该属性由Turbo维护
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+
+class ColorImage3D: public ColorImage
+{
+    struct ColorImage3D::Descriptor
+    {
+        //TImageType type; //该属性由Turbo维护
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+```
