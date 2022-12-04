@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
 [![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group--deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![WeChat](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
@@ -1729,3 +1729,11 @@ Turbo是渲染引擎
   >* 将`TFrameGraph`下的`Data`重命名成`TData`
   >* 将`TFrameGraph`下的`Setup`重命名成`TSetup`
   >* 修缮`TFrameGraph`
+  >* `./docs`下增加`Desgin`文件夹
+  >* `./docs/Desgin/images`下增加`fg1~18`文件，记录平日的`FrameGraph`的琐碎设计
+  >* `./docs`下增加`linux_env`文件，记录`linux`上的依赖库（随便扯了张纸，有点脏，噗哈哈）
+  >* `./docs/Desgin`下增加`FrameGraphAdvance.md`文件，用于整理位于`Turbo`教上层的`FrameGraph`和`Turbo`引擎衔接设计，相关设计源头位于`./docs/Desgin/images`下的一些琐碎设计
+
+* 2022/12/4 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`基本完成，之后新的设计都会在此文档中增加
