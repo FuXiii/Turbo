@@ -128,7 +128,10 @@ int test2()
             uint32_t depth_texture_value = depth_texture.value;
 
             std::cout << "Depth Pass Execute" << std::endl;
-            /*Some Rendering Command...*/
+
+            /*<Some Rendering/Compute Command...>*/
+            /*...*/
+            /*</Some Rendering/Compute Command...>*/
         });
 
     struct GBufferPassData
@@ -165,7 +168,9 @@ int test2()
 
             std::cout << "GBuffer Pass Execute" << std::endl;
 
-            /*Some Rendering Command...*/
+            /*<Some Rendering/Compute Command...>*/
+            /*...*/
+            /*</Some Rendering/Compute Command...>*/
         });
 
     struct LightPassData
@@ -201,7 +206,9 @@ int test2()
 
             std::cout << "Light Pass Execute" << std::endl;
 
-            /*Some Renderring Command...*/
+            /*<Some Rendering/Compute Command...>*/
+            /*...*/
+            /*</Some Rendering/Compute Command...>*/
         });
 
     struct PostPassData
@@ -227,7 +234,9 @@ int test2()
 
             std::cout << "Post Pass Execute" << std::endl;
 
-            /*Some Renderring Command...*/
+            /*<Some Rendering/Compute Command...>*/
+            /*...*/
+            /*</Some Rendering/Compute Command...>*/
         });
 
     struct PresentPassData
@@ -252,7 +261,9 @@ int test2()
 
             std::cout << "Present Pass Execute" << std::endl;
 
-            /*Some Renderring Command...*/
+            /*<Some Rendering/Compute Command...>*/
+            /*...*/
+            /*</Some Rendering/Compute Command...>*/
         });
 
     fg.Compile();

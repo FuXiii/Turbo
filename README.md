@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
 [![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group--deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![WeChat](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
@@ -24,7 +24,7 @@ Turbo是渲染引擎
 
 ### 赞助项目
 >
->* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）
+>* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）<研究光照散射中>
 
 ## Document
 
@@ -1716,3 +1716,24 @@ Turbo是渲染引擎
   >
   >* `./samples`中`VolumetricCloud`中增加`power`、`absorption`、`outScattering`传输变量，用于体积云渲染
   >* `./samples`中`VolumetricCloud`中增加对高频沃利纹理的采样
+
+* 2022/12/1 设计架构
+  >
+  >* 目前`VolumetricCloud`体积云渲染正在研究光照散射传输，研究周期可能会较长，先重构`FrameGraph`
+  >* 对于`Deepin`环境下`C++17/20`的支持一直没有很好的解决方式，有可能`LLVM`环境没有配对，研究研究。
+  >* 将`TFrameGraph`下的`*Agency`重命名成`*Proxy`
+
+* 2022/12/2 设计架构
+  >
+  >* 将`TFrameGraph`下的`TURBO_NVALID_ID`重命名成`TURBO_INVALID_ID`
+  >* 将`TFrameGraph`下的`Data`重命名成`TData`
+  >* 将`TFrameGraph`下的`Setup`重命名成`TSetup`
+  >* 修缮`TFrameGraph`
+  >* `./docs`下增加`Desgin`文件夹
+  >* `./docs/Desgin/images`下增加`fg1~18`文件，记录平日的`FrameGraph`的琐碎设计
+  >* `./docs`下增加`linux_env`文件，记录`linux`上的依赖库（随便扯了张纸，有点脏，噗哈哈）
+  >* `./docs/Desgin`下增加`FrameGraphAdvance.md`文件，用于整理位于`Turbo`教上层的`FrameGraph`和`Turbo`引擎衔接设计，相关设计源头位于`./docs/Desgin/images`下的一些琐碎设计
+
+* 2022/12/4 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`基本完成，之后新的设计都会在此文档中增加
