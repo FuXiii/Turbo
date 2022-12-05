@@ -9,6 +9,11 @@
   >* 结束琐碎设计文档化
   >* 创建`Turbo驱动设计`章节，用于开始`Turbo`引擎`Engine`层面与`FrameGraph`配合的设计
 
+* 2022/12/5
+  >
+  >* 创建`资源的创建与销毁`章节
+  >* 创建`Context上下文`章节
+  >* 创建`WorldRender/Render 渲染器`章节
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -623,3 +628,19 @@ class ColorImage3D: public ColorImage
     };
 };
 ```
+
+### 资源的创建与销毁
+
+资源的创建与销毁需要一个资源分配器，而该资源分配器因该由`Context`上下文来创建
+
+### Context上下文
+
+`Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
+
+用户在构建上下文对象时，上下文的构造函数会去初始化环境。
+
+在构造完`Context`之后，使用`Context`去构造`WorldRender/Render`进行后面渲染
+
+### WorldRender/Render 渲染器
+
+用户在使用`Context`创建完`WorldRender/Render`后调用`WorldRender/Render::DrawFrame(...)`，其中`DrawFrame(...)`函数会去构建一帧的`FrameGraph`并进行一帧的渲染

@@ -572,7 +572,8 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
-        int max_step = 6;
+        //int max_step = 6;
+        int max_step = 32;
         float step = abs(length(end_pos - start_pos) / 3) / max_step;
         float light_ray_density = 0.0;
 
@@ -642,10 +643,10 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             {
                 vec3 ambient = vec3(0.412, 0.513, 0.607);
 
-                vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox);
+                vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox) /** (1 - exp(-density))*/;
                 luminance *= sampleSigmaS;
                 vec3 transmittance = exp(-sampleSigmaE * step);
-                color += T * (luminance - luminance * transmittance) / sampleSigmaE;
+                color += T * ((luminance - luminance * transmittance) / sampleSigmaE);
                 T *= transmittance;
                 if (length(T) < 0.01)
                 {

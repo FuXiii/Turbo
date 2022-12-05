@@ -93,8 +93,8 @@ class TVirtualResourceProxy : public TProxy
 
     TVersion GetVersion();
 
-    virtual void Create() = 0;
-    virtual void Destroy() = 0;
+    virtual void Create(/*TODO: we need a allocator/context*/) = 0;
+    virtual void Destroy(/*TODO: we need a allocator/context*/) = 0;
 };
 
 template <typename T>
@@ -110,8 +110,8 @@ class TResourceProxy : public TVirtualResourceProxy
 
     T &GetResource();
 
-    virtual void Create() override;
-    virtual void Destroy() override;
+    virtual void Create(/*TODO: we need a allocator/context*/) override;
+    virtual void Destroy(/*TODO: we need a allocator/context*/) override;
 };
 
 class TNode
@@ -302,15 +302,15 @@ inline T &Turbo::FrameGraph::TResourceProxy<T>::GetResource()
 }
 
 template <typename T>
-inline void Turbo::FrameGraph::TResourceProxy<T>::Create()
+inline void Turbo::FrameGraph::TResourceProxy<T>::Create(/*TODO: we need a allocator/context*/)
 {
-    this->resource.Create(this->GetName(), this->descriptor);
+    this->resource.Create(this->GetName(), this->descriptor/*TODO: we need a allocator/context*/);
 }
 
 template <typename T>
-inline void Turbo::FrameGraph::TResourceProxy<T>::Destroy()
+inline void Turbo::FrameGraph::TResourceProxy<T>::Destroy(/*TODO: we need a allocator/context*/)
 {
-    this->resource.Destroy();
+    this->resource.Destroy(/*TODO: we need a allocator/context*/);
 }
 
 template <typename T>

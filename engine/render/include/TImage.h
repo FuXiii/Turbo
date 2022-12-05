@@ -39,8 +39,8 @@ class TImage
     TImage() = default;
     ~TImage() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor);
-    void Destroy();
+    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
+    void Destroy(/*TODO: we need a allocator/context*/);
 };
 
 class TColorImage : public TImage
@@ -59,7 +59,7 @@ class TColorImage : public TImage
     TColorImage() = default;
     ~TColorImage() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor);
+    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
 };
 
 class TColorImage2D : public TColorImage
@@ -77,7 +77,7 @@ class TColorImage2D : public TColorImage
     TColorImage2D() = default;
     ~TColorImage2D() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor);
+    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
 };
 
 void Test();

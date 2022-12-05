@@ -336,7 +336,7 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
 
         for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.devirtualizes)
         {
-            virtual_resource_item->Create();
+            virtual_resource_item->Create(/*TODO: we need a allocator/context*/);
         }
 
         if (pass_node_item.refCount > 0)
@@ -348,7 +348,7 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
         {
             // FIXME: 此处不应该真的去销毁相应的资源，正常应该标记对应资源需要被回收，进而异步的回收资源
             // FIXME: 详情见Issue文档
-            virtual_resource_item->Destroy();
+            virtual_resource_item->Destroy(/*TODO: we need a allocator/context*/);
         }
     }
 }
