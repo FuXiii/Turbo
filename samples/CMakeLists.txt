@@ -8,6 +8,7 @@ target_link_libraries(${Sample} PUBLIC ${Libs})
 endfunction()
 
 set(INCLUDE_PARTH 
+PUBLIC ../engine/render/include 
 PUBLIC ../engine/framegraph/include 
 PUBLIC ../engine/core/include
 PUBLIC ../thirdparty/glm/
@@ -18,6 +19,7 @@ PUBLIC ../thirdparty/KTX-Software/include/
 )
 
 set(LINK_PARTH 
+PUBLIC /engine/render/ 
 PUBLIC /engine/framegraph/ 
 PUBLIC /engine/core/
 PUBLIC /thirdparty/glfw/src/
@@ -25,6 +27,7 @@ PUBLIC /thirdparty/KTX-Software/
 )
 
 set(LIBS 
+TRender
 TCore 
 TFrameGraph
 glfw
@@ -173,3 +176,8 @@ add_executable(RayMarchingPerlinWorleyNoise ./RayMarchingPerlinWorleyNoise.cpp $
 target_include_directories(RayMarchingPerlinWorleyNoise PUBLIC ${INCLUDE_PARTH})
 target_link_directories(RayMarchingPerlinWorleyNoise PUBLIC ${LINK_PARTH})
 target_link_libraries(RayMarchingPerlinWorleyNoise PUBLIC ${LIBS})
+
+add_executable(RenderDesignTest ./RenderDesignTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(RenderDesignTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(RenderDesignTest PUBLIC ${LINK_PARTH})
+target_link_libraries(RenderDesignTest PUBLIC ${LIBS})

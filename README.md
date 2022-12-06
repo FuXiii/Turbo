@@ -1745,3 +1745,8 @@ Turbo是渲染引擎
   >
   >* `FrameGraph`下对于资源的创建和销毁需要一个分配器或上下文
   >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+
+* 2022/12/6 设计架构
+  >
+  >* `./engine/render`下新建`TContext`类，用于引擎上下文
+  >* `./samples`下新建`RenderDesignTest`示例，用于`Turbo::Render`架构的测试
