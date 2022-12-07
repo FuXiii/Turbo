@@ -14,6 +14,11 @@
   >* 创建`资源的创建与销毁`章节
   >* 创建`Context上下文`章节
   >* 创建`WorldRender/Render 渲染器`章节
+
+* 2022/12/7
+  >
+  >* 更新`资源的创建与销毁`章节
+  >* 更新`Context上下文`章节
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -570,7 +575,7 @@ class Image{
         //initialLayout //该属性由Turbo维护
     };
 
-void Create(const std::string &name, const Image::Descriptor &descriptor);
+void Create(const std::string &name, const Image::Descriptor &descriptor,void* allocator);
 void Destroy();
 };
 
@@ -633,6 +638,44 @@ class ColorImage3D: public ColorImage
 
 资源的创建与销毁需要一个资源分配器，而该资源分配器因该由`Context`上下文来创建
 
+资源分配器命名为`TResourceAllocator`，其构造函数参数：`context`。
+
+资源分配器只要分配两种资源：
+1. Image
+2. Buffer
+
+资源分配器只分配基础资源，比如`class Image`类的资源，而不会分配其派生的子类(因为子类都是派生自`Image`)，`class Buffer`资源类似。
+
+由于创建`Turbo::Render::Image`需要返回`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，所以`TResourceAllocator`在创建`Image`时需要返回`std::pair<Turbo::Core::TImage*, Turbo::Core::TImageView*>`。
+
+对于销毁`Turbo::Render::Image`，需要传入`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，其中`Turbo`在销毁时查看``Turbo::Core::TImageView`是否能与`Turbo::Core::TImage`对应上，能对上就删除，对不上直接返回异常
+
+```CXX
+class TResourceAllocator
+{
+    public:
+    TResourceAllocator(TContext* context);
+
+    std::pair<Turbo::Core::TImage*, Turbo::Core::TImageView*> CreateImage(const Turbo::Render::TImage::Descriptor& des)
+    {
+        //返回使用context创建的图片资源
+        return context->CreateImage(des.width,des.height,des.depth,...);
+    }
+
+    void DestroyImage(Turbo::Core::TImage* image, Turbo::Core::TImageView* imageView)
+    {
+        if(imageView->image.vulkanHandle==image.vulkanHandle)
+        {
+            context->DestroyImage(image,imageView);
+        }
+
+        throw 非法数据异常;
+    }
+}
+```
+
+`Buffer`同`Image`
+
 ### Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
@@ -640,6 +683,8 @@ class ColorImage3D: public ColorImage
 用户在构建上下文对象时，上下文的构造函数会去初始化环境。
 
 在构造完`Context`之后，使用`Context`去构造`WorldRender/Render`进行后面渲染
+
+`Context`需要提供`CreateImage(...)`，`DestroyImage(...)`，`CreateBuffer(...)`，`DestroyBuffer(...)`函数，用于创建和销毁资源
 
 ### WorldRender/Render 渲染器
 

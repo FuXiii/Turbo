@@ -1750,3 +1750,8 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下新建`TContext`类，用于引擎上下文
   >* `./samples`下新建`RenderDesignTest`示例，用于`Turbo::Render`架构的测试
+
+* 2022/12/7 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+  >* `./engine/render`下`TContext`中增加`TInstance`初始化构建
