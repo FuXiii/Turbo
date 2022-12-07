@@ -21,10 +21,10 @@ namespace Render
 class TContext
 {
   private:
-    Turbo::Core::TInstance *instance;
-    Turbo::Core::TPhysicalDevice *physicalDevice;
-    Turbo::Core::TDevice *device;
-    Turbo::Core::TDeviceQueue *graphicsQueue;
+    Turbo::Core::TInstance *instance = nullptr;
+    Turbo::Core::TPhysicalDevice *physicalDevice = nullptr;
+    Turbo::Core::TDevice *device = nullptr;
+    Turbo::Core::TDeviceQueue *graphicsQueue = nullptr;
 
   public:
     TContext();

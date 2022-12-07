@@ -134,14 +134,37 @@ Turbo::Render::TContext::TContext()
     // create instance
     this->instance = new Turbo::Core::TInstance(&enable_instance_layer, &enable_instance_extensions, &instance_support_version);
     std::cout << "Vulkan Version:" << this->instance->GetVulkanVersion().ToString() << std::endl;
+
+    this->physicalDevice = this->instance->GetBestPhysicalDevice();
+
+    std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = this->physicalDevice->GetSupportExtensions();
+
+    Turbo::Core::TExtensionInfo vk_khr_swapchain_extension;
+    for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
+    {
+        if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN)
+        {
+            vk_khr_swapchain_extension = extension;
+            break;
+        }
+    }
+
+    std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
+    if (vk_khr_swapchain_extension.GetExtensionType() != Turbo::Core::TExtensionType::UNDEFINED)
+    {
+        enable_device_extensions.push_back(vk_khr_swapchain_extension);
+    }
+
+    VkPhysicalDeviceFeatures vk_physical_device_features = {VK_FALSE};
+    vk_physical_device_features.sampleRateShading = VK_TRUE;
+    this->device = new Turbo::Core::TDevice(this->physicalDevice, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    this->graphicsQueue = this->device->GetBestGraphicsQueue();
 }
 
 Turbo::Render::TContext::~TContext()
 {
-    // TODO:
-    // destroy device queue
-    // destroy device
-    // destroy physical device
-    // destroy instance
+    this->graphicsQueue = nullptr;
+    delete this->device;
+    this->physicalDevice = nullptr;
     delete this->instance;
 }

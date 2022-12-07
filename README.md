@@ -1755,3 +1755,4 @@ Turbo是渲染引擎
   >
   >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
   >* `./engine/render`下`TContext`中增加`TInstance`初始化构建
+  >* `./engine/render`下`TContext`中增加`TDevice`初始化构建
