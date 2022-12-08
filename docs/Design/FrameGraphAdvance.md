@@ -19,7 +19,10 @@
   >
   >* 更新`资源的创建与销毁`章节
   >* 更新`Context上下文`章节
+
+* 2022/12/8
   >
+  >* 创建`Surface和Context`章节
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -498,7 +501,7 @@ Image 2;
 
 ---
 
-## Turbo驱动设计
+# Turbo驱动设计
 
 主要有两种资源`Image`和`Buffer`，每个资源内部都有一个`Descriptor`的结构体，用于创建时描述该资源。  
 >`Image`派生有：
@@ -635,7 +638,7 @@ class ColorImage3D: public ColorImage
 };
 ```
 
-### 资源的创建与销毁
+## 资源的创建与销毁
 
 资源的创建与销毁需要一个资源分配器，而该资源分配器因该由`Context`上下文来创建
 
@@ -651,7 +654,7 @@ class ColorImage3D: public ColorImage
 方案一（弃用）×
 >
 >* 由于创建`Turbo::Render::Image`需要返回`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，所以`TResourceAllocator`在创建`Image`时需要返回`std::pair<Turbo::Core::TImage*, Turbo::Core::TImageView*>`。
->* 对于销毁`Turbo::Render::Image`，需要传入`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，其中`Turbo`在销毁时查看``Turbo::Core::TImageView`是否能与`Turbo::Core::TImage`对应上，能对上就删除，对不上直接返回异常。
+>* 对于销毁`Turbo::Render::Image`，需要传入`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，其中`Turbo`在销毁时查看`Turbo::Core::TImageView`是否能与`Turbo::Core::TImage`对应上，能对上就删除，对不上直接返回异常。
 
 方案二（采纳）√
 >
@@ -663,27 +666,22 @@ class TResourceAllocator
     public:
     TResourceAllocator(TContext* context);
 
-    std::pair<Turbo::Core::TImage*, Turbo::Core::TImageView*> CreateImage(const Turbo::Render::TImage::Descriptor& des)
+    Turbo::Core::TImage* CreateImage(const Turbo::Render::TImage::Descriptor& des)
     {
         //返回使用context创建的图片资源
         return context->CreateImage(des.width,des.height,des.depth,...);
     }
 
-    void DestroyImage(Turbo::Core::TImage* image, Turbo::Core::TImageView* imageView)
+    void DestroyImage(Turbo::Core::TImage* image)
     {
-        if(imageView->image.vulkanHandle==image.vulkanHandle)
-        {
-            context->DestroyImage(image,imageView);
-        }
-
-        throw 非法数据异常;
+        context->DestroyImage(image,imageView);
     }
 }
 ```
 
 `Buffer`同`Image`
 
-### Context上下文
+## Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
 
@@ -693,6 +691,44 @@ class TResourceAllocator
 
 `Context`需要提供`CreateImage(...)`，`DestroyImage(...)`，`CreateBuffer(...)`，`DestroyBuffer(...)`函数，用于创建和销毁资源
 
-### WorldRender/Render 渲染器
+## WorldRender/Render 渲染器
 
 用户在使用`Context`创建完`WorldRender/Render`后调用`WorldRender/Render::DrawFrame(...)`，其中`DrawFrame(...)`函数会去构建一帧的`FrameGraph`并进行一帧的渲染
+
+## Surface、Swapchain和Context
+
+### 方案一（弃用）×
+
+在创建完`Context`后`Turbo`的基本环境已近构建，如果想要将渲染画面展示在屏幕上，还需要用户传入从窗口获得的`Surface`。
+
+目前有以下几种情况：
+
+1. 用户没有指定`Surface`（离屏渲染）
+2. 用户指定了`Surface`
+3. 用户更改了(重新指定了)`Surface`
+
+>1. 对于**用户没有指定`Surface`**  
+>如果用户没有指定`Surface`，`Turbo`则会在内部创建一个虚的`Surface`，并使用虚`Surface`创建虚`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）  
+>   * 随即带来个问题：创建多大的`Surface`呢？
+
+>2. 对于**用户指定了`Surface`**  
+>如果用户指定了`Surface`，`Turbo`则会使用该`Surface`创建`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）
+
+>3. 对于**用户更改了(重新指定了)`Surface`**  
+>如果用户之前已经指定了`Surface`，并再次指定`Surface`，如果当前`Surface`和指定的`Surface`不相同需要等待之前多有相关工作结束，并重新构建相关资源。
+
+### 方案二（采纳）√
+
+`Turbo`核心将使用离屏渲染，将渲染结果写入`RenderTarget`，如果用户绑定了`Surface`则将`RenderTarget`的渲染结果拷贝到`Surface`所对应的`Swapchain`所对应的`Image`中。
+
+`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
+
+---
+`mermaid`图测试
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
