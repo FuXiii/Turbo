@@ -25,6 +25,8 @@
   >* 创建`Surface、Swapchain和Context`章节
   >* 创建`Surface`章节
   >* 创建`Swapchain`章节
+  >* 创建`离屏渲染流程`章节
+  >
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -711,7 +713,8 @@ class TResourceAllocator
 
 >1. 对于**用户没有指定`Surface`**  
 >如果用户没有指定`Surface`，`Turbo`则会在内部创建一个虚的`Surface`，并使用虚`Surface`创建虚`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）  
->   * 随即带来个问题：创建多大的`Surface`呢？
+>
+> * 随即带来个问题：创建多大的`Surface`呢？
 
 >2. 对于**用户指定了`Surface`**  
 >如果用户指定了`Surface`，`Turbo`则会使用该`Surface`创建`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）
@@ -724,11 +727,13 @@ class TResourceAllocator
 `Turbo::Render`核心将使用离屏渲染，将渲染结果写入`RenderTarget`，如果用户绑定了`Surface`则将`RenderTarget`的渲染结果拷贝到`Surface`所对应的`Swapchain`所对应的`Image`中。
 
 优点：
+
 * 灵活，非常容易实现`GBufferPass`和`Post-ProcessPass`之类的功能
 * 不依赖某一窗口，甚至是可以没有窗口
 * 架构统一
 
 缺点：
+
 * 会多一次纹理图片颜色拷贝（无伤大雅，噗哈哈）
 
 使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
@@ -739,6 +744,7 @@ class TResourceAllocator
 >   1. 用户没有指定`Surface`  
 >       如果用户没有绑定任何`Surface`，`Context`将不会做任何事情，应为没有目标输出
 >   2. 用户指定了`Surface`
+>
 >       ```mermaid
 >        graph TD;
 >            IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothing[什么也不做];
@@ -751,13 +757,14 @@ class TResourceAllocator
 ## Surface
 
 用户创建的`Surface`有两种
+
 1. 虚拟`Surface`：对应着离屏渲染。所谓虚拟`Surface`是不跟任何窗口系统相关的虚拟表面（大白话是：不能显示在屏幕上，但可以获取渲染结果）
 2. 真实`Surface`: 对应着与窗口系统相关的`Surface`(底层为`VkSurface`与`Turbo::Core::TSurface`对应)（大白话是：能显示在屏幕上，同时可以获取渲染结果）
 
 这两种`Surface`都对应着`Turbo::Render::TSurface`，只不过是对应得构造函数不同罢了。
 
 * 如果用户使用的是虚拟`Surface`，`Turbo`引擎将会在内部构建一套`ColorImage:RenderTarget`并在渲染结束后将渲染结果交给用户做后续工作
-* 如果用户使用的是真实`Surface`，`Turbo`引擎将会在内部构建`Swapchain`等一系列工作，并将渲染结果展现在屏幕窗口上，同时用户也可以获取相应的渲染结果（同离屏渲染）   
+* 如果用户使用的是真实`Surface`，`Turbo`引擎将会在内部构建`Swapchain`等一系列工作，并将渲染结果展现在屏幕窗口上，同时用户也可以获取相应的渲染结果（同离屏渲染）
 *注：现在`Turbo`并没有`Turbo::Windows`跨平台窗口层，而是交由用户自己制定需求，而大多数跨平台窗口层都提供返回`VkSurface`的接口，这也是`Turbo`支持跨平台窗口的原因，在未来也许会推出`Turbo::Windows`跨平台窗口层吧~？*
 
 ```CXX
@@ -811,12 +818,40 @@ private:
 ```
 
 ## Swapchain
+
 该类型由`Turbo`管理。对用户透明
 
 为了满足离屏渲染的需求，`Turbo::Core::TSwapchain`需要支持虚拟`Surface`
 
+## 离屏渲染流程
+
+```mermaid
+ graph TD;
+    UserCreateContext[用户创建Context上下文]
+    UserCreateContext-->IsBindSurface{{是否已经绑定Surface}}
+    IsBindSurface--未绑定-->DoNothingWithoutSurface[什么也不做]
+    IsBindSurface--"已绑定(通过调用Context.BindSurface(...))"-->IsSurfaceSame[什么也不做]
+    IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothingForSameSurface[什么也不做]
+    IsSurfaceSame--不相同-->WaitAll[等待之前所有工作结束并回收资源]
+    subgraph RefreshSurface[使用用户指定的Surface进行新的构建]
+        direction TB
+        IsVirtualSurface{{是否是虚Surface}}
+        IsVirtualSurface--是-->CreateRenderTargetAccordingVirtualSurface[根据虚拟Surface创建RenderTarget]
+        IsVirtualSurface--否-->CreateRenderTargetAccordingRActualSurface[根据真实Surface创建RenderTarget]
+        subgraph UseRenderTarget["使用RenderTarget渲染"]
+            direction TB
+        end
+        CreateRenderTargetAccordingVirtualSurface-->UseRenderTarget
+        CreateRenderTargetAccordingRActualSurface-->UseRenderTarget
+    end
+    WaitAll-->IsVirtualSurface
+    DoNothingForSameSurface-->Frame[继续下一帧工作]
+    UseRenderTarget-->Frame[继续下一帧工作]
+ ```
+
 ---
 `mermaid`图测试
+
 ```mermaid
 graph TD;
     A-->B;
