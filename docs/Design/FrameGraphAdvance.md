@@ -771,7 +771,7 @@ namespace Turbo
             VkSurface vkSurface = VK_NULL_HANDLE;
 
             public:
-            TSurface(uint32_t width,uint32_t height,uint32_t depth,...);//对应着[虚拟Surface]
+            TSurface(uint32_t width,uint32_t height,uint32_t layer,uint32_t imageCount,...);//对应着[虚拟Surface]
             TSurface(VkSurface vkSurface);//对应着[真实Surface]
             //TSurface(const Turbo::TWindows& windows);//for未来~？
         }
@@ -780,6 +780,35 @@ namespace Turbo
 ```
 
 为了满足离屏渲染的需求，`Turbo::Core::TSurface`需要支持虚拟`Surface`
+
+```CXX
+//虚拟Turbo::Render::TSurface对应的Turbo::Core::TSurface
+Turbo::Core::TSurface属性
+{
+private:
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = Context.device;//上下文中创建的设备
+    T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;//vkSurfaceKHR为空是虚Surface的标志
+
+    bool isExternalHandle = true;//为true，单独为属性赋值
+
+    std::vector<Turbo::Core::TQueueFamilyInfo> supportQueueFamilys;//空数组，size()为0
+
+    uint32_t minImageCount;//同uint32_t Turbo::Render::TSurface::imageCount
+    uint32_t maxImageCount;//同uint32_t Turbo::Render::TSurface::imageCount
+    Turbo::Core::TExtent2D currentExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    Turbo::Core::TExtent2D minImageExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    Turbo::Core::TExtent2D maxImageExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    uint32_t maxImageArrayLayers;//同uint32_t Turbo::Render::TSurface::layer
+
+    Turbo::Extension::TSurfaceTransforms supportedTransforms;//TSurfaceTransformBits::TRANSFORM_IDENTITY_BIT
+    Turbo::Extension::TSurfaceTransformBits currentTransform;//TSurfaceTransformBits::TRANSFORM_IDENTITY_BIT
+    Turbo::Extension::TCompositeAlphas supportedCompositeAlpha;//TCompositeAlphaBits::ALPHA_OPAQUE_BIT
+    Turbo::Core::TImageUsages supportedUsageFlags;//IMAGE_TRANSFER_SRC+IMAGE_TRANSFER_DST+IMAGE_COLOR_ATTACHMENT
+
+    std::vector<Turbo::Extension::TSurfaceFormat> surfaceFormats;//{format=Turbo选择一个颜色格式R8G8B8A8,TColorSpace::colorSpaceType=TColorSpaceType::SRGB_NONLINEAR}
+    std::vector<Turbo::Extension::TPresentMode> presentModes;//FIFO
+}
+```
 
 ## Swapchain
 该类型由`Turbo`管理。对用户透明
