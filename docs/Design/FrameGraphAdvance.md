@@ -724,10 +724,19 @@ class TResourceAllocator
 使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
 
 >* 现在有个问题：如果采用方案二，离线渲染的图片（`RenderTarget`）大小是多少呢？
->   1. 如果没有绑定`Surface`
->   2. 如果已经绑定`Surface`
 >* 解决方案：需要用户自定义创建`Surface`（此`Surface`可以使虚的也可以是实的），并将创建好的`Surface`绑定给`Context`，之后`Context`根据`Surface`进行操作。
-     
+> 如此会有两种情况：
+>   1. 用户没有指定`Surface`  
+>       如果用户没有绑定任何`Surface`，`Context`将不会做任何事情，应为没有目标输出
+>   2. 用户指定了`Surface`
+>       ```mermaid
+>        graph TD;
+>            IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothing[什么也不做];
+>            IsSurfaceSame--不相同-->WaitAll[等待之前所有工作结束并回收资源];
+>            WaitAll-->Refresh[使用用户指定的Surface进行新的构建];
+>            DoNothing-->Frame[继续下一帧工作]
+>            Refresh-->Frame[继续下一帧工作]
+>        ```
 ---
 `mermaid`图测试
 ```mermaid
