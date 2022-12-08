@@ -722,7 +722,7 @@ class TResourceAllocator
 `Turbo`核心将使用离屏渲染，将渲染结果写入`RenderTarget`，如果用户绑定了`Surface`则将`RenderTarget`的渲染结果拷贝到`Surface`所对应的`Swapchain`所对应的`Image`中。
 
 `CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
-
+     
 ---
 `mermaid`图测试
 ```mermaid
