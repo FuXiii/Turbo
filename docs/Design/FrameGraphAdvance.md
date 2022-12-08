@@ -721,7 +721,12 @@ class TResourceAllocator
 
 `Turbo`核心将使用离屏渲染，将渲染结果写入`RenderTarget`，如果用户绑定了`Surface`则将`RenderTarget`的渲染结果拷贝到`Surface`所对应的`Swapchain`所对应的`Image`中。
 
-`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
+使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
+
+>* 现在有个问题：如果采用方案二，离线渲染的图片（`RenderTarget`）大小是多少呢？
+>   1. 如果没有绑定`Surface`
+>   2. 如果已经绑定`Surface`
+>* 解决方案：需要用户自定义创建`Surface`（此`Surface`可以使虚的也可以是实的），并将创建好的`Surface`绑定给`Context`，之后`Context`根据`Surface`进行操作。
      
 ---
 `mermaid`图测试
