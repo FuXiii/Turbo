@@ -25,8 +25,10 @@
   >* 创建`Surface、Swapchain和Context`章节
   >* 创建`Surface`章节
   >* 创建`Swapchain`章节
-  >* 创建`离屏渲染流程`章节
+
+* 2022/12/9
   >
+  >* 创建`离屏渲染流程`章节
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -786,8 +788,10 @@ namespace Turbo
 }
 ```
 
-为了满足离屏渲染的需求，`Turbo::Core::TSurface`需要支持虚拟`Surface`
+~~为了满足离屏渲染的需求，`Turbo::Core::TSurface`需要支持虚拟`Surface`~~
+离屏渲染并不需要`Turbo::Core::TSurface`支持虚拟`Surface`，而是需要`RenderTarget`纹理
 
+*注：以下代码已被遗弃，但可以做一个虚拟`Surface`内部数据参考*
 ```CXX
 //虚拟Turbo::Render::TSurface对应的Turbo::Core::TSurface
 Turbo::Core::TSurface属性
@@ -821,10 +825,11 @@ private:
 
 该类型由`Turbo`管理。对用户透明
 
-为了满足离屏渲染的需求，`Turbo::Core::TSwapchain`需要支持虚拟`Surface`
+~~为了满足离屏渲染的需求，`Turbo::Core::TSwapchain`需要支持虚拟`Surface`~~
+同`Surface`情况
 
 ## 离屏渲染流程
-
+`Turbo::Render`层的任务核心，其中`RenderTarget`是离屏渲染的目标纹理图片（内部对应一个`Image`）
 ```mermaid
  graph TD;
     UserCreateContext[用户创建Context上下文]
@@ -836,17 +841,39 @@ private:
     subgraph RefreshSurface[使用用户指定的Surface进行新的构建]
         direction TB
         IsVirtualSurface{{是否是虚Surface}}
-        IsVirtualSurface--是-->CreateRenderTargetAccordingVirtualSurface[根据虚拟Surface创建RenderTarget]
-        IsVirtualSurface--否-->CreateRenderTargetAccordingRActualSurface[根据真实Surface创建RenderTarget]
-        subgraph UseRenderTarget["使用RenderTarget渲染"]
+            subgraph CreateRenderTargetAccordingVirtualSurface[根据虚拟Surface创建RenderTarget]
+                    direction TB
+                    GetVirtualSurfaceConfig[获取用户的虚拟Surface的配置]
+            end
+        IsVirtualSurface--是-->CreateRenderTargetAccordingVirtualSurface
+            subgraph CreateRenderTargetAccordingActualSurface[根据真实Surface创建RenderTarget]
+                direction TB
+                GetVkSurface[获取VkSurface] -->CreateSwapchain[根据VkSurface创建Swapchain]
+                CreateSwapchain-->GetImage[获取Swapchain中的Image]
+            end
+        IsVirtualSurface--否-->CreateRenderTargetAccordingActualSurface
+    end
+
+    subgraph FrameGraph["FrameGraph"]
+        direction TB
+        CreateRenderTargetForFG[创建RenderTarget]-->UseRenderTarget
+        subgraph UseRenderTarget["使用RenderTarget渲染（此处为FrameGraph的核心）"]
             direction TB
         end
-        CreateRenderTargetAccordingVirtualSurface-->UseRenderTarget
-        CreateRenderTargetAccordingRActualSurface-->UseRenderTarget
+        UseRenderTarget-->IsVirtualSurface1{{是否是虚Surface}}
+        IsVirtualSurface1--是-->CopyResultReturntoUser[将RenderTarget结果拷贝给用户]
+        IsVirtualSurface1--否-->CopyRenderTargetToSwapchainImage[将RenderTarget渲染结果拷贝 Swapchain的Image中]
+        CopyRenderTargetToSwapchainImage-->ToUser[将渲染结果拷贝给用户]
+        ToUser-->PresentSwapchainImage["显示到Surface上(PresentPass)"]
     end
+
+    
+    CreateRenderTargetAccordingVirtualSurface-->CreateRenderTargetForFG
+    CreateRenderTargetAccordingActualSurface-->CreateRenderTargetForFG
     WaitAll-->IsVirtualSurface
-    DoNothingForSameSurface-->Frame[继续下一帧工作]
-    UseRenderTarget-->Frame[继续下一帧工作]
+    DoNothingForSameSurface-->EndFrame[当前帧结束]
+    CopyResultReturntoUser-->EndFrame
+    PresentSwapchainImage-->EndFrame
  ```
 
 ---
