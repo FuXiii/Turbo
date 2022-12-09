@@ -740,7 +740,7 @@ class TResourceAllocator
 
 使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
 
->* 现在有个问题：如果采用方案二，离屏渲染的图片（`RenderTarget`）大小是多少呢？
+> 现在有个问题：如果采用方案二，离屏渲染的图片（`RenderTarget`）大小是多少呢？
 >* 解决方案：需要用户自定义创建`Surface`（此`Surface`可以使虚的也可以是实的），并将创建好的`Surface`绑定给`Context`，之后`Context`根据`Surface`进行操作。
 > 如此会有两种情况：
 >   1. 用户没有指定`Surface`  
@@ -833,7 +833,8 @@ private:
 ```mermaid
  graph TD;
     UserCreateContext[用户创建Context上下文]
-    UserCreateContext-->IsBindSurface{{是否已经绑定Surface}}
+    UserCreateContext-->BeginFrame[开始当前帧]
+    BeginFrame-->IsBindSurface{{是否已经绑定Surface}}
     IsBindSurface--未绑定-->DoNothingWithoutSurface[什么也不做]
     IsBindSurface--"已绑定(通过调用Context.BindSurface(...))"-->IsSurfaceSame[什么也不做]
     IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothingForSameSurface[什么也不做]
@@ -871,9 +872,11 @@ private:
     CreateRenderTargetAccordingVirtualSurface-->CreateRenderTargetForFG
     CreateRenderTargetAccordingActualSurface-->CreateRenderTargetForFG
     WaitAll-->IsVirtualSurface
-    DoNothingForSameSurface-->EndFrame[当前帧结束]
-    CopyResultReturntoUser-->EndFrame
+    DoNothingForSameSurface-->CreateRenderTargetForFG
+    CopyResultReturntoUser-->EndFrame[当前帧结束]
     PresentSwapchainImage-->EndFrame
+
+    %%EndFrame-->BeginFrame
  ```
 
 ---
