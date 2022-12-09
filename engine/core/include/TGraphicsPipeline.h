@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TGRAPHICSPIPELINE_H
-#define TGRAPHICSPIPELINE_H
+#ifndef TURBO_CORE_TGRAPHICSPIPELINE_H
+#define TURBO_CORE_TGRAPHICSPIPELINE_H
 #include "TImage.h"
 #include "TPipeline.h"
 
@@ -273,4 +273,4 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TGRAPHICSPIPELINE_H
+#endif // !TURBO_CORE_TGRAPHICSPIPELINE_H

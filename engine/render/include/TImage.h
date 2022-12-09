@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TIMAGE_H
-#define TIMAGE_H
+#ifndef TURBO_RENDER_TIMAGE_H
+#define TURBO_RENDER_TIMAGE_H
 #include <cstdint>
 #include <string>
 
@@ -83,4 +83,4 @@ class TColorImage2D : public TColorImage
 void Test();
 } // namespace Render
 } // namespace Turbo
-#endif // !TIMAGE_H
+#endif // !TURBO_RENDER_TIMAGE_H

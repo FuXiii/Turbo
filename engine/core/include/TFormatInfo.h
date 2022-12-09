@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TFORMAT_H
-#define TFORMAT_H
+#ifndef TURBO_CORE_TFORMAT_H
+#define TURBO_CORE_TFORMAT_H
 #include "TObject.h"
 
 namespace Turbo
@@ -375,4 +375,4 @@ class TFormatInfo : public TObject
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TORMAT_H
+#endif // !TURBO_CORE_TFORMAT_H

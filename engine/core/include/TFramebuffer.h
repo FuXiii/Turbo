@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TFRAMEBUFFER_H
-#define TFRAMEBUFFER_H
+#ifndef TURBO_CORE_TFRAMEBUFFER_H
+#define TURBO_CORE_TFRAMEBUFFER_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -41,4 +41,4 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TFRAMEBUFFER_H
+#endif // !TURBO_CORE_TFRAMEBUFFER_H

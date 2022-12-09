@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TALLOCATOR_H
-#define TALLOCATOR_H
+#ifndef TURBO_CORE_TALLOCATOR_H
+#define TURBO_CORE_TALLOCATOR_H
 #include "TObject.h"
 
 namespace Turbo
@@ -22,4 +22,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TALLOCATOR_H
+#endif // !TURBO_CORE_TALLOCATOR_H

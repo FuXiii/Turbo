@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TEXTENSION_H
-#define TEXTENSION_H
+#ifndef TURBO_CORE_TEXTENSION_H
+#define TURBO_CORE_TEXTENSION_H
 #include "TInfo.h"
 #include <vector>
 
@@ -272,4 +272,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TEXTENSION_H
+#endif // !TURBO_CORE_TEXTENSION_H

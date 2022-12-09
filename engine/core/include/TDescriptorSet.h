@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDESCRIPTORSET_H
-#define TDESCRIPTORSET_H
+#ifndef TURBO_CORE_TDESCRIPTORSET_H
+#define TURBO_CORE_TDESCRIPTORSET_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -44,4 +44,4 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TDESCRIPTORSET_H
+#endif // !TURBO_CORE_TDESCRIPTORSET_H

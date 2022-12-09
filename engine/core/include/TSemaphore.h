@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSEMAPHORE_H
-#define TSEMAPHORE_H
+#ifndef TURBO_CORE_TSEMAPHORE_H
+#define TURBO_CORE_TSEMAPHORE_H
 #include "TPipeline.h"
 #include "TVulkanHandle.h"
 
@@ -35,4 +35,4 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TFENCE_H
+#endif // !TURBO_CORE_TSEMAPHORE_H

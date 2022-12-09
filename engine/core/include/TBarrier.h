@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TBARRIER_H
-#define TBARRIER_H
+#ifndef TURBO_CORE_TBARRIER_H
+#define TURBO_CORE_TBARRIER_H
 #include "TImage.h"
 #include "TImageView.h"
 #include "TInfo.h"
@@ -82,4 +82,4 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TBARRIER_H
+#endif // !TURBO_CORE_TBARRIER_H

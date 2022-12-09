@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVULKANLOADER_H
-#define TVULKANLOADER_H
+#ifndef TURBO_CORE_TVULKANLOADER_H
+#define TURBO_CORE_TVULKANLOADER_H
 #include "TDevice.h"
 #include "TException.h"
 #include "TInstance.h"
@@ -399,4 +399,4 @@ Function Turbo::Core::TVulkanLoader::LoadDeviceFunction(VkDevice device, const c
 {
     return this->Load<TLoaderType::DEVICE, Function>(device, name);
 }
-#endif // !TVULKANLOADER_H
+#endif // !TURBO_CORE_TVULKANLOADER_H

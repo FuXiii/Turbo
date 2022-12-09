@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDESCRIPTOR_H
-#define TDESCRIPTOR_H
+#ifndef TURBO_CORE_TDESCRIPTOR_H
+#define TURBO_CORE_TDESCRIPTOR_H
 #include "TInfo.h"
 
 namespace Turbo
@@ -186,4 +186,4 @@ class TStorageImageDescriptor : public TDescriptor
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TDESCRIPTOR_H
+#endif // !TURBO_CORE_TDESCRIPTOR_H

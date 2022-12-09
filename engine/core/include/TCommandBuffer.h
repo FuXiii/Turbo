@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TCOMMANDBUFFER_H
-#define TCOMMANDBUFFER_H
+#ifndef TURBO_CORE_TCOMMANDBUFFER_H
+#define TURBO_CORE_TCOMMANDBUFFER_H
 #include "TBarrier.h"
 #include "TBuffer.h"
 #include "TPipeline.h"
@@ -179,4 +179,4 @@ class TCommandBuffer : public Turbo::Core::TCommandBufferBase
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TCOMMANDBUFFER_H
+#endif // !TURBO_CORE_TCOMMANDBUFFER_H

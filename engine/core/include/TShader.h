@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSHADER_H
-#define TSHADER_H
+#ifndef TURBO_CORE_TSHADER_H
+#define TURBO_CORE_TSHADER_H
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
 
@@ -125,4 +125,4 @@ class TComputeShader : public Turbo::Core::TShader
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TSHADER_H
+#endif // !TURBO_CORE_TSHADER_H

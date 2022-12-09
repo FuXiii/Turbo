@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TLAYER_H
-#define TLAYER_H
+#ifndef TURBO_CORE_TLAYER_H
+#define TURBO_CORE_TLAYER_H
 #include "TInfo.h"
 #include "TVersion.h"
 #include "TExtensionInfo.h"
@@ -75,4 +75,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TLAYER_H
+#endif // !TURBO_CORE_TLAYER_H

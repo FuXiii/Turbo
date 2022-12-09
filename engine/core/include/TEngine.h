@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TAPPLICATION_H
-#define TAPPLICATION_H
+#ifndef TURBO_CORE_TAPPLICATION_H
+#define TURBO_CORE_TAPPLICATION_H
 #include "TObject.h"
 #include "TInstance.h"
 
@@ -31,4 +31,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // TAPPLICATION_H
+#endif // TURBO_CORE_TAPPLICATION_H

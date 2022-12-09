@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TCONTEXT_H
-#define TCONTEXT_H
+#ifndef TURBO_RENDER_TCONTEXT_H
+#define TURBO_RENDER_TCONTEXT_H
 
 namespace Turbo
 {
@@ -33,5 +33,4 @@ class TContext
 
 } // namespace Render
 } // namespace Turbo
-
-#endif // !TCONTEXT_H
+#endif // !TURBO_RENDER_TCONTEXT_H

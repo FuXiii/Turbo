@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TINFO_H
-#define TINFO_H
+#ifndef TURBO_CORE_TINFO_H
+#define TURBO_CORE_TINFO_H
 #include "TObject.h"
 
 namespace Turbo
@@ -15,4 +15,4 @@ class TInfo : public TObject
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TINFO_H
+#endif // !TURBO_CORE_TINFO_H

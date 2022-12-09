@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPIPELINEDESCRIPTORSET_H
-#define TPIPELINEDESCRIPTORSET_H
+#ifndef TURBO_CORE_TPIPELINEDESCRIPTORSET_H
+#define TURBO_CORE_TPIPELINEDESCRIPTORSET_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -43,4 +43,4 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TPIPELINEDESCRIPTORSET_H
+#endif // !TURBO_CORE_TPIPELINEDESCRIPTORSET_H

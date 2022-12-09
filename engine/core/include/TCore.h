@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TURBO_H
-#define TURBO_H
+#ifndef TURBO_CORE_TURBO_H
+#define TURBO_CORE_TURBO_H
 
 #include <utility>
 #include <vector>
@@ -157,4 +157,4 @@ typedef VkImageViewCreateFlags TImageViewCreateFlags;
 typedef VkImageAspectFlags TImageAspectFlags;
 } // namespace Core
 } // namespace Turbo
-#endif // !TURBO_H
+#endif // !TURBO_CORE_TURBO_H

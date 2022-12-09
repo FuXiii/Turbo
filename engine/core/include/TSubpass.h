@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSUBPASS_H
-#define TSUBPASS_H
+#ifndef TURBO_CORE_TSUBPASS_H
+#define TURBO_CORE_TSUBPASS_H
 #include "TImage.h"
 #include "TInfo.h"
 #include "TPipeline.h"
@@ -46,4 +46,4 @@ class TSubpass : public Turbo::Core::TInfo
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TSUBPASS_H
+#endif // !TURBO_CORE_TSUBPASS_H

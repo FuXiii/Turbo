@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPIPELINE_H
-#define TPIPELINE_H
+#ifndef TURBO_CORE_TPIPELINE_H
+#define TURBO_CORE_TPIPELINE_H
 #include "TFormatInfo.h"
 #include "TScissor.h"
 #include "TViewport.h"
@@ -85,4 +85,4 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TPIPELINE_H
+#endif // !TURBO_CORE_TPIPELINE_H

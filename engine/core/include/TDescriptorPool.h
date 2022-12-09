@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDESCRIPTORPOOL_H
-#define TDESCRIPTORPOOL_H
+#ifndef TURBO_CORE_TDESCRIPTORPOOL_H
+#define TURBO_CORE_TDESCRIPTORPOOL_H
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
 
@@ -58,4 +58,4 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TDESCRIPTORPOOL_H
+#endif // !TURBO_CORE_TDESCRIPTORPOOL_H

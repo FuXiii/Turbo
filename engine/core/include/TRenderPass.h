@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TRENDERPASS_H
-#define TRENDERPASS_H
+#ifndef TURBO_CORE_TRENDERPASS_H
+#define TURBO_CORE_TRENDERPASS_H
 #include "TAttachment.h"
 #include "TVulkanHandle.h"
 #include "TSubpass.h"
@@ -45,4 +45,4 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TRENDERPASS_H
+#endif // !TURBO_CORE_TRENDERPASS_H

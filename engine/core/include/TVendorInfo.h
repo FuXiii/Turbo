@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVENDOR_H
-#define TVENDOR_H
+#ifndef TURBO_CORE_TVENDORINFO_H
+#define TURBO_CORE_TVENDORINFO_H
 #include "TInfo.h"
 
 namespace Turbo
@@ -41,4 +41,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TVENDOR_H
+#endif // !TURBO_CORE_TVENDORINFO_H

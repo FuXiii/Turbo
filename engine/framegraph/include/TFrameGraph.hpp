@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TFRAMEGRAPH_H
-#define TFRAMEGRAPH_H
+#ifndef TURBO_FRAMEGRAPH_TFRAMEGRAPH_H
+#define TURBO_FRAMEGRAPH_TFRAMEGRAPH_H
 #include <assert.h>
 #include <cstdint>
 #include <iostream>
@@ -370,4 +370,4 @@ inline T &Turbo::FrameGraph::TResources::Get(TResource resource) const
 } // namespace FrameGraph
 } // namespace Turbo
 
-#endif // !TFRAMEGRAPH_H
+#endif // !TURBO_FRAMEGRAPH_TFRAMEGRAPH_H

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TINSTANCE_H
-#define TINSTANCE_H
+#ifndef TURBO_CORE_TINSTANCE_H
+#define TURBO_CORE_TINSTANCE_H
 #include "TLayerInfo.h"
 #include "TVulkanHandle.h"
 #include <vector>
@@ -82,4 +82,4 @@ class TInstance : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // TINSTANCE_H
+#endif // !TURBO_CORE_TINSTANCE_H

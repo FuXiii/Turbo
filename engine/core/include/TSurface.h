@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSURFACE_H
-#define TSURFACE_H
+#ifndef TURBO_CORE_TSURFACE_H
+#define TURBO_CORE_TSURFACE_H
 #include "TImage.h"
 #include "TInfo.h"
 #include "TQueueFamilyInfo.h"
@@ -265,4 +265,4 @@ class TSurface : public Turbo::Core::TVulkanHandle
 };
 } // namespace Extension
 } // namespace Turbo
-#endif // !TSURFACE_H
+#endif // !TURBO_CORE_TSURFACE_H

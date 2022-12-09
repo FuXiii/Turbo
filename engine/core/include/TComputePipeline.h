@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TCOMPUTEPIPELINE_H
-#define TCOMPUTEPIPELINE_H
+#ifndef TURBO_CORE_TCOMPUTEPIPELINE_H
+#define TURBO_CORE_TCOMPUTEPIPELINE_H
 #include "TPipeline.h"
 
 namespace Turbo
@@ -29,4 +29,4 @@ class TComputePipeline : public Turbo::Core::TPipeline
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TCOMPUTEPIPELINE_H
+#endif // !TURBO_CORE_TCOMPUTEPIPELINE_H

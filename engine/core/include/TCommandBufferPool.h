@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TCOMMANDBUFFERPOOL_H
-#define TCOMMANDBUFFERPOOL_H
+#ifndef TURBO_CORE_TCOMMANDBUFFERPOOL_H
+#define TURBO_CORE_TCOMMANDBUFFERPOOL_H
 //#include "TPool.h"
 #include "TVulkanHandle.h"
 
@@ -52,4 +52,4 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TCOMMANDBUFFERPOOL_H
+#endif // !TURBO_CORE_TCOMMANDBUFFERPOOL_H

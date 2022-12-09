@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPLATFORM_H
-#define TPLATFORM_H
+#ifndef TURBO_CORE_TPLATFORM_H
+#define TURBO_CORE_TPLATFORM_H
 #include "TObject.h"
 
 /*
@@ -41,4 +41,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TPLATFORM_H
+#endif // !TURBO_CORE_TPLATFORM_H
