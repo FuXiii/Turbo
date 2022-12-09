@@ -1766,3 +1766,4 @@ Turbo是渲染引擎
   >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
   >* `./engine/render`下新建`TSurface`类
   >* 重命名`Turbo`中所有的头文件定义宏，防止冲突
+  >* `./engine/render`下`TContext`增加`Turbo::Core::TImage *CreateImage(...)`函数

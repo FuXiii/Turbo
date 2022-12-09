@@ -1,6 +1,7 @@
 #include "TContext.h"
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
+#include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TVersion.h>
@@ -167,4 +168,10 @@ Turbo::Render::TContext::~TContext()
     delete this->device;
     this->physicalDevice = nullptr;
     delete this->instance;
+}
+
+Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(uint32_t width, uint32_t height, uint32_t depth, uint32_t layer)
+{
+    // return new Turbo::Core::TImage(...);
+    return nullptr;
 }

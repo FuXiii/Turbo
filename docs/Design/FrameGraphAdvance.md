@@ -31,6 +31,8 @@
   >* 创建`离屏渲染流程`章节
   >* 创建`将RenderTarget结果拷贝给用户`章节
   >* 创建`用户自定义PassNode`章节
+  >* `Image`资源派生中增加`CubeImage`资源类
+  >* `资源的创建与销毁`章节中增加在使用`Render::TContext`创建`Redner::TImage`时与`Turbo::Core::TImage`资源类的对应说明
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -536,6 +538,10 @@ Image 2;
 >`DepthStencilImage`派生有：
 >
 >* DepthStencilImage2D
+>
+>`ColorImage2D`派生有：
+>
+>* CubeImage
 
 >`Buffer`派生有：
 >
@@ -688,6 +694,40 @@ class TResourceAllocator
 ```
 
 `Buffer`同`Image`
+
+>* 对于`TContext::CreateImage(...)`与`Turbo::Core::TImage`参数对应
+> ```CXX
+>struct Turbo::Render::Image::Descriptor
+>{
+>    Turbo::Render::TImageType type;
+>    Turbo::Render::TFlag flag;//用于CubeImage
+>    Turbo::Render::TFormat format;
+>    uint32_t width;//1D轴，当（width≠0,height=0,depth=0）时，对应Turbo::Core::TImageType::1D
+>    uint32_t height;//2D轴，当（width≠0,height≠0,depth=0）时，，对应Turbo::Core::TImageType::2D
+>    uint32_t depth;//3D轴，当（width≠0,height≠0,depth≠0）时，，对应Turbo::Core::TImageType::3D
+>    uitn32_t mipLevels;
+>    uint32_t layers;
+>    TUsages usages;
+>};
+>
+>Turbo::Render::TContext::CreateImage(const Turbo::Render::Image::Descriptor& descriptor);
+>Turbo::Core::TImage::TImage(
+>       TDevice *device, //由TContext指定
+>       VkImageCreateFlags imageFlags, //由Render层传入，一般Render::TCubeImage创建指定
+>       TImageType type, //由Render层转换推出（根据Turbo::Render::Image::Descriptor的长宽高转换推出）
+>       TFormatInfo format, //由Render层传入
+>       uint32_t width, //由Render层传入
+>       uint32_t height, //由Render层传入
+>       uint32_t depth, //由Render层传入
+>       uint32_t mipLevels, //由Render层传入
+>       uint32_t arrayLayers, //由Render层传入
+>       TSampleCountBits samples, //由Turbo维护
+>       TImageTiling tiling, //由Turbo维护
+>       TImageUsages usages, //由Render层传入
+>       TMemoryFlags memoryFlags, //由Turbo维护
+>       TImageLayout layout//由Turbo维护，默认值TImageLayout::UNDEFINED
+>)
+>```
 
 ## Context上下文
 
