@@ -1767,3 +1767,9 @@ Turbo是渲染引擎
   >* `./engine/render`下新建`TSurface`类
   >* 重命名`Turbo`中所有的头文件定义宏，防止冲突
   >* `./engine/render`下`TContext`增加`Turbo::Core::TImage *CreateImage(...)`函数
+  >* `./engine/render`下`TImage`增加`typedef enum TImageCreateFlagBits`用于创建`TImage`的描述的位域标示
+  >* `./engine/render`下`TImage`增加`using TImageCreateFlags = uint32_t`用于创建`TImage`的描述的位域标示集
+  >* `./engine/render`下`TImage`的`Descriptor`增加`TImageCreateFlags flags`成员
+  >* `./engine/render`下`TImage`增加`typedef enum TImageUsageBits`用于创建`TImage`的描述的`usage`位域标示
+  >* `./engine/render`下`TImage`增加`using TImageUsages = uint32_t;`用于创建`TImage`的描述的`usage`位域标示集
+  >* `./engine/render`下`TImage`的`Descriptor`增加`TImageUsages usages;`成员

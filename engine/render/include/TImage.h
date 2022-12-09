@@ -17,16 +17,38 @@ namespace Turbo
 {
 namespace Render
 {
+typedef enum TImageCreateFlagBits
+{
+    CUBE_COMPATIBLE_BIT = 0x00000001,
+} TImageCreateFlagBits;
+using TImageCreateFlags = uint32_t;
+
+typedef enum TImageUsageBits
+{
+    TRANSFER_SRC = 0x00000001,
+    TRANSFER_DST = 0x00000002,
+    SAMPLED = 0x00000004,
+    STORAGE = 0x00000008,
+    COLOR_ATTACHMENT = 0x00000010,
+    DEPTH_STENCIL_ATTACHMENT = 0x00000020,
+    TRANSIENT_ATTACHMENT = 0x00000040,
+    INPUT_ATTACHMENT = 0x00000080,
+} TImageUsageBits;
+using TImageUsages = uint32_t;
+
 class TImage
 {
   public:
     struct Descriptor
     {
+        TImageCreateFlags flags;
+        // TFormat format;
         uint32_t width;
         uint32_t height;
         uint32_t depth;
+        uint32_t mipLevels;
         uint32_t layers;
-        //...
+        TImageUsages usages;
     };
 
   private:

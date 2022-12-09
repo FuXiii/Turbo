@@ -134,7 +134,8 @@ Turbo::Render::TContext::TContext()
 
     // create instance
     this->instance = new Turbo::Core::TInstance(&enable_instance_layer, &enable_instance_extensions, &instance_support_version);
-    std::cout << "Vulkan Version:" << this->instance->GetVulkanVersion().ToString() << std::endl;
+    std::cout << "Support Vulkan Version:" << support_vulkan_version.ToString() << std::endl;
+    std::cout << "Turbo Vulkan Version:" << this->instance->GetVulkanVersion().ToString() << std::endl;
 
     this->physicalDevice = this->instance->GetBestPhysicalDevice();
 

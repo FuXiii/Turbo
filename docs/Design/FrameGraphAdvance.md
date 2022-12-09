@@ -33,6 +33,7 @@
   >* 创建`用户自定义PassNode`章节
   >* `Image`资源派生中增加`CubeImage`资源类
   >* `资源的创建与销毁`章节中增加在使用`Render::TContext`创建`Redner::TImage`时与`Turbo::Core::TImage`资源类的对应说明
+  >
 ---
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
@@ -696,15 +697,15 @@ class TResourceAllocator
 `Buffer`同`Image`
 
 >* 对于`TContext::CreateImage(...)`与`Turbo::Core::TImage`参数对应
+>
 > ```CXX
 >struct Turbo::Render::Image::Descriptor
 >{
->    Turbo::Render::TImageType type;
 >    Turbo::Render::TFlag flag;//用于CubeImage
 >    Turbo::Render::TFormat format;
 >    uint32_t width;//1D轴，当（width≠0,height=0,depth=0）时，对应Turbo::Core::TImageType::1D
->    uint32_t height;//2D轴，当（width≠0,height≠0,depth=0）时，，对应Turbo::Core::TImageType::2D
->    uint32_t depth;//3D轴，当（width≠0,height≠0,depth≠0）时，，对应Turbo::Core::TImageType::3D
+>    uint32_t height;//2D轴，当（width≠0,height≠0,depth=0）时，对应Turbo::Core::TImageType::2D
+>    uint32_t depth;//3D轴，当（width≠0,height≠0,depth≠0）时，对应Turbo::Core::TImageType::3D
 >    uitn32_t mipLevels;
 >    uint32_t layers;
 >    TUsages usages;
@@ -783,6 +784,7 @@ class TResourceAllocator
 使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
 
 > 现在有个问题：如果采用方案二，离屏渲染的图片（`RenderTarget`）大小是多少呢？
+>
 >* 解决方案：需要用户自定义创建`Surface`（此`Surface`可以使虚的也可以是实的），并将创建好的`Surface`绑定给`Context`，之后`Context`根据`Surface`进行操作。
 > 如此会有两种情况：
 >   1. 用户没有指定`Surface`  
@@ -834,6 +836,7 @@ namespace Turbo
 离屏渲染并不需要`Turbo::Core::TSurface`支持虚拟`Surface`，而是需要`RenderTarget`纹理
 
 *注：以下代码已被遗弃，但可以做一个虚拟`Surface`内部数据参考*
+
 ```CXX
 //虚拟Turbo::Render::TSurface对应的Turbo::Core::TSurface
 Turbo::Core::TSurface属性
@@ -871,7 +874,9 @@ private:
 同`Surface`情况
 
 ## 离屏渲染流程
+
 `Turbo::Render`层的任务核心，其中`RenderTarget`是离屏渲染的目标纹理图片（内部对应一个`Image`）
+
 ```mermaid
  graph TD;
     UserCreateContext[用户创建Context上下文]
@@ -921,19 +926,21 @@ private:
     %%EndFrame-->BeginFrame
  ```
 
- ## 将`RenderTarget`结果拷贝给用户
+## 将`RenderTarget`结果拷贝给用户
+
  用户如何获取渲染的结果呢？
 
- ### 方案一 （弃用）×
+### 方案一 （弃用）×
+
  用户通过`Surface`获取渲染结果
 
- ### 方案二 （采纳）√
+### 方案二 （采纳）√
+
  用户通过自定义`PassNode`获取渲染结果
 
- ## 用户自定义`PassNode`
+## 用户自定义`PassNode`
+
 用户如何自定义`PassNode`？接口如何设计？
-
-
 
 ---
 `mermaid`图测试
