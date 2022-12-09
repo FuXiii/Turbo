@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPIPELINELAYOUT_H
-#define TPIPELINELAYOUT_H
+#ifndef TURBO_CORE_TPIPELINELAYOUT_H
+#define TURBO_CORE_TPIPELINELAYOUT_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -38,4 +38,4 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TPIPELINELAYOUT_H
+#endif // !TURBO_CORE_TPIPELINELAYOUT_H

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVULKANALLOCATOR_H
-#define TVULKANALLOCATOR_H
+#ifndef TURBO_CORE_TVULKANALLOCATOR_H
+#define TURBO_CORE_TVULKANALLOCATOR_H
 #include "TAllocator.h"
 
 namespace Turbo
@@ -36,4 +36,4 @@ class TVulkanAllocator : public TAllocator
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TVULKANALLOCATOR_H
+#endif // !TURBO_CORE_TVULKANALLOCATOR_H

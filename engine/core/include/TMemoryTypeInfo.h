@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TMEMORYTYPE_H
-#define TMEMORYTYPE_H
+#ifndef TURBO_CORE_TMEMORYTYPE_H
+#define TURBO_CORE_TMEMORYTYPE_H
 #include "TInfo.h"
 #include "TMemoryHeapInfo.h"
 
@@ -41,4 +41,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TMEMORYTYPE_H
+#endif // !TURBO_CORE_TMEMORYTYPE_H

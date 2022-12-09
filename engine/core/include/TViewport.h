@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVIEWPORT_H
-#define TVIEWPORT_H
+#ifndef TURBO_CORE_TVIEWPORT_H
+#define TURBO_CORE_TVIEWPORT_H
 #include "TInfo.h"
 
 namespace Turbo
@@ -37,4 +37,4 @@ class TViewport : public Turbo::Core::TInfo
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TVIEWPORT_H
+#endif // !TURBO_CORE_TVIEWPORT_H

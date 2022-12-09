@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSAMPLER_H
-#define TSAMPLER_H
+#ifndef TURBO_CORE_TSAMPLER_H
+#define TURBO_CORE_TSAMPLER_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -78,4 +78,4 @@ class TSampler : public TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TSAMPLER_H
+#endif // !TURBO_CORE_TSAMPLER_H

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TQUEUEFAMILY_H
-#define TQUEUEFAMILY_H
+#ifndef TURBO_CORE_TQUEUEFAMILY_H
+#define TURBO_CORE_TQUEUEFAMILY_H
 #include "TInfo.h"
 
 namespace Turbo
@@ -55,4 +55,4 @@ class TQueueFamilyInfo : public TInfo
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TQUEUEFAMILY_H
+#endif // !TURBO_CORE_TQUEUEFAMILY_H

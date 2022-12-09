@@ -1,5 +1,38 @@
 # Turbo引擎使用FrameGraph驱动设计
 
+最终会映射到`./docs/TurboDesign:Render`设计中
+
+## 更新日志
+
+* 2022/12/4
+  >
+  >* 结束琐碎设计文档化
+  >* 创建`Turbo驱动设计`章节，用于开始`Turbo`引擎`Engine`层面与`FrameGraph`配合的设计
+
+* 2022/12/5
+  >
+  >* 创建`资源的创建与销毁`章节
+  >* 创建`Context上下文`章节
+  >* 创建`WorldRender/Render 渲染器`章节
+
+* 2022/12/7
+  >
+  >* 更新`资源的创建与销毁`章节
+  >* 更新`Context上下文`章节
+
+* 2022/12/8
+  >
+  >* 创建`Surface、Swapchain和Context`章节
+  >* 创建`Surface`章节
+  >* 创建`Swapchain`章节
+
+* 2022/12/9
+  >
+  >* 创建`离屏渲染流程`章节
+  >* 创建`将RenderTarget结果拷贝给用户`章节
+  >* 创建`用户自定义PassNode`章节
+---
+
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
 
 > `Unity`中的一个材质就可以看成对应`fg`的一个`PassNode`，多个可渲染物体绑定同一个材质是，其实就是在当前的`Material`所对应的的那个`PassNode`内渲染绑定的`Mesh`，换句话说就是多个`DrawableObject`如果绑定了同一个`Material`，就在`Material`对应的`PassNode`下渲染多个`DrawableObject`
@@ -473,3 +506,402 @@ Image 2;
 ```
 
 **解释**：每一帧都会等待上次用到自己(图片0,1,2)的那一帧结束后再使用自己，每一帧等待上次结束是回收资源的好时候，可能的行为：唤醒资源回收线程等。
+
+---
+
+# Turbo驱动设计
+
+主要有两种资源`Image`和`Buffer`，每个资源内部都有一个`Descriptor`的结构体，用于创建时描述该资源。  
+>`Image`派生有：
+>
+>* ColorImage
+>* DepthImage
+>* StencilImage
+>* DepthStencilImage
+>
+>`ColorImage`派生有：
+>
+>* ColorImage1D（这个可能用处不多）
+>* ColorImage2D
+>* ColorImage3D
+>
+>`DepthImage`派生有：
+>
+>* DepthImage2D (二维的Depth纹理比较常用)
+>
+>`StencilImage`派生有：
+>
+>* StencilImage2D
+>
+>`DepthStencilImage`派生有：
+>
+>* DepthStencilImage2D
+
+>`Buffer`派生有：
+>
+>* VertexBuffer
+>* IndexBuffer
+
+```CXX
+typedef uint32_t TFlags;
+
+enum TImageType
+{
+    1D,
+    2D,
+    3D
+};
+
+enum TFormat
+{...};
+
+enum TUsageFlagsBits
+{
+    TRANSFER，
+    SAMPLED，
+    STORAGE，
+    COLOR_ATTACHMENT，
+    DEPTH_STENCIL，
+    INPUT_ATTACHMENT，
+};
+typedef TFlags TUsages;
+
+enum TCreateFlagsBits
+{
+    CUBE//用于天空盒
+};
+
+class Image{
+    struct Image::Descriptor
+    {
+        TImageType type;
+        TFormat format;
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels;
+        uint32_t layers;
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+
+void Create(const std::string &name, const Image::Descriptor &descriptor,void* allocator);
+void Destroy();
+};
+
+class ColorImage: public Image
+{
+    struct ColorImage::Descriptor
+    {
+        TImageType type;
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels;
+        uint32_t layers;
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+
+class ColorImage2D: public Image
+{
+    struct ColorImage2D::Descriptor
+    {
+        //TImageType type; //该属性由Turbo维护
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+
+class ColorImage3D: public ColorImage
+{
+    struct ColorImage3D::Descriptor
+    {
+        //TImageType type; //该属性由Turbo维护
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        TUsages usages;
+        //ShaderMode //该属性由Turbo维护
+        //initialLayout //该属性由Turbo维护
+    };
+};
+```
+
+## 资源的创建与销毁
+
+资源的创建与销毁需要一个资源分配器，而该资源分配器因该由`Context`上下文来创建
+
+资源分配器命名为`TResourceAllocator`，其构造函数参数：`context`。
+
+资源分配器只要分配两种资源：
+
+1. Image
+2. Buffer
+
+资源分配器只分配基础资源，比如`class Image`类的资源，而不会分配其派生的子类(因为子类都是派生自`Image`)，`class Buffer`资源类似。
+
+方案一（弃用）×
+>
+>* 由于创建`Turbo::Render::Image`需要返回`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，所以`TResourceAllocator`在创建`Image`时需要返回`std::pair<Turbo::Core::TImage*, Turbo::Core::TImageView*>`。
+>* 对于销毁`Turbo::Render::Image`，需要传入`Turbo::Core::TImage`和`Turbo::Core::TImageView`两个类，其中`Turbo`在销毁时查看`Turbo::Core::TImageView`是否能与`Turbo::Core::TImage`对应上，能对上就删除，对不上直接返回异常。
+
+方案二（采纳）√
+>
+>* 由于`Turbo::Render::TContext`来创建和销毁`Turbo::Core::TImage`并由`Turbo::Render::TImage`来创建和销毁`Turbo::Core::TImageView`(其原因是`Turbo::Core::TImageView`其实可以动态的改变，当将某`Image`解释成`Color Image`，对应生成支持`Color`的`ImageView`即可，当想解释成`Depth`时，重新建立支持`Depth`的`ImageView`即可，灵活管理，方便扩展)
+
+```CXX
+class TResourceAllocator
+{
+    public:
+    TResourceAllocator(TContext* context);
+
+    Turbo::Core::TImage* CreateImage(const Turbo::Render::TImage::Descriptor& des)
+    {
+        //返回使用context创建的图片资源
+        return context->CreateImage(des.width,des.height,des.depth,...);
+    }
+
+    void DestroyImage(Turbo::Core::TImage* image)
+    {
+        context->DestroyImage(image,imageView);
+    }
+}
+```
+
+`Buffer`同`Image`
+
+## Context上下文
+
+`Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
+
+用户在构建上下文对象时，上下文的构造函数会去初始化环境。
+
+在构造完`Context`之后，使用`Context`去构造`WorldRender/Render`进行后面渲染
+
+`Context`需要提供`CreateImage(...)`，`DestroyImage(...)`，`CreateBuffer(...)`，`DestroyBuffer(...)`函数，用于创建和销毁资源
+
+## WorldRender/Render 渲染器
+
+用户在使用`Context`创建完`WorldRender/Render`后调用`WorldRender/Render::DrawFrame(...)`，其中`DrawFrame(...)`函数会去构建一帧的`FrameGraph`并进行一帧的渲染
+
+## Surface、Swapchain和Context
+
+### 方案一（弃用）×
+
+在创建完`Context`后`Turbo`的基本环境已近构建，如果想要将渲染画面展示在屏幕上，还需要用户传入从窗口获得的`Surface`。
+
+目前有以下几种情况：
+
+1. 用户没有指定`Surface`（离屏渲染）
+2. 用户指定了`Surface`
+3. 用户更改了(重新指定了)`Surface`
+
+>1. 对于**用户没有指定`Surface`**  
+>如果用户没有指定`Surface`，`Turbo`则会在内部创建一个虚的`Surface`，并使用虚`Surface`创建虚`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）  
+>
+> * 随即带来个问题：创建多大的`Surface`呢？
+
+>2. 对于**用户指定了`Surface`**  
+>如果用户指定了`Surface`，`Turbo`则会使用该`Surface`创建`Swapchain`，最终创建`ColorImage`用于存储最终的渲染结果（`RenderTarget`）
+
+>3. 对于**用户更改了(重新指定了)`Surface`**  
+>如果用户之前已经指定了`Surface`，并再次指定`Surface`，如果当前`Surface`和指定的`Surface`不相同需要等待之前多有相关工作结束，并重新构建相关资源。
+
+### 方案二（采纳）√
+
+`Turbo::Render`核心将使用离屏渲染，将渲染结果写入`RenderTarget`，如果用户绑定了`Surface`则将`RenderTarget`的渲染结果拷贝到`Surface`所对应的`Swapchain`所对应的`Image`中。
+
+优点：
+
+* 灵活，非常容易实现`GBufferPass`和`Post-ProcessPass`之类的功能
+* 不依赖某一窗口，甚至是可以没有窗口
+* 架构统一
+
+缺点：
+
+* 会多一次纹理图片颜色拷贝（无伤大雅，噗哈哈）
+
+使用`CommandBuffer::CmdBlitImage(...)`可以很好的支持该工作
+
+> 现在有个问题：如果采用方案二，离屏渲染的图片（`RenderTarget`）大小是多少呢？
+>* 解决方案：需要用户自定义创建`Surface`（此`Surface`可以使虚的也可以是实的），并将创建好的`Surface`绑定给`Context`，之后`Context`根据`Surface`进行操作。
+> 如此会有两种情况：
+>   1. 用户没有指定`Surface`  
+>       如果用户没有绑定任何`Surface`，`Context`将不会做任何事情，应为没有目标输出
+>   2. 用户指定了`Surface`
+>
+>       ```mermaid
+>        graph TD;
+>            IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothing[什么也不做];
+>            IsSurfaceSame--不相同-->WaitAll[等待之前所有工作结束并回收资源];
+>            WaitAll-->Refresh[使用用户指定的Surface进行新的构建];
+>            DoNothing-->Frame[继续下一帧工作]
+>            Refresh-->Frame[继续下一帧工作]
+>        ```
+
+## Surface
+
+用户创建的`Surface`有两种
+
+1. 虚拟`Surface`：对应着离屏渲染。所谓虚拟`Surface`是不跟任何窗口系统相关的虚拟表面（大白话是：不能显示在屏幕上，但可以获取渲染结果）
+2. 真实`Surface`: 对应着与窗口系统相关的`Surface`(底层为`VkSurface`与`Turbo::Core::TSurface`对应)（大白话是：能显示在屏幕上，同时可以获取渲染结果）
+
+这两种`Surface`都对应着`Turbo::Render::TSurface`，只不过是对应得构造函数不同罢了。
+
+* 如果用户使用的是虚拟`Surface`，`Turbo`引擎将会在内部构建一套`ColorImage:RenderTarget`并在渲染结束后将渲染结果交给用户做后续工作
+* 如果用户使用的是真实`Surface`，`Turbo`引擎将会在内部构建`Swapchain`等一系列工作，并将渲染结果展现在屏幕窗口上，同时用户也可以获取相应的渲染结果（同离屏渲染）
+*注：现在`Turbo`并没有`Turbo::Windows`跨平台窗口层，而是交由用户自己制定需求，而大多数跨平台窗口层都提供返回`VkSurface`的接口，这也是`Turbo`支持跨平台窗口的原因，在未来也许会推出`Turbo::Windows`跨平台窗口层吧~？*
+
+```CXX
+namespace Turbo
+{
+    namespace Render
+    {
+        class TSurface
+        {
+            private:
+            VkSurface vkSurface = VK_NULL_HANDLE;
+
+            public:
+            TSurface(uint32_t width,uint32_t height,uint32_t layer,uint32_t imageCount,...);//对应着[虚拟Surface]
+            TSurface(VkSurface vkSurface);//对应着[真实Surface]
+            //TSurface(const Turbo::TWindows& windows);//for未来~？
+        }
+    }
+}
+```
+
+~~为了满足离屏渲染的需求，`Turbo::Core::TSurface`需要支持虚拟`Surface`~~
+离屏渲染并不需要`Turbo::Core::TSurface`支持虚拟`Surface`，而是需要`RenderTarget`纹理
+
+*注：以下代码已被遗弃，但可以做一个虚拟`Surface`内部数据参考*
+```CXX
+//虚拟Turbo::Render::TSurface对应的Turbo::Core::TSurface
+Turbo::Core::TSurface属性
+{
+private:
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = Context.device;//上下文中创建的设备
+    T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;//vkSurfaceKHR为空是虚Surface的标志
+
+    bool isExternalHandle = true;//为true，单独为属性赋值
+
+    std::vector<Turbo::Core::TQueueFamilyInfo> supportQueueFamilys;//空数组，size()为0
+
+    uint32_t minImageCount;//同uint32_t Turbo::Render::TSurface::imageCount
+    uint32_t maxImageCount;//同uint32_t Turbo::Render::TSurface::imageCount
+    Turbo::Core::TExtent2D currentExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    Turbo::Core::TExtent2D minImageExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    Turbo::Core::TExtent2D maxImageExtent;//同uint32_t Turbo::Render::TSurface::width 和 ~::height
+    uint32_t maxImageArrayLayers;//同uint32_t Turbo::Render::TSurface::layer
+
+    Turbo::Extension::TSurfaceTransforms supportedTransforms;//TSurfaceTransformBits::TRANSFORM_IDENTITY_BIT
+    Turbo::Extension::TSurfaceTransformBits currentTransform;//TSurfaceTransformBits::TRANSFORM_IDENTITY_BIT
+    Turbo::Extension::TCompositeAlphas supportedCompositeAlpha;//TCompositeAlphaBits::ALPHA_OPAQUE_BIT
+    Turbo::Core::TImageUsages supportedUsageFlags;//IMAGE_TRANSFER_SRC+IMAGE_TRANSFER_DST+IMAGE_COLOR_ATTACHMENT
+
+    std::vector<Turbo::Extension::TSurfaceFormat> surfaceFormats;//{format=Turbo选择一个颜色格式R8G8B8A8,TColorSpace::colorSpaceType=TColorSpaceType::SRGB_NONLINEAR}
+    std::vector<Turbo::Extension::TPresentMode> presentModes;//FIFO
+}
+```
+
+## Swapchain
+
+该类型由`Turbo`管理。对用户透明
+
+~~为了满足离屏渲染的需求，`Turbo::Core::TSwapchain`需要支持虚拟`Surface`~~
+同`Surface`情况
+
+## 离屏渲染流程
+`Turbo::Render`层的任务核心，其中`RenderTarget`是离屏渲染的目标纹理图片（内部对应一个`Image`）
+```mermaid
+ graph TD;
+    UserCreateContext[用户创建Context上下文]
+    UserCreateContext-->BeginFrame[开始当前帧]
+    BeginFrame-->IsBindSurface{{是否已经绑定Surface}}
+    IsBindSurface--未绑定-->DoNothingWithoutSurface[什么也不做]
+    IsBindSurface--"已绑定(通过调用Context.BindSurface(...))"-->IsSurfaceSame[什么也不做]
+    IsSurfaceSame{{当前Surface与用户指定的Surface是否相同}}--相同--->DoNothingForSameSurface[什么也不做]
+    IsSurfaceSame--不相同-->WaitAll[等待之前所有工作结束并回收资源]
+    subgraph RefreshSurface[使用用户指定的Surface进行新的构建]
+        direction TB
+        IsVirtualSurface{{是否是虚Surface}}
+            subgraph CreateRenderTargetAccordingVirtualSurface[根据虚拟Surface创建RenderTarget]
+                    direction TB
+                    GetVirtualSurfaceConfig[获取用户的虚拟Surface的配置]
+            end
+        IsVirtualSurface--是-->CreateRenderTargetAccordingVirtualSurface
+            subgraph CreateRenderTargetAccordingActualSurface[根据真实Surface创建RenderTarget]
+                direction TB
+                GetVkSurface[获取VkSurface] -->CreateSwapchain[根据VkSurface创建Swapchain]
+                CreateSwapchain-->GetImage[获取Swapchain中的Image]
+            end
+        IsVirtualSurface--否-->CreateRenderTargetAccordingActualSurface
+    end
+
+    subgraph FrameGraph["FrameGraph"]
+        direction TB
+        CreateRenderTargetForFG[创建RenderTarget]-->UseRenderTarget
+        subgraph UseRenderTarget["使用RenderTarget渲染（此处为FrameGraph的核心）"]
+            direction TB
+        end
+        UseRenderTarget-->IsVirtualSurface1{{是否是虚Surface}}
+        IsVirtualSurface1--是-->CopyResultReturntoUser[将RenderTarget结果拷贝给用户]
+        IsVirtualSurface1--否-->CopyRenderTargetToSwapchainImage[将RenderTarget渲染结果拷贝 Swapchain的Image中]
+        CopyRenderTargetToSwapchainImage-->ToUser[将渲染结果拷贝给用户]
+        ToUser-->PresentSwapchainImage["显示到Surface上(PresentPass)"]
+    end
+
+    
+    CreateRenderTargetAccordingVirtualSurface-->CreateRenderTargetForFG
+    CreateRenderTargetAccordingActualSurface-->CreateRenderTargetForFG
+    WaitAll-->IsVirtualSurface
+    DoNothingForSameSurface-->CreateRenderTargetForFG
+    CopyResultReturntoUser-->EndFrame[当前帧结束]
+    PresentSwapchainImage-->EndFrame
+
+    %%EndFrame-->BeginFrame
+ ```
+
+ ## 将`RenderTarget`结果拷贝给用户
+ 用户如何获取渲染的结果呢？
+
+ ### 方案一 （弃用）×
+ 用户通过`Surface`获取渲染结果
+
+ ### 方案二 （采纳）√
+ 用户通过自定义`PassNode`获取渲染结果
+
+ ## 用户自定义`PassNode`
+用户如何自定义`PassNode`？接口如何设计？
+
+
+
+---
+`mermaid`图测试
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

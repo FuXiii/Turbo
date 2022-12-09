@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVERSION_H
-#define TVERSION_H
+#ifndef TURBO_CORE_TVERSION_H
+#define TURBO_CORE_TVERSION_H
 #include "TObject.h"
 #include <stdint.h>
 
@@ -46,4 +46,4 @@ namespace Turbo
 		};
 	}
 }
-#endif // !TVERSION_H
+#endif // !TURBO_CORE_TVERSION_H

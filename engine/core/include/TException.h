@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TException_H
-#define TException_H
+#ifndef TURBO_CORE_TException_H
+#define TURBO_CORE_TException_H
 #include "TObject.h"
 #include <exception>
 
@@ -30,4 +30,4 @@ class TException : public std::exception, public Turbo::Core::TObject
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TException_H
+#endif // !TURBO_CORE_TException_H

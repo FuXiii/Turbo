@@ -1737,3 +1737,32 @@ Turbo是渲染引擎
 * 2022/12/4 设计架构
   >
   >* `./docs/Desgin`下`FrameGraphAdvance.md`基本完成，之后新的设计都会在此文档中增加
+  >* 将`./docs/TurboDesign`中的`Engine`模块重命名成`Render`(考虑到将来可能会集成实现`ECS`)
+  >* `./engine`下新建`render`文件夹，并在`render`文件夹下创建`include`和`src`文件夹
+  >* `./engine/render`下创建`TImage`类
+
+* 2022/12/5 设计架构
+  >
+  >* `FrameGraph`下对于资源的创建和销毁需要一个分配器或上下文
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+
+* 2022/12/6 设计架构
+  >
+  >* `./engine/render`下新建`TContext`类，用于引擎上下文
+  >* `./samples`下新建`RenderDesignTest`示例，用于`Turbo::Render`架构的测试
+
+* 2022/12/7 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+  >* `./engine/render`下`TContext`中增加`TInstance`初始化构建
+  >* `./engine/render`下`TContext`中增加`TDevice`初始化构建
+
+* 2022/12/8 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+
+* 2022/12/9 设计架构
+  >
+  >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
+  >* `./engine/render`下新建`TSurface`类
+  >* 重命名`Turbo`中所有的头文件定义宏，防止冲突

@@ -79,6 +79,10 @@ class AAA
     }
 };
 
+class BBB
+{
+};
+
 int main()
 {
     AAA aaa;
@@ -104,6 +108,11 @@ int main()
 
     int *nullptr_point = nullptr;
     delete nullptr_point;
+
+    std::pair<AAA *, BBB *> aaa_bbb = std::make_pair(new AAA(), new BBB());
+
+    AAA *first = aaa_bbb.first;
+    BBB *second = aaa_bbb.second;
 
     return 0;
 }

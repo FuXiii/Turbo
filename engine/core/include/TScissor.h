@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSCISSOR_H
-#define TSCISSOR_H
+#ifndef TURBO_CORE_TSCISSOR_H
+#define TURBO_CORE_TSCISSOR_H
 #include "TInfo.h"
 
 namespace Turbo
@@ -33,4 +33,4 @@ class TScissor : public Turbo::Core::TInfo
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TVIEWPORT_H
+#endif // !TURBO_CORE_TSCISSOR_H

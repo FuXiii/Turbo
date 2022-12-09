@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVMAALLOCATOR_H
-#define TVMAALLOCATOR_H
+#ifndef TURBO_CORE_TVMAALLOCATOR_H
+#define TURBO_CORE_TVMAALLOCATOR_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -36,4 +36,4 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TVMAALLOCATOR_H
+#endif // !TURBO_CORE_TVMAALLOCATOR_H

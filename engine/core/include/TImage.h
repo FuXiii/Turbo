@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TIMAGE_H
-#define TIMAGE_H
+#ifndef TURBO_CORE_TIMAGE_H
+#define TURBO_CORE_TIMAGE_H
 #include "TFormatInfo.h"
 #include "TVulkanHandle.h"
 
@@ -135,4 +135,4 @@ class TImage : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // TIMAGE_H
+#endif // !TURBO_CORE_TIMAGE_H

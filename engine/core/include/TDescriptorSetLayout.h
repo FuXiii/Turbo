@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDESCRIPTORSETLAYOUT_H
-#define TDESCRIPTORSETLAYOUT_H
+#ifndef TURBO_CORE_TDESCRIPTORSETLAYOUT_H
+#define TURBO_CORE_DESCRIPTORSETLAYOUT_H
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
 
@@ -37,4 +37,4 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TDESCRIPTORSETLAYOUT_H
+#endif // !TURBO_CORE_TDESCRIPTORSETLAYOUT_H

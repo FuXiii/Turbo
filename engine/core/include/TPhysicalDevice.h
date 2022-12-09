@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPHYSICALDEVICE_H
-#define TPHYSICALDEVICE_H
+#ifndef TURBO_CORE_TPHYSICALDEVICE_H
+#define TURBO_CORE_TPHYSICALDEVICE_H
 #include "TImage.h"
 #include "TPhysicalDeviceInfo.h"
 #include "TVulkanHandle.h"
@@ -169,4 +169,4 @@ class TPhysicalDevice : public TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TPHYSICALDEVICE_H
+#endif // !TURBO_CORE_TPHYSICALDEVICE_H

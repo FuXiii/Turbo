@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDEVICEQUEUE_H
-#define TDEVICEQUEUE_H
+#ifndef TURBO_CORE_TDEVICEQUEUE_H
+#define TURBO_CORE_TDEVICEQUEUE_H
 #include "TQueueFamilyInfo.h"
 #include "TVulkanHandle.h"
 
@@ -68,4 +68,4 @@ class TDeviceQueue : public TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TDEVICEQUEUE_H
+#endif // !TURBO_CORE_TDEVICEQUEUE_H

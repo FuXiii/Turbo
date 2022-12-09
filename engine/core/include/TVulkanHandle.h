@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TVULKANHANDLE_H
-#define TVULKANHANDLE_H
+#ifndef TURBO_CORE_TVULKANHANDLE_H
+#define TURBO_CORE_TVULKANHANDLE_H
 #include "TObject.h"
 
 #define T_VULKAN_HANDLE_PARENT
@@ -41,4 +41,4 @@ class TVulkanHandle : public Turbo::Core::TObject
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TVULKANHANDLE_H
+#endif // !TURBO_CORE_TVULKANHANDLE_H

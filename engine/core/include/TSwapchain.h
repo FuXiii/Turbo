@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TSWAPCHAIN_H
-#define TSWAPCHAIN_H
+#ifndef TURBO_CORE_TSWAPCHAIN_H
+#define TURBO_CORE_TSWAPCHAIN_H
 #include "TFormatInfo.h"
 #include "TSurface.h"
 #include "TVulkanHandle.h"
@@ -79,4 +79,4 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
 };
 } // namespace Extension
 } // namespace Turbo
-#endif // !TSWAPCHAIN_H
+#endif // !TURBO_CORE_TSWAPCHAIN_H

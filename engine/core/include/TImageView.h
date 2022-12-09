@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TIMAGEVIEW_H
-#define TIMAGEVIEW_H
+#ifndef TURBO_CORE_TIMAGEVIEW_H
+#define TURBO_CORE_TIMAGEVIEW_H
 #include "TFormatInfo.h"
 #include "TInfo.h"
 #include "TVulkanHandle.h"
@@ -81,4 +81,4 @@ class TImageView : public TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TIMAGEVIEW_H
+#endif // !TURBO_CORE_TIMAGEVIEW_H

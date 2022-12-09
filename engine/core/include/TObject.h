@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TOBJECT_H
-#define TOBJECT_H
+#ifndef TURBO_CORE_TOBJECT_H
+#define TURBO_CORE_TOBJECT_H
 #include "TCore.h"
 #include <string>
 
@@ -19,4 +19,4 @@ class TObject
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TOBJECT_H
+#endif // !TURBO_CORE_TOBJECT_H

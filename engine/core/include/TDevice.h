@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TDEVICE_H
-#define TDEVICE_H
+#ifndef TURBO_CORE_TDEVICE_H
+#define TURBO_CORE_TDEVICE_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -84,4 +84,4 @@ class TDevice : public Turbo::Core::TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TDEVICE_H
+#endif // !TURBO_CORE_TDEVICE_H

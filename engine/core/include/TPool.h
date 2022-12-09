@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPOOL_H
-#define TPOOL_H
+#ifndef TURBO_CORE_TPOOL_H
+#define TURBO_CORE_TPOOL_H
 #include "TObject.h"
 #include <stdint.h>
 #include <vector>
@@ -84,4 +84,4 @@ template <typename T> std::string Turbo::Core::TPool<T>::ToString()
 } // namespace Core
 } // namespace Turbo
 
-#endif // !TPOOL_H
+#endif // !TURBO_CORE_TPOOL_H

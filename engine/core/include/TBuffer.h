@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TBUFFER_H
-#define TBUFFER_H
+#ifndef TURBO_CORE_TBUFFER_H
+#define TURBO_CORE_TBUFFER_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -78,4 +78,4 @@ class TBuffer : public TVulkanHandle
 };
 } // namespace Core
 } // namespace Turbo
-#endif // !TBUFFER_H
+#endif // !TURBO_CORE_TBUFFER_H

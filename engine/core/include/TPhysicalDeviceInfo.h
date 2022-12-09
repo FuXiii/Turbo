@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TPHYSICALDEVICEINFO_H
-#define TPHYSICALDEVICEINFO_H
+#ifndef TURBO_CORE_TPHYSICALDEVICEINFO_H
+#define TURBO_CORE_TPHYSICALDEVICEINFO_H
 
 #include "TInfo.h"
 #include "TVersion.h"
@@ -63,4 +63,4 @@ namespace Turbo
     }
 } // namespace Turbo
 
-#endif // !TPHYSICALDEVICEINFO_H
+#endif // !TURBO_CORE_TPHYSICALDEVICEINFO_H

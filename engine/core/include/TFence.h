@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TFENCE_H
-#define TFENCE_H
+#ifndef TURBO_CORE_TFENCE_H
+#define TURBO_CORE_TFENCE_H
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -35,4 +35,4 @@ class TFence : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
-#endif // !TFENCE_H
+#endif // !TURBO_CORE_TFENCE_H
