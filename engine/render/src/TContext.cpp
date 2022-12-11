@@ -171,8 +171,96 @@ Turbo::Render::TContext::~TContext()
     delete this->instance;
 }
 
-Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(uint32_t width, uint32_t height, uint32_t depth, uint32_t layer)
+Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descriptor &descriptor)
 {
-    // return new Turbo::Core::TImage(...);
-    return nullptr;
+    TImageCreateFlags image_create_flags = descriptor.flags;
+    TFormat format = descriptor.format;
+    uint32_t width = descriptor.width;
+    uint32_t height = descriptor.height;
+    uint32_t depth = descriptor.depth;
+    uint32_t layers = descriptor.layers;
+    uint32_t mip_levels = descriptor.mipLevels;
+    TImageUsages usages = descriptor.usages;
+    TDomain domain = descriptor.domain;
+
+    if (width == 0 && height == 0 && depth == 0)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descriptor &descriptor)", "Try to create image, but all three dimensions are zero");
+    }
+
+    Turbo::Core::TDevice *device = this->device;
+
+    VkImageCreateFlags vk_image_create_flags = 0;
+    if ((image_create_flags & Turbo::Render::TImageCreateFlagBits::CUBE) == Turbo::Render::TImageCreateFlagBits::CUBE)
+    {
+        vk_image_create_flags |= VkImageCreateFlagBits::VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    }
+
+    Turbo::Core::TImageType type = Turbo::Core::TImageType::DIMENSION_1D;
+    if (width >= 1)
+    {
+        type = Turbo::Core::TImageType::DIMENSION_1D;
+    }
+    if (height >= 1)
+    {
+        type = Turbo::Core::TImageType::DIMENSION_2D;
+    }
+    if (depth >= 1)
+    {
+        type = Turbo::Core::TImageType::DIMENSION_3D;
+    }
+
+    Turbo::Core::TFormatType format_type = Turbo::Core::TFormatType::UNDEFINED;
+    switch (format)
+    {
+    case TFormat::B8G8R8A8_SRGB: {
+        format_type = Turbo::Core::TFormatType::B8G8R8A8_SRGB;
+    }
+    break;
+    case TFormat::D32_SFLOAT: {
+        format_type = Turbo::Core::TFormatType::D32_SFLOAT;
+    }
+    break;
+    case TFormat::R8G8B8A8_UNORM: {
+        format_type = Turbo::Core::TFormatType::R8G8B8A8_UNORM;
+    }
+    break;
+    }
+
+    Turbo::Core::TSampleCountBits sample_count_bits = Turbo::Core::TSampleCountBits::SAMPLE_1_BIT;
+
+    // TODO:Turbo::Core::TImageTiling需要适配Linear的情况
+    Turbo::Core::TImageTiling image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
+
+    Turbo::Core::TImageUsages image_usages = usages;
+
+    Turbo::Core::TMemoryFlags memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+
+    // GPU only
+    if (((domain & Turbo::Render::TDomainBits::CPU) != Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+    }
+    // Staging copy for upload && Readback
+    else if (((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE /*| Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM*/;
+    }
+    // Advanced data uploading(Both CPU and GPU domain can access)
+    else if (((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE | Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD;
+    }
+
+    Turbo::Core::TImageLayout layout = Turbo::Core::TImageLayout::UNDEFINED;
+
+    return new Turbo::Core::TImage(device, vk_image_create_flags, type, format_type, width, height, depth, mip_levels, layers, sample_count_bits, image_tiling, image_usages, memory_flags, layout);
+}
+
+void Turbo::Render::TContext::DestroyImage(Turbo::Core::TImage *image)
+{
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        delete image;
+    }
 }

@@ -34,7 +34,23 @@
   >* `Image`资源派生中增加`CubeImage`资源类
   >* `资源的创建与销毁`章节中增加在使用`Render::TContext`创建`Redner::TImage`时与`Turbo::Core::TImage`资源类的对应说明
   >
+
+* 2022/12/10
+  >
+  >* 将原先的`TImage`资源说明，创建成`资源`章节
+  >* 更新`资源`资源章节中的`Descriptor`与`资源的创建与销毁`章节对应上
+  >* 创建`Format格式`章节，用于规定创建`Image`和`Buffer`时的资源格式
+  >* 创建`Turbo驱动初步`章节，用于将琐碎设计和之后的`Turbo驱动设计`做区分
+  >
+
+* 2022/12/11
+  >
+  >* 创建`资源的所有者端域`章节
+  >* 更新`资源`章节，增加`端域`
+  >
 ---
+
+# Turbo驱动初步
 
 来源于`docs/images`下的一些平日琐碎设计，该文档是琐碎设计的整理
 
@@ -514,6 +530,8 @@ Image 2;
 
 # Turbo驱动设计
 
+## 资源
+
 主要有两种资源`Image`和`Buffer`，每个资源内部都有一个`Descriptor`的结构体，用于创建时描述该资源。  
 >`Image`派生有：
 >
@@ -559,7 +577,7 @@ enum TImageType
     3D
 };
 
-enum TFormat
+enum TFormat//这个枚举放到TFormat.h中作为通用枚举（Buffer也要用）
 {...};
 
 enum TUsageFlagsBits
@@ -573,25 +591,24 @@ enum TUsageFlagsBits
 };
 typedef TFlags TUsages;
 
-enum TCreateFlagsBits
+enum TImageCreateFlagBits
 {
     CUBE//用于天空盒
 };
+using TImageCreateFlags = uint32_t;
 
 class Image{
     struct Image::Descriptor
     {
-        TImageType type;
+        TImageCreateFlags flags;//CUBE用于六面体纹理，多用于天空盒（详见CubeImage）
         TFormat format;
-        uint32_t width;
-        uint32_t height;
-        uint32_t depth;
-        uitn32_t mipLevels;
+        uint32_t width;//1D轴，当（width≠0,height=0,depth=0）时，对应Turbo::Core::TImageType::1D
+        uint32_t height;//2D轴，当（width≠0,height≠0,depth=0）时，对应Turbo::Core::TImageType::2D
+        uint32_t depth;//3D轴，当（width≠0,height≠0,depth≠0）时，对应Turbo::Core::TImageType::3D
+        uint32_t mipLevels;
         uint32_t layers;
-        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
-        TUsages usages;
-        //ShaderMode //该属性由Turbo维护
-        //initialLayout //该属性由Turbo维护
+        TImageUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
     };
 
 void Create(const std::string &name, const Image::Descriptor &descriptor,void* allocator);
@@ -602,35 +619,95 @@ class ColorImage: public Image
 {
     struct ColorImage::Descriptor
     {
-        TImageType type;
+        TImageCreateFlags flags;
         //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
         uint32_t width;
         uint32_t height;
         uint32_t depth;
         uitn32_t mipLevels;
         uint32_t layers;
-        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
         TUsages usages;
-        //ShaderMode //该属性由Turbo维护
-        //initialLayout //该属性由Turbo维护
+        TDomain domain;//详见[资源的所有者端域]章节
     };
 };
 
-class ColorImage2D: public Image
+class Texture: public Image
+{
+    struct Texture::Descriptor
+    {
+        TImageCreateFlags flags;
+        TFormat format; 
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uitn32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class ColorImage1D:public ColorImage
+{
+    struct ColorImage1D::Descriptor
+    {
+        //TImageCreateFlags flags; //flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;//width不能为0
+        //uint32_t height;//该属性由Turbo维护，值为1
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class Texture1D: public Texture
+{
+    struct Texture1D::Descriptor
+    {
+        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
+        TFormat format; 
+        uint32_t width;
+        //uint32_t height;//该属性由Turbo维护，默认值为1
+        //uint32_t depth;//该属性由Turbo维护，默认值为1
+        uitn32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class ColorImage2D: public ColorImage
 {
     struct ColorImage2D::Descriptor
     {
-        //TImageType type; //该属性由Turbo维护
+        TImageCreateFlags flags; //TODO:考虑是否由Turbo维护，由于有了CubeImage类，这个flags对于ColorImage2D有点多余
         //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
-        uint32_t width;
-        uint32_t height;
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
         //uint32_t depth; //该属性由Turbo维护，值为1
         uitn32_t mipLevels; //默认值为1
-        uint32_t layers; //默认值为1
-        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
         TUsages usages;
-        //ShaderMode //该属性由Turbo维护
-        //initialLayout //该属性由Turbo维护
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class Texture2D: public Texture
+{
+    struct Texture2D::Descriptor
+    {
+        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
+        TFormat format; 
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        //uint32_t depth;//该属性由Turbo维护，默认值为1
+        uitn32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
     };
 };
 
@@ -638,19 +715,86 @@ class ColorImage3D: public ColorImage
 {
     struct ColorImage3D::Descriptor
     {
-        //TImageType type; //该属性由Turbo维护
+        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，三维不满足该条件
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        uint32_t depth;//depth不能为0
+        uitn32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class Texture3D: public Texture
+{
+    struct Texture3D::Descriptor
+    {
+        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
+        TFormat format; 
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        uint32_t depth;//depth不能为0
+        uitn32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class CubeImage: public ColorImage2D
+{
+    struct CubeImage::Descriptor
+    {
+        //TImageCreateFlags flags;//该属性由Turbo维护，为CUBE
         //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
         uint32_t width;
         uint32_t height;
-        uint32_t depth;
+        //uint32_t depth; //该属性由Turbo维护，值为1
         uitn32_t mipLevels; //默认值为1
-        uint32_t layers; //默认值为1
-        //SampleCount //该属性由Turbo维护，Turbo提供顶层开启多采样功能接口
+        //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
-        //ShaderMode //该属性由Turbo维护
-        //initialLayout //该属性由Turbo维护
+        TDomain domain;//详见[资源的所有者端域]章节
     };
 };
+
+class Cubemap: public Texture2D
+{
+    struct Texture3D::Descriptor
+    {
+        //TImageCreateFlags flags;//该属性由Turbo维护，为CUBE
+        TFormat format;
+        uint32_t width; //width不能为0
+        uint32_t height; //height不能为0
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uitn32_t mipLevels;
+        //uint32_t layers; //该属性由Turbo维护，默认值为6
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class DepthStencilImage: public Image
+{...}
+
+class DepthImage:public DepthStencilImage
+{...}
+```
+
+## Format格式
+
+```CXX
+
+namespace Turbo::Render
+typedef enum class TFormat
+{
+    B8G8R8A8_SRGB,
+    D32_SFLOAT,
+    //R32G32B32_SFLOAT,
+    //
+}TFormat;
+
 ```
 
 ## 资源的创建与销毁
@@ -729,6 +873,85 @@ class TResourceAllocator
 >       TImageLayout layout//由Turbo维护，默认值TImageLayout::UNDEFINED
 >)
 >```
+
+### 资源的所有者端域
+
+所谓的资源所有者端位，其实是指资源是在`CPU`端创建，还是在`GPU`端创建。对于`CPU`和`GPU`的资源之间可以互相拷贝传输，所以需要在创建资源时设置资源的端域
+
+有多种情况：
+
+>1. `CPU`端到`GPU`端
+>
+>```mermaid
+>graph TD;
+>    CreateCPUDomainResource["创建CPU端资源"]
+>    CreateGPUDomainResource["创建GPU端资源"]
+>    SetDataIntoCPUDomainResource[将数据设置到CPU端资源中]
+>    CopyCPUDomainResourceIntoGPUDomainResource[将CPU端资源数据拷贝到GPU端资源中]
+>    ReleaseCPUDomainResource[释放CPU端资源]
+>    
+>    CreateCPUDomainResource-->CreateGPUDomainResource
+>    CreateGPUDomainResource-->SetDataIntoCPUDomainResource
+>    SetDataIntoCPUDomainResource-->CopyCPUDomainResourceIntoGPUDomainResource
+>    CopyCPUDomainResourceIntoGPUDomainResource-->ReleaseCPUDomainResource
+>```
+>
+>---
+>
+>2. `GPU`端到`CPU`端
+>
+>```mermaid
+>graph TD;
+>    CreateCPUDomainResource["创建CPU端资源"]
+>    CreateGPUDomainResource["创建GPU端资源"]
+>    SetDataIntoGPUDomainResource["通过运行CommandBuffer(Draw/Dispatch等)，将数据设置到GPU端资源中"]
+>    CopyGPUDomainResourceIntoCPUDomainResource[将GPU端资源数据拷贝到CPU端资源中]
+>    ReleaseGPUDomainResource[释放GPU端资源]
+>    
+>    CreateCPUDomainResource-->CreateGPUDomainResource
+>    CreateGPUDomainResource-->SetDataIntoGPUDomainResource
+>    SetDataIntoGPUDomainResource-->CopyGPUDomainResourceIntoCPUDomainResource
+>    CopyGPUDomainResourceIntoCPUDomainResource-->ReleaseGPUDomainResource
+>```
+>
+>---
+>
+>3. `CPU`端到`CPU`端
+>
+>```mermaid
+>graph TD;
+>    CreateCPUDomainResourceCPUa["创建CPU端资源CPUa"]
+>    CreateCPUDomainResourceCPUb["创建CPU端资源CPUb"]
+>    Copy["使用CommandBuffer或者memcpy在CPUa和CPUb之间拷贝数据"]
+>    CreateCPUDomainResourceCPUa-->CreateCPUDomainResourceCPUb
+>    CreateCPUDomainResourceCPUb-->Copy
+>```
+>
+>---
+>
+>4. `GPU`端到`GPU`端
+>
+>```mermaid
+>graph TD;
+>    CreateGPUDomainResourceGPUa["创建GPU端资源GPUa"]
+>    CreateGPUDomainResourceGPUb["创建GPU端资源GPUb"]
+>    Copy["使用CommandBuffer在GPUa和GPUb之间拷贝数据"]
+>    CreateGPUDomainResourceGPUa-->CreateGPUDomainResourceGPUb
+>    CreateGPUDomainResourceGPUb-->Copy
+>```
+>
+>5. `CPU`端与`GPU`端兼容  
+>有时可以创建`CPU`端和`GPU`端共享的资源
+>
+```CXX
+namespace Turbo::Render
+typedef enum TDomainBits
+{
+    CPU=0x00000001,
+    GPU=0x00000002
+}TDomainBits;
+using TDomain = uint32_t;
+```
 
 ## Context上下文
 

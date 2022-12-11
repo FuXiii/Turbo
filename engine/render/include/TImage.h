@@ -1,6 +1,8 @@
 #pragma once
 #ifndef TURBO_RENDER_TIMAGE_H
 #define TURBO_RENDER_TIMAGE_H
+#include "TDomain.h"
+#include "TFormat.h"
 #include <cstdint>
 #include <string>
 
@@ -19,7 +21,7 @@ namespace Render
 {
 typedef enum TImageCreateFlagBits
 {
-    CUBE_COMPATIBLE_BIT = 0x00000001,
+    CUBE = 0x00000001,
 } TImageCreateFlagBits;
 using TImageCreateFlags = uint32_t;
 
@@ -29,10 +31,10 @@ typedef enum TImageUsageBits
     TRANSFER_DST = 0x00000002,
     SAMPLED = 0x00000004,
     STORAGE = 0x00000008,
-    COLOR_ATTACHMENT = 0x00000010,
-    DEPTH_STENCIL_ATTACHMENT = 0x00000020,
-    TRANSIENT_ATTACHMENT = 0x00000040,
-    INPUT_ATTACHMENT = 0x00000080,
+    COLOR = 0x00000010,
+    DEPTH_STENCIL = 0x00000020,
+    TRANSIENT = 0x00000040,
+    INPUT = 0x00000080,
 } TImageUsageBits;
 using TImageUsages = uint32_t;
 
@@ -42,13 +44,14 @@ class TImage
     struct Descriptor
     {
         TImageCreateFlags flags;
-        // TFormat format;
+        TFormat format;
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uint32_t mipLevels;
         uint32_t layers;
+        uint32_t mipLevels;
         TImageUsages usages;
+        TDomain domain;
     };
 
   private:
@@ -61,8 +64,8 @@ class TImage
     TImage() = default;
     ~TImage() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
-    void Destroy(/*TODO: we need a allocator/context*/);
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
 };
 
 class TColorImage : public TImage
@@ -70,18 +73,21 @@ class TColorImage : public TImage
   public:
     struct Descriptor
     {
+        TImageCreateFlags flags;
         uint32_t width;
         uint32_t height;
         uint32_t depth;
         uint32_t layers;
-        //...
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
     };
 
   public:
     TColorImage() = default;
     ~TColorImage() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };
 
 class TColorImage2D : public TColorImage
@@ -89,20 +95,21 @@ class TColorImage2D : public TColorImage
   public:
     struct Descriptor
     {
+        TImageCreateFlags flags;
         uint32_t width;
         uint32_t height;
         uint32_t layers;
-        //...
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
     };
 
   public:
     TColorImage2D() = default;
     ~TColorImage2D() = default;
 
-    void Create(const std::string &name, const Descriptor &descriptor /*TODO: we need a allocator/context*/);
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };
-
-void Test();
 } // namespace Render
 } // namespace Turbo
 #endif // !TURBO_RENDER_TIMAGE_H
