@@ -1766,3 +1766,24 @@ Turbo是渲染引擎
   >* `./docs/Desgin`下`FrameGraphAdvance.md`更新设计
   >* `./engine/render`下新建`TSurface`类
   >* 重命名`Turbo`中所有的头文件定义宏，防止冲突
+
+* 2022/12/10 设计架构
+  >
+  >* `./engine/render`下`TContext`增加`Turbo::Core::TImage *CreateImage(...)`函数
+  >* `./engine/render`下`TImage`增加`typedef enum TImageCreateFlagBits`用于创建`TImage`的描述的位域标示
+  >* `./engine/render`下`TImage`增加`using TImageCreateFlags = uint32_t`用于创建`TImage`的描述的位域标示集
+  >* `./engine/render`下`TImage`的`Descriptor`增加`TImageCreateFlags flags`成员
+  >* `./engine/render`下`TImage`增加`typedef enum TImageUsageBits`用于创建`TImage`的描述的`usage`位域标示
+  >* `./engine/render`下`TImage`增加`using TImageUsages = uint32_t;`用于创建`TImage`的描述的`usage`位域标示集
+  >* `./engine/render`下`TImage`的`Descriptor`增加`TImageUsages usages`成员
+  >* 更新`./engine/render`下`TImage`及其子类的`Descriptor`成员
+  >* 更新`./engine/render`下`TImage`其子类的`Create()`和`Destroy()`成员函数，增加`allocator`
+  >* 更新`./engine/render`下`TContext`的`CreateImage()`函数
+  >* `./engine/render`下新建`TResourceAllocator`类，用于资源创建的分配器
+
+* 2022/12/11 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* `./engine/render`下增加`TDomain.h`，用于定义资源分配的所有者端域
+  >* `./engine/render`下`TImage`的`Descriptor`增加`TDomain domain`成员
+  >* 更新`./engine/render`下`TContext`的`CreateImage()`函数
