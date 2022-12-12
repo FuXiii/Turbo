@@ -48,6 +48,11 @@
   >* 创建`资源的所有者端域`章节
   >* 更新`资源`章节，增加`端域`
   >
+
+* 2022/12/12
+  >
+  >* 创建`Usage和Domain`章节
+
 ---
 
 # Turbo驱动初步
@@ -952,6 +957,62 @@ typedef enum TDomainBits
 }TDomainBits;
 using TDomain = uint32_t;
 ```
+
+## Usage和Domain
+不同的`Usage`和`Domain`会影响`Turbo`底层对于具体资源的创建策略。  
+常见的资源创建策略有一下几种：
+>1. GPU独占资源（GPU）  
+>表示该资源只有`GPU`可以访问。   
+>满足以下条件即为`GPU独占资源`：
+>    * `Domain`只有`GPU`位标  
+>>* 对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY`
+>>* `Turbo::Core::Image`对应的构造参数：
+>>      * Turbo::Core::TImageTiling::OPTIMAL
+>>* `Turbo::Core::TBuffer`对应的构造参数：
+>>      * ...
+
+>2. 用于传输拷贝的暂存副本（CPU→GPU）  
+>*注：暂存副本多为`Buffer`资源*  
+>由于`GPU独占资源`只能使用`GPU`进行访问，有时需要将`CPU`端的数据赋值给`GPU`端，所以需要使用一个`CPU`端可写入并且可以拷贝到`GPU`端的资源，此种资源叫做`暂存副本`（`Staging`）。  
+>满足以下条件即为`暂存副本`：    
+>    * `Usage`包含`TRANSFER_SRC`位标，并且`Domain`只包含`CPU`位标
+>>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`
+>>* `Turbo::Core::Image`对应的构造参数：
+>>      * Turbo::Core::TImageTiling::OPTIMAL（目前有问题[VMA:OPTIMAL with HOST_ACCESS_SEQUENTIAL_WRITE](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/305)）
+>>* `Turbo::Core::TBuffer`对应的构造参数：
+>>      * ...
+
+>3. 回读（CPU←GPU）  
+>`回读`是将`GPU独占资源`回读拷贝至`CPU`端
+>满足以下条件即为`回读`：    
+>    * `Usage`包含`TRANSFER_DST`位标，并且`Domain`只包含`CPU`位标
+>>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM`
+>>* `Turbo::Core::Image`对应的构造参数：
+>>      * Turbo::Core::TImageTiling::LINEAR  
+in [vulkan specs : VkImageCreateInfo](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VkImageCreateInfo)：  
+Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further restrictions on their limits and capabilities compared to images created with `tiling` equal to `VK_IMAGE_TILING_OPTIMAL`. Creation of images with tiling `VK_IMAGE_TILING_LINEAR` may not be supported unless other parameters meet all of the constraints:
+>>          * `imageType` is `VK_IMAGE_TYPE_2D`
+>>          * `format` is not a depth/stencil format
+>>          * `mipLevels` is 1
+>>          * `arrayLayers` is 1
+>>          * `samples` is `VK_SAMPLE_COUNT_1_BIT`
+>>          * `usage` only includes `VK_IMAGE_USAGE_TRANSFER_SRC_BIT` and/or `VK_IMAGE_USAGE_TRANSFER_DST_BIT`
+>>* `Turbo::Core::TBuffer`对应的构造参数：
+>>      * ...
+
+>4. 高频传输(CPU→GPU)
+>`高频传输`一般用于`CPU`频繁的更改资源数据，`GPU`之后频繁的读此数据（多见于`uniform buffer`）    
+>*注：高频传输多为`Buffer`资源*  
+>满足以下条件即为`高频传输`：    
+>    * `Usage`包含`TRANSFER_DST`位标，并且`Domain`包含`CPU`和`GPU`位标
+>>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`和`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD`
+>>
+>>此种情况在`Map`时需要`Turbo`底层查看分配的内存是否支持`VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT`如果支持直接`memcpy`，如果不支持需要调用`暂存副本`流程（详情参考[VulkanMemoryAllocator::Advanced data uploading](`https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html`)）(这需要提供`Copy`接口函数统一调配)，
+>>如果简化的话可以直击使用`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`（有待测试）
+>>* `Turbo::Core::Image`对应的构造参数：
+>>      * ...
+>>* `Turbo::Core::TBuffer`对应的构造参数：
+>>      * ...
 
 ## Context上下文
 

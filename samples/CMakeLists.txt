@@ -181,3 +181,8 @@ add_executable(RenderDesignTest ./RenderDesignTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(RenderDesignTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(RenderDesignTest PUBLIC ${LINK_PARTH})
 target_link_libraries(RenderDesignTest PUBLIC ${LIBS})
+
+add_executable(VulkanTest ./VulkanTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanTest PUBLIC ${LIBS})

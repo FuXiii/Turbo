@@ -1787,3 +1787,8 @@ Turbo是渲染引擎
   >* `./engine/render`下增加`TDomain.h`，用于定义资源分配的所有者端域
   >* `./engine/render`下`TImage`的`Descriptor`增加`TDomain domain`成员
   >* 更新`./engine/render`下`TContext`的`CreateImage()`函数
+
+* 2022/12/12 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* `./samples`下创建`VulkanTest`示例，用于纯`Vulkan`代码测试
