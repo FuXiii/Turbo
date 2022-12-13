@@ -1792,3 +1792,8 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
   >* `./samples`下创建`VulkanTest`示例，用于纯`Vulkan`代码测试
+
+* 2022/12/12 设计架构
+  >
+  >* 更新`./engine/render`下`TContext`的`CreateImage()`函数
+  >* 更新`./engine/render`下`TImage`中`TImageUsageBits`枚举成员命名增加`..._ATTACHMENT`明确用意

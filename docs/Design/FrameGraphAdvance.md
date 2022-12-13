@@ -53,6 +53,11 @@
   >
   >* 创建`Usage和Domain`章节
 
+* 2022/12/13
+  >
+  >* 更新`Usage和Domain`章节
+  >* 创建`资源拷贝传输`章节
+
 ---
 
 # Turbo驱动初步
@@ -963,42 +968,157 @@ using TDomain = uint32_t;
 常见的资源创建策略有一下几种：
 >1. GPU独占资源（GPU）  
 >表示该资源只有`GPU`可以访问。   
+>```mermaid
+>graph TD;
+>    direction TB
+>    subgraph GPU
+>        subgraph GPUImage["Image"]
+>        direction TB
+>           subgraph GPUImageDescriptor[Descriptor]
+>                GPUImageDescriptorArgs["Usages:不限\nDomain:GPU"]
+>           end
+>           subgraph GPUImageCreateTImage["创建Core::TImage"]
+>                GPUImageCreateTImageArgs["Tiling:OPTIMAL\nMemoryFlags:DEDICATED_MEMORY"]
+>           end
+>           GPUImageDescriptor--对应底层-->GPUImageCreateTImage
+>        end
+>        subgraph GPUBuffer["Buffer"]
+>        direction TB
+>           subgraph GPUBufferDescriptor[Descriptor]
+>                GPUBufferDescriptorArgs["Usages:不限\nDomain:GPU"]
+>           end
+>           subgraph GPUBufferCreateTImage["创建Core::TBuffer"]
+>                GPUBufferCreateTImageArgs["MemoryFlags:DEDICATED_MEMORY"]
+>           end
+>           GPUBufferDescriptor--对应底层-->GPUBufferCreateTImage
+>        end
+>    end
+>```
 >满足以下条件即为`GPU独占资源`：
 >    * `Domain`只有`GPU`位标  
 >>* 对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY`
 >>* `Turbo::Core::Image`对应的构造参数：
 >>      * Turbo::Core::TImageTiling::OPTIMAL
 >>* `Turbo::Core::TBuffer`对应的构造参数：
->>      * ...
+>>      * 略
 
 >2. 用于传输拷贝的暂存副本（CPU→GPU）  
 >*注：暂存副本多为`Buffer`资源*  
 >由于`GPU独占资源`只能使用`GPU`进行访问，有时需要将`CPU`端的数据赋值给`GPU`端，所以需要使用一个`CPU`端可写入并且可以拷贝到`GPU`端的资源，此种资源叫做`暂存副本`（`Staging`）。  
+>```mermaid
+>graph TD;
+>    direction TB
+>    subgraph CPU[CPU端资源]
+>        subgraph CPUImage["Image"]
+>        direction TB
+>           subgraph CPUImageDescriptor[Descriptor]
+>                CPUImageDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"]
+>           end
+>           subgraph CPUImageCreateTImage["创建Core::TImage"]
+>                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>           end
+>           CPUImageDescriptor--对应底层-->CPUImageCreateTImage
+>        end
+>        subgraph CPUBuffer["Buffer"]
+>        direction TB
+>           subgraph CPUBufferDescriptor[Descriptor]
+>                CPUBufferDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"]
+>           end
+>           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
+>                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>           end
+>           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage
+>        end
+>    end
+>
+>    CPUImage--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoImage[刷新CPU端Image数据]
+>    CPUBuffer--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoBuffer[刷新CPU端Buffer数据]
+>
+>    subgraph CreateGPUOnlyResource["GPU独占资源"]
+>        GPUOnlyImage["Image"]
+>        GPUOnlyBuffer["Buffer"]
+>    end
+>
+>    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
+>    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
+>
+>    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
+>    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
+>```
+
 >满足以下条件即为`暂存副本`：    
->    * `Usage`包含`TRANSFER_SRC`位标，并且`Domain`只包含`CPU`位标
+>    * `Usage`包含`TRANSFER_SRC`位标，不包括`TRANSFER_DST`位标，并且`Domain`只包含`CPU`位标
 >>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`
 >>* `Turbo::Core::Image`对应的构造参数：
->>      * Turbo::Core::TImageTiling::OPTIMAL（目前有问题[VMA:OPTIMAL with HOST_ACCESS_SEQUENTIAL_WRITE](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/305)）
+>>      * (一般都是创建暂存`Buffer`，之后`Command`拷贝到`OPTIMAL`和`DEDICATED_MEMORY`的`Image`中)
+>>      * Turbo::Core::TImageTiling::~~OPTIMAL~~（目前有问题[VMA:OPTIMAL with HOST_ACCESS_SEQUENTIAL_WRITE](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/305)）
+>>          * 作为传输的数据源`usage`应该为`TRANSFER_SRC`
 >>* `Turbo::Core::TBuffer`对应的构造参数：
 >>      * ...
 
 >3. 回读（CPU←GPU）  
->`回读`是将`GPU独占资源`回读拷贝至`CPU`端
+>`回读`是将`GPU独占资源`回读拷贝至`CPU`端，简单来说是`暂存副本`（CPU→GPU）的逆向。  
+>```mermaid
+>graph TD;
+>    direction TB
+>    subgraph CPU[CPU端资源]
+>        subgraph CPUImage["Image"]
+>        direction TB
+>           subgraph CPUImageDescriptor[Descriptor]
+>                CPUImageDescriptorArgs["Usages:TRANSFER_DST+除了TRANSFER_SRC所有\nDomain:CPU"]
+>           end
+>           subgraph CPUImageCreateTImage["创建Core::TImage"]
+>                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>           end
+>           CPUImageDescriptor--对应底层-->CPUImageCreateTImage
+>        end
+>        subgraph CPUBuffer["Buffer"]
+>        direction TB
+>           subgraph CPUBufferDescriptor[Descriptor]
+>                CPUBufferDescriptorArgs["Usages:TRANSFER_DST+除了TRANSFER_SRC所有\nDomain:CPU"]
+>           end
+>           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
+>                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>           end
+>           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage
+>        end
+>    end
+>
+>    CPUImage--"使用Map获取数据指针"-->UseMapCopyDataIntoImage[CPU端获取数据]
+>    CPUBuffer--"使用Map获取数据指针"-->UseMapCopyDataIntoBuffer[CPU端获取数据]
+>
+>    subgraph CreateGPUOnlyResource["GPU独占资源"]
+>        GPUOnlyImage["Image"]
+>        GPUOnlyBuffer["Buffer"]
+>    end
+>
+>    GPUOnlyImage--"使用CopyCommand将GPU端数据拷贝至CPU端"-->CPUImage
+>    GPUOnlyBuffer--"使用CopyCommand将GPU端数据拷贝至CPU端"-->CPUImage
+>
+>    GPUOnlyImage--"使用CopyCommand将GPU端数据拷贝至CPU端"-->CPUBuffer
+>    GPUOnlyBuffer--"使用CopyCommand将GPU端数据拷贝至CPU端"-->CPUBuffer
+>```
 >满足以下条件即为`回读`：    
->    * `Usage`包含`TRANSFER_DST`位标，并且`Domain`只包含`CPU`位标
+>    * `Usage`包含`TRANSFER_DST`位标，不包含`TRANSFER_SRC`位标，并且`Domain`只包含`CPU`位标
 >>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM`
 >>* `Turbo::Core::Image`对应的构造参数：
->>      * Turbo::Core::TImageTiling::LINEAR  
-in [vulkan specs : VkImageCreateInfo](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VkImageCreateInfo)：  
+>>      * 一种是是创建`CPU`端的`Buffer`，之后`Command`将`Image`拷贝到`Buffer`中，之后读`Buffer`。
+>>      * 另一种是创建`CPU`端的`Image`，之后将`GPU`端的`Image`拷贝到`CPU`端`Image`中
+>>      * Turbo::Core::TImageTiling::LINEAR（如果满足以下条件）  
+in [Vulkan 标准 : VkImageCreateInfo](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VkImageCreateInfo)：  
 Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further restrictions on their limits and capabilities compared to images created with `tiling` equal to `VK_IMAGE_TILING_OPTIMAL`. Creation of images with tiling `VK_IMAGE_TILING_LINEAR` may not be supported unless other parameters meet all of the constraints:
 >>          * `imageType` is `VK_IMAGE_TYPE_2D`
 >>          * `format` is not a depth/stencil format
 >>          * `mipLevels` is 1
 >>          * `arrayLayers` is 1
 >>          * `samples` is `VK_SAMPLE_COUNT_1_BIT`
->>          * `usage` only includes `VK_IMAGE_USAGE_TRANSFER_SRC_BIT` and/or `VK_IMAGE_USAGE_TRANSFER_DST_BIT`
+>>          * `usage` only includes `VK_IMAGE_USAGE_TRANSFER_SRC_BIT` and/or `VK_IMAGE_USAGE_TRANSFER_DST_BIT`  
+>>
+>>      * Turbo::Core::TImageTiling::OPTIMAL(如果使用`Khronos KTX`标准进行纹理回读的话，满足此种情况)
 >>* `Turbo::Core::TBuffer`对应的构造参数：
 >>      * ...
+
+**综上**:`暂存副本`和`回读`两者的底层`Core::TImage`创建相同，可以按照`Domain::CPU`进行创建区分
 
 >4. 高频传输(CPU→GPU)
 >`高频传输`一般用于`CPU`频繁的更改资源数据，`GPU`之后频繁的读此数据（多见于`uniform buffer`）    
@@ -1008,11 +1128,18 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`和`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD`
 >>
 >>此种情况在`Map`时需要`Turbo`底层查看分配的内存是否支持`VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT`如果支持直接`memcpy`，如果不支持需要调用`暂存副本`流程（详情参考[VulkanMemoryAllocator::Advanced data uploading](`https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html`)）(这需要提供`Copy`接口函数统一调配)，
->>如果简化的话可以直击使用`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`（有待测试）
->>* `Turbo::Core::Image`对应的构造参数：
+>>*如果简化的话可以直击使用`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`（有待测试）*
+>>* `Turbo::Core::Image`对应的构造参数（同`暂存副本`情况）：
 >>      * ...
 >>* `Turbo::Core::TBuffer`对应的构造参数：
 >>      * ...
+
+## 资源拷贝传输
+
+资源的拷贝传输包括：
+1. `CPU`⇄`GPU`
+2. `CPU`⇄`CPU`
+3. `GPU`⇄`GPU`
 
 ## Context上下文
 

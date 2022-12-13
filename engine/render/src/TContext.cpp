@@ -1,4 +1,5 @@
 #include "TContext.h"
+#include "TImage.h"
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
 #include <core/include/TImage.h>
@@ -241,15 +242,34 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
     }
-    // Staging copy for upload && Readback
-    else if (((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    else
     {
-        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE /*| Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM*/;
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE;
+    }
+
+    // GPU only
+    if (((domain & Turbo::Render::TDomainBits::CPU) != Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+        image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
+    }
+    // Staging copy for upload
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_SRC) == Turbo::Render::TImageUsageBits::TRANSFER_SRC) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE;
+        image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
+    }
+    // Readback
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_SRC) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM;
+        image_tiling = Turbo::Core::TImageTiling::OPTIMAL; // FIXME:需要适配LINEAR的情况
     }
     // Advanced data uploading(Both CPU and GPU domain can access)
     else if (((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE | Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD;
+        // image_tiling = ???; // FIXME:LINEAR or OPTIMAL
     }
 
     Turbo::Core::TImageLayout layout = Turbo::Core::TImageLayout::UNDEFINED;
