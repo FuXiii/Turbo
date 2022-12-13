@@ -970,27 +970,27 @@ using TDomain = uint32_t;
 >表示该资源只有`GPU`可以访问。   
 >```mermaid
 >graph TD;
->    direction TB;
->    subgraph GPU;
->        subgraph GPUImage["Image"];
->        direction TB;
->           subgraph GPUImageDescriptor[Descriptor];
->                GPUImageDescriptorArgs["Usages:不限\nDomain:GPU"];
+>    direction TB
+>    subgraph GPU
+>        subgraph GPUImage["Image"]
+>        direction TB
+>           subgraph GPUImageDescriptor[Descriptor]
+>                GPUImageDescriptorArgs["Usages:不限\nDomain:GPU"]
 >           end
->           subgraph GPUImageCreateTImage["创建Core::TImage"];
->                GPUImageCreateTImageArgs["Tiling:OPTIMAL\nMemoryFlags:DEDICATED_MEMORY"];
+>           subgraph GPUImageCreateTImage["创建Core::TImage"]
+>                GPUImageCreateTImageArgs["Tiling:OPTIMAL\nMemoryFlags:DEDICATED_MEMORY"]
 >           end
->           GPUImageDescriptor--对应底层-->GPUImageCreateTImage;
+>           GPUImageDescriptor--对应底层-->GPUImageCreateTImage
 >        end
->        subgraph GPUBuffer["Buffer"];
->        direction TB;
->           subgraph GPUBufferDescriptor[Descriptor];
->                GPUBufferDescriptorArgs["Usages:不限\nDomain:GPU"];
+>        subgraph GPUBuffer["Buffer"]
+>        direction TB
+>           subgraph GPUBufferDescriptor[Descriptor]
+>                GPUBufferDescriptorArgs["Usages:不限\nDomain:GPU"]
 >           end
->           subgraph GPUBufferCreateTImage["创建Core::TBuffer"];
->                GPUBufferCreateTImageArgs["MemoryFlags:DEDICATED_MEMORY"];
+>           subgraph GPUBufferCreateTImage["创建Core::TBuffer"]
+>                GPUBufferCreateTImageArgs["MemoryFlags:DEDICATED_MEMORY"]
 >           end
->           GPUBufferDescriptor--对应底层-->GPUBufferCreateTImage;
+>           GPUBufferDescriptor--对应底层-->GPUBufferCreateTImage
 >        end
 >    end
 >```
@@ -1007,43 +1007,43 @@ using TDomain = uint32_t;
 >由于`GPU独占资源`只能使用`GPU`进行访问，有时需要将`CPU`端的数据赋值给`GPU`端，所以需要使用一个`CPU`端可写入并且可以拷贝到`GPU`端的资源，此种资源叫做`暂存副本`（`Staging`）。  
 >```mermaid
 >graph TD;
->    direction TB;
->    subgraph CPU[CPU端资源];
->        subgraph CPUImage["Image"];
->        direction TB;
->           subgraph CPUImageDescriptor[Descriptor];
->                CPUImageDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"];
+>    direction TB
+>    subgraph CPU[CPU端资源]
+>        subgraph CPUImage["Image"]
+>        direction TB
+>           subgraph CPUImageDescriptor[Descriptor]
+>                CPUImageDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"]
 >           end
->           subgraph CPUImageCreateTImage["创建Core::TImage"];
->                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"];
+>           subgraph CPUImageCreateTImage["创建Core::TImage"]
+>                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
 >           end
->           CPUImageDescriptor--对应底层-->CPUImageCreateTImage;
+>           CPUImageDescriptor--对应底层-->CPUImageCreateTImage
 >        end
->        subgraph CPUBuffer["Buffer"];
->        direction TB;
->           subgraph CPUBufferDescriptor[Descriptor];
->                CPUBufferDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"];
+>        subgraph CPUBuffer["Buffer"]
+>        direction TB
+>           subgraph CPUBufferDescriptor[Descriptor]
+>                CPUBufferDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU"]
 >           end
->           subgraph CPUBufferCreateTImage["创建Core::TBuffer"];
->                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"];
+>           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
+>                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
 >           end
->           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage;
+>           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage
 >        end
 >    end
 >
->    CPUImage--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoImage[刷新CPU端Image数据];
->    CPUBuffer--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoBuffer[刷新CPU端Buffer数据];
+>    CPUImage--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoImage[刷新CPU端Image数据]
+>    CPUBuffer--"使用Map/Copy将数据赋值给CPU端Image"-->UseMapCopyDataIntoBuffer[刷新CPU端Buffer数据]
 >
->    subgraph CreateGPUOnlyResource["GPU独占资源"];
->        GPUOnlyImage["Image"];
->        GPUOnlyBuffer["Buffer"];
+>    subgraph CreateGPUOnlyResource["GPU独占资源"]
+>        GPUOnlyImage["Image"]
+>        GPUOnlyBuffer["Buffer"]
 >    end
 >
->    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage;
->    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer;
+>    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
+>    UseMapCopyDataIntoImage--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
 >
->    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage;
->    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer;
+>    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
+>    UseMapCopyDataIntoBuffer--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
 >```
 
 >满足以下条件即为`暂存副本`：    
