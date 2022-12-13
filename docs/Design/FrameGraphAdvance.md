@@ -1161,7 +1161,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >                CPUBufferDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU+GPU"]
 >           end
 >           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
->                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE++HOST_ACCESS_ALLOW_TRANSFER_INSTEAD"]
+>                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE+HOST_ACCESS_ALLOW_TRANSFER_INSTEAD"]
 >           end
 >           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage
 >        end
