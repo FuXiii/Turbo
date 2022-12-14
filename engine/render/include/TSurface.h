@@ -2,7 +2,9 @@
 #ifndef TURBO_RENDER_TSURFACE_H
 #define TURBO_RENDER_TSURFACE_H
 
+#ifndef VULKAN_CORE_H_
 #include <core/include/vulkan/vulkan_core.h>
+#endif
 
 namespace Turbo
 {
