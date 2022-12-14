@@ -1,6 +1,7 @@
 # Turbo引擎使用FrameGraph驱动设计
 
-最终会映射到`./docs/TurboDesign:Render`设计中
+最终会映射到`./docs/TurboDesign:Render`设计中  
+*注：该文档有些图表是使用[mermaid](https://mermaid-js.github.io/mermaid/#/)进行书写的，`github`并不支持复杂的`mermaid`语法，导致在线查看该文档会渲染不出图表，本人是使用`VSCode`安装`Markdown Preview Mermaid Support`插件进行查看和书写的。*
 
 ## 更新日志
 
@@ -1140,7 +1141,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >>* `Turbo::Core::TBuffer`对应的构造参数：
 >>   * ...
 
-**综上**:`暂存副本`和`回读`两者的底层`Core::TImage`创建相同，可以按照`Domain::CPU`进行创建区分
+**综上**:~~`暂存副本`和`回读`两者的底层`Core::TImage`创建相同~~(不同一个是`TRANSFER_SRC`一个是`TRANSFER_DST`)，可以按照`Domain::CPU`进行创建区分
 
 >4. 高频传输(CPU⇄GPU)(多为CPU与GPU端共享资源)  
 >`高频传输`一般用于`CPU`频繁的更改资源数据，`GPU`之后频繁的读此数据（多见于`uniform buffer`）  
@@ -1207,6 +1208,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 ## 资源拷贝传输
 
 资源的拷贝传输基本上有两种方式：
+
 1. 创建`CPU`端资源，之后使用`memcpy(...)`直接将数据拷贝至资源中
 2. 创建`GPU`端资源，之后使用`commandbuffer`将数据拷贝至资源中
 
@@ -1215,13 +1217,14 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 1. `CPU`⇄`GPU`  
     1.1 `CPU`→`GPU`  
     * 使用`暂存副本`
+
     ```CXX
     void* some_data=...;
     Image/Buffer* cpu_resource=new Image/Buffer(TRANSFER_SRC, Domain::CPU);//暂存副本
     cpu_resource->Copy(some_data);//将数据存入暂存副本
     /*
     void Copy(some_data){
-        memcpy(src:some_data, dst:this cpu resource);
+        memcpy(src: some_data, dst: this cpu resource);
     }
     */
     delete some_data;//可以删除原始数据了
@@ -1235,8 +1238,10 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     }
     */
     ```
-    1.2 `CPU`←`GPU`   
+
+    1.2 `CPU`←`GPU`
     * 使用`回读`
+
     ```CXX
     Image/Buffer* gpu_resource = ...;//某些已经有数据的GPU独占资源
     Image/Buffer* cpu_resource = new Image/Buffer(TRANSFER_DST, Domain::CPU);//回读副本
@@ -1253,11 +1258,13 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     void* read_some_data = new ...(data[n...n+i]);//读数据
     cpu_resource->Close();//关闭资源
     ```
+
     1.3 `CPU`↔`GPU`
     * 使用`高频传输`
+
     ```CXX
     void* some_data =...;
-    Image/Buffer* cpu_gpu_share_resource = new Image/Buffer(...,Domain::CPU + Domain::GPU);//CPU端和GPU端共享资源
+    Image/Buffer* cpu_gpu_share_resource = new Image/Buffer(TRANSFER_DST, Domain::CPU + Domain::GPU);//CPU端和GPU端共享资源
     cpu_gpu_share_resource->Copy(some_data);//将数据存入共享资源
      /*
     void Copy(some_data){
@@ -1274,11 +1281,37 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     ```
 
 2. `CPU`⇄`CPU`
-    * 使用`memcpy(...)`和`CommandBuffer`均可
+    * 使用`memcpy(...)`
+
+    ```CXX
+    Image/Buffer* cpu_resource_a = ...;//某个已经存有数据的CPU端资源a
+    Image/Buffer* cpu_resource_b = new Image/Buffer(TRANSFER_SRC, Domain::CPU);//CPU端资源b
+    cpu_resource_b->Copy(cpu_resource_a);//将数据存入共享资源
+     /*
+    void Copy(cpu_resource_a){
+       {
+            memcpy(src:cpu_resource_a, dst:this cpu resource);
+       }
+    }
+    */
+    ```
 
 3. `GPU`⇄`GPU`
     * 使用`CommandBuffer`
 
+    ```CXX
+    void* some_data=...;
+    Image/Buffer* gpu_resource_a = ...;//某个已经存有数据的GPU端资源a
+    Image/Buffer* gpu_resource_b = new Image/Buffer(TRANSFER_DST, Domain::CPU);//GPU端资源b
+    gpu_resource_b->Copy(gpu_resource_a);//将数据存入暂存副本
+    /*
+    void Copy(gpu_resource_a){
+        command_buffer->Copy(src: gpu_resource_a, dst: this gpu resource);
+        device_queue->submit(command_buffer, fence);
+        fence->WaitUntil();
+    }
+    */
+    ```
 
 ## Context上下文
 
