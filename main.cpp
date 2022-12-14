@@ -1,6 +1,7 @@
 #include "TDevice.h"
 #include "TDeviceQueue.h"
 #include "TEngine.h"
+#include "TFormatInfo.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
 
@@ -32,6 +33,7 @@
 #include "TSurface.h"
 #include "TSwapchain.h"
 
+#include <iostream>
 #include <math.h>
 
 #include "TPipelineDescriptorSet.h"
@@ -605,6 +607,7 @@ int main()
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    std::cout << "Physical Device:" << physical_device->GetDeviceName() << std::endl;
 
     if (!glfwInit())
         return -1;
