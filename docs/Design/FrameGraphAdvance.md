@@ -61,6 +61,7 @@
 * 2022/12/14
   >
   >* 更新`Usage和Domain`章节中
+  >* 更新`资源拷贝传输`章节中
 
 ---
 
@@ -1141,7 +1142,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 **综上**:`暂存副本`和`回读`两者的底层`Core::TImage`创建相同，可以按照`Domain::CPU`进行创建区分
 
->4. 高频传输(CPU→GPU)(多为CPU与GPU端共享资源)  
+>4. 高频传输(CPU⇄GPU)(多为CPU与GPU端共享资源)  
 >`高频传输`一般用于`CPU`频繁的更改资源数据，`GPU`之后频繁的读此数据（多见于`uniform buffer`）  
 >
 >* 注：高频传输多为`Buffer`资源*  
@@ -1205,9 +1206,15 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 ## 资源拷贝传输
 
+资源的拷贝传输基本上有两种方式：
+1. 创建`CPU`端资源，之后使用`memcpy(...)`直接将数据拷贝至资源中
+2. 创建`GPU`端资源，之后使用`commandbuffer`将数据拷贝至资源中
+
 资源的拷贝传输包括：
 
-1. `CPU`⇄`GPU`
+1. `CPU`⇄`GPU`  
+    1.1 `CPU`→`GPU`  
+    1.2 `GPU`→`CPU`  
 2. `CPU`⇄`CPU`
 3. `GPU`⇄`GPU`
 
