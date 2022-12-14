@@ -60,8 +60,8 @@
 
 * 2022/12/14
   >
-  >* 更新`Usage和Domain`章节中
-  >* 更新`资源拷贝传输`章节中
+  >* 更新`Usage和Domain`章节
+  >* 更新`资源拷贝传输`章节
 
 ---
 
@@ -1214,9 +1214,71 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 1. `CPU`⇄`GPU`  
     1.1 `CPU`→`GPU`  
-    1.2 `GPU`→`CPU`  
+    * 使用`暂存副本`
+    ```CXX
+    void* some_data=...;
+    Image/Buffer* cpu_resource=new Image/Buffer(TRANSFER_SRC, Domain::CPU);//暂存副本
+    cpu_resource->Copy(some_data);//将数据存入暂存副本
+    /*
+    void Copy(some_data){
+        memcpy(src:some_data, dst:this cpu resource);
+    }
+    */
+    delete some_data;//可以删除原始数据了
+    Image/Buffer* gpu_resource=new Image/Buffer(TRANSFER_DST, Domain::GPU);//GPU独占资源，内部位标
+    gpu_resource->Copy(cpu_resource);//将暂存资源中的数据存入GPU独占资源中
+    /*
+    void Copy(cpu_resource){
+        command_buffer->Copy(src: cpu_resource, dst: this gpu resource);
+        device_queue->submit(command_buffer, fence);
+        fence->WaitUntil();
+    }
+    */
+    ```
+    1.2 `CPU`←`GPU`   
+    * 使用`回读`
+    ```CXX
+    Image/Buffer* gpu_resource = ...;//某些已经有数据的GPU独占资源
+    Image/Buffer* cpu_resource = new Image/Buffer(TRANSFER_DST, Domain::CPU);//回读副本
+    cpu_resource->Copy(gpu_resource);//将GPU独占资源数据存入回读副本
+    /*
+    void Copy(gpu_resource){
+        command_buffer->Copy(src: gpu_resource, dst: this cpu resource);
+        device_queue->submit(command_buffer, fence);
+        fence->WaitUntil();
+    }
+    */
+    cpu_resource->Open();//开启资源
+    void* data = cpu_resource->Data();//获取资源指针
+    void* read_some_data = new ...(data[n...n+i]);//读数据
+    cpu_resource->Close();//关闭资源
+    ```
+    1.3 `CPU`↔`GPU`
+    * 使用`高频传输`
+    ```CXX
+    void* some_data =...;
+    Image/Buffer* cpu_gpu_share_resource = new Image/Buffer(...,Domain::CPU + Domain::GPU);//CPU端和GPU端共享资源
+    cpu_gpu_share_resource->Copy(some_data);//将数据存入共享资源
+     /*
+    void Copy(some_data){
+       if(is_support_host_visible)
+       {
+            memcpy(src:some_data, dst:this cpu resource);
+       }
+       else
+       {
+            //TODO: 使用暂存副本流程
+       }
+    }
+    */
+    ```
+
 2. `CPU`⇄`CPU`
+    * 使用`memcpy(...)`和`CommandBuffer`均可
+
 3. `GPU`⇄`GPU`
+    * 使用`CommandBuffer`
+
 
 ## Context上下文
 
