@@ -2,8 +2,8 @@
 
 [![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
 [![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
-[![WeChat](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
+[![Email](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
 Turbo是渲染引擎
@@ -1801,3 +1801,4 @@ Turbo是渲染引擎
 * 2022/12/14 设计架构
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* 更新`readme`文档开头的`QQ`群链接，一开始链接放错了，放成爱发电赞助链接的交流群了
