@@ -58,6 +58,10 @@
   >* 更新`Usage和Domain`章节
   >* 创建`资源拷贝传输`章节
 
+* 2022/12/14
+  >
+  >* 更新`Usage和Domain`章节中
+
 ---
 
 # Turbo驱动初步
@@ -965,6 +969,8 @@ using TDomain = uint32_t;
 
 ## Usage和Domain
 
+>**考虑是否向用户开放`TRANSFER_SRC`和`TRANSFER_DST`？如果`Turbo`负责维护该属性应该会更符合设计思想，用户只需要考虑使用Domain[CPU,GPU]即可，会比较简单**
+
 不同的`Usage`和`Domain`会影响`Turbo`底层对于具体资源的创建策略。  
 常见的资源创建策略有一下几种：
 >
@@ -1135,7 +1141,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 **综上**:`暂存副本`和`回读`两者的底层`Core::TImage`创建相同，可以按照`Domain::CPU`进行创建区分
 
->4. 高频传输(CPU→GPU)
+>4. 高频传输(CPU→GPU)(多为CPU与GPU端共享资源)  
 >`高频传输`一般用于`CPU`频繁的更改资源数据，`GPU`之后频繁的读此数据（多见于`uniform buffer`）  
 >
 >* 注：高频传输多为`Buffer`资源*  
@@ -1144,11 +1150,11 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >```mermaid
 >graph TD;
 >    direction TB
->    subgraph CPU[CPU端资源]
+>    subgraph CPUAndGPU[CPU与GPU端共享资源]
 >        subgraph CPUImage["Image"]
 >        direction TB
 >           subgraph CPUImageDescriptor[Descriptor]
->                CPUImageDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU+GPU"]
+>                CPUImageDescriptorArgs["Usages:TRANSFER_DST\nDomain:CPU+GPU"]
 >           end
 >           subgraph CPUImageCreateTImage["创建Core::TImage"]
 >                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE+HOST_ACCESS_ALLOW_TRANSFER_INSTEAD"]
@@ -1158,7 +1164,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >        subgraph CPUBuffer["Buffer"]
 >        direction TB
 >           subgraph CPUBufferDescriptor[Descriptor]
->                CPUBufferDescriptorArgs["Usages:TRANSFER_SRC+除了TRANSFER_DST所有\nDomain:CPU+GPU"]
+>                CPUBufferDescriptorArgs["Usages:TRANSFER_DST\nDomain:CPU+GPU"]
 >           end
 >           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
 >                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE+HOST_ACCESS_ALLOW_TRANSFER_INSTEAD"]
@@ -1174,17 +1180,13 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >       IsSupportHOST_VISIBLE--支持-->Memcpy
 >       IsSupportHOST_VISIBLE--不支持-->UseStagingCase
 >    end
->    subgraph CreateGPUOnlyResource["GPU独占资源"]
->        GPUOnlyImage["Image"]
->        GPUOnlyBuffer["Buffer"]
->    end
+>
 >    CPUImage--"使用Copy将数据赋值给CPU端Image(由Turbo负责正确拷贝)"-->IsSupportHOST_VISIBLE
 >    CPUBuffer--"使用Copy将数据赋值给CPU端Image(由Turbo负责正确拷贝)"-->IsSupportHOST_VISIBLE
->    Memcpy--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
->    Memcpy--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
->
->    UseStagingCase--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyImage
->    UseStagingCase--"使用CopyCommand将CPU端数据拷贝至GPU端"-->GPUOnlyBuffer
+>    Memcpy-->FinishCopy[赋值结束]
+>    Memcpy-->FinishCopy
+>    UseStagingCase-->FinishCopy
+>    UseStagingCase-->FinishCopy
 >```
 >
 >满足以下条件即为`高频传输`：
