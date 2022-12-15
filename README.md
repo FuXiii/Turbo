@@ -56,7 +56,7 @@ Turbo是渲染引擎
     该问题将会在不远的未来通过动态加载库文件得到解决。~~
     >┗|｀O′|┛oO 2022/7/27 该问题已修改完成，详情请参考下面的`如何编译Turbo`章节的`注`
 
-  * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
+  * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`和`./samples`文件夹下，就像前面说的，用例使用如下第三方库：
     * [`glfw`](https://github.com/glfw/glfw) :窗口库
     * [`glm`](https://github.com/g-truc/glm) : 用于向量矩阵等运算
     * [`imgui`](https://github.com/ocornut/imgui) : 用于绘制界面UI
