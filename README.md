@@ -1813,3 +1813,5 @@ Turbo是渲染引擎
   >* `./engine/core`下`TBuffer`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
   >* `./engine/core`下`TImage`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
   >* `./engine/core`下`TBuffer`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
+  >* `./engine/render`下`TContext`中根据`FrameGraphAdvance.md`设计文档，更新实现`Turbo::Render::TContext::CreateImage(...)`成员函数
+  >* `./engine/render`下`TDomainBits`中增加一个`BOTH`位标，用于表示`CPU+GPU`，方便使用

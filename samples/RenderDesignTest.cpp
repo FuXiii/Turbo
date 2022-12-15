@@ -7,19 +7,23 @@ int main()
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
 
-    Turbo::Render::TColorImage2D::Descriptor color_image_2d_descriptor = {};
-    color_image_2d_descriptor.flags = 0;
-    color_image_2d_descriptor.width = 512;
-    color_image_2d_descriptor.height = 512;
-    color_image_2d_descriptor.layers = 1;
-    color_image_2d_descriptor.mipLevels = 1;
-    color_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
-    color_image_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    // gpu only
+    Turbo::Render::TColorImage2D::Descriptor gpu_only_image_2d_descriptor = {};
+    gpu_only_image_2d_descriptor.flags = 0;
+    gpu_only_image_2d_descriptor.width = 512;
+    gpu_only_image_2d_descriptor.height = 512;
+    gpu_only_image_2d_descriptor.layers = 1;
+    gpu_only_image_2d_descriptor.mipLevels = 1;
+    gpu_only_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    gpu_only_image_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
 
     Turbo::Render::TColorImage2D color_image_2d;
-    color_image_2d.Create("color_image_2d", color_image_2d_descriptor, &resource_allocator);
+    color_image_2d.Create("color_image_2d", gpu_only_image_2d_descriptor, &resource_allocator);
     color_image_2d.Destroy(&resource_allocator);
 
+    std::cout << "gpu_only_image_2d::End" << std::endl;
+
+    // staging upload
     Turbo::Render::TColorImage2D::Descriptor staging_image_2d_descriptor = {};
     staging_image_2d_descriptor.flags = 0;
     staging_image_2d_descriptor.width = 512;
@@ -32,6 +36,40 @@ int main()
     Turbo::Render::TColorImage2D staging_image_2d;
     staging_image_2d.Create("staging_image_2d", staging_image_2d_descriptor, &resource_allocator);
     staging_image_2d.Destroy(&resource_allocator);
+
+    std::cout << "staging_image_2d::End" << std::endl;
+
+    // read back
+    Turbo::Render::TColorImage2D::Descriptor read_back_image_2d_descriptor = {};
+    read_back_image_2d_descriptor.flags = 0;
+    read_back_image_2d_descriptor.width = 512;
+    read_back_image_2d_descriptor.height = 512;
+    read_back_image_2d_descriptor.layers = 1;
+    read_back_image_2d_descriptor.mipLevels = 1;
+    read_back_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    read_back_image_2d_descriptor.domain = Turbo::Render::TDomainBits::CPU;
+
+    Turbo::Render::TColorImage2D read_back_image_2d;
+    read_back_image_2d.Create("read_back_image_2d", read_back_image_2d_descriptor, &resource_allocator);
+    read_back_image_2d.Destroy(&resource_allocator);
+
+    std::cout << "read_back_image_2d::End" << std::endl;
+
+    // advanced upload
+    Turbo::Render::TColorImage2D::Descriptor advanced_upload_image_2d_descriptor = {};
+    advanced_upload_image_2d_descriptor.flags = 0;
+    advanced_upload_image_2d_descriptor.width = 512;
+    advanced_upload_image_2d_descriptor.height = 512;
+    advanced_upload_image_2d_descriptor.layers = 1;
+    advanced_upload_image_2d_descriptor.mipLevels = 1;
+    advanced_upload_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    advanced_upload_image_2d_descriptor.domain = Turbo::Render::TDomainBits::BOTH /*Turbo::Render::TDomainBits::CPU|Turbo::Render::TDomainBits::GPU*/;
+
+    Turbo::Render::TColorImage2D advanced_upload_image_2d;
+    advanced_upload_image_2d.Create("read_back_image_2d", advanced_upload_image_2d_descriptor, &resource_allocator);
+    advanced_upload_image_2d.Destroy(&resource_allocator);
+
+    std::cout << "advanced_upload_image_2d::End" << std::endl;
 
     return 0;
 }

@@ -42,7 +42,7 @@ void Turbo::Render::TColorImage::Create(const std::string &name, const Descripto
 {
     TImage::Descriptor image_descriptor{};
     image_descriptor.flags = descriptor.flags;
-    image_descriptor.format = Turbo::Render::TFormat::B8G8R8A8_SRGB;
+    image_descriptor.format = Turbo::Render::TFormat::R8G8B8A8_UNORM;
     image_descriptor.width = descriptor.width;
     image_descriptor.height = descriptor.height;
     image_descriptor.depth = descriptor.depth;

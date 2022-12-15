@@ -64,6 +64,11 @@
   >* 更新`Usage和Domain`章节
   >* 更新`资源拷贝传输`章节
 
+* 2022/12/15
+  >
+  >* 更新`Usage和Domain`章节。回读内存位标应为`HOST_ACCESS_RANDOM`，而不是`HOST_ACCESS_SEQUENTIAL_WRITE`
+  >* 创建`Image的Format`章节
+  
 ---
 
 # Turbo驱动初步
@@ -1087,7 +1092,7 @@ using TDomain = uint32_t;
 >                CPUImageDescriptorArgs["Usages:TRANSFER_DST+除了TRANSFER_SRC所有\nDomain:CPU"]
 >           end
 >           subgraph CPUImageCreateTImage["创建Core::TImage"]
->                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>                CPUImageCreateTImageArgs["Tiling:LINEAR（注意：Vulkan标准限值）\nMemoryFlags:HOST_ACCESS_RANDOM"]
 >           end
 >           CPUImageDescriptor--对应底层-->CPUImageCreateTImage
 >        end
@@ -1097,7 +1102,7 @@ using TDomain = uint32_t;
 >                CPUBufferDescriptorArgs["Usages:TRANSFER_DST+除了TRANSFER_SRC所有\nDomain:CPU"]
 >           end
 >           subgraph CPUBufferCreateTImage["创建Core::TBuffer"]
->                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_SEQUENTIAL_WRITE"]
+>                CPUBufferCreateTImageArgs["MemoryFlags:HOST_ACCESS_RANDOM"]
 >           end
 >           CPUBufferDescriptor--对应底层-->CPUBufferCreateTImage
 >        end
@@ -1312,6 +1317,8 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     }
     */
     ```
+
+## Image的Format
 
 ## Context上下文
 

@@ -10,7 +10,8 @@ namespace Render
 typedef enum TDomainBits
 {
     CPU = 0x00000001,
-    GPU = 0x00000002
+    GPU = 0x00000002,
+    BOTH = CPU | GPU
 } TDomainBits;
 using TDomain = uint32_t;
 } // namespace Render
