@@ -65,7 +65,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
-    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14适配完成))
       >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
@@ -94,6 +94,8 @@ Turbo是渲染引擎
 * 整理一下头文件，有点乱，去掉不必要的头文件
 
 ## RoadMap
+
+*注：该`RoadMap`章节信息有滞后性，引擎具体细节和开发计划请查看后面的开发`Log`章节(更新的比较频繁)*
 
 2022/5/15
 
@@ -1679,7 +1681,7 @@ Turbo是渲染引擎
 
 * 2022/11/22 设计架构
   >
-  >* `./asset/shaders`增加`compiler_env_version.png`用于标识编译环境，`Windows`系统中，该环境在`LLVM`新版本下编译不了，需要导成`Visual Studio`能够顺利编译，`Linux`不变
+  >* `./docs`增加`compiler_env_version.png`用于标识编译环境，`Windows`系统中，该环境在`LLVM`新版本下编译不了，需要导成`Visual Studio`能够顺利编译，`Linux`不变
   >* `./docs`增加`raymarching.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`ray_surface_intersect.png`。用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
