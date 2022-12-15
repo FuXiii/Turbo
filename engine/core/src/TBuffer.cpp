@@ -4,7 +4,7 @@
 #include "TPhysicalDevice.h"
 #include "TVmaAllocator.h"
 
-//#define VMA_IMPLEMENTATION
+// #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 
 void Turbo::Core::TBuffer::InternalCreate()
@@ -24,11 +24,15 @@ void Turbo::Core::TBuffer::InternalCreate()
     alloc_info.flags = this->memoryFlags;
 
     VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
-    VkResult result = vmaCreateBuffer(*vma_allocator, &vk_buffer_create_info, &alloc_info, &this->vkBuffer, (VmaAllocation *)this->vmaAllocation, nullptr);
+    VmaAllocation *vma_allocation = (VmaAllocation *)this->vmaAllocation;
+    VkResult result = vmaCreateBuffer(*vma_allocator, &vk_buffer_create_info, &alloc_info, &this->vkBuffer, vma_allocation, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TBuffer::InternalCreate::vmaCreateBuffer");
     }
+
+    VmaAllocationInfo *vma_allocation_info = (VmaAllocationInfo *)this->vmaAllocationInfo;
+    vmaGetAllocationInfo(*vma_allocator, *vma_allocation, vma_allocation_info);
 }
 
 void Turbo::Core::TBuffer::InternalDestroy()
@@ -48,6 +52,7 @@ Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, 
         this->usages = usages;
         this->size = size;
         this->vmaAllocation = malloc(sizeof(VmaAllocation));
+        this->vmaAllocationInfo = malloc(sizeof(VmaAllocationInfo));
         this->InternalCreate();
     }
     else
@@ -61,6 +66,8 @@ Turbo::Core::TBuffer::~TBuffer()
     this->InternalDestroy();
     free(this->vmaAllocation);
     this->vmaAllocation = nullptr;
+    free(this->vmaAllocationInfo);
+    this->vmaAllocationInfo = nullptr;
 }
 
 Turbo::Core::TBufferUsageFlags Turbo::Core::TBuffer::GetBufferUsageFlags()

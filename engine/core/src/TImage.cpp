@@ -137,12 +137,15 @@ void Turbo::Core::TImage::InternalCreate()
     alloc_info.flags = this->memoryFlags;
 
     VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
-
-    VkResult result = vmaCreateImage(*vma_allocator, &vk_image_create_info, &alloc_info, &this->vkImage, (VmaAllocation *)this->vmaAllocation, nullptr);
+    VmaAllocation *vma_allocation = (VmaAllocation *)this->vmaAllocation;
+    VkResult result = vmaCreateImage(*vma_allocator, &vk_image_create_info, &alloc_info, &this->vkImage, vma_allocation, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TImage::InternalCreate::vmaCreateImage");
     }
+
+    VmaAllocationInfo *vma_allocation_info = (VmaAllocationInfo *)this->vmaAllocationInfo;
+    vmaGetAllocationInfo(*vma_allocator, *vma_allocation, vma_allocation_info);
 }
 
 void Turbo::Core::TImage::InternalDestroy()
@@ -189,6 +192,7 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TIma
         this->usages = usages;
         this->layout = layout;
         this->vmaAllocation = malloc(sizeof(VmaAllocation));
+        this->vmaAllocationInfo = malloc(sizeof(VmaAllocationInfo));
         this->InternalCreate();
     }
     else
@@ -202,6 +206,8 @@ Turbo::Core::TImage::~TImage()
     this->InternalDestroy();
     free(this->vmaAllocation);
     this->vmaAllocation = nullptr;
+    free(this->vmaAllocationInfo);
+    this->vmaAllocationInfo = nullptr;
 }
 
 VkImage Turbo::Core::TImage::GetVkImage()

@@ -38,6 +38,7 @@ class TBuffer : public TVulkanHandle
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkBuffer vkBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
+    T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
     T_VULKAN_HANDLE_CHILDREN;
 
     T_VULKAN_HANDLE_DATA TDeviceSize size = 0;

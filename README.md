@@ -1802,3 +1802,11 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
   >* 更新`readme`文档开头的`QQ`群链接，一开始链接放错了，放成爱发电赞助链接的交流群了
+
+* 2022/12/15 设计架构
+  >
+  >* `./engine/core`下`TImage`内增加`void *vmaAllocationInfo`成员变量，用于存储`vma`内存分配信息，并在`构造函数中初始化，并赋值`，`析构`函数中释放
+  >* `./engine/core`下`TImage`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
+  >* `./engine/core`下`TBuffer`内增加`void *vmaAllocationInfo`成员变量，用于存储`vma`内存分配信息，并在`构造函数中初始化，并赋值`，`析构`函数中释放
+  >* `./engine/core`下`TBuffer`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
+
