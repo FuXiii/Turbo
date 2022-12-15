@@ -1,9 +1,11 @@
 #include "TImage.h"
 #include "TDevice.h"
 #include "TException.h"
+#include "TPhysicalDevice.h"
 #include "TVmaAllocator.h"
 
 #include "vk_mem_alloc.h"
+#include <stdint.h>
 
 void Turbo::Core::TImage::InternalCreate()
 {
@@ -258,6 +260,12 @@ uint32_t Turbo::Core::TImage::GetMipLevels()
 uint32_t Turbo::Core::TImage::GetArrayLayers()
 {
     return this->arrayLayers;
+}
+
+Turbo::Core::TMemoryTypeInfo Turbo::Core::TImage::GetMemoryTypeInfo()
+{
+    uint32_t memory_type_index = ((VmaAllocationInfo *)this->vmaAllocationInfo)->memoryType;
+    return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
 }
 
 void *Turbo::Core::TImage::Map()

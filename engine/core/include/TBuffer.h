@@ -2,6 +2,7 @@
 #ifndef TURBO_CORE_TBUFFER_H
 #define TURBO_CORE_TBUFFER_H
 #include "TVulkanHandle.h"
+#include "TMemoryTypeInfo.h"
 
 namespace Turbo
 {
@@ -72,6 +73,8 @@ class TBuffer : public TVulkanHandle
     bool IsIndexBuffer();
     bool IsVertexBuffer();
     bool IsIndirectBuffer();
+
+    TMemoryTypeInfo GetMemoryTypeInfo();
 
     VkBuffer GetVkBuffer();
 

@@ -1809,4 +1809,6 @@ Turbo是渲染引擎
   >* `./engine/core`下`TImage`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
   >* `./engine/core`下`TBuffer`内增加`void *vmaAllocationInfo`成员变量，用于存储`vma`内存分配信息，并在`构造函数中初始化，并赋值`，`析构`函数中释放
   >* `./engine/core`下`TBuffer`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
-
+  >* `./engine/core`下`TImage`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
+  >* `./engine/core`下`TBuffer`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
+  >* `./engine/core`下`TBuffer`和`TImage`有个公共类应该更加合理

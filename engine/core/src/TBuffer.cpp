@@ -194,6 +194,12 @@ void Turbo::Core::TBuffer::Flush(TDeviceSize offset, TDeviceSize size)
     vmaFlushAllocation(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), offset, size);
 }
 
+Turbo::Core::TMemoryTypeInfo Turbo::Core::TBuffer::GetMemoryTypeInfo()
+{
+    uint32_t memory_type_index = ((VmaAllocationInfo *)this->vmaAllocationInfo)->memoryType;
+    return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
+}
+
 std::string Turbo::Core::TBuffer::ToString()
 {
     return std::string();
