@@ -2,6 +2,7 @@
 #ifndef TURBO_CORE_TBUFFER_H
 #define TURBO_CORE_TBUFFER_H
 #include "TVulkanHandle.h"
+#include "TMemoryTypeInfo.h"
 
 namespace Turbo
 {
@@ -38,6 +39,7 @@ class TBuffer : public TVulkanHandle
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkBuffer vkBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
+    T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
     T_VULKAN_HANDLE_CHILDREN;
 
     T_VULKAN_HANDLE_DATA TDeviceSize size = 0;
@@ -71,6 +73,8 @@ class TBuffer : public TVulkanHandle
     bool IsIndexBuffer();
     bool IsVertexBuffer();
     bool IsIndirectBuffer();
+
+    TMemoryTypeInfo GetMemoryTypeInfo();
 
     VkBuffer GetVkBuffer();
 

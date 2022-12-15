@@ -56,7 +56,7 @@ Turbo是渲染引擎
     该问题将会在不远的未来通过动态加载库文件得到解决。~~
     >┗|｀O′|┛oO 2022/7/27 该问题已修改完成，详情请参考下面的`如何编译Turbo`章节的`注`
 
-  * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`，就像前面说的，该用例使用如下第三方库：
+  * `Turbo`非核心模块，也就是目前除了`./engine/core`之外，基本上就是`Turbo`的非核心了，之后将在核心之外，基于核心开发高级模块，比如`FrameGraph`之类的，目前非核心模块已有核心模块使用案例，位于`./main.cpp`和`./samples`文件夹下，就像前面说的，用例使用如下第三方库：
     * [`glfw`](https://github.com/glfw/glfw) :窗口库
     * [`glm`](https://github.com/g-truc/glm) : 用于向量矩阵等运算
     * [`imgui`](https://github.com/ocornut/imgui) : 用于绘制界面UI
@@ -65,7 +65,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
-    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，`Linux`系统等有空适配一下)
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14适配完成))
       >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
@@ -94,6 +94,8 @@ Turbo是渲染引擎
 * 整理一下头文件，有点乱，去掉不必要的头文件
 
 ## RoadMap
+
+*注：该`RoadMap`章节信息有滞后性，引擎具体细节和开发计划请查看后面的开发`Log`章节(更新的比较频繁)*
 
 2022/5/15
 
@@ -1679,7 +1681,7 @@ Turbo是渲染引擎
 
 * 2022/11/22 设计架构
   >
-  >* `./asset/shaders`增加`compiler_env_version.png`用于标识编译环境，`Windows`系统中，该环境在`LLVM`新版本下编译不了，需要导成`Visual Studio`能够顺利编译，`Linux`不变
+  >* `./docs`增加`compiler_env_version.png`用于标识编译环境，`Windows`系统中，该环境在`LLVM`新版本下编译不了，需要导成`Visual Studio`能够顺利编译，`Linux`不变
   >* `./docs`增加`raymarching.png`。用于`VolumetricCloud.md`文章说明
   >* `./docs`增加`ray_surface_intersect.png`。用于`VolumetricCloud.md`文章说明
   >* 更新`VolumetricCloud`文章
@@ -1802,3 +1804,14 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
   >* 更新`readme`文档开头的`QQ`群链接，一开始链接放错了，放成爱发电赞助链接的交流群了
+
+* 2022/12/15 设计架构
+  >
+  >* `./engine/core`下`TImage`内增加`void *vmaAllocationInfo`成员变量，用于存储`vma`内存分配信息，并在`构造函数中初始化，并赋值`，`析构`函数中释放
+  >* `./engine/core`下`TImage`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
+  >* `./engine/core`下`TBuffer`内增加`void *vmaAllocationInfo`成员变量，用于存储`vma`内存分配信息，并在`构造函数中初始化，并赋值`，`析构`函数中释放
+  >* `./engine/core`下`TBuffer`的`构造函数`中获取`VmaAllocationInfo`的`vma`内存分配信息
+  >* `./engine/core`下`TImage`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
+  >* `./engine/core`下`TBuffer`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
+  >* `./engine/render`下`TContext`中根据`FrameGraphAdvance.md`设计文档，更新实现`Turbo::Render::TContext::CreateImage(...)`成员函数
+  >* `./engine/render`下`TDomainBits`中增加一个`BOTH`位标，用于表示`CPU+GPU`，方便使用

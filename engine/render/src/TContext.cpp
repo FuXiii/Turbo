@@ -10,7 +10,6 @@
 
 Turbo::Render::TContext::TContext()
 {
-    // TODO:
     // check Vulkan support
     if (!Turbo::Core::TInstance::IsSupportVulkan())
     {
@@ -230,46 +229,40 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
 
     Turbo::Core::TSampleCountBits sample_count_bits = Turbo::Core::TSampleCountBits::SAMPLE_1_BIT;
 
-    // TODO:Turbo::Core::TImageTiling需要适配Linear的情况
     Turbo::Core::TImageTiling image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
 
     Turbo::Core::TImageUsages image_usages = usages;
 
     Turbo::Core::TMemoryFlags memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
 
-    // GPU only
-    if (((domain & Turbo::Render::TDomainBits::CPU) != Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    if ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
     {
-        memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+        image_tiling = Turbo::Core::TImageTiling::LINEAR;
     }
     else
     {
-        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE;
+        image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
     }
 
     // GPU only
     if (((domain & Turbo::Render::TDomainBits::CPU) != Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
-        image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
     }
     // Staging copy for upload
     else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_SRC) == Turbo::Render::TImageUsageBits::TRANSFER_SRC) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE;
-        image_tiling = Turbo::Core::TImageTiling::OPTIMAL;
     }
     // Readback
-    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_SRC) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM;
-        image_tiling = Turbo::Core::TImageTiling::OPTIMAL; // FIXME:需要适配LINEAR的情况
     }
     // Advanced data uploading(Both CPU and GPU domain can access)
-    else if (((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
     {
         memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE | Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD;
-        // image_tiling = ???; // FIXME:LINEAR or OPTIMAL
     }
 
     Turbo::Core::TImageLayout layout = Turbo::Core::TImageLayout::UNDEFINED;

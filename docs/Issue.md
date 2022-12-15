@@ -202,3 +202,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 在`engine\framegraph\include\TFrameGraph.hpp`中`void Turbo::FrameGraph::TFrameGraph::Execute(void *context)`中，在运行结束时会去销毁对应得资源文件，正常此时应该将资源标记为待回收，并进行异步回收。
 
 - 由于`TFrameGraph`中的资源回收属于异步回收（见上一条目），则需要一个异步回收器，在结束一帧的工作后进行异步回收。
+
+- `./engine/core`下`TBuffer`和`TImage`有个公共类应该更加合理

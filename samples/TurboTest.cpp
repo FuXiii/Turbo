@@ -1,6 +1,7 @@
 #include "TDevice.h"
 #include "TDeviceQueue.h"
 #include "TEngine.h"
+#include "TMemoryTypeInfo.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
 
@@ -32,6 +33,7 @@
 #include "TSurface.h"
 #include "TSwapchain.h"
 
+#include <iostream>
 #include <math.h>
 
 #include "TPipelineDescriptorSet.h"
@@ -44,7 +46,70 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <utility>
+
+void OutputMemoryInfo(Turbo::Core::TMemoryTypeInfo &memoryTypeInfo)
+{
+    Turbo::Core::TMemoryTypeInfo current_memory_type_info = memoryTypeInfo;
+    Turbo::Core::TMemoryHeapInfo current_memory_heap_info = current_memory_type_info.GetMemoryHeap();
+    if (current_memory_heap_info.IsDeviceLocal())
+    {
+        std::cout << "\tHeap:"
+                  << "Device_Local" << std::endl;
+    }
+    if (current_memory_heap_info.IsMultiInstance())
+    {
+        std::cout << "\tHeap:"
+                  << "Multi_Instance" << std::endl;
+    }
+
+    if (current_memory_type_info.IsDeviceLocal())
+    {
+        std::cout << "\t\tType:"
+                  << "Device_Local" << std::endl;
+    }
+    if (current_memory_type_info.IsHostCached())
+    {
+        std::cout << "\t\tType:"
+                  << "Host_Cached" << std::endl;
+    }
+    if (current_memory_type_info.IsHostCoherent())
+    {
+        std::cout << "\t\tType:"
+                  << "Host_Coherent" << std::endl;
+    }
+    if (current_memory_type_info.IsHostVisible())
+    {
+        std::cout << "\t\tType:"
+                  << "Host_Visible" << std::endl;
+    }
+    if (current_memory_type_info.IsLazilyAllocated())
+    {
+        std::cout << "\t\tType:"
+                  << "Lazily_Allocated" << std::endl;
+    }
+    if (current_memory_type_info.IsProtected())
+    {
+        std::cout << "\t\tType:"
+                  << "Protected" << std::endl;
+    }
+}
+
+void OutputResourceMemoryInfo(const std::string &name, Turbo::Core::TBuffer *buffer)
+{
+    std::cout << "Buffer:[" << name << "]:" << std::endl;
+    Turbo::Core::TMemoryTypeInfo current_memory_type_info = buffer->GetMemoryTypeInfo();
+    OutputMemoryInfo(current_memory_type_info);
+}
+
+void OutputResourceMemoryInfo(const std::string &name, Turbo::Core::TImage *image)
+{
+    std::cout << "Image:[" << name << "]:" << std::endl;
+    Turbo::Core::TMemoryTypeInfo current_memory_type_info = image->GetMemoryTypeInfo();
+    OutputMemoryInfo(current_memory_type_info);
+}
+
 void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
 {
     std::string save_file_path = "./";
@@ -336,11 +401,15 @@ int main()
     memcpy(value_ptr, &value, sizeof(value));
     value_buffer->Unmap();
 
+    OutputResourceMemoryInfo("value_buffer", value_buffer);
+
     Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_COLOR_UV) * POSITION_COLOR_UV_DATA.size());
     void *vertx_buffer_ptr = vertex_buffer->Map();
     memcpy(vertx_buffer_ptr, POSITION_COLOR_UV_DATA.data(), sizeof(POSITION_COLOR_UV) * POSITION_COLOR_UV_DATA.size());
     vertex_buffer->Unmap();
     POSITION_COLOR_UV_DATA.clear();
+
+    OutputResourceMemoryInfo("vertex_buffer", vertex_buffer);
 
     POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{0.5f + 0.1f, 0.5f, 0.0f}, {0.f, 0.f, 0.f}, {1.f, 1.0f}});
     POSITION_COLOR_UV_DATA.push_back(POSITION_COLOR_UV{{-0.5f + 0.1f, 0.5f, 0.0f}, {0.f, 0.f, 0.f}, {0.0f, 1.0f}});
@@ -453,6 +522,8 @@ int main()
         ktxTexture_Destroy(ktx_texture);
     }
     //</KTX Texture>
+    OutputResourceMemoryInfo("ktx_image", ktx_image);
+
     Turbo::Core::TImageView *ktx_texture_view = new Turbo::Core::TImageView(ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_image->GetMipLevels(), 0, 1);
     Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, ktx_image->GetMipLevels());
 
@@ -648,7 +719,7 @@ int main()
         memcpy(_ptr, &value, sizeof(value));
         value_buffer->Unmap();
 
-        push_constant_data.value = (std::sin(_time)+1)/2.0f;
+        push_constant_data.value = (std::sin(_time) + 1) / 2.0f;
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;

@@ -2,6 +2,7 @@
 #ifndef TURBO_CORE_TIMAGE_H
 #define TURBO_CORE_TIMAGE_H
 #include "TFormatInfo.h"
+#include "TMemoryTypeInfo.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -88,6 +89,7 @@ class TImage : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkImage vkImage = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
+    T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
     T_VULKAN_HANDLE_CHILDREN;
 
     T_VULKAN_HANDLE_DATA VkImageCreateFlags imageFlags;
@@ -127,6 +129,8 @@ class TImage : public Turbo::Core::TVulkanHandle
     TImageUsages GetUsages();
     uint32_t GetMipLevels();
     uint32_t GetArrayLayers();
+
+    TMemoryTypeInfo GetMemoryTypeInfo();
 
     void *Map();
     void Unmap();
