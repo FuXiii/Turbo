@@ -1818,6 +1818,15 @@ Turbo是渲染引擎
 
 * 2022/12/16 设计架构
   >
-  >* `./engine/render`下`TFormat`内增加`R8G8B8A8_SRGB`、`B8G8R8A8_UNORM`、`D16_UNORM`枚举成员
+  >* `./engine/render`下`TFormat`内增加`R8G8B8A8_SRGB`、`B8G8R8A8_UNORM`、`D16_UNORM`、`R8G8B8_SRGB`、`B8G8R8_SRGB`、`R8G8B8_UNORM`、`B8G8R8_UNORM`枚举成员
   >* `./engine/render`下`TContext`内增加`Turbo::Render::TContext::CreateImage(...)`增加对新增格式枚举成员的适配
   >* `./engine/render`下`TContext`的`Turbo::Render::TContext::CreateImage(...)`中对于`Turbo::Core::TImageType`的判断逻辑上有问题，修复
+  >* `./engine/core`下`TCore`增加`typedef VkFormatProperties TFormatProperties`定义
+  >* `./engine/core`下`TFormatInfo`增加`TFormatProperties formatProperties`成员变量
+  >* `./engine/core`下`TFormatInfo`新增构造函数`TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED, TFormatProperties formatProperties)`
+  >* `./engine/core`下`TFormatInfo`构造函数`TFormatInfo(TFormatType formatType)`设置成遗弃函数
+  >* `./engine/core`下`TFormatInfo`修改`Turbo::Core::TFormatInfo::GetSupportFormats()`函数适配`TFormatInfo`带有`TFormatProperties formatProperties`参数函数。
+  >* `./engine/core`下`TPhysicalDeviceInfo`修改`std::vector<TFormatInfo> supportFormats`成员变量为`std::map<TFormatType, TFormatInfo> supportFormats`参数函数。
+  >* `./engine/core`下`TPhysicalDevice`修改`void Turbo::Core::TPhysicalDevice::EnumerateFromat()`成员函数，为适配`std::map<TFormatType, TFormatInfo> TPhysicalDeviceInfo::supportFormats`参数函数。
+  >* `./engine/core`下`TPhysicalDevice`修改`Turbo::Core::TPhysicalDevice::GetSupportFormats()`成员函数
+  >* `./engine/core`下`TPhysicalDevice`修改`Turbo::Core::TPhysicalDevice::IsSupportFormat()`成员函数

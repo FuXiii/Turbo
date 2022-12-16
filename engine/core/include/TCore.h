@@ -155,6 +155,8 @@ typedef VkImageCreateFlags TImageCreateFlags;
 
 typedef VkImageViewCreateFlags TImageViewCreateFlags;
 typedef VkImageAspectFlags TImageAspectFlags;
+
+typedef VkFormatProperties TFormatProperties;
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TURBO_H

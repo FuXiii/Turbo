@@ -16,15 +16,15 @@ std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormat
         size_t all_formats_count = TAllFormats.size();
         for (size_t format_index = 0; format_index < all_formats_count; format_index++)
         {
-            VkFormatProperties format_properties = {};
-            format_properties.bufferFeatures = 0;
-            format_properties.linearTilingFeatures = 0;
-            format_properties.optimalTilingFeatures = 0;
+            VkFormatProperties vk_format_properties = {};
+            vk_format_properties.bufferFeatures = 0;
+            vk_format_properties.linearTilingFeatures = 0;
+            vk_format_properties.optimalTilingFeatures = 0;
 
-            pfn_vk_get_physical_device_format_properties(physicalDevice->GetVkPhysicalDevice(), TAllFormats[format_index], &format_properties);
-            if (format_properties.bufferFeatures || format_properties.linearTilingFeatures || format_properties.optimalTilingFeatures)
+            pfn_vk_get_physical_device_format_properties(physicalDevice->GetVkPhysicalDevice(), TAllFormats[format_index], &vk_format_properties);
+            if (vk_format_properties.bufferFeatures || vk_format_properties.linearTilingFeatures || vk_format_properties.optimalTilingFeatures)
             {
-                TFormatInfo format(static_cast<TFormatType>(TAllFormats[format_index]));
+                TFormatInfo format(static_cast<TFormatType>(TAllFormats[format_index]), vk_format_properties);
                 formats.push_back(format);
             }
         }
@@ -51,9 +51,26 @@ bool Turbo::Core::TFormatInfo::IsSupportFormat(TPhysicalDevice *physicalDevice, 
     return false;
 }
 
+// Turbo::Core::TFormatInfo::TFormatInfo()
+// {
+//     this->formatType = TFormatType::UNDEFINED;
+//     this->formatProperties.bufferFeatures = 0;
+//     this->formatProperties.linearTilingFeatures = 0;
+//     this->formatProperties.optimalTilingFeatures = 0;
+// }
+
 Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType)
 {
     this->formatType = formatType;
+    this->formatProperties.bufferFeatures = 0;
+    this->formatProperties.linearTilingFeatures = 0;
+    this->formatProperties.optimalTilingFeatures = 0;
+}
+
+Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType, TFormatProperties formatProperties)
+{
+    this->formatType = formatType;
+    this->formatProperties = formatProperties;
 }
 
 Turbo::Core::TFormatInfo::~TFormatInfo()

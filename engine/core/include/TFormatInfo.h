@@ -333,14 +333,17 @@ class TPhysicalDevice;
 class TFormatInfo : public TObject
 {
   private:
-    TFormatType formatType;
+    TFormatType formatType = TFormatType::UNDEFINED;
+    TFormatProperties formatProperties = {};
 
   public:
     static std::vector<TFormatInfo> GetSupportFormats(TPhysicalDevice *physicalDevice);
     static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);
 
   public:
-    TFormatInfo(TFormatType formatType = TFormatType::R8G8B8A8_SRGB);
+    /*TFormatInfo();*/
+    [[deprecated]] TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED);
+    explicit TFormatInfo(TFormatType formatType, TFormatProperties formatProperties);
     ~TFormatInfo();
 
   public:
@@ -348,7 +351,7 @@ class TFormatInfo : public TObject
     VkFormat GetVkFormat();
 
     TFormatDataTypes GetFormatDataType();
-    
+
     // bool IsPacked();
     // uint32_t GetPackGroup();
     // uint32_t GetPackBits();

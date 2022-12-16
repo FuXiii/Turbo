@@ -74,6 +74,7 @@
   >* 更新`Usage和Domain`章节。高频内存位标`条件`应为`TRANSFER_DST`，而不是`TRANSFER_SRC`
   >* 更新`资源`章节。增加`Vulkan`标准对于`3D纹理`资源的`layer`限值，由`Turbo`引擎维护
   >* 创建`Image的Format`章节
+  >* 更新`Image的Format`章节
   
 ---
 
@@ -818,12 +819,17 @@ class DepthImage:public DepthStencilImage
 namespace Turbo::Render
 typedef enum class TFormat
 {
+    R8G8B8A8_SRGB,
     B8G8R8A8_SRGB,
+    R8G8B8_SRGB,
+    B8G8R8_SRGB,
+    R8G8B8A8_UNORM,
+    B8G8R8A8_UNORM,
+    R8G8B8_UNORM,
+    B8G8R8_UNORM,
     D32_SFLOAT,
-    //R32G32B32_SFLOAT,
-    //
+    D16_UNORM
 }TFormat;
-
 ```
 
 ## 资源的创建与销毁
@@ -1327,6 +1333,61 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     ```
 
 ## Image的Format
+
+图片(纹理)主要有一下几种数据：
+
+1. 颜色（有时存储的颜色值并不是“颜色”信息，也可以是法线等信息）
+2. 深度
+3. 模板（用的不多）
+
+由于不同设备对于不同格式的支持程度不大相同，所以在使用某种格式时需要先查看是否支持该格式。
+
+对于颜色数据，目前有如下格式
+
+```CXX
+R8G8B8A8_SRGB
+B8G8R8A8_SRGB
+R8G8B8_SRGB
+B8G8R8_SRGB
+R8G8B8A8_UNORM
+B8G8R8A8_UNORM
+R8G8B8_UNORM
+B8G8R8_UNORM
+```
+
+分配策略如下
+
+```mermaid
+graph TD;
+    IsColorAttachmentUsage{{是否是COLOR_ATTACHMENT}}
+
+    IsSupportR8G8B8A8_SRGB{{是否支持R8G8B8A8_SRGB}}
+    UseR8G8B8A8_SRGB[使用R8G8B8A8_SRGB]
+
+    IsSupportB8G8R8A8_SRGB{{是否支持B8G8R8A8_SRGB}}
+    UseB8G8R8A8_SRGB[使用B8G8R8A8_SRGB]
+
+    IsSupportR8G8B8A8_UNORM{{是否支持R8G8B8A8_UNORM}}
+    UseR8G8B8A8_UNORM[使用R8G8B8A8_UNORM]
+
+    IsSupportB8G8R8A8_UNORM{{是否支持B8G8R8A8_UNORM}}
+    UseB8G8R8A8_UNORM[使用B8G8R8A8_UNORM]
+
+    IsColorAttachmentUsage--否-->A
+    IsColorAttachmentUsage--是-->IsSupportR8G8B8A8_SRGB
+
+    IsSupportR8G8B8A8_SRGB--是-->UseR8G8B8A8_SRGB
+    IsSupportR8G8B8A8_SRGB--否-->IsSupportB8G8R8A8_SRGB
+
+    IsSupportB8G8R8A8_SRGB--是-->UseB8G8R8A8_SRGB
+    IsSupportB8G8R8A8_SRGB--否-->IsSupportR8G8B8A8_UNORM
+
+    IsSupportR8G8B8A8_UNORM--是-->UseR8G8B8A8_UNORM
+    IsSupportR8G8B8A8_UNORM--否-->IsSupportB8G8R8A8_UNORM
+
+    IsSupportB8G8R8A8_UNORM--是-->UseB8G8R8A8_UNORM
+    IsSupportB8G8R8A8_UNORM--否-->error
+```
 
 ## Context上下文
 

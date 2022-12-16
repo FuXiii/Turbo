@@ -204,3 +204,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 由于`TFrameGraph`中的资源回收属于异步回收（见上一条目），则需要一个异步回收器，在结束一帧的工作后进行异步回收。
 
 - `./engine/core`下`TBuffer`和`TImage`有个公共类应该更加合理
+
+- 修改`./engine/core`下`TBuffer`和`TImage`对于`TFormatInfo`参数的构造函数，更改成使用`TFormatType formatType`参数构造
