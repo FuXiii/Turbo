@@ -1815,3 +1815,9 @@ Turbo是渲染引擎
   >* `./engine/core`下`TBuffer`中增加`TMemoryTypeInfo GetMemoryTypeInfo()`成员函数，用于获取底层数据的内存属性
   >* `./engine/render`下`TContext`中根据`FrameGraphAdvance.md`设计文档，更新实现`Turbo::Render::TContext::CreateImage(...)`成员函数
   >* `./engine/render`下`TDomainBits`中增加一个`BOTH`位标，用于表示`CPU+GPU`，方便使用
+
+* 2022/12/16 设计架构
+  >
+  >* `./engine/render`下`TFormat`内增加`R8G8B8A8_SRGB`、`B8G8R8A8_UNORM`、`D16_UNORM`枚举成员
+  >* `./engine/render`下`TContext`内增加`Turbo::Render::TContext::CreateImage(...)`增加对新增格式枚举成员的适配
+  >* `./engine/render`下`TContext`的`Turbo::Render::TContext::CreateImage(...)`中对于`Turbo::Core::TImageType`的判断逻辑上有问题，修复

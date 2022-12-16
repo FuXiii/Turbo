@@ -21,7 +21,7 @@ int main()
     color_image_2d.Create("color_image_2d", gpu_only_image_2d_descriptor, &resource_allocator);
     color_image_2d.Destroy(&resource_allocator);
 
-    std::cout << "gpu_only_image_2d::End" << std::endl;
+    std::cout << "======================================== GPU only" << std::endl;
 
     // staging upload
     Turbo::Render::TColorImage2D::Descriptor staging_image_2d_descriptor = {};
@@ -37,7 +37,7 @@ int main()
     staging_image_2d.Create("staging_image_2d", staging_image_2d_descriptor, &resource_allocator);
     staging_image_2d.Destroy(&resource_allocator);
 
-    std::cout << "staging_image_2d::End" << std::endl;
+    std::cout << "======================================== staging upload" << std::endl;
 
     // read back
     Turbo::Render::TColorImage2D::Descriptor read_back_image_2d_descriptor = {};
@@ -53,7 +53,7 @@ int main()
     read_back_image_2d.Create("read_back_image_2d", read_back_image_2d_descriptor, &resource_allocator);
     read_back_image_2d.Destroy(&resource_allocator);
 
-    std::cout << "read_back_image_2d::End" << std::endl;
+    std::cout << "======================================== read back" << std::endl;
 
     // advanced upload
     Turbo::Render::TColorImage2D::Descriptor advanced_upload_image_2d_descriptor = {};
@@ -69,7 +69,7 @@ int main()
     advanced_upload_image_2d.Create("read_back_image_2d", advanced_upload_image_2d_descriptor, &resource_allocator);
     advanced_upload_image_2d.Destroy(&resource_allocator);
 
-    std::cout << "advanced_upload_image_2d::End" << std::endl;
+    std::cout << "======================================== advanced upload" << std::endl;
 
     return 0;
 }

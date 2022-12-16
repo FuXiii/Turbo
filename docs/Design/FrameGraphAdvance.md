@@ -68,6 +68,12 @@
   >
   >* 更新`Usage和Domain`章节。回读内存位标应为`HOST_ACCESS_RANDOM`，而不是`HOST_ACCESS_SEQUENTIAL_WRITE`
   >* 创建`Image的Format`章节
+
+* 2022/12/16
+  >
+  >* 更新`Usage和Domain`章节。高频内存位标`条件`应为`TRANSFER_DST`，而不是`TRANSFER_SRC`
+  >* 更新`资源`章节。增加`Vulkan`标准对于`3D纹理`资源的`layer`限值，由`Turbo`引擎维护
+  >* 创建`Image的Format`章节
   
 ---
 
@@ -588,6 +594,8 @@ Image 2;
 >* VertexBuffer
 >* IndexBuffer
 
+**注：按照`Vulkan`标准：[If imageType is VK_IMAGE_TYPE_3D, arrayLayers must be 1](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VUID-VkImageCreateInfo-imageType-00961)（如果创建三维纹理资源，layer必须是1）**
+
 ```CXX
 typedef uint32_t TFlags;
 
@@ -742,7 +750,7 @@ class ColorImage3D: public ColorImage
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
         uitn32_t mipLevels; //默认值为1
-        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
+        //uint32_t layers; //默认值为1，由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
     };
@@ -1198,7 +1206,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 >
 >满足以下条件即为`高频传输`：
 >
-> * `Usage`包含`TRANSFER_SRC`位标，并且`Domain`包含`CPU`和`GPU`位标
+> * `Usage`包含`TRANSFER_DST`位标，并且`Domain`包含`CPU`和`GPU`位标
 >
 >>对应`Turbo::Core`底层资源内存分配为：`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE`和`Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD`
 >>

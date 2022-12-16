@@ -196,33 +196,41 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
         vk_image_create_flags |= VkImageCreateFlagBits::VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     }
 
-    Turbo::Core::TImageType type = Turbo::Core::TImageType::DIMENSION_1D;
-    if (width >= 1)
-    {
-        type = Turbo::Core::TImageType::DIMENSION_1D;
-    }
-    if (height >= 1)
+    Turbo::Core::TImageType type = Turbo::Core::TImageType::DIMENSION_3D;
+    if (depth == 1)
     {
         type = Turbo::Core::TImageType::DIMENSION_2D;
     }
-    if (depth >= 1)
+    if (height == 1)
     {
-        type = Turbo::Core::TImageType::DIMENSION_3D;
+        type = Turbo::Core::TImageType::DIMENSION_1D;
     }
 
     Turbo::Core::TFormatType format_type = Turbo::Core::TFormatType::UNDEFINED;
     switch (format)
     {
+    case TFormat::R8G8B8A8_SRGB: {
+        format_type = Turbo::Core::TFormatType::R8G8B8A8_SRGB;
+    }
+    break;
     case TFormat::B8G8R8A8_SRGB: {
         format_type = Turbo::Core::TFormatType::B8G8R8A8_SRGB;
     }
     break;
-    case TFormat::D32_SFLOAT: {
-        format_type = Turbo::Core::TFormatType::D32_SFLOAT;
-    }
-    break;
     case TFormat::R8G8B8A8_UNORM: {
         format_type = Turbo::Core::TFormatType::R8G8B8A8_UNORM;
+    }
+    break;
+    case TFormat::B8G8R8A8_UNORM: {
+        format_type = Turbo::Core::TFormatType::B8G8R8A8_UNORM;
+    }
+    break;
+    case TFormat::D16_UNORM: {
+        format_type = Turbo::Core::TFormatType::D16_UNORM;
+    }
+    break;
+    case TFormat::D32_SFLOAT: {
+        format_type = Turbo::Core::TFormatType::D32_SFLOAT;
     }
     break;
     }
