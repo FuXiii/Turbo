@@ -119,7 +119,7 @@ int main()
     vk_image_create_info.pNext = nullptr;
     vk_image_create_info.flags = 0;
     vk_image_create_info.imageType = VkImageType::VK_IMAGE_TYPE_2D;
-    vk_image_create_info.format = VkFormat::VK_FORMAT_B8G8R8A8_UNORM;
+    vk_image_create_info.format = VkFormat::VK_FORMAT_R8G8B8A8_UNORM;
     vk_image_create_info.extent.width = 512;
     vk_image_create_info.extent.height = 512;
     vk_image_create_info.extent.depth = 1;
@@ -127,15 +127,37 @@ int main()
     vk_image_create_info.arrayLayers = 1;
     vk_image_create_info.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
     vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
-    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     vk_image_create_info.sharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
     vk_image_create_info.queueFamilyIndexCount = 0;
     vk_image_create_info.pQueueFamilyIndices = nullptr;
     vk_image_create_info.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
 
+    // GPU only
     VkImage vk_image = VK_NULL_HANDLE;
     VkResult result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
     Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== GPU only" << std::endl;
+    // staging upload
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== staging upload" << std::endl;
+
+    // read back
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== read back" << std::endl;
+
+    // advanced upload
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== advanced upload" << std::endl;
 
     Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_UNORM, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
     delete temp_image;
