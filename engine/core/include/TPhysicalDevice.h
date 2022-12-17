@@ -113,6 +113,7 @@ class TPhysicalDevice : public TVulkanHandle
     std::vector<TFormatInfo> GetSupportFormats();
     bool IsSupportFormat(TFormatType formatType);
     bool IsSupportFormat(TFormatInfo format);
+    TFormatInfo GetFormatInfo(TFormatType formatType);
 
     size_t GetQueueFamilyCount();
     std::vector<TQueueFamilyInfo> GetQueueFamilys();

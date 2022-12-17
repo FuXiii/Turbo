@@ -7,10 +7,10 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-Turbo::Core::TVertexAttribute::TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset) : Turbo::Core::TInfo()
+Turbo::Core::TVertexAttribute::TVertexAttribute(uint32_t location, TFormatType formatType, uint32_t offset) : Turbo::Core::TInfo()
 {
     this->location = location;
-    this->format = format;
+    this->formatType = formatType;
     this->offset = offset;
 }
 
@@ -23,9 +23,9 @@ uint32_t Turbo::Core::TVertexAttribute::GetLocation()
     return this->location;
 }
 
-Turbo::Core::TFormatInfo Turbo::Core::TVertexAttribute::GetFormat()
+Turbo::Core::TFormatType Turbo::Core::TVertexAttribute::GetFormatType()
 {
-    return this->format;
+    return this->formatType;
 }
 
 uint32_t Turbo::Core::TVertexAttribute::GetOffset()
@@ -51,7 +51,13 @@ Turbo::Core::TVertexBinding::~TVertexBinding()
 
 void Turbo::Core::TVertexBinding::AddAttribute(uint32_t location, TFormatInfo format, uint32_t offset)
 {
-    TVertexAttribute vertex_attribute(location, format, offset);
+    TVertexAttribute vertex_attribute(location, format.GetFormatType(), offset);
+    this->AddAttribute(vertex_attribute);
+}
+
+void Turbo::Core::TVertexBinding::AddAttribute(uint32_t location, TFormatType formatType, uint32_t offset)
+{
+    TVertexAttribute vertex_attribute(location, formatType, offset);
     this->AddAttribute(vertex_attribute);
 }
 
@@ -117,7 +123,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
             VkVertexInputAttributeDescription vk_vertex_input_attribute_description = {};
             vk_vertex_input_attribute_description.location = vertex_attribute_item.GetLocation();
             vk_vertex_input_attribute_description.binding = binding;
-            vk_vertex_input_attribute_description.format = vertex_attribute_item.GetFormat().GetVkFormat();
+            vk_vertex_input_attribute_description.format = static_cast<VkFormat>(vertex_attribute_item.GetFormatType());
             vk_vertex_input_attribute_description.offset = vertex_attribute_item.GetOffset();
 
             vk_vertex_input_attribute_descriptions.push_back(vk_vertex_input_attribute_description);

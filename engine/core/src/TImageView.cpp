@@ -2,6 +2,7 @@
 #include "TDevice.h"
 #include "TException.h"
 #include "TImage.h"
+#include "TPhysicalDevice.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
@@ -56,6 +57,36 @@ Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFor
         this->image = image;
         this->viewType = viewType;
         this->format = format;
+        this->aspects = aspects;
+        this->baseMipLevel = baseMipLevel;
+        this->levelCount = levelCount;
+        this->baseArrayLayer = baseArrayLayer;
+        this->layerCount = layerCount;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImageView::TImageView");
+    }
+}
+
+Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        TPhysicalDevice *physical_device = image->GetDevice()->GetPhysicalDevice();
+        if (physical_device->IsSupportFormat(formatType))
+        {
+            this->format = physical_device->GetFormatInfo(formatType);
+        }
+        else
+        {
+            throw TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImageView::TImageView", "Unsupport format");
+        }
+
+        this->image = image;
+        this->viewType = viewType;
         this->aspects = aspects;
         this->baseMipLevel = baseMipLevel;
         this->levelCount = levelCount;

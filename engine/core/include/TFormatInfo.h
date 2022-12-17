@@ -341,8 +341,8 @@ class TFormatInfo : public TObject
     static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);
 
   public:
-    /*TFormatInfo();*/
-    [[deprecated]] TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED);
+    TFormatInfo();
+    //[[deprecated]] TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED);
     explicit TFormatInfo(TFormatType formatType, TFormatProperties formatProperties);
     ~TFormatInfo();
 

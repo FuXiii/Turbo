@@ -250,6 +250,122 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
+Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
+{
+    if (surface != nullptr)
+    {
+        Turbo::Core::TDevice *device = surface->GetDevice();
+        if (device != nullptr)
+        {
+            if (device->GetPhysicalDevice()->IsSupportFormat(formatType))
+            {
+                this->format = device->GetPhysicalDevice()->GetFormatInfo(formatType);
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "Unsupport format");
+            }
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
+        }
+
+        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+
+        this->surface = surface;
+        this->minImageCount = minImageCount;
+        this->width = width;
+        this->height = height;
+        this->imageArrayLayers = imageArrayLayers;
+        this->usages = usages;
+        this->transform = transform;
+        this->compositeAlpha = compositeAlpha;
+        this->presentMode = presentMode;
+        this->isClipped = isClipped;
+        this->oldSwapchain = nullptr;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain");
+    }
+}
+
+Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
+{
+    if (surface != nullptr)
+    {
+        Turbo::Core::TDevice *device = surface->GetDevice();
+        if (device != nullptr)
+        {
+            if (device->GetPhysicalDevice()->IsSupportFormat(formatType))
+            {
+                this->format = device->GetPhysicalDevice()->GetFormatInfo(formatType);
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "Unsupport format");
+            }
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
+        }
+
+        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+
+        this->surface = surface;
+        this->minImageCount = minImageCount;
+        this->width = surface->GetCurrentWidth();
+        this->height = surface->GetCurrentHeight();
+        this->imageArrayLayers = 1;
+        this->usages = usages;
+        this->transform = surface->GetCurrentTransform();
+
+        TCompositeAlphas support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
+        if (!this->surface->IsSupportCompositeAlphaOpaque())
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
+        }
+
+        this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+
+        if (this->surface->IsSupportPresentModeFifo())
+        {
+            this->presentMode = TPresentMode::FIFO;
+        }
+        else if (this->surface->IsSupportPresentModeFifoRelaxed())
+        {
+            this->presentMode = TPresentMode::FIFO_RELAXED;
+        }
+        else if (this->surface->IsSupportPresentModeMailbox())
+        {
+            this->presentMode = TPresentMode::MAILBOX;
+        }
+        else
+        {
+            this->presentMode = TPresentMode::IMMEDIATE;
+        }
+
+        this->isClipped = isClipped;
+        this->oldSwapchain = nullptr;
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain");
+    }
+}
+
 Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
 {
     if (oldSwapchain != nullptr)

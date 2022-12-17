@@ -51,21 +51,21 @@ bool Turbo::Core::TFormatInfo::IsSupportFormat(TPhysicalDevice *physicalDevice, 
     return false;
 }
 
-// Turbo::Core::TFormatInfo::TFormatInfo()
-// {
-//     this->formatType = TFormatType::UNDEFINED;
-//     this->formatProperties.bufferFeatures = 0;
-//     this->formatProperties.linearTilingFeatures = 0;
-//     this->formatProperties.optimalTilingFeatures = 0;
-// }
-
-Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType)
+Turbo::Core::TFormatInfo::TFormatInfo()
 {
-    this->formatType = formatType;
+    this->formatType = TFormatType::UNDEFINED;
     this->formatProperties.bufferFeatures = 0;
     this->formatProperties.linearTilingFeatures = 0;
     this->formatProperties.optimalTilingFeatures = 0;
 }
+
+// Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType)
+// {
+//     this->formatType = formatType;
+//     this->formatProperties.bufferFeatures = 0;
+//     this->formatProperties.linearTilingFeatures = 0;
+//     this->formatProperties.optimalTilingFeatures = 0;
+// }
 
 Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType, TFormatProperties formatProperties)
 {

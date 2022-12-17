@@ -460,6 +460,16 @@ bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatInfo format)
     return this->IsSupportFormat(format.GetFormatType());
 }
 
+Turbo::Core::TFormatInfo Turbo::Core::TPhysicalDevice::GetFormatInfo(TFormatType formatType)
+{
+    Turbo::Core::TFormatInfo result;
+    if (this->IsSupportFormat(formatType))
+    {
+        result = this->info.supportFormats[formatType];
+    }
+    return result;
+}
+
 size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount()
 {
     return this->info.queueFamilys.size();
