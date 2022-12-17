@@ -80,6 +80,10 @@
   >
   >* 更新`Image的Format`章节
 
+* 2022/12/18
+  >
+  >* 更新`Image的Format`章节
+
 ---
 
 # Turbo驱动初步
@@ -1346,7 +1350,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 由于不同设备对于不同格式的支持程度不大相同，所以在使用某种格式时需要先查看是否支持该格式。
 
-对于颜色数据，目前有如下格式
+* 对于`颜色`数据，目前有如下格式
 
 ```CXX
 R8G8B8A8_SRGB
@@ -1424,6 +1428,17 @@ graph TD;
 
     TargetFormatStillUndefined--从头筛选-->IsSupportR8G8B8A8_SRGB
 ```
+
+* 对于`深度`数据，目前有如下格式
+
+```CXX
+D32_SFLOAT,
+D16_UNORM
+```
+
+分配策略如下
+
+
 
 ## Context上下文
 

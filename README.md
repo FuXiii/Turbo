@@ -1882,3 +1882,8 @@ Turbo是渲染引擎
   >   ```
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+
+* 2022/12/18 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* `./docs`下增加`vkspec1.3Core.pdf`文件，为`Vulkan1.3`官方标准文档，国内在线访问`Vulkan`官网真难受。
