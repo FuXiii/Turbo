@@ -372,6 +372,35 @@ class TFormatInfo : public TObject
     // uint8_t GetDepthBitSize();//unit bit
     // uint8_t GetStencilBitSize();//unit bit
 
+    bool IsSupportBuffer();
+    bool IsSupportVertexBuffer();
+
+    bool IsSupportLinearTiling();
+    bool IsLinearTilingSupportSampledImage();
+    bool IsLinearTilingSupportStorageImage();
+    bool IsLinearTilingSupportStorageImageAtomic();
+    bool IsLinearTilingSupportColorAttachment();
+    bool IsLinearTilingSupportColorAttachmentBlend();
+    bool IsLinearTilingSupportDepthStencilAttachment();
+    bool IsLinearTilingSupportBlitSrc();
+    bool IsLinearTilingSupportBlitDst();
+    bool IsLinearTilingSupportSampledImageFilterLinear();
+    bool IsLinearTilingSupportTransferSrc();
+    bool IsLinearTilingSupportTransferDst();
+
+    bool IsSupportOptimalTiling();
+    bool IsOptimalTilingSupportSampledImage();
+    bool IsOptimalTilingSupportStorageImage();
+    bool IsOptimalTilingSupportStorageImageAtomic();
+    bool IsOptimalTilingSupportColorAttachment();
+    bool IsOptimalTilingSupportColorAttachmentBlend();
+    bool IsOptimalTilingSupportDepthStencilAttachment();
+    bool IsOptimalTilingSupportBlitSrc();
+    bool IsOptimalTilingSupportBlitDst();
+    bool IsOptimalTilingSupportSampledImageFilterLinear();
+    bool IsOptimalTilingSupportTransferSrc();
+    bool IsOptimalTilingSupportTransferDst();
+
     bool operator==(const TFormatInfo &format) const; // TODO: Format Compatibility Classes
     bool operator!=(const TFormatInfo &format) const;
     virtual std::string ToString() override;
