@@ -17,15 +17,15 @@ class TVertexAttribute : public Turbo::Core::TInfo
 {
   private:
     uint32_t location;
-    TFormatInfo format;
+    TFormatType formatType;
     uint32_t offset;
 
   public:
-    TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset);
+    TVertexAttribute(uint32_t location, TFormatType formatType, uint32_t offset);
     ~TVertexAttribute();
 
     uint32_t GetLocation();
-    TFormatInfo GetFormat();
+    TFormatType GetFormatType();
     uint32_t GetOffset();
 
   public:
@@ -50,7 +50,8 @@ class TVertexBinding : public Turbo::Core::TInfo
     TVertexBinding(uint32_t binding, uint32_t stride, TVertexRate rate);
     ~TVertexBinding();
 
-    void AddAttribute(uint32_t location, TFormatInfo format, uint32_t offset);
+    [[deprecated]] void AddAttribute(uint32_t location, TFormatInfo format, uint32_t offset);
+    void AddAttribute(uint32_t location, TFormatType formatType, uint32_t offset);
     void AddAttribute(TVertexAttribute &vertexAttribute);
 
     uint32_t GetBinding();

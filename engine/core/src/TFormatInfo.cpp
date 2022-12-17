@@ -16,15 +16,15 @@ std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormat
         size_t all_formats_count = TAllFormats.size();
         for (size_t format_index = 0; format_index < all_formats_count; format_index++)
         {
-            VkFormatProperties format_properties = {};
-            format_properties.bufferFeatures = 0;
-            format_properties.linearTilingFeatures = 0;
-            format_properties.optimalTilingFeatures = 0;
+            VkFormatProperties vk_format_properties = {};
+            vk_format_properties.bufferFeatures = 0;
+            vk_format_properties.linearTilingFeatures = 0;
+            vk_format_properties.optimalTilingFeatures = 0;
 
-            pfn_vk_get_physical_device_format_properties(physicalDevice->GetVkPhysicalDevice(), TAllFormats[format_index], &format_properties);
-            if (format_properties.bufferFeatures || format_properties.linearTilingFeatures || format_properties.optimalTilingFeatures)
+            pfn_vk_get_physical_device_format_properties(physicalDevice->GetVkPhysicalDevice(), TAllFormats[format_index], &vk_format_properties);
+            if (vk_format_properties.bufferFeatures || vk_format_properties.linearTilingFeatures || vk_format_properties.optimalTilingFeatures)
             {
-                TFormatInfo format(static_cast<TFormatType>(TAllFormats[format_index]));
+                TFormatInfo format(static_cast<TFormatType>(TAllFormats[format_index]), vk_format_properties);
                 formats.push_back(format);
             }
         }
@@ -51,9 +51,26 @@ bool Turbo::Core::TFormatInfo::IsSupportFormat(TPhysicalDevice *physicalDevice, 
     return false;
 }
 
-Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType)
+Turbo::Core::TFormatInfo::TFormatInfo()
+{
+    this->formatType = TFormatType::UNDEFINED;
+    this->formatProperties.bufferFeatures = 0;
+    this->formatProperties.linearTilingFeatures = 0;
+    this->formatProperties.optimalTilingFeatures = 0;
+}
+
+// Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType)
+// {
+//     this->formatType = formatType;
+//     this->formatProperties.bufferFeatures = 0;
+//     this->formatProperties.linearTilingFeatures = 0;
+//     this->formatProperties.optimalTilingFeatures = 0;
+// }
+
+Turbo::Core::TFormatInfo::TFormatInfo(TFormatType formatType, TFormatProperties formatProperties)
 {
     this->formatType = formatType;
+    this->formatProperties = formatProperties;
 }
 
 Turbo::Core::TFormatInfo::~TFormatInfo()
@@ -652,6 +669,239 @@ uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
     }
     break;
     }
+}
+
+bool Turbo::Core::TFormatInfo::IsSupportBuffer()
+{
+    if (this->formatProperties.bufferFeatures != 0)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsSupportVertexBuffer()
+{
+    if ((this->formatProperties.bufferFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+bool Turbo::Core::TFormatInfo::IsSupportLinearTiling()
+{
+    if ((this->formatProperties.bufferFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImage()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImage()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImageAtomic()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachment()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachmentBlend()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportDepthStencilAttachment()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitSrc()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitDst()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImageFilterLinear()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferSrc()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferDst()
+{
+    if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsSupportOptimalTiling()
+{
+    if (this->formatProperties.optimalTilingFeatures != 0)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImage()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImage()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImageAtomic()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachment()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachmentBlend()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportDepthStencilAttachment()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitSrc()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitDst()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImageFilterLinear()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferSrc()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferDst()
+{
+    if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool Turbo::Core::TFormatInfo::operator==(const TFormatInfo &format) const

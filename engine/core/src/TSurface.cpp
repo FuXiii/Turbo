@@ -49,7 +49,12 @@ std::string Turbo::Extension::TColorSpace::ToString()
 
 Turbo::Extension::TSurfaceFormat::TSurfaceFormat()
 {
-    this->format = Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::UNDEFINED);
+    Turbo::Core::TFormatProperties format_properties = {};
+    format_properties.bufferFeatures = 0;
+    format_properties.linearTilingFeatures = 0;
+    format_properties.optimalTilingFeatures = 0;
+
+    this->format = Turbo::Core::TFormatInfo(Turbo::Core::TFormatType::UNDEFINED, format_properties);
     this->colorSpace = TColorSpace(TColorSpaceType::UNDEFINED);
 }
 

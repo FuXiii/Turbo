@@ -162,6 +162,14 @@ int main()
     Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_UNORM, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
     delete temp_image;
 
+    std::vector<Turbo::Core::TFormatInfo> support_format = physical_device->GetSupportFormats();
+
+    for (Turbo::Core::TFormatInfo &format_info_item : support_format)
+    {
+        VkFormat vk_format = format_info_item.GetVkFormat();
+        std::cout << "vk_format::" << vk_format << std::endl;
+    }
+
     delete device;
     delete instance;
 

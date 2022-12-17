@@ -1818,6 +1818,65 @@ Turbo是渲染引擎
 
 * 2022/12/16 设计架构
   >
-  >* `./engine/render`下`TFormat`内增加`R8G8B8A8_SRGB`、`B8G8R8A8_UNORM`、`D16_UNORM`枚举成员
+  >* `./engine/render`下`TFormat`内增加`R8G8B8A8_SRGB`、`B8G8R8A8_UNORM`、`D16_UNORM`、`R8G8B8_SRGB`、`B8G8R8_SRGB`、`R8G8B8_UNORM`、`B8G8R8_UNORM`枚举成员
   >* `./engine/render`下`TContext`内增加`Turbo::Render::TContext::CreateImage(...)`增加对新增格式枚举成员的适配
   >* `./engine/render`下`TContext`的`Turbo::Render::TContext::CreateImage(...)`中对于`Turbo::Core::TImageType`的判断逻辑上有问题，修复
+  >* `./engine/core`下`TCore`增加`typedef VkFormatProperties TFormatProperties`定义
+  >* `./engine/core`下`TFormatInfo`增加`TFormatProperties formatProperties`成员变量
+  >* `./engine/core`下`TFormatInfo`新增构造函数`TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED, TFormatProperties formatProperties)`
+  >* `./engine/core`下`TFormatInfo`构造函数`TFormatInfo(TFormatType formatType)`设置成遗弃函数
+  >* `./engine/core`下`TFormatInfo`修改`Turbo::Core::TFormatInfo::GetSupportFormats()`函数适配`TFormatInfo`带有`TFormatProperties formatProperties`参数函数。
+  >* `./engine/core`下`TPhysicalDeviceInfo`修改`std::vector<TFormatInfo> supportFormats`成员变量为`std::map<TFormatType, TFormatInfo> supportFormats`参数函数。
+  >* `./engine/core`下`TPhysicalDevice`修改`void Turbo::Core::TPhysicalDevice::EnumerateFromat()`成员函数，为适配`std::map<TFormatType, TFormatInfo> TPhysicalDeviceInfo::supportFormats`参数函数。
+  >* `./engine/core`下`TPhysicalDevice`修改`Turbo::Core::TPhysicalDevice::GetSupportFormats()`成员函数
+  >* `./engine/core`下`TPhysicalDevice`修改`Turbo::Core::TPhysicalDevice::IsSupportFormat()`成员函数
+
+* 2022/12/17 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice`修改`Turbo::Core::TPhysicalDevice::IsSupportFormat()`成员函数
+  >* `./engine/core`下`TFormatInfo`的`TFormatInfo(TFormatType formatType = TFormatType::UNDEFINED);`构造函数移除
+  >* `./engine/core`下`TSwapchain`增加`TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)`构造函数，并实现
+  >* `./engine/core`下`TSwapchain`增加`explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);`构造函数，并实现
+  >* `./engine/core`下`TSwapchain`的`explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);`构造函数标记为遗弃
+  >* `./engine/core`下`TSwapchain`的`explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);`构造函数标记为遗弃
+  >* `./engine/core`下`TPhysicalDevice`增加`TFormatInfo GetFormatInfo(TFormatType formatType);`函数，用于返回更加丰富的格式信息
+  >* `./engine/core`下`TImageView`增加`explicit TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)`构造函数
+  >* `./engine/core`下`TImageView`下`explicit TImageView(TImage *image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)`构造函数标记为遗弃
+  >* `./engine/core`下`TImage`下`[[deprecated]] explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);`构造函数标记为遗弃
+  >* `./engine/core`下`TImage`增加`explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);`构造函数
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexBinding`增加`void AddAttribute(uint32_t location, TFormatType formatType, uint32_t offset);`成员函数
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexBinding`增加`void AddAttribute(uint32_t location, TFormatType formatType, uint32_t offset);`成员函数标记为遗弃
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`的`TFormatInfo format`成员变量更改为`TFormatType formatType`
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`的`TFormatInfo GetFormat();`成员函数更改为`TFormatType GetFormatType()`并实现
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`增加`TVertexAttribute(uint32_t location, TFormatType formatType, uint32_t offset);`构造函数
+  >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`的`TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset)`构造函数移除
+  >* `./engine/core`下`TFormatInfo`中增加如下成员函数:
+  >
+  >```CXX
+  >bool IsSupportBuffer();
+  >bool IsSupportVertexBuffer();
+  >bool IsSupportLinearTiling();
+  >bool IsLinearTilingSupportSampledImage();
+  >bool IsLinearTilingSupportStorageImage();
+  >bool IsLinearTilingSupportStorageImageAtomic();
+  >bool IsLinearTilingSupportColorAttachment();
+  >bool IsLinearTilingSupportColorAttachmentBlend();
+  >bool IsLinearTilingSupportDepthStencilAttachment();
+  >bool IsLinearTilingSupportBlitSrc();
+  >bool IsLinearTilingSupportBlitDst();
+  >bool IsLinearTilingSupportSampledImageFilterLinear();
+  >bool IsLinearTilingSupportTransferSrc();
+  >bool IsLinearTilingSupportTransferDst();
+  >bool IsSupportOptimalTiling();
+  >bool IsOptimalTilingSupportSampledImage();
+  >bool IsOptimalTilingSupportStorageImage();
+  >bool IsOptimalTilingSupportStorageImageAtomic();
+  >bool IsOptimalTilingSupportColorAttachment();
+  >bool IsOptimalTilingSupportColorAttachmentBlend();
+  >bool IsOptimalTilingSupportDepthStencilAttachment();
+  >bool IsOptimalTilingSupportBlitSrc();
+  >bool IsOptimalTilingSupportBlitDst();
+  >bool IsOptimalTilingSupportSampledImageFilterLinear();
+  >bool IsOptimalTilingSupportTransferSrc();
+  >bool IsOptimalTilingSupportTransferDst();
+  >```

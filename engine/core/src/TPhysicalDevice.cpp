@@ -203,7 +203,11 @@ void Turbo::Core::TPhysicalDevice::EnumerateMemoryType()
 
 void Turbo::Core::TPhysicalDevice::EnumerateFromat()
 {
-    this->info.supportFormats = TFormatInfo::GetSupportFormats(this);
+    std::vector<TFormatInfo> support_formats = TFormatInfo::GetSupportFormats(this);
+    for (TFormatInfo &format_info_item : support_formats)
+    {
+        this->info.supportFormats[format_info_item.GetFormatType()] = format_info_item;
+    }
 }
 
 void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
@@ -438,21 +442,14 @@ bool Turbo::Core::TPhysicalDevice::IsSupportLayer(TLayerType layerType)
 
 std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TPhysicalDevice::GetSupportFormats()
 {
-    return this->info.supportFormats;
+    return TFormatInfo::GetSupportFormats(this);
 }
 
 bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType)
 {
-    size_t support_format_count = this->info.supportFormats.size();
-    if (support_format_count > 0 && formatType != TFormatType::UNDEFINED)
+    if (this->info.supportFormats.find(formatType) != this->info.supportFormats.end())
     {
-        for (size_t format_index = 0; format_index < support_format_count; format_index++)
-        {
-            if (this->info.supportFormats[format_index].GetFormatType() == formatType)
-            {
-                return true;
-            }
-        }
+        return true;
     }
 
     return false;
@@ -461,6 +458,16 @@ bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType)
 bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatInfo format)
 {
     return this->IsSupportFormat(format.GetFormatType());
+}
+
+Turbo::Core::TFormatInfo Turbo::Core::TPhysicalDevice::GetFormatInfo(TFormatType formatType)
+{
+    Turbo::Core::TFormatInfo result;
+    if (this->IsSupportFormat(formatType))
+    {
+        result = this->info.supportFormats[formatType];
+    }
+    return result;
 }
 
 size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount()

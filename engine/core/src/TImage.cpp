@@ -203,6 +203,43 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TIma
     }
 }
 
+Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
+{
+    if (device != nullptr)
+    {
+        TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+        if (physical_device->IsSupportFormat(formatType))
+        {
+            this->format = physical_device->GetFormatInfo(formatType);
+        }
+        else
+        {
+            throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TImage::TImage", "Unsupport format");
+        }
+
+        this->device = device;
+        this->imageFlags = imageFlags;
+        this->memoryFlags = memoryFlags;
+        this->type = type;
+        this->extent.width = width;
+        this->extent.height = height;
+        this->extent.depth = depth;
+        this->mipLevels = mipLevels;
+        this->arrayLayers = arrayLayers;
+        this->samples = samples;
+        this->tiling = tiling;
+        this->usages = usages;
+        this->layout = layout;
+        this->vmaAllocation = malloc(sizeof(VmaAllocation));
+        this->vmaAllocationInfo = malloc(sizeof(VmaAllocationInfo));
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImage::TImage");
+    }
+}
+
 Turbo::Core::TImage::~TImage()
 {
     this->InternalDestroy();
