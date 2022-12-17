@@ -1852,31 +1852,33 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`的`TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset)`构造函数移除
   >* `./engine/core`下`TFormatInfo`中增加如下成员函数:
   >
-  >```CXX
-  >bool IsSupportBuffer();
-  >bool IsSupportVertexBuffer();
-  >bool IsSupportLinearTiling();
-  >bool IsLinearTilingSupportSampledImage();
-  >bool IsLinearTilingSupportStorageImage();
-  >bool IsLinearTilingSupportStorageImageAtomic();
-  >bool IsLinearTilingSupportColorAttachment();
-  >bool IsLinearTilingSupportColorAttachmentBlend();
-  >bool IsLinearTilingSupportDepthStencilAttachment();
-  >bool IsLinearTilingSupportBlitSrc();
-  >bool IsLinearTilingSupportBlitDst();
-  >bool IsLinearTilingSupportSampledImageFilterLinear();
-  >bool IsLinearTilingSupportTransferSrc();
-  >bool IsLinearTilingSupportTransferDst();
-  >bool IsSupportOptimalTiling();
-  >bool IsOptimalTilingSupportSampledImage();
-  >bool IsOptimalTilingSupportStorageImage();
-  >bool IsOptimalTilingSupportStorageImageAtomic();
-  >bool IsOptimalTilingSupportColorAttachment();
-  >bool IsOptimalTilingSupportColorAttachmentBlend();
-  >bool IsOptimalTilingSupportDepthStencilAttachment();
-  >bool IsOptimalTilingSupportBlitSrc();
-  >bool IsOptimalTilingSupportBlitDst();
-  >bool IsOptimalTilingSupportSampledImageFilterLinear();
-  >bool IsOptimalTilingSupportTransferSrc();
-  >bool IsOptimalTilingSupportTransferDst();
-  >```
+  >   ```CXX
+  >   bool IsSupportBuffer();
+  >   bool IsSupportVertexBuffer();
+  >   bool IsSupportLinearTiling();
+  >   bool IsLinearTilingSupportSampledImage();
+  >   bool IsLinearTilingSupportStorageImage();
+  >   bool IsLinearTilingSupportStorageImageAtomic();
+  >   bool IsLinearTilingSupportColorAttachment();
+  >   bool IsLinearTilingSupportColorAttachmentBlend();
+  >   bool IsLinearTilingSupportDepthStencilAttachment();
+  >   bool IsLinearTilingSupportBlitSrc();
+  >   bool IsLinearTilingSupportBlitDst();
+  >   bool IsLinearTilingSupportSampledImageFilterLinear();
+  >   bool IsLinearTilingSupportTransferSrc();
+  >   bool IsLinearTilingSupportTransferDst();
+  >   bool IsSupportOptimalTiling();
+  >   bool IsOptimalTilingSupportSampledImage();
+  >   bool IsOptimalTilingSupportStorageImage();
+  >   bool IsOptimalTilingSupportStorageImageAtomic();
+  >   bool IsOptimalTilingSupportColorAttachment();
+  >   bool IsOptimalTilingSupportColorAttachmentBlend();
+  >   bool IsOptimalTilingSupportDepthStencilAttachment();
+  >   bool IsOptimalTilingSupportBlitSrc();
+  >   bool IsOptimalTilingSupportBlitDst();
+  >   bool IsOptimalTilingSupportSampledImageFilterLinear();
+  >   bool IsOptimalTilingSupportTransferSrc();
+  >   bool IsOptimalTilingSupportTransferDst();
+  >   ```
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计

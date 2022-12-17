@@ -76,6 +76,10 @@
   >* 创建`Image的Format`章节
   >* 更新`Image的Format`章节
   
+* 2022/12/17
+  >
+  >* 更新`Image的Format`章节
+
 ---
 
 # Turbo驱动初步
@@ -1359,34 +1363,66 @@ B8G8R8_UNORM
 
 ```mermaid
 graph TD;
-    IsColorAttachmentUsage{{是否是COLOR_ATTACHMENT}}
+    IsContainColorAttachmentOrInputAttahcmentUsage{{"Usage是否包含COLOR_ATTACHMENT || Usage是否包含INPUT_ATTACHMENT "}}
 
-    IsSupportR8G8B8A8_SRGB{{是否支持R8G8B8A8_SRGB}}
+    IsSupportR8G8B8A8_SRGB{{"是否支持R8G8B8A8_SRGB(检测是否满足Usage标志位)"}}
     UseR8G8B8A8_SRGB[使用R8G8B8A8_SRGB]
 
-    IsSupportB8G8R8A8_SRGB{{是否支持B8G8R8A8_SRGB}}
+    IsSupportB8G8R8A8_SRGB{{"是否支持B8G8R8A8_SRGB(检测是否满足Usage标志位)"}}
     UseB8G8R8A8_SRGB[使用B8G8R8A8_SRGB]
 
-    IsSupportR8G8B8A8_UNORM{{是否支持R8G8B8A8_UNORM}}
+    IsSupportR8G8B8_SRGB{{"是否支持R8G8B8_SRGB(检测是否满足Usage标志位)"}}
+    UseR8G8B8_SRGB[使用R8G8B8A8_SRGB]
+
+    IsSupportB8G8R8_SRGB{{"是否支持B8G8R8_SRGB(检测是否满足Usage标志位)"}}
+    UseB8G8R8_SRGB[使用B8G8R8_SRGB]
+
+    IsSupportR8G8B8A8_UNORM{{"是否支持R8G8B8A8_UNORM(检测是否满足Usage标志位)"}}
     UseR8G8B8A8_UNORM[使用R8G8B8A8_UNORM]
 
-    IsSupportB8G8R8A8_UNORM{{是否支持B8G8R8A8_UNORM}}
+    IsSupportB8G8R8A8_UNORM{{"是否支持B8G8R8A8_UNORM(检测是否满足Usage标志位)"}}
     UseB8G8R8A8_UNORM[使用B8G8R8A8_UNORM]
 
-    IsColorAttachmentUsage--否-->A
-    IsColorAttachmentUsage--是-->IsSupportR8G8B8A8_SRGB
+    IsSupportR8G8B8_UNORM{{"是否支持R8G8B8_UNORM(检测是否满足Usage标志位)"}}
+    UseR8G8B8_UNORM[使用R8G8B8_UNORM]
+
+    IsSupportB8G8R8_UNORM{{"是否支持B8G8R8_UNORM(检测是否满足Usage标志位)"}}
+    UseB8G8R8_UNORM[使用B8G8R8_UNORM]
+
+    InitTargetFormat[初始化目标格式为UNDEFINED]
+    InitTargetFormat-->IsContainColorAttachmentOrInputAttahcmentUsage
+
+    IsContainColorAttachmentOrInputAttahcmentUsage--是-->IsSupportR8G8B8A8_SRGB
+    IsContainColorAttachmentOrInputAttahcmentUsage--否-->IsContainSampledUsage{{"Usage是否包含Sampled || Usage是否包含Storage"}}
 
     IsSupportR8G8B8A8_SRGB--是-->UseR8G8B8A8_SRGB
     IsSupportR8G8B8A8_SRGB--否-->IsSupportB8G8R8A8_SRGB
 
     IsSupportB8G8R8A8_SRGB--是-->UseB8G8R8A8_SRGB
-    IsSupportB8G8R8A8_SRGB--否-->IsSupportR8G8B8A8_UNORM
+    IsSupportB8G8R8A8_SRGB--否-->IsSupportR8G8B8_SRGB
+
+    IsSupportR8G8B8_SRGB--是-->UseR8G8B8_SRGB
+    IsSupportR8G8B8_SRGB--否-->IsSupportB8G8R8_SRGB
+
+    IsSupportB8G8R8_SRGB--是-->UseB8G8R8_SRGB
+    IsSupportB8G8R8_SRGB--否-->IsSupportR8G8B8A8_UNORM
 
     IsSupportR8G8B8A8_UNORM--是-->UseR8G8B8A8_UNORM
     IsSupportR8G8B8A8_UNORM--否-->IsSupportB8G8R8A8_UNORM
 
     IsSupportB8G8R8A8_UNORM--是-->UseB8G8R8A8_UNORM
-    IsSupportB8G8R8A8_UNORM--否-->error
+    IsSupportB8G8R8A8_UNORM--否-->IsSupportR8G8B8_UNORM
+
+    IsSupportR8G8B8_UNORM--是-->UseR8G8B8_UNORM
+    IsSupportR8G8B8_UNORM--否-->IsSupportB8G8R8_UNORM
+
+    IsSupportB8G8R8_UNORM--是-->UseB8G8R8_UNORM
+    IsSupportB8G8R8_UNORM--否-->error["抛出不支持异常，没找到支持的格式"]
+
+    IsContainSampledUsage--是-->IsSupportR8G8B8A8_UNORM
+    IsContainSampledUsage--否-->TargetFormatStillUndefined[此时目标格式仍为UNDEFINED]
+
+    TargetFormatStillUndefined--从头筛选-->IsSupportR8G8B8A8_SRGB
 ```
 
 ## Context上下文
