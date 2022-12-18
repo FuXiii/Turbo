@@ -1438,7 +1438,29 @@ D16_UNORM
 
 分配策略如下
 
+```mermaid
+graph TD;
+    InitTargetFormat[初始化目标格式为UNDEFINED]
 
+    IsSupportD32_SFLOAT{{"是否支持D32_SFLOAT(检测是否满足Usage标志位)"}}
+    UseD32_SFLOAT[使用D32_SFLOAT]
+
+    IsSupportD16_UNORM{{"是否支持D16_UNORM(检测是否满足Usage标志位)"}}
+    UseD16_UNORM[使用D16_UNORM]
+
+    error["抛出不支持异常，没找到支持的格式"]
+
+
+    InitTargetFormat-->IsSupportD32_SFLOAT
+
+    IsSupportD32_SFLOAT--是-->UseD32_SFLOAT
+    IsSupportD32_SFLOAT--否-->IsSupportD16_UNORM
+
+    IsSupportD16_UNORM--是-->UseD16_UNORM
+    IsSupportD16_UNORM--否-->error
+```
+
+* 对于`模板`数据，目前暂时不考虑
 
 ## Context上下文
 

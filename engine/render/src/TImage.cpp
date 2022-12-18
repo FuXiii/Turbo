@@ -1,6 +1,7 @@
 #include "TImage.h"
 #include "TResourceAllocator.h"
 #include <core/include/TException.h>
+#include <core/include/TPhysicalDevice.h>
 
 void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
 {
@@ -42,7 +43,7 @@ void Turbo::Render::TColorImage::Create(const std::string &name, const Descripto
 {
     TImage::Descriptor image_descriptor{};
     image_descriptor.flags = descriptor.flags;
-    image_descriptor.format = Turbo::Render::TFormat::R8G8B8A8_UNORM;
+    image_descriptor.format = Turbo::Render::TFormat::UNDEFINED;
     image_descriptor.width = descriptor.width;
     image_descriptor.height = descriptor.height;
     image_descriptor.depth = descriptor.depth;
@@ -50,6 +51,169 @@ void Turbo::Render::TColorImage::Create(const std::string &name, const Descripto
     image_descriptor.mipLevels = descriptor.mipLevels;
     image_descriptor.usages = descriptor.usages;
     image_descriptor.domain = descriptor.domain;
+
+    Turbo::Render::TResourceAllocator *resource_allocator = nullptr;
+    if (allocator != nullptr)
+    {
+        resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)", "Please use an available allocator");
+    }
+
+    Turbo::Core::TPhysicalDevice *physical_device = resource_allocator->GetContext()->GetPhysicalDevice();
+    static std::vector<Turbo::Render::TFormat> pending_formats{Turbo::Render::TFormat::R8G8B8A8_SRGB, Turbo::Render::TFormat::B8G8R8A8_SRGB, Turbo::Render::TFormat::R8G8B8_SRGB, Turbo::Render::TFormat::B8G8R8_SRGB, Turbo::Render::TFormat::R8G8B8A8_UNORM, Turbo::Render::TFormat::B8G8R8A8_UNORM, Turbo::Render::TFormat::R8G8B8_UNORM, Turbo::Render::TFormat::B8G8R8_UNORM};
+
+    std::vector<Turbo::Render::TFormat>::iterator begin = pending_formats.begin();
+    std::vector<Turbo::Render::TFormat>::iterator end = pending_formats.end();
+    // choose format
+    if (((image_descriptor.usages & TImageUsageBits::COLOR_ATTACHMENT) == TImageUsageBits::COLOR_ATTACHMENT) || ((image_descriptor.usages & TImageUsageBits::INPUT_ATTACHMENT) == TImageUsageBits::INPUT_ATTACHMENT))
+    {
+        begin = pending_formats.begin();
+    }
+    else if (((image_descriptor.usages & TImageUsageBits::SAMPLED) == TImageUsageBits::SAMPLED) || ((image_descriptor.usages & TImageUsageBits::STORAGE) == TImageUsageBits::STORAGE))
+    {
+        begin = pending_formats.begin() + 4;
+    }
+    else
+    {
+        // TODO: do nothing
+    }
+
+    // TODO: choose support format
+    for (; begin != end; begin++)
+    {
+        Turbo::Render::TFormat candidate_format = *begin;
+        Turbo::Core::TFormatInfo format_info = physical_device->GetFormatInfo(static_cast<Turbo::Core::TFormatType>(candidate_format));
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSFER_SRC) == Turbo::Render::TImageUsageBits::TRANSFER_SRC)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportTransferSrc())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportTransferSrc())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportTransferDst())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportTransferDst())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::SAMPLED) == Turbo::Render::TImageUsageBits::SAMPLED)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportSampledImage())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportSampledImage())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::STORAGE) == Turbo::Render::TImageUsageBits::STORAGE)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportStorageImage())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportStorageImage())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT) == Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportColorAttachment())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportColorAttachment())
+                {
+                    continue;
+                }
+            }
+        }
+
+        // Normally, depth_stencil usage should not be set, but we still try to deal with it,
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT) == Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportDepthStencilAttachment())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportDepthStencilAttachment())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSIENT_ATTACHMENT) == Turbo::Render::TImageUsageBits::TRANSIENT_ATTACHMENT)
+        {
+            // In Vulkan spec can not find some VkFormatFeatureFlagBits standard about TRANSIENT_ATTACHMENT
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT) == Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT)
+        {
+            // In Vulkan spec can not find some VkFormatFeatureFlagBits standard about INPUT_ATTACHMENT
+        }
+
+        image_descriptor.format = static_cast<Turbo::Render::TFormat>(format_info.GetFormatType());
+        break;
+    }
+
+    if (image_descriptor.format == Turbo::Render::TFormat::UNDEFINED)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)", "Can not found suitable format for this case");
+    }
 
     TImage::Create(name, image_descriptor, allocator);
 }

@@ -1887,3 +1887,16 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
   >* `./docs`下增加`vkspec1.3Core.pdf`文件，为`Vulkan1.3`官方标准文档，国内在线访问`Vulkan`官网真难受。
+  >* `./engine/render`下`TFormat`中增加`UNDEFINED`枚举成员
+  >* `./engine/render`下将`TFormat`中的枚举成员的值与`Vulkan`标准一一对应上
+  >* `./engine/render`下将`TContext`下增加如下函数并实现
+  >
+  >   ```CXX
+  >   Turbo::Core::TInstance *GetInstance();
+  >   Turbo::Core::TPhysicalDevice*GetPhysicalDevice();
+  >   Turbo::Core::TDevice *GetDevice();
+  >   Turbo::Core::TDeviceQueue *GetDeviceQueue();
+  >   ```
+  >
+  >* `./engine/render`下将`TResourceAllocator`下增加`TContext* GetContext()`函数并实现
+  >* `./engine/render`下将`TColorImage`下`Turbo::Render::TColorImage::Create()`函数更新实现

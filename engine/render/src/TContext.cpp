@@ -206,34 +206,7 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
         type = Turbo::Core::TImageType::DIMENSION_1D;
     }
 
-    Turbo::Core::TFormatType format_type = Turbo::Core::TFormatType::UNDEFINED;
-    switch (format)
-    {
-    case TFormat::R8G8B8A8_SRGB: {
-        format_type = Turbo::Core::TFormatType::R8G8B8A8_SRGB;
-    }
-    break;
-    case TFormat::B8G8R8A8_SRGB: {
-        format_type = Turbo::Core::TFormatType::B8G8R8A8_SRGB;
-    }
-    break;
-    case TFormat::R8G8B8A8_UNORM: {
-        format_type = Turbo::Core::TFormatType::R8G8B8A8_UNORM;
-    }
-    break;
-    case TFormat::B8G8R8A8_UNORM: {
-        format_type = Turbo::Core::TFormatType::B8G8R8A8_UNORM;
-    }
-    break;
-    case TFormat::D16_UNORM: {
-        format_type = Turbo::Core::TFormatType::D16_UNORM;
-    }
-    break;
-    case TFormat::D32_SFLOAT: {
-        format_type = Turbo::Core::TFormatType::D32_SFLOAT;
-    }
-    break;
-    }
+    Turbo::Core::TFormatType format_type = static_cast<Turbo::Core::TFormatType>(format);
 
     Turbo::Core::TSampleCountBits sample_count_bits = Turbo::Core::TSampleCountBits::SAMPLE_1_BIT;
 
@@ -276,6 +249,26 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
     Turbo::Core::TImageLayout layout = Turbo::Core::TImageLayout::UNDEFINED;
 
     return new Turbo::Core::TImage(device, vk_image_create_flags, type, format_type, width, height, depth, mip_levels, layers, sample_count_bits, image_tiling, image_usages, memory_flags, layout);
+}
+
+Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()
+{
+    return this->instance;
+}
+
+Turbo::Core::TPhysicalDevice *Turbo::Render::TContext::GetPhysicalDevice()
+{
+    return this->physicalDevice;
+}
+
+Turbo::Core::TDevice *Turbo::Render::TContext::GetDevice()
+{
+    return this->device;
+}
+
+Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
+{
+    return this->graphicsQueue;
 }
 
 void Turbo::Render::TContext::DestroyImage(Turbo::Core::TImage *image)
