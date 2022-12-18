@@ -83,6 +83,7 @@
 * 2022/12/18
   >
   >* 更新`Image的Format`章节
+  >* 更新`资源`章节，添加`Depth`图片说明
 
 ---
 
@@ -662,7 +663,7 @@ class ColorImage: public Image
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         uint32_t layers;
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -678,7 +679,7 @@ class Texture: public Image
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -694,7 +695,7 @@ class ColorImage1D:public ColorImage
         uint32_t width;//width不能为0
         //uint32_t height;//该属性由Turbo维护，值为1
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -710,7 +711,7 @@ class Texture1D: public Texture
         uint32_t width;
         //uint32_t height;//该属性由Turbo维护，默认值为1
         //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -726,7 +727,7 @@ class ColorImage2D: public ColorImage
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -742,7 +743,7 @@ class Texture2D: public Texture
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -758,7 +759,7 @@ class ColorImage3D: public ColorImage
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         //uint32_t layers; //默认值为1，由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -774,7 +775,7 @@ class Texture3D: public Texture
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -790,7 +791,7 @@ class CubeImage: public ColorImage2D
         uint32_t width;
         uint32_t height;
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -806,7 +807,7 @@ class Cubemap: public Texture2D
         uint32_t width; //width不能为0
         uint32_t height; //height不能为0
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -814,10 +815,52 @@ class Cubemap: public Texture2D
 };
 
 class DepthStencilImage: public Image
-{...}
+{
+    struct DepthStencilImage::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        uint32_t depth; //该属性由Turbo维护，值为1
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
+        TUsages usages;//内部会自动附上TImageUsageBits::DEPTH_STENCIL_ATTACHMENT
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
 
 class DepthImage:public DepthStencilImage
-{...}
+{
+    struct DepthImage::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class DepthImage2D:public DepthImage
+{
+    struct DepthImage2D::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+}
 ```
 
 ## Format格式

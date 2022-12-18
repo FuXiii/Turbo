@@ -71,5 +71,19 @@ int main()
 
     std::cout << "======================================== advanced upload" << std::endl;
 
+    Turbo::Render::TDepthImage2D::Descriptor depth_image_2d_descriptor = {};
+    depth_image_2d_descriptor.width = 512;
+    depth_image_2d_descriptor.height = 512;
+    depth_image_2d_descriptor.layers = 1;
+    depth_image_2d_descriptor.mipLevels = 1;
+    depth_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT | Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT;
+    depth_image_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TDepthImage2D depth_image_2d;
+    depth_image_2d.Create("depth_image_2d", depth_image_2d_descriptor, &resource_allocator);
+    depth_image_2d.Destroy(&resource_allocator);
+
+    std::cout << "======================================== depth image" << std::endl;
+
     return 0;
 }

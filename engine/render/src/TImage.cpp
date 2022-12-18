@@ -232,3 +232,196 @@ void Turbo::Render::TColorImage2D::Create(const std::string &name, const Descrip
 
     TColorImage::Create(name, color_image_descriptor, allocator);
 }
+
+void Turbo::Render::TDepthStencilImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TImage::Descriptor image_descriptor{};
+    image_descriptor.flags = 0;
+    image_descriptor.format = Turbo::Render::TFormat::UNDEFINED;
+    image_descriptor.width = descriptor.width;
+    image_descriptor.height = descriptor.height;
+    image_descriptor.depth = descriptor.depth;
+    image_descriptor.layers = descriptor.layers;
+    image_descriptor.mipLevels = descriptor.mipLevels;
+    image_descriptor.usages = descriptor.usages | Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    image_descriptor.domain = descriptor.domain;
+
+    Turbo::Render::TResourceAllocator *resource_allocator = nullptr;
+    if (allocator != nullptr)
+    {
+        resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)", "Please use an available allocator");
+    }
+
+    Turbo::Core::TPhysicalDevice *physical_device = resource_allocator->GetContext()->GetPhysicalDevice();
+    static std::vector<Turbo::Render::TFormat> pending_formats{Turbo::Render::TFormat::D32_SFLOAT, Turbo::Render::TFormat::D16_UNORM};
+
+    std::vector<Turbo::Render::TFormat>::iterator begin = pending_formats.begin();
+    std::vector<Turbo::Render::TFormat>::iterator end = pending_formats.end();
+    // choose format
+    for (; begin != end; begin++)
+    {
+        Turbo::Render::TFormat candidate_format = *begin;
+        Turbo::Core::TFormatInfo format_info = physical_device->GetFormatInfo(static_cast<Turbo::Core::TFormatType>(candidate_format));
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSFER_SRC) == Turbo::Render::TImageUsageBits::TRANSFER_SRC)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportTransferSrc())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportTransferSrc())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportTransferDst())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportTransferDst())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::SAMPLED) == Turbo::Render::TImageUsageBits::SAMPLED)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportSampledImage())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportSampledImage())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::STORAGE) == Turbo::Render::TImageUsageBits::STORAGE)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportStorageImage())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportStorageImage())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT) == Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportColorAttachment())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportColorAttachment())
+                {
+                    continue;
+                }
+            }
+        }
+
+        // Normally, depth_stencil usage should not be set, but we still try to deal with it,
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT) == Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT)
+        {
+            if ((image_descriptor.domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU)
+            {
+                if (!format_info.IsLinearTilingSupportDepthStencilAttachment())
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!format_info.IsOptimalTilingSupportDepthStencilAttachment())
+                {
+                    continue;
+                }
+            }
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::TRANSIENT_ATTACHMENT) == Turbo::Render::TImageUsageBits::TRANSIENT_ATTACHMENT)
+        {
+            // In Vulkan spec can not find some VkFormatFeatureFlagBits standard about TRANSIENT_ATTACHMENT
+        }
+
+        if ((image_descriptor.usages & Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT) == Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT)
+        {
+            // In Vulkan spec can not find some VkFormatFeatureFlagBits standard about INPUT_ATTACHMENT
+        }
+
+        image_descriptor.format = static_cast<Turbo::Render::TFormat>(format_info.GetFormatType());
+        break;
+    }
+
+    if (image_descriptor.format == Turbo::Render::TFormat::UNDEFINED)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)", "Can not found suitable format for this case");
+    }
+
+    TImage::Create(name, image_descriptor, allocator);
+}
+
+void Turbo::Render::TDepthImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TDepthStencilImage::Descriptor depth_stencil_image_descriptor = {};
+    depth_stencil_image_descriptor.width = descriptor.width;
+    depth_stencil_image_descriptor.height = descriptor.height;
+    depth_stencil_image_descriptor.depth = descriptor.depth;
+    depth_stencil_image_descriptor.layers = descriptor.layers;
+    depth_stencil_image_descriptor.mipLevels = descriptor.mipLevels;
+    depth_stencil_image_descriptor.usages = descriptor.usages;
+    depth_stencil_image_descriptor.domain = descriptor.domain;
+
+    Turbo::Render::TDepthStencilImage::Create(name, depth_stencil_image_descriptor, allocator);
+}
+
+void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TDepthImage::Descriptor depth_image_descriptor = {};
+    depth_image_descriptor.width = descriptor.width;
+    depth_image_descriptor.height = descriptor.height;
+    depth_image_descriptor.depth = 1;
+    depth_image_descriptor.layers = descriptor.layers;
+    depth_image_descriptor.mipLevels = descriptor.mipLevels;
+    depth_image_descriptor.usages = descriptor.usages;
+    depth_image_descriptor.domain = descriptor.domain;
+
+    Turbo::Render::TDepthImage::Create(name, depth_image_descriptor, allocator);
+}

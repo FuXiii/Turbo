@@ -1900,3 +1900,6 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下将`TResourceAllocator`下增加`TContext* GetContext()`函数并实现
   >* `./engine/render`下将`TColorImage`下`Turbo::Render::TColorImage::Create()`函数更新实现
+  >* `./engine/render`下将`TImage`下增加`class TDepthStencilImage`
+  >* `./engine/render`下将`TImage`下增加`class TDepthImage`
+  >* `./engine/render`下将`TImage`下增加`class TDepthImage2D`
