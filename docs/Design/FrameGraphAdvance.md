@@ -87,7 +87,7 @@
 
 * 2022/12/18
   >
-  >* 更新`资源`章节，添加`Texture`说明
+  >* 更新`资源`章节，添加更新`Texture`和`3DImage`说明
 
 ---
 
@@ -716,7 +716,7 @@ class ColorImage3D: public ColorImage
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
         uint32_t mipLevels; //默认值为1
-        //uint32_t layers; //默认值为1，由Turbo维护
+        //uint32_t layers; //默认值为1，由Turbo维护(根据Vulkan标准：If imageType is VK_IMAGE_TYPE_3D, arrayLayers must be 1)
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
     };
@@ -850,7 +850,6 @@ class DepthTexture2D: public DepthImage2D
 ## Format格式
 
 ```CXX
-
 namespace Turbo::Render
 typedef enum class TFormat
 {

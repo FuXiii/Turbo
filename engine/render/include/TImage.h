@@ -111,6 +111,26 @@ class TColorImage2D : public TColorImage
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };
 
+class TColorImage3D : public TColorImage
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TColorImage3D() = default;
+    ~TColorImage3D() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
 class TDepthStencilImage : public TImage
 {
   public:
@@ -169,6 +189,45 @@ class TDepthImage2D : public TDepthImage
   public:
     TDepthImage2D() = default;
     ~TDepthImage2D() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
+class TTexture2D : public TColorImage2D
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TTexture2D() = default;
+    ~TTexture2D() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
+class TTexture3D : public TColorImage3D
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TTexture3D() = default;
+    ~TTexture3D() = default;
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };

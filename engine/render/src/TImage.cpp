@@ -233,6 +233,21 @@ void Turbo::Render::TColorImage2D::Create(const std::string &name, const Descrip
     TColorImage::Create(name, color_image_descriptor, allocator);
 }
 
+void Turbo::Render::TColorImage3D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TColorImage::Descriptor color_image_descriptor{};
+    color_image_descriptor.flags = 0;
+    color_image_descriptor.width = descriptor.width;
+    color_image_descriptor.height = descriptor.height;
+    color_image_descriptor.depth = descriptor.depth;
+    color_image_descriptor.layers = 1;
+    color_image_descriptor.mipLevels = descriptor.mipLevels;
+    color_image_descriptor.usages = descriptor.usages;
+    color_image_descriptor.domain = descriptor.domain;
+
+    TColorImage::Create(name, color_image_descriptor, allocator);
+}
+
 void Turbo::Render::TDepthStencilImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
 {
     TImage::Descriptor image_descriptor{};
@@ -424,4 +439,31 @@ void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descrip
     depth_image_descriptor.domain = descriptor.domain;
 
     Turbo::Render::TDepthImage::Create(name, depth_image_descriptor, allocator);
+}
+
+void Turbo::Render::TTexture2D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TColorImage2D::Descriptor color_image2d_descriptor{};
+    color_image2d_descriptor.flags = 0;
+    color_image2d_descriptor.width = descriptor.width;
+    color_image2d_descriptor.height = descriptor.height;
+    color_image2d_descriptor.layers = 1;
+    color_image2d_descriptor.mipLevels = descriptor.mipLevels;
+    color_image2d_descriptor.usages = descriptor.usages;
+    color_image2d_descriptor.domain = descriptor.domain;
+
+    TColorImage2D::Create(name, color_image2d_descriptor, allocator);
+}
+
+void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TColorImage3D::Descriptor color_image3d_descriptor{};
+    color_image3d_descriptor.width = descriptor.width;
+    color_image3d_descriptor.height = descriptor.height;
+    color_image3d_descriptor.depth = descriptor.depth;
+    color_image3d_descriptor.mipLevels = descriptor.mipLevels;
+    color_image3d_descriptor.usages = descriptor.usages;
+    color_image3d_descriptor.domain = descriptor.domain;
+
+    TColorImage3D::Create(name, color_image3d_descriptor, allocator);
 }
