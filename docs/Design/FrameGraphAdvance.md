@@ -85,6 +85,10 @@
   >* 更新`Image的Format`章节
   >* 更新`资源`章节，添加`Depth`图片说明
 
+* 2022/12/18
+  >
+  >* 更新`资源`章节，添加`Texture`说明
+
 ---
 
 # Turbo驱动初步
@@ -670,22 +674,6 @@ class ColorImage: public Image
     };
 };
 
-class Texture: public Image
-{
-    struct Texture::Descriptor
-    {
-        TImageCreateFlags flags;
-        TFormat format; 
-        uint32_t width;
-        uint32_t height;
-        uint32_t depth;
-        uint32_t mipLevels;
-        //uint32_t layers;//该属性由Turbo维护，默认值为1
-        TUsages usages;
-        TDomain domain;//详见[资源的所有者端域]章节
-    };
-};
-
 class ColorImage1D:public ColorImage
 {
     struct ColorImage1D::Descriptor
@@ -697,22 +685,6 @@ class ColorImage1D:public ColorImage
         //uint32_t depth; //该属性由Turbo维护，值为1
         uint32_t mipLevels; //默认值为1
         uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
-        TUsages usages;
-        TDomain domain;//详见[资源的所有者端域]章节
-    };
-};
-
-class Texture1D: public Texture
-{
-    struct Texture1D::Descriptor
-    {
-        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
-        TFormat format; 
-        uint32_t width;
-        //uint32_t height;//该属性由Turbo维护，默认值为1
-        //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uint32_t mipLevels;
-        //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
     };
@@ -734,22 +706,6 @@ class ColorImage2D: public ColorImage
     };
 };
 
-class Texture2D: public Texture
-{
-    struct Texture2D::Descriptor
-    {
-        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
-        TFormat format; 
-        uint32_t width;//width不能为0
-        uint32_t height;//height不能为0
-        //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uint32_t mipLevels;
-        //uint32_t layers;//该属性由Turbo维护，默认值为1
-        TUsages usages;
-        TDomain domain;//详见[资源的所有者端域]章节
-    };
-};
-
 class ColorImage3D: public ColorImage
 {
     struct ColorImage3D::Descriptor
@@ -766,22 +722,6 @@ class ColorImage3D: public ColorImage
     };
 };
 
-class Texture3D: public Texture
-{
-    struct Texture3D::Descriptor
-    {
-        //TImageCreateFlags flags;//flags值为0，Cube纹理需要六个二维纹理，一维不满足该条件
-        TFormat format; 
-        uint32_t width;//width不能为0
-        uint32_t height;//height不能为0
-        uint32_t depth;//depth不能为0
-        uint32_t mipLevels;
-        //uint32_t layers;//该属性由Turbo维护，默认值为1
-        TUsages usages;
-        TDomain domain;//详见[资源的所有者端域]章节
-    };
-};
-
 class CubeImage: public ColorImage2D
 {
     struct CubeImage::Descriptor
@@ -792,22 +732,6 @@ class CubeImage: public ColorImage2D
         uint32_t height;
         //uint32_t depth; //该属性由Turbo维护，值为1
         uint32_t mipLevels; //默认值为1
-        //uint32_t layers; //该属性由Turbo维护，默认值为6
-        TUsages usages;
-        TDomain domain;//详见[资源的所有者端域]章节
-    };
-};
-
-class Cubemap: public Texture2D
-{
-    struct Texture3D::Descriptor
-    {
-        //TImageCreateFlags flags;//该属性由Turbo维护，为CUBE
-        TFormat format;
-        uint32_t width; //width不能为0
-        uint32_t height; //height不能为0
-        //uint32_t depth; //该属性由Turbo维护，值为1
-        uint32_t mipLevels;
         //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -861,6 +785,66 @@ class DepthImage2D:public DepthImage
         TDomain domain;//详见[资源的所有者端域]章节
     };
 }
+```
+
+由于在开发中，二维/三维的单张颜色纹理和二维的单张深度纹理最为常用，所以`Turbo`应该提供如下`Texture`类
+
+```CXX
+class Texture2D: public ColorImage2D
+{
+    struct Texture2D::Descriptor
+    {
+        //TImageCreateFlags flags;//该属性由Turbo维护, flags值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        //uint32_t depth;//该属性由Turbo维护，默认值为1
+        uint32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class Texture3D: public ColorImage3D
+{
+    struct Texture3D::Descriptor
+    {
+        //TImageCreateFlags flags;//该属性由Turbo维护, flags值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持颜色的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        uint32_t depth;//depth不能为0
+        uint32_t mipLevels;
+        //uint32_t layers;//该属性由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class Cubemap: public CubeImage
+{
+    struct Cubemap::Descriptor
+    {
+       ...
+    };
+};
+
+class DepthTexture2D: public DepthImage2D
+{
+    struct DepthImage2D::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uint32_t mipLevels; //默认值为1
+        //uint32_t layers; //由Turbo维护，默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
 ```
 
 ## Format格式

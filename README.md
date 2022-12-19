@@ -1903,3 +1903,7 @@ Turbo是渲染引擎
   >* `./engine/render`下将`TImage`下增加`class TDepthStencilImage`
   >* `./engine/render`下将`TImage`下增加`class TDepthImage`
   >* `./engine/render`下将`TImage`下增加`class TDepthImage2D`
+
+* 2022/12/19 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
