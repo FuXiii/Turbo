@@ -1918,4 +1918,6 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`下增加`class TColorImage3D`
   >* `./engine/render`下`TImage`下增加`class TTexture3D`
   >* `readme`增加平台支持标签
+  >* `./docs/Desgin`下新增`WebGPU_Dawn.md`文档，用于记录[Google Dawn, a WebGPU implementation](https://dawn.googlesource.com/dawn/)学习记录
+
 
