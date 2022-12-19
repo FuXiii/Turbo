@@ -1,3 +1,4 @@
+#include "TImage.h"
 #include <iostream>
 #include <render/include/TContext.h>
 #include <render/include/TResourceAllocator.h>
@@ -70,6 +71,47 @@ int main()
     advanced_upload_image_2d.Destroy(&resource_allocator);
 
     std::cout << "======================================== advanced upload" << std::endl;
+
+    Turbo::Render::TDepthImage2D::Descriptor depth_image_2d_descriptor = {};
+    depth_image_2d_descriptor.width = 512;
+    depth_image_2d_descriptor.height = 512;
+    depth_image_2d_descriptor.layers = 1;
+    depth_image_2d_descriptor.mipLevels = 1;
+    depth_image_2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT | Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT;
+    depth_image_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TDepthImage2D depth_image_2d;
+    depth_image_2d.Create("depth_image_2d", depth_image_2d_descriptor, &resource_allocator);
+    depth_image_2d.Destroy(&resource_allocator);
+
+    std::cout << "======================================== depth image" << std::endl;
+
+    Turbo::Render::TTexture2D::Descriptor texture_2d_descriptor = {};
+    texture_2d_descriptor.width = 512;
+    texture_2d_descriptor.height = 512;
+    texture_2d_descriptor.mipLevels = 1;
+    texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
+    texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TTexture2D texture_2d;
+    texture_2d.Create("texture_2d", texture_2d_descriptor, &resource_allocator);
+    texture_2d.Destroy(&resource_allocator);
+
+    std::cout << "======================================== texture2D" << std::endl;
+
+    Turbo::Render::TTexture3D::Descriptor texture_3d_descriptor = {};
+    texture_3d_descriptor.width = 512;
+    texture_3d_descriptor.height = 512;
+    texture_3d_descriptor.depth = 512;
+    texture_3d_descriptor.mipLevels = 1;
+    texture_3d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
+    texture_3d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TTexture3D texture_3d;
+    texture_3d.Create("texture_3d", texture_3d_descriptor, &resource_allocator);
+    texture_3d.Destroy(&resource_allocator);
+
+    std::cout << "======================================== texture3D" << std::endl;
 
     return 0;
 }

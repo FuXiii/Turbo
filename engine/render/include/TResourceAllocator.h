@@ -25,6 +25,8 @@ class TResourceAllocator
     TResourceAllocator(TContext *context);
     ~TResourceAllocator();
 
+    TContext* GetContext();
+
     Turbo::Core::TImage *CreateImage(const TImage::Descriptor &descriptor);
     void DestroyImage(Turbo::Core::TImage *image);
 };

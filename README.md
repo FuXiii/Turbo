@@ -8,6 +8,13 @@
 
 Turbo是渲染引擎
 
+## Platform
+![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
+![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
+![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
+![Platform HarmonyOS](https://img.shields.io/badge/platform-HarmonyOS-lightgrey)  
+![Platform Web](https://img.shields.io/badge/platform-Web(WebGPU_with_Dawn)-lightgrey)  
+
 ## Version
 
 当前版本 0.0.0.12
@@ -1852,31 +1859,63 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline`的`TVertexAttribute`的`TVertexAttribute(uint32_t location, TFormatInfo format, uint32_t offset)`构造函数移除
   >* `./engine/core`下`TFormatInfo`中增加如下成员函数:
   >
-  >```CXX
-  >bool IsSupportBuffer();
-  >bool IsSupportVertexBuffer();
-  >bool IsSupportLinearTiling();
-  >bool IsLinearTilingSupportSampledImage();
-  >bool IsLinearTilingSupportStorageImage();
-  >bool IsLinearTilingSupportStorageImageAtomic();
-  >bool IsLinearTilingSupportColorAttachment();
-  >bool IsLinearTilingSupportColorAttachmentBlend();
-  >bool IsLinearTilingSupportDepthStencilAttachment();
-  >bool IsLinearTilingSupportBlitSrc();
-  >bool IsLinearTilingSupportBlitDst();
-  >bool IsLinearTilingSupportSampledImageFilterLinear();
-  >bool IsLinearTilingSupportTransferSrc();
-  >bool IsLinearTilingSupportTransferDst();
-  >bool IsSupportOptimalTiling();
-  >bool IsOptimalTilingSupportSampledImage();
-  >bool IsOptimalTilingSupportStorageImage();
-  >bool IsOptimalTilingSupportStorageImageAtomic();
-  >bool IsOptimalTilingSupportColorAttachment();
-  >bool IsOptimalTilingSupportColorAttachmentBlend();
-  >bool IsOptimalTilingSupportDepthStencilAttachment();
-  >bool IsOptimalTilingSupportBlitSrc();
-  >bool IsOptimalTilingSupportBlitDst();
-  >bool IsOptimalTilingSupportSampledImageFilterLinear();
-  >bool IsOptimalTilingSupportTransferSrc();
-  >bool IsOptimalTilingSupportTransferDst();
-  >```
+  >   ```CXX
+  >   bool IsSupportBuffer();
+  >   bool IsSupportVertexBuffer();
+  >   bool IsSupportLinearTiling();
+  >   bool IsLinearTilingSupportSampledImage();
+  >   bool IsLinearTilingSupportStorageImage();
+  >   bool IsLinearTilingSupportStorageImageAtomic();
+  >   bool IsLinearTilingSupportColorAttachment();
+  >   bool IsLinearTilingSupportColorAttachmentBlend();
+  >   bool IsLinearTilingSupportDepthStencilAttachment();
+  >   bool IsLinearTilingSupportBlitSrc();
+  >   bool IsLinearTilingSupportBlitDst();
+  >   bool IsLinearTilingSupportSampledImageFilterLinear();
+  >   bool IsLinearTilingSupportTransferSrc();
+  >   bool IsLinearTilingSupportTransferDst();
+  >   bool IsSupportOptimalTiling();
+  >   bool IsOptimalTilingSupportSampledImage();
+  >   bool IsOptimalTilingSupportStorageImage();
+  >   bool IsOptimalTilingSupportStorageImageAtomic();
+  >   bool IsOptimalTilingSupportColorAttachment();
+  >   bool IsOptimalTilingSupportColorAttachmentBlend();
+  >   bool IsOptimalTilingSupportDepthStencilAttachment();
+  >   bool IsOptimalTilingSupportBlitSrc();
+  >   bool IsOptimalTilingSupportBlitDst();
+  >   bool IsOptimalTilingSupportSampledImageFilterLinear();
+  >   bool IsOptimalTilingSupportTransferSrc();
+  >   bool IsOptimalTilingSupportTransferDst();
+  >   ```
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+
+* 2022/12/18 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* `./docs`下增加`vkspec1.3Core.pdf`文件，为`Vulkan1.3`官方标准文档，国内在线访问`Vulkan`官网真难受。
+  >* `./engine/render`下`TFormat`中增加`UNDEFINED`枚举成员
+  >* `./engine/render`下将`TFormat`中的枚举成员的值与`Vulkan`标准一一对应上
+  >* `./engine/render`下将`TContext`下增加如下函数并实现
+  >
+  >   ```CXX
+  >   Turbo::Core::TInstance *GetInstance();
+  >   Turbo::Core::TPhysicalDevice*GetPhysicalDevice();
+  >   Turbo::Core::TDevice *GetDevice();
+  >   Turbo::Core::TDeviceQueue *GetDeviceQueue();
+  >   ```
+  >
+  >* `./engine/render`下`TResourceAllocator`下增加`TContext* GetContext()`函数并实现
+  >* `./engine/render`下`TColorImage`下`Turbo::Render::TColorImage::Create()`函数更新实现
+  >* `./engine/render`下`TImage`下增加`class TDepthStencilImage`
+  >* `./engine/render`下`TImage`下增加`class TDepthImage`
+  >* `./engine/render`下`TImage`下增加`class TDepthImage2D`
+
+* 2022/12/19 设计架构
+  >
+  >* 更新`./docs/Desgin`下`FrameGraphAdvance.md`设计
+  >* `./engine/render`下`TImage`下增加`class TTexture2D`
+  >* `./engine/render`下`TImage`下增加`class TColorImage3D`
+  >* `./engine/render`下`TImage`下增加`class TTexture3D`
+  >* `readme`增加平台支持标签
+
