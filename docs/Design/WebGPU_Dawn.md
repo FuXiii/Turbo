@@ -1,13 +1,15 @@
 # WebGPU : Dawn
 
 ## 更新日志
+
 * 2022/12/19
   >
   >* 创建`WebGPU : Dawn`文档
   >* 创建`概述`章节
   >* 创建`Git Clone Dawn`章节
   >* 创建`浏览器`章节
-
+  >* 创建`Dawn`章节
+  >* 创建`Dawn 概览`章节
 
 ---
 
@@ -51,14 +53,17 @@ WebGPUImplement--Vulkan-->VulkanDriver
 ```
 git clone https://dawn.googlesource.com/dawn
 ```
+
 对于国内网络是不能直接访问此链接地址的，需要设置`git代理`
 
 1. 首先你需要有`VPN`或`某些科学工具`
 2. 查看代理的地址和端口号
 3. 调用如下指令设置`git代理`（注：这里设置的是`http`代理，还有个`socket5`代理，详细信息请查看[google的Dawn挂梯子也Clone不下来](https://forum.orillusion.com/topic/78/google%E7%9A%84dawn%E6%8C%82%E6%A2%AF%E5%AD%90%E4%B9%9Fclone%E4%B8%8D%E4%B8%8B%E6%9D%A5)）
+
     ```CXX
     git config --global http.proxy http://127.0.0.1:你VPN或科学工具的端口号
     ```
+
 4. 调用`git clone`即可
 
 ## 浏览器
@@ -77,3 +82,45 @@ git clone https://dawn.googlesource.com/dawn
     * [pbrglossy](https://www.babylonjs.com/demos/pbrglossy/)
     * [flighthelmet](https://www.babylonjs.com/demos/flighthelmet/)
 
+## Dawn
+
+`Dawn`是开源跨平台的基于`Chromium`的`WebGPU`实现，在`webgpu.h`中有与`WebGPU`标准更加详细的一一对应声明。
+
+`Dawn`提供如下构建`WebGPU`组件：
+
+* **WebGPU C/C++头文件**，用于应用开发和其他一些构建组件
+* **一个“原始的”WebGPU实现**，用于使用平台相关的`GPU`图形`API`
+* **一个客户端-服务器WebGPU实现**，用于用于程序的沙盒环境，而不需要接触原始`GPU`图形`API`
+* **Tint**，用于编译`WebGPU Shader Language(WGSL)`和与其他着色器互相转换
+
+## Dawn 概览
+
+`Dawn`主要有两个库：`dawn_native`和`dawn_wire`，`Dawn`使用`dawn.json`来描述`WebGPU`标准API，之后将用于生成`c/c++`的头文件，客户端-服务端实现的一部分等等。
+
+### 文件结构
+
+* `dawn.json`: 使用`Json`格式描述`WebGPU`，之后用于生成代码
+* `dawn_wire.json`:  包含一些生成`dawn_wire`文件的额外信息，就比如`WebGPU`标准中的一系列`Command`
+* `examples`: 一些例子集合(*注：目前没找到该文件夹*)
+* `generator`: 包含代码构建和对应的模板. 代码是基于`Jinja2`构建的，并会去解析相应的`JSON`文件.
+  * `dawn_json_generator.py`: 用于生成`WebGPU`头文件，客户端-服务端实现等.
+  * `templates`: Jinja2 的构建器的模板，子目录下有相应的模板
+* `infra`: *注：不知道干啥的，可能是用于查看文件变化的*
+* `scripts`: 用于`Dawn`的构建，测试等的一系列文件
+* `src`:
+  * `dawn`: `Dawn`源码根目录
+    * `common`: h通用库并用于 `dawn_native` 和 `dawn_wire`等其他库
+    * `fuzzers`: 在`Dawn`中运行`fuzzers`[Clusterfuzz](https://google.github.io/clusterfuzz/).（*注：好像是用来提示潜在`Bug`的*）
+    * `native`: `WebGPU`的具体实现. 在本级文件夹下的是展现给用户使用的`前端`，而子文件夹是对应`后端`实现.
+      * `<backend>`: 根据不同图形API`后端`的实现, 比如 `d3d12`, `metal` 或 `vulkan`.
+    * `tests`:
+      * `end2end`: 运行`WebGPU API`的测试程序并且获取一个`GPU`执行.
+      * `perf_tests`: `Dawn`的不同使用准则.
+      * `unittests`: 内部类的单元测试, 并且扩展`WebGPU API`测试使其不使用`GPU`执行.
+        * `validation`: `WebGPU` 不使用`GPU`的验证测试
+      * `white_box`: 需要使用`GPU`并且与 `dawn_native` 或 `dawn_wire`进行交互.
+    * `wire`: 用于使用`WebGPU`的`客户端-服务器`架构代码.
+    * `utils`: 帮助代码用于测试和示例，但是不允许`dawn_native`和`dawn_wire`使用.
+    * `platform`: 用于在 `dawn_native` 或 `dawn_wire`中定义接口依赖.
+  * `include`: 公共头文件和与子文件夹对应的库. 注意有些文件是动态生成的并不能直接找到.
+* `third_party`: 依赖.
