@@ -76,6 +76,15 @@
   >* 创建`Image的Format`章节
   >* 更新`Image的Format`章节
   
+* 2022/12/17
+  >
+  >* 更新`Image的Format`章节
+
+* 2022/12/18
+  >
+  >* 更新`Image的Format`章节
+  >* 更新`资源`章节，添加`Depth`图片说明
+
 ---
 
 # Turbo驱动初步
@@ -654,7 +663,7 @@ class ColorImage: public Image
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         uint32_t layers;
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -670,7 +679,7 @@ class Texture: public Image
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -686,7 +695,7 @@ class ColorImage1D:public ColorImage
         uint32_t width;//width不能为0
         //uint32_t height;//该属性由Turbo维护，值为1
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -702,7 +711,7 @@ class Texture1D: public Texture
         uint32_t width;
         //uint32_t height;//该属性由Turbo维护，默认值为1
         //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -718,7 +727,7 @@ class ColorImage2D: public ColorImage
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -734,7 +743,7 @@ class Texture2D: public Texture
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         //uint32_t depth;//该属性由Turbo维护，默认值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -750,7 +759,7 @@ class ColorImage3D: public ColorImage
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         //uint32_t layers; //默认值为1，由Turbo维护
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -766,7 +775,7 @@ class Texture3D: public Texture
         uint32_t width;//width不能为0
         uint32_t height;//height不能为0
         uint32_t depth;//depth不能为0
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers;//该属性由Turbo维护，默认值为1
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -782,7 +791,7 @@ class CubeImage: public ColorImage2D
         uint32_t width;
         uint32_t height;
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels; //默认值为1
+        uint32_t mipLevels; //默认值为1
         //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -798,7 +807,7 @@ class Cubemap: public Texture2D
         uint32_t width; //width不能为0
         uint32_t height; //height不能为0
         //uint32_t depth; //该属性由Turbo维护，值为1
-        uitn32_t mipLevels;
+        uint32_t mipLevels;
         //uint32_t layers; //该属性由Turbo维护，默认值为6
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
@@ -806,10 +815,52 @@ class Cubemap: public Texture2D
 };
 
 class DepthStencilImage: public Image
-{...}
+{
+    struct DepthStencilImage::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        uint32_t depth; //该属性由Turbo维护，值为1
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1，TODO:考虑是否由Turbo维护
+        TUsages usages;//内部会自动附上TImageUsageBits::DEPTH_STENCIL_ATTACHMENT
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
 
 class DepthImage:public DepthStencilImage
-{...}
+{
+    struct DepthImage::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+};
+
+class DepthImage2D:public DepthImage
+{
+    struct DepthImage2D::Descriptor
+    {
+        //TImageCreateFlags flags; //由Turbo维护，默认值为0
+        //TFormat format; //该属性由Turbo维护(Turbo会设置支持深度的格式)
+        uint32_t width;//width不能为0
+        uint32_t height;//height不能为0
+        //uint32_t depth; //该属性由Turbo维护，值为1
+        uint32_t mipLevels; //默认值为1
+        uint32_t layers; //默认值为1
+        TUsages usages;
+        TDomain domain;//详见[资源的所有者端域]章节
+    };
+}
 ```
 
 ## Format格式
@@ -1342,7 +1393,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 
 由于不同设备对于不同格式的支持程度不大相同，所以在使用某种格式时需要先查看是否支持该格式。
 
-对于颜色数据，目前有如下格式
+* 对于`颜色`数据，目前有如下格式
 
 ```CXX
 R8G8B8A8_SRGB
@@ -1359,35 +1410,100 @@ B8G8R8_UNORM
 
 ```mermaid
 graph TD;
-    IsColorAttachmentUsage{{是否是COLOR_ATTACHMENT}}
+    IsContainColorAttachmentOrInputAttahcmentUsage{{"Usage是否包含COLOR_ATTACHMENT || Usage是否包含INPUT_ATTACHMENT "}}
 
-    IsSupportR8G8B8A8_SRGB{{是否支持R8G8B8A8_SRGB}}
+    IsSupportR8G8B8A8_SRGB{{"是否支持R8G8B8A8_SRGB(检测是否满足Usage标志位)"}}
     UseR8G8B8A8_SRGB[使用R8G8B8A8_SRGB]
 
-    IsSupportB8G8R8A8_SRGB{{是否支持B8G8R8A8_SRGB}}
+    IsSupportB8G8R8A8_SRGB{{"是否支持B8G8R8A8_SRGB(检测是否满足Usage标志位)"}}
     UseB8G8R8A8_SRGB[使用B8G8R8A8_SRGB]
 
-    IsSupportR8G8B8A8_UNORM{{是否支持R8G8B8A8_UNORM}}
+    IsSupportR8G8B8_SRGB{{"是否支持R8G8B8_SRGB(检测是否满足Usage标志位)"}}
+    UseR8G8B8_SRGB[使用R8G8B8A8_SRGB]
+
+    IsSupportB8G8R8_SRGB{{"是否支持B8G8R8_SRGB(检测是否满足Usage标志位)"}}
+    UseB8G8R8_SRGB[使用B8G8R8_SRGB]
+
+    IsSupportR8G8B8A8_UNORM{{"是否支持R8G8B8A8_UNORM(检测是否满足Usage标志位)"}}
     UseR8G8B8A8_UNORM[使用R8G8B8A8_UNORM]
 
-    IsSupportB8G8R8A8_UNORM{{是否支持B8G8R8A8_UNORM}}
+    IsSupportB8G8R8A8_UNORM{{"是否支持B8G8R8A8_UNORM(检测是否满足Usage标志位)"}}
     UseB8G8R8A8_UNORM[使用B8G8R8A8_UNORM]
 
-    IsColorAttachmentUsage--否-->A
-    IsColorAttachmentUsage--是-->IsSupportR8G8B8A8_SRGB
+    IsSupportR8G8B8_UNORM{{"是否支持R8G8B8_UNORM(检测是否满足Usage标志位)"}}
+    UseR8G8B8_UNORM[使用R8G8B8_UNORM]
+
+    IsSupportB8G8R8_UNORM{{"是否支持B8G8R8_UNORM(检测是否满足Usage标志位)"}}
+    UseB8G8R8_UNORM[使用B8G8R8_UNORM]
+
+    InitTargetFormat[初始化目标格式为UNDEFINED]
+    InitTargetFormat-->IsContainColorAttachmentOrInputAttahcmentUsage
+
+    IsContainColorAttachmentOrInputAttahcmentUsage--是-->IsSupportR8G8B8A8_SRGB
+    IsContainColorAttachmentOrInputAttahcmentUsage--否-->IsContainSampledUsage{{"Usage是否包含Sampled || Usage是否包含Storage"}}
 
     IsSupportR8G8B8A8_SRGB--是-->UseR8G8B8A8_SRGB
     IsSupportR8G8B8A8_SRGB--否-->IsSupportB8G8R8A8_SRGB
 
     IsSupportB8G8R8A8_SRGB--是-->UseB8G8R8A8_SRGB
-    IsSupportB8G8R8A8_SRGB--否-->IsSupportR8G8B8A8_UNORM
+    IsSupportB8G8R8A8_SRGB--否-->IsSupportR8G8B8_SRGB
+
+    IsSupportR8G8B8_SRGB--是-->UseR8G8B8_SRGB
+    IsSupportR8G8B8_SRGB--否-->IsSupportB8G8R8_SRGB
+
+    IsSupportB8G8R8_SRGB--是-->UseB8G8R8_SRGB
+    IsSupportB8G8R8_SRGB--否-->IsSupportR8G8B8A8_UNORM
 
     IsSupportR8G8B8A8_UNORM--是-->UseR8G8B8A8_UNORM
     IsSupportR8G8B8A8_UNORM--否-->IsSupportB8G8R8A8_UNORM
 
     IsSupportB8G8R8A8_UNORM--是-->UseB8G8R8A8_UNORM
-    IsSupportB8G8R8A8_UNORM--否-->error
+    IsSupportB8G8R8A8_UNORM--否-->IsSupportR8G8B8_UNORM
+
+    IsSupportR8G8B8_UNORM--是-->UseR8G8B8_UNORM
+    IsSupportR8G8B8_UNORM--否-->IsSupportB8G8R8_UNORM
+
+    IsSupportB8G8R8_UNORM--是-->UseB8G8R8_UNORM
+    IsSupportB8G8R8_UNORM--否-->error["抛出不支持异常，没找到支持的格式"]
+
+    IsContainSampledUsage--是-->IsSupportR8G8B8A8_UNORM
+    IsContainSampledUsage--否-->TargetFormatStillUndefined[此时目标格式仍为UNDEFINED]
+
+    TargetFormatStillUndefined--从头筛选-->IsSupportR8G8B8A8_SRGB
 ```
+
+* 对于`深度`数据，目前有如下格式
+
+```CXX
+D32_SFLOAT,
+D16_UNORM
+```
+
+分配策略如下
+
+```mermaid
+graph TD;
+    InitTargetFormat[初始化目标格式为UNDEFINED]
+
+    IsSupportD32_SFLOAT{{"是否支持D32_SFLOAT(检测是否满足Usage标志位)"}}
+    UseD32_SFLOAT[使用D32_SFLOAT]
+
+    IsSupportD16_UNORM{{"是否支持D16_UNORM(检测是否满足Usage标志位)"}}
+    UseD16_UNORM[使用D16_UNORM]
+
+    error["抛出不支持异常，没找到支持的格式"]
+
+
+    InitTargetFormat-->IsSupportD32_SFLOAT
+
+    IsSupportD32_SFLOAT--是-->UseD32_SFLOAT
+    IsSupportD32_SFLOAT--否-->IsSupportD16_UNORM
+
+    IsSupportD16_UNORM--是-->UseD16_UNORM
+    IsSupportD16_UNORM--否-->error
+```
+
+* 对于`模板`数据，目前暂时不考虑
 
 ## Context上下文
 

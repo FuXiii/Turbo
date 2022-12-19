@@ -18,6 +18,11 @@ Turbo::Render::TResourceAllocator::~TResourceAllocator()
     this->context = nullptr;
 }
 
+Turbo::Render::TContext *Turbo::Render::TResourceAllocator::GetContext()
+{
+    return this->context;
+}
+
 Turbo::Core::TImage *Turbo::Render::TResourceAllocator::CreateImage(const TImage::Descriptor &descriptor)
 {
     return this->context->CreateImage(descriptor);

@@ -110,6 +110,68 @@ class TColorImage2D : public TColorImage
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };
+
+class TDepthStencilImage : public TImage
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t layers;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TDepthStencilImage() = default;
+    ~TDepthStencilImage() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
+class TDepthImage : public TDepthStencilImage
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t layers;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TDepthImage() = default;
+    ~TDepthImage() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
+class TDepthImage2D : public TDepthImage
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t layers;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TDepthImage2D() = default;
+    ~TDepthImage2D() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
 } // namespace Render
 } // namespace Turbo
 #endif // !TURBO_RENDER_TIMAGE_H
