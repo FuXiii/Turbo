@@ -8,6 +8,13 @@
 
 Turbo是渲染引擎
 
+## Platform
+![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
+![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
+![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
+![Platform HarmonyOS](https://img.shields.io/badge/platform-HarmonyOS-lightgrey)  
+![Platform Web](https://img.shields.io/badge/platform-Web(WebGPU_with_Dawn)-lightgrey)  
+
 ## Version
 
 当前版本 0.0.0.12
@@ -1910,4 +1917,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`下增加`class TTexture2D`
   >* `./engine/render`下`TImage`下增加`class TColorImage3D`
   >* `./engine/render`下`TImage`下增加`class TTexture3D`
+  >* `readme`增加平台支持标签
 
