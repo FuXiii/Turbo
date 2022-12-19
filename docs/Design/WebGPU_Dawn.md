@@ -63,3 +63,17 @@ git clone https://dawn.googlesource.com/dawn
 
 ## 浏览器
 
+由于`WebGPU`是一个新兴标准，大部分浏览器还没有完全适配，目前大部分浏览器的发行版都不支持`WebGPU`，但是可以使用浏览器发布的开发版或者是每日更新版本，这些版本支持`WebGPU`。
+
+由于`Edge`浏览器原生支持`chromium`内核，将使用[Edge Dev版](https://www.microsoftedgeinsider.com/en-us/download)进行学习（`Edge Canary版也是可以的`）
+
+1. 浏览器默认是不开启`WebGPU`支持的
+2. 下载安装`Edge Dev版`
+3. 后运行`Edge Dev版`访问`url`为`edge://flags/`的地址
+4. 搜素`Unsafe WebGPU`标志位特性，开启即可。
+5. 访问如下示例进行`WebGPU`测试
+    * [webgpu-samples](https://austin-eng.com/webgpu-samples)
+    * [yeti](https://www.babylonjs.com/demos/yeti/)
+    * [pbrglossy](https://www.babylonjs.com/demos/pbrglossy/)
+    * [flighthelmet](https://www.babylonjs.com/demos/flighthelmet/)
+
