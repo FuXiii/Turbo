@@ -19,6 +19,7 @@ void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &de
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         this->image = resource_allocator->CreateImage(descriptor);
+        this->descriptor = descriptor;
     }
     else
     {
@@ -37,6 +38,46 @@ void Turbo::Render::TImage::Destroy(void *allocator)
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         resource_allocator->DestroyImage(this->image);
     }
+}
+
+Turbo::Render::TFormat Turbo::Render::TImage::GetFormat()
+{
+    return this->descriptor.format;
+}
+
+uint32_t Turbo::Render::TImage::GetWidth()
+{
+    return this->descriptor.width;
+}
+
+uint32_t Turbo::Render::TImage::GteHeight()
+{
+    return this->descriptor.height;
+}
+
+uint32_t Turbo::Render::TImage::GetDepth()
+{
+    return this->descriptor.depth;
+}
+
+uint32_t Turbo::Render::TImage::GetLayers()
+{
+    return this->descriptor.layers;
+}
+
+uint32_t Turbo::Render::TImage::GetMipLevels()
+{
+    return this->descriptor.mipLevels;
+}
+
+Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsage()
+{
+    return this->descriptor.usages;
+}
+
+Turbo::Render::TDomain Turbo::Render::TImage::GetDomain()
+{
+    return this->descriptor.domain;
 }
 
 void Turbo::Render::TColorImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -466,4 +507,17 @@ void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor
     color_image3d_descriptor.domain = descriptor.domain;
 
     TColorImage3D::Create(name, color_image3d_descriptor, allocator);
+}
+
+void Turbo::Render::TDepthTexture2D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    TDepthImage2D::Descriptor depth_image2d_descriptor = {};
+    depth_image2d_descriptor.width = descriptor.width;
+    depth_image2d_descriptor.height = descriptor.height;
+    depth_image2d_descriptor.layers = 1;
+    depth_image2d_descriptor.mipLevels = descriptor.mipLevels;
+    depth_image2d_descriptor.usages = descriptor.usages;
+    depth_image2d_descriptor.domain = descriptor.domain;
+
+    TDepthImage2D::Create(name, depth_image2d_descriptor, allocator);
 }

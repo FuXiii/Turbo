@@ -1924,3 +1924,12 @@ Turbo是渲染引擎
 * 2022/12/20 设计架构
   >
   >* 🐑了，好难受。(눈_눈)
+  >* `./engine/render`下`TImage`下增加`class TDepthTexture2D`
+  >* `./engine/render`下`TImage`下增加`TFormat GetFormat()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetWidth()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GteHeight()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetDepth()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetLayers()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetMipLevels()`成员函数
+  >* `./engine/render`下`TImage`下增加`TImageUsages GetUsage()`成员函数
+  >* `./engine/render`下`TImage`下增加`TDomain GetDomain()`成员函数

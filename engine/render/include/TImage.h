@@ -66,6 +66,15 @@ class TImage
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
     void Destroy(void *allocator);
+
+    TFormat GetFormat();
+    uint32_t GetWidth();
+    uint32_t GteHeight();
+    uint32_t GetDepth();
+    uint32_t GetLayers();
+    uint32_t GetMipLevels();
+    TImageUsages GetUsage();
+    TDomain GetDomain();
 };
 
 class TColorImage : public TImage
@@ -231,6 +240,26 @@ class TTexture3D : public TColorImage3D
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 };
+
+class TDepthTexture2D : public TDepthImage2D
+{
+  public:
+    struct Descriptor
+    {
+        uint32_t width;
+        uint32_t height;
+        uint32_t mipLevels;
+        TImageUsages usages;
+        TDomain domain;
+    };
+
+  public:
+    TDepthTexture2D() = default;
+    ~TDepthTexture2D() = default;
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+
 } // namespace Render
 } // namespace Turbo
 #endif // !TURBO_RENDER_TIMAGE_H
