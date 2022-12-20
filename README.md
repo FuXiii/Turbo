@@ -9,6 +9,7 @@
 Turbo是渲染引擎
 
 ## Platform
+
 ![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
 ![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
 ![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
@@ -1920,4 +1921,6 @@ Turbo是渲染引擎
   >* `readme`增加平台支持标签
   >* `./docs/Desgin`下新增`WebGPU_Dawn.md`文档，用于记录[Google Dawn, a WebGPU implementation](https://dawn.googlesource.com/dawn/)学习记录
 
-
+* 2022/12/20 设计架构
+  >
+  >* 🐑了，好难受。(눈_눈)
