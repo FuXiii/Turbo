@@ -1,5 +1,6 @@
 #include "TContext.h"
 #include "TImage.h"
+#include <core/include/TBuffer.h>
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
 #include <core/include/TImage.h>
@@ -248,7 +249,58 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
 
     Turbo::Core::TImageLayout layout = Turbo::Core::TImageLayout::UNDEFINED;
 
-    return new Turbo::Core::TImage(device, vk_image_create_flags, type, format_type, width, height, depth, mip_levels, layers, sample_count_bits, image_tiling, image_usages, memory_flags, layout);
+    return new Turbo::Core::TImage(this->device, vk_image_create_flags, type, format_type, width, height, depth, mip_levels, layers, sample_count_bits, image_tiling, image_usages, memory_flags, layout);
+}
+
+void Turbo::Render::TContext::DestroyImage(Turbo::Core::TImage *image)
+{
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        delete image;
+    }
+}
+
+Turbo::Core::TBuffer *Turbo::Render::TContext::CreateBuffer(const TBuffer::Descriptor &descriptor)
+{
+    TImageUsages usages = descriptor.usages;
+    uint32_t size = descriptor.size;
+    TDomain domain = descriptor.domain;
+
+    Turbo::Core::TBufferUsages buffer_usages = usages;
+    Turbo::Core::TMemoryFlags memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+
+    // GPU only
+    if (((domain & Turbo::Render::TDomainBits::CPU) != Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY;
+    }
+    // Staging copy for upload
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_SRC) == Turbo::Render::TImageUsageBits::TRANSFER_SRC) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE;
+    }
+    // Readback
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) != Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_RANDOM;
+    }
+    // Advanced data uploading(Both CPU and GPU domain can access)
+    else if (((usages & Turbo::Render::TImageUsageBits::TRANSFER_DST) == Turbo::Render::TImageUsageBits::TRANSFER_DST) && ((domain & Turbo::Render::TDomainBits::CPU) == Turbo::Render::TDomainBits::CPU) && ((domain & Turbo::Render::TDomainBits::GPU) == Turbo::Render::TDomainBits::GPU))
+    {
+        memory_flags = Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE | Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_ALLOW_TRANSFER_INSTEAD;
+    }
+
+    Turbo::Core::TImageUsages image_usages = usages;
+
+    return new Turbo::Core::TBuffer(this->device, 0, buffer_usages, memory_flags, size);
+}
+
+void Turbo::Render::TContext::DestroyBuffer(Turbo::Core::TBuffer *buffer)
+{
+    if (buffer != nullptr && buffer->GetVkBuffer() != VK_NULL_HANDLE)
+    {
+        delete buffer;
+    }
 }
 
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()
@@ -269,12 +321,4 @@ Turbo::Core::TDevice *Turbo::Render::TContext::GetDevice()
 Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
 {
     return this->graphicsQueue;
-}
-
-void Turbo::Render::TContext::DestroyImage(Turbo::Core::TImage *image)
-{
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
-    {
-        delete image;
-    }
 }

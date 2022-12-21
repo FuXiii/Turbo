@@ -674,59 +674,59 @@ int main()
     memcpy(mvp_ptr, &mvp, sizeof(mvp));
     mvp_buffer->Unmap();
 
-    Turbo::Core::TBuffer *sky_cube_mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(sky_cube_mvp));
+    Turbo::Core::TBuffer *sky_cube_mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(sky_cube_mvp));
     void *sky_cube_mvp_ptr = sky_cube_mvp_buffer->Map();
     memcpy(sky_cube_mvp_ptr, &sky_cube_mvp, sizeof(sky_cube_mvp));
     sky_cube_mvp_buffer->Unmap();
 
-    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
     void *value_ptr = value_buffer->Map();
     memcpy(value_ptr, &value, sizeof(value));
     value_buffer->Unmap();
 
-    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
+    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
     void *position_buffer_ptr = position_buffer->Map();
     memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
     position_buffer->Unmap();
     POSITION_data.clear();
 
-    Turbo::Core::TBuffer *sky_cube_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
+    Turbo::Core::TBuffer *sky_cube_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
     void *sky_cube_position_buffer_ptr = sky_cube_position_buffer->Map();
     memcpy(sky_cube_position_buffer_ptr, SKY_CUBE_POSITION_data.data(), sizeof(POSITION) * SKY_CUBE_POSITION_data.size());
     sky_cube_position_buffer->Unmap();
     SKY_CUBE_POSITION_data.clear();
 
-    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
+    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
     void *normal_buffer_ptr = normal_buffer->Map();
     memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
     normal_buffer->Unmap();
     NORMAL_data.clear();
 
-    Turbo::Core::TBuffer *sky_cube_normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
+    Turbo::Core::TBuffer *sky_cube_normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
     void *sky_cube_normal_buffer_ptr = sky_cube_normal_buffer->Map();
     memcpy(sky_cube_normal_buffer_ptr, SKY_CUBE_NORMAL_data.data(), sizeof(NORMAL) * SKY_CUBE_NORMAL_data.size());
     sky_cube_normal_buffer->Unmap();
     SKY_CUBE_NORMAL_data.clear();
 
-    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
+    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
     void *texcoord_buffer_ptr = texcoord_buffer->Map();
     memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
     texcoord_buffer->Unmap();
     TEXCOORD_data.clear();
 
-    Turbo::Core::TBuffer *sky_cube_texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
+    Turbo::Core::TBuffer *sky_cube_texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
     void *sky_cube_texcoord_buffer_ptr = sky_cube_texcoord_buffer->Map();
     memcpy(sky_cube_texcoord_buffer_ptr, SKY_CUBE_TEXCOORD_data.data(), sizeof(TEXCOORD) * SKY_CUBE_TEXCOORD_data.size());
     sky_cube_texcoord_buffer->Unmap();
     SKY_CUBE_TEXCOORD_data.clear();
 
-    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
+    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
     void *index_buffer_ptr = index_buffer->Map();
     memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
     index_buffer->Unmap();
     INDICES_data.clear();
 
-    Turbo::Core::TBuffer *sky_cube_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
+    Turbo::Core::TBuffer *sky_cube_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
     void *sky_cube_index_buffer_ptr = sky_cube_index_buffer->Map();
     memcpy(sky_cube_index_buffer_ptr, SKY_CUBE_INDICES_data.data(), sizeof(uint32_t) * SKY_CUBE_INDICES_data.size());
     sky_cube_index_buffer->Unmap();

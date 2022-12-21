@@ -5,16 +5,6 @@
 
 void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
 {
-    TImageCreateFlags image_create_flags = descriptor.flags;
-    TFormat format = descriptor.format;
-    uint32_t width = descriptor.width;
-    uint32_t height = descriptor.height;
-    uint32_t depth = descriptor.depth;
-    uint32_t layers = descriptor.layers;
-    uint32_t mipLevels = descriptor.mipLevels;
-    TImageUsages usages = descriptor.usages;
-    TDomain domain = descriptor.domain;
-
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
