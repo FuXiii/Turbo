@@ -1934,10 +1934,15 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`下增加`TImageUsages GetUsage()`成员函数
   >* `./engine/render`下`TImage`下增加`TDomain GetDomain()`成员函数
 
-* 2022/12/20 设计架构
+* 2022/12/21 设计架构
   >
   >* `./engine/render`下增加`TBuffer`类
   >* `./engine/render`下`TContext`下增加`Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor)`成员函数
   >* `./engine/render`下`TContext`下增加`void DestroyBuffer(Turbo::Core::TBuffer *buffer)`成员函数
   >* `./engine/render`下`TResourceAllocator.h`下增加`Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor)`成员函数
   >* `./engine/render`下`ResourceAllocator.h`下增加`void DestroyBuffer(Turbo::Core::TBuffer *buffer)`成员函数
+
+* 2022/12/23 设计架构
+  >
+  >* `./docs/Desgin`下将`WebGPU_Dawn.md`重命名为`WebGPU_CCPP.md`
+  >* 更新`./docs/Desgin`下`WebGPU_CCPP`

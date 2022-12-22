@@ -1,4 +1,4 @@
-# WebGPU : Dawn
+# WebGPU : C/C++
 
 ## 更新日志
 
@@ -11,6 +11,12 @@
   >* 创建`Dawn`章节
   >* 创建`Dawn 概览`章节
   >* 创建`文件结构`章节
+
+* 2022/12/23
+  >
+  >* 创建`C/C++与WebGPU`章节
+  >* 更改该文档为`WebGPU : C/C++`
+  >* 创建`Emscripten`章节
 
 ---
 
@@ -125,3 +131,28 @@ git clone https://dawn.googlesource.com/dawn
     * `platform`: 用于在 `dawn_native` 或 `dawn_wire`中定义接口依赖.
   * `include`: 公共头文件和与子文件夹对应的库. 注意有些文件是动态生成的并不能直接找到.
 * `third_party`: 依赖.
+
+## C/C++与WebGPU
+
+跑到`Dawn`的官方群里聊了会儿闲篇，根据群里大佬的说法`Dawn`是在原始图形API的基础上实现的`WebGPU`接口并开放在`webgpu.h`文件中，当在网络端并不会访问原始图形API，所以`Dawn`在页面端并不会做任何有用的事情，而`Emscripten`上有个使用`JavaScript`实行的`WebGPU`，并且也开放在`webgpu.h`中，所以想用`C/C++`使用`WebGPU`在浏览器上绘制，使用`Emscripten`而不是`Dawn`。
+
+## Emscripten
+
+[Emscripten](https://emscripten.org)是一个基于`LLVM`将代码编译到`WebAssembly`的编译工具链，特别是在Web平台上注重程序大小和运行速度。
+
+给我的感觉`Emscripten`是一个编译器，可以将`C/C++`代码编译到`Web`平台，在浏览器上运行。
+
+有关`Emscripten`的下载安装[下载安装说明](https://emscripten.org/docs/getting_started/downloads.html)说的蛮详细的这里就不在赘述。
+
+要说的是，在`./emsdk install latest`这一步，大概率是安装报错不会成功，由于`“玛利亚之墙”`的存在，想让`“巨人”`们进来还是需要`"超大型巨人"`来一脚。同获取`Dawn`一样先设个代理先
+
+* Windows设置代理
+
+cmd中直接键入如下（同`git`中设置代理差不多）
+
+```CMD
+set http_proxy=127.0.0.1:你VPN或科学工具的端口号
+set https_proxy=127.0.0.1:你VPN或科学工具的端口号
+```
+
+之后再调用`./emsdk install latest`
