@@ -113,5 +113,19 @@ int main()
 
     std::cout << "======================================== texture3D" << std::endl;
 
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture_2d_descriptor = {};
+    depth_texture_2d_descriptor.width = 512;
+    depth_texture_2d_descriptor.height = 512;
+    depth_texture_2d_descriptor.mipLevels = 1;
+    depth_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TDepthTexture2D depth_texture_2d;
+
+    depth_texture_2d.Create("depth_texture_2d", depth_texture_2d_descriptor, &resource_allocator);
+    depth_texture_2d.Destroy(&resource_allocator);
+
+    std::cout << "======================================== depth texture2d" << std::endl;
+
     return 0;
 }

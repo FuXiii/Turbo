@@ -32,3 +32,13 @@ void Turbo::Render::TResourceAllocator::DestroyImage(Turbo::Core::TImage *image)
 {
     this->context->DestroyImage(image);
 }
+
+Turbo::Core::TBuffer *Turbo::Render::TResourceAllocator::CreateBuffer(const TBuffer::Descriptor &descriptor)
+{
+    return this->context->CreateBuffer(descriptor);
+}
+
+void Turbo::Render::TResourceAllocator::DestroyBuffer(Turbo::Core::TBuffer *buffer)
+{
+    this->context->DestroyBuffer(buffer);
+}

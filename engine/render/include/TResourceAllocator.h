@@ -9,6 +9,7 @@ namespace Turbo
 namespace Core
 {
 class TImage;
+class TBuffer;
 } // namespace Core
 } // namespace Turbo
 
@@ -25,10 +26,13 @@ class TResourceAllocator
     TResourceAllocator(TContext *context);
     ~TResourceAllocator();
 
-    TContext* GetContext();
+    TContext *GetContext();
 
     Turbo::Core::TImage *CreateImage(const TImage::Descriptor &descriptor);
     void DestroyImage(Turbo::Core::TImage *image);
+
+    Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor);
+    void DestroyBuffer(Turbo::Core::TBuffer *buffer);
 };
 } // namespace Render
 } // namespace Turbo

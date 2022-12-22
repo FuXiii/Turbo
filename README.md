@@ -9,6 +9,7 @@
 Turbo是渲染引擎
 
 ## Platform
+
 ![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
 ![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
 ![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
@@ -1920,4 +1921,28 @@ Turbo是渲染引擎
   >* `readme`增加平台支持标签
   >* `./docs/Desgin`下新增`WebGPU_Dawn.md`文档，用于记录[Google Dawn, a WebGPU implementation](https://dawn.googlesource.com/dawn/)学习记录
 
+* 2022/12/20 设计架构
+  >
+  >* 🐑了，好难受。(눈_눈)
+  >* `./engine/render`下`TImage`下增加`class TDepthTexture2D`
+  >* `./engine/render`下`TImage`下增加`TFormat GetFormat()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetWidth()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GteHeight()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetDepth()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetLayers()`成员函数
+  >* `./engine/render`下`TImage`下增加`uint32_t GetMipLevels()`成员函数
+  >* `./engine/render`下`TImage`下增加`TImageUsages GetUsage()`成员函数
+  >* `./engine/render`下`TImage`下增加`TDomain GetDomain()`成员函数
 
+* 2022/12/21 设计架构
+  >
+  >* `./engine/render`下增加`TBuffer`类
+  >* `./engine/render`下`TContext`下增加`Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor)`成员函数
+  >* `./engine/render`下`TContext`下增加`void DestroyBuffer(Turbo::Core::TBuffer *buffer)`成员函数
+  >* `./engine/render`下`TResourceAllocator.h`下增加`Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor)`成员函数
+  >* `./engine/render`下`ResourceAllocator.h`下增加`void DestroyBuffer(Turbo::Core::TBuffer *buffer)`成员函数
+
+* 2022/12/23 设计架构
+  >
+  >* `./docs/Desgin`下将`WebGPU_Dawn.md`重命名为`WebGPU_CCPP.md`
+  >* 更新`./docs/Desgin`下`WebGPU_CCPP`
