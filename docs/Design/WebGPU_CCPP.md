@@ -144,7 +144,7 @@ git clone https://dawn.googlesource.com/dawn
 
 有关`Emscripten`的下载安装[下载安装说明](https://emscripten.org/docs/getting_started/downloads.html)说的蛮详细的这里就不在赘述。
 
-要说的是，在`./emsdk install latest`这一步，大概率是安装报错不会成功，由于`“玛利亚之墙”`的存在，想让`“巨人”`们进来还是需要`"超大型巨人"`来一脚。同获取`Dawn`一样先设个代理先
+要说的是，在`./emsdk install latest`这一步，大概率是安装报错不会成功，由于`“玛利亚之墙”`的存在，想让`“巨人”`们进来还是需要`"超大型巨人"`来一脚。同获取`Dawn`一样先设个代理先，[详情请看emsdk对于该问题的Issue](https://github.com/emscripten-core/emsdk/issues/95)
 
 * Windows设置代理
 
@@ -155,4 +155,4 @@ set http_proxy=127.0.0.1:你VPN或科学工具的端口号
 set https_proxy=127.0.0.1:你VPN或科学工具的端口号
 ```
 
-之后再调用`./emsdk install latest`
+之后再调用`./emsdk install latest`即可
