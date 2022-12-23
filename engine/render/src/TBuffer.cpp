@@ -21,3 +21,18 @@ void Turbo::Render::TBuffer::Destroy(void *allocator)
         resource_allocator->DestroyBuffer(this->buffer);
     }
 }
+
+Turbo::Render::TBufferUsages Turbo::Render::TBuffer::GetUsages()
+{
+    return this->descriptor.usages;
+}
+
+uint64_t Turbo::Render::TBuffer::GetSize()
+{
+    return this->descriptor.size;
+}
+
+Turbo::Render::TDomain Turbo::Render::TBuffer::GetDomain()
+{
+    return this->descriptor.domain;
+}

@@ -73,7 +73,7 @@ class TImage
     uint32_t GetDepth();
     uint32_t GetLayers();
     uint32_t GetMipLevels();
-    TImageUsages GetUsage();
+    TImageUsages GetUsages();
     TDomain GetDomain();
 };
 

@@ -1946,3 +1946,8 @@ Turbo是渲染引擎
   >
   >* `./docs/Desgin`下将`WebGPU_Dawn.md`重命名为`WebGPU_CCPP.md`
   >* 更新`./docs/Desgin`下`WebGPU_CCPP`
+  >* `./engine/render`下`TBuffer::Descriptor::usages`类型由原来的`TBufferUsageBits`改为`TBufferUsages`
+  >* `./engine/render`下`TBuffer`中增加`TBufferUsages GetUsages()`成员函数
+  >* `./engine/render`下`TBuffer`中增加`uint64_t GetSize()`成员函数
+  >* `./engine/render`下`TBuffer`中增加`TDomain GetDomain()`成员函数
+  >* `./engine/render`下`TImage`中`TImageUsages GetUsage()`成员函数更名为`TImageUsages GetUsages()`

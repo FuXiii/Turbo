@@ -37,7 +37,7 @@ class TBuffer
   public:
     struct Descriptor
     {
-        TBufferUsageBits usages;
+        TBufferUsages usages;
         uint64_t size;
         TDomain domain;
     };
@@ -53,6 +53,8 @@ class TBuffer
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
     void Destroy(void *allocator);
 
+    TBufferUsages GetUsages();
+    uint64_t GetSize();
     TDomain GetDomain();
 };
 } // namespace Render
