@@ -1951,3 +1951,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer`中增加`uint64_t GetSize()`成员函数
   >* `./engine/render`下`TBuffer`中增加`TDomain GetDomain()`成员函数
   >* `./engine/render`下`TImage`中`TImageUsages GetUsage()`成员函数更名为`TImageUsages GetUsages()`
+
+* 2022/12/24 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`

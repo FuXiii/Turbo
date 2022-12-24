@@ -89,6 +89,10 @@
   >
   >* 更新`资源`章节，添加更新`Texture`和`3DImage`说明
 
+* 2022/12/24
+  >
+  >* 更新`资源拷贝传输`章节
+
 ---
 
 # Turbo驱动初步
@@ -1365,6 +1369,50 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     }
     */
     ```
+
+资源拷贝传输大致可分为3种情况：
+
+1. 以void*为代表的的数据资源
+2. 以Buffer为代表的的数据资源
+3. 以Image为代表的的数据资源
+
+所以正常来说`void*`，`Buffer`，`Image`三者之间应该两两互相可拷贝传输
+
+```mermaid
+graph LR;
+    VoidPtrSrc["void*"]
+    BufferSrc["Buffer"]
+    ImageSrc["Image"]
+
+    VoidPtrDst["void*"]
+    BufferDst["Buffer"]
+    ImageDst["Image"]
+
+    VoidPtrSrc<-..->VoidPtrDst
+    VoidPtrSrc<---->BufferDst
+    VoidPtrSrc<---->ImageDst
+
+    BufferSrc<---->VoidPtrDst
+    BufferSrc<---->BufferDst
+    BufferSrc<---->ImageDst
+
+    ImageSrc<---->VoidPtrDst
+    ImageSrc<---->BufferDst
+    ImageSrc<---->ImageDst
+```
+
+1. `void*`↔`void*`  
+    此种情况属于程序自身内存拷贝，不属于`Turbo`负责的范畴
+
+2. `void*`→`Buffer`
+
+3. `void*`→`Image`
+4. `Buffer`→`void*`
+5. `Buffer`→`Buffer`
+6. `Buffer`→`Image`
+7. `Image`→`void*`
+8. `Image`→`Buffer`
+9. `Image`→`Image`
 
 ## Image的Format
 
