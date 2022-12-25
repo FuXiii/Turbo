@@ -43,6 +43,7 @@ class TBuffer
     };
 
   private:
+    void *allocator = nullptr;
     Turbo::Core::TBuffer *buffer = nullptr;
     Descriptor descriptor;
 
@@ -56,6 +57,8 @@ class TBuffer
     TBufferUsages GetUsages();
     uint64_t GetSize();
     TDomain GetDomain();
+
+    void Copy(void *src, uint64_t size);
 };
 } // namespace Render
 } // namespace Turbo

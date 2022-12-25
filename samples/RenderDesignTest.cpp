@@ -176,5 +176,20 @@ int main()
         texture2d_item.Destroy(&resource_allocator);
     }
 
+    //========================================================================
+
+    std::vector<uint32_t> index_datas{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    uint32_t create_buffer_size = index_datas.size() * sizeof(uint32_t);
+
+    Turbo::Render::TBuffer::Descriptor copy_buffer_descriptor = {};
+    copy_buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER;
+    copy_buffer_descriptor.size = create_buffer_size;
+    copy_buffer_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TBuffer copy_buffer;
+    copy_buffer.Create("copy_buffer", copy_buffer_descriptor, &resource_allocator);
+    copy_buffer.Copy(index_datas.data(), create_buffer_size);
+    copy_buffer.Destroy(&resource_allocator);
+
     return 0;
 }

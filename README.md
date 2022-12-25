@@ -1959,3 +1959,5 @@ Turbo是渲染引擎
 * 2022/12/25 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/render`下`TBuffer`中增加`void Copy(void *src, uint64_t size)`成员函数
+  >* `./engine/render`下`TBuffer`中增加`void *allocator = nullptr`成员变量
