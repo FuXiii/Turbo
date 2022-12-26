@@ -1961,3 +1961,7 @@ Turbo是渲染引擎
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* `./engine/render`下`TBuffer`中增加`void Copy(void *src, uint64_t size)`成员函数
   >* `./engine/render`下`TBuffer`中增加`void *allocator = nullptr`成员变量
+
+* 2022/12/26
+  >
+  >* 更新`./docs/Desgin`下`WebGPU_CCPP.md`

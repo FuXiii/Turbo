@@ -18,6 +18,10 @@
   >* 更改该文档为`WebGPU : C/C++`
   >* 创建`Emscripten`章节
 
+* 2022/12/26
+  >
+  >* 创建`Hello-WebGPU`章节
+
 ---
 
 [WebGPU标准](https://www.w3.org/TR/webgpu/)
@@ -134,7 +138,7 @@ git clone https://dawn.googlesource.com/dawn
 
 ## C/C++与WebGPU
 
-跑到`Dawn`的官方群里聊了会儿闲篇，根据群里大佬的说法`Dawn`是在原始图形API的基础上实现的`WebGPU`接口并开放在`webgpu.h`文件中，当在网络端并不会访问原始图形API，所以`Dawn`在页面端并不会做任何有用的事情，而`Emscripten`上有个使用`JavaScript`实行的`WebGPU`，并且也开放在`webgpu.h`中，所以想用`C/C++`使用`WebGPU`在浏览器上绘制，使用`Emscripten`而不是`Dawn`。
+跑到`Dawn`的官方群里聊了会儿闲篇，根据群里大佬的说法`Dawn`是在原始图形API的基础上实现的`WebGPU`接口并开放在`webgpu.h`文件中，当在网络端并不会访问原始图形API，所以`Dawn`在页面端并不会做任何有用的事情，而`Emscripten`上有个使用`JavaScript`实现的`WebGPU`，并且也开放在`webgpu.h`中，所以想用`C/C++`使用`WebGPU`在浏览器上绘制，使用`Emscripten`而不是`Dawn`。
 
 ## Emscripten
 
@@ -156,3 +160,41 @@ set https_proxy=127.0.0.1:你VPN或科学工具的端口号
 ```
 
 之后再调用`./emsdk install latest`即可
+
+## Hello-WebGPU
+
+`Dawn`官方群中的一位大佬写的小例子[Hello-WebGPU](https://github.com/cwoffenden/hello-webgpu)，支持`Windows`，`Mac`和`Web`，其中网络端就是使用`Emscripten`实现的，而`Windows`和`Mac`端是使用`Dawn`实现的。
+
+1. 首先将[Hello-WebGPU](https://github.com/cwoffenden/hello-webgpu)克隆下来
+2. 将`emsdk`路径添加到系统环境变量`path`中
+3. 在克隆下来的`hello-webgpu`文件夹下新建`build`文件夹，并在`build`文件夹目录下打开终端
+4. 终端输入如下后回车
+    ```cmd
+    > emcmdprompt.bat
+    ```
+    将会自动构建`Emscripten`的环境
+    *注：有关`emcmdprompt.bat`详情请查看[First things first](https://emscripten.org/docs/getting_started/Tutorial.html#first-things-first)和[Emscripten Windows Command Prompt(emcmdprompt.bat)](https://emscripten.org/docs/tools_reference/emcmdprompt.html#emcmdprompt)*
+5. 终端输入如下后回车（使用`mingw`构建，也可以选择`Ninja`等）
+    ```cmd
+    > emcmake cmake -G "MinGW Makefiles" ..
+    ```
+    ```cmd
+    > mingw32-make
+    ```
+
+    *注：`mingw32-make`来自[llvm-mingw](https://github.com/mstorsjo/llvm-mingw/releases)*
+6. 将会在`build`下构建`.html`，`.js`，`.wasm`目标文件，说明构建成功
+7. 在`build`目录终端中输入如下：
+    ```cmd
+    > python -m http.server
+    ```
+    将会起一个`http`本地服务器
+    可能的输出：
+    ```cmd
+    > Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+    ```
+8. 之后访问`http://localhost:8000/`并点击页面上的`hello-webgpu.html`选项  
+*注：请不要访问`http://[::]:8000/`，具体原因请查看[Don't show anything on Edge dev browser](https://github.com/kainino0x/webgpu-cross-platform-demo/issues/13)*
+
+9. 网络端渲染结果：
+![WebGPU_triangle](../images/WebGPU_triangle.png)
