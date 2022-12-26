@@ -94,7 +94,8 @@ void Turbo::Render::TBuffer::Copy(TBuffer *src, uint64_t srcOffset, uint64_t siz
 {
     if (this->buffer != nullptr && this->buffer->GetVkBuffer() != VK_NULL_HANDLE && src != nullptr)
     {
-        uint64_t copy_size = this->descriptor.size < size ? this->descriptor.size : size;
+        uint64_t copy_size = src->descriptor.size < size ? src->descriptor.size : size;
+        copy_size = copy_size < this->descriptor.size ? copy_size : this->descriptor.size;
 
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         Turbo::Render::TContext *context = resource_allocator->GetContext();
