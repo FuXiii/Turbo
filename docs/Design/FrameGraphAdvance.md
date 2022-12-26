@@ -97,6 +97,10 @@
   >
   >* 更新`资源拷贝传输`章节
 
+* 2022/12/26
+  >
+  >* 更新`Context上下文`章节
+
 ---
 
 # Turbo驱动初步
@@ -1622,6 +1626,8 @@ graph TD;
 在构造完`Context`之后，使用`Context`去构造`WorldRender/Render`进行后面渲染
 
 `Context`需要提供`CreateImage(...)`，`DestroyImage(...)`，`CreateBuffer(...)`，`DestroyBuffer(...)`函数，用于创建和销毁资源
+
+`Context`中应该有一个默认的`CommandBufferPool`，并提供`CommandBuffer* AllocateCommandBuffer()`和`void FreeCommandBuffer(CommandBuffer*)`函数
 
 ## WorldRender/Render 渲染器
 

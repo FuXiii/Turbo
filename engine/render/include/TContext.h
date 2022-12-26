@@ -1,4 +1,5 @@
 #pragma once
+#include "TCommandBufferPool.h"
 #ifndef TURBO_RENDER_TCONTEXT_H
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
@@ -15,6 +16,8 @@ class TDevice;
 class TDeviceQueue;
 class TImage;
 class TBuffer;
+class TCommandBufferPool;
+class TCommandBuffer;
 } // namespace Core
 } // namespace Turbo
 
@@ -30,6 +33,7 @@ class TContext
     Turbo::Core::TPhysicalDevice *physicalDevice = nullptr;
     Turbo::Core::TDevice *device = nullptr;
     Turbo::Core::TDeviceQueue *graphicsQueue = nullptr;
+    Turbo::Core::TCommandBufferPool *commandBufferPool = nullptr;
 
   public:
     TContext();
@@ -40,6 +44,9 @@ class TContext
     // Turbo::Core::TImage *CreateCubeImage(uint32_t width, uint32_t height,uint32_t depth,uint32_t layer/*, flags,TImage*/);
     Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor);
     void DestroyBuffer(Turbo::Core::TBuffer *buffer);
+
+    Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
+    void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();

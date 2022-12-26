@@ -15,6 +15,7 @@ void Turbo::Render::TBuffer::Create(const std::string &name, const Descriptor &d
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         this->buffer = resource_allocator->CreateBuffer(descriptor);
         this->allocator = allocator;
+        this->descriptor = descriptor;
     }
 }
 
@@ -71,9 +72,7 @@ void Turbo::Render::TBuffer::Copy(void *src, uint64_t size)
                 Turbo::Render::TContext *context = resource_allocator->GetContext();
                 Turbo::Core::TDeviceQueue *queue = context->GetDeviceQueue();
 
-                // TODO: 需要优化，这里需要Context中的CommandPool，而不是手动创建
-                Turbo::Core::TCommandBufferPool *command_buffer_pool = new Turbo::Core::TCommandBufferPool(queue);
-                Turbo::Core::TCommandBuffer *command_buffer = command_buffer_pool->Allocate();
+                Turbo::Core::TCommandBuffer *command_buffer = resource_allocator->AllocateCommandBuffer();
                 command_buffer->Begin();
                 command_buffer->CmdCopyBuffer(temp_buffer.buffer, this->buffer, 0, 0, copy_size);
                 command_buffer->End();
@@ -83,8 +82,7 @@ void Turbo::Render::TBuffer::Copy(void *src, uint64_t size)
                 copy_fence->WaitUntil();
 
                 delete copy_fence;
-                command_buffer_pool->Free(command_buffer);
-                delete command_buffer_pool;
+                resource_allocator->FreeCommandBuffer(command_buffer);
             }
 
             temp_buffer.Destroy(this->allocator);

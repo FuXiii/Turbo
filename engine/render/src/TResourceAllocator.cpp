@@ -42,3 +42,13 @@ void Turbo::Render::TResourceAllocator::DestroyBuffer(Turbo::Core::TBuffer *buff
 {
     this->context->DestroyBuffer(buffer);
 }
+
+Turbo::Core::TCommandBuffer *Turbo::Render::TResourceAllocator::AllocateCommandBuffer()
+{
+    return this->context->AllocateCommandBuffer();
+}
+
+void Turbo::Render::TResourceAllocator::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
+{
+    this->context->FreeCommandBuffer(commandBuffer);
+}
