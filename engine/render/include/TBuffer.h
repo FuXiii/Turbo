@@ -37,12 +37,13 @@ class TBuffer
   public:
     struct Descriptor
     {
-        TBufferUsageBits usages;
+        TBufferUsages usages;
         uint64_t size;
         TDomain domain;
     };
 
   private:
+    void *allocator = nullptr;
     Turbo::Core::TBuffer *buffer = nullptr;
     Descriptor descriptor;
 
@@ -53,7 +54,11 @@ class TBuffer
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
     void Destroy(void *allocator);
 
+    TBufferUsages GetUsages();
+    uint64_t GetSize();
     TDomain GetDomain();
+
+    void Copy(void *src, uint64_t size);
 };
 } // namespace Render
 } // namespace Turbo

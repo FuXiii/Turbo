@@ -89,6 +89,18 @@
   >
   >* 更新`资源`章节，添加更新`Texture`和`3DImage`说明
 
+* 2022/12/24
+  >
+  >* 更新`资源拷贝传输`章节
+
+* 2022/12/25
+  >
+  >* 更新`资源拷贝传输`章节
+
+* 2022/12/26
+  >
+  >* 更新`Context上下文`章节
+
 ---
 
 # Turbo驱动初步
@@ -1263,7 +1275,7 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
 资源的拷贝传输基本上有两种方式：
 
 1. 创建`CPU`端资源，之后使用`memcpy(...)`直接将数据拷贝至资源中
-2. 创建`GPU`端资源，之后使用`commandbuffer`将数据拷贝至资源中
+2. 创建`GPU`端资源，之后使用`Commandbuffer`将数据拷贝至资源中
 
 资源的拷贝传输包括：
 
@@ -1365,6 +1377,123 @@ Images created with `tiling` equal to `VK_IMAGE_TILING_LINEAR` have further rest
     }
     */
     ```
+
+资源拷贝传输大致可分为3种情况：
+
+1. 以void*为代表的的数据资源
+2. 以Buffer为代表的的数据资源
+3. 以Image为代表的的数据资源
+
+所以正常来说`void*`，`Buffer`，`Image`三者之间应该两两互相可拷贝传输
+
+```mermaid
+graph LR;
+    VoidPtrSrc["void*"]
+    BufferSrc["Buffer"]
+    ImageSrc["Image"]
+
+    VoidPtrDst["void*"]
+    BufferDst["Buffer"]
+    ImageDst["Image"]
+
+    VoidPtrSrc<-..->VoidPtrDst
+    VoidPtrSrc<---->BufferDst
+    VoidPtrSrc<---->ImageDst
+
+    BufferSrc<---->VoidPtrDst
+    BufferSrc<---->BufferDst
+    BufferSrc<---->ImageDst
+
+    ImageSrc<---->VoidPtrDst
+    ImageSrc<---->BufferDst
+    ImageSrc<---->ImageDst
+```
+
+1. `void*`↔`void*`  
+    此种情况属于程序自身内存拷贝，不属于`Turbo`负责的范畴
+
+2. `void*`→`Buffer`
+
+    ```CXX
+    void* some_data;
+    Buffer buffer;
+    buffer.Copy(some_data,size);
+    ```
+
+    >`void Buffer::Copy(void* src,uint32_t size)`
+    >
+    >```mermaid
+    >graph TD;
+    >    IsCPUVisible{{资源能否在CPU端被访问}}
+    >    UseMemcpy[使用memcpy进行数据拷贝]
+    >    UseTempResource[使用临时资源进行数据拷贝]
+    >
+    >
+    >    IsCPUVisible--能-->UseMemcpy
+    >    IsCPUVisible--不能-->UseTempResource
+    >```
+
+3. `void*`→`Image`
+
+    同`void*`→`Buffer`
+
+    >`void TImage::Copy(void* src,uint32_t size)`
+
+4. `Buffer`→`void*`
+
+    有个前提是`Buffer`必须是`CPU`域的，也就是`CPU`可访问资源
+
+    >`void* Buffer::Open()`
+
+    >`void Buffer::Close()`
+
+    ```CXX
+    Buffer buffer;
+    void* data_ptr = buffer.Open();
+    //使用data_ptr将数据拷贝出来
+    //...
+    buffer.Close();
+    ```
+
+5. `Buffer`→`Buffer`
+
+    ```mermaid
+    graph TD;
+        IsSrcAndDstCPUVisible{{目标Buffer和源Buffer能否都能在CPU端被访问}}
+        UseMemcpy[使用memcpy进行数据拷贝]
+        UseCommandBuffer[使用CommandBuffer进行数据拷贝]
+
+
+        IsSrcAndDstCPUVisible--能-->UseMemcpy
+        IsSrcAndDstCPUVisible--不能-->UseCommandBuffer
+    ```
+
+    >`void Buffer::Copy(const Buffer& buffer)`
+
+6. `Buffer`→`Image`
+
+    使用`CommandBuffer::CmdCopyBufferToImage(...)`
+
+    >`void Image::Copy(const Buffer& buffer)`
+
+7. `Image`→`void*`
+    同 `Buffer`→`void*`
+
+    >`void* Image::Open()`
+
+    >`void Image::Close()`
+
+8. `Image`→`Buffer`
+
+    使用`CommandBuffer::CmdCopyImageToBuffer(...)`
+
+    >`void Buffer::Copy(const Image& image)`
+
+9. `Image`→`Image`
+
+    使用`CommandBuffer::CmdCopyImage(...)`或`CommandBuffer::CmdBlitImage(...)`
+
+    >`void Image::Copy(const Image& image)`
 
 ## Image的Format
 
@@ -1497,6 +1626,8 @@ graph TD;
 在构造完`Context`之后，使用`Context`去构造`WorldRender/Render`进行后面渲染
 
 `Context`需要提供`CreateImage(...)`，`DestroyImage(...)`，`CreateBuffer(...)`，`DestroyBuffer(...)`函数，用于创建和销毁资源
+
+`Context`中应该有一个默认的`CommandBufferPool`，并提供`CommandBuffer* AllocateCommandBuffer()`和`void FreeCommandBuffer(CommandBuffer*)`函数
 
 ## WorldRender/Render 渲染器
 

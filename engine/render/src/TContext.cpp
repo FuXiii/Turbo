@@ -1,6 +1,7 @@
 #include "TContext.h"
 #include "TImage.h"
 #include <core/include/TBuffer.h>
+#include <core/include/TCommandBufferPool.h>
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
 #include <core/include/TImage.h>
@@ -162,10 +163,14 @@ Turbo::Render::TContext::TContext()
     vk_physical_device_features.sampleRateShading = VK_TRUE;
     this->device = new Turbo::Core::TDevice(this->physicalDevice, nullptr, &enable_device_extensions, &vk_physical_device_features);
     this->graphicsQueue = this->device->GetBestGraphicsQueue();
+
+    this->commandBufferPool = new Turbo::Core::TCommandBufferPool(this->graphicsQueue);
 }
 
 Turbo::Render::TContext::~TContext()
 {
+    delete this->commandBufferPool;
+    this->commandBufferPool = nullptr;
     this->graphicsQueue = nullptr;
     delete this->device;
     this->physicalDevice = nullptr;
@@ -301,6 +306,16 @@ void Turbo::Render::TContext::DestroyBuffer(Turbo::Core::TBuffer *buffer)
     {
         delete buffer;
     }
+}
+
+Turbo::Core::TCommandBuffer *Turbo::Render::TContext::AllocateCommandBuffer()
+{
+    return this->commandBufferPool->Allocate();
+}
+
+void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
+{
+    this->commandBufferPool->Free(commandBuffer);
 }
 
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()

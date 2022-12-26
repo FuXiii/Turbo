@@ -1946,3 +1946,29 @@ Turbo是渲染引擎
   >
   >* `./docs/Desgin`下将`WebGPU_Dawn.md`重命名为`WebGPU_CCPP.md`
   >* 更新`./docs/Desgin`下`WebGPU_CCPP`
+  >* `./engine/render`下`TBuffer::Descriptor::usages`类型由原来的`TBufferUsageBits`改为`TBufferUsages`
+  >* `./engine/render`下`TBuffer`中增加`TBufferUsages GetUsages()`成员函数
+  >* `./engine/render`下`TBuffer`中增加`uint64_t GetSize()`成员函数
+  >* `./engine/render`下`TBuffer`中增加`TDomain GetDomain()`成员函数
+  >* `./engine/render`下`TImage`中`TImageUsages GetUsage()`成员函数更名为`TImageUsages GetUsages()`
+
+* 2022/12/24 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2022/12/25 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/render`下`TBuffer`中增加`void Copy(void *src, uint64_t size)`成员函数
+  >* `./engine/render`下`TBuffer`中增加`void *allocator = nullptr`成员变量
+
+* 2022/12/26
+  >
+  >* 更新`./docs/Desgin`下`WebGPU_CCPP.md`
+  >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBufferPool *commandBufferPool = nullptr`成员变量
+  >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBuffer *AllocateCommandBuffer()`成员函数
+  >* `./engine/render`下`TContext`中增加`void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)`成员函数
+  >* `./engine/render`下`TResourceAllocator`中增加`Turbo::Core::TCommandBuffer *AllocateCommandBuffer()`成员函数
+  >* `./engine/render`下`TResourceAllocator`中增加`void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)`成员函数
+  >* `./engine/render`下`TBuffer`中`void Copy(void *src, uint64_t size)`成员函数进行优化
+

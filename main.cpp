@@ -669,7 +669,7 @@ int main()
     glm::mat4 sky_cube_view = glm::mat4(glm::mat3(view));
     glm::mat4 sky_cube_mvp = projection * sky_cube_view * glm::mat4(1.0f);
 
-    Turbo::Core::TBuffer *mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(mvp));
+    Turbo::Core::TBuffer *mvp_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER /*| Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST*/, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(mvp));
     void *mvp_ptr = mvp_buffer->Map();
     memcpy(mvp_ptr, &mvp, sizeof(mvp));
     mvp_buffer->Unmap();

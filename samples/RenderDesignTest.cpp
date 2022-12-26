@@ -1,7 +1,10 @@
+#include "TBuffer.h"
 #include "TImage.h"
+#include <chrono>
 #include <iostream>
 #include <render/include/TContext.h>
 #include <render/include/TResourceAllocator.h>
+#include <vector>
 
 int main()
 {
@@ -121,11 +124,72 @@ int main()
     depth_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
 
     Turbo::Render::TDepthTexture2D depth_texture_2d;
-
     depth_texture_2d.Create("depth_texture_2d", depth_texture_2d_descriptor, &resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
 
     std::cout << "======================================== depth texture2d" << std::endl;
+
+    Turbo::Render::TBuffer::Descriptor vertex_buffer_cpu_descriptor;
+    vertex_buffer_cpu_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_VERTEX_BUFFER;
+    vertex_buffer_cpu_descriptor.size = 1024 * 1024;
+    vertex_buffer_cpu_descriptor.domain = Turbo::Render::TDomainBits::CPU;
+
+    Turbo::Render::TBuffer vertex_buffer_cpu;
+    vertex_buffer_cpu.Create("vertex_buffer_cpu", vertex_buffer_cpu_descriptor, &resource_allocator);
+    vertex_buffer_cpu.Destroy(&resource_allocator);
+
+    std::cout << "======================================== vertex buffer cpu" << std::endl;
+
+    Turbo::Render::TBuffer::Descriptor vertex_buffer_gpu_descriptor;
+    vertex_buffer_gpu_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_VERTEX_BUFFER;
+    vertex_buffer_gpu_descriptor.size = 1024 * 1024;
+    vertex_buffer_gpu_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TBuffer vertex_buffer_gpu;
+    vertex_buffer_gpu.Create("vertex_buffer_gpu", vertex_buffer_gpu_descriptor, &resource_allocator);
+    vertex_buffer_gpu.Destroy(&resource_allocator);
+
+    std::cout << "======================================== vertex buffer gpu" << std::endl;
+
+    uint32_t create_count = 2048;
+    std::vector<Turbo::Render::TTexture2D> texture2ds(create_count);
+    std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
+    for (uint32_t create_index = 0; create_index < create_count; create_index++)
+    {
+        Turbo::Render::TTexture2D::Descriptor temp_texture_2d_descriptor = {};
+        temp_texture_2d_descriptor.width = 512;
+        temp_texture_2d_descriptor.height = 512;
+        temp_texture_2d_descriptor.mipLevels = 1;
+        temp_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
+        temp_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+        Turbo::Render::TTexture2D temp_texture_2d;
+        temp_texture_2d.Create("temp_texture_2d", temp_texture_2d_descriptor, &resource_allocator);
+        texture2ds[create_index] = temp_texture_2d;
+    }
+    std::chrono::system_clock::time_point end_time = std::chrono::system_clock::now();
+    std::chrono::duration<double> delta_time = end_time - start_time;
+    std::cout << "create " << create_count << " Turbo::Render::TTexture2D use:" << delta_time.count() << "s" << std::endl;
+
+    for (Turbo::Render::TTexture2D &texture2d_item : texture2ds)
+    {
+        texture2d_item.Destroy(&resource_allocator);
+    }
+
+    //========================================================================
+
+    std::vector<uint32_t> index_datas{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    uint32_t create_buffer_size = index_datas.size() * sizeof(uint32_t);
+
+    Turbo::Render::TBuffer::Descriptor copy_buffer_descriptor = {};
+    copy_buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER;
+    copy_buffer_descriptor.size = create_buffer_size;
+    copy_buffer_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TBuffer copy_buffer;
+    copy_buffer.Create("copy_buffer", copy_buffer_descriptor, &resource_allocator);
+    copy_buffer.Copy(index_datas.data(), create_buffer_size);
+    copy_buffer.Destroy(&resource_allocator);
 
     return 0;
 }

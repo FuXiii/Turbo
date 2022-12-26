@@ -60,7 +60,7 @@ uint32_t Turbo::Render::TImage::GetMipLevels()
     return this->descriptor.mipLevels;
 }
 
-Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsage()
+Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsages()
 {
     return this->descriptor.usages;
 }

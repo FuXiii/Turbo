@@ -10,6 +10,8 @@ namespace Core
 {
 class TImage;
 class TBuffer;
+class TCommandBufferPool;
+class TCommandBuffer;
 } // namespace Core
 } // namespace Turbo
 
@@ -33,6 +35,9 @@ class TResourceAllocator
 
     Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor);
     void DestroyBuffer(Turbo::Core::TBuffer *buffer);
+
+    Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
+    void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 };
 } // namespace Render
 } // namespace Turbo
