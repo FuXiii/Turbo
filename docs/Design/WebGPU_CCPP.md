@@ -174,7 +174,7 @@ set https_proxy=127.0.0.1:你VPN或科学工具的端口号
     ```
     将会自动构建`Emscripten`的环境
     *注：有关`emcmdprompt.bat`详情请查看[First things first](https://emscripten.org/docs/getting_started/Tutorial.html#first-things-first)和[Emscripten Windows Command Prompt(emcmdprompt.bat)](https://emscripten.org/docs/tools_reference/emcmdprompt.html#emcmdprompt)*
-5. 终端输入如下后回车（使用`mingw`构建，也可以选择`Ninja`等）
+5. 终端输入如下后回车（使用`mingw`构建，也可以选择`ninja`等）
     ```cmd
     > emcmake cmake -G "MinGW Makefiles" ..
     ```
