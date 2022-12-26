@@ -1971,4 +1971,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TResourceAllocator`中增加`Turbo::Core::TCommandBuffer *AllocateCommandBuffer()`成员函数
   >* `./engine/render`下`TResourceAllocator`中增加`void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)`成员函数
   >* `./engine/render`下`TBuffer`中`void Copy(void *src, uint64_t size)`成员函数进行优化
+  >* `./engine/render`下`TBuffer`中增加`void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size)`成员函数
 

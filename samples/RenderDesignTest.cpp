@@ -191,5 +191,28 @@ int main()
     copy_buffer.Copy(index_datas.data(), create_buffer_size);
     copy_buffer.Destroy(&resource_allocator);
 
+    //
+
+    Turbo::Render::TBuffer::Descriptor copy_temp_buffer_descriptor = {};
+    copy_temp_buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER;
+    copy_temp_buffer_descriptor.size = create_buffer_size;
+    copy_temp_buffer_descriptor.domain = Turbo::Render::TDomainBits::CPU;
+
+    Turbo::Render::TBuffer copy_temp_buffer;
+    copy_temp_buffer.Create("copy_temp_buffer", copy_temp_buffer_descriptor, &resource_allocator);
+    copy_temp_buffer.Copy(index_datas.data(), create_buffer_size);
+
+    Turbo::Render::TBuffer::Descriptor copy_gpu_buffer_descriptor = {};
+    copy_gpu_buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER;
+    copy_gpu_buffer_descriptor.size = create_buffer_size;
+    copy_gpu_buffer_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+
+    Turbo::Render::TBuffer copy_gpu_buffer;
+    copy_gpu_buffer.Create("copy_gpu_buffer", copy_gpu_buffer_descriptor, &resource_allocator);
+    copy_gpu_buffer.Copy(&copy_temp_buffer, 0, copy_temp_buffer.GetSize());
+
+    copy_temp_buffer.Destroy(&resource_allocator);
+    copy_gpu_buffer.Destroy(&resource_allocator);
+
     return 0;
 }
