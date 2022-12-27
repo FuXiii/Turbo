@@ -101,6 +101,11 @@
   >
   >* 更新`Context上下文`章节
 
+* 2022/12/27
+  >
+  >* 更新`Context上下文`章节
+  >* 更新`用户自定义PassNode`章节
+
 ---
 
 # Turbo驱动初步
@@ -1629,6 +1634,8 @@ graph TD;
 
 `Context`中应该有一个默认的`CommandBufferPool`，并提供`CommandBuffer* AllocateCommandBuffer()`和`void FreeCommandBuffer(CommandBuffer*)`函数
 
+`Context`中应该有一个默认的`CommandBuffer`
+
 ## WorldRender/Render 渲染器
 
 用户在使用`Context`创建完`WorldRender/Render`后调用`WorldRender/Render::DrawFrame(...)`，其中`DrawFrame(...)`函数会去构建一帧的`FrameGraph`并进行一帧的渲染
@@ -1829,7 +1836,62 @@ private:
 
 ## 用户自定义`PassNode`
 
-用户如何自定义`PassNode`？接口如何设计？
+一个`PassNode`代表一个`GPU过程`，`GPU过程`主要有两个过程：
+
+1. RenderPass：绘制过程
+2. ComputePass：计算过程
+
+而在`RenderPass`绘制过程中是可以绑定调用`ComputePass`的，所以`PassNode`主要是用于描述`绘制过程`。
+
+而`PassNode`有两个过程`Setup`初始化阶段和`Execute`执行阶段
+
+1. `Setup`初始化阶段  
+该阶段主要是描述各`Subpass`，其中`Subpass`用于描述对各`Image`的读写情况，之后`Turbo`会根据相应配置创建相应的`RenderPass`，`FrameBuffer`等
+
+```mermaid
+graph TD;
+    PassNode>"PassNode::Setup"]
+    subgraph Subpass0[Subpass0]
+        direction LR
+        Depth0-.读.->Subpass
+        Color0-->Subpass
+        Subpass--写-->Color1
+        Subpass--写-->Color2
+        Subpass--写-->Depth2
+
+    end
+    Subpass1["Subpass1"]
+    Subpass2["Subpass2"]
+    Subpassn["Subpass..."]
+    
+    PassNode-->Subpass0
+    Subpass0-->Subpass1
+    Subpass1-->Subpass2
+    Subpass2-->Subpassn
+```
+
+2. `Execute`执行阶段  
+执行阶段就是运行`Setup`阶段设置的各种`Subpass`，执行阶段会去创建`Pipeline`，绑定`CommandBuffer`等
+
+```mermaid
+graph TD;
+    PassNode>"PassNode::Execute"]
+            BeginRenderPass["BeginRenderPass(Turbo的任务，会自动调用)"]
+                CmdBindPipeline[CmdBindPipeline]
+                CmdBindVertexBuffer[CmdBindVertexBuffer]
+                CmdDraw[CmdDraw]
+                CmdNextSubpass[CmdNextSubpass]
+                Etc["..."]
+            EndRenderPass["EndRenderPass(Turbo的任务，会自动调用)"]
+
+            PassNode-->BeginRenderPass
+            BeginRenderPass-->CmdBindPipeline
+            CmdBindPipeline-->CmdBindVertexBuffer
+            CmdBindVertexBuffer-->CmdDraw
+            CmdDraw-->CmdNextSubpass
+            CmdNextSubpass-->Etc
+            Etc-->EndRenderPass
+```
 
 ---
 `mermaid`图测试

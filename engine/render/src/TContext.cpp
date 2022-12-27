@@ -1,6 +1,7 @@
 #include "TContext.h"
 #include "TImage.h"
 #include <core/include/TBuffer.h>
+#include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
@@ -165,6 +166,9 @@ Turbo::Render::TContext::TContext()
     this->graphicsQueue = this->device->GetBestGraphicsQueue();
 
     this->commandBufferPool = new Turbo::Core::TCommandBufferPool(this->graphicsQueue);
+    this->commandBuffer = this->commandBufferPool->Allocate();
+
+    this->commandBuffer->Begin();
 }
 
 Turbo::Render::TContext::~TContext()
@@ -336,4 +340,9 @@ Turbo::Core::TDevice *Turbo::Render::TContext::GetDevice()
 Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
 {
     return this->graphicsQueue;
+}
+
+Turbo::Core::TCommandBuffer *Turbo::Render::TContext::GetCommandBuffer()
+{
+    return this->commandBuffer;
 }
