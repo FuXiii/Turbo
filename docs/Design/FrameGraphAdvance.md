@@ -1888,7 +1888,7 @@ struct CustomPassData
 
     Subpass subpass0 = builder.CreateSubpass();    
     subpass0.Write(data.colorTex);
-    subpass1.Write(data.depthTex);
+    subpass0.Write(data.depthTex);
 
     Subpass subpass1 = builder.CreateSubpass();
     subpass1.Read(data.colorTex);
