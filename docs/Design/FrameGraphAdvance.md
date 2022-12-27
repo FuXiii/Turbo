@@ -1877,11 +1877,15 @@ graph TD;
 graph TD;
     PassNode>"PassNode::Execute"]
             BeginRenderPass["BeginRenderPass(Turbo的任务，会自动调用)"]
-                CmdBindPipeline[CmdBindPipeline]
-                CmdBindVertexBuffer[CmdBindVertexBuffer]
-                CmdDraw[CmdDraw]
-                CmdNextSubpass[CmdNextSubpass]
-                Etc["..."]
+                subgraph Execute
+                    direction TB
+                    CmdBindPipeline[CmdBindPipeline]
+                    CmdBindVertexBuffer[CmdBindVertexBuffer]
+                    CmdDraw[CmdDraw]
+                    CmdNextSubpass[CmdNextSubpass]
+                    Etc["..."]
+                end
+                
             EndRenderPass["EndRenderPass(Turbo的任务，会自动调用)"]
 
             PassNode-->BeginRenderPass
