@@ -105,6 +105,7 @@
   >
   >* 更新`Context上下文`章节
   >* 更新`用户自定义PassNode`章节
+  >* 创建`Mesh，Material和Drawable`章节
 
 ---
 
@@ -1883,19 +1884,48 @@ graph TD;
                     CmdBindVertexBuffer[CmdBindVertexBuffer]
                     CmdDraw[CmdDraw]
                     CmdNextSubpass[CmdNextSubpass]
-                    Etc["..."]
+                    EtcExecute["..."]
+                end
+
+                subgraph MeshMaterial["Mesh/Material"]
+                    direction TB
+                    CmdBindMesh[CmdBindMesh]
+                    CmdBindMaterial[CmdBindMaterial]
+                    CmdMeshDraw[CmdMeshDraw]
+                    EtcMeshMaterial["..."]
                 end
                 
             EndRenderPass["EndRenderPass(Turbo的任务，会自动调用)"]
 
             PassNode-->BeginRenderPass
-            BeginRenderPass-->CmdBindPipeline
+            BeginRenderPass--底层-->CmdBindPipeline
             CmdBindPipeline-->CmdBindVertexBuffer
             CmdBindVertexBuffer-->CmdDraw
             CmdDraw-->CmdNextSubpass
-            CmdNextSubpass-->Etc
-            Etc-->EndRenderPass
+            CmdNextSubpass-->EtcExecute
+            EtcExecute-->EndRenderPass
+
+            BeginRenderPass-.高层.->CmdBindMesh
+            CmdBindMesh-.->CmdBindMaterial
+            CmdBindMaterial-.->CmdMeshDraw
+            CmdMeshDraw-.->EtcMeshMaterial
+            EtcMeshMaterial-.->EndRenderPass
 ```
+
+## Mesh，Material和Drawable
+
+`Turbo`上层想要抽象出`Mesh`，`Material`和`Drawable`，其中：
+
+* `Mesh`代表三维模型的各种顶点信息，包括：
+    * 顶点位置数据
+    * 顶点法线数据
+    * 顶点索引数据
+    * 顶点UV数据
+    * 等等
+
+* `Material`代表渲染流程，也就是代表着：`RenderPass`中的配置和渲染指令`Command`
+
+* （非必要）`Drawable`或者叫`MeshDrawable`，是`Mesh`和`Material`的配对
 
 ---
 `mermaid`图测试
