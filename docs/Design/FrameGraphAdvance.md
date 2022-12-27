@@ -1871,6 +1871,32 @@ graph TD;
     Subpass2-->Subpassn
 ```
 
+```CXX
+struct CustomPassData
+{
+    Resource colorTex;
+    Resource normalTex;
+    Resource depthTex;
+}
+
+//FrameGraph::PassNode::Setup
+[&](TFrameGraph::TBuilder &builder, CustomPassData &data)
+{
+    data.colorTex = builder.Create<Texture2D>("color",{512,512,Usage::Color})
+    data.normalTex = builder.Create<Texture2D>("normal",{512,512,Usage::Normal})
+    data.depthTex = builder.Create<DepthTexture2D>("depth",{512,512,Usage::Depth})
+
+    Subpass subpass0 = builder.CreateSubpass();    
+    subpass0.Write(data.colorTex);
+    subpass1.Write(data.depthTex);
+
+    Subpass subpass1 = builder.CreateSubpass();
+    subpass1.Read(data.colorTex);
+    subpass1.Read(data.depthTex);
+    subpass1.Write(data.normalTex);
+}
+```
+
 2. `Execute`执行阶段  
 执行阶段就是运行`Setup`阶段设置的各种`Subpass`，执行阶段会去创建`Pipeline`，绑定`CommandBuffer`等
 
@@ -1917,11 +1943,11 @@ graph TD;
 `Turbo`上层想要抽象出`Mesh`，`Material`和`Drawable`，其中：
 
 * `Mesh`代表三维模型的各种顶点信息，包括：
-    * 顶点位置数据
-    * 顶点法线数据
-    * 顶点索引数据
-    * 顶点UV数据
-    * 等等
+  * 顶点位置数据
+  * 顶点法线数据
+  * 顶点索引数据
+  * 顶点UV数据
+  * 等等
 
 * `Material`代表渲染流程，也就是代表着：`RenderPass`中的配置和渲染指令`Command`
 
