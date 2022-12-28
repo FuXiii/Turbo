@@ -112,6 +112,7 @@
   >* 更新`用户自定义PassNode`章节
   >* 创建`Pipeline`章节
   >* 创建`RenderPass`章节
+  >
 ---
 
 # Turbo驱动初步
@@ -2001,17 +2002,69 @@ graph TD;
 ## Pipeline
 
 `Pipeline`主要有两类
+
 1. Graphic图形管线
 2. Compute计算管线
 
 其中计算管线比较简单，只需要指定计算着色器即可。
+
 ```CXX
+class ComputePipeline
+{
+    ComputeShader* computeShader;
+};
+
 ComputeShader* compute_shader = new ...;
 ComputePipeline compute_pipeline(compute_shader);
+
 //FrameGraph::PassNode::Execute
 context->BindPipeine(compute_pipeline);
 context->Dispatch(...);
 ```
+
+而对于图形管线，需要的相对较多了（大部分有默认值）：
+
+```CXX
+class GraphicsPipeline
+{
+    VertexShader* vertexShader;
+    FragmentShader* fragmentShader;
+    Topology topology;//POINT_LIST,LINE_LIST,LINE_STRIP,TRIANGLE_LIST等
+    Polygon polygon;//FILL,LINE,POINT等
+    Cull cull;//Front|Back
+    FrontFace front;//COUNTER_CLOCKWISE,CLOCKWISE
+    float lineWidth;
+    bool depthTestEnable;
+    bool depthWriteEnable;
+    CompareOp depthCompareOp;//LESS_OR_EQUAL
+
+    bool blendEnable;
+    BlendFactor srcColorBlendFactor;
+    BlendFactor dstColorBlendFactor;
+    BlendOp colorBlendOp;
+    BlendFactor srcAlphaBlendFactor;
+    BlendFactor dstAlphaBlendFactor;
+    BlendOp alphaBlendOp;
+
+    ...等
+    /*bool stencilTestEnable;
+    StencilOp frontFailOp;
+    StencilOp frontPassOp;
+    StencilOp frontDepthFailOp;
+    CompareOp frontCompareOp;*/
+};
+
+VertexShader* vertex_shader = new ...;
+FragmentShader* fragment_shader = new ...;
+GraphicsPipeline graphics_pipeline(vertex_shader, fragment_shader);
+//FrameGraph::PassNode::Execute
+context->BindPipeine(graphics_pipeline);//并不会真的去创建Pipeline，只是做记录，在绘制时进行真正的pipeline创建
+context->BindVertexBuffer(vertex_buffer);
+context->BindIndexBuffer(index_buffer);
+context->Draw(...);//创建pipeline，并绘制
+```
+
+`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建
 
 ## RenderPass
 
