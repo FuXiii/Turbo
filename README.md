@@ -1978,3 +1978,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBuffer *commandBuffer`成员变量
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBuffer *GetCommandBuffer()`成员变量
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2022/12/28 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
