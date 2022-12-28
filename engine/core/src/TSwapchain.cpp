@@ -50,7 +50,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         }
 
         // arrayLayers
-        if (this->surface->GetMaxImageArrayLayers() > this->imageArrayLayers)
+        if (this->surface->GetMaxImageArrayLayers() < this->imageArrayLayers)
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the arrary of swapchain out range of [surface.minArrary surface.maxArrary]");
         }
