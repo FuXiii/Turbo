@@ -1983,3 +1983,7 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* 修改`./engine/core`下的`TSwapchain::InternalCreate()`中的`if (this->surface->GetMaxImageArrayLayers() > this->imageArrayLayers)`，更改成`if (this->surface->GetMaxImageArrayLayers() < this->imageArrayLayers)`原先是个`Bug`
+
+* 2022/12/29 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
