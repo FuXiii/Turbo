@@ -59,6 +59,7 @@ class TBuffer
     TDomain GetDomain();
 
     void Copy(void *src, uint64_t size);
+    void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size);
 };
 } // namespace Render
 } // namespace Turbo

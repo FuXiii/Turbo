@@ -1962,7 +1962,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer`中增加`void Copy(void *src, uint64_t size)`成员函数
   >* `./engine/render`下`TBuffer`中增加`void *allocator = nullptr`成员变量
 
-* 2022/12/26
+* 2022/12/26 设计架构
   >
   >* 更新`./docs/Desgin`下`WebGPU_CCPP.md`
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBufferPool *commandBufferPool = nullptr`成员变量
@@ -1971,4 +1971,15 @@ Turbo是渲染引擎
   >* `./engine/render`下`TResourceAllocator`中增加`Turbo::Core::TCommandBuffer *AllocateCommandBuffer()`成员函数
   >* `./engine/render`下`TResourceAllocator`中增加`void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)`成员函数
   >* `./engine/render`下`TBuffer`中`void Copy(void *src, uint64_t size)`成员函数进行优化
+  >* `./engine/render`下`TBuffer`中增加`void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size)`成员函数
 
+* 2022/12/27 设计架构
+  >
+  >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBuffer *commandBuffer`成员变量
+  >* `./engine/render`下`TContext`中增加`Turbo::Core::TCommandBuffer *GetCommandBuffer()`成员变量
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2022/12/28 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* 修改`./engine/core`下的`TSwapchain::InternalCreate()`中的`if (this->surface->GetMaxImageArrayLayers() > this->imageArrayLayers)`，更改成`if (this->surface->GetMaxImageArrayLayers() < this->imageArrayLayers)`原先是个`Bug`

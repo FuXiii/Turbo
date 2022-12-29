@@ -101,6 +101,24 @@
   >
   >* 更新`Context上下文`章节
 
+* 2022/12/27
+  >
+  >* 更新`Context上下文`章节
+  >* 更新`用户自定义PassNode`章节
+  >* 创建`Mesh，Material和Drawable`章节
+
+* 2022/12/28
+  >
+  >* 更新`用户自定义PassNode`章节
+  >* 创建`Pipeline`章节
+  >* 创建`RenderPass`章节
+  >
+
+* 2022/12/29
+  >
+  >* 更新`Pipeline`章节
+  >* 创建`Pipeline的VertexBinding`章节
+  >
 ---
 
 # Turbo驱动初步
@@ -1629,6 +1647,8 @@ graph TD;
 
 `Context`中应该有一个默认的`CommandBufferPool`，并提供`CommandBuffer* AllocateCommandBuffer()`和`void FreeCommandBuffer(CommandBuffer*)`函数
 
+`Context`中应该有一个默认的`CommandBuffer`
+
 ## WorldRender/Render 渲染器
 
 用户在使用`Context`创建完`WorldRender/Render`后调用`WorldRender/Render::DrawFrame(...)`，其中`DrawFrame(...)`函数会去构建一帧的`FrameGraph`并进行一帧的渲染
@@ -1829,7 +1849,251 @@ private:
 
 ## 用户自定义`PassNode`
 
-用户如何自定义`PassNode`？接口如何设计？
+一个`PassNode`代表一个`GPU过程`，`GPU过程`主要有两个过程：
+
+1. RenderPass：绘制过程
+2. ComputePass：计算过程
+
+而在`RenderPass`绘制过程中是可以绑定调用`ComputePass`的，所以`PassNode`主要是用于描述`绘制过程`。
+
+而`PassNode`有两个阶段：`Setup`初始化阶段和`Execute`执行阶段
+
+1. `Setup`初始化阶段  
+该阶段主要是描述各`Subpass`，其中`Subpass`用于描述对各`Image`的读写情况，之后`Turbo`会根据相应配置创建相应的`RenderPass`，`FrameBuffer`等
+
+```mermaid
+graph TD;
+    PassNode>"PassNode::Setup"]
+    subgraph Subpass0[Subpass0]
+        direction LR
+        Depth0-.读.->Subpass
+        Color0-->Subpass
+        Subpass--写-->Color1
+        Subpass--写-->Color2
+        Subpass--写-->Depth2
+
+    end
+    Subpass1["Subpass1"]
+    Subpass2["Subpass2"]
+    Subpassn["Subpass..."]
+    
+    PassNode-->Subpass0
+    Subpass0-->Subpass1
+    Subpass1-->Subpass2
+    Subpass2-->Subpassn
+```
+
+```CXX
+struct CustomPassData
+{
+    Resource colorTex;
+    Resource normalTex;
+    Resource depthTex;
+}
+
+//FrameGraph::PassNode::Setup
+[&](TFrameGraph::TBuilder &builder, CustomPassData &data)
+{
+    data.colorTex = builder.Create<Texture2D>("color",{512,512,Usage::Color})
+    data.normalTex = builder.Create<Texture2D>("normal",{512,512,Usage::Normal})
+    data.depthTex = builder.Create<DepthTexture2D>("depth",{512,512,Usage::Depth})
+
+    Subpass subpass0 = builder.CreateSubpass();    
+    subpass0.Write(data.colorTex);
+    subpass0.Write(data.depthTex);
+
+    Subpass subpass1 = builder.CreateSubpass();
+    subpass1.Read(data.colorTex);
+    subpass1.Read(data.depthTex);
+    subpass1.Write(data.normalTex);
+}
+```
+
+2. `Execute`执行阶段  
+执行阶段就是运行`Setup`阶段设置的各种`Subpass`，执行阶段会去创建`Pipeline`，绑定`CommandBuffer`等
+
+```mermaid
+graph TD;
+    PassNode>"PassNode::Execute"]
+            BeginRenderPass["BeginRenderPass"]
+                subgraph Execute
+                    direction TB
+                    CmdBindPipeline[CmdBindPipeline]
+                    CmdBindVertexBuffer[CmdBindVertexBuffer]
+                    CmdDraw[CmdDraw]
+                    CmdNextSubpass[CmdNextSubpass]
+                    EtcExecute["..."]
+                end
+
+                subgraph MeshMaterial["Mesh/Material"]
+                    direction TB
+                    CmdBindMesh[CmdBindMesh]
+                    CmdBindMaterial[CmdBindMaterial]
+                    CmdMeshDraw[CmdMeshDraw]
+                    EtcMeshMaterial["..."]
+                end
+                
+            EndRenderPass["EndRenderPass"]
+
+            PassNode-->BeginRenderPass
+            BeginRenderPass--底层-->CmdBindPipeline
+            CmdBindPipeline-->CmdBindVertexBuffer
+            CmdBindVertexBuffer-->CmdDraw
+            CmdDraw-->CmdNextSubpass
+            CmdNextSubpass-->EtcExecute
+            EtcExecute-->EndRenderPass
+
+            BeginRenderPass-.高层.->CmdBindMesh
+            CmdBindMesh-.->CmdBindMaterial
+            CmdBindMaterial-.->CmdMeshDraw
+            CmdMeshDraw-.->EtcMeshMaterial
+            EtcMeshMaterial-.->EndRenderPass
+```
+
+```CXX
+//FrameGraph::PassNode::Execute
+
+//方案一(倾向于此方案)
+[=](const CustomPassData &data, const TResources &resources, void *context) {
+    Texture2D& color = resources.Get<Texture2D>(data.colorTex);
+    Texture2D& normal = resources.Get<Texture2D>(data.normalTex);
+    DepthTexture2D& depth = resources.Get<DepthTexture2D>(data.depth);
+
+    //注：以下context->*仅为示意，大概率会随着设计的改变而变化
+    Context* context = static_cast<Context*>(context);
+    context->CmdBeginRenderPass(？？？TODO: 如何将RenderPass从PassNode中提出来？？？);
+    context->CmdBindPipeline(pipeline);//来自Material：Pipeline需要现用，现创建
+    context->CmdPushConstants(0, sizeof(alpha), &alpha);//来自Material
+    context->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//来自Material
+    context->CmdBindVertexBuffers(vertex_buffers);//来自Mesh
+    context->CmdSetViewport(frame_viewports);
+    context->CmdSetScissor(frame_scissors);//来自Material
+    context->CmdBindIndexBuffer(index_buffer);//来自Mesh
+    context->CmdDrawIndexed(indices_count, 1, 0, 0, 0);//来自Drawable
+
+    context->CmdNextSubpass();
+    ...
+    context->CmdEndRenderPass();
+}
+
+//方案二（需要高级特性）
+[=](const CustomPassData &data, const TResources &resources, void *context) {
+    Texture2D& color = resources.Get<Texture2D>(data.colorTex);
+    Texture2D& normal = resources.Get<Texture2D>(data.normalTex);
+    DepthTexture2D& depth = resources.Get<DepthTexture2D>(data.depth);
+
+    Context* context = static_cast<Context*>(context);
+
+    context->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+    context->CmdSetViewport(frame_viewports);
+    context->BindMaterial(material);
+        //context->CmdBindPipeline(pipeline);//来自Material：Pipeline需要现用，现创建
+        //context->CmdPushConstants(0, sizeof(alpha), &alpha);//来自Material
+        //context->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//来自Material
+        //context->CmdSetScissor(frame_scissors);//来自Material
+    context->BindMesh(mesh);
+        //context->CmdBindVertexBuffers(vertex_buffers);//来自Mesh
+        //context->CmdBindIndexBuffer(index_buffer);//来自Mesh
+    context->DrawMesh();
+        //context->CmdDrawIndexed(indices_count, 1, 0, 0, 0);//来自Drawable
+
+    context->CmdNextSubpass();
+    ...
+    context->CmdEndRenderPass();
+}
+```
+
+由于`Pipeline`是在绑定时由`Turbo`动态管理创建，所以需要一个`Pipeline`描述，用于告诉`Context`绑定什么样的`Pipeline`
+
+## Pipeline
+
+`Pipeline`主要有两类
+
+1. Graphic图形管线
+2. Compute计算管线
+
+其中计算管线比较简单，只需要指定计算着色器即可。
+
+```CXX
+class ComputePipeline
+{
+    ComputeShader* computeShader;
+};
+
+ComputeShader* compute_shader = new ...;
+ComputePipeline compute_pipeline(compute_shader);
+
+//FrameGraph::PassNode::Execute
+context->BindPipeine(compute_pipeline);
+context->Dispatch(...);
+```
+
+而对于图形管线，需要的相对较多了（大部分有默认值）：
+
+```CXX
+class GraphicsPipeline
+{
+    VertexShader* vertexShader;
+    FragmentShader* fragmentShader;
+    Topology topology;//POINT_LIST,LINE_LIST,LINE_STRIP,TRIANGLE_LIST等
+    Polygon polygon;//FILL,LINE,POINT等
+    Cull cull;//Front|Back
+    FrontFace front;//COUNTER_CLOCKWISE,CLOCKWISE
+    float lineWidth;
+    bool depthTestEnable;
+    bool depthWriteEnable;
+    CompareOp depthCompareOp;//LESS_OR_EQUAL
+
+    bool blendEnable;
+    BlendFactor srcColorBlendFactor;
+    BlendFactor dstColorBlendFactor;
+    BlendOp colorBlendOp;
+    BlendFactor srcAlphaBlendFactor;
+    BlendFactor dstAlphaBlendFactor;
+    BlendOp alphaBlendOp;
+
+    ...等
+    /*bool stencilTestEnable;
+    StencilOp frontFailOp;
+    StencilOp frontPassOp;
+    StencilOp frontDepthFailOp;
+    CompareOp frontCompareOp;*/
+};
+
+VertexShader* vertex_shader = new ...;
+FragmentShader* fragment_shader = new ...;
+GraphicsPipeline graphics_pipeline(vertex_shader, fragment_shader);
+//FrameGraph::PassNode::Execute
+context->BindPipeine(graphics_pipeline);
+context->BindVertexBuffer(vertex_buffer);
+context->BindIndexBuffer(index_buffer);
+context->Draw(...);
+```
+
+~~`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建，归根结底，在`DrawCall`时创建`Pipeline`是因为：~~`Turbo::Core`中创建`TGraphicsPipeline`需要指定`std::vector<Turbo::Core::TVertexBinding>`，也就是顶点属性，而顶点属性正常来说应该在`Mesh`中，或者声明在`VertexBuffer`中(声明在`VertexBuffer`中，这是一个好主意)，并在绑定`VertexBuffer`时更新相关状态，总而言之：需要在创建`Pipeline`之前告诉`Turbo`绑定的顶点数据的属性，这样`Turbo`才能根据顶点属性创建`Pipeline`。由于其复杂性，新建一个`Pipeline的VertexBinding`章节单独讨论
+
+### Pipeline的VertexBinding
+
+如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
+
+按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
+
+## RenderPass
+
+## Mesh，Material和Drawable
+
+`Turbo`上层想要抽象出`Mesh`，`Material`和`Drawable`，其中：
+
+* `Mesh`代表三维模型的各种顶点信息，包括：
+  * 顶点位置数据
+  * 顶点法线数据
+  * 顶点索引数据
+  * 顶点UV数据
+  * 等等
+
+* `Material`代表渲染流程，也就是代表着：`RenderPass`中的配置和渲染指令`Command`
+
+* （非必要）`Drawable`或者叫`MeshDrawable`，是`Mesh`和`Material`的配对
 
 ---
 `mermaid`图测试
