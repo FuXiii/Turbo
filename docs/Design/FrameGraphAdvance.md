@@ -117,6 +117,8 @@
 * 2022/12/29
   >
   >* 更新`Pipeline`章节
+  >* 创建`Pipeline的VertexBinding`章节
+  >
 ---
 
 # Turbo驱动初步
@@ -2062,13 +2064,19 @@ VertexShader* vertex_shader = new ...;
 FragmentShader* fragment_shader = new ...;
 GraphicsPipeline graphics_pipeline(vertex_shader, fragment_shader);
 //FrameGraph::PassNode::Execute
-context->BindPipeine(graphics_pipeline);//并不会真的去创建Pipeline，只是做记录，在绘制时进行真正的pipeline创建
+context->BindPipeine(graphics_pipeline);
 context->BindVertexBuffer(vertex_buffer);
 context->BindIndexBuffer(index_buffer);
-context->Draw(...);//创建pipeline，并绘制
+context->Draw(...);
 ```
 
-`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建，归根结底，在`DrawCall`时创建`Pipeline`是因为：`Turbo::Core`中创建`TGraphicsPipeline`需要指定`std::vector<Turbo::Core::TVertexBinding>`，也就是顶点属性，而顶点属性正常来说应该在`Mesh`中，或者声明在`VertexBuffer`中，并在绑定`VertexBuffer`时更新相关状态，总而言之：需要在创建`Pipeline`之前告诉`Turbo`绑定的顶点数据的属性，这样`Turbo`才能根据顶点属性创建`Pipeline`
+~~`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建，归根结底，在`DrawCall`时创建`Pipeline`是因为：~~`Turbo::Core`中创建`TGraphicsPipeline`需要指定`std::vector<Turbo::Core::TVertexBinding>`，也就是顶点属性，而顶点属性正常来说应该在`Mesh`中，或者声明在`VertexBuffer`中(声明在`VertexBuffer`中，这是一个好主意)，并在绑定`VertexBuffer`时更新相关状态，总而言之：需要在创建`Pipeline`之前告诉`Turbo`绑定的顶点数据的属性，这样`Turbo`才能根据顶点属性创建`Pipeline`。由于其复杂性，新建一个`Pipeline的VertexBinding`章节单独讨论
+
+### Pipeline的VertexBinding
+
+如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
+
+按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
 
 ## RenderPass
 
