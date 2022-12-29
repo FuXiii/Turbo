@@ -2068,7 +2068,7 @@ context->BindIndexBuffer(index_buffer);
 context->Draw(...);//创建pipeline，并绘制
 ```
 
-`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建，归根结底，在`DrawCall`时创建`Pipeline`是应为：`Turbo::Core`中创建`TGraphicsPipeline`需要指定`std::vector<Turbo::Core::TVertexBinding>`，也就是顶点属性，而顶点属性正常来说应该在`Mesh`中，需要在创建`Pipeline`之前告诉`Turbo`绑定的顶点数据的属性，这样`Turbo`才能根据顶点属性创建`Pipeline`
+`context`在绑定`pipeline`时并不会真的去创建`pipeline`，而只是更新`context`中当前`pipeline`状态，真正的的`Pipeline`创建在调用`DrawCall`绘制指令时，`Turbo`会根据当前状态进行相应对象的创建，归根结底，在`DrawCall`时创建`Pipeline`是因为：`Turbo::Core`中创建`TGraphicsPipeline`需要指定`std::vector<Turbo::Core::TVertexBinding>`，也就是顶点属性，而顶点属性正常来说应该在`Mesh`中，或者声明在`VertexBuffer`中，并在绑定`VertexBuffer`时更新相关状态，总而言之：需要在创建`Pipeline`之前告诉`Turbo`绑定的顶点数据的属性，这样`Turbo`才能根据顶点属性创建`Pipeline`
 
 ## RenderPass
 
