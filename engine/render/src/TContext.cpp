@@ -10,6 +10,8 @@
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TVersion.h>
 #include <core/include/TVulkanLoader.h>
+#include <framegraph/include/TFrameGraph.hpp>
+#include <stdint.h>
 
 Turbo::Render::TContext::TContext()
 {
@@ -320,6 +322,12 @@ Turbo::Core::TCommandBuffer *Turbo::Render::TContext::AllocateCommandBuffer()
 void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
 {
     this->commandBufferPool->Free(commandBuffer);
+}
+
+void Turbo::Render::TContext::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)
+{
+    uint32_t test_value = renderPass.testValue;
+    std::cout << "Turbo::Render::TContext::BeginRenderPass-test_value:" << test_value << std::endl;
 }
 
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()

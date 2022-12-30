@@ -23,6 +23,11 @@ constexpr uint32_t TURBO_INVALID_ID = std::numeric_limits<uint32_t>::max();
 using ID = uint32_t;
 using TVersion = uint32_t;
 
+struct TRenderPass
+{
+    uint32_t testValue;
+};
+
 struct TNodeHandle
 {
     ID id = TURBO_INVALID_ID;
@@ -103,7 +108,7 @@ class TResourceProxy : public TVirtualResourceProxy
   private:
     uint32_t id;
     typename T::Descriptor descriptor;
-    T resource; //FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
+    T resource; // FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
 
   public:
     TResourceProxy(const std::string &name, uint32_t id, typename T::Descriptor &&descriptor);
@@ -304,7 +309,7 @@ inline T &Turbo::FrameGraph::TResourceProxy<T>::GetResource()
 template <typename T>
 inline void Turbo::FrameGraph::TResourceProxy<T>::Create(/*TODO: we need a allocator/context*/)
 {
-    this->resource.Create(this->GetName(), this->descriptor/*TODO: we need a allocator/context*/);
+    this->resource.Create(this->GetName(), this->descriptor /*TODO: we need a allocator/context*/);
 }
 
 template <typename T>

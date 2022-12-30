@@ -1991,3 +1991,6 @@ Turbo是渲染引擎
 * 2022/12/30 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/framegraph`下`TFrameGraph`中增加`struct TRenderPass`成员，目前是实验性代码
+  >* `./engine/render`下`TContext`中增加`void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);`成员函数，目前是实验性代码
+
