@@ -2117,7 +2117,16 @@ context->CmdBeginRenderPass(render_pass)
 }
 ```
 
-`FrameGraph::PassNode`中增加`FrameGraph::RenderPass FrameGraph::PassNode::GetRenderPass()`，这样就可以获得`FrameGraph::PassNode::Setup`阶段所配置的`RenderPass`，并拿着该配置创建`Context`需要的`RenderPass`。缺点就是有点麻烦，需要定义两头差不多的`RenderPass`数据结构。
+`FrameGraph::PassNode`中增加`FrameGraph::RenderPass FrameGraph::PassNode::GetRenderPass()`，这样就可以获得`FrameGraph::PassNode::Setup`阶段所配置的`RenderPass`，并拿着该配置创建`Context`需要的`RenderPass`。缺点就是有点麻烦，需要定义两头差不多的`RenderPass`数据结构。优化的方式就是直接将`FrameGraph::RenderPass`作为`Context::CmdBeginRenderPass`的实参。
+
+```CXX
+//Turbo::Render
+class Context
+{
+    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
+}
+```
 
 ## Mesh，Material和Drawable
 
