@@ -23,11 +23,6 @@ constexpr uint32_t TURBO_INVALID_ID = std::numeric_limits<uint32_t>::max();
 using ID = uint32_t;
 using TVersion = uint32_t;
 
-struct TRenderPass
-{
-    uint32_t testValue;
-};
-
 struct TNodeHandle
 {
     ID id = TURBO_INVALID_ID;
@@ -117,6 +112,34 @@ class TResourceProxy : public TVirtualResourceProxy
 
     virtual void Create(/*TODO: we need a allocator/context*/) override;
     virtual void Destroy(/*TODO: we need a allocator/context*/) override;
+};
+
+class TSubpass
+{
+  private:
+    std::vector<TResource> writes;
+    std::vector<TResource> reads;
+
+  public:
+    TSubpass() = default;
+    ~TSubpass() = default;
+
+    void Write(TResource resource);
+    void Read(TResource resource);
+};
+
+class TRenderPass
+{
+  private:
+    std::vector<TSubpass> subpasses;
+
+  public:
+    uint32_t testValue; // TODO: delete
+
+    TRenderPass() = default;
+    ~TRenderPass() = default;
+
+    void AddSubpass(const TSubpass &subpass);
 };
 
 class TNode

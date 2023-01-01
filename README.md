@@ -1998,3 +1998,13 @@ Turbo是渲染引擎
 * 2022/12/31 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraph.md`
+
+* 2023/1/1 设计架构
+  >
+  >* `./engine/framegraph/include/TFrameGraph.hpp`中增加`class TSubpass`类
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> writes`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> reads`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`TResource Write(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`TResource Read(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`std::vector<TSubpass> subpasses`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`void AddSubpass(const TSubpass &subpass)`成员变量

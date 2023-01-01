@@ -215,11 +215,11 @@ int main()
     copy_temp_buffer.Destroy(&resource_allocator);
     copy_gpu_buffer.Destroy(&resource_allocator);
 
+    //========================================================================
+    
     Turbo::FrameGraph::TRenderPass fg_render_pass{};
     fg_render_pass.testValue = 123;
 
-    //========================================================================
-    
     context.BeginRenderPass(fg_render_pass);
 
     return 0;

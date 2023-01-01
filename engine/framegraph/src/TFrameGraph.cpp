@@ -2,6 +2,47 @@
 #include <cassert>
 #include <stack>
 
+void Turbo::FrameGraph::TSubpass::Write(TResource resource)
+{
+    bool is_found = false;
+    for (TResource resource_item : this->writes)
+    {
+        if (resource_item.id == resource.id)
+        {
+            is_found = true;
+            break;
+        }
+    }
+
+    if (!is_found)
+    {
+        this->writes.push_back(resource);
+    }
+}
+
+void Turbo::FrameGraph::TSubpass::Read(TResource resource)
+{
+    bool is_found = false;
+    for (TResource resource_item : this->reads)
+    {
+        if (resource_item.id == resource.id)
+        {
+            is_found = true;
+            break;
+        }
+    }
+
+    if (!is_found)
+    {
+        this->reads.push_back(resource);
+    }
+}
+
+void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
+{
+    this->subpasses.push_back(subpass);
+}
+
 Turbo::FrameGraph::TNode::TNode()
 {
 }
