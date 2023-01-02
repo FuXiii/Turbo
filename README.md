@@ -2008,3 +2008,22 @@ Turbo是渲染引擎
   >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`TResource Read(TResource resource)`成员函数
   >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`std::vector<TSubpass> subpasses`成员变量
   >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`void AddSubpass(const TSubpass &subpass)`成员变量
+
+* 2023/1/2 设计架构
+  >
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> GetWrites()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> GetReads()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TSubpass> GetSubpasses()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`friend class TFrameGraph`友元类
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`friend class TFrameGraph`友元类
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`增加`class TSubpass`成员类，其作为`TFrameGraph::TSubpass`类的前端类或代理
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`增加`TSubpass CreateSubpass()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TSubpass(TBuilder *builder, uint32_t index)`构造函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TTBuilder *builder = nullptr`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`uint32_t index`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TResource Write(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TResource Read(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TPassNode`增加`TRenderPass renderPass`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TPassNode`增加`TRenderPass GetRenderPass()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph`增加`uint32_t TURBO_INVALID_SUBPASS_INDEX`全局变量
+  >* 更新`./samples`中`rameGraphSample`增加`int test3()`对于新`FrameGraph`标准的测试代码

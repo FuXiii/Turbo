@@ -38,9 +38,24 @@ void Turbo::FrameGraph::TSubpass::Read(TResource resource)
     }
 }
 
+std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetWrites()
+{
+    return this->writes;
+}
+
+std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetReads()
+{
+    return this->reads;
+}
+
 void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
 {
     this->subpasses.push_back(subpass);
+}
+
+std::vector<Turbo::FrameGraph::TSubpass> Turbo::FrameGraph::TRenderPass::GetSubpasses()
+{
+    return this->subpasses;
 }
 
 Turbo::FrameGraph::TNode::TNode()
@@ -106,6 +121,11 @@ bool Turbo::FrameGraph::TPassNode::IsRead(TResource resource)
     return false;
 }
 
+Turbo::FrameGraph::TRenderPass Turbo::FrameGraph::TPassNode::GetRenderPass()
+{
+    return this->renderPass;
+}
+
 const std::string &Turbo::FrameGraph::TPassNode::GetName()
 {
     return this->name;
@@ -150,6 +170,48 @@ uint32_t Turbo::FrameGraph::TResourceNode::GetVersion()
     return this->version;
 }
 
+Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass::TSubpass(TBuilder *builder, uint32_t index)
+{
+    this->builder = builder;
+    this->index = index;
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass::Write(TResource resource)
+{
+    if (this->builder != nullptr)
+    {
+        TResource return_resurce = this->builder->Write(resource);
+        std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
+        if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
+        {
+            Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
+            subpass.Write(return_resurce);
+        }
+
+        return return_resurce;
+    }
+
+    return Turbo::FrameGraph::TResource();
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass::Read(TResource resource)
+{
+    if (this->builder != nullptr)
+    {
+        TResource return_resurce = this->builder->Read(resource);
+        std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
+        if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
+        {
+            Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
+            subpass.Read(return_resurce);
+        }
+
+        return return_resurce;
+    }
+
+    return Turbo::FrameGraph::TResource();
+}
+
 Turbo::FrameGraph::TFrameGraph::TBuilder::TBuilder(TFrameGraph &frameGraph, TPassNode &passNode) : frameGraph{frameGraph}, passNode{passNode}
 {
 }
@@ -187,6 +249,16 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
     TResourceNode &new_resource_node = this->frameGraph.CreateResourceNode(resource_proxy);
     TResource new_resource = new_resource_node.GetResource();
     return this->passNode.AddWrite(new_resource);
+}
+
+Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass Turbo::FrameGraph::TFrameGraph::TBuilder::CreateSubpass()
+{
+    Turbo::FrameGraph::TSubpass subpass;
+    this->passNode.renderPass.AddSubpass(subpass);
+
+    uint32_t subpass_index = this->passNode.renderPass.subpasses.size() - 1;
+
+    return Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass(this, subpass_index);
 }
 
 Turbo::FrameGraph::TFrameGraph::TBuilder &Turbo::FrameGraph::TFrameGraph::TBuilder::SideEffect()
