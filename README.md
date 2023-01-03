@@ -2036,3 +2036,4 @@ Turbo是渲染引擎
   >* 更新`./samples`中`rameGraphSample`示例代码，适配到新的`FrameGraph`标准并移除原先的`test2`，并将`test3`改名成`test2`
   >* `./engine/framegraph`中`TFrameGraph::TRenderPass`移除`uint32_t testValue`成员变量
   >* `./engine/samples`中`RenderDesignTest`移除`TFrameGraph::TRenderPass::testValue`有关代码
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`

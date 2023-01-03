@@ -123,6 +123,10 @@
 * 2022/12/30
   >
   >* 更新`RenderPass`章节
+
+* 2023/1/3
+  >
+  >* 更新`用户自定义PassNode`章节
 ---
 
 # Turbo驱动初步
@@ -1871,7 +1875,7 @@ graph TD;
     subgraph Subpass0[Subpass0]
         direction LR
         Depth0-.读.->Subpass
-        Color0-->Subpass
+        Color0-.读.->Subpass
         Subpass--写-->Color1
         Subpass--写-->Color2
         Subpass--写-->Depth2
@@ -1970,7 +1974,7 @@ graph TD;
     context->CmdPushConstants(0, sizeof(alpha), &alpha);//来自Material
     context->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//来自Material
     context->CmdBindVertexBuffers(vertex_buffers);//来自Mesh
-    context->CmdSetViewport(frame_viewports);
+    context->CmdSetViewport(frame_viewports);//来自Camera和Surface
     context->CmdSetScissor(frame_scissors);//来自Material
     context->CmdBindIndexBuffer(index_buffer);//来自Mesh
     context->CmdDrawIndexed(indices_count, 1, 0, 0, 0);//来自Drawable
