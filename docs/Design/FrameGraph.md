@@ -204,7 +204,7 @@ std::string FrameGraph::ToMermaid();
 
 1. 推送到`http`服务器，展示在浏览器页面上
 2. 保存到本地，进而在本地打开，浏览查看
-Pass
+
 示例：
 ```mermaid
 graph LR;
