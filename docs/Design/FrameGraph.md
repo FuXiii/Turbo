@@ -24,6 +24,11 @@
   >* 更新`FrameGraph::RenderPass`章节
   >* 创建`FrameGraph::Subpass`章节
 
+* 2023/1/3
+  >
+  >* 创建`FrameGraph::Mermaid`章节
+
+
 ## PassNode与RenderPass
 
 在`PassNode::Setup`阶段需要配置当前`PassNode`的各种`Subpass`，之后`Turbo`引擎会根据用户的配置创建`RenderPass`和`FrameBuffer`
@@ -181,4 +186,79 @@ class RenderPass
        
         void AddSubpass(Subpass& subpass);
 };
+```
+
+## FrameGraph::Mermaid
+
+`FrameGraph`中应该提供一种接口，用于输出通用图形化图表结构，目前常见的通用图形化图表标准有：
+
+1. [Graphviz](http://www.graphviz.org/)
+2. [Mermaid](https://mermaid.js.org/)
+
+`Turbo`选择`Mermaid`标准作为通用图形化图表接口。
+
+```CXX
+std::string FrameGraph::ToMermaid();
+```
+该接口将会输出`Mermaid`标准字符串，之后最常见的用法有两种：
+
+1. 推送到`http`服务器，展示在浏览器页面上
+2. 保存到本地，进而在本地打开，浏览查看
+Pass
+示例：
+```mermaid
+graph LR;
+    classDef Resource fill:#608ba3
+    classDef Pass fill:#e8924a
+    classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
+    classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
+
+    Start((" ")):::Start
+    End((" ")):::End
+    
+    DepthBuffer0("Depth Buffer"):::Resource
+    DepthBuffer1("Depth Buffer"):::Resource
+    GBuffer1("GBuffer 1"):::Resource
+    GBuffer2("GBuffer 2"):::Resource
+    GBuffer3("GBuffer 3"):::Resource
+    LightBuffer("Light Buffer"):::Resource
+    BackBuffer("Back Buffer"):::Resource
+
+    DepthPass("Depth Pass"):::Pass
+    GBufferPass("GBuffer Pass"):::Pass
+    LightingPass("Lighting"):::Pass
+    PostPass("Post"):::Pass
+    PresentPass("Present"):::Pass
+
+    Start-.->DepthPass
+    DepthPass-->DepthBuffer0
+    DepthBuffer0-->GBufferPass
+    GBufferPass-->DepthBuffer1
+    GBufferPass-->GBuffer1
+    GBufferPass-->GBuffer2
+    GBufferPass-->GBuffer3
+    DepthBuffer1-->LightingPass
+    GBuffer1-->LightingPass
+    GBuffer2-->LightingPass
+    GBuffer3-->LightingPass
+    LightingPass-->LightBuffer
+    LightBuffer-->PostPass
+    PostPass-->BackBuffer
+    BackBuffer-->PresentPass
+    PresentPass-.->End
+
+    linkStyle 1 stroke:#a44141,stroke-width:3px
+    linkStyle 2 stroke:#95ad5b,stroke-width:3px
+    linkStyle 3 stroke:#a44141,stroke-width:3px
+    linkStyle 4 stroke:#a44141,stroke-width:3px
+    linkStyle 5 stroke:#a44141,stroke-width:3px
+    linkStyle 6 stroke:#a44141,stroke-width:3px
+    linkStyle 7 stroke:#95ad5b,stroke-width:3px
+    linkStyle 8 stroke:#95ad5b,stroke-width:3px
+    linkStyle 9 stroke:#95ad5b,stroke-width:3px
+    linkStyle 10 stroke:#95ad5b,stroke-width:3px
+    linkStyle 11 stroke:#a44141,stroke-width:3px
+    linkStyle 12 stroke:#95ad5b,stroke-width:3px
+    linkStyle 13 stroke:#a44141,stroke-width:3px
+    linkStyle 14 stroke:#95ad5b,stroke-width:3px
 ```

@@ -2027,3 +2027,7 @@ Turbo是渲染引擎
   >* `./engine/framegraph`中`TFrameGraph::TPassNode`增加`TRenderPass GetRenderPass()`成员函数
   >* `./engine/framegraph`中`TFrameGraph`增加`uint32_t TURBO_INVALID_SUBPASS_INDEX`全局变量
   >* 更新`./samples`中`rameGraphSample`增加`int test3()`对于新`FrameGraph`标准的测试代码
+
+* 2023/1/3 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
