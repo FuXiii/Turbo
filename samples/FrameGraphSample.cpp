@@ -1,6 +1,21 @@
 
 #include <TFrameGraph.hpp>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+void WriteTextFile(const std::string &text, const std::string &filename)
+{
+    std::ofstream out_stream;
+    out_stream.open(filename, std::ios::out | std::ios::trunc);
+
+    if (out_stream.good())
+    {
+        out_stream << text;
+    }
+
+    out_stream.close();
+}
 
 using namespace Turbo::FrameGraph;
 
@@ -280,6 +295,14 @@ int test2()
 
     fg.Compile();
     fg.Execute();
+
+    std::string mermaid = fg.ToMermaid();
+
+    std::stringstream ss;
+
+    ss << "```mermaid" << std::endl << mermaid << "```" << std::endl;
+
+    WriteTextFile(ss.str(), "./Fg.md");
 
     return 0;
 }

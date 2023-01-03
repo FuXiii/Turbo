@@ -1,5 +1,6 @@
 #include "TFrameGraph.hpp"
 #include <cassert>
+#include <sstream>
 #include <stack>
 
 void Turbo::FrameGraph::TSubpass::Write(TResource resource)
@@ -464,6 +465,30 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context)
             virtual_resource_item->Destroy(/*TODO: we need a allocator/context*/);
         }
     }
+}
+
+std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
+{
+    std::stringstream mermaid_string_stream;
+
+    mermaid_string_stream << "graph LR;" << std::endl;
+    mermaid_string_stream << "classDef Resource fill:#608ba3" << std::endl;
+    mermaid_string_stream << "classDef Pass fill:#e8924a" << std::endl;
+    mermaid_string_stream << "classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px" << std::endl;
+    mermaid_string_stream << "classDef End fill:#a44141,stroke:#a44141,stroke-width:4px" << std::endl;
+
+    mermaid_string_stream << "Start((\" \")):::Start" << std::endl;
+    mermaid_string_stream << "End((\" \")):::End" << std::endl;
+
+    uint32_t pass_node_cout = this->passNodes->size();
+    for (uint32_t pass_node_index = 0; pass_node_index < pass_node_cout; pass_node_index++)
+    {
+        const TPassNode &pass_node_item = (*this->passNodes)[pass_node_index];
+        mermaid_string_stream << "PassNode" << pass_node_item.pass.id << "(\"" << pass_node_item.name << "\")"
+                              << ":::Pass" << std::endl;
+    }
+
+    return mermaid_string_stream.str();
 }
 
 Turbo::FrameGraph::TBlackboard &Turbo::FrameGraph::TFrameGraph::GetBlackboard()

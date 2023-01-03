@@ -316,6 +316,8 @@ class TFrameGraph
     void Compile();
     void Execute(void *context = nullptr);
 
+    std::string ToMermaid();
+
     TBlackboard &GetBlackboard();
 };
 

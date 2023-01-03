@@ -2038,3 +2038,4 @@ Turbo是渲染引擎
   >* `./engine/samples`中`RenderDesignTest`移除`TFrameGraph::TRenderPass::testValue`有关代码
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* `./asset/models/`下增加`fuxiii-2022.gltf`模型
+  >* `./engine/framegraph`中`TFrameGraph`增加`std::string ToMermaid()`成员函数
