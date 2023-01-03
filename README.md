@@ -2031,3 +2031,8 @@ Turbo是渲染引擎
 * 2023/1/3 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`下的`TResource Read(TResource resource)`成员函数访问域从`public`改成`private`
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`下的`TResource Write(TResource resource)`成员函数访问域从`public`改成`private`
+  >* 更新`./samples`中`rameGraphSample`示例代码，适配到新的`FrameGraph`标准并移除原先的`test2`，并将`test3`改名成`test2`
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`移除`uint32_t testValue`成员变量
+  >* `./engine/samples`中`RenderDesignTest`移除`TFrameGraph::TRenderPass::testValue`有关代码

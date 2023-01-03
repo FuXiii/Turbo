@@ -326,8 +326,7 @@ void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *com
 
 void Turbo::Render::TContext::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)
 {
-    uint32_t test_value = renderPass.testValue;
-    std::cout << "Turbo::Render::TContext::BeginRenderPass-test_value:" << test_value << std::endl;
+    //TODO: convert Turbo::FrameGraph::TRenderPass to Turbo::Render::TRenderPass
 }
 
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()

@@ -144,8 +144,6 @@ class TRenderPass
     std::vector<Turbo::FrameGraph::TSubpass> subpasses;
 
   public:
-    uint32_t testValue; // TODO: delete
-
     TRenderPass() = default;
     ~TRenderPass() = default;
 
@@ -282,12 +280,13 @@ class TFrameGraph
       public:
         TBuilder(TFrameGraph &frameGraph, TPassNode &passNode);
 
+      private:
+        TResource Read(TResource resource);
+        TResource Write(TResource resource);
+
       public:
         template <typename T>
         TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
-
-        TResource Read(TResource resource);  // TODO: 声明成private
-        TResource Write(TResource resource); // TODO: 声明成private
 
         Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass CreateSubpass();
 
