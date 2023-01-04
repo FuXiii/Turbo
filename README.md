@@ -2044,4 +2044,6 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design/`下的`FrameGraph.md`
   >* `./engine/framegraph`中`TFrameGraph`更新`std::string ToMermaid()`成员函数
+  >* `./engine/render`下增加`TRenderPass.h`，`TRenderPass.cpp`文件
+  >* `./engine/render`下增加`TRenderPass`类
 

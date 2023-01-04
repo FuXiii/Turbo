@@ -4,6 +4,7 @@
 #include <framegraph/include/TFrameGraph.hpp>
 #include <iostream>
 #include <render/include/TContext.h>
+#include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
 #include <vector>
 
@@ -216,9 +217,14 @@ int main()
     copy_gpu_buffer.Destroy(&resource_allocator);
 
     //========================================================================
-    
+
     Turbo::FrameGraph::TRenderPass fg_render_pass{};
     context.BeginRenderPass(fg_render_pass);
+
+    //========================================================================
+    Turbo::Render::TRenderPass render_pass;
+    render_pass.SetTestValue(123)
+               .SetTestIsSomething(true);
 
     return 0;
 }
