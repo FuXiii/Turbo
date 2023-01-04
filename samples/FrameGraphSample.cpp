@@ -1,6 +1,21 @@
 
 #include <TFrameGraph.hpp>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+void WriteTextFile(const std::string &text, const std::string &filename)
+{
+    std::ofstream out_stream;
+    out_stream.open(filename, std::ios::out | std::ios::trunc);
+
+    if (out_stream.good())
+    {
+        out_stream << text;
+    }
+
+    out_stream.close();
+}
 
 using namespace Turbo::FrameGraph;
 
@@ -76,10 +91,12 @@ int test1()
         "CustomPass",
         [&](TFrameGraph::TBuilder &builder, CustomPassData &data) {
             data.foo = builder.Create<CustomTexture>("foo", {128, 128, CustomTexture::Color});
-            data.foo = builder.Write(data.foo);
+
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+            data.foo = subpass.Write(data.foo);
 
             data.bar = builder.Create<CustomTexture>("bar", {256, 256, CustomTexture::Depth});
-            data.bar = builder.Write(data.bar);
+            data.bar = subpass.Write(data.bar);
         },
         [=](const CustomPassData &data, const TResources &resources, void *context) {
             int32_t foo_value = resources.Get<CustomTexture>(data.foo).value;
@@ -108,6 +125,8 @@ Depth Texture
 */
 int test2()
 {
+    std::cout << "==========Test FrameGraph Subpass==========" << std::endl;
+
     TFrameGraph fg;
 
     struct DepthPassData
@@ -119,7 +138,9 @@ int test2()
         "Depth Pass",
         [&](TFrameGraph::TBuilder &builder, DepthPassData &data) {
             data.depthTexture = builder.Create<CustomTexture>("Depth Texture", {128, 128, CustomTexture::Depth});
-            data.depthTexture = builder.Write(data.depthTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+            data.depthTexture = subpass.Write(data.depthTexture);
 
             fg.GetBlackboard()["Depth Texture"] = data.depthTexture;
         },
@@ -145,14 +166,33 @@ int test2()
         "GBuffer Pass",
         [&](TFrameGraph::TBuilder &builder, GBufferPassData &data) {
             data.depthTexture = fg.GetBlackboard()["Depth Texture"];
-            data.depthTexture = builder.Read(data.depthTexture);
-            data.depthTexture = builder.Write(data.depthTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+            data.depthTexture = subpass.Read(data.depthTexture);
+            data.depthTexture = subpass.Write(data.depthTexture);
 
             data.normalTexture = builder.Create<CustomTexture>("Normal Texture", {128, 128, CustomTexture::Normal});
-            data.normalTexture = builder.Write(data.normalTexture);
+            data.normalTexture = subpass.Write(data.normalTexture);
 
             data.colorTexture = builder.Create<CustomTexture>("Color Texture", {128, 128, CustomTexture::Color});
-            data.colorTexture = builder.Write(data.colorTexture);
+            data.colorTexture = subpass.Write(data.colorTexture);
+
+            //<MultiSubpass>
+            TFrameGraph::TBuilder::TSubpass subpass1 = builder.CreateSubpass();
+            data.depthTexture = subpass1.Write(data.depthTexture);
+            data.normalTexture = subpass1.Write(data.normalTexture);
+            data.colorTexture = subpass1.Write(data.colorTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass2 = builder.CreateSubpass();
+            data.depthTexture = subpass2.Write(data.depthTexture);
+            data.normalTexture = subpass2.Write(data.normalTexture);
+            data.colorTexture = subpass2.Write(data.colorTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass3 = builder.CreateSubpass();
+            data.depthTexture = subpass3.Write(data.depthTexture);
+            data.normalTexture = subpass3.Write(data.normalTexture);
+            data.colorTexture = subpass3.Write(data.colorTexture);
+            //</MultiSubpass>
 
             fg.GetBlackboard()["Depth Texture"] = data.depthTexture;
             fg.GetBlackboard()["Normal Texture"] = data.normalTexture;
@@ -184,17 +224,19 @@ int test2()
     fg.AddPass<LightPassData>(
         "Light Pass",
         [&](TFrameGraph::TBuilder &builder, LightPassData &data) {
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+
             data.depthTexture = fg.GetBlackboard()["Depth Texture"];
-            data.depthTexture = builder.Read(data.depthTexture);
+            data.depthTexture = subpass.Read(data.depthTexture);
 
             data.normalTexture = fg.GetBlackboard()["Normal Texture"];
-            data.normalTexture = builder.Read(data.normalTexture);
+            data.normalTexture = subpass.Read(data.normalTexture);
 
             data.colorTexture = fg.GetBlackboard()["Color Texture"];
-            data.colorTexture = builder.Read(data.colorTexture);
+            data.colorTexture = subpass.Read(data.colorTexture);
 
             data.lightTexture = builder.Create<CustomTexture>("Light Texture", {128, 128, CustomTexture::Shadow});
-            data.lightTexture = builder.Write(data.lightTexture);
+            data.lightTexture = subpass.Write(data.lightTexture);
 
             fg.GetBlackboard()["Light Texture"] = data.lightTexture;
         },
@@ -220,11 +262,13 @@ int test2()
     fg.AddPass<PostPassData>(
         "Post Pass",
         [&](TFrameGraph::TBuilder &builder, PostPassData &data) {
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+
             data.lightTexture = fg.GetBlackboard()["Light Texture"];
-            data.lightTexture = builder.Read(data.lightTexture);
+            data.lightTexture = subpass.Read(data.lightTexture);
 
             data.renderTargetTexture = builder.Create<CustomTexture>("RenderTarget Texture", {128, 128, CustomTexture::Shadow});
-            data.renderTargetTexture = builder.Write(data.renderTargetTexture);
+            data.renderTargetTexture = subpass.Write(data.renderTargetTexture);
 
             fg.GetBlackboard()["RenderTarget Texture"] = data.renderTargetTexture;
         },
@@ -249,12 +293,12 @@ int test2()
     fg.AddPass<PresentPassData>(
         "Present Pass",
         [&](TFrameGraph::TBuilder &builder, PresentPassData &data) {
+            TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
+
             data.renderTargetTexture = fg.GetBlackboard()["RenderTarget Texture"];
-            data.renderTargetTexture = builder.Read(data.renderTargetTexture);
+            data.renderTargetTexture = subpass.Read(data.renderTargetTexture);
 
             builder.SideEffect();
-            // data.testTexture = builder.Create<CustomTexture>("Test Texture", {128, 128, CustomTexture::Color});
-            // data.testTexture = builder.Write(data.testTexture);
         },
         [=](const PresentPassData &data, const TResources &resources, void *context) {
             CustomTexture &render_target_texture = resources.Get<CustomTexture>(data.renderTargetTexture);
@@ -267,7 +311,14 @@ int test2()
         });
 
     fg.Compile();
+    std::string mermaid = fg.ToMermaid();
     fg.Execute();
+
+    std::stringstream ss;
+
+    ss << "```mermaid" << std::endl << mermaid << "```" << std::endl;
+
+    WriteTextFile(ss.str(), "./Fg.md");
 
     return 0;
 }

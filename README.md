@@ -1987,3 +1987,61 @@ Turbo是渲染引擎
 * 2022/12/29 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2022/12/30 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/framegraph`下`TFrameGraph`中增加`struct TRenderPass`成员，目前是实验性代码
+  >* `./engine/render`下`TContext`中增加`void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);`成员函数，目前是实验性代码
+  >* `./docs/Design/`下新增`FrameGraph.md`，用于`FrameGraph`设计文档
+
+* 2022/12/31 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+
+* 2023/1/1 设计架构
+  >
+  >* `./engine/framegraph/include/TFrameGraph.hpp`中增加`class TSubpass`类
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> writes`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> reads`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`TResource Write(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`TResource Read(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`std::vector<TSubpass> subpasses`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`void AddSubpass(const TSubpass &subpass)`成员变量
+
+* 2023/1/2 设计架构
+  >
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> GetWrites()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TResource> GetReads()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`std::vector<TSubpass> GetSubpasses()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TSubpass`增加`friend class TFrameGraph`友元类
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`增加`friend class TFrameGraph`友元类
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`增加`class TSubpass`成员类，其作为`TFrameGraph::TSubpass`类的前端类或代理
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`增加`TSubpass CreateSubpass()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TSubpass(TBuilder *builder, uint32_t index)`构造函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TTBuilder *builder = nullptr`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`uint32_t index`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TResource Write(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder::TSubpass`增加`TResource Read(TResource resource)`成员函数
+  >* `./engine/framegraph`中`TFrameGraph::TPassNode`增加`TRenderPass renderPass`成员变量
+  >* `./engine/framegraph`中`TFrameGraph::TPassNode`增加`TRenderPass GetRenderPass()`成员函数
+  >* `./engine/framegraph`中`TFrameGraph`增加`uint32_t TURBO_INVALID_SUBPASS_INDEX`全局变量
+  >* 更新`./samples`中`rameGraphSample`增加`int test3()`对于新`FrameGraph`标准的测试代码
+
+* 2023/1/3 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`下的`TResource Read(TResource resource)`成员函数访问域从`public`改成`private`
+  >* `./engine/framegraph`中`TFrameGraph::TBuilder`下的`TResource Write(TResource resource)`成员函数访问域从`public`改成`private`
+  >* 更新`./samples`中`rameGraphSample`示例代码，适配到新的`FrameGraph`标准并移除原先的`test2`，并将`test3`改名成`test2`
+  >* `./engine/framegraph`中`TFrameGraph::TRenderPass`移除`uint32_t testValue`成员变量
+  >* `./engine/samples`中`RenderDesignTest`移除`TFrameGraph::TRenderPass::testValue`有关代码
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./asset/models/`下增加`fuxiii-2022.gltf`模型
+  >* `./engine/framegraph`中`TFrameGraph`增加`std::string ToMermaid()`成员函数
+
+* 2023/1/4 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`中`TFrameGraph`更新`std::string ToMermaid()`成员函数
+

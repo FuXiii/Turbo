@@ -22,6 +22,14 @@ class TCommandBuffer;
 
 namespace Turbo
 {
+namespace FrameGraph
+{
+class TRenderPass;
+} // namespace FrameGraph
+} // namespace Turbo
+
+namespace Turbo
+{
 namespace Render
 {
 
@@ -47,6 +55,8 @@ class TContext
 
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
+
+    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();

@@ -1,6 +1,7 @@
 #include "TBuffer.h"
 #include "TImage.h"
 #include <chrono>
+#include <framegraph/include/TFrameGraph.hpp>
 #include <iostream>
 #include <render/include/TContext.h>
 #include <render/include/TResourceAllocator.h>
@@ -213,6 +214,11 @@ int main()
 
     copy_temp_buffer.Destroy(&resource_allocator);
     copy_gpu_buffer.Destroy(&resource_allocator);
+
+    //========================================================================
+    
+    Turbo::FrameGraph::TRenderPass fg_render_pass{};
+    context.BeginRenderPass(fg_render_pass);
 
     return 0;
 }

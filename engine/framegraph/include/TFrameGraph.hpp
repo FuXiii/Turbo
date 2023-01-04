@@ -20,6 +20,7 @@ namespace FrameGraph
 {
 constexpr size_t EXECUTE_MAX_LOAD = 1024;
 constexpr uint32_t TURBO_INVALID_ID = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t TURBO_INVALID_SUBPASS_INDEX = std::numeric_limits<uint32_t>::max();
 using ID = uint32_t;
 using TVersion = uint32_t;
 
@@ -103,7 +104,7 @@ class TResourceProxy : public TVirtualResourceProxy
   private:
     uint32_t id;
     typename T::Descriptor descriptor;
-    T resource; //FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
+    T resource; // FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
 
   public:
     TResourceProxy(const std::string &name, uint32_t id, typename T::Descriptor &&descriptor);
@@ -112,6 +113,43 @@ class TResourceProxy : public TVirtualResourceProxy
 
     virtual void Create(/*TODO: we need a allocator/context*/) override;
     virtual void Destroy(/*TODO: we need a allocator/context*/) override;
+};
+
+class TSubpass
+{
+  public:
+    friend class TFrameGraph;
+
+  private:
+    std::vector<TResource> writes;
+    std::vector<TResource> reads;
+
+  public:
+    TSubpass() = default;
+    ~TSubpass() = default;
+
+    void Write(TResource resource);
+    void Read(TResource resource);
+
+    std::vector<TResource> GetWrites();
+    std::vector<TResource> GetReads();
+};
+
+class TRenderPass
+{
+  public:
+    friend class TFrameGraph;
+
+  private:
+    std::vector<Turbo::FrameGraph::TSubpass> subpasses;
+
+  public:
+    TRenderPass() = default;
+    ~TRenderPass() = default;
+
+    void AddSubpass(const TSubpass &subpass);
+
+    std::vector<Turbo::FrameGraph::TSubpass> GetSubpasses();
 };
 
 class TNode
@@ -144,6 +182,8 @@ class TPassNode : public TNode
     std::vector<TVirtualResourceProxy *> devirtualizes;
     std::vector<TVirtualResourceProxy *> destroies;
 
+    TRenderPass renderPass;
+
     bool sideEffect = false;
 
   public:
@@ -155,6 +195,8 @@ class TPassNode : public TNode
     bool IsCreate(TResource resource);
     bool IsWrite(TResource resource);
     bool IsRead(TResource resource);
+
+    TRenderPass GetRenderPass();
 
     const std::string &GetName();
 };
@@ -215,6 +257,22 @@ class TFrameGraph
   public:
     class TBuilder final
     {
+      public:
+        class TSubpass final
+        {
+          private:
+            TBuilder *builder = nullptr;
+            uint32_t index = TURBO_INVALID_SUBPASS_INDEX;
+
+          public:
+            TSubpass() = default;
+            TSubpass(TBuilder *builder, uint32_t index);
+            ~TSubpass() = default;
+
+            TResource Write(TResource resource);
+            TResource Read(TResource resource);
+        };
+
       private:
         TFrameGraph &frameGraph;
         TPassNode &passNode;
@@ -222,11 +280,15 @@ class TFrameGraph
       public:
         TBuilder(TFrameGraph &frameGraph, TPassNode &passNode);
 
+      private:
+        TResource Read(TResource resource);
+        TResource Write(TResource resource);
+
       public:
         template <typename T>
         TResource Create(const std::string &name, typename T::Descriptor &&descriptor);
-        TResource Read(TResource resource);
-        TResource Write(TResource resource);
+
+        Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass CreateSubpass();
 
         TBuilder &SideEffect();
     };
@@ -253,6 +315,8 @@ class TFrameGraph
 
     void Compile();
     void Execute(void *context = nullptr);
+
+    std::string ToMermaid();
 
     TBlackboard &GetBlackboard();
 };
@@ -304,7 +368,7 @@ inline T &Turbo::FrameGraph::TResourceProxy<T>::GetResource()
 template <typename T>
 inline void Turbo::FrameGraph::TResourceProxy<T>::Create(/*TODO: we need a allocator/context*/)
 {
-    this->resource.Create(this->GetName(), this->descriptor/*TODO: we need a allocator/context*/);
+    this->resource.Create(this->GetName(), this->descriptor /*TODO: we need a allocator/context*/);
 }
 
 template <typename T>

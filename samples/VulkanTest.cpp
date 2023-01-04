@@ -46,6 +46,22 @@
 #include <stdio.h>
 #include <string.h>
 
+std::string ReadTextFile(const std::string &filename)
+{
+    std::vector<std::string> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -169,6 +185,18 @@ int main()
         VkFormat vk_format = format_info_item.GetVkFormat();
         std::cout << "vk_format::" << vk_format << std::endl;
     }
+
+    const std::string vert_shader_str = ReadTextFile("../../asset/shaders/shader_base.vert");
+    const std::string fragment_shader_str = ReadTextFile("../../asset/shaders/shader_base.frag");
+
+    Turbo::Core::TVertexShader *vs = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, vert_shader_str);
+    Turbo::Core::TFragmentShader *fs = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, fragment_shader_str);
+
+    std::cout << vs->ToString() << std::endl;
+    std::cout << fs->ToString() << std::endl;
+
+    delete vs;
+    delete fs;
 
     delete device;
     delete instance;

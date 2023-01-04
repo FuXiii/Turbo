@@ -119,6 +119,14 @@
   >* 更新`Pipeline`章节
   >* 创建`Pipeline的VertexBinding`章节
   >
+
+* 2022/12/30
+  >
+  >* 更新`RenderPass`章节
+
+* 2023/1/3
+  >
+  >* 更新`用户自定义PassNode`章节
 ---
 
 # Turbo驱动初步
@@ -1867,7 +1875,7 @@ graph TD;
     subgraph Subpass0[Subpass0]
         direction LR
         Depth0-.读.->Subpass
-        Color0-->Subpass
+        Color0-.读.->Subpass
         Subpass--写-->Color1
         Subpass--写-->Color2
         Subpass--写-->Depth2
@@ -1966,7 +1974,7 @@ graph TD;
     context->CmdPushConstants(0, sizeof(alpha), &alpha);//来自Material
     context->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//来自Material
     context->CmdBindVertexBuffers(vertex_buffers);//来自Mesh
-    context->CmdSetViewport(frame_viewports);
+    context->CmdSetViewport(frame_viewports);//来自Camera和Surface
     context->CmdSetScissor(frame_scissors);//来自Material
     context->CmdBindIndexBuffer(index_buffer);//来自Mesh
     context->CmdDrawIndexed(indices_count, 1, 0, 0, 0);//来自Drawable
@@ -2079,6 +2087,50 @@ context->Draw(...);
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
 
 ## RenderPass
+
+在`FrameGraph::PassNode::Execute`阶段绑定`RenderPass`时
+```CXX
+context->CmdBeginRenderPass(render_pass)
+```
+`Turbo`主要做两件事：
+
+1.创建相应的`RenderPass`
+2.创建相应的`FrameBuffer`
+
+对于`RenderPass`和`FrameBuffer`的创建，需要根据`FrameGraph::PassNode::Setup`阶段中声明的各种`Subpass`来创建。
+
+现在有个问题：如何从`PassNode`中将`RenderPass`配置提取出来，并传给`Context`，说白了就是传给`CmdBeginRenderPass(RenderPass)`函数的`RenderPass`参数的实参如何构建？接口如何设计？
+
+可能的方式：
+```CXX
+[=](const PresentPassData &data, const TResources &resources, void *context) 
+{
+    FrameGraph::RenderPass fg_render_pass = this->GetRenderPass();
+
+    //std::vector<FrameGraph::Subpass> subpasses = fg_render_pass.GetSubpasses();
+    //FrameGraph::Attachment attachment = subpasses[x].GetAttachment();
+    //Texture2D &color_texture = resources.Get<Texture2D>(data.colorTexture);
+    //Texture2D &color_texture = attachment.Get<Texture2D>(data.colorTexture);
+    //...
+
+    Render::RenderPass render_pass = Fg_RenderPass_To_Render_RnederPass(fg_render_pass);
+
+    context->CmdBeginRenderPass(render_pass);
+    ...
+    context->CmdEndRenderPass();
+}
+```
+
+`FrameGraph::PassNode`中增加`FrameGraph::RenderPass FrameGraph::PassNode::GetRenderPass()`，这样就可以获得`FrameGraph::PassNode::Setup`阶段所配置的`RenderPass`，并拿着该配置创建`Context`需要的`RenderPass`。缺点就是有点麻烦，需要定义两头差不多的`RenderPass`数据结构。优化的方式就是直接将`FrameGraph::RenderPass`作为`Context::CmdBeginRenderPass`的实参。
+
+```CXX
+//Turbo::Render
+class Context
+{
+    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
+}
+```
 
 ## Mesh，Material和Drawable
 
