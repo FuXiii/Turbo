@@ -2039,3 +2039,9 @@ Turbo是渲染引擎
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* `./asset/models/`下增加`fuxiii-2022.gltf`模型
   >* `./engine/framegraph`中`TFrameGraph`增加`std::string ToMermaid()`成员函数
+
+* 2023/1/4 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`中`TFrameGraph`更新`std::string ToMermaid()`成员函数
+

@@ -177,6 +177,23 @@ int test2()
             data.colorTexture = builder.Create<CustomTexture>("Color Texture", {128, 128, CustomTexture::Color});
             data.colorTexture = subpass.Write(data.colorTexture);
 
+            //<MultiSubpass>
+            TFrameGraph::TBuilder::TSubpass subpass1 = builder.CreateSubpass();
+            data.depthTexture = subpass1.Write(data.depthTexture);
+            data.normalTexture = subpass1.Write(data.normalTexture);
+            data.colorTexture = subpass1.Write(data.colorTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass2 = builder.CreateSubpass();
+            data.depthTexture = subpass2.Write(data.depthTexture);
+            data.normalTexture = subpass2.Write(data.normalTexture);
+            data.colorTexture = subpass2.Write(data.colorTexture);
+
+            TFrameGraph::TBuilder::TSubpass subpass3 = builder.CreateSubpass();
+            data.depthTexture = subpass3.Write(data.depthTexture);
+            data.normalTexture = subpass3.Write(data.normalTexture);
+            data.colorTexture = subpass3.Write(data.colorTexture);
+            //</MultiSubpass>
+
             fg.GetBlackboard()["Depth Texture"] = data.depthTexture;
             fg.GetBlackboard()["Normal Texture"] = data.normalTexture;
             fg.GetBlackboard()["Color Texture"] = data.colorTexture;
@@ -294,9 +311,8 @@ int test2()
         });
 
     fg.Compile();
-    fg.Execute();
-
     std::string mermaid = fg.ToMermaid();
+    fg.Execute();
 
     std::stringstream ss;
 

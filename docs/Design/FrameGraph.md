@@ -28,6 +28,10 @@
   >
   >* 创建`FrameGraph::Mermaid`章节
 
+* 2023/1/4
+  >
+  >* 更新`FrameGraph::Mermaid`章节
+
 
 ## PassNode与RenderPass
 
@@ -210,6 +214,7 @@ std::string FrameGraph::ToMermaid();
 graph LR;
     classDef Resource fill:#608ba3
     classDef Pass fill:#e8924a
+    classDef Subpass fill:#8474a0
     classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
     classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
 
@@ -224,31 +229,51 @@ graph LR;
     LightBuffer("Light Buffer"):::Resource
     BackBuffer("Back Buffer"):::Resource
 
-    DepthPass("Depth Pass"):::Pass
-    GBufferPass("GBuffer Pass"):::Pass
-    LightingPass("Lighting"):::Pass
-    PostPass("Post"):::Pass
-    PresentPass("Present"):::Pass
+    DepthPass:::Pass
+        subgraph DepthPass["Depth Pass"]
+            direction TB
+            DepthPassSubpass0("Subpass 0"):::Subpass
+        end
+    GBufferPass:::Pass
+        subgraph GBufferPass["GBuffer Pass"]
+            direction TB
+            GBufferPassSubpass0("Subpass 0"):::Subpass
+        end
+    LightingPass:::Pass
+        subgraph LightingPass["Lighting"]
+            direction TB
+            LightingPassSubpass0("Subpass 0"):::Subpass
+        end
+    PostPass:::Pass
+        subgraph PostPass["Post"]
+            direction TB
+            PostPassSubpass0("Subpass 0"):::Subpass
+        end
+    PresentPass:::Pass
+        subgraph PresentPass["Present"]
+            direction TB
+            PresentPassSubpass0("Subpass 0"):::Subpass
+        end
 
     Start-.->DepthPass
-    DepthPass-->DepthBuffer0
-    DepthBuffer0-->GBufferPass
-    GBufferPass-->DepthBuffer1
-    GBufferPass-->GBuffer1
-    GBufferPass-->GBuffer2
-    GBufferPass-->GBuffer3
-    DepthBuffer1-->LightingPass
-    GBuffer1-->LightingPass
-    GBuffer2-->LightingPass
-    GBuffer3-->LightingPass
-    LightingPass-->LightBuffer
-    LightBuffer-->PostPass
-    PostPass-->BackBuffer
-    BackBuffer-->PresentPass
+    DepthPassSubpass0-->DepthBuffer0
+    DepthBuffer0-->GBufferPassSubpass0
+    GBufferPassSubpass0-->DepthBuffer1
+    GBufferPassSubpass0-->GBuffer1
+    GBufferPassSubpass0-->GBuffer2
+    GBufferPassSubpass0-->GBuffer3
+    DepthBuffer1-->LightingPassSubpass0
+    GBuffer1-->LightingPassSubpass0
+    GBuffer2-->LightingPassSubpass0
+    GBuffer3-->LightingPassSubpass0
+    LightingPassSubpass0-->LightBuffer
+    LightBuffer-->PostPassSubpass0
+    PostPassSubpass0-->BackBuffer
+    BackBuffer-->PresentPassSubpass0
     PresentPass-.->End
 
-    linkStyle 1 stroke:#a44141,stroke-width:3px
-    linkStyle 2 stroke:#95ad5b,stroke-width:3px
+    linkStyle 1 stroke:#a44141,stroke-width:3px %% write link style
+    linkStyle 2 stroke:#95ad5b,stroke-width:3px %% read link style
     linkStyle 3 stroke:#a44141,stroke-width:3px
     linkStyle 4 stroke:#a44141,stroke-width:3px
     linkStyle 5 stroke:#a44141,stroke-width:3px
