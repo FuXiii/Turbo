@@ -127,6 +127,13 @@
 * 2023/1/3
   >
   >* 更新`用户自定义PassNode`章节
+
+* 2023/1/5
+  >
+  >* 将`RenderPass`章节更名为`Context::CmdBeginRenderPass`
+  >* 创建`RenderPass`章节
+  >* 创建`Subpass`章节
+
 ---
 
 # Turbo驱动初步
@@ -2086,7 +2093,47 @@ context->Draw(...);
 
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
 
+## Subpass
+
+`Subpass`实际上是多个`Image`的集合，包括如下三种`Image`集
+
+1. `Input`
+2. `Color`
+3. `DepthStencil`（确切说`DepthStencil`不是`Image`集，应该是单一的，只能有一张`DepthStencil`纹理）
+
+```CXX
+//in Turbo::Render
+class Subpass
+{
+    private:
+        std::vector<ColorImage> colors;
+        std::vector<Image> inputs;
+        DepthStencilImage depthStencil;
+
+    public:
+        Subpass& AddColorAttachment(const ColorImage& colorImage);
+        Subpass& AddInputAttachment(const Image& image);
+        Subpass& SetDepthStencilAttachment(const DepthStencilImage& depthStencilImage);
+};
+```
+
 ## RenderPass
+
+`RenderPass`实际上是多个`Subpass`的集合
+
+```CXX
+//in Turbo::Render
+class RenderPass
+{
+    private:
+        std::vector<Subpass> subpasses;
+
+    public:
+        void AddSubpass(const Subpass& subpass);
+};
+```
+
+## Context::CmdBeginRenderPass
 
 在`FrameGraph::PassNode::Execute`阶段绑定`RenderPass`时
 ```CXX
@@ -2094,8 +2141,8 @@ context->CmdBeginRenderPass(render_pass)
 ```
 `Turbo`主要做两件事：
 
-1.创建相应的`RenderPass`
-2.创建相应的`FrameBuffer`
+1. 创建相应的`RenderPass`
+2. 创建相应的`FrameBuffer`
 
 对于`RenderPass`和`FrameBuffer`的创建，需要根据`FrameGraph::PassNode::Setup`阶段中声明的各种`Subpass`来创建。
 
