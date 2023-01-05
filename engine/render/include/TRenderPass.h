@@ -1,6 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <stdint.h>
 #ifndef TURBO_RENDER_TRENDERPASS_H
 #define TURBO_RENDER_TRENDERPASS_H
 #include <stdint.h>

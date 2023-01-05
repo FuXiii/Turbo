@@ -2114,6 +2114,10 @@ class Subpass
         Subpass& AddColorAttachment(const ColorImage& colorImage);
         Subpass& AddInputAttachment(const Image& image);
         Subpass& SetDepthStencilAttachment(const DepthStencilImage& depthStencilImage);
+
+        const std::vector<ColorImage> GetColorAttachments();
+        const std::vector<Image> GetInputAttachments();
+        const DepthStencilImage GetDepthStencilAttachments();
 };
 ```
 
@@ -2129,7 +2133,7 @@ class RenderPass
         std::vector<Subpass> subpasses;
 
     public:
-        void AddSubpass(const Subpass& subpass);
+        RenderPass& AddSubpass(const Subpass& subpass);
 };
 ```
 
