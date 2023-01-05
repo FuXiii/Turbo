@@ -2048,3 +2048,7 @@ Turbo是渲染引擎
   >* `./engine/render`下增加`TRenderPass`类
   >* `./asset/models`下增加`SciFiHelmet`模型
 
+* 2023/1/5 设计架构
+  >
+  >* `./engine/render`下的`TRenderPass`中增加`TSubpass`类
+
