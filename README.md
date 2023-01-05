@@ -2050,5 +2050,14 @@ Turbo是渲染引擎
 
 * 2023/1/5 设计架构
   >
-  >* `./engine/render`下的`TRenderPass`中增加`TSubpass`类
+  >* `./engine/render`下的`RenderPass`中增加`TSubpass`类
+  >* `./engine/render`下的`TSubpass`中增加`std::vector<Turbo::Render::TColorImage> colors`成员变量
+  >* `./engine/render`下的`TSubpass`中增加`std::vector<Turbo::Render::TImage> inputs`成员变量
+  >* `./engine/render`下的`TSubpass`中增加`Turbo::Render::TDepthStencilImage depthStencil`成员变量
+  >* `./engine/render`下的`TSubpass`中增加`TSubpass &AddColorAttachment(const Turbo::Render::TColorImage &colorImage)`成员函数
+  >* `./engine/render`下的`TSubpass`中增加`const std::vector<Turbo::Render::TImage>& GetInputAttachments()`成员函数
+  >* `./engine/render`下的`TSubpass`中增加`Turbo::Render::TDepthStencilImage GetDepthStencilAttachment()`成员函数
+  >* `./engine/render`下的`TRenderPass`中去除实验性代码
+  >* `./engine/render`下的`TRenderPass`中增加``
+
 

@@ -25,23 +25,22 @@ class TSubpass
     TSubpass &AddInputAttachment(const Turbo::Render::TImage &image);
     TSubpass &SetDepthStencilAttachment(const Turbo::Render::TDepthStencilImage &depthStencil);
 
-    const std::vector<Turbo::Render::TColorImage>& GetColorAttachments();
-    const std::vector<Turbo::Render::TImage>& GetInputAttachments();
+    const std::vector<Turbo::Render::TColorImage> &GetColorAttachments();
+    const std::vector<Turbo::Render::TImage> &GetInputAttachments();
     Turbo::Render::TDepthStencilImage GetDepthStencilAttachment();
 };
 
 class TRenderPass
 {
   private:
-    uint32_t testValue = 0;
-    bool testIsSomething = false;
+    std::vector<TSubpass> subpasses;
 
   public:
     TRenderPass() = default;
     ~TRenderPass() = default;
 
-    TRenderPass &SetTestValue(uint32_t value);
-    TRenderPass &SetTestIsSomething(bool isSomething);
+    TRenderPass &AddSubpass(const Turbo::Render::TSubpass &subpass);
+    const std::vector<Turbo::Render::TSubpass> &GetSubpasses();
 };
 } // namespace Render
 } // namespace Turbo

@@ -34,14 +34,13 @@ Turbo::Render::TDepthStencilImage Turbo::Render::TSubpass::GetDepthStencilAttach
     return this->depthStencil;
 }
 
-Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::SetTestValue(uint32_t value)
+Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::AddSubpass(const Turbo::Render::TSubpass &subpass)
 {
-    this->testValue = value;
+    this->subpasses.push_back(subpass);
     return *this;
 }
 
-Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::SetTestIsSomething(bool isSomething)
+const std::vector<Turbo::Render::TSubpass> &Turbo::Render::TRenderPass::GetSubpasses()
 {
-    this->testIsSomething = isSomething;
-    return *this;
+    return this->subpasses;
 }

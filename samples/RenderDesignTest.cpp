@@ -223,8 +223,6 @@ int main()
 
     //========================================================================
     Turbo::Render::TRenderPass render_pass;
-    render_pass.SetTestValue(123)
-               .SetTestIsSomething(true);
 
     return 0;
 }
