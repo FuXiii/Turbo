@@ -2058,6 +2058,8 @@ Turbo是渲染引擎
   >* `./engine/render`下的`TSubpass`中增加`const std::vector<Turbo::Render::TImage>& GetInputAttachments()`成员函数
   >* `./engine/render`下的`TSubpass`中增加`Turbo::Render::TDepthStencilImage GetDepthStencilAttachment()`成员函数
   >* `./engine/render`下的`TRenderPass`中去除实验性代码
-  >* `./engine/render`下的`TRenderPass`中增加``
+  >* `./engine/render`下的`TRenderPass`中增加`std::vector<TSubpass> subpasses`成员变量
+  >* `./engine/render`下的`TRenderPass`中增加`TRenderPass &AddSubpass(const Turbo::Render::TSubpass &subpass)`成员函数
+  >* `./engine/render`下的`TRenderPass`中增加`const std::vector<Turbo::Render::TSubpass> &GetSubpasses()`成员函数
 
 
