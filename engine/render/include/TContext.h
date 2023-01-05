@@ -1,4 +1,5 @@
 #pragma once
+#include "TRenderPass.h"
 #ifndef TURBO_RENDER_TCONTEXT_H
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
@@ -33,6 +34,8 @@ namespace Turbo
 namespace Render
 {
 
+class TRenderPass;
+
 class TContext
 {
   private:
@@ -57,6 +60,7 @@ class TContext
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
     void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();

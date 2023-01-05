@@ -1,4 +1,5 @@
 #include "TBuffer.h"
+#include "TDomain.h"
 #include "TImage.h"
 #include <chrono>
 #include <framegraph/include/TFrameGraph.hpp>
@@ -222,7 +223,47 @@ int main()
     context.BeginRenderPass(fg_render_pass);
 
     //========================================================================
+
+    Turbo::Render::TTexture2D color_texture2d;
+    Turbo::Render::TTexture2D::Descriptor color_texture2d_descriptor{};
+    color_texture2d_descriptor.width = 1920;
+    color_texture2d_descriptor.height = 1080;
+    color_texture2d_descriptor.mipLevels = 1;
+    color_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    color_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture2d.Create("color_texture2d", color_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TTexture2D normal_texture2d;
+    Turbo::Render::TTexture2D::Descriptor normal_texture2d_descriptor{};
+    normal_texture2d_descriptor.width = 1920;
+    normal_texture2d_descriptor.height = 1080;
+    normal_texture2d_descriptor.mipLevels = 1;
+    normal_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    normal_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    normal_texture2d.Create("normal_texture2d", normal_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TDepthTexture2D depth_texture2d;
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor{};
+    depth_texture2d_descriptor.width = 1920;
+    depth_texture2d_descriptor.height = 1080;
+    depth_texture2d_descriptor.mipLevels = 1;
+    depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    depth_texture2d.Create("depth_texture2d", depth_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TSubpass subpass0;
+    subpass0.AddColorAttachment(color_texture2d);
+    subpass0.AddColorAttachment(normal_texture2d);
+    subpass0.SetDepthStencilAttachment(depth_texture2d);
+
     Turbo::Render::TRenderPass render_pass;
+    render_pass.AddSubpass(subpass0);
+
+    context.BeginRenderPass(render_pass);
+
+    normal_texture2d.Destroy(&resource_allocator);
+    normal_texture2d.Destroy(&resource_allocator);
+    color_texture2d.Destroy(&resource_allocator);
 
     return 0;
 }

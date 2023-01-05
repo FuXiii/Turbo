@@ -329,6 +329,11 @@ void Turbo::Render::TContext::BeginRenderPass(Turbo::FrameGraph::TRenderPass &re
     //TODO: convert Turbo::FrameGraph::TRenderPass to Turbo::Render::TRenderPass
 }
 
+void Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &renderPass)
+{
+    //TODO: create Turbo::Core::TRenderPass and Turbo::Core::TFramebuffer
+}
+
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()
 {
     return this->instance;

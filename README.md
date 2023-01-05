@@ -2061,5 +2061,6 @@ Turbo是渲染引擎
   >* `./engine/render`下的`TRenderPass`中增加`std::vector<TSubpass> subpasses`成员变量
   >* `./engine/render`下的`TRenderPass`中增加`TRenderPass &AddSubpass(const Turbo::Render::TSubpass &subpass)`成员函数
   >* `./engine/render`下的`TRenderPass`中增加`const std::vector<Turbo::Render::TSubpass> &GetSubpasses()`成员函数
+  >* `./engine/render`下的`TContext`中增加`void BeginRenderPass(Turbo::Render::TRenderPass &renderPass)`成员函数
 
 
