@@ -1,5 +1,5 @@
-#include "TContext.h"
-#include "TImage.h"
+#include "render/include/TContext.h"
+#include "render/include/TImage.h"
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>

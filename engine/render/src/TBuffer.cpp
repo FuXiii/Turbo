@@ -1,5 +1,5 @@
-#include "TBuffer.h"
-#include "TResourceAllocator.h"
+#include "render/include/TBuffer.h"
+#include "render/include/TResourceAllocator.h"
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>

@@ -1,6 +1,6 @@
-#include "TBuffer.h"
-#include "TDomain.h"
-#include "TImage.h"
+#include "render/include/TBuffer.h"
+#include "render/include/TDomain.h"
+#include "render/include/TImage.h"
 #include <chrono>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <iostream>

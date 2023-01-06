@@ -1,5 +1,5 @@
-#include "TImage.h"
-#include "TResourceAllocator.h"
+#include "render/include/TImage.h"
+#include "render/include/TResourceAllocator.h"
 #include "vulkan/vulkan_core.h"
 #include <core/include/TException.h>
 #include <core/include/TPhysicalDevice.h>

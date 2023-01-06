@@ -1,5 +1,5 @@
 
-#include <TFrameGraph.hpp>
+#include <framegraph/include/TFrameGraph.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>

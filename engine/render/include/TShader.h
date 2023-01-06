@@ -7,9 +7,9 @@ namespace Turbo
 {
 namespace Core
 {
+class TComputeShader;
 class TVertexShader;
 class TFragmentShader;
-class TComputeShader;
 } // namespace Core
 } // namespace Turbo
 
@@ -32,6 +32,18 @@ class TShader
   public:
     TShader() = default;
     ~TShader() = default;
+};
+
+class TComputeShader : public TShader
+{
+  private:
+    Turbo::Core::TComputeShader *computeShader = nullptr;
+
+  public:
+    TComputeShader() = default;
+    TComputeShader(TContext *context, TShader::TLanguage language, const std::string &code);
+    TComputeShader(TContext *context, size_t size, uint32_t *code);
+    ~TComputeShader();
 };
 
 class TVertexShader : public TShader

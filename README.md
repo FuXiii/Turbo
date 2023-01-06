@@ -2082,3 +2082,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TShader`中增加`class TFragmentShader`
   >* `./engine/render`下`TFragmentShader`中增加`TFragmentShader(TContext *context, TShader::TLanguage language, const std::string &code)`构造函数
   >* `./engine/render`下`TFragmentShader`中增加`TFragmentShader(TContext *context, size_t size, uint32_t *code)`构造函数
+  >* `./engine/render`下`TShader`中增加`class TComputeShader`
+  >* `./engine/render`下`TComputeShader`中增加`TComputeShader(TContext *context, TShader::TLanguage language, const std::string &code)`构造函数
+  >* `./engine/render`下`TComputeShader`中增加`TComputeShader(TContext *context, size_t size, uint32_t *code)`构造函数
+  >* `Turbo::Core`层与`Turbo::Render`有同名头文件，会有冲突，使用`Turbo::Core`的头文件使用`core/include/...`，使用`Turbo::Render`的头文件使用`render/include/...`，同时修改`CMakeList.txt`中的相关设置

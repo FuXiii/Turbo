@@ -1,6 +1,6 @@
-#include "TRenderPass.h"
-#include "TCore.h"
-#include "TImage.h"
+#include "render/include/TRenderPass.h"
+#include "render/include/TImage.h"
+#include <core/include/TCore.h>
 #include <core/include/TException.h>
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddColorAttachment(const Turbo::Render::TColorImage &colorImage)
