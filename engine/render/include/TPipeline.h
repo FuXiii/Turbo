@@ -13,7 +13,7 @@ class TPipeline
     ~TPipeline() = default;
 };
 
-class TComputePipeline
+class TComputePipeline : public TPipeline
 {
   private:
     // TODO: TComputeShader* computeShader=nullptr;
@@ -23,7 +23,7 @@ class TComputePipeline
     ~TComputePipeline() = default;
 };
 
-class TGraphicsPipeline
+class TGraphicsPipeline : public TPipeline
 {
   public:
     TGraphicsPipeline() = default;

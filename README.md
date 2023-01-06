@@ -2075,5 +2075,10 @@ Turbo是渲染引擎
   >* `./engine/render`下增加`TShader.h`和`TShader.cpp`
   >* `./engine/render`下`TShader`中增加`class TShader`
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
-
-
+  >* `./engine/render`下`TShader`中增加`class TVertexShader`
+  >* `./engine/render`下`TShader`中增加`typedef enum TLanguage`成员枚举
+  >* `./engine/render`下`TVertexShader`中增加`TVertexShader(TContext *context, TShader::TLanguage language, const std::string &code)`构造函数
+  >* `./engine/render`下`TVertexShader`中增加`TVertexShader(TContext *context, size_t size, uint32_t *code)`构造函数
+  >* `./engine/render`下`TShader`中增加`class TFragmentShader`
+  >* `./engine/render`下`TFragmentShader`中增加`TFragmentShader(TContext *context, TShader::TLanguage language, const std::string &code)`构造函数
+  >* `./engine/render`下`TFragmentShader`中增加`TFragmentShader(TContext *context, size_t size, uint32_t *code)`构造函数
