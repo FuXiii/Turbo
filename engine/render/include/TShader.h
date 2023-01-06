@@ -32,6 +32,13 @@ class TShader
   public:
     TShader() = default;
     ~TShader() = default;
+
+    public:
+    // disallow copy and assignment
+    TShader(TShader const &) = delete;
+    TShader(TShader &&) = delete;
+    TShader &operator=(TShader const &) = delete;
+    TShader &operator=(TShader &&) = delete;
 };
 
 class TComputeShader : public TShader
@@ -40,7 +47,6 @@ class TComputeShader : public TShader
     Turbo::Core::TComputeShader *computeShader = nullptr;
 
   public:
-    TComputeShader() = default;
     TComputeShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TComputeShader(TContext *context, size_t size, uint32_t *code);
     ~TComputeShader();
@@ -52,7 +58,6 @@ class TVertexShader : public TShader
     Turbo::Core::TVertexShader *vertexShader = nullptr;
 
   public:
-    TVertexShader() = default;
     TVertexShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TVertexShader(TContext *context, size_t size, uint32_t *code);
     ~TVertexShader();
@@ -64,7 +69,6 @@ class TFragmentShader : public TShader
     Turbo::Core::TFragmentShader *fragmentShader = nullptr;
 
   public:
-    TFragmentShader() = default;
     TFragmentShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TFragmentShader(TContext *context, size_t size, uint32_t *code);
     ~TFragmentShader();

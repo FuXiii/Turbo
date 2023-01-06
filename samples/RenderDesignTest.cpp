@@ -1,13 +1,31 @@
 #include "render/include/TBuffer.h"
 #include "render/include/TDomain.h"
 #include "render/include/TImage.h"
+#include "render/include/TShader.h"
 #include <chrono>
 #include <framegraph/include/TFrameGraph.hpp>
+#include <fstream>
 #include <iostream>
 #include <render/include/TContext.h>
 #include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
 #include <vector>
+
+std::string ReadTextFile(const std::string &filename)
+{
+    std::vector<std::string> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
 
 int main()
 {
@@ -264,6 +282,21 @@ int main()
     normal_texture2d.Destroy(&resource_allocator);
     normal_texture2d.Destroy(&resource_allocator);
     color_texture2d.Destroy(&resource_allocator);
+
+    //========================================================================
+    std::string compute_shader_code = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+    Turbo::Render::TComputeShader *compute_shader = new Turbo::Render::TComputeShader(&context, Turbo::Render::TShader::TLanguage::GLSL, compute_shader_code);
+
+    std::string vertex_shader_code = ReadTextFile("../../asset/shaders/shader_base.vert");
+    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, vertex_shader_code);
+
+    std::string fragment_shader_code = ReadTextFile("../../asset/shaders/shader_base.frag");
+    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, fragment_shader_code);
+
+    delete compute_shader;
+    delete vertex_shader;
+    delete fragment_shader;
+    //========================================================================
 
     return 0;
 }
