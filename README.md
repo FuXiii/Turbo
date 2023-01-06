@@ -2094,3 +2094,6 @@ Turbo是渲染引擎
   >  TShader &operator=(TShader const &) = delete;
   >  TShader &operator=(TShader &&) = delete;
   >  ```
+  >
+  >* `./engine/render`下`TComputePipeline`中增加`TComputePipeline(Turbo::Render::TComputeShader *computeShader)`构造函数
+  >* `./engine/render`下`TComputePipeline`中增加`Turbo::Render::TComputeShader* computeShader`成员变量

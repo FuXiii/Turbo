@@ -6,6 +6,10 @@ namespace Turbo
 {
 namespace Render
 {
+class TComputeShader;
+class TVertexShader;
+class TFragmentShader;
+
 class TPipeline
 {
   public:
@@ -16,10 +20,11 @@ class TPipeline
 class TComputePipeline : public TPipeline
 {
   private:
-    // TODO: TComputeShader* computeShader=nullptr;
+    Turbo::Render::TComputeShader *computeShader = nullptr;
+
   public:
     TComputePipeline() = default;
-    // TODO: TComputePipeline(TComputeShader* computeShader);
+    TComputePipeline(Turbo::Render::TComputeShader *computeShader);
     ~TComputePipeline() = default;
 };
 
@@ -27,6 +32,7 @@ class TGraphicsPipeline : public TPipeline
 {
   public:
     TGraphicsPipeline() = default;
+    // TODO::TGraphicsPipeline(vertexShader, fragmentShader)
     ~TGraphicsPipeline() = default;
 };
 } // namespace Render
