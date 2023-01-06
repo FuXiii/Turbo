@@ -2203,12 +2203,12 @@ class Context
 6. `IntersectionShader`
 7. `AnyHitShader`
 8. `ClosetHitShader`
-8. `MissShader`
+9. `MissShader`
 
 `NVIDIA`标准：
 
-9. `TaskShader`
-10. `MeshShader`
+10. `TaskShader`
+11. `MeshShader`
 
 ## Mesh，Material和Drawable
 
