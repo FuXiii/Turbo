@@ -2063,4 +2063,17 @@ Turbo是渲染引擎
   >* `./engine/render`下的`TRenderPass`中增加`const std::vector<Turbo::Render::TSubpass> &GetSubpasses()`成员函数
   >* `./engine/render`下的`TContext`中增加`void BeginRenderPass(Turbo::Render::TRenderPass &renderPass)`成员函数
 
+* 2023/1/6 设计架构
+  >
+  >* `./engine/render`下的`TImage`中增加对于`Get*()`成员函数的`const`修饰
+  >* `./engine/render`下的`TImage`中增加`bool IsValid()`成员函数
+  >* `./engine/render`下的`TSubpass`中增加`Attachment`时增加对于传入`Image`参数的有效性判断（`Turbo::Render::TImage::IsValid()`），有效则加入，无效则直接返回异常
+  >* `./engine/render`下增加`TPipeline.h`和`TPipeline.cpp`
+  >* `./engine/render`下`TPipeline`中增加`class TPipeline`
+  >* `./engine/render`下`TPipeline`中增加`class TComputePipeline`
+  >* `./engine/render`下`TPipeline`中增加`class TGraphicsPipeline`
+  >* `./engine/render`下增加`TShader.h`和`TShader.cpp`
+  >* `./engine/render`下`TShader`中增加`class TShader`
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
 

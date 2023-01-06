@@ -1,21 +1,44 @@
 #include "TRenderPass.h"
+#include "TCore.h"
 #include "TImage.h"
+#include <core/include/TException.h>
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddColorAttachment(const Turbo::Render::TColorImage &colorImage)
 {
-    this->colors.push_back(colorImage);
+    if (colorImage.IsValid())
+    {
+        this->colors.push_back(colorImage);
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_EXTERNAL_HANDLE, "Turbo::Render::TSubpass::AddColorAttachment", "ColorImage which input is invalid");
+    }
     return *this;
 }
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddInputAttachment(const Turbo::Render::TImage &image)
 {
-    this->inputs.push_back(image);
+    if (image.IsValid())
+    {
+        this->inputs.push_back(image);
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_EXTERNAL_HANDLE, "Turbo::Render::TSubpass::AddColorAttachment", "ColorImage which input is invalid");
+    }
     return *this;
 }
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::SetDepthStencilAttachment(const Turbo::Render::TDepthStencilImage &depthStencil)
 {
-    this->depthStencil = depthStencil;
+    if (depthStencil.IsValid())
+    {
+        this->depthStencil = depthStencil;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_EXTERNAL_HANDLE, "Turbo::Render::TSubpass::AddColorAttachment", "ColorImage which input is invalid");
+    }
     return *this;
 }
 

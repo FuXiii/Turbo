@@ -134,6 +134,10 @@
   >* 创建`RenderPass`章节
   >* 创建`Subpass`章节
 
+* 2023/1/6
+  >
+  >* 创建`Shader`章节
+
 ---
 
 # Turbo驱动初步
@@ -2183,6 +2187,28 @@ class Context
     void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
 }
 ```
+
+## Shader
+
+`Shader`（着色器），是组成`Pipeline`的重要组件，常见的`Shader`如下：
+
+1. `VertexShader`（顶点着色器）
+2. `GeometryShader`（几何着色器）
+3. `TessellationShader`（细分着色器）
+4. `FragmentShader`(片元着色器)
+
+光追标准着色器(`NVIDIA`标准或`Khronos`标准)： 
+
+5. `RayGenerationShader`
+6. `IntersectionShader`
+7. `AnyHitShader`
+8. `ClosetHitShader`
+8. `MissShader`
+
+`NVIDIA`标准：
+
+9. `TaskShader`
+10. `MeshShader`
 
 ## Mesh，Material和Drawable
 
