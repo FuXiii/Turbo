@@ -292,7 +292,7 @@ int main()
 
     std::string fragment_shader_code = ReadTextFile("../../asset/shaders/shader_base.frag");
     Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, fragment_shader_code);
-
+    
     delete compute_shader;
     delete vertex_shader;
     delete fragment_shader;

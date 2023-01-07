@@ -2104,4 +2104,32 @@ Turbo是渲染引擎
   >* `./engine/render`下`TComputePipeline`中移除`TComputePipeline(Turbo::Render::TComputeShader *computeShader)`构造函数
   >* `./engine/render`下`TGraphicsPipeline`中增加`Turbo::Render::TVertexShader *vertexShader`成员变量
   >* `./engine/render`下`TGraphicsPipeline`中增加`Turbo::Render::TFragmentShader *fragmentShader`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum TTopology`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TTopology topology`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetTopology(TTopology topology)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum TCullBits`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`using TCull = uint32_t`成员声明
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool primitiveRestartEnable`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool depthClampEnable`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool rasterizerDiscardEnable`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TPolygon polygon`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TCull cull`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetPrimitiveRestartEnable(bool primitiveRestartEnable);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthClampEnable(bool depthClampEnable);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetRasterizerDiscardEnable(bool rasterizerDiscardEnable);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetPolygon(TPolygon polygon);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetCull(TCull cull);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum TFront`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetFront(TFront front)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool depthBiasEnable`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float depthBiasConstantFactor`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float depthBiasClamp`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float depthBiasSlopeFactor`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float lineWidth`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasEnable(bool depthBiasEnable);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasConstantFactor(float depthBiasConstantFactor);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasClamp(float depthBiasClamp);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasSlopeFactor(float depthBiasSlopeFactor);`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetLineWidth(float lineWidth);`成员函数
   >
+  
