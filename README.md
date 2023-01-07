@@ -2097,3 +2097,11 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下`TComputePipeline`中增加`TComputePipeline(Turbo::Render::TComputeShader *computeShader)`构造函数
   >* `./engine/render`下`TComputePipeline`中增加`Turbo::Render::TComputeShader* computeShader`成员变量
+
+* 2023/1/7 设计架构
+  >
+  >* `./engine/render`下`TComputePipeline`中增加`TComputePipeline &SetComputeShader(Turbo::Render::TComputeShader *computeShader)`成员函数
+  >* `./engine/render`下`TComputePipeline`中移除`TComputePipeline(Turbo::Render::TComputeShader *computeShader)`构造函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`Turbo::Render::TVertexShader *vertexShader`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`Turbo::Render::TFragmentShader *fragmentShader`成员变量
+  >

@@ -24,16 +24,23 @@ class TComputePipeline : public TPipeline
 
   public:
     TComputePipeline() = default;
-    TComputePipeline(Turbo::Render::TComputeShader *computeShader);
     ~TComputePipeline() = default;
+
+    TComputePipeline &SetComputeShader(Turbo::Render::TComputeShader *computeShader);
 };
 
 class TGraphicsPipeline : public TPipeline
 {
+  private:
+    Turbo::Render::TVertexShader *vertexShader = nullptr;
+    Turbo::Render::TFragmentShader *fragmentShader = nullptr;
+
   public:
     TGraphicsPipeline() = default;
-    // TODO::TGraphicsPipeline(vertexShader, fragmentShader)
     ~TGraphicsPipeline() = default;
+
+    TGraphicsPipeline &SetVertexShader(Turbo::Render::TVertexShader *vertexShader);
+    TGraphicsPipeline &SetFragmentShader(Turbo::Render::TFragmentShader *fragmentShader);
 };
 } // namespace Render
 } // namespace Turbo
