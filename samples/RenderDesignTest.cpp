@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <render/include/TContext.h>
+#include <render/include/TPipeline.h>
 #include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
 #include <vector>
@@ -287,12 +288,19 @@ int main()
     std::string compute_shader_code = ReadTextFile("../../asset/shaders/perlin-worley.comp");
     Turbo::Render::TComputeShader *compute_shader = new Turbo::Render::TComputeShader(&context, Turbo::Render::TShader::TLanguage::GLSL, compute_shader_code);
 
+    Turbo::Render::TComputePipeline compute_pipeline;
+    compute_pipeline.SetComputeShader(compute_shader);
+
     std::string vertex_shader_code = ReadTextFile("../../asset/shaders/shader_base.vert");
     Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, vertex_shader_code);
 
     std::string fragment_shader_code = ReadTextFile("../../asset/shaders/shader_base.frag");
     Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, fragment_shader_code);
-    
+
+    Turbo::Render::TGraphicsPipeline graphics_pipeline;
+    graphics_pipeline.SetVertexShader(vertex_shader);
+    graphics_pipeline.SetFragmentShader(fragment_shader).SetPolygon(Turbo::Render::TGraphicsPipeline::TPolygon::FILL);
+
     delete compute_shader;
     delete vertex_shader;
     delete fragment_shader;
