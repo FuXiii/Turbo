@@ -2131,5 +2131,75 @@ Turbo是渲染引擎
   >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasClamp(float depthBiasClamp);`成员函数
   >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBiasSlopeFactor(float depthBiasSlopeFactor);`成员函数
   >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetLineWidth(float lineWidth);`成员函数
+
+* 2023/1/8 设计架构
   >
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum class TCompareOp`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum class TStencilOp`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum class TLogicOp`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum class TBlendFactor`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`typedef enum class TBlendOp`成员枚举
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool depthTestEnable = true`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool depthWriteEnable = true`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool depthBoundsTestEnable = false`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool stencilTestEnable = false`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp frontFailOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp frontPassOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp frontDepthFailOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TCompareOp frontCompareOp = TCompareOp::ALWAYS`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t frontCompareMask = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t frontWriteMask = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t frontReference = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp backFailOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp backPassOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TStencilOp backDepthFailOp = TStencilOp::KEEP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TCompareOp backCompareOp = TCompareOp::ALWAYS`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t backCompareMask = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t backWriteMask = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t backReference = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float minDepthBounds = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`float maxDepthBounds = 0`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool logicOpEnable = false`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TLogicOp logicOp = TLogicOp::NO_OP`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`bool blendEnable = false`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendOp colorBlendOp = TBlendOp::ADD`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TBlendOp alphaBlendOp = TBlendOp::ADD`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`uint32_t patchControlPoints`成员变量
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetPatchControlPoints(uint32_t patchControlPoints)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthTestEnable(bool depthTestEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthWriteEnable(bool depthWriteEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthCompareOp(TCompareOp depthCompareOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDepthBoundsTestEnable(bool depthBoundsTestEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilTestEnable(bool stencilTestEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontFailOp(TStencilOp frontFailOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontPassOp(TStencilOp frontPassOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontDepthFailOp(TStencilOp frontDepthFailOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontCompareOp(TCompareOp frontCompareOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontCompareMask(uint32_t frontCompareMask)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontWriteMask(uint32_t frontWriteMask)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilFrontReference(uint32_t frontReference)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackFailOp(TStencilOp backFailOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackPassOp(TStencilOp backPassOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackDepthFailOp(TStencilOp backDepthFailOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackCompareOp(TCompareOp backCompareOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackCompareMask(uint32_t backCompareMask)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackWriteMask(uint32_t backWriteMask)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetStencilBackReference(uint32_t backReference)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetMinDepthBounds(float minDepthBounds)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetMaxDepthBounds(float maxDepthBounds)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetLogicOpEnable(bool logicOpEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetLogicOp(TLogicOp logicOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetBlendEnable(bool blendEnable)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetSrcColorBlendFactor(TBlendFactor srcColorBlendFactor)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDstColorBlendFactor(TBlendFactor dstColorBlendFactor)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetColorBlendOp(TBlendOp colorBlendOp)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetSrcAlphaBlendFactor(TBlendFactor srcAlphaBlendFactor)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetDstAlphaBlendFactor(TBlendFactor dstAlphaBlendFactor)`成员函数
+  >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetAlphaBlendOp(TBlendOp alphaBlendOp)`成员函数
+  >* `./docs/Issue.md`中增加`TGraphicsPipeline`对于`VkPipelineTessellationStateCreateInfo`不支持的待解决问题
   
