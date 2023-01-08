@@ -1,5 +1,5 @@
 
-#include <TFrameGraph.hpp>
+#include <framegraph/include/TFrameGraph.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -314,11 +314,23 @@ int test2()
     std::string mermaid = fg.ToMermaid();
     fg.Execute();
 
-    std::stringstream ss;
+    std::stringstream ss_to_markdown;
+    ss_to_markdown << "```mermaid" << std::endl << mermaid << "```" << std::endl;
 
-    ss << "```mermaid" << std::endl << mermaid << "```" << std::endl;
+    WriteTextFile(ss_to_markdown.str(), "./Fg.md");
 
-    WriteTextFile(ss.str(), "./Fg.md");
+    std::stringstream ss_to_html;
+    ss_to_html << "<html>" << std::endl;
+    ss_to_html << "<body>" << std::endl;
+    ss_to_html << "<script src=\"https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js\"></script>" << std::endl;
+    ss_to_html << "<script>mermaid.initialize({startOnLoad:true});</script>" << std::endl;
+    ss_to_html << "<div class=\"mermaid\">" << std::endl;
+    ss_to_html << mermaid << std::endl;
+    ss_to_html << "</div>" << std::endl;
+    ss_to_html << "</body>" << std::endl;
+    ss_to_html << "</html>" << std::endl;
+
+    WriteTextFile(ss_to_html.str(), "./Fg.html");
 
     return 0;
 }

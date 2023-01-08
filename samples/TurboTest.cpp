@@ -1,45 +1,45 @@
-#include "TDevice.h"
-#include "TDeviceQueue.h"
-#include "TEngine.h"
-#include "TMemoryTypeInfo.h"
-#include "TPhysicalDevice.h"
-#include "TVulkanAllocator.h"
+#include "core/include/TDevice.h"
+#include "core/include/TDeviceQueue.h"
+#include "core/include/TEngine.h"
+#include "core/include/TMemoryTypeInfo.h"
+#include "core/include/TPhysicalDevice.h"
+#include "core/include/TVulkanAllocator.h"
 
-#include "TBuffer.h"
-#include "TCommandBuffer.h"
-#include "TCommandBufferPool.h"
-#include "TImage.h"
-#include "TImageView.h"
+#include "core/include/TBuffer.h"
+#include "core/include/TCommandBuffer.h"
+#include "core/include/TCommandBufferPool.h"
+#include "core/include/TImage.h"
+#include "core/include/TImageView.h"
 
-#include "TShader.h"
+#include "core/include/TShader.h"
 
-#include "TAttachment.h"
-#include "TGraphicsPipeline.h"
-#include "TRenderPass.h"
-#include "TSubpass.h"
+#include "core/include/TAttachment.h"
+#include "core/include/TGraphicsPipeline.h"
+#include "core/include/TRenderPass.h"
+#include "core/include/TSubpass.h"
 
-#include "TDescriptorPool.h"
-#include "TDescriptorSet.h"
-#include "TDescriptorSetLayout.h"
-#include "TFramebuffer.h"
+#include "core/include/TDescriptorPool.h"
+#include "core/include/TDescriptorSet.h"
+#include "core/include/TDescriptorSetLayout.h"
+#include "core/include/TFramebuffer.h"
 
-#include "TFence.h"
-#include "TSemaphore.h"
+#include "core/include/TFence.h"
+#include "core/include/TSemaphore.h"
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "TSurface.h"
-#include "TSwapchain.h"
+#include "core/include/TSurface.h"
+#include "core/include/TSwapchain.h"
 
 #include <iostream>
 #include <math.h>
 
-#include "TPipelineDescriptorSet.h"
-#include "TSampler.h"
+#include "core/include/TPipelineDescriptorSet.h"
+#include "core/include/TSampler.h"
 
-#include "TVulkanLoader.h"
+#include "core/include/TVulkanLoader.h"
 
 #include <ktx.h>
 

@@ -1,5 +1,6 @@
-#include "TImage.h"
-#include "TResourceAllocator.h"
+#include "render/include/TImage.h"
+#include "render/include/TResourceAllocator.h"
+#include "vulkan/vulkan_core.h"
 #include <core/include/TException.h>
 #include <core/include/TPhysicalDevice.h>
 
@@ -30,44 +31,57 @@ void Turbo::Render::TImage::Destroy(void *allocator)
     }
 }
 
-Turbo::Render::TFormat Turbo::Render::TImage::GetFormat()
+Turbo::Render::TFormat Turbo::Render::TImage::GetFormat() const
 {
     return this->descriptor.format;
 }
 
-uint32_t Turbo::Render::TImage::GetWidth()
+uint32_t Turbo::Render::TImage::GetWidth() const
 {
     return this->descriptor.width;
 }
 
-uint32_t Turbo::Render::TImage::GteHeight()
+uint32_t Turbo::Render::TImage::GteHeight() const
 {
     return this->descriptor.height;
 }
 
-uint32_t Turbo::Render::TImage::GetDepth()
+uint32_t Turbo::Render::TImage::GetDepth() const
 {
     return this->descriptor.depth;
 }
 
-uint32_t Turbo::Render::TImage::GetLayers()
+uint32_t Turbo::Render::TImage::GetLayers() const
 {
     return this->descriptor.layers;
 }
 
-uint32_t Turbo::Render::TImage::GetMipLevels()
+uint32_t Turbo::Render::TImage::GetMipLevels() const
 {
     return this->descriptor.mipLevels;
 }
 
-Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsages()
+Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsages() const
 {
     return this->descriptor.usages;
 }
 
-Turbo::Render::TDomain Turbo::Render::TImage::GetDomain()
+Turbo::Render::TDomain Turbo::Render::TImage::GetDomain() const
 {
     return this->descriptor.domain;
+}
+
+bool Turbo::Render::TImage::IsValid() const
+{
+    if (this->image != nullptr)
+    {
+        if (this->image->GetVkImage() != VK_NULL_HANDLE)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Turbo::Render::TColorImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)

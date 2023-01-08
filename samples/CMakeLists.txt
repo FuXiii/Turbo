@@ -8,9 +8,9 @@ target_link_libraries(${Sample} PUBLIC ${Libs})
 endfunction()
 
 set(INCLUDE_PARTH 
-PUBLIC ../engine/render/include 
-PUBLIC ../engine/framegraph/include 
-PUBLIC ../engine/core/include
+PUBLIC ../engine/render 
+PUBLIC ../engine/framegraph
+PUBLIC ../engine/core
 PUBLIC ../thirdparty/glm/
 PUBLIC ../thirdparty/tinygltf/
 PUBLIC ../thirdparty/imgui/

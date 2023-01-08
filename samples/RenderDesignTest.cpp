@@ -1,11 +1,31 @@
-#include "TBuffer.h"
-#include "TImage.h"
+#include "render/include/TBuffer.h"
+#include "render/include/TDomain.h"
+#include "render/include/TImage.h"
+#include "render/include/TShader.h"
 #include <chrono>
 #include <framegraph/include/TFrameGraph.hpp>
+#include <fstream>
 #include <iostream>
 #include <render/include/TContext.h>
+#include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
 #include <vector>
+
+std::string ReadTextFile(const std::string &filename)
+{
+    std::vector<std::string> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
 
 int main()
 {
@@ -216,9 +236,67 @@ int main()
     copy_gpu_buffer.Destroy(&resource_allocator);
 
     //========================================================================
-    
+
     Turbo::FrameGraph::TRenderPass fg_render_pass{};
     context.BeginRenderPass(fg_render_pass);
+
+    //========================================================================
+
+    Turbo::Render::TTexture2D color_texture2d;
+    Turbo::Render::TTexture2D::Descriptor color_texture2d_descriptor{};
+    color_texture2d_descriptor.width = 1920;
+    color_texture2d_descriptor.height = 1080;
+    color_texture2d_descriptor.mipLevels = 1;
+    color_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    color_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture2d.Create("color_texture2d", color_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TTexture2D normal_texture2d;
+    Turbo::Render::TTexture2D::Descriptor normal_texture2d_descriptor{};
+    normal_texture2d_descriptor.width = 1920;
+    normal_texture2d_descriptor.height = 1080;
+    normal_texture2d_descriptor.mipLevels = 1;
+    normal_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    normal_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    normal_texture2d.Create("normal_texture2d", normal_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TDepthTexture2D depth_texture2d;
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor{};
+    depth_texture2d_descriptor.width = 1920;
+    depth_texture2d_descriptor.height = 1080;
+    depth_texture2d_descriptor.mipLevels = 1;
+    depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    depth_texture2d.Create("depth_texture2d", depth_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TSubpass subpass0;
+    subpass0.AddColorAttachment(color_texture2d);
+    subpass0.AddColorAttachment(normal_texture2d);
+    subpass0.SetDepthStencilAttachment(depth_texture2d);
+
+    Turbo::Render::TRenderPass render_pass;
+    render_pass.AddSubpass(subpass0);
+
+    context.BeginRenderPass(render_pass);
+
+    normal_texture2d.Destroy(&resource_allocator);
+    normal_texture2d.Destroy(&resource_allocator);
+    color_texture2d.Destroy(&resource_allocator);
+
+    //========================================================================
+    std::string compute_shader_code = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+    Turbo::Render::TComputeShader *compute_shader = new Turbo::Render::TComputeShader(&context, Turbo::Render::TShader::TLanguage::GLSL, compute_shader_code);
+
+    std::string vertex_shader_code = ReadTextFile("../../asset/shaders/shader_base.vert");
+    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, vertex_shader_code);
+
+    std::string fragment_shader_code = ReadTextFile("../../asset/shaders/shader_base.frag");
+    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, fragment_shader_code);
+    
+    delete compute_shader;
+    delete vertex_shader;
+    delete fragment_shader;
+    //========================================================================
 
     return 0;
 }

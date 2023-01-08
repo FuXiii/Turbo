@@ -6,8 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 aux_source_directory(./src/ SRCS)
 
 set(LINK_PARTH 
-PUBLIC /engine/framegraph/ 
-PUBLIC /engine/core/
+PUBLIC /engine
 )
 
 add_library(${PROJECT_NAME} STATIC ${SRCS})

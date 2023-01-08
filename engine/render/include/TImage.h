@@ -67,14 +67,15 @@ class TImage
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
     void Destroy(void *allocator);
 
-    TFormat GetFormat();
-    uint32_t GetWidth();
-    uint32_t GteHeight();
-    uint32_t GetDepth();
-    uint32_t GetLayers();
-    uint32_t GetMipLevels();
-    TImageUsages GetUsages();
-    TDomain GetDomain();
+    TFormat GetFormat() const;
+    uint32_t GetWidth() const;
+    uint32_t GteHeight() const;
+    uint32_t GetDepth() const;
+    uint32_t GetLayers() const;
+    uint32_t GetMipLevels() const;
+    TImageUsages GetUsages() const;
+    TDomain GetDomain() const;
+    bool IsValid() const;
 };
 
 class TColorImage : public TImage
