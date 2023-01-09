@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
 [![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen?logo=tencentqq)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
 [![Email](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
@@ -10,11 +10,11 @@ Turbo是渲染引擎
 
 ## Platform
 
-![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
-![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
-![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
-![Platform HarmonyOS](https://img.shields.io/badge/platform-HarmonyOS-lightgrey)  
-![Platform Web](https://img.shields.io/badge/platform-Web(WebGPU_with_Dawn)-lightgrey)  
+![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen?logo=linux)  
+![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen?logo=windows)  
+![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey?logo=apple)  
+![Platform HarmonyOS](https://img.shields.io/badge/platform-HarmonyOS-lightgrey?logo=harmonyos)  
+![Platform Web](https://img.shields.io/badge/platform-Web(WebGPU_with_Dawn)-lightgrey?logo=internetexplorer)  
 
 ## Version
 
