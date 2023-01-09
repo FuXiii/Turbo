@@ -138,6 +138,11 @@
   >
   >* 创建`Shader`章节
 
+* 2023/1/9
+  >
+  >* 创建`指令推送`章节
+  >* 创建`指令等待`章节
+
 ---
 
 # Turbo驱动初步
@@ -2145,9 +2150,11 @@ class RenderPass
 ## Context::CmdBeginRenderPass
 
 在`FrameGraph::PassNode::Execute`阶段绑定`RenderPass`时
+
 ```CXX
 context->CmdBeginRenderPass(render_pass)
 ```
+
 `Turbo`主要做两件事：
 
 1. 创建相应的`RenderPass`
@@ -2158,6 +2165,7 @@ context->CmdBeginRenderPass(render_pass)
 现在有个问题：如何从`PassNode`中将`RenderPass`配置提取出来，并传给`Context`，说白了就是传给`CmdBeginRenderPass(RenderPass)`函数的`RenderPass`参数的实参如何构建？接口如何设计？
 
 可能的方式：
+
 ```CXX
 [=](const PresentPassData &data, const TResources &resources, void *context) 
 {
@@ -2197,7 +2205,7 @@ class Context
 3. `TessellationShader`（细分着色器）
 4. `FragmentShader`(片元着色器)
 
-光追标准着色器(`NVIDIA`标准或`Khronos`标准)： 
+光追标准着色器(`NVIDIA`标准或`Khronos`标准)：
 
 5. `RayGenerationShader`
 6. `IntersectionShader`
@@ -2209,6 +2217,66 @@ class Context
 
 10. `TaskShader`
 11. `MeshShader`
+
+## 指令推送
+
+指令推送就是将记录了一堆指令的`CommandBuffer`推送到`GPU`进行执行，所以`Context`中需要提供`Flush(bool isWait = false)`函数
+
+```mermaid
+graph TD;
+Flush["Context::Flush(...)函数调用"]
+CreateFence["创建Fence"]
+SubmmitCurrentCommandBuffer["推送当前CommandBuffer"]
+IsWait{"是否等待"}
+YesWaitThenDestroyFence["等待Fence返回，之后销毁Fence"]
+NoWaitAndPushIntoFenceSet["将Fence加入到【待同步Fence集合】中(将来的某一时刻进行同步等待)"]
+CurrentCommandBufferPushIntoCommandBufferSet["将当前CommandBuffer加入到【待同步CommandBuffer集合】中"]
+ReCreateCommandBuffer["重新创建一个CommandBuffer,并作为当前CommandBuffer使用"]
+ResetCurrentCommandBuffer["重置当前CommandBuffer"]
+Return["返回"]
+
+Flush-->CreateFence
+CreateFence-->SubmmitCurrentCommandBuffer
+SubmmitCurrentCommandBuffer-->IsWait
+IsWait--等待-->YesWaitThenDestroyFence
+IsWait--不等待-->NoWaitAndPushIntoFenceSet
+
+YesWaitThenDestroyFence-->ResetCurrentCommandBuffer
+ResetCurrentCommandBuffer-->Return
+
+NoWaitAndPushIntoFenceSet-->CurrentCommandBufferPushIntoCommandBufferSet
+CurrentCommandBufferPushIntoCommandBufferSet-->ReCreateCommandBuffer
+ReCreateCommandBuffer-->Return
+```
+
+*注：Context::Flush(...)函数调用的最佳时机多位于`Renderer::BeginFrame()`或`Renderer::EndFrame()`时（目前`Turbo`还没有`Renderer`的相关设计）*
+
+## 指令等待
+
+指令推送到`GPU`执行后，需要在未来的某一时刻进行等待`GPU`指令执行完成，所以`Context`需要提供`bool Wait(uint64_t timeout)`函数
+
+```mermaid
+graph TD;
+Wait["Context::Wait(...)函数调用"]
+CreateFence["创建Fence"]
+SubmmitCurrentCommandBuffer["推送当前CommandBuffer"]
+PushFenceIntoFenceSet["将Fence加入到【待同步Fence集合】中(将来的某一时刻进行同步等待)"]
+CurrentCommandBufferPushIntoCommandBufferSet["将当前CommandBuffer加入到【待同步CommandBuffer集合】中"]
+WaitAllFenceTimeoutFenceSet["等待【待同步Fence集合】中的Fence，timeout时长"]
+IsHasTimeout{"是否有超时"}
+
+Wait-->CreateFence
+CreateFence-->SubmmitCurrentCommandBuffer
+SubmmitCurrentCommandBuffer-->CurrentCommandBufferPushIntoCommandBufferSet
+CurrentCommandBufferPushIntoCommandBufferSet-->PushFenceIntoFenceSet
+PushFenceIntoFenceSet-->WaitAllFenceTimeoutFenceSet
+WaitAllFenceTimeoutFenceSet-->IsHasTimeout
+IsHasTimeout-->NotFinish["未完待续"]
+```
+
+*注：判断`是否有超时`时需要`Turbo::Core`层提供同时等待多个`Fence`的接口，目前未提供该接口，只能一个`Fence`一个`Fence`的等，需要扩展`Turbo::Core`接口，比如提供`class Turbo::Core::TFences`*
+
+*注：Context::Wait(...)函数调用的最佳时机多位获取`Swapchain`的`Image`时（当`Swapchain`的`Image`上次被使用后，这次又再一次被使用，这时需要等待上一次使用结束，才能进行这一次的使用）*
 
 ## Mesh，Material和Drawable
 
