@@ -35,6 +35,8 @@ namespace Render
 {
 
 class TRenderPass;
+class TComputePipeline;
+class TGraphicsPipeline;
 
 class TContext
 {
@@ -59,8 +61,11 @@ class TContext
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
-    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
-    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
+    void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(const Turbo::Render::TRenderPass &renderPass);
+
+    void BindPipeline(const TComputePipeline &computePipeline);
+    void BindPipeline(const TGraphicsPipeline &graphicsPipeline);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();

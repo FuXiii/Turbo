@@ -2203,3 +2203,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetAlphaBlendOp(TBlendOp alphaBlendOp)`成员函数
   >* `./docs/Issue.md`中增加`TGraphicsPipeline`对于`VkPipelineTessellationStateCreateInfo`不支持的待解决问题
   
+* 2023/1/9 设计架构
+  >
+  >* `./engine/render`下`TContext`中增加`void BindPipeline(const TComputePipeline *computePipeline)`成员函数
+  >* `./engine/render`下`TContext`中增加`void BindPipeline(const TGraphicsPipeline *graphicsPipeline)`成员函数
