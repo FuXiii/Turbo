@@ -324,14 +324,24 @@ void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *com
     this->commandBufferPool->Free(commandBuffer);
 }
 
-void Turbo::Render::TContext::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)
+void Turbo::Render::TContext::BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass)
 {
-    //TODO: convert Turbo::FrameGraph::TRenderPass to Turbo::Render::TRenderPass
+    // TODO: convert Turbo::FrameGraph::TRenderPass to Turbo::Render::TRenderPass
 }
 
-void Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &renderPass)
+void Turbo::Render::TContext::BeginRenderPass(const Turbo::Render::TRenderPass &renderPass)
 {
-    //TODO: create Turbo::Core::TRenderPass and Turbo::Core::TFramebuffer
+    // TODO: create Turbo::Core::TRenderPass and Turbo::Core::TFramebuffer
+}
+
+void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
+{
+    // TODO: create Turbo::Core::TComputePipeline if didn't create before
+}
+
+void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    // TODO: create Turbo::Core::TGraphicsPipeline if didn't create before
 }
 
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()

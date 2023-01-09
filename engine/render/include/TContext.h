@@ -64,8 +64,8 @@ class TContext
     void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
     void BeginRenderPass(const Turbo::Render::TRenderPass &renderPass);
 
-    void BindPipeline(const TComputePipeline &computePipeline);
-    void BindPipeline(const TGraphicsPipeline &graphicsPipeline);
+    void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
+    void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();
