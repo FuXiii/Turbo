@@ -1,7 +1,9 @@
 #pragma once
+#include <vector>
 #ifndef TURBO_CORE_TFENCE_H
 #define TURBO_CORE_TFENCE_H
 #include "TVulkanHandle.h"
+#include <map>
 
 namespace Turbo
 {
@@ -23,11 +25,30 @@ class TFence : public Turbo::Core::TVulkanHandle
     TFence(TDevice *device);
     ~TFence();
 
+    TDevice *GetDevice();
+
     VkFence GetVkFence();
 
     TResult Wait(uint64_t timeout);
 
     void WaitUntil();
+
+  public:
+    virtual std::string ToString() override;
+};
+
+class TFences : public Turbo::Core::TObject
+{
+  private:
+    std::map<TDevice *, std::vector<TFence *>> fenceMap;
+
+  public:
+    TFences() = default;
+    ~TFences() = default;
+
+    void Add(TFence *fence);
+
+    TResult Wait(uint64_t timeout);
 
   public:
     virtual std::string ToString() override;

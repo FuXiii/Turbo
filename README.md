@@ -2241,3 +2241,9 @@ Turbo是渲染引擎
 * 2023/1/10 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/core`下`TFence.h`中增加`class TFences`类
+  >* `./engine/core`下`TFences`中增加`std::map<TDevice *, std::vector<TFence *>> fenceMap`成员变量
+  >* `./engine/core`下`TFences`中增加`void Add(TFence *fence)`成员函数
+  >* `./engine/core`下`TFences`中增加`bool Wait(uint64_t timeout)`成员函数
+  >* `./engine/core`下`TFence`中增加`TDevice *GetDevice()`成员函数
+
