@@ -121,6 +121,7 @@ Turbo是渲染引擎
         VMA_STATIC_VULKAN_FUNCTIONS=0
         VMA_DYNAMIC_VULKAN_FUNCTIONS=1
         ```
+  *注：如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 * 如何运行
     1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是相对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`asset`字符，替换成自己的目录即可。
@@ -2252,4 +2253,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *commandBuffer`成员变量改为`Turbo::Render::TCommandBuffer currentCommandBuffer`
   >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *GetCommandBuffer()`成员变量改为`Turbo::Render::TCommandBuffer GetCommandBuffer()`
   >* `./engine/render`下`TContext`中增加`std::vector<Turbo::Render::TCommandBuffer> commandBuffers`成员变量
+  >* `./docs/`下增加`FAQ.md`用于记录常见问题
 
