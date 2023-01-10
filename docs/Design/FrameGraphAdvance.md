@@ -2253,7 +2253,7 @@ CurrentCommandBufferPushIntoCommandBufferSet-->ReCreateCommandBuffer
 ReCreateCommandBuffer-->Return
 ```
 
-*注：Context::Flush(...)函数调用的最佳时机多位于`Renderer::BeginFrame()`或`Renderer::EndFrame()`时（目前`Turbo`还没有`Renderer`的相关设计）*
+*注：`Context::Flush(...)`函数调用的最佳时机多位于`Renderer::BeginFrame()`或`Renderer::EndFrame()`时（目前`Turbo`还没有`Renderer`的相关设计）*
 
 ## 指令等待
 
@@ -2292,7 +2292,7 @@ RemoveFinishedFenceAndDestroy-->ReturnFalse
 
 *注：判断`是否有超时`时需要`Turbo::Core`层提供同时等待多个`Fence`的接口，目前未提供该接口，只能一个`Fence`一个`Fence`的等，需要扩展`Turbo::Core`接口，比如提供`class Turbo::Core::TFences`*
 
-*注：Context::Wait(...)函数调用的最佳时机多位获取`Swapchain`的`Image`时（当`Swapchain`的`Image`上次被使用后，这次又再一次被使用，这时需要等待上一次使用结束，才能进行这一次的使用）*
+*注：`Context::Wait(...)`函数调用的最佳时机多为获取`Swapchain`的`Image`时（当`Swapchain`的`Image`上次被使用后，这次又再一次被使用，这时需要等待上一次使用结束，才能进行这一次的使用）*
 
 ## Mesh，Material和Drawable
 
