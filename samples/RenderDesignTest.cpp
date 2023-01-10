@@ -10,6 +10,7 @@
 #include <render/include/TPipeline.h>
 #include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
+#include <stdint.h>
 #include <vector>
 
 std::string ReadTextFile(const std::string &filename)
@@ -331,6 +332,40 @@ int main()
         delete compute_shader;
         delete vertex_shader;
         delete fragment_shader;
+    }
+
+    {
+        // 这一部分只是示意性代码
+
+        std::cout << "flush Commandbuffer to GPU" << std::endl;
+        Turbo::Render::TGraphicsPipeline some_graphics_pipeline;
+        Turbo::Render::TRenderPass some_render_pass;
+
+        // 进行100万批次指令记录
+        for (uint32_t some_command = 0; some_command < 1000000; some_command++)
+        {
+            context.BeginRenderPass(some_render_pass);
+            context.BindPipeline(some_graphics_pipeline);
+            // context.OtherCmd(....)//其他指令
+            // context.Draw(...)//绘制指令
+            // context.Dispatch(...)//调度指令
+            // context.EndRenderPass(...)
+            if (some_command % 2048 == 0)
+            {
+                context.Flush(); // 每记录2048条记录，将指令推到GPU进行执行
+            }
+        }
+
+        context.Flush();     // 将剩余指令推到GPU进行执行
+        if (context.Wait(1)) // 等待1纳秒，等待之前所有推送到GPU的指令执行完成，返回ture表示所有任务完成，返回false表示有任务在1纳米内没完成
+        {
+            std::cout << "wait GPU run all commandbuffer finished in 1 nanoseconds" << std::endl;
+        }
+        else
+        {
+            context.Wait(UINT64_MAX); // 一直等到所有任务完成
+            std::cout << "wait GPU run all commandbuffer finished" << std::endl;
+        }
     }
 
     return 0;

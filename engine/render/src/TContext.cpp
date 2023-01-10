@@ -178,6 +178,18 @@ Turbo::Render::TContext::TContext()
 
 Turbo::Render::TContext::~TContext()
 {
+    if (this->currentCommandBuffer.commandBuffer != nullptr)
+    {
+        this->commandBufferPool->Free(this->currentCommandBuffer.commandBuffer);
+        this->currentCommandBuffer.commandBuffer = nullptr;
+    }
+
+    if (this->currentCommandBuffer.fence != nullptr)
+    {
+        delete this->currentCommandBuffer.fence;
+        this->currentCommandBuffer.fence = nullptr;
+    }
+
     delete this->commandBufferPool;
     this->commandBufferPool = nullptr;
     this->graphicsQueue = nullptr;
@@ -380,6 +392,8 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
 
             if (result == Turbo::Core::TResult::SUCCESS)
             {
+                delete command_buffer.fence;
+                this->commandBufferPool->Free(command_buffer.commandBuffer);
                 it = this->commandBuffers.erase(it);
             }
             else
