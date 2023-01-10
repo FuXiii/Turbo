@@ -2237,3 +2237,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中增加`void BindPipeline(const TGraphicsPipeline *graphicsPipeline)`成员函数
   >* `./README.md`下增加`Modular`章节，用于描述`Turbo`架构中的各个模块
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2023/1/10 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`

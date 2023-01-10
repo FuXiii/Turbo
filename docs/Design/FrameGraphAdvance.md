@@ -143,6 +143,10 @@
   >* 创建`指令推送`章节
   >* 创建`指令等待`章节
 
+* 2023/1/10
+  >
+  >* 更新`指令等待`章节
+
 ---
 
 # Turbo驱动初步
@@ -2258,20 +2262,32 @@ ReCreateCommandBuffer-->Return
 ```mermaid
 graph TD;
 Wait["Context::Wait(...)函数调用"]
-CreateFence["创建Fence"]
-SubmmitCurrentCommandBuffer["推送当前CommandBuffer"]
-PushFenceIntoFenceSet["将Fence加入到【待同步Fence集合】中(将来的某一时刻进行同步等待)"]
-CurrentCommandBufferPushIntoCommandBufferSet["将当前CommandBuffer加入到【待同步CommandBuffer集合】中"]
 WaitAllFenceTimeoutFenceSet["等待【待同步Fence集合】中的Fence，timeout时长"]
 IsHasTimeout{"是否有超时"}
+YesHasTimeout["说明【待同步CommandBuffer集合】中有的CommandBuffer在timeout时间段内没有完成"]
+NoHasTimeout["说明所有的CommandBuffer都完成了"]
 
-Wait-->CreateFence
-CreateFence-->SubmmitCurrentCommandBuffer
-SubmmitCurrentCommandBuffer-->CurrentCommandBufferPushIntoCommandBufferSet
-CurrentCommandBufferPushIntoCommandBufferSet-->PushFenceIntoFenceSet
-PushFenceIntoFenceSet-->WaitAllFenceTimeoutFenceSet
+RemoveAndDestroyCommandBuffers["销毁并移除所有【待同步CommandBuffer集合】中的CommandBuffer"]
+RemoveAndDestroyFences["销毁并移除所有【待同步Fence集合】中的Fence"]
+
+RemoveFinishedCommandBufferAndDestroy["移除【待同步CommandBuffer集合】中已完成的CommandBuffer并销毁"]
+RemoveFinishedFenceAndDestroy["移除【待同步Fence集合】中已完成的Fence并销毁"]
+
+ReturnFalse["返回False，标时超时，规定时间内有任务没完成"]
+ReturnTrue["返回True，规定时间内所有任务完成"]
+
+Wait-->WaitAllFenceTimeoutFenceSet
 WaitAllFenceTimeoutFenceSet-->IsHasTimeout
-IsHasTimeout-->NotFinish["未完待续"]
+IsHasTimeout--有超时-->YesHasTimeout
+IsHasTimeout--无超时-->NoHasTimeout
+
+NoHasTimeout-->RemoveAndDestroyCommandBuffers
+RemoveAndDestroyCommandBuffers-->RemoveAndDestroyFences
+RemoveAndDestroyFences-->ReturnTrue
+
+YesHasTimeout-->RemoveFinishedCommandBufferAndDestroy
+RemoveFinishedCommandBufferAndDestroy-->RemoveFinishedFenceAndDestroy
+RemoveFinishedFenceAndDestroy-->ReturnFalse
 ```
 
 *注：判断`是否有超时`时需要`Turbo::Core`层提供同时等待多个`Fence`的接口，目前未提供该接口，只能一个`Fence`一个`Fence`的等，需要扩展`Turbo::Core`接口，比如提供`class Turbo::Core::TFences`*
