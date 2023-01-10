@@ -379,9 +379,13 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
             result = command_buffer.fence->Wait(0);
 
             if (result == Turbo::Core::TResult::SUCCESS)
+            {
                 it = this->commandBuffers.erase(it);
+            }
             else
+            {
                 ++it;
+            }
         }
         return false;
     }
