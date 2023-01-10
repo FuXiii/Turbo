@@ -10,8 +10,22 @@
 #include <render/include/TPipeline.h>
 #include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
+#include <sstream>
 #include <stdint.h>
 #include <vector>
+
+void WriteTextFile(const std::string &text, const std::string &filename)
+{
+    std::ofstream out_stream;
+    out_stream.open(filename, std::ios::out | std::ios::trunc);
+
+    if (out_stream.good())
+    {
+        out_stream << text;
+    }
+
+    out_stream.close();
+}
 
 std::string ReadTextFile(const std::string &filename)
 {
@@ -29,7 +43,7 @@ std::string ReadTextFile(const std::string &filename)
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
-int main()
+void Test0()
 {
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
@@ -367,6 +381,112 @@ int main()
             std::cout << "wait GPU run all commandbuffer finished" << std::endl;
         }
     }
+}
 
+#define TUEBO_COMPILE 0
+
+void Test1()
+{
+#if TUEBO_COMPILE
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+    /*
+    [Color Pass] → Color Texture → [Post Pass] → RenderTarget Texture → [Present Pass]
+                 ↘ Depthh Texture ↗
+    */
+    Turbo::FrameGraph::TFrameGraph fg;
+
+    struct ColorPassData
+    {
+        Turbo::FrameGraph::TResource colorTexture;
+        Turbo::FrameGraph::TResource depthTexture;
+    };
+
+    fg.AddPass<ColorPassData>(
+        "Color Pass",
+        [&](Turbo::FrameGraph::TFrameGraph::TBuilder &builder, ColorPassData &data) {
+            data.colorTexture = builder.Create<Turbo::Render::TTexture2D>("Color Texture2D", {512, 512, 1, Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT | Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT, Turbo::Render::TDomainBits::GPU});
+            data.depthTexture = builder.Create<Turbo::Render::TDepthTexture2D>("Depth Texture2D", {512, 512, 1, Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT | Turbo::Render::TImageUsageBits::INPUT_ATTACHMENT, Turbo::Render::TDomainBits::GPU});
+
+            Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass subpass0 = builder.CreateSubpass();
+            data.colorTexture = subpass0.Write(data.colorTexture);
+            data.depthTexture = subpass0.Write(data.depthTexture);
+
+            fg.GetBlackboard()["ColorTexture"] = data.colorTexture;
+            fg.GetBlackboard()["DepthTexture"] = data.depthTexture;
+        },
+        [=](const ColorPassData &data, const Turbo::FrameGraph::TResources &resources, void *context) {
+            // TODO:
+        });
+
+    struct PostPassData
+    {
+        Turbo::FrameGraph::TResource colorTexture;
+        Turbo::FrameGraph::TResource depthTexture;
+        Turbo::FrameGraph::TResource renderTargetTexture;
+    };
+
+    fg.AddPass<PostPassData>(
+        "Post Pass",
+        [&](Turbo::FrameGraph::TFrameGraph::TBuilder &builder, PostPassData &data) {
+            data.colorTexture = fg.GetBlackboard()["ColorTexture"];
+            data.depthTexture = fg.GetBlackboard()["DepthTexture"];
+            data.renderTargetTexture = builder.Create<Turbo::Render::TTexture2D>("RenderTarget Texture2D", {512, 512, 1, Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT, Turbo::Render::TDomainBits::GPU});
+
+            Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass subpass0 = builder.CreateSubpass();
+            data.colorTexture = subpass0.Read(data.colorTexture);
+            data.depthTexture = subpass0.Read(data.depthTexture);
+            data.renderTargetTexture = subpass0.Write(data.renderTargetTexture);
+
+            fg.GetBlackboard()["RenderTargetTexture"] = data.renderTargetTexture;
+        },
+        [=](const PostPassData &data, const Turbo::FrameGraph::TResources &resources, void *context) {
+            // TODO:
+        });
+
+    struct PresentPassData
+    {
+        Turbo::FrameGraph::TResource renderTargetTexture;
+    };
+
+    fg.AddPass<PresentPassData>(
+        "Present Pass",
+        [&](Turbo::FrameGraph::TFrameGraph::TBuilder &builder, PresentPassData &data) {
+            data.renderTargetTexture = fg.GetBlackboard()["RenderTargetTexture"];
+
+            Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass subpass0 = builder.CreateSubpass();
+            data.renderTargetTexture = subpass0.Read(data.renderTargetTexture);
+        },
+        [=](const PostPassData &data, const Turbo::FrameGraph::TResources &resources, void *context) {
+            // TODO:
+        });
+
+    fg.Compile();
+    std::string mermaid = fg.ToMermaid();
+
+    std::stringstream ss_to_markdown;
+    ss_to_markdown << "```mermaid" << std::endl << mermaid << "```" << std::endl;
+
+    WriteTextFile(ss_to_markdown.str(), "./RenderFg.md");
+
+    std::stringstream ss_to_html;
+    ss_to_html << "<html>" << std::endl;
+    ss_to_html << "<body>" << std::endl;
+    ss_to_html << "<script src=\"https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js\"></script>" << std::endl;
+    ss_to_html << "<script>mermaid.initialize({startOnLoad:true});</script>" << std::endl;
+    ss_to_html << "<div class=\"mermaid\">" << std::endl;
+    ss_to_html << mermaid << std::endl;
+    ss_to_html << "</div>" << std::endl;
+    ss_to_html << "</body>" << std::endl;
+    ss_to_html << "</html>" << std::endl;
+
+    WriteTextFile(ss_to_html.str(), "./RenderFg.html");
+#endif
+}
+
+int main()
+{
+    Test0();
+    Test1();
     return 0;
 }
