@@ -1,10 +1,13 @@
 #include "render/include/TContext.h"
 #include "render/include/TImage.h"
+#include "vulkan/vulkan_core.h"
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
 #include <core/include/TCore.h>
+#include <core/include/TDeviceQueue.h>
 #include <core/include/TException.h>
+#include <core/include/TFence.h>
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
@@ -168,9 +171,9 @@ Turbo::Render::TContext::TContext()
     this->graphicsQueue = this->device->GetBestGraphicsQueue();
 
     this->commandBufferPool = new Turbo::Core::TCommandBufferPool(this->graphicsQueue);
-    this->commandBuffer = this->commandBufferPool->Allocate();
-
-    this->commandBuffer->Begin();
+    this->currentCommandBuffer.commandBuffer = this->commandBufferPool->Allocate();
+    this->currentCommandBuffer.fence = new Turbo::Core::TFence(this->device);
+    this->currentCommandBuffer.commandBuffer->Begin();
 }
 
 Turbo::Render::TContext::~TContext()
@@ -344,6 +347,55 @@ void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipelin
     // TODO: create Turbo::Core::TGraphicsPipeline if didn't create before
 }
 
+void Turbo::Render::TContext::Flush()
+{
+    if (this->currentCommandBuffer.commandBuffer != nullptr && this->currentCommandBuffer.commandBuffer->GetVkCommandBuffer() != VK_NULL_HANDLE)
+    {
+        this->currentCommandBuffer.commandBuffer->End();
+
+        this->graphicsQueue->Submit(nullptr, nullptr, this->currentCommandBuffer.commandBuffer, this->currentCommandBuffer.fence);
+        this->commandBuffers.push_back(this->currentCommandBuffer);
+
+        this->currentCommandBuffer.commandBuffer = this->commandBufferPool->Allocate();
+        this->currentCommandBuffer.fence = new Turbo::Core::TFence(this->device);
+        this->currentCommandBuffer.commandBuffer->Begin();
+    }
+}
+
+bool Turbo::Render::TContext::Wait(uint64_t timeout)
+{
+    Turbo::Core::TFences fences;
+    for (Turbo::Render::TCommandBuffer &command_buffer_item : this->commandBuffers)
+    {
+        fences.Add(command_buffer_item.fence);
+    }
+
+    Turbo::Core::TResult result = fences.Wait(timeout);
+    if (result == Turbo::Core::TResult::TIMEOUT)
+    {
+        for (std::vector<Turbo::Render::TCommandBuffer>::iterator it = this->commandBuffers.begin(); it != this->commandBuffers.end();)
+        {
+            Turbo::Render::TCommandBuffer command_buffer = *it;
+            result = command_buffer.fence->Wait(0);
+
+            if (result == Turbo::Core::TResult::SUCCESS)
+                it = this->commandBuffers.erase(it);
+            else
+                ++it;
+        }
+        return false;
+    }
+
+    for (Turbo::Render::TCommandBuffer &command_buffer_item : this->commandBuffers)
+    {
+        delete command_buffer_item.fence;
+        this->commandBufferPool->Free(command_buffer_item.commandBuffer);
+    }
+
+    this->commandBuffers.clear();
+    return true;
+}
+
 Turbo::Core::TInstance *Turbo::Render::TContext::GetInstance()
 {
     return this->instance;
@@ -364,7 +416,7 @@ Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
     return this->graphicsQueue;
 }
 
-Turbo::Core::TCommandBuffer *Turbo::Render::TContext::GetCommandBuffer()
+Turbo::Render::TCommandBuffer Turbo::Render::TContext::GetCommandBuffer()
 {
-    return this->commandBuffer;
+    return this->currentCommandBuffer;
 }

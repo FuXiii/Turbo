@@ -2224,29 +2224,21 @@ class Context
 
 ## 指令推送
 
-指令推送就是将记录了一堆指令的`CommandBuffer`推送到`GPU`进行执行，所以`Context`中需要提供`Flush(bool isWait = false)`函数
+指令推送就是将记录了一堆指令的`CommandBuffer`推送到`GPU`进行执行，所以`Context`中需要提供`Flush()`函数
 
 ```mermaid
 graph TD;
 Flush["Context::Flush(...)函数调用"]
 CreateFence["创建Fence"]
 SubmmitCurrentCommandBuffer["推送当前CommandBuffer"]
-IsWait{"是否等待"}
-YesWaitThenDestroyFence["等待Fence返回，之后销毁Fence"]
 NoWaitAndPushIntoFenceSet["将Fence加入到【待同步Fence集合】中(将来的某一时刻进行同步等待)"]
 CurrentCommandBufferPushIntoCommandBufferSet["将当前CommandBuffer加入到【待同步CommandBuffer集合】中"]
 ReCreateCommandBuffer["重新创建一个CommandBuffer,并作为当前CommandBuffer使用"]
-ResetCurrentCommandBuffer["重置当前CommandBuffer"]
 Return["返回"]
 
 Flush-->CreateFence
 CreateFence-->SubmmitCurrentCommandBuffer
-SubmmitCurrentCommandBuffer-->IsWait
-IsWait--等待-->YesWaitThenDestroyFence
-IsWait--不等待-->NoWaitAndPushIntoFenceSet
-
-YesWaitThenDestroyFence-->ResetCurrentCommandBuffer
-ResetCurrentCommandBuffer-->Return
+SubmmitCurrentCommandBuffer-->NoWaitAndPushIntoFenceSet
 
 NoWaitAndPushIntoFenceSet-->CurrentCommandBufferPushIntoCommandBufferSet
 CurrentCommandBufferPushIntoCommandBufferSet-->ReCreateCommandBuffer

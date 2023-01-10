@@ -2246,4 +2246,10 @@ Turbo是渲染引擎
   >* `./engine/core`下`TFences`中增加`void Add(TFence *fence)`成员函数
   >* `./engine/core`下`TFences`中增加`bool Wait(uint64_t timeout)`成员函数
   >* `./engine/core`下`TFence`中增加`TDevice *GetDevice()`成员函数
+  >* `./engine/render`下`TContext`中增加`void Flush()`成员函数
+  >* `./engine/render`下`TContext`中增加`bool Wait(uint64_t timeout)`成员函数
+  >* `./engine/render`下`TContext.h`中增加`typedef struct TCommandBuffer`结构体
+  >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *commandBuffer`成员变量改为`Turbo::Render::TCommandBuffer currentCommandBuffer`
+  >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *GetCommandBuffer()`成员变量改为`Turbo::Render::TCommandBuffer GetCommandBuffer()`
+  >* `./engine/render`下`TContext`中增加`std::vector<Turbo::Render::TCommandBuffer> commandBuffers`成员变量
 
