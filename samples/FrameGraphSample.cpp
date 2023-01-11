@@ -42,14 +42,14 @@ struct CustomTexture
 
     std::string name;
 
-    void Create(const std::string &name, const Descriptor &)
+    void Create(const std::string &name, const Descriptor &, void *allocator = nullptr)
     {
         // custom create
         std::cout << "CustomTexture::Create::" << name << std::endl;
         this->name = name;
     }
 
-    void Destroy()
+    void Destroy(void *allocator = nullptr)
     {
         // custom destroy
         std::cout << "CustomTexture::Destroy::" << name << std::endl;

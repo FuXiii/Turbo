@@ -383,7 +383,7 @@ void Test0()
     }
 }
 
-#define TUEBO_COMPILE 0
+#define TUEBO_COMPILE 1
 
 void Test1()
 {
@@ -457,7 +457,7 @@ void Test1()
             Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass subpass0 = builder.CreateSubpass();
             data.renderTargetTexture = subpass0.Read(data.renderTargetTexture);
         },
-        [=](const PostPassData &data, const Turbo::FrameGraph::TResources &resources, void *context) {
+        [=](const PresentPassData &data, const Turbo::FrameGraph::TResources &resources, void *context) {
             // TODO:
         });
 
