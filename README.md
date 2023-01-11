@@ -2262,3 +2262,5 @@ Turbo是渲染引擎
   >* `./engine/framegraph`下`TResourceProxy`中`virtual void Create()`成员函数增加`void *allocator`函数参数
   >* `./engine/framegraph`下`TResourceProxy`中`virtual void Destroy()`成员函数增加`void *allocator`参数
   >* `./engine/framegraph`下`TFrameGraph`中`void Execute(void *context = nullptr)`成员函数增加`void *allocator`参数
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+

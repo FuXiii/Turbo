@@ -2330,6 +2330,7 @@ void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
     }
 }
 ```
+在`Filament`中`mTextureCache`是作为`ResourceAllocator`成员变量来缓存资源文件的，这是一个不错的选择。
 
 ## Mesh，Material和Drawable
 
