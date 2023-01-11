@@ -31,7 +31,10 @@
 * 2023/1/4
   >
   >* 更新`FrameGraph::Mermaid`章节
-
+  
+* 2023/1/11
+  >
+  >* 更新`PassNode与RenderPass`章节
 
 ## PassNode与RenderPass
 
@@ -69,6 +72,80 @@
 > * `Subpass::Write(Resource)`，对应于`Vulkan`底层的`ColorAttachment`或 `DepthStencilAttachment`，具体需要看是什么资源
 >
 > 对于当`Subpass::Write(Resource)`资源为`DepthStencil`纹理时，会有个问题，按照`Vulkan`标准每个`Subpass`只能绑定一个`DepthTexture`，而`Turbo`并不会制止用户往多个`DepthTexture`中写入，这会与`Vulkan`标准冲突，一种解决方案是当写入多个`DepthStencil`纹理时，只有最后一个深度模板纹理有效，`Turbo`输出警告信息
+
+>此处有一点要注意一下，如下：
+>
+>```CXX
+>subpass.Write(DepthStencilTexture);
+>```
+>
+>此时代表`DepthStencilTexture`在`Vulkan`底层作为`DepthStencilAttachment`进行使用
+>
+>```CXX
+>subpass.Read(DepthStencilTexture);
+>```
+>
+>此时代表`DepthStencilTexture`在`Vulkan`底层作为`InputAttachment`进行使用
+>
+
+>此时可能会有如下问题：
+>
+>```mermaid
+>graph LR;
+>    classDef Resource fill:#608ba3
+>    classDef Pass fill:#e8924a
+>    classDef Subpass fill:#8474a0
+>    classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
+>    classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
+>
+>    Start((" ")):::Start
+>    End((" ")):::End
+>    
+>    DepthBuffer0("Depth Buffer"):::Resource
+>    DepthBuffer1("Depth Buffer"):::Resource
+>   
+>    PassNode0:::Pass
+>        subgraph PassNode0["PassNode0"]
+>            direction TB
+>            PassNode0Subpass0("Subpass 0"):::Subpass
+>        end
+>    PassNode1:::Pass
+>        subgraph PassNode1["PassNode1"]
+>            direction TB
+>            PassNode1Subpass0("Subpass 0"):::Subpass
+>        end
+>
+>    Start-.->PassNode0
+>    PassNode0Subpass0-->DepthBuffer0
+>    DepthBuffer0-.->PassNode1Subpass0
+>    PassNode1Subpass0-->DepthBuffer1
+>    DepthBuffer1-.->End
+>
+>    linkStyle 1 stroke:#a44141,stroke-width:3px %% write link style
+>    linkStyle 2 stroke:#95ad5b,stroke-width:0.5px %% read link style
+>    linkStyle 3 stroke:#a44141,stroke-width:3px
+>    linkStyle 4 stroke:#a44141,stroke-width:3px
+>```
+>
+>此时对应的代码为：
+>
+>```CXX
+>DepthTexture2D depth_texture;
+>
+>PassNode pass_node0;
+>pass_node0.Subpass0.Write(depth_texture);
+>
+>PassNode pass_node01;
+>pass_node01.Subpass0.Write(depth_texture);
+>```
+>
+>如果此时调用`FrameGraph::Compile()`，当走到`pass_node01`之后写入`Depth Buffer`时，发现没有人使用该`Depth Buffer`，这会导致`FrameGraph`进行一系列剔除操作。此非良构。
+>
+>---
+>
+>### 如何解决该问题呢？
+>
+>问题的根源在于对于像`DepthStencilTexture`这样的资源，目前`FrameGraph::Read(...)`可以解释成`Vulkan`的`InputAttachment`，但对于`DepthStencilTexture`这样的资源这不是必须的,`DepthStencilTexture`可以不作为`InputAttachment`而被其他`PassNode`使用。
 
 ## FrameGraph::Builder::Subpass
 
@@ -204,12 +281,14 @@ class RenderPass
 ```CXX
 std::string FrameGraph::ToMermaid();
 ```
+
 该接口将会输出`Mermaid`标准字符串，之后最常见的用法有两种：
 
 1. 推送到`http`服务器，展示在浏览器页面上
 2. 保存到本地，进而在本地打开，浏览查看
 
 示例：
+
 ```mermaid
 graph LR;
     classDef Resource fill:#608ba3
