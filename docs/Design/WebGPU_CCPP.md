@@ -22,6 +22,10 @@
   >
   >* 创建`Hello-WebGPU`章节
 
+* 2023/1/11
+  >
+  >* `C/C++与WebGPU`中勘误
+
 ---
 
 [WebGPU标准](https://www.w3.org/TR/webgpu/)
@@ -138,7 +142,7 @@ git clone https://dawn.googlesource.com/dawn
 
 ## C/C++与WebGPU
 
-跑到`Dawn`的官方群里聊了会儿闲篇，根据群里大佬的说法`Dawn`是在原始图形API的基础上实现的`WebGPU`接口并开放在`webgpu.h`文件中，当在网络端并不会访问原始图形API，所以`Dawn`在页面端并不会做任何有用的事情，而`Emscripten`上有个使用`JavaScript`实现的`WebGPU`，并且也开放在`webgpu.h`中，所以想用`C/C++`使用`WebGPU`在浏览器上绘制，使用`Emscripten`而不是`Dawn`。
+跑到`Dawn`的官方群里聊了会儿闲篇，根据群里大佬的说法`Dawn`是在原始图形API的基础上实现的`WebGPU`接口并开放在`webgpu.h`文件中，当在网络端并不会访问原始图形API，所以`Dawn`在页面端并不会做任何有用的事情，而`Emscripten`上有个使用`C++`实现的`WebGPU`，并且也开放在`webgpu.h`中，所以想用`C/C++`使用`WebGPU`在浏览器上绘制，使用`Emscripten`而不是`Dawn`。
 
 ## Emscripten
 

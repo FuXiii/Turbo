@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
 [![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen?logo=tencentqq)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
 [![Email](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
@@ -10,11 +10,11 @@ Turbo是渲染引擎
 
 ## Platform
 
-![Platform Linux](https://img.shields.io/badge/platform-Linux-brightgreen)  
-![Platform Windows](https://img.shields.io/badge/platform-Windows-brightgreen)  
-![Platform IOS](https://img.shields.io/badge/platform-IOS-lightgrey)  
-![Platform HarmonyOS](https://img.shields.io/badge/platform-HarmonyOS-lightgrey)  
-![Platform Web](https://img.shields.io/badge/platform-Web(WebGPU_with_Dawn)-lightgrey)  
+![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux)  
+![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
+![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
+![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
+![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Future-lightgrey?logo=internetexplorer)  
 
 ## Version
 
@@ -41,6 +41,34 @@ Turbo是渲染引擎
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 * 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
+
+## Modular
+
+目前`Turbo`中有以下模块
+
+![Core](https://img.shields.io/badge/Core-初步完成-brightgreen?style=flat-square&logo=appveyor)
+
+* 命名空间：`Turbo::Core`
+* 文档：`./docs/TurboDesign.drawio:Core`
+* 目录：`./engine/core`
+* 依赖：独立模块，无依赖。
+* 说明：`Core`作为核心模块直接与`Vulkan`沟通，是上层与`Vulkan`底层最直接的桥梁，`Turbo`中所有的`GPU`相关工作最终都会从上层回到`Core`层。
+
+![FrameGraph](https://img.shields.io/badge/FrameGraph-初步完成-brightgreen?style=flat-square&logo=appveyor)
+
+* 命名空间：`Turbo::FrameGraph`
+* 文档：`./docs/TurboDesign.drawio:FrameGraph`和`./docs/Design/FrameGraph.md`
+* 目录：`./engine/framegraph`
+* 依赖：独立模块，无依赖。
+* 说明：`FrameGraph`用于描述一帧中的资源、渲染配置和渲染指令
+
+![Render](https://img.shields.io/badge/Render-开发中-orange?style=flat-square&logo=appveyor)
+
+* 命名空间：`Turbo::Render`
+* 文档：`./docs/Design/FrameGraphAdvance.md`
+* 目录：`./engine/render`
+* 依赖：`Core`和`FrameGraph`。
+* 说明：由于直接使用`Core`层进行渲染相对来说还是会比较繁琐吃力一些，`Render`模块的出现就是将`Core`和`FrameGraph`结合起来，提供更加方便的工作流，将开发者从繁杂的`Core`层脱离出来，提供更加简单易用的设计架构
 
 ## Build
 
@@ -93,6 +121,7 @@ Turbo是渲染引擎
         VMA_STATIC_VULKAN_FUNCTIONS=0
         VMA_DYNAMIC_VULKAN_FUNCTIONS=1
         ```
+  *注：如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 * 如何运行
     1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是相对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`asset`字符，替换成自己的目录即可。
@@ -2203,3 +2232,35 @@ Turbo是渲染引擎
   >* `./engine/render`下`TGraphicsPipeline`中增加`TGraphicsPipeline &SetAlphaBlendOp(TBlendOp alphaBlendOp)`成员函数
   >* `./docs/Issue.md`中增加`TGraphicsPipeline`对于`VkPipelineTessellationStateCreateInfo`不支持的待解决问题
   
+* 2023/1/9 设计架构
+  >
+  >* `./engine/render`下`TContext`中增加`void BindPipeline(const TComputePipeline *computePipeline)`成员函数
+  >* `./engine/render`下`TContext`中增加`void BindPipeline(const TGraphicsPipeline *graphicsPipeline)`成员函数
+  >* `./README.md`下增加`Modular`章节，用于描述`Turbo`架构中的各个模块
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2023/1/10 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/core`下`TFence.h`中增加`class TFences`类
+  >* `./engine/core`下`TFences`中增加`std::map<TDevice *, std::vector<TFence *>> fenceMap`成员变量
+  >* `./engine/core`下`TFences`中增加`void Add(TFence *fence)`成员函数
+  >* `./engine/core`下`TFences`中增加`bool Wait(uint64_t timeout)`成员函数
+  >* `./engine/core`下`TFence`中增加`TDevice *GetDevice()`成员函数
+  >* `./engine/render`下`TContext`中增加`void Flush()`成员函数
+  >* `./engine/render`下`TContext`中增加`bool Wait(uint64_t timeout)`成员函数
+  >* `./engine/render`下`TContext.h`中增加`typedef struct TCommandBuffer`结构体
+  >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *commandBuffer`成员变量改为`Turbo::Render::TCommandBuffer currentCommandBuffer`
+  >* `./engine/render`下`TContext`中`Turbo::Core::TCommandBuffer *GetCommandBuffer()`成员变量改为`Turbo::Render::TCommandBuffer GetCommandBuffer()`
+  >* `./engine/render`下`TContext`中增加`std::vector<Turbo::Render::TCommandBuffer> commandBuffers`成员变量
+  >* `./docs/`下增加`FAQ.md`用于记录常见问题
+
+* 2023/1/11 设计架构
+  >
+  >* `./engine/framegraph`下`TVirtualResourceProxy`中`virtual void Create()`成员函数增加`void *allocator`函数参数
+  >* `./engine/framegraph`下`TVirtualResourceProxy`中`virtual void Destroy()`成员函数增加`void *allocator`参数
+  >* `./engine/framegraph`下`TResourceProxy`中`virtual void Create()`成员函数增加`void *allocator`函数参数
+  >* `./engine/framegraph`下`TResourceProxy`中`virtual void Destroy()`成员函数增加`void *allocator`参数
+  >* `./engine/framegraph`下`TFrameGraph`中`void Execute(void *context = nullptr)`成员函数增加`void *allocator`参数
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+

@@ -1,10 +1,12 @@
 #pragma once
-#include "TRenderPass.h"
+#include "TCommandBuffer.h"
+#include "TFence.h"
 #ifndef TURBO_RENDER_TCONTEXT_H
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
 #include "TImage.h"
 #include <stdint.h>
+#include <vector>
 
 namespace Turbo
 {
@@ -18,6 +20,7 @@ class TImage;
 class TBuffer;
 class TCommandBufferPool;
 class TCommandBuffer;
+class TFence;
 } // namespace Core
 } // namespace Turbo
 
@@ -35,6 +38,14 @@ namespace Render
 {
 
 class TRenderPass;
+class TComputePipeline;
+class TGraphicsPipeline;
+
+typedef struct TCommandBuffer
+{
+    Turbo::Core::TCommandBuffer *commandBuffer = nullptr;
+    Turbo::Core::TFence *fence = nullptr;
+} TCommandBuffer;
 
 class TContext
 {
@@ -44,7 +55,9 @@ class TContext
     Turbo::Core::TDevice *device = nullptr;
     Turbo::Core::TDeviceQueue *graphicsQueue = nullptr;
     Turbo::Core::TCommandBufferPool *commandBufferPool = nullptr;
-    Turbo::Core::TCommandBuffer *commandBuffer = nullptr;
+
+    Turbo::Render::TCommandBuffer currentCommandBuffer;
+    std::vector<Turbo::Render::TCommandBuffer> commandBuffers;
 
   public:
     TContext();
@@ -59,14 +72,20 @@ class TContext
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
-    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
-    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
+    void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(const Turbo::Render::TRenderPass &renderPass);
+
+    void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
+    void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+
+    void Flush();
+    bool Wait(uint64_t timeout);
 
     Turbo::Core::TInstance *GetInstance();
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();
     Turbo::Core::TDevice *GetDevice();
     Turbo::Core::TDeviceQueue *GetDeviceQueue();
-    Turbo::Core::TCommandBuffer *GetCommandBuffer();
+    Turbo::Render::TCommandBuffer GetCommandBuffer();
 };
 } // namespace Render
 } // namespace Turbo

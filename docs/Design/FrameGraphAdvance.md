@@ -138,6 +138,19 @@
   >
   >* 创建`Shader`章节
 
+* 2023/1/9
+  >
+  >* 创建`指令推送`章节
+  >* 创建`指令等待`章节
+
+* 2023/1/10
+  >
+  >* 更新`指令等待`章节
+
+* 2023/1/11
+  >
+  >* 创建`异步资源回收`章节
+
 ---
 
 # Turbo驱动初步
@@ -2145,9 +2158,11 @@ class RenderPass
 ## Context::CmdBeginRenderPass
 
 在`FrameGraph::PassNode::Execute`阶段绑定`RenderPass`时
+
 ```CXX
 context->CmdBeginRenderPass(render_pass)
 ```
+
 `Turbo`主要做两件事：
 
 1. 创建相应的`RenderPass`
@@ -2158,6 +2173,7 @@ context->CmdBeginRenderPass(render_pass)
 现在有个问题：如何从`PassNode`中将`RenderPass`配置提取出来，并传给`Context`，说白了就是传给`CmdBeginRenderPass(RenderPass)`函数的`RenderPass`参数的实参如何构建？接口如何设计？
 
 可能的方式：
+
 ```CXX
 [=](const PresentPassData &data, const TResources &resources, void *context) 
 {
@@ -2197,7 +2213,7 @@ class Context
 3. `TessellationShader`（细分着色器）
 4. `FragmentShader`(片元着色器)
 
-光追标准着色器(`NVIDIA`标准或`Khronos`标准)： 
+光追标准着色器(`NVIDIA`标准或`Khronos`标准)：
 
 5. `RayGenerationShader`
 6. `IntersectionShader`
@@ -2209,6 +2225,112 @@ class Context
 
 10. `TaskShader`
 11. `MeshShader`
+
+## 指令推送
+
+指令推送就是将记录了一堆指令的`CommandBuffer`推送到`GPU`进行执行，所以`Context`中需要提供`Flush()`函数
+
+```mermaid
+graph TD;
+Flush["Context::Flush(...)函数调用"]
+CreateFence["创建Fence"]
+SubmmitCurrentCommandBuffer["推送当前CommandBuffer"]
+NoWaitAndPushIntoFenceSet["将Fence加入到【待同步Fence集合】中(将来的某一时刻进行同步等待)"]
+CurrentCommandBufferPushIntoCommandBufferSet["将当前CommandBuffer加入到【待同步CommandBuffer集合】中"]
+ReCreateCommandBuffer["重新创建一个CommandBuffer,并作为当前CommandBuffer使用"]
+Return["返回"]
+
+Flush-->CreateFence
+CreateFence-->SubmmitCurrentCommandBuffer
+SubmmitCurrentCommandBuffer-->NoWaitAndPushIntoFenceSet
+
+NoWaitAndPushIntoFenceSet-->CurrentCommandBufferPushIntoCommandBufferSet
+CurrentCommandBufferPushIntoCommandBufferSet-->ReCreateCommandBuffer
+ReCreateCommandBuffer-->Return
+```
+
+*注：`Context::Flush(...)`函数调用的最佳时机多位于`Renderer::BeginFrame()`或`Renderer::EndFrame()`时（目前`Turbo`还没有`Renderer`的相关设计）*
+
+## 指令等待
+
+指令推送到`GPU`执行后，需要在未来的某一时刻进行等待`GPU`指令执行完成，所以`Context`需要提供`bool Wait(uint64_t timeout)`函数
+
+```mermaid
+graph TD;
+Wait["Context::Wait(...)函数调用"]
+WaitAllFenceTimeoutFenceSet["等待【待同步Fence集合】中的Fence，timeout时长"]
+IsHasTimeout{"是否有超时"}
+YesHasTimeout["说明【待同步CommandBuffer集合】中有的CommandBuffer在timeout时间段内没有完成"]
+NoHasTimeout["说明所有的CommandBuffer都完成了"]
+
+RemoveAndDestroyCommandBuffers["销毁并移除所有【待同步CommandBuffer集合】中的CommandBuffer"]
+RemoveAndDestroyFences["销毁并移除所有【待同步Fence集合】中的Fence"]
+
+RemoveFinishedCommandBufferAndDestroy["移除【待同步CommandBuffer集合】中已完成的CommandBuffer并销毁"]
+RemoveFinishedFenceAndDestroy["移除【待同步Fence集合】中已完成的Fence并销毁"]
+
+ReturnFalse["返回False，标时超时，规定时间内有任务没完成"]
+ReturnTrue["返回True，规定时间内所有任务完成"]
+
+Wait-->WaitAllFenceTimeoutFenceSet
+WaitAllFenceTimeoutFenceSet-->IsHasTimeout
+IsHasTimeout--有超时-->YesHasTimeout
+IsHasTimeout--无超时-->NoHasTimeout
+
+NoHasTimeout-->RemoveAndDestroyCommandBuffers
+RemoveAndDestroyCommandBuffers-->RemoveAndDestroyFences
+RemoveAndDestroyFences-->ReturnTrue
+
+YesHasTimeout-->RemoveFinishedCommandBufferAndDestroy
+RemoveFinishedCommandBufferAndDestroy-->RemoveFinishedFenceAndDestroy
+RemoveFinishedFenceAndDestroy-->ReturnFalse
+```
+
+*注：判断`是否有超时`时需要`Turbo::Core`层提供同时等待多个`Fence`的接口，目前未提供该接口，只能一个`Fence`一个`Fence`的等，需要扩展`Turbo::Core`接口，比如提供`class Turbo::Core::TFences`*
+
+*注：`Context::Wait(...)`函数调用的最佳时机多为获取`Swapchain`的`Image`时（当`Swapchain`的`Image`上次被使用后，这次又再一次被使用，这时需要等待上一次使用结束，才能进行这一次的使用）*
+
+## 异步资源回收
+
+由于`FrameGraph`在`void Execute(...)`时的流程如下
+
+```mermaid
+graph TD;
+    CreateResource["创建PassNode要用的资源数据"]
+    PassNodeExecute["运行PassNode的Execute回调"]
+    DestroyResource["销毁不需要的资源数据"]
+
+    CreateResource-->PassNodeExecute
+    PassNodeExecute-->DestroyResource
+    DestroyResource--下一个PassNode-->CreateResource
+```
+这里在`销毁不需要的资源数据`时，此时可能用户并没有调用`Flush`，换句话说就是，用户此时可能并没有将指令推送到`GPU`，如果此时销毁了相应的资源，之后再推送指令，由于资源已经销毁了，所以在`销毁不需要的资源数据`时并不能真的去销毁资源，而需要将资源保存下来，等待未来的某一合适的时候销毁。
+
+`Filament`引擎在`销毁不需要的资源数据`时，是将资源保存到了一个`Cache`中，如下：
+```CXX
+//Filament engine code
+void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
+    if constexpr (mEnabled) {//目前mEnabled永远为true
+        // find the texture in the in-use list (it must be there!)
+        auto it = mInUseTextures.find(h);
+        assert_invariant(it != mInUseTextures.end());
+
+        // move it to the cache
+        const TextureKey key = it->second;
+        uint32_t size = key.getSize();
+
+        //将资源转移到缓存中
+        mTextureCache.emplace(key, TextureCachePayload{ h, mAge, size });
+        mCacheSize += size;
+
+        // remove it from the in-use list
+        mInUseTextures.erase(it);
+    } else {
+        mBackend.destroyTexture(h);
+    }
+}
+```
+在`Filament`中`mTextureCache`是作为`ResourceAllocator`成员变量来缓存资源文件的，这是一个不错的选择。
 
 ## Mesh，Material和Drawable
 
