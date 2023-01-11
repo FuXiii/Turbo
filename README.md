@@ -2255,7 +2255,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中增加`std::vector<Turbo::Render::TCommandBuffer> commandBuffers`成员变量
   >* `./docs/`下增加`FAQ.md`用于记录常见问题
 
-* 2023/1/10 设计架构
+* 2023/1/11 设计架构
   >
   >* `./engine/framegraph`下`TVirtualResourceProxy`中`virtual void Create()`成员函数增加`void *allocator`函数参数
   >* `./engine/framegraph`下`TVirtualResourceProxy`中`virtual void Destroy()`成员函数增加`void *allocator`参数

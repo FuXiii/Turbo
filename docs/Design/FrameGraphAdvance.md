@@ -147,6 +147,10 @@
   >
   >* 更新`指令等待`章节
 
+* 2023/1/11
+  >
+  >* 创建`异步资源回收`章节
+
 ---
 
 # Turbo驱动初步
@@ -2285,6 +2289,47 @@ RemoveFinishedFenceAndDestroy-->ReturnFalse
 *注：判断`是否有超时`时需要`Turbo::Core`层提供同时等待多个`Fence`的接口，目前未提供该接口，只能一个`Fence`一个`Fence`的等，需要扩展`Turbo::Core`接口，比如提供`class Turbo::Core::TFences`*
 
 *注：`Context::Wait(...)`函数调用的最佳时机多为获取`Swapchain`的`Image`时（当`Swapchain`的`Image`上次被使用后，这次又再一次被使用，这时需要等待上一次使用结束，才能进行这一次的使用）*
+
+## 异步资源回收
+
+由于`FrameGraph`在`void Execute(...)`时的流程如下
+
+```mermaid
+graph TD;
+    CreateResource["创建PassNode要用的资源数据"]
+    PassNodeExecute["运行PassNode的Execute回调"]
+    DestroyResource["销毁不需要的资源数据"]
+
+    CreateResource-->PassNodeExecute
+    PassNodeExecute-->DestroyResource
+    DestroyResource--下一个PassNode-->CreateResource
+```
+这里在`销毁不需要的资源数据`时，此时可能用户并没有调用`Flush`，换句话说就是，用户此时可能并没有将指令推送到`GPU`，如果此时销毁了相应的资源，之后再推送指令，由于资源已经销毁了，所以在`销毁不需要的资源数据`时并不能真的去销毁资源，而需要将资源保存下来，等待未来的某一合适的时候销毁。
+
+`Filament`引擎在`销毁不需要的资源数据`时，是将资源保存到了一个`Cache`中，如下：
+```CXX
+//Filament engine code
+void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
+    if constexpr (mEnabled) {//目前mEnabled永远为true
+        // find the texture in the in-use list (it must be there!)
+        auto it = mInUseTextures.find(h);
+        assert_invariant(it != mInUseTextures.end());
+
+        // move it to the cache
+        const TextureKey key = it->second;
+        uint32_t size = key.getSize();
+
+        //将资源转移到缓存中
+        mTextureCache.emplace(key, TextureCachePayload{ h, mAge, size });
+        mCacheSize += size;
+
+        // remove it from the in-use list
+        mInUseTextures.erase(it);
+    } else {
+        mBackend.destroyTexture(h);
+    }
+}
+```
 
 ## Mesh，Material和Drawable
 
