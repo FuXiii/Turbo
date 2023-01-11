@@ -79,6 +79,7 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TPassNode::AddCreate(TResource r
 
 Turbo::FrameGraph::TResource Turbo::FrameGraph::TPassNode::AddRead(TResource resource)
 {
+    // FIXME: 同一个PassNode的多Subpass下经常会发生读取之前写过的资源，此行代码并不适合此种情况，应该删除该assert(...)判断
     assert(!this->IsCreate(resource) && !this->IsWrite(resource));
     return this->IsRead(resource) ? resource : this->reads.emplace_back(resource);
 }
@@ -360,20 +361,6 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
         }
     }
 
-    //<Test output>
-    {
-        for (auto &pass_node_item : *this->passNodes)
-        {
-            std::cout << "PassNode::" << pass_node_item.GetName() << "::" << pass_node_item.refCount << std::endl;
-        }
-
-        for (auto &resource_node_item : *this->resourceNodes)
-        {
-            std::cout << "ResourceNode::" << resource_node_item.GetName() << "::" << resource_node_item.refCount << "::writer::" << this->passNodes->at(resource_node_item.writer.id).name << std::endl;
-        }
-    }
-    //</Test output>
-
     // cull passes and resources unreference
     std::stack<TResource> unref_resources;
     for (TResourceNode &resource_node_item : *this->resourceNodes)
@@ -402,7 +389,6 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
                 }
             }
         }
-        std::cout << "UnRef::" << resource_node.GetName() << "::Writer::" << writer.name << ":" << writer.refCount << std::endl;
     }
 
     // compute resource first/last users for active passes

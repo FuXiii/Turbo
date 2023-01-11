@@ -481,6 +481,8 @@ void Test1()
     ss_to_html << "</html>" << std::endl;
 
     WriteTextFile(ss_to_html.str(), "./RenderFg.html");
+
+    fg.Execute(&context, &resource_allocator);
 #endif
 }
 
