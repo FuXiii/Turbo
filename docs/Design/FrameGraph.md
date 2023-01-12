@@ -41,6 +41,7 @@
   >* 更新`PassNode与RenderPass`章节
   >* 更新`FrameGraph::Builder::Subpass`章节
   >* 更新`FrameGraph::Subpass`章节
+  >* 更新`FrameGraph::Mermaid`章节的示例图
 
 ## PassNode与RenderPass
 
@@ -169,6 +170,7 @@
 >    FrameGraph::Read(resource, true);
 >}
 >```
+>
 >详情请预览下面的`FrameGraph::Builder::Subpass`章节和`FrameGraph::Subpass`章节
 
 ## FrameGraph::Builder::Subpass
@@ -388,7 +390,7 @@ graph LR;
     GBufferPassSubpass0-->GBuffer1
     GBufferPassSubpass0-->GBuffer2
     GBufferPassSubpass0-->GBuffer3
-    DepthBuffer1-->LightingPassSubpass0
+    DepthBuffer1-.->LightingPassSubpass0 %% read link is dashed
     GBuffer1-->LightingPassSubpass0
     GBuffer2-->LightingPassSubpass0
     GBuffer3-->LightingPassSubpass0
@@ -399,12 +401,12 @@ graph LR;
     PresentPass-.->End
 
     linkStyle 1 stroke:#a44141,stroke-width:3px %% write link style
-    linkStyle 2 stroke:#95ad5b,stroke-width:3px %% read link style
+    linkStyle 2 stroke:#95ad5b,stroke-width:3px %% input link style
     linkStyle 3 stroke:#a44141,stroke-width:3px
     linkStyle 4 stroke:#a44141,stroke-width:3px
     linkStyle 5 stroke:#a44141,stroke-width:3px
     linkStyle 6 stroke:#a44141,stroke-width:3px
-    linkStyle 7 stroke:#95ad5b,stroke-width:3px
+    linkStyle 7 stroke:#ffd305,stroke-width:3px %% read link style
     linkStyle 8 stroke:#95ad5b,stroke-width:3px
     linkStyle 9 stroke:#95ad5b,stroke-width:3px
     linkStyle 10 stroke:#95ad5b,stroke-width:3px
@@ -412,4 +414,50 @@ graph LR;
     linkStyle 12 stroke:#95ad5b,stroke-width:3px
     linkStyle 13 stroke:#a44141,stroke-width:3px
     linkStyle 14 stroke:#95ad5b,stroke-width:3px
+```
+
+```mermaid
+graph LR;
+classDef Resource fill:#608ba3
+classDef Pass fill:#e8924a
+classDef Subpass fill:#8474a0
+classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
+classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
+Start((" ")):::Start
+End((" ")):::End
+PassNode0:::Pass
+subgraph PassNode0["Color Pass"]
+direction TB
+PassNode0Subpass0("Subpass 0"):::Subpass
+end
+Color_Texture2D0("Color Texture2D"):::Resource
+PassNode0Subpass0-->Color_Texture2D0
+Depth_Texture2D0("Depth Texture2D"):::Resource
+PassNode0Subpass0-->Depth_Texture2D0
+PassNode1:::Pass
+subgraph PassNode1["Post Pass"]
+direction TB
+PassNode1Subpass0("Subpass 0"):::Subpass
+end
+Color_Texture2D0("Color Texture2D"):::Resource
+Color_Texture2D0-->PassNode1Subpass0
+Depth_Texture2D0("Depth Texture2D"):::Resource
+Depth_Texture2D0-->PassNode1Subpass0
+RenderTarget_Texture2D0("RenderTarget Texture2D"):::Resource
+PassNode1Subpass0-->RenderTarget_Texture2D0
+PassNode2:::Pass
+subgraph PassNode2["Present Pass"]
+direction TB
+PassNode2Subpass0("Subpass 0"):::Subpass
+end
+RenderTarget_Texture2D0("RenderTarget Texture2D"):::Resource
+RenderTarget_Texture2D0-->PassNode2Subpass0
+Start-.->PassNode0
+PassNode2-.->End
+linkStyle 0 stroke:#a44141,stroke-width:3px
+linkStyle 1 stroke:#a44141,stroke-width:3px
+linkStyle 2 stroke:#95ad5b,stroke-width:3px
+linkStyle 3 stroke:#95ad5b,stroke-width:3px
+linkStyle 4 stroke:#a44141,stroke-width:3px
+linkStyle 5 stroke:#95ad5b,stroke-width:3px
 ```

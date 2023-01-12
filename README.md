@@ -2276,4 +2276,8 @@ Turbo是渲染引擎
   >* `./engine/framegraph`下`TFrameGraph::TBuilder`中增加`TResource Input(TResource resource)`成员函数
   >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Read(TResource resource)`中增加`resource.isInput = false`设置代码
   >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Input(TResource resource)`中增加`resource.isInput = true`设置代码
-  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::IsRead(TResource resource)`下增加重复性`isInput`属性判断
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::IsRead(TResource resource)`下增加重复性`isInput`检测
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TFrameGraph::ToMermaid()`下增加对`input`资源的解析
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TFrameGraph::ToMermaid()`下`struct linkStyle`下增加`enum Type`成员枚举，并增加`Type type`成员变量，移除`bool isWrite`成员变量
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::AddRead(...)`中移除`assert(!this->IsCreate(resource) && !this->IsWrite(resource))`判断
+  >* 更新`./samples`下`FrameGraphSample`示例
