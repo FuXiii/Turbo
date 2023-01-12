@@ -36,6 +36,10 @@
   >
   >* 更新`PassNode与RenderPass`章节
 
+* 2023/1/12
+  >
+  >* 更新`PassNode与RenderPass`章节
+
 ## PassNode与RenderPass
 
 在`PassNode::Setup`阶段需要配置当前`PassNode`的各种`Subpass`，之后`Turbo`引擎会根据用户的配置创建`RenderPass`和`FrameBuffer`
@@ -145,7 +149,24 @@
 >
 >### 如何解决该问题呢？
 >
->问题的根源在于对于像`DepthStencilTexture`这样的资源，目前`FrameGraph::Read(...)`可以解释成`Vulkan`的`InputAttachment`，但对于`DepthStencilTexture`这样的资源这不是必须的,`DepthStencilTexture`可以不作为`InputAttachment`而被其他`PassNode`使用。
+>问题的根源在于对于像`DepthStencilTexture`这样的资源，目前`FrameGraph::Read(...)`可以解释成`Vulkan`的`InputAttachment`，但对于`DepthStencilTexture`这样的资源这不是必须的，`DepthStencilTexture`可以不作为`InputAttachment`而被其他`PassNode`使用。
+>
+>目前能想到的解决方案就是:`FrameGraph::Read(someResource)`唯一的作用是告诉`FrameGraph`有人要使用该`someResource`，请在`FrameGraph::Compile()`阶段不要剔除相关节点，之后为`FrameGraph::Read(someResource)`增加一个`标志位`，用于表示此次读操作是否作为`InputAttachment`进行解析。可能的函数声明如下：
+>
+>```CXX
+>//in FrameGraph
+>FrameGraph::Read(Resource resource, bool isInput=false);
+>```
+>
+>或许给`Subpass`中添加`Subpass::Input(Resource resource)`会更加方便
+>
+>```CXX
+>//in FrameGraph
+>FrameGraph::Input(Resource resource)
+>{
+>    FrameGraph::Read(resource, true);
+>}
+>```
 
 ## FrameGraph::Builder::Subpass
 
