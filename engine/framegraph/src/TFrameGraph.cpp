@@ -44,6 +44,24 @@ void Turbo::FrameGraph::TSubpass::Read(TResource resource)
     }
 }
 
+void Turbo::FrameGraph::TSubpass::Input(TResource resource)
+{
+    bool is_found = false;
+    for (TResource resource_item : this->inputs)
+    {
+        if (resource_item.id == resource.id)
+        {
+            is_found = true;
+            break;
+        }
+    }
+
+    if (!is_found)
+    {
+        this->reads.push_back(resource);
+    }
+}
+
 std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetWrites()
 {
     return this->writes;
@@ -52,6 +70,11 @@ std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetWrites
 std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetReads()
 {
     return this->reads;
+}
+
+std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetInputs()
+{
+    return this->inputs;
 }
 
 void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
@@ -121,6 +144,11 @@ bool Turbo::FrameGraph::TPassNode::IsRead(TResource resource)
     {
         if (resource.id == resource_item.id)
         {
+            if (resource.isInput)
+            {
+                resource_item.isInput = true;
+            }
+
             return true;
         }
     }
@@ -205,12 +233,32 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass:
 {
     if (this->builder != nullptr)
     {
+        resource.isInput = false;
         TResource return_resurce = this->builder->Read(resource);
         std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
         if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
         {
             Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
             subpass.Read(return_resurce);
+        }
+
+        return return_resurce;
+    }
+
+    return Turbo::FrameGraph::TResource();
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass::Input(TResource resource)
+{
+    if (this->builder != nullptr)
+    {
+        resource.isInput = true;
+        TResource return_resurce = this->builder->Read(resource);
+        std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
+        if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
+        {
+            Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
+            subpass.Input(return_resurce);
         }
 
         return return_resurce;

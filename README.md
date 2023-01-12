@@ -2265,3 +2265,15 @@ Turbo是渲染引擎
   >* `./engine/framegraph`下`TFrameGraph`中`void Execute(void *context = nullptr)`成员函数增加`void *allocator`参数
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* 更新`./docs/Design/`下的`FrameGraph.md`
+
+* 2023/1/12 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`下`TSubpass`中增加`std::vector<TResource> inputs`成员变量
+  >* `./engine/framegraph`下`TSubpass`中增加`void Input(TResource resource)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`std::vector<TResource> GetInputs()`成员函数
+  >* `./engine/framegraph`下`TResource`中增加`bool isInput`成员变量
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder`中增加`TResource Input(TResource resource)`成员函数
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Read(TResource resource)`中增加`resource.isInput = false`设置代码
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Input(TResource resource)`中增加`resource.isInput = true`设置代码
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::IsRead(TResource resource)`下增加重复性`isInput`属性判断

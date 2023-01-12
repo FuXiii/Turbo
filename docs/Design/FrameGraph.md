@@ -232,8 +232,8 @@ Resource Subpass::Write(Resource resource)
 Resource Subpass::Read(Resource resource)
 {
    Resource read_resource = builder.Read(resource, false/*Input标志位*/);
-   //对于FrameGraph::Subpass来说read信息对其不重要，该信息只用于FrameGraph计算是否进行剔除
-   //renderPass.Subpasses[subpass].Read(read_resource);
+   //对于FrameGraph::Subpass来说read信息对其不重要，该信息只用于FrameGraph计算是否进行剔除，FrameGraph::Subpass保留read信息也不是一件坏事，在转成图表化信息时可以有更丰富的信息
+   renderPass.Subpasses[subpass].Read(read_resource);
 
    return read_resource;
 }
