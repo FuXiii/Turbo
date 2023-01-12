@@ -39,6 +39,8 @@
 * 2023/1/12
   >
   >* 更新`PassNode与RenderPass`章节
+  >* 更新`FrameGraph::Builder::Subpass`章节
+  >* 更新`FrameGraph::Subpass`章节
 
 ## PassNode与RenderPass
 
@@ -167,6 +169,7 @@
 >    FrameGraph::Read(resource, true);
 >}
 >```
+>详情请预览下面的`FrameGraph::Builder::Subpass`章节和`FrameGraph::Subpass`章节
 
 ## FrameGraph::Builder::Subpass
 
@@ -191,8 +194,11 @@ namespace TFrameGraph
 
 而对于资源的读写，同样要注册到`PassNode`对应的`RenderPass`中，所以
 
-* `Subpass::Write()`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
-* `Subpass::Read()`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Write(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Read(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Input(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+
+*注：`Subpass::Input(Resource)`与`Subpass::Read(Resource)`本质上没区别，唯一的区别就是`Subpass::Input(Resource)`会将对应得`Resource`的`input`标志位设置成`true`*
 
 ~~*考虑:是否将`Subpass::Write(...)`和`Subpass::Read(...)`设计成私有，并成为`TBuilder`的友元，这样只有在`PassNode::Setup`阶段可以调用`Subpass::Write(...)`和`Subpass::Read(...)`，如果设计成友元，其他私有成员也可以访问到了，也是个问题*~~
 
@@ -212,6 +218,7 @@ class Subpass
 
         Resource Write(Resource);
         Resource Read(Resource);
+        Resource Input(Resource);
 }
 
 Resource Subpass::Write(Resource resource)
@@ -224,8 +231,17 @@ Resource Subpass::Write(Resource resource)
 
 Resource Subpass::Read(Resource resource)
 {
-   Resource read_resource = builder.Read(resource);
-   renderPass.Subpasses[subpass].Read(read_resource);
+   Resource read_resource = builder.Read(resource, false/*Input标志位*/);
+   //对于FrameGraph::Subpass来说read信息对其不重要，该信息只用于FrameGraph计算是否进行剔除
+   //renderPass.Subpasses[subpass].Read(read_resource);
+
+   return read_resource;
+}
+
+Resource Subpass::Input(Resource resource)
+{
+   Resource read_resource = builder.Read(resource，true/*Input标志位*/);
+   renderPass.Subpasses[subpass].Input(read_resource);
 
    return read_resource;
 }
@@ -241,14 +257,15 @@ class TSubpass
 {
   private:
     std::vector<TResource> writes;
-    std::vector<TResource> reads;
+    std::vector<TResource> inputs;
 
   public:
     TSubpass() = default;
     ~TSubpass() = default;
 
     void Write(TResource resource);
-    void Read(TResource resource);
+    //void Read(TResource resource);
+    void Input(TResource resource);
 };
 
 void Write(TResource resource)
@@ -256,11 +273,20 @@ void Write(TResource resource)
     this->writes.push_back(resource);
 }
 
-void Read(TResource resource)
+// void Read(TResource resource)
+// {
+//     this->reads.push_back(resource);
+// }
+
+void Input(TResource resource)
 {
-    this->reads.push_back(resource);
+    this->inputs.push_back(resource);
 }
 ```
+
+* 其中`TSubpass::writes`如果是`ColorImage`，应该对应`Vulkan`的`ColorAttachment`。
+* 其中`TSubpass::writes`如果是`DepthStencil`，应该对应`Vulkan`的`DepthStencilAttachment`。
+* 其中`TSubpass::inputs`应该对应`Vulkan`的`InputAttachment`。
 
 ## FrameGraph::RenderPass
 
