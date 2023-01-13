@@ -265,7 +265,7 @@ int test2()
             TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
 
             data.lightTexture = fg.GetBlackboard()["Light Texture"];
-            data.lightTexture = subpass.Read(data.lightTexture);
+            data.lightTexture = subpass.Input(data.lightTexture);
 
             data.renderTargetTexture = builder.Create<CustomTexture>("RenderTarget Texture", {128, 128, CustomTexture::Shadow});
             data.renderTargetTexture = subpass.Write(data.renderTargetTexture);
