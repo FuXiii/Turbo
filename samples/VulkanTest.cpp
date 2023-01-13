@@ -170,7 +170,67 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
     {
         size_t pipeline_cache_size = 0;
         result = Turbo::Core::vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &pipeline_cache_size, nullptr);
+        if (result != VkResult::VK_SUCCESS)
+        {
+            std::cout << "!!!Error::Turbo::Core::vkGetPipelineCacheData(...)::GetPipelineCacheData::Size" << std::endl;
+        }
         std::cout << "pipeline cache size::" << pipeline_cache_size << std::endl;
+
+        void *pipeline_cache_data = malloc(pipeline_cache_size);
+        result = Turbo::Core::vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &pipeline_cache_size, pipeline_cache_data);
+        if (result != VkResult::VK_SUCCESS)
+        {
+            std::cout << "!!!Error::Turbo::Core::vkGetPipelineCacheData(...)::GetPipelineCacheData::Data" << std::endl;
+        }
+
+        {
+            // FIXME:The Vulkan spec states: dstCache must not appear in the list of source caches
+            // result = Turbo::Core::vkMergePipelineCaches(vk_device, vk_pipeline_cache, 1, &vk_pipeline_cache);
+            // if (result != VkResult::VK_SUCCESS)
+            // {
+            //     std::cout << "!!!Error::Turbo::Core::vkMergePipelineCaches(...)" << std::endl;
+            // }
+        }
+
+        VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+        memcpy(&vk_pipeline_cache_header_version_one, pipeline_cache_data, sizeof(VkPipelineCacheHeaderVersionOne));
+
+        uint32_t header_size = vk_pipeline_cache_header_version_one.headerSize;
+        std::cout << "Cache header size::" << header_size << std::endl;
+
+        VkPipelineCacheHeaderVersion header_version = vk_pipeline_cache_header_version_one.headerVersion;
+        std::cout << "Cache header version::" << header_version << std::endl;
+
+        uint32_t vendor_id = vk_pipeline_cache_header_version_one.vendorID;
+        std::cout << "Cache vendor id::" << vendor_id << std::endl;
+
+        uint32_t device_id = vk_pipeline_cache_header_version_one.deviceID;
+        std::cout << "Cache device id::" << device_id << std::endl;
+
+        for (uint32_t cache_uuid_index = 0; cache_uuid_index < VK_UUID_SIZE; cache_uuid_index++)
+        {
+            uint8_t uuid = vk_pipeline_cache_header_version_one.pipelineCacheUUID[cache_uuid_index];
+            std::cout << cache_uuid_index << "::UUID::" << uuid << std::endl;
+        }
+
+        free(pipeline_cache_data);
+
+        {
+            Turbo::Core::TPipelineCacheUUID physcial_device_uuid = physical_device->GetDevicePiplineCacheUUID();
+            for (uint32_t cache_uuid_index = 0; cache_uuid_index < VK_UUID_SIZE; cache_uuid_index++)
+            {
+                uint8_t uuid = physcial_device_uuid.uuid[cache_uuid_index];
+                std::cout << cache_uuid_index << "::Physica Device UUID::" << uuid << std::endl;
+            }
+        }
+
+        {
+            uint32_t physcial_device_id = physical_device->GetPhysicalDeviceID();
+            std::cout << "Physica Device id::" << physcial_device_id << std::endl;
+
+            uint32_t physcial_device_vendor_id = physical_device->GetVendor().GetVendorID();
+            std::cout << "Physica Device vendor id::" << physcial_device_vendor_id << std::endl;
+        }
     }
 
     std::cout << "Success::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;

@@ -2281,3 +2281,7 @@ Turbo是渲染引擎
   >* `./engine/framegraph`下`Turbo::FrameGraph::TFrameGraph::ToMermaid()`下`struct linkStyle`下增加`enum Type`成员枚举，并增加`Type type`成员变量，移除`bool isWrite`成员变量
   >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::AddRead(...)`中移除`assert(!this->IsCreate(resource) && !this->IsWrite(resource))`判断
   >* 更新`./samples`下`FrameGraphSample`示例
+
+* 2023/1/13 设计架构
+  >
+  >* 更新`./samples`下的`VulkanTest.cpp`
