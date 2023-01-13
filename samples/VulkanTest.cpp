@@ -1,3 +1,4 @@
+#include "TInstance.h"
 #include "core/include/TDevice.h"
 #include "core/include/TDeviceQueue.h"
 #include "core/include/TEngine.h"
@@ -40,7 +41,6 @@
 #include "core/include/TSampler.h"
 
 #include "core/include/TVulkanLoader.h"
-#include "vulkan/vulkan_core.h"
 
 #include <memory>
 #include <stdio.h>
@@ -60,6 +60,115 @@ std::string ReadTextFile(const std::string &filename)
     }
 
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
+
+void Test0(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test0>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+
+    VkImageCreateInfo vk_image_create_info = {};
+    vk_image_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    vk_image_create_info.pNext = nullptr;
+    vk_image_create_info.flags = 0;
+    vk_image_create_info.imageType = VkImageType::VK_IMAGE_TYPE_2D;
+    vk_image_create_info.format = VkFormat::VK_FORMAT_R8G8B8A8_UNORM;
+    vk_image_create_info.extent.width = 512;
+    vk_image_create_info.extent.height = 512;
+    vk_image_create_info.extent.depth = 1;
+    vk_image_create_info.mipLevels = 1;
+    vk_image_create_info.arrayLayers = 1;
+    vk_image_create_info.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    vk_image_create_info.sharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
+    vk_image_create_info.queueFamilyIndexCount = 0;
+    vk_image_create_info.pQueueFamilyIndices = nullptr;
+    vk_image_create_info.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+
+    // GPU only
+    VkImage vk_image = VK_NULL_HANDLE;
+    VkResult result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== GPU only" << std::endl;
+    // staging upload
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== staging upload" << std::endl;
+
+    // read back
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== read back" << std::endl;
+
+    // advanced upload
+    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
+    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
+    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
+    std::cout << "======================================== advanced upload" << std::endl;
+
+    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_UNORM, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
+    delete temp_image;
+
+    std::vector<Turbo::Core::TFormatInfo> support_format = physical_device->GetSupportFormats();
+
+    for (Turbo::Core::TFormatInfo &format_info_item : support_format)
+    {
+        VkFormat vk_format = format_info_item.GetVkFormat();
+        std::cout << "vk_format::" << vk_format << std::endl;
+    }
+
+    const std::string vert_shader_str = ReadTextFile("../../asset/shaders/shader_base.vert");
+    const std::string fragment_shader_str = ReadTextFile("../../asset/shaders/shader_base.frag");
+
+    Turbo::Core::TVertexShader *vs = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, vert_shader_str);
+    Turbo::Core::TFragmentShader *fs = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, fragment_shader_str);
+
+    std::cout << vs->ToString() << std::endl;
+    std::cout << fs->ToString() << std::endl;
+
+    delete vs;
+    delete fs;
+    std::cout << "</Test0>" << std::endl;
+}
+
+void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test1>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    VkPipelineCacheCreateInfo vk_pipeline_cache_create_info = {};
+    vk_pipeline_cache_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+    vk_pipeline_cache_create_info.pNext = nullptr;
+    vk_pipeline_cache_create_info.flags = 0;
+    vk_pipeline_cache_create_info.initialDataSize = 0;
+    vk_pipeline_cache_create_info.pInitialData = nullptr;
+
+    VkPipelineCache vk_pipeline_cache = VK_NULL_HANDLE;
+    VkResult result = Turbo::Core::vkCreatePipelineCache(vk_device, &vk_pipeline_cache_create_info, nullptr, &vk_pipeline_cache);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        std::cout << "Error::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
+        std::cout << "</Test1>" << std::endl;
+        return;
+    }
+    std::cout << "Success::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
+
+    Turbo::Core::vkDestroyPipelineCache(vk_device, vk_pipeline_cache, nullptr);
+    std::cout << "</Test1>" << std::endl;
 }
 
 int main()
@@ -130,73 +239,8 @@ int main()
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
-    VkImageCreateInfo vk_image_create_info = {};
-    vk_image_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    vk_image_create_info.pNext = nullptr;
-    vk_image_create_info.flags = 0;
-    vk_image_create_info.imageType = VkImageType::VK_IMAGE_TYPE_2D;
-    vk_image_create_info.format = VkFormat::VK_FORMAT_R8G8B8A8_UNORM;
-    vk_image_create_info.extent.width = 512;
-    vk_image_create_info.extent.height = 512;
-    vk_image_create_info.extent.depth = 1;
-    vk_image_create_info.mipLevels = 1;
-    vk_image_create_info.arrayLayers = 1;
-    vk_image_create_info.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
-    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
-    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    vk_image_create_info.sharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
-    vk_image_create_info.queueFamilyIndexCount = 0;
-    vk_image_create_info.pQueueFamilyIndices = nullptr;
-    vk_image_create_info.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-
-    // GPU only
-    VkImage vk_image = VK_NULL_HANDLE;
-    VkResult result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
-    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
-    std::cout << "======================================== GPU only" << std::endl;
-    // staging upload
-    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT;
-    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
-    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
-    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
-    std::cout << "======================================== staging upload" << std::endl;
-
-    // read back
-    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
-    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
-    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
-    std::cout << "======================================== read back" << std::endl;
-
-    // advanced upload
-    vk_image_create_info.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    vk_image_create_info.tiling = VkImageTiling::VK_IMAGE_TILING_LINEAR;
-    result = Turbo::Core::vkCreateImage(device->GetVkDevice(), &vk_image_create_info, nullptr, &vk_image);
-    Turbo::Core::vkDestroyImage(device->GetVkDevice(), vk_image, nullptr);
-    std::cout << "======================================== advanced upload" << std::endl;
-
-    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_UNORM, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
-    delete temp_image;
-
-    std::vector<Turbo::Core::TFormatInfo> support_format = physical_device->GetSupportFormats();
-
-    for (Turbo::Core::TFormatInfo &format_info_item : support_format)
-    {
-        VkFormat vk_format = format_info_item.GetVkFormat();
-        std::cout << "vk_format::" << vk_format << std::endl;
-    }
-
-    const std::string vert_shader_str = ReadTextFile("../../asset/shaders/shader_base.vert");
-    const std::string fragment_shader_str = ReadTextFile("../../asset/shaders/shader_base.frag");
-
-    Turbo::Core::TVertexShader *vs = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, vert_shader_str);
-    Turbo::Core::TFragmentShader *fs = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, fragment_shader_str);
-
-    std::cout << vs->ToString() << std::endl;
-    std::cout << fs->ToString() << std::endl;
-
-    delete vs;
-    delete fs;
+    Test0(queue);
+    Test1(queue);
 
     delete device;
     delete instance;
