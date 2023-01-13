@@ -161,12 +161,19 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
     VkResult result = Turbo::Core::vkCreatePipelineCache(vk_device, &vk_pipeline_cache_create_info, nullptr, &vk_pipeline_cache);
     if (result != VkResult::VK_SUCCESS)
     {
-        std::cout << "Error::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
+        std::cout << "!!!Error::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
         std::cout << "</Test1>" << std::endl;
         return;
     }
-    std::cout << "Success::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
 
+    // TODO:
+    {
+        size_t pipeline_cache_size = 0;
+        result = Turbo::Core::vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &pipeline_cache_size, nullptr);
+        std::cout << "pipeline cache size::" << pipeline_cache_size << std::endl;
+    }
+
+    std::cout << "Success::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
     Turbo::Core::vkDestroyPipelineCache(vk_device, vk_pipeline_cache, nullptr);
     std::cout << "</Test1>" << std::endl;
 }
