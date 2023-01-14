@@ -2285,3 +2285,7 @@ Turbo是渲染引擎
 * 2023/1/13 设计架构
   >
   >* 更新`./samples`下的`VulkanTest.cpp`
+
+* 2023/1/14 设计架构
+  >
+  >* `./engine/core`下`Turbo::Core::TGraphicsPipeline`下增加兼容`VkPipelineCache`的构造函数，目前为测试研发
