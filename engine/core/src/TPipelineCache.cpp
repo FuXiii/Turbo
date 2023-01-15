@@ -90,3 +90,32 @@ size_t Turbo::Core::TPipelineCache::GetSize()
     }
     return cache_size;
 }
+
+Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst)
+{
+    VkDevice vk_device = this->device->GetVkDevice();
+    VkResult result = VkResult::VK_ERROR_UNKNOWN;
+    size_t cache_size = size;
+    result = this->device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, this->vkPipelineCache, &cache_size, dst);
+    if (result != VkResult::VK_SUCCESS || result != VkResult::VK_INCOMPLETE)
+    {
+        throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TPipelineCache::GetData");
+    }
+
+    switch (result)
+    {
+    case VkResult::VK_SUCCESS: {
+        return TResult::SUCCESS;
+    }
+    break;
+    case VkResult::VK_INCOMPLETE: {
+        return TResult::SUCCESS;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    return TResult::FAIL;
+}

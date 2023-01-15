@@ -28,7 +28,9 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
     ~TPipelineCache();
 
     VkPipelineCache GetVkPipelineCache();
+
     size_t GetSize();
+    TResult GetData(size_t size, void *dst);
 
   public:
     virtual std::string ToString() override;
