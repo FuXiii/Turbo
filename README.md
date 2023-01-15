@@ -2294,3 +2294,16 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下增加`TPipelineCache.h`和`TPipelineCache.cpp`
   >* `./engine/core`下`TPipelineCache`中增加`class Turbo::Core::TPipelineCache`
+  >* `./engine/core`下`TPipelineCache`中增加`TDevice *device`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`VkPipelineCache vkPipelineCache`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`size_t size`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`void *data`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`void InternalCreate()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`void InternalDestroy()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCache(TDevice *device)`构造函数
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCache(TDevice *device, size_t size, void *data)`构造函数
+  >* `./engine/core`下`TPipelineCache`中增加`~TPipelineCache()`析构函数
+  >* `./engine/core`下`TPipelineCache`中增加`VkPipelineCache GetVkPipelineCache()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`size_t GetSize()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TResult GetData(size_t size, void *dst)`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`std::string ToString()`成员函数

@@ -119,3 +119,8 @@ Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst
 
     return TResult::FAIL;
 }
+
+std::string Turbo::Core::TPipelineCache::ToString()
+{
+    return std::string();
+}
