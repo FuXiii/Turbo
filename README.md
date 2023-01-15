@@ -2307,3 +2307,9 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPipelineCache`中增加`size_t GetSize()`成员函数
   >* `./engine/core`下`TPipelineCache`中增加`TResult GetData(size_t size, void *dst)`成员函数
   >* `./engine/core`下`TPipelineCache`中增加`std::string ToString()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`uint32_t GetHeaderSize()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`enum class TPipelineCacheHeaderVersion`枚举
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCacheHeaderVersion GetHeaderVersion()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TVendorInfo GetVendor()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`uint32_t GetDeviceID()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`std::vector<uint8_t> GetUUID()`成员函数

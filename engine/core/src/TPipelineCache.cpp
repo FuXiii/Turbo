@@ -97,9 +97,12 @@ Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
     size_t cache_size = size;
     result = this->device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, this->vkPipelineCache, &cache_size, dst);
-    if (result != VkResult::VK_SUCCESS || result != VkResult::VK_INCOMPLETE)
+    if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TPipelineCache::GetData");
+        if (result != VkResult::VK_INCOMPLETE)
+        {
+            throw Turbo::Core::TException(TResult::FAIL, "Turbo::Core::TPipelineCache::GetData");
+        }
     }
 
     switch (result)
@@ -118,6 +121,93 @@ Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst
     }
 
     return TResult::FAIL;
+}
+
+uint32_t Turbo::Core::TPipelineCache::GetHeaderSize()
+{
+    VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+    this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);
+    return vk_pipeline_cache_header_version_one.headerSize;
+}
+
+Turbo::Core::TPipelineCacheHeaderVersion Turbo::Core::TPipelineCache::GetHeaderVersion()
+{
+    VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+    this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);
+
+    switch (vk_pipeline_cache_header_version_one.headerVersion)
+    {
+    case VK_PIPELINE_CACHE_HEADER_VERSION_ONE: {
+        return TPipelineCacheHeaderVersion::ONE;
+    }
+    break;
+    default: {
+        return TPipelineCacheHeaderVersion::ONE;
+    }
+    break;
+    }
+    return TPipelineCacheHeaderVersion::ONE;
+}
+
+Turbo::Core::TVendorInfo Turbo::Core::TPipelineCache::GetVendor()
+{
+    VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+    this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);
+
+    uint32_t vendor_id = vk_pipeline_cache_header_version_one.vendorID;
+
+    TVendorType vendor_type = static_cast<TVendorType>(vendor_id);
+    switch (vendor_type)
+    {
+    case Turbo::Core::TVendorType::UNDEFINED:
+        vendor_type = TVendorType::UNDEFINED;
+        break;
+    case Turbo::Core::TVendorType::VIVANTE:
+        vendor_type = TVendorType::VIVANTE;
+        break;
+    case Turbo::Core::TVendorType::VERISILICON:
+        vendor_type = TVendorType::VERISILICON;
+        break;
+    case Turbo::Core::TVendorType::KAZAN:
+        vendor_type = TVendorType::KAZAN;
+        break;
+    case Turbo::Core::TVendorType::CODEPLAY:
+        vendor_type = TVendorType::CODEPLAY;
+        break;
+    case Turbo::Core::TVendorType::MESA:
+        vendor_type = TVendorType::MESA;
+        break;
+    case Turbo::Core::TVendorType::NVIDIA:
+        vendor_type = TVendorType::NVIDIA;
+        break;
+    case Turbo::Core::TVendorType::INTEL:
+        vendor_type = TVendorType::INTEL;
+        break;
+    default:
+        vendor_type = TVendorType::UNDEFINED;
+        break;
+    }
+
+    return TVendorInfo(vendor_type, vendor_id);
+}
+
+uint32_t Turbo::Core::TPipelineCache::GetDeviceID()
+{
+    VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+    this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);
+    return vk_pipeline_cache_header_version_one.deviceID;
+}
+
+std::vector<uint8_t> Turbo::Core::TPipelineCache::GetUUID()
+{
+    VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+    this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);
+    std::vector<uint8_t> cache_uuid;
+    for (uint32_t cache_uuid_index = 0; cache_uuid_index < VK_UUID_SIZE; cache_uuid_index++)
+    {
+        cache_uuid.push_back(vk_pipeline_cache_header_version_one.pipelineCacheUUID[cache_uuid_index]);
+    }
+    return cache_uuid;
 }
 
 std::string Turbo::Core::TPipelineCache::ToString()

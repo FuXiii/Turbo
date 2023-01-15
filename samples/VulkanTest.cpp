@@ -48,6 +48,8 @@
 
 #include <chrono>
 
+#include <core/include/TPipelineCache.h>
+
 class TTimer
 {
   private:
@@ -492,6 +494,120 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
     std::cout << "</Test1>" << std::endl;
 }
 
+void Test2(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test2>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    Turbo::Core::TPipelineCache *pc = new Turbo::Core::TPipelineCache(device);
+
+    uint32_t header_size = pc->GetHeaderSize();
+    Turbo::Core::TPipelineCacheHeaderVersion cache_version = pc->GetHeaderVersion();
+    Turbo::Core::TVendorInfo vendor = pc->GetVendor();
+    uint32_t device_id = pc->GetDeviceID();
+    std::vector<uint8_t> cache_uuid = pc->GetUUID();
+
+    std::string cache_uuid_str;
+    for (auto &uuid_item : cache_uuid)
+    {
+        cache_uuid_str += std::to_string(uuid_item);
+    }
+
+    std::cout << "Cache Size::" << pc->GetSize() << std::endl;
+    std::cout << "Cache Header:"
+              << "\n"
+              << "\tsize:" << header_size << "\n"
+              << "\tversion:" << (uint32_t)cache_version << "\n"
+              << "\tvendor:" << vendor.ToString() << "\n"
+              << "\tdevice id:" << device_id << "\n"
+              << "\tuuid:" << cache_uuid_str << std::endl;
+
+    size_t cache_size = pc->GetSize();
+    void *cache_data = malloc(cache_size);
+    pc->GetData(cache_size, cache_data);
+
+    free(cache_data);
+    delete pc;
+    std::cout << "</Test2>" << std::endl;
+}
+
+void Test3(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test3>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    std::cout << "device name:" << physical_device->GetDeviceName() << std::endl;
+    std::cout << "driver version:" << physical_device->GetDriverVersion() << std::endl;
+
+    VkPipelineCacheCreateInfo vk_pipeline_cache_create_info = {};
+    vk_pipeline_cache_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+    vk_pipeline_cache_create_info.pNext = nullptr;
+    vk_pipeline_cache_create_info.flags = 0;
+    vk_pipeline_cache_create_info.initialDataSize = 0;
+    vk_pipeline_cache_create_info.pInitialData = nullptr;
+
+    VkPipelineCache vk_pipeline_cache = VK_NULL_HANDLE;
+    VkResult result = device->GetDeviceDriver()->vkCreatePipelineCache(vk_device, &vk_pipeline_cache_create_info, nullptr, &vk_pipeline_cache);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        exit(-1);
+    }
+
+    {
+        size_t cache_size = 0;
+        device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &cache_size, nullptr);
+        std::cout << "Cache size:" << cache_size << std::endl;
+    }
+
+    {
+        VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+        size_t cache_size = sizeof(VkPipelineCacheHeaderVersionOne);
+        device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &cache_size, &vk_pipeline_cache_header_version_one);
+        std::cout << "Cache size:" << cache_size << std::endl;
+        std::cout << "\t Header size:" << vk_pipeline_cache_header_version_one.headerSize << std::endl;
+    }
+
+    {
+        size_t cache_size = 0;
+        device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &cache_size, nullptr);
+        std::cout << "Cache size:" << cache_size << std::endl;
+        void *cache_data = malloc(cache_size);
+        device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &cache_size, cache_data);
+        VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+        memcpy(&vk_pipeline_cache_header_version_one, cache_data, sizeof(VkPipelineCacheHeaderVersionOne));
+        std::cout << "\t Header size:" << vk_pipeline_cache_header_version_one.headerSize << std::endl;
+        free(cache_data);
+    }
+
+    {
+        size_t cache_size = sizeof(VkPipelineCacheHeaderVersionOne);
+        void *cache_data = malloc(cache_size);
+        device->GetDeviceDriver()->vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &cache_size, cache_data);
+        VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
+        memcpy(&vk_pipeline_cache_header_version_one, cache_data, sizeof(VkPipelineCacheHeaderVersionOne));
+        std::cout << "\t Header size:" << vk_pipeline_cache_header_version_one.headerSize << std::endl;
+        free(cache_data);
+    }
+
+    device->GetDeviceDriver()->vkDestroyPipelineCache(vk_device, vk_pipeline_cache, nullptr);
+
+    std::cout << "</Test3>" << std::endl;
+}
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -561,7 +677,9 @@ int main()
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Test0(queue);
-    Test1(queue);
+    // Test1(queue);
+    Test3(queue);
+    Test2(queue);
 
     delete device;
     delete instance;
