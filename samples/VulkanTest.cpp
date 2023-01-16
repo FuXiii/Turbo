@@ -27,7 +27,6 @@
 #include "TFence.h"
 #include "TSemaphore.h"
 
-#include <corecrt_malloc.h>
 #include <cstddef>
 #include <exception>
 #include <fstream>
@@ -52,8 +51,7 @@
 #include <chrono>
 
 #include <core/include/TPipelineCache.h>
-#include <vcruntime.h>
-#include <vcruntime_string.h>
+
 
 class TTimer
 {
