@@ -41,6 +41,7 @@
 #include "core/include/TSampler.h"
 
 #include "core/include/TVulkanLoader.h"
+#include "vulkan/vulkan_core.h"
 
 #include <memory>
 #include <stdio.h>
@@ -184,22 +185,10 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
     VkDevice vk_device = device->GetVkDevice();
     VkQueue vk_queue = deviceQueue->GetVkQueue();
 
-    VkPipelineCacheCreateInfo vk_pipeline_cache_create_info = {};
-    vk_pipeline_cache_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    vk_pipeline_cache_create_info.pNext = nullptr;
-    vk_pipeline_cache_create_info.flags = 0;
-    vk_pipeline_cache_create_info.initialDataSize = 0;
-    vk_pipeline_cache_create_info.pInitialData = nullptr;
+    Turbo::Core::TPipelineCache *pipeline_cache = new Turbo::Core::TPipelineCache(device);
+    VkPipelineCache vk_pipeline_cache = pipeline_cache->GetVkPipelineCache();
 
-    VkPipelineCache vk_pipeline_cache = VK_NULL_HANDLE;
-    VkResult result = Turbo::Core::vkCreatePipelineCache(vk_device, &vk_pipeline_cache_create_info, nullptr, &vk_pipeline_cache);
-    if (result != VkResult::VK_SUCCESS)
-    {
-        std::cout << "!!!Error::Turbo::Core::vkCreatePipelineCache(...)" << std::endl;
-        std::cout << "</Test1>" << std::endl;
-        return;
-    }
-
+    VkResult result = VkResult::VK_ERROR_UNKNOWN;
     {
         size_t pipeline_cache_size = 0;
         result = Turbo::Core::vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &pipeline_cache_size, nullptr);
@@ -307,7 +296,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
         std::cout << "Create TGraphicsPipeline without cache use:" << timer.GetDeltaSecond() << "s" << std::endl;
 
         {
-            Turbo::Core::TGraphicsPipeline *_gp = new Turbo::Core::TGraphicsPipeline(vk_pipeline_cache, render_pass, 0, vb, vs, fs);
+            Turbo::Core::TGraphicsPipeline *_gp = new Turbo::Core::TGraphicsPipeline(pipeline_cache, render_pass, 0, vb, vs, fs);
 
             size_t _pipeline_cache_size = 0;
             VkResult _result = Turbo::Core::vkGetPipelineCacheData(vk_device, vk_pipeline_cache, &_pipeline_cache_size, nullptr);
@@ -348,7 +337,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
                 timer2.Begin();
                 for (uint32_t create_pipeline_index = 0; create_pipeline_index < create_pipeline_count; create_pipeline_index++)
                 {
-                    Turbo::Core::TGraphicsPipeline *_gp = new Turbo::Core::TGraphicsPipeline(vk_pipeline_cache, render_pass, 0, vb, vs, fs);
+                    Turbo::Core::TGraphicsPipeline *_gp = new Turbo::Core::TGraphicsPipeline(pipeline_cache, render_pass, 0, vb, vs, fs);
                     gps[create_pipeline_index] = _gp;
                 }
                 timer2.End();
@@ -411,15 +400,8 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
             free(pipeline_cache_data);
         }
 
-        VkPipelineCacheCreateInfo new_vk_pipeline_cache_create_info = {};
-        new_vk_pipeline_cache_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        new_vk_pipeline_cache_create_info.pNext = nullptr;
-        new_vk_pipeline_cache_create_info.flags = 0;
-        new_vk_pipeline_cache_create_info.initialDataSize = 0;
-        new_vk_pipeline_cache_create_info.pInitialData = nullptr;
-        VkPipelineCache new_pipeline_cache = VK_NULL_HANDLE;
-        Turbo::Core::vkCreatePipelineCache(vk_device, &new_vk_pipeline_cache_create_info, nullptr, &new_pipeline_cache);
-
+        Turbo::Core::TPipelineCache *new_pipeline_cache = new Turbo::Core::TPipelineCache(device);
+        VkPipelineCache new_vk_pipeline_cache = new_pipeline_cache->GetVkPipelineCache();
         {
             uint32_t create_pipeline_count = 32768;
             std::vector<Turbo::Core::TGraphicsPipeline *> gps(create_pipeline_count);
@@ -441,7 +423,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
 
         {
             size_t _pipeline_cache_size = 0;
-            VkResult _result = Turbo::Core::vkGetPipelineCacheData(vk_device, new_pipeline_cache, &_pipeline_cache_size, nullptr);
+            VkResult _result = Turbo::Core::vkGetPipelineCacheData(vk_device, new_vk_pipeline_cache, &_pipeline_cache_size, nullptr);
             if (result != VkResult::VK_SUCCESS)
             {
                 std::cout << "!!!Error::Turbo::Core::vkGetPipelineCacheData(...)::GetPipelineCacheData::Size" << std::endl;
@@ -461,7 +443,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
         {
             std::vector<VkPipelineCache> merge_caches;
             merge_caches.push_back(vk_pipeline_cache);
-            merge_caches.push_back(new_pipeline_cache);
+            merge_caches.push_back(new_vk_pipeline_cache);
             VkResult __result = Turbo::Core::vkMergePipelineCaches(vk_device, merge_pipeline_cache, merge_caches.size(), merge_caches.data());
             if (__result != VkResult::VK_SUCCESS)
             {
@@ -480,7 +462,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
         }
 
         Turbo::Core::vkDestroyPipelineCache(vk_device, merge_pipeline_cache, nullptr);
-        Turbo::Core::vkDestroyPipelineCache(vk_device, new_pipeline_cache, nullptr);
+        delete new_pipeline_cache;
 
         delete gp;
         delete render_pass;
@@ -490,7 +472,7 @@ void Test1(Turbo::Core::TDeviceQueue *deviceQueue)
         delete vs;
     }
 
-    Turbo::Core::vkDestroyPipelineCache(vk_device, vk_pipeline_cache, nullptr);
+    delete pipeline_cache;
     std::cout << "</Test1>" << std::endl;
 }
 
@@ -677,9 +659,9 @@ int main()
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Test0(queue);
-    // Test1(queue);
-    Test3(queue);
+    Test1(queue);
     Test2(queue);
+    Test3(queue);
 
     delete device;
     delete instance;

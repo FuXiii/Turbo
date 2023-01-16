@@ -2313,3 +2313,11 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPipelineCache`中增加`TVendorInfo GetVendor()`成员函数
   >* `./engine/core`下`TPipelineCache`中增加`uint32_t GetDeviceID()`成员函数
   >* `./engine/core`下`TPipelineCache`中增加`std::vector<uint8_t> GetUUID()`成员函数
+
+* 2023/1/16 设计架构
+  >
+  >* `./engine/core`下`TPipeline.h`中构造函数，增加对`TPipelineCache`的使用
+  >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *pipelineCache`成员变量
+  >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *GetPipelineCache()`成员函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中移除`VkPipelineCache vkPipelineCache`的相关参数和成员，改为使用`TPipelineCache`
+  >* 更新`./samples`下的`VulkanTest.cpp`

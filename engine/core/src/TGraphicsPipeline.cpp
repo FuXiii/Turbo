@@ -1,11 +1,13 @@
 #include "TGraphicsPipeline.h"
 #include "TDevice.h"
 #include "TException.h"
+#include "TPipelineCache.h"
 #include "TPipelineLayout.h"
 #include "TRenderPass.h"
 #include "TShader.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
+#include "vulkan/vulkan_core.h"
 
 Turbo::Core::TVertexAttribute::TVertexAttribute(uint32_t location, TFormatType formatType, uint32_t offset) : Turbo::Core::TInfo()
 {
@@ -347,17 +349,18 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
 
     TDevice *device = this->renderPass->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
+    TPipelineCache *pipeline_cache = this->GetPipelineCache();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
-    if (this->vkPipelineCache != VK_NULL_HANDLE)
+    if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
     {
-        result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, this->vkPipelineCache, 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
+        result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     }
     else
     {
         result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, VK_NULL_HANDLE, 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     }
-    
+
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TGraphicsPipeline::InternalCreate::vkCreateGraphicsPipelines");
@@ -453,7 +456,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         //  目前为 viewport scissor linewidth
 
         // VkPipelineLayout VkGraphicsPipelineCreateInfo::layout
-        //使用传进来的Shader来创建
+        // 使用传进来的Shader来创建
 
         this->InternalCreate();
     }
@@ -544,7 +547,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
         //  目前为 viewport scissor linewidth
 
         // VkPipelineLayout VkGraphicsPipelineCreateInfo::layout
-        //使用传进来的Shader来创建
+        // 使用传进来的Shader来创建
 
         this->InternalCreate();
     }
@@ -554,11 +557,10 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
     }
 }
 
-Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(VkPipelineCache vkPipelineCache, TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, fragmentShader)
+Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, fragmentShader, pipelineCache)
 {
     if (renderPass != nullptr)
     {
-        this->vkPipelineCache = vkPipelineCache;
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
 
@@ -636,7 +638,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(VkPipelineCache vkPipelineCach
         //  目前为 viewport scissor linewidth
 
         // VkPipelineLayout VkGraphicsPipelineCreateInfo::layout
-        //使用传进来的Shader来创建
+        // 使用传进来的Shader来创建
 
         this->InternalCreate();
     }
