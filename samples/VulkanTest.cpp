@@ -517,7 +517,7 @@ void Test2(Turbo::Core::TDeviceQueue *deviceQueue)
     std::string cache_uuid_str;
     for (auto &uuid_item : cache_uuid)
     {
-        cache_uuid_str += std::to_string(uuid_item);
+        cache_uuid_str += std::to_string(uuid_item) + " ";
     }
 
     std::cout << "Cache Size::" << pc->GetSize() << std::endl;
