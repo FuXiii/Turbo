@@ -2323,3 +2323,4 @@ Turbo是渲染引擎
   >* `./engine/core`下`TComputePipeline`中增加`TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader)`构造函数
   >* `./engine/core`下`TComputePipeline`中更新`TComputePipeline::InternalCreate()`成员函数，适配`TPipelineCache`来创建`TComputePipeline`
   >* 更新`./samples`下的`VulkanTest.cpp`
+  >* 移除`./engine/core`下`TPipelineCache.cpp`中莫名其妙的头文件，应该是`clangd`的自动头文件补全搞的

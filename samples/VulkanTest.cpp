@@ -27,7 +27,9 @@
 #include "TFence.h"
 #include "TSemaphore.h"
 
+#include <corecrt_malloc.h>
 #include <cstddef>
+#include <exception>
 #include <fstream>
 
 #include <GLFW/glfw3.h>
@@ -50,6 +52,8 @@
 #include <chrono>
 
 #include <core/include/TPipelineCache.h>
+#include <vcruntime.h>
+#include <vcruntime_string.h>
 
 class TTimer
 {
@@ -95,6 +99,55 @@ std::string ReadTextFile(const std::string &filename)
     }
 
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
+
+std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t count)
+{
+    std::vector<uint8_t> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in | std::ios::binary);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    uint64_t read_count = count;
+    if (count == 0)
+    {
+        file.seekg(0, std::ios::end);
+        read_count = static_cast<uint64_t>(file.tellg());
+        file.seekg(0, std::ios::beg);
+    }
+
+    data.resize(static_cast<size_t>(read_count));
+    file.read(reinterpret_cast<char *>(data.data()), read_count);
+    file.close();
+
+    return data;
+}
+
+void WriteBinaryFile(const std::string &filename, const uint32_t count, const std::vector<uint8_t> &data)
+{
+    std::ofstream file;
+
+    file.open(filename, std::ios::out | std::ios::binary | std::ios::trunc);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    uint64_t write_count = count;
+    if (count == 0)
+    {
+        write_count = data.size();
+    }
+
+    file.write(reinterpret_cast<const char *>(data.data()), write_count);
+    file.close();
 }
 
 void Test0(Turbo::Core::TDeviceQueue *deviceQueue)
@@ -590,6 +643,90 @@ void Test3(Turbo::Core::TDeviceQueue *deviceQueue)
     std::cout << "</Test3>" << std::endl;
 }
 
+void Test4(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test4>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    {
+        const std::string vert_shader_str = ReadTextFile("../../asset/shaders/shader_base.vert");
+        const std::string fragment_shader_str = ReadTextFile("../../asset/shaders/shader_base.frag");
+
+        Turbo::Core::TVertexShader *vs = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, vert_shader_str);
+        Turbo::Core::TFragmentShader *fs = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, fragment_shader_str);
+
+        Turbo::Core::TFormatInfo format_info = physical_device->GetFormatInfo(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
+        if (format_info.IsOptimalTilingSupportColorAttachment())
+        {
+            std::cout << "B8G8R8A8_SRGB support color attachment" << std::endl;
+        }
+        else
+        {
+            std::cout << "B8G8R8A8_SRGB Not support color attachment" << std::endl;
+        }
+
+        Turbo::Core::TImage *color_attachment_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+        Turbo::Core::TImageView *color_attachment_image_view = new Turbo::Core::TImageView(color_attachment_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_attachment_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+        std::vector<Turbo::Core::TAttachment> attachments;
+        attachments.push_back({color_attachment_image_view->GetFormat(), Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL});
+
+        Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
+        subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+
+        std::vector<Turbo::Core::TSubpass> subpasses;
+        subpasses.push_back(subpass);
+
+        Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachments, subpasses);
+        std::vector<Turbo::Core::TVertexBinding> vb;
+        std::vector<uint8_t> meta_cache_data;
+        try
+        {
+            meta_cache_data = ReadBinaryFile("./PipelineCache.bin", 0);
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << "!!!Exception::" << e.what() << std::endl;
+        }
+
+        Turbo::Core::TPipelineCache *pipeline_cache = new Turbo::Core::TPipelineCache(device, meta_cache_data.size(), meta_cache_data.data());
+
+        TTimer timer;
+        timer.Begin();
+        Turbo::Core::TGraphicsPipeline *gp = new Turbo::Core::TGraphicsPipeline(pipeline_cache, render_pass, 0, vb, vs, fs);
+        timer.End();
+        std::cout << "Create TGraphicsPipeline cache use:" << timer.GetDeltaSecond() << "s" << std::endl;
+
+        size_t cache_size = pipeline_cache->GetSize();
+        void *cache_data = malloc(cache_size);
+        pipeline_cache->GetData(cache_size, cache_data);
+
+        meta_cache_data.clear();
+
+        std::vector<uint8_t> data(cache_size);
+        memcpy(data.data(), cache_data, cache_size);
+        WriteBinaryFile("./PipelineCache.bin", cache_size, data);
+        free(cache_data);
+
+        delete pipeline_cache;
+        delete gp;
+        delete render_pass;
+        delete color_attachment_image_view;
+        delete color_attachment_image;
+        delete fs;
+        delete vs;
+    }
+
+    std::cout << "</Test4>" << std::endl;
+}
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -659,9 +796,10 @@ int main()
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Test0(queue);
-    Test1(queue);
+    // Test1(queue);
     Test2(queue);
     Test3(queue);
+    Test4(queue);
 
     delete device;
     delete instance;

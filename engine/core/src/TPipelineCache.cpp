@@ -3,10 +3,6 @@
 #include "TException.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
-#include <corecrt_malloc.h>
-#include <vcruntime.h>
-#include <vcruntime_string.h>
-#include <vector>
 
 void Turbo::Core::TPipelineCache::InternalCreate()
 {
@@ -253,7 +249,7 @@ uint32_t Turbo::Core::TPipelineCache::GetDeviceID()
         memcpy(&vk_pipeline_cache_header_version_one, cahce_data, sizeof(VkPipelineCacheHeaderVersionOne));
         free(cahce_data);
     }
-    
+
     return vk_pipeline_cache_header_version_one.deviceID;
 }
 
