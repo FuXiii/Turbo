@@ -2320,4 +2320,6 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *pipelineCache`成员变量
   >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *GetPipelineCache()`成员函数
   >* `./engine/core`下`TGraphicsPipeline.h`中移除`VkPipelineCache vkPipelineCache`的相关参数和成员，改为使用`TPipelineCache`
+  >* `./engine/core`下`TComputePipeline`中增加`TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader)`构造函数
+  >* `./engine/core`下`TComputePipeline`中更新`TComputePipeline::InternalCreate()`成员函数，适配`TPipelineCache`来创建`TComputePipeline`
   >* 更新`./samples`下的`VulkanTest.cpp`
