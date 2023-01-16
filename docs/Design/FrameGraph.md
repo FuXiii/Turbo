@@ -31,7 +31,17 @@
 * 2023/1/4
   >
   >* 更新`FrameGraph::Mermaid`章节
+  
+* 2023/1/11
+  >
+  >* 更新`PassNode与RenderPass`章节
 
+* 2023/1/12
+  >
+  >* 更新`PassNode与RenderPass`章节
+  >* 更新`FrameGraph::Builder::Subpass`章节
+  >* 更新`FrameGraph::Subpass`章节
+  >* 更新`FrameGraph::Mermaid`章节的示例图
 
 ## PassNode与RenderPass
 
@@ -70,6 +80,99 @@
 >
 > 对于当`Subpass::Write(Resource)`资源为`DepthStencil`纹理时，会有个问题，按照`Vulkan`标准每个`Subpass`只能绑定一个`DepthTexture`，而`Turbo`并不会制止用户往多个`DepthTexture`中写入，这会与`Vulkan`标准冲突，一种解决方案是当写入多个`DepthStencil`纹理时，只有最后一个深度模板纹理有效，`Turbo`输出警告信息
 
+>此处有一点要注意一下，如下：
+>
+>```CXX
+>subpass.Write(DepthStencilTexture);
+>```
+>
+>此时代表`DepthStencilTexture`在`Vulkan`底层作为`DepthStencilAttachment`进行使用
+>
+>```CXX
+>subpass.Read(DepthStencilTexture);
+>```
+>
+>此时代表`DepthStencilTexture`在`Vulkan`底层作为`InputAttachment`进行使用
+>
+
+>此时可能会有如下问题：
+>
+>```mermaid
+>graph LR;
+>    classDef Resource fill:#608ba3
+>    classDef Pass fill:#e8924a
+>    classDef Subpass fill:#8474a0
+>    classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
+>    classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
+>
+>    Start((" ")):::Start
+>    End((" ")):::End
+>    
+>    DepthBuffer0("Depth Buffer"):::Resource
+>    DepthBuffer1("Depth Buffer"):::Resource
+>   
+>    PassNode0:::Pass
+>        subgraph PassNode0["PassNode0"]
+>            direction TB
+>            PassNode0Subpass0("Subpass 0"):::Subpass
+>        end
+>    PassNode1:::Pass
+>        subgraph PassNode1["PassNode1"]
+>            direction TB
+>            PassNode1Subpass0("Subpass 0"):::Subpass
+>        end
+>
+>    Start-.->PassNode0
+>    PassNode0Subpass0-->DepthBuffer0
+>    DepthBuffer0-.->PassNode1Subpass0
+>    PassNode1Subpass0-->DepthBuffer1
+>    DepthBuffer1-.->End
+>
+>    linkStyle 1 stroke:#a44141,stroke-width:3px %% write link style
+>    linkStyle 2 stroke:#95ad5b,stroke-width:0.5px %% read link style
+>    linkStyle 3 stroke:#a44141,stroke-width:3px
+>    linkStyle 4 stroke:#a44141,stroke-width:3px
+>```
+>
+>此时对应的代码为：
+>
+>```CXX
+>DepthTexture2D depth_texture;
+>
+>PassNode pass_node0;
+>pass_node0.Subpass0.Write(depth_texture);
+>
+>PassNode pass_node01;
+>pass_node01.Subpass0.Write(depth_texture);
+>```
+>
+>如果此时调用`FrameGraph::Compile()`，当走到`pass_node01`之后写入`Depth Buffer`时，发现没有人使用该`Depth Buffer`，这会导致`FrameGraph`进行一系列剔除操作。此非良构。
+>
+>---
+>
+>### 如何解决该问题呢？
+>
+>问题的根源在于对于像`DepthStencilTexture`这样的资源，目前`FrameGraph::Read(...)`可以解释成`Vulkan`的`InputAttachment`，但对于`DepthStencilTexture`这样的资源这不是必须的，`DepthStencilTexture`可以不作为`InputAttachment`而被其他`PassNode`使用。
+>
+>目前能想到的解决方案就是:`FrameGraph::Read(someResource)`唯一的作用是告诉`FrameGraph`有人要使用该`someResource`，请在`FrameGraph::Compile()`阶段不要剔除相关节点，之后为`FrameGraph::Read(someResource)`增加一个`标志位`，用于表示此次读操作是否作为`InputAttachment`进行解析。可能的函数声明如下：
+>
+>```CXX
+>//in FrameGraph
+>FrameGraph::Read(Resource resource, bool isInput=false);
+>```
+>
+>或许给`Subpass`中添加`Subpass::Input(Resource resource)`会更加方便
+>
+>```CXX
+>//in FrameGraph
+>FrameGraph::Input(Resource resource)
+>{
+>    FrameGraph::Read(resource, true);
+>}
+>```
+>
+>详情请预览下面的`FrameGraph::Builder::Subpass`章节和`FrameGraph::Subpass`章节
+
 ## FrameGraph::Builder::Subpass
 
 位于：
@@ -93,8 +196,11 @@ namespace TFrameGraph
 
 而对于资源的读写，同样要注册到`PassNode`对应的`RenderPass`中，所以
 
-* `Subpass::Write()`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
-* `Subpass::Read()`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Write(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Read(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+* `Subpass::Input(Resource)`的同时将向其中的`RenderPass`下对应的`Subpass`中注册资源
+
+*注：`Subpass::Input(Resource)`与`Subpass::Read(Resource)`本质上没区别，唯一的区别就是`Subpass::Input(Resource)`会将对应得`Resource`的`input`标志位设置成`true`*
 
 ~~*考虑:是否将`Subpass::Write(...)`和`Subpass::Read(...)`设计成私有，并成为`TBuilder`的友元，这样只有在`PassNode::Setup`阶段可以调用`Subpass::Write(...)`和`Subpass::Read(...)`，如果设计成友元，其他私有成员也可以访问到了，也是个问题*~~
 
@@ -114,6 +220,7 @@ class Subpass
 
         Resource Write(Resource);
         Resource Read(Resource);
+        Resource Input(Resource);
 }
 
 Resource Subpass::Write(Resource resource)
@@ -126,8 +233,17 @@ Resource Subpass::Write(Resource resource)
 
 Resource Subpass::Read(Resource resource)
 {
-   Resource read_resource = builder.Read(resource);
+   Resource read_resource = builder.Read(resource, false/*Input标志位*/);
+   //对于FrameGraph::Subpass来说read信息对其不重要，该信息只用于FrameGraph计算是否进行剔除，FrameGraph::Subpass保留read信息也不是一件坏事，在转成图表化信息时可以有更丰富的信息
    renderPass.Subpasses[subpass].Read(read_resource);
+
+   return read_resource;
+}
+
+Resource Subpass::Input(Resource resource)
+{
+   Resource read_resource = builder.Read(resource，true/*Input标志位*/);
+   renderPass.Subpasses[subpass].Input(read_resource);
 
    return read_resource;
 }
@@ -143,14 +259,15 @@ class TSubpass
 {
   private:
     std::vector<TResource> writes;
-    std::vector<TResource> reads;
+    std::vector<TResource> inputs;
 
   public:
     TSubpass() = default;
     ~TSubpass() = default;
 
     void Write(TResource resource);
-    void Read(TResource resource);
+    //void Read(TResource resource);
+    void Input(TResource resource);
 };
 
 void Write(TResource resource)
@@ -158,11 +275,20 @@ void Write(TResource resource)
     this->writes.push_back(resource);
 }
 
-void Read(TResource resource)
+// void Read(TResource resource)
+// {
+//     this->reads.push_back(resource);
+// }
+
+void Input(TResource resource)
 {
-    this->reads.push_back(resource);
+    this->inputs.push_back(resource);
 }
 ```
+
+* 其中`TSubpass::writes`如果是`ColorImage`，应该对应`Vulkan`的`ColorAttachment`。
+* 其中`TSubpass::writes`如果是`DepthStencil`，应该对应`Vulkan`的`DepthStencilAttachment`。
+* 其中`TSubpass::inputs`应该对应`Vulkan`的`InputAttachment`。
 
 ## FrameGraph::RenderPass
 
@@ -204,12 +330,14 @@ class RenderPass
 ```CXX
 std::string FrameGraph::ToMermaid();
 ```
+
 该接口将会输出`Mermaid`标准字符串，之后最常见的用法有两种：
 
 1. 推送到`http`服务器，展示在浏览器页面上
 2. 保存到本地，进而在本地打开，浏览查看
 
 示例：
+
 ```mermaid
 graph LR;
     classDef Resource fill:#608ba3
@@ -262,7 +390,7 @@ graph LR;
     GBufferPassSubpass0-->GBuffer1
     GBufferPassSubpass0-->GBuffer2
     GBufferPassSubpass0-->GBuffer3
-    DepthBuffer1-->LightingPassSubpass0
+    DepthBuffer1-.->LightingPassSubpass0 %% read link is dashed
     GBuffer1-->LightingPassSubpass0
     GBuffer2-->LightingPassSubpass0
     GBuffer3-->LightingPassSubpass0
@@ -273,12 +401,12 @@ graph LR;
     PresentPass-.->End
 
     linkStyle 1 stroke:#a44141,stroke-width:3px %% write link style
-    linkStyle 2 stroke:#95ad5b,stroke-width:3px %% read link style
+    linkStyle 2 stroke:#95ad5b,stroke-width:3px %% input link style
     linkStyle 3 stroke:#a44141,stroke-width:3px
     linkStyle 4 stroke:#a44141,stroke-width:3px
     linkStyle 5 stroke:#a44141,stroke-width:3px
     linkStyle 6 stroke:#a44141,stroke-width:3px
-    linkStyle 7 stroke:#95ad5b,stroke-width:3px
+    linkStyle 7 stroke:#ffd305,stroke-width:3px %% read link style
     linkStyle 8 stroke:#95ad5b,stroke-width:3px
     linkStyle 9 stroke:#95ad5b,stroke-width:3px
     linkStyle 10 stroke:#95ad5b,stroke-width:3px
@@ -286,4 +414,50 @@ graph LR;
     linkStyle 12 stroke:#95ad5b,stroke-width:3px
     linkStyle 13 stroke:#a44141,stroke-width:3px
     linkStyle 14 stroke:#95ad5b,stroke-width:3px
+```
+
+```mermaid
+graph LR;
+classDef Resource fill:#608ba3
+classDef Pass fill:#e8924a
+classDef Subpass fill:#8474a0
+classDef Start fill:#95ad5b,stroke:#95ad5b,stroke-width:4px
+classDef End fill:#a44141,stroke:#a44141,stroke-width:4px
+Start((" ")):::Start
+End((" ")):::End
+PassNode0:::Pass
+subgraph PassNode0["Color Pass"]
+direction TB
+PassNode0Subpass0("Subpass 0"):::Subpass
+end
+Color_Texture2D0("Color Texture2D"):::Resource
+PassNode0Subpass0-->Color_Texture2D0
+Depth_Texture2D0("Depth Texture2D"):::Resource
+PassNode0Subpass0-->Depth_Texture2D0
+PassNode1:::Pass
+subgraph PassNode1["Post Pass"]
+direction TB
+PassNode1Subpass0("Subpass 0"):::Subpass
+end
+Color_Texture2D0("Color Texture2D"):::Resource
+Color_Texture2D0-->PassNode1Subpass0
+Depth_Texture2D0("Depth Texture2D"):::Resource
+Depth_Texture2D0-->PassNode1Subpass0
+RenderTarget_Texture2D0("RenderTarget Texture2D"):::Resource
+PassNode1Subpass0-->RenderTarget_Texture2D0
+PassNode2:::Pass
+subgraph PassNode2["Present Pass"]
+direction TB
+PassNode2Subpass0("Subpass 0"):::Subpass
+end
+RenderTarget_Texture2D0("RenderTarget Texture2D"):::Resource
+RenderTarget_Texture2D0-->PassNode2Subpass0
+Start-.->PassNode0
+PassNode2-.->End
+linkStyle 0 stroke:#a44141,stroke-width:3px
+linkStyle 1 stroke:#a44141,stroke-width:3px
+linkStyle 2 stroke:#95ad5b,stroke-width:3px
+linkStyle 3 stroke:#95ad5b,stroke-width:3px
+linkStyle 4 stroke:#a44141,stroke-width:3px
+linkStyle 5 stroke:#95ad5b,stroke-width:3px
 ```

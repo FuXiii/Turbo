@@ -44,6 +44,24 @@ void Turbo::FrameGraph::TSubpass::Read(TResource resource)
     }
 }
 
+void Turbo::FrameGraph::TSubpass::Input(TResource resource)
+{
+    bool is_found = false;
+    for (TResource resource_item : this->inputs)
+    {
+        if (resource_item.id == resource.id)
+        {
+            is_found = true;
+            break;
+        }
+    }
+
+    if (!is_found)
+    {
+        this->inputs.push_back(resource);
+    }
+}
+
 std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetWrites()
 {
     return this->writes;
@@ -52,6 +70,11 @@ std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetWrites
 std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetReads()
 {
     return this->reads;
+}
+
+std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetInputs()
+{
+    return this->inputs;
 }
 
 void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
@@ -80,7 +103,7 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TPassNode::AddCreate(TResource r
 Turbo::FrameGraph::TResource Turbo::FrameGraph::TPassNode::AddRead(TResource resource)
 {
     // FIXME: 同一个PassNode的多Subpass下经常会发生读取之前写过的资源，此行代码并不适合此种情况，应该删除该assert(...)判断
-    assert(!this->IsCreate(resource) && !this->IsWrite(resource));
+    // assert(!this->IsCreate(resource) && !this->IsWrite(resource));
     return this->IsRead(resource) ? resource : this->reads.emplace_back(resource);
 }
 
@@ -121,6 +144,11 @@ bool Turbo::FrameGraph::TPassNode::IsRead(TResource resource)
     {
         if (resource.id == resource_item.id)
         {
+            if (resource.isInput)
+            {
+                resource_item.isInput = true;
+            }
+
             return true;
         }
     }
@@ -205,12 +233,32 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass:
 {
     if (this->builder != nullptr)
     {
+        resource.isInput = false;
         TResource return_resurce = this->builder->Read(resource);
         std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
         if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
         {
             Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
             subpass.Read(return_resurce);
+        }
+
+        return return_resurce;
+    }
+
+    return Turbo::FrameGraph::TResource();
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass::Input(TResource resource)
+{
+    if (this->builder != nullptr)
+    {
+        resource.isInput = true;
+        TResource return_resurce = this->builder->Read(resource);
+        std::vector<Turbo::FrameGraph::TSubpass> &subpasses = this->builder->passNode.renderPass.subpasses;
+        if (this->index != TURBO_INVALID_SUBPASS_INDEX && this->index < subpasses.size())
+        {
+            Turbo::FrameGraph::TSubpass &subpass = this->builder->passNode.renderPass.subpasses[this->index];
+            subpass.Input(return_resurce);
         }
 
         return return_resurce;
@@ -460,16 +508,23 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context, void *allocator)
 
 std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
 {
-    struct linkStyle
+    struct LinkStyle
     {
+        enum Type
+        {
+            READ,
+            WRITE,
+            INPUT
+        };
         uint32_t index = 0;
-        bool isWrite = false;
+        Type type;
     };
 
     std::stringstream mermaid_string_stream;
 
     std::string write_link_style = "stroke:#a44141,stroke-width:3px";
-    std::string read_link_style = "stroke:#95ad5b,stroke-width:3px";
+    std::string read_link_style = "stroke:#ffd305,stroke-width:3px";
+    std::string input_link_style = "stroke:#95ad5b,stroke-width:3px";
 
     mermaid_string_stream << "graph LR;" << std::endl;
     mermaid_string_stream << "classDef Resource fill:#608ba3" << std::endl;
@@ -482,7 +537,7 @@ std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
     mermaid_string_stream << "End((\" \")):::End" << std::endl;
 
     uint32_t link_index = 0;
-    std::vector<linkStyle> link_styles;
+    std::vector<LinkStyle> link_styles;
     uint32_t pass_node_cout = this->passNodes->size();
     for (uint32_t pass_node_index = 0; pass_node_index < pass_node_cout; pass_node_index++)
     {
@@ -526,41 +581,65 @@ std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
             std::string subpass_name = "Subpass " + std::to_string(subpass_index);
             std::string subpass_key_name = pass_node_key_name + "Subpass" + std::to_string(subpass_index);
 
-            const std::vector<TResource> &subpass_read_resources = subpass.reads;
-            uint32_t subpass_read_resources_count = subpass_read_resources.size();
-            for (uint32_t subpass_read_resource_index = 0; subpass_read_resource_index < subpass_read_resources_count; subpass_read_resource_index++)
             {
-                const TResource &read_resource = subpass_read_resources[subpass_read_resource_index];
-                Turbo::FrameGraph::TResourceNode &resource_node = this->GetResourceNode(read_resource);
-                std::string resource_name = resource_node.GetName();
-                uint32_t resource_version = resource_node.GetVersion();
+                const std::vector<TResource> &subpass_read_resources = subpass.reads;
+                uint32_t subpass_read_resources_count = subpass_read_resources.size();
+                for (uint32_t subpass_read_resource_index = 0; subpass_read_resource_index < subpass_read_resources_count; subpass_read_resource_index++)
+                {
+                    const TResource &read_resource = subpass_read_resources[subpass_read_resource_index];
+                    Turbo::FrameGraph::TResourceNode &resource_node = this->GetResourceNode(read_resource);
+                    std::string resource_name = resource_node.GetName();
+                    uint32_t resource_version = resource_node.GetVersion();
 
-                std::string resource_key_name = resource_name + std::to_string(resource_version);
-                std::regex space_regex(" ");
-                resource_key_name = std::regex_replace(resource_key_name, space_regex, "_");
-                mermaid_string_stream << resource_key_name << "(\"" << resource_name << "\")"
-                                      << ":::Resource" << std::endl;
-                mermaid_string_stream << resource_key_name << "-->" << subpass_key_name << std::endl;
-                link_index++;
-                link_styles.push_back({link_index, false});
+                    std::string resource_key_name = resource_name + std::to_string(resource_version);
+                    std::regex space_regex(" ");
+                    resource_key_name = std::regex_replace(resource_key_name, space_regex, "_");
+                    mermaid_string_stream << resource_key_name << "(\"" << resource_name << "\")"
+                                          << ":::Resource" << std::endl;
+                    mermaid_string_stream << resource_key_name << "-.read.->" << subpass_key_name << std::endl;
+                    link_index++;
+                    link_styles.push_back({link_index, LinkStyle::Type::READ});
+                }
             }
 
-            const std::vector<TResource> &subpass_write_resources = subpass.writes;
-            uint32_t subpass_write_resources_count = subpass_write_resources.size();
-            for (uint32_t subpass_write_resource_index = 0; subpass_write_resource_index < subpass_write_resources_count; subpass_write_resource_index++)
             {
-                const TResource &write_resource = subpass_write_resources[subpass_write_resource_index];
-                Turbo::FrameGraph::TResourceNode &resource_node = this->GetResourceNode(write_resource);
-                std::string resource_name = resource_node.GetName();
-                uint32_t resource_version = resource_node.GetVersion();
-                std::string resource_key_name = resource_name + std::to_string(resource_version);
-                std::regex space_regex(" ");
-                resource_key_name = std::regex_replace(resource_key_name, space_regex, "_");
-                mermaid_string_stream << resource_key_name << "(\"" << resource_name << "\")"
-                                      << ":::Resource" << std::endl;
-                mermaid_string_stream << subpass_key_name << "-->" << resource_key_name << std::endl;
-                link_index++;
-                link_styles.push_back({link_index, true});
+                const std::vector<TResource> &subpass_write_resources = subpass.writes;
+                uint32_t subpass_write_resources_count = subpass_write_resources.size();
+                for (uint32_t subpass_write_resource_index = 0; subpass_write_resource_index < subpass_write_resources_count; subpass_write_resource_index++)
+                {
+                    const TResource &write_resource = subpass_write_resources[subpass_write_resource_index];
+                    Turbo::FrameGraph::TResourceNode &resource_node = this->GetResourceNode(write_resource);
+                    std::string resource_name = resource_node.GetName();
+                    uint32_t resource_version = resource_node.GetVersion();
+                    std::string resource_key_name = resource_name + std::to_string(resource_version);
+                    std::regex space_regex(" ");
+                    resource_key_name = std::regex_replace(resource_key_name, space_regex, "_");
+                    mermaid_string_stream << resource_key_name << "(\"" << resource_name << "\")"
+                                          << ":::Resource" << std::endl;
+                    mermaid_string_stream << subpass_key_name << "--write-->" << resource_key_name << std::endl;
+                    link_index++;
+                    link_styles.push_back({link_index, LinkStyle::Type::WRITE});
+                }
+            }
+
+            {
+                const std::vector<TResource> &subpass_input_resources = subpass.inputs;
+                uint32_t subpass_input_resources_count = subpass_input_resources.size();
+                for (uint32_t subpass_input_resource_index = 0; subpass_input_resource_index < subpass_input_resources_count; subpass_input_resource_index++)
+                {
+                    const TResource &input_resource = subpass_input_resources[subpass_input_resource_index];
+                    Turbo::FrameGraph::TResourceNode &resource_node = this->GetResourceNode(input_resource);
+                    std::string resource_name = resource_node.GetName();
+                    uint32_t resource_version = resource_node.GetVersion();
+                    std::string resource_key_name = resource_name + std::to_string(resource_version);
+                    std::regex space_regex(" ");
+                    resource_key_name = std::regex_replace(resource_key_name, space_regex, "_");
+                    mermaid_string_stream << resource_key_name << "(\"" << resource_name << "\")"
+                                          << ":::Resource" << std::endl;
+                    mermaid_string_stream << resource_key_name << "--input-->" << subpass_key_name << std::endl;
+                    link_index++;
+                    link_styles.push_back({link_index, LinkStyle::Type::INPUT});
+                }
             }
         }
     }
@@ -582,18 +661,24 @@ std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
         link_index++;
     }
 
-    for (const linkStyle &link_styles_item : link_styles)
+    for (const LinkStyle &link_styles_item : link_styles)
     {
-        if (link_styles_item.isWrite)
+        switch (link_styles_item.type)
         {
-            mermaid_string_stream << "linkStyle " << std::to_string(link_styles_item.index - 1) << " " << write_link_style << std::endl;
-        }
-        else
-        {
+        case LinkStyle::READ: {
             mermaid_string_stream << "linkStyle " << std::to_string(link_styles_item.index - 1) << " " << read_link_style << std::endl;
         }
+        break;
+        case LinkStyle::WRITE: {
+            mermaid_string_stream << "linkStyle " << std::to_string(link_styles_item.index - 1) << " " << write_link_style << std::endl;
+        }
+        break;
+        case LinkStyle::INPUT: {
+            mermaid_string_stream << "linkStyle " << std::to_string(link_styles_item.index - 1) << " " << input_link_style << std::endl;
+        }
+        break;
+        }
     }
-
     return mermaid_string_stream.str();
 }
 

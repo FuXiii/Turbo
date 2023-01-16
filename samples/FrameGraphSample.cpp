@@ -227,13 +227,13 @@ int test2()
             TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
 
             data.depthTexture = fg.GetBlackboard()["Depth Texture"];
-            data.depthTexture = subpass.Read(data.depthTexture);
+            data.depthTexture = subpass.Input(data.depthTexture);
 
             data.normalTexture = fg.GetBlackboard()["Normal Texture"];
-            data.normalTexture = subpass.Read(data.normalTexture);
+            data.normalTexture = subpass.Input(data.normalTexture);
 
             data.colorTexture = fg.GetBlackboard()["Color Texture"];
-            data.colorTexture = subpass.Read(data.colorTexture);
+            data.colorTexture = subpass.Input(data.colorTexture);
 
             data.lightTexture = builder.Create<CustomTexture>("Light Texture", {128, 128, CustomTexture::Shadow});
             data.lightTexture = subpass.Write(data.lightTexture);
@@ -265,7 +265,7 @@ int test2()
             TFrameGraph::TBuilder::TSubpass subpass = builder.CreateSubpass();
 
             data.lightTexture = fg.GetBlackboard()["Light Texture"];
-            data.lightTexture = subpass.Read(data.lightTexture);
+            data.lightTexture = subpass.Input(data.lightTexture);
 
             data.renderTargetTexture = builder.Create<CustomTexture>("RenderTarget Texture", {128, 128, CustomTexture::Shadow});
             data.renderTargetTexture = subpass.Write(data.renderTargetTexture);

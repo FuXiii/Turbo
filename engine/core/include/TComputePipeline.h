@@ -21,6 +21,7 @@ class TComputePipeline : public Turbo::Core::TPipeline
 
   public:
     TComputePipeline(TComputeShader *computeShader);
+    TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader);
     ~TComputePipeline();
 
   public:

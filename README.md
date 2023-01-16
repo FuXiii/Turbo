@@ -121,6 +121,7 @@ Turbo是渲染引擎
         VMA_STATIC_VULKAN_FUNCTIONS=0
         VMA_DYNAMIC_VULKAN_FUNCTIONS=1
         ```
+
   *注：如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 * 如何运行
@@ -2263,4 +2264,62 @@ Turbo是渲染引擎
   >* `./engine/framegraph`下`TResourceProxy`中`virtual void Destroy()`成员函数增加`void *allocator`参数
   >* `./engine/framegraph`下`TFrameGraph`中`void Execute(void *context = nullptr)`成员函数增加`void *allocator`参数
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
 
+* 2023/1/12 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  >* `./engine/framegraph`下`TSubpass`中增加`std::vector<TResource> inputs`成员变量
+  >* `./engine/framegraph`下`TSubpass`中增加`void Input(TResource resource)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`std::vector<TResource> GetInputs()`成员函数
+  >* `./engine/framegraph`下`TResource`中增加`bool isInput`成员变量
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder`中增加`TResource Input(TResource resource)`成员函数
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Read(TResource resource)`中增加`resource.isInput = false`设置代码
+  >* `./engine/framegraph`下`TFrameGraph::TBuilder::TSubpass::Input(TResource resource)`中增加`resource.isInput = true`设置代码
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::IsRead(TResource resource)`下增加重复性`isInput`检测
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TFrameGraph::ToMermaid()`下增加对`input`资源的解析
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TFrameGraph::ToMermaid()`下`struct linkStyle`下增加`enum Type`成员枚举，并增加`Type type`成员变量，移除`bool isWrite`成员变量
+  >* `./engine/framegraph`下`Turbo::FrameGraph::TPassNode::AddRead(...)`中移除`assert(!this->IsCreate(resource) && !this->IsWrite(resource))`判断
+  >* 更新`./samples`下`FrameGraphSample`示例
+
+* 2023/1/13 设计架构
+  >
+  >* 更新`./samples`下的`VulkanTest.cpp`
+
+* 2023/1/14 设计架构
+  >
+  >* `./engine/core`下`Turbo::Core::TGraphicsPipeline`下增加兼容`VkPipelineCache`的构造函数，目前为测试研发
+
+* 2023/1/15 设计架构
+  >
+  >* `./engine/core`下增加`TPipelineCache.h`和`TPipelineCache.cpp`
+  >* `./engine/core`下`TPipelineCache`中增加`class Turbo::Core::TPipelineCache`
+  >* `./engine/core`下`TPipelineCache`中增加`TDevice *device`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`VkPipelineCache vkPipelineCache`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`size_t size`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`void *data`成员变量
+  >* `./engine/core`下`TPipelineCache`中增加`void InternalCreate()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`void InternalDestroy()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCache(TDevice *device)`构造函数
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCache(TDevice *device, size_t size, void *data)`构造函数
+  >* `./engine/core`下`TPipelineCache`中增加`~TPipelineCache()`析构函数
+  >* `./engine/core`下`TPipelineCache`中增加`VkPipelineCache GetVkPipelineCache()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`size_t GetSize()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TResult GetData(size_t size, void *dst)`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`std::string ToString()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`uint32_t GetHeaderSize()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`enum class TPipelineCacheHeaderVersion`枚举
+  >* `./engine/core`下`TPipelineCache`中增加`TPipelineCacheHeaderVersion GetHeaderVersion()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`TVendorInfo GetVendor()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`uint32_t GetDeviceID()`成员函数
+  >* `./engine/core`下`TPipelineCache`中增加`std::vector<uint8_t> GetUUID()`成员函数
+
+* 2023/1/16 设计架构
+  >
+  >* `./engine/core`下`TPipeline.h`中构造函数，增加对`TPipelineCache`的使用
+  >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *pipelineCache`成员变量
+  >* `./engine/core`下`TPipeline.h`中增加`TPipelineCache *GetPipelineCache()`成员函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中移除`VkPipelineCache vkPipelineCache`的相关参数和成员，改为使用`TPipelineCache`
+  >* `./engine/core`下`TComputePipeline`中增加`TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader)`构造函数
+  >* `./engine/core`下`TComputePipeline`中更新`TComputePipeline::InternalCreate()`成员函数，适配`TPipelineCache`来创建`TComputePipeline`
+  >* 更新`./samples`下的`VulkanTest.cpp`

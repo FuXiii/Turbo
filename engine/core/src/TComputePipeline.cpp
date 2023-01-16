@@ -4,6 +4,7 @@
 #include "TShader.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
+#include "vulkan/vulkan_core.h"
 
 void Turbo::Core::TComputePipeline::InternalCreate()
 {
@@ -29,8 +30,18 @@ void Turbo::Core::TComputePipeline::InternalCreate()
 
     TDevice *device = computer_shader->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
+    TPipelineCache *pipeline_cache = this->GetPipelineCache();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
+    VkResult result = VkResult::VK_ERROR_UNKNOWN;
+    if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
+    {
+        result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
+    }
+    else
+    {
+        result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
+    }
+    
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TComputePipeline::InternalCreate::vkCreateGraphicsPipelines");
@@ -49,6 +60,10 @@ void Turbo::Core::TComputePipeline::InternalDestroy()
 Turbo::Core::TComputePipeline::TComputePipeline(TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader)
 {
     this->InternalCreate();
+}
+
+Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
+{
 }
 
 Turbo::Core::TComputePipeline::~TComputePipeline()

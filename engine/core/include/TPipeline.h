@@ -1,4 +1,5 @@
 #pragma once
+#include "TPipelineCache.h"
 #ifndef TURBO_CORE_TPIPELINE_H
 #define TURBO_CORE_TPIPELINE_H
 #include "TFormatInfo.h"
@@ -17,6 +18,7 @@ class TFragmentShader;
 class TComputeShader;
 class TDescriptorSetLayout;
 class TPipelineLayout;
+class TPipelineCache;
 
 typedef enum class TPipelineType
 {
@@ -52,6 +54,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
     T_VULKAN_HANDLE_HANDLE TPipelineLayout *pipelineLayout = nullptr;
     T_VULKAN_HANDLE_CHILDREN std::vector<TShader *> shaders;
+    T_VULKAN_HANDLE_CHILDREN TPipelineCache *pipelineCache = nullptr;
 
     TPipelineType type;
 
@@ -63,11 +66,11 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    [[deprecated]]TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders);
-    TPipeline(TDevice *device, TVertexShader* vertexShader,TFragmentShader* fragmentShader);//for graphics Pipeline
-    //TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
-    //TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
-    TPipeline(TDevice *device, TComputeShader *computeShader); // for compute pipeline
+    [[deprecated]] TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
+    // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
+    // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
+    TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
     ~TPipeline();
 
   public:
@@ -78,6 +81,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     std::vector<TShader *> GetShaders();
 
     TDevice *GetDevice();
+    TPipelineCache *GetPipelineCache();
 
   public:
     virtual std::string ToString() override;

@@ -37,6 +37,7 @@ struct TPass : public TNodeHandle
 struct TResource : public TNodeHandle
 {
     // some extension data for future
+    bool isInput = false;
 };
 
 class TProxy
@@ -123,6 +124,7 @@ class TSubpass
   private:
     std::vector<TResource> writes;
     std::vector<TResource> reads;
+    std::vector<TResource> inputs;
 
   public:
     TSubpass() = default;
@@ -130,9 +132,11 @@ class TSubpass
 
     void Write(TResource resource);
     void Read(TResource resource);
+    void Input(TResource resource);
 
     std::vector<TResource> GetWrites();
     std::vector<TResource> GetReads();
+    std::vector<TResource> GetInputs();
 };
 
 class TRenderPass
@@ -271,6 +275,7 @@ class TFrameGraph
 
             TResource Write(TResource resource);
             TResource Read(TResource resource);
+            TResource Input(TResource resource);
         };
 
       private:

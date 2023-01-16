@@ -107,13 +107,14 @@ void Turbo::Core::TPipeline::InternalDestroy()
     delete this->pipelineLayout;
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
     {
         this->device = device;
         this->type = type;
         this->shaders = shaders;
+        this->pipelineCache = pipelineCache;
         this->InternalCreate();
     }
     else
@@ -122,7 +123,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vect
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && vertexShader != nullptr && fragmentShader != nullptr)
     {
@@ -130,6 +131,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
         this->type = TPipelineType::Graphics;
         this->shaders.push_back(vertexShader);
         this->shaders.push_back(fragmentShader);
+        this->pipelineCache = pipelineCache;
         this->InternalCreate();
     }
     else
@@ -138,13 +140,14 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && computeShader != nullptr)
     {
         this->device = device;
         this->type = TPipelineType::Compute;
         this->shaders.push_back(computeShader);
+        this->pipelineCache = pipelineCache;
         this->InternalCreate();
     }
     else
@@ -181,6 +184,11 @@ std::vector<Turbo::Core::TShader *> Turbo::Core::TPipeline::GetShaders()
 Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()
 {
     return this->device;
+}
+
+Turbo::Core::TPipelineCache *Turbo::Core::TPipeline::GetPipelineCache()
+{
+    return this->pipelineCache;
 }
 
 std::string Turbo::Core::TPipeline::ToString()
