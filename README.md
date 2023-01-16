@@ -2326,4 +2326,5 @@ Turbo是渲染引擎
   >* 移除`./engine/core`下`TPipelineCache.cpp`中莫名其妙的头文件，应该是`clangd`的自动头文件补全搞的
   >* 移除`./engine/core`下`TPipelineCache.cpp`中`#include <basetsd.h>`头文件，应该是`clangd`的自动头文件补全搞的
   >* 移除`./engine/core`下`TFrameGraph.cpp`中`#include <basetsd.h>`头文件，应该是`clangd`的自动头文件补全搞的
+  >* 移除`./samples`下`VulkanTest.cpp`中移除`#include <vcruntime.h>`和`#include <vcruntime_string.h>`头文件，应该是`clangd`的自动头文件补全搞的
   >* `./engine/core`下`TObject.h`中增加`#include <string.h>`头文件`memcpy`，在此头文件声明

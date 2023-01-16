@@ -51,8 +51,7 @@
 #include <chrono>
 
 #include <core/include/TPipelineCache.h>
-#include <vcruntime.h>
-#include <vcruntime_string.h>
+
 
 class TTimer
 {
