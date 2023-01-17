@@ -151,6 +151,10 @@
   >
   >* 创建`异步资源回收`章节
 
+* 2023/1/17
+  >
+  >* 创建`Context::CmdBeginRenderPass`章节
+
 ---
 
 # Turbo驱动初步
@@ -2199,10 +2203,12 @@ context->CmdBeginRenderPass(render_pass)
 //Turbo::Render
 class Context
 {
-    void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);
+    //void BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass);//会有问题，见下文
     void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
 }
 ```
+
+对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
 
 ## Shader
 
