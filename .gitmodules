@@ -10,7 +10,7 @@
 	branch = master
 [submodule "thirdparty/glm"]
 	path = thirdparty/glm
-	url = git@github.com:Groovounet/glm.git
+	url = git@github.com:g-truc/glm.git
 [submodule "thirdparty/glfw"]
 	path = thirdparty/glfw
 	url = git@github.com:glfw/glfw.git
