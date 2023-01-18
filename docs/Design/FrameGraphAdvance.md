@@ -154,6 +154,8 @@
 * 2023/1/18
   >
   >* 更新`Context::CmdBeginRenderPass`章节
+  >* 更新`资源的创建与销毁`章节
+  >* 更新`异步资源回收`章节
 
 ---
 
@@ -1008,6 +1010,10 @@ class TResourceAllocator
 >       TImageLayout layout//由Turbo维护，默认值TImageLayout::UNDEFINED
 >)
 >```
+
+目前`TResourceAllocator`分配和销毁`Image`和`Buffer`是直接分配，直接销毁的（这是短期目标），目前每一帧中用到就分配，结束就销毁，但是这并不是一种良构。正常来说分配的`Image`和`Buffer`最终应该在`Context`或者`ResourceAllocator`中存储并使用`Cache`或者`Pool`之类技术存储，这样也能与`异步资源回收`(见`异步资源回收`章节)互相配合。
+
+*注：`异步资源回收`主要是针对`FrameGraph`中的资源进行回收，用户自定义的资源，比如采样纹理之类的还是要自己管理*
 
 ### 资源的所有者端域
 
@@ -2337,6 +2343,11 @@ void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
 }
 ```
 在`Filament`中`mTextureCache`是作为`ResourceAllocator`成员变量来缓存资源文件的，这是一个不错的选择。
+
+目前能想到的资源回收有两个方面：
+
+1. 每个资源有个最长生命周期，超过生命周期将自动回收（这个可能需要想一下`Turbo::Core::Image`、`Turbo::Core::TImageView`和`Turbo::Render::TImage`之间如何配合，配合不好可能会出问题）
+2. `ResourceAllocator`提供一个`Gc()`函数，用于定期回收资源
 
 ## Mesh，Material和Drawable
 
