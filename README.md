@@ -2334,3 +2334,5 @@ Turbo是渲染引擎
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* 更新`./.gitmodules`下的`thirdparty/glm`库链接
   >* 更新`./docs`下的`FAQ.md`
+  >* `./engine/framegraph`下`TResources`中增加`Turbo::FrameGraph::TRenderPass GetRenderPass() const`成员函数
+  >* 更新`./samples`下的`RenderDesignTest.cpp`

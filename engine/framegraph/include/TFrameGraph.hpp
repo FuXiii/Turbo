@@ -338,6 +338,8 @@ class TResources
     template <typename T>
     T &Get(TResource resource) const;
 
+    Turbo::FrameGraph::TRenderPass GetRenderPass() const;
+
     // template <typename Virtualizable>
     // const typename Virtualizable::Descriptor &getDescriptor(TResource resource);
 };

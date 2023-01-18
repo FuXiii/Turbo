@@ -386,6 +386,11 @@ Turbo::FrameGraph::TResources::TResources(TFrameGraph &frameGraph, TPassNode &pa
 {
 }
 
+Turbo::FrameGraph::TRenderPass Turbo::FrameGraph::TResources::GetRenderPass() const
+{
+    return this->passNode.GetRenderPass();
+}
+
 void Turbo::FrameGraph::TFrameGraph::Compile()
 {
     // compute passes and resource reference counts
