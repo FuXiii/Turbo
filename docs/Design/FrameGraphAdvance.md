@@ -2187,7 +2187,7 @@ context->CmdBeginRenderPass(render_pass)
 ```CXX
 [=](const PresentPassData &data, const TResources &resources, void *context) 
 {
-    FrameGraph::RenderPass fg_render_pass = this->GetRenderPass();
+    FrameGraph::RenderPass fg_render_pass = resources.GetRenderPass();
 
     //std::vector<FrameGraph::Subpass> subpasses = fg_render_pass.GetSubpasses();
     //FrameGraph::Attachment attachment = subpasses[x].GetAttachment();
