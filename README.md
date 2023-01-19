@@ -2336,3 +2336,12 @@ Turbo是渲染引擎
   >* 更新`./docs`下的`FAQ.md`
   >* `./engine/framegraph`下`TResources`中增加`Turbo::FrameGraph::TRenderPass GetRenderPass() const`成员函数
   >* 更新`./samples`下的`RenderDesignTest.cpp`
+
+* 2023/1/19 设计架构
+  >
+  >* `./engine/framegraph`下`TRenderPass`中增加`Turbo::FrameGraph::TSubpass GetSubpass(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetWrite(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetRead(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetInput(size_t index)`成员函数
+  >* `./engine/framegraph`下`TNodeHandle`中增加`bool IsValid()`成员函数
+  >* `./engine/render`下`TImage`中`uint32_t GteHeight() const`成员函数，更改成`uint32_t GetHeight() const`。之前拼写错误

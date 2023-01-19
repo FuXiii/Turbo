@@ -434,14 +434,14 @@ void Test1()
             }
 
             // 简化的宗旨就是尽量不要遍历，而是使用Turbo提供的接口（尽可能的简化）。可能的使用方式：
-            /*
-                Turbo::FrameGraph::TRenderPass render_pass = resources.GetRenderPass();
-                Turbo::FrameGraph::TResource color_texture_resource = render_pass.GetSubpass(0).GetWrite(0);//当用户不小心发生了数组越界，Turbo将会返回一个非法资源句柄
-                if(color_texture_resource.IsVaild())//判断句柄是否合法（有效）
+            {
+                Turbo::FrameGraph::TResource color_texture_resource = render_pass.GetSubpass(0).GetWrite(0); // 当用户不小心发生了数组越界，Turbo将会返回一个非法资源句柄
+                if (color_texture_resource.IsValid())                                                        // 判断句柄是否合法（有效）
                 {
                     Turbo::Render::TTexture2D color_texture = resources.Get<Turbo::Render::TTexture2D>(color_texture_resource);
+                    std::cout << "color_texture::Width×Height::" << color_texture.GetWidth() << "×" << color_texture.GetHeight() << std::endl;
                 }
-            */
+            }
         });
 
     struct PostPassData

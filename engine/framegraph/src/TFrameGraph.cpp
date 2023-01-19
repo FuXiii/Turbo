@@ -7,6 +7,16 @@
 #include <string>
 #include <vector>
 
+bool Turbo::FrameGraph::TNodeHandle::IsValid()
+{
+    if (this->id != TURBO_INVALID_ID)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void Turbo::FrameGraph::TSubpass::Write(TResource resource)
 {
     bool is_found = false;
@@ -76,6 +86,36 @@ std::vector<Turbo::FrameGraph::TResource> Turbo::FrameGraph::TSubpass::GetInputs
     return this->inputs;
 }
 
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TSubpass::GetWrite(size_t index)
+{
+    if (index >= this->writes.size())
+    {
+        return Turbo::FrameGraph::TResource();
+    }
+
+    return this->writes[index];
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TSubpass::GetRead(size_t index)
+{
+    if (index >= this->reads.size())
+    {
+        return Turbo::FrameGraph::TResource();
+    }
+
+    return this->reads[index];
+}
+
+Turbo::FrameGraph::TResource Turbo::FrameGraph::TSubpass::GetInput(size_t index)
+{
+    if (index >= this->inputs.size())
+    {
+        return Turbo::FrameGraph::TResource();
+    }
+
+    return this->inputs[index];
+}
+
 void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
 {
     this->subpasses.push_back(subpass);
@@ -84,6 +124,16 @@ void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
 std::vector<Turbo::FrameGraph::TSubpass> Turbo::FrameGraph::TRenderPass::GetSubpasses()
 {
     return this->subpasses;
+}
+
+Turbo::FrameGraph::TSubpass Turbo::FrameGraph::TRenderPass::GetSubpass(size_t index)
+{
+    if (index >= this->subpasses.size())
+    {
+        return Turbo::FrameGraph::TSubpass();
+    }
+
+    return this->subpasses[index];
 }
 
 Turbo::FrameGraph::TNode::TNode()
