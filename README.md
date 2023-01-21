@@ -2348,4 +2348,7 @@ Turbo是渲染引擎
 
 * 2023/1/21 设计架构
   >
-  >* `./engine/core`下`TBuffer`中`Map`函数中有`Bug`,当想要映射内存时，目前使用的是用户创建`TBuffer`时，是否指定了`HOST_ACCESS_RANDOM`或者`HOST_ACCESS_SEQUENTIAL_WRITE`标志位，如果设置了该标志位说明内存可以进行映射，但是某些移动设备（手机或笔记本等平台端）上的内存是`CPU`与`GPU`共存、共享的。换句话说当你在上层创建一个`GPU`端的内存(此时用户指定的是`DEDICATED_MEMORY`)，在底层也许是`CPU`和`GPU`共享的内存，所以此时根据用户是否指定了`HOST_ACCESS_RANDOM`和`HOST_ACCESS_SEQUENTIAL_WRITE`来判断是否可以`Map`是不合理的，应该查看分配的内存是否有在`host`端能够访问，能访问将返回映射的内存指针，反之则返回`nullptr`
+  >* `./engine/core`下`TBuffer`中`Map`函数中有`Bug`,当想要映射内存时，目前使用的是用户创建`TBuffer`时，是否指定了`HOST_ACCESS_RANDOM`或者`HOST_ACCESS_SEQUENTIAL_WRITE`标志位，如果设置了该标志位说明内存可以进行映射，但是某些移动设备（手机或笔记本等平台端）上的内存是`CPU`与`GPU`共存、共享的。换句话说当你在上层创建一个`GPU`端的内存(此时用户指定的是`DEDICATED_MEMORY`)，在底层也许是`CPU`和`GPU`共享的内存，所以此时根据用户是否指定了`HOST_ACCESS_RANDOM`和`HOST_ACCESS_SEQUENTIAL_WRITE`标志位来判断是否可以`Map`是不合理的，应该查看分配的内存是否有在`host`端能够访问，能访问将返回映射的内存指针，反之则返回`nullptr`
+  >* `./engine/core`下`TBuffer`中`Map`函数中取消对`HOST_ACCESS_RANDOM`和`HOST_ACCESS_SEQUENTIAL_WRITE`的判断，更改使用`Turbo::Core::TMemoryTypeInfo::IsHostVisible()`函数判断
+  >* `./engine/core`下`TImage`中`Map`函数做相同修改
+  

@@ -173,7 +173,9 @@ VkBuffer Turbo::Core::TBuffer::GetVkBuffer()
 void *Turbo::Core::TBuffer::Map()
 {
     void *result = nullptr;
-    if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+
+    Turbo::Core::TMemoryTypeInfo memory_type_info = this->GetMemoryTypeInfo();
+    if (memory_type_info.IsHostVisible())
     {
         VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
         vmaMapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), &result);
