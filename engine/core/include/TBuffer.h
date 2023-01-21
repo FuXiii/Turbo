@@ -57,6 +57,7 @@ class TBuffer : public TVulkanHandle
     explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
     ~TBuffer();
 
+    bool IsMappable();
     void *Map();
     void Unmap();
 
