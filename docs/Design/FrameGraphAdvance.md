@@ -2237,6 +2237,12 @@ class Context
 * `RenderPass& Allocate(RenderPass& renderPass)`:先使用`Find(renderPass)`查询一下是否有该`RenderPass`,如果有直接返回相应的`RenderPass`，反之则分配一个`RenderPass`并存入池子中，之后返回创建的`RenderPass`
 * `void Free(RenderPass& renderPass)`：销毁相应的`RenderPass`
 
+对于`RenderPassPool`中存储的`RenderPass`应该关心如下事物（核心思路是适配`Turbo::Core::TRenderPass`）：
+
+* 对应的`Turbo::Core::TRenderPass`
+* 从`Turbo::Render::TRenderPass`中的各种`Subpass`
+* 从`Turbo::Render::TRenderPass`中的各种`Subpass`中指定的`attachment`相关的
+
 ### FrameBuffer 创建
 
 一个`RenderPass`下可以绑定多个`FrameBuffer`

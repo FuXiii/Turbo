@@ -15,6 +15,41 @@
 #include <core/include/TVulkanLoader.h>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
+Turbo::Render::TRenderPassPool::TRenderPassProxy::TRenderPassProxy(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
+    // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
+{
+    // TODO:Destroy Turbo::Core::TRenderPass
+    // TODO:delete this->renderPass;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassPool()
+{
+}
+
+Turbo::Render::TRenderPassPool::~TRenderPassPool()
+{
+    // TODO:release this->renderPassProxies;
+}
+
+bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
+{
+    return false;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy &Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:return a valid TRenderPassProxy
+}
+
+void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:let renderPass into pool
+}
 
 Turbo::Render::TContext::TContext()
 {

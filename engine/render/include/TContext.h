@@ -1,6 +1,4 @@
 #pragma once
-#include "TCommandBuffer.h"
-#include "TFence.h"
 #ifndef TURBO_RENDER_TCONTEXT_H
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
@@ -21,6 +19,7 @@ class TBuffer;
 class TCommandBufferPool;
 class TCommandBuffer;
 class TFence;
+class TRenderPass;
 } // namespace Core
 } // namespace Turbo
 
@@ -40,6 +39,31 @@ namespace Render
 class TRenderPass;
 class TComputePipeline;
 class TGraphicsPipeline;
+
+class TRenderPassPool
+{
+  public:
+    class TRenderPassProxy
+    {
+      private:
+        Turbo::Core::TRenderPass *renderPass = nullptr;
+
+      public:
+        TRenderPassProxy(Turbo::Render::TRenderPass &renderPass);
+        ~TRenderPassProxy();
+    };
+
+  private:
+    std::vector<TRenderPassProxy> renderPassProxies;
+
+  public:
+    TRenderPassPool();
+    ~TRenderPassPool();
+
+    bool Find(Turbo::Render::TRenderPass &renderPass);
+    TRenderPassProxy &Allocate(Turbo::Render::TRenderPass &renderPass);
+    void Free(Turbo::Render::TRenderPass &renderPass);
+};
 
 typedef struct TCommandBuffer
 {
