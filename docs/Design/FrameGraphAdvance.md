@@ -157,6 +157,12 @@
   >* 更新`资源的创建与销毁`章节
   >* 更新`异步资源回收`章节
 
+* 2023/1/22
+  >
+  >* `Context::CmdBeginRenderPass`章节下创建`RenderPass 创建`章节
+  >* `Context::CmdBeginRenderPass`章节下创建`FrameBuffer 创建`章节
+  >* `Context::CmdBeginRenderPass`章节下`FrameBuffer 创建`章节下创建`RenderPassPool`章节
+
 ---
 
 # Turbo驱动初步
@@ -2215,6 +2221,25 @@ class Context
 ```
 
 对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
+
+### RenderPass 创建
+当调用`Context::BeginRenderPass(...)`后，`Turbo`会去查找是否有已经创建完的`RenderPass`,尝试重复利用已有的`RenderPass`，如果没有找到的话，则创建相应的`RenderPass`。
+
+由于需要查询当前`Context`是否存在相互兼容的`RenderPass`已做到重复利用已有的`RenderPass`，此时需要`Context`中存在一个用于存储`RenderPass`的集合（`Set`）或池子(`Pool`,这个不错)
+
+#### RenderPassPool
+
+`Context`下有多个`RenderPass`，存储在`RenderPassPool`中。
+
+`RenderPassPool`应该有如下功能：
+
+* `bool Find(RenderPass& renderPass)`：查询相应的兼容的`RenderPass`，如果存在则返回`true`,并将结果写入到`RenderPass& renderPass`中，如果没找到则返回`false`，在内部会去调用`std::find(...)`函数，所以`class RenderPass`需要实现对于`==`符号重载
+* `RenderPass& Allocate(RenderPass& renderPass)`:先使用`Find(renderPass)`查询一下是否有该`RenderPass`,如果有直接返回相应的`RenderPass`，反之则分配一个`RenderPass`并存入池子中，之后返回创建的`RenderPass`
+* `void Free(RenderPass& renderPass)`：销毁相应的`RenderPass`
+
+### FrameBuffer 创建
+
+一个`RenderPass`下可以绑定多个`FrameBuffer`
 
 ## Shader
 
