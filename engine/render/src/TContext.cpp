@@ -1,6 +1,7 @@
 #include "render/include/TContext.h"
 #include "render/include/TImage.h"
 #include "vulkan/vulkan_core.h"
+#include <algorithm>
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
@@ -57,6 +58,16 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy &Turbo::Render::TRenderPassPool
     // TODO:find a valid RenderPassProxy
     // TODO:if not found create a new RenderPassProxy/RenderPass
     // TODO:if found return what we want
+    if (this->Find(renderPass))
+    {
+        // return reusable RenderPass/TRenderPassProxy
+    }
+
+    // create a new RenderPass/TRenderPassProxy
+    this->renderPassProxies.push_back(TRenderPassProxy());
+    size_t render_pass_index = this->renderPassProxies.size() - 1;
+    this->renderPassProxies[render_pass_index].Create(renderPass);
+    return this->renderPassProxies[render_pass_index];
 }
 
 void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
