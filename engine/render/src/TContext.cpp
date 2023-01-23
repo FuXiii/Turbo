@@ -1,5 +1,6 @@
 #include "render/include/TContext.h"
 #include "render/include/TImage.h"
+#include "render/include/TRenderPass.h"
 #include "vulkan/vulkan_core.h"
 #include <algorithm>
 #include <core/include/TBuffer.h>
@@ -14,6 +15,7 @@
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TVersion.h>
 #include <core/include/TVulkanLoader.h>
+#include <cstdint>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
 
@@ -29,13 +31,18 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
     // TODO:delete this->renderPass;
 }
 
-Turbo::Render::TRenderPassPool::TRenderPassProxy::TRenderPassProxy(Turbo::Render::TRenderPass &renderPass)
-{
-    // TODO:this->Create(renderPass);//create really RenderPass
-}
-
 Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
 {
+}
+
+bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
+{
+    if (this->renderPass != nullptr)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassPool()
@@ -47,20 +54,31 @@ Turbo::Render::TRenderPassPool::~TRenderPassPool()
     // TODO:release this->renderPassProxies;
 }
 
-bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
+Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
-    return false;
+    auto find_result = std::find(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxy) {
+        renderPass.GetSubpasses();
+        return false;
+    });
+
+    if (find_result != this->renderPassProxies.end())
+    {
+        return *find_result;
+    }
+
+    return TRenderPassProxy();
 }
 
-Turbo::Render::TRenderPassPool::TRenderPassProxy &Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
+Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:return a valid TRenderPassProxy
     // TODO:find a valid RenderPassProxy
     // TODO:if not found create a new RenderPassProxy/RenderPass
     // TODO:if found return what we want
-    if (this->Find(renderPass))
+    TRenderPassProxy find_render_pass_proxy = this->Find(renderPass);
+    if (find_render_pass_proxy.IsValid())
     {
-        // return reusable RenderPass/TRenderPassProxy
+        return find_render_pass_proxy;
     }
 
     // create a new RenderPass/TRenderPassProxy
@@ -73,7 +91,7 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy &Turbo::Render::TRenderPassPool
 void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:let renderPass into pool
-    // this->renderPassProxies[0].Destroy();
+    // this->renderPassProxies[x].Destroy();
 }
 
 Turbo::Render::TContext::TContext()

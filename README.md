@@ -2362,7 +2362,11 @@ Turbo是渲染引擎
 * 2023/1/23 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
-  >* `./engine/render`下`TRenderPassPool`中增加`void Create(Turbo::Render::TRenderPass &renderPass)`成员函数
-  >* `./engine/render`下`TRenderPassPool`中增加`void Destroy()`成员函数
-  >* `./engine/render`下`TRenderPassPool`中增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`void Create(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`void Destroy()`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TRenderPassPool`中`Find(...)`函数更改成`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TRenderPassPool`中增加`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中增加`void Free(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`bool IsValid()`成员函数
   

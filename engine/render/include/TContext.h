@@ -55,23 +55,24 @@ class TRenderPassPool
         void Create(Turbo::Render::TRenderPass &renderPass);
         void Destroy();
 
-      private:
-        TRenderPassProxy(Turbo::Render::TRenderPass &renderPass);
-
       public:
         TRenderPassProxy() = default;
         ~TRenderPassProxy();
+
+        bool IsValid();
     };
 
   private:
     std::vector<TRenderPassProxy> renderPassProxies;
 
+  private:
+    TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass);
+
   public:
     TRenderPassPool();
     ~TRenderPassPool();
 
-    bool Find(Turbo::Render::TRenderPass &renderPass);
-    TRenderPassProxy &Allocate(Turbo::Render::TRenderPass &renderPass);
+    TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
 };
 
