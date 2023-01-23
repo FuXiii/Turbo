@@ -56,7 +56,7 @@ Turbo::Render::TRenderPassPool::~TRenderPassPool()
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
-    auto find_result = std::find(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxy) {
+    auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxy) {
         renderPass.GetSubpasses();
         return false;
     });
