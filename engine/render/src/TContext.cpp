@@ -15,16 +15,26 @@
 #include <core/include/TVulkanLoader.h>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
-Turbo::Render::TRenderPassPool::TRenderPassProxy::TRenderPassProxy(Turbo::Render::TRenderPass &renderPass)
+
+void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
     // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
 }
 
-Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
+void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
 {
     // TODO:Destroy Turbo::Core::TRenderPass
     // TODO:delete this->renderPass;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy::TRenderPassProxy(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:this->Create(renderPass);//create really RenderPass
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
+{
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassPool()
@@ -44,11 +54,15 @@ bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass
 Turbo::Render::TRenderPassPool::TRenderPassProxy &Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:return a valid TRenderPassProxy
+    // TODO:find a valid RenderPassProxy
+    // TODO:if not found create a new RenderPassProxy/RenderPass
+    // TODO:if found return what we want
 }
 
 void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:let renderPass into pool
+    // this->renderPassProxies[0].Destroy();
 }
 
 Turbo::Render::TContext::TContext()

@@ -45,11 +45,21 @@ class TRenderPassPool
   public:
     class TRenderPassProxy
     {
+      public:
+        friend class TRenderPassPool;
+
       private:
         Turbo::Core::TRenderPass *renderPass = nullptr;
 
-      public:
+      private:
+        void Create(Turbo::Render::TRenderPass &renderPass);
+        void Destroy();
+
+      private:
         TRenderPassProxy(Turbo::Render::TRenderPass &renderPass);
+
+      public:
+        TRenderPassProxy() = default;
         ~TRenderPassProxy();
     };
 

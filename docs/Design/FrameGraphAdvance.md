@@ -163,6 +163,10 @@
   >* `Context::CmdBeginRenderPass`章节下创建`FrameBuffer 创建`章节
   >* `Context::CmdBeginRenderPass`章节下`FrameBuffer 创建`章节下创建`RenderPassPool`章节
 
+* 2023/1/23
+  >
+  >* `Context::CmdBeginRenderPass`章节下增加`RenderPassProxy(RenderPass代理)`章节
+
 ---
 
 # Turbo驱动初步
@@ -2246,6 +2250,12 @@ class Context
 ### FrameBuffer 创建
 
 一个`RenderPass`下可以绑定多个`FrameBuffer`
+
+### RenderPassProxy(RenderPass代理)
+
+由于需要管理`RenderPass`和`FrameBuffer`，所以提供了`RenderPassProxy`类，用于整合管理`RenderPass`和`FrameBuffer`，并由`RenderPassPool`创建和销毁
+
+
 
 ## Shader
 

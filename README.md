@@ -2352,7 +2352,17 @@ Turbo是渲染引擎
   >* `./engine/core`下`TBuffer`中增加`bool IsMappable()`成员函数
   >* `./engine/core`下`TBuffer`中`Copy`函数中增加对`this->buffer->IsMappable()`的判断
   >* `./engine/core`下`TImage`中增加`bool IsMappable()`成员函数
+
+* 2023/1/22 设计架构
+  >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
   >* `./engine/render`下`TContext`中增加`class TRenderPassPool`类
   >* `./engine/render`下`TContext`中`class TRenderPassPool`下增加`class TRenderPassProxy`类
+
+* 2023/1/23 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/render`下`TRenderPassPool`中增加`void Create(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中增加`void Destroy()`成员函数
+  >* `./engine/render`下`TRenderPassPool`中增加`friend class TRenderPassPool`友元类
   
