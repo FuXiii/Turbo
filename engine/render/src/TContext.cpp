@@ -85,7 +85,8 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
                     std::vector<Turbo::Render::TImage> render_input_images = render_subpass.GetInputAttachments();
                     Turbo::Render::TDepthStencilImage render_depth_stencil_images = render_subpass.GetDepthStencilAttachment();
 
-                    //To Compare Core:: and Render::
+                    // To Compare Core:: and Render::
+                    //  size
                 }
             }
         }
