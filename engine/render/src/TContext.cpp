@@ -1,4 +1,6 @@
 #include "render/include/TContext.h"
+#include "TAttachment.h"
+#include "TRenderPass.h"
 #include "render/include/TImage.h"
 #include "render/include/TRenderPass.h"
 #include "vulkan/vulkan_core.h"
@@ -13,11 +15,13 @@
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
+#include <core/include/TRenderPass.h>
 #include <core/include/TVersion.h>
 #include <core/include/TVulkanLoader.h>
 #include <cstdint>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
+#include <vector>
 
 void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass)
 {
@@ -56,8 +60,35 @@ Turbo::Render::TRenderPassPool::~TRenderPassPool()
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
-    auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxy) {
-        renderPass.GetSubpasses();
+    auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxyItem) {
+        std::vector<Turbo::Render::TSubpass> render_subpasses = renderPass.GetSubpasses();
+        Turbo::Core::TRenderPass *core_render_pass = renderPassProxyItem.renderPass;
+        if (core_render_pass != nullptr)
+        {
+            std::vector<Turbo::Core::TAttachment> core_attachments = core_render_pass->GetAttachments();
+            std::vector<Turbo::Core::TSubpass> core_subpasses = core_render_pass->GetSubpasses();
+
+            size_t render_subpass_count = render_subpasses.size();
+            size_t core_subpass_count = core_subpasses.size();
+            if (render_subpass_count == /*<=*/core_subpass_count)
+            {
+                for (uint32_t subpass_index = 0; subpass_index < render_subpass_count; subpass_index++)
+                {
+                    Turbo::Core::TSubpass &core_subpass = core_subpasses[subpass_index];
+                    Turbo::Render::TSubpass &render_subpass = render_subpasses[subpass_index];
+
+                    std::vector<VkAttachmentReference> *core_color_attachment_references = core_subpass.GetColorAttachmentReferences();
+                    std::vector<VkAttachmentReference> *core_input_attachment_references = core_subpass.GetInputAttachmentReferences();
+                    VkAttachmentReference *core_depth_stencil_attachment_reference = core_subpass.GetDepthStencilAttachmentReference();
+
+                    std::vector<Turbo::Render::TColorImage> render_color_images = render_subpass.GetColorAttachments();
+                    std::vector<Turbo::Render::TImage> render_input_images = render_subpass.GetInputAttachments();
+                    Turbo::Render::TDepthStencilImage render_depth_stencil_images = render_subpass.GetDepthStencilAttachment();
+
+                    //To Compare Core:: and Render::
+                }
+            }
+        }
         return false;
     });
 
