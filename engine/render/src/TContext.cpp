@@ -23,16 +23,82 @@
 #include <stdint.h>
 #include <vector>
 
-void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass)
+void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
 {
     // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
     // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
+
+    // TODO: 考虑是否剔除重复的Attachment?
+    if (context != nullptr)
+    {
+        Turbo::Core::TDevice *device = context->GetDevice();
+
+        std::vector<Turbo::Core::TAttachment> core_attachments;
+        std::vector<Turbo::Core::TSubpass> core_subpasses;
+
+        std::vector<Turbo::Render::TSubpass> subpasses = renderPass.GetSubpasses();
+        for (Turbo::Render::TSubpass &subpass_item : subpasses)
+        {
+            uint32_t index = 0;
+            Turbo::Core::TSubpass core_subpass(Turbo::Core::TPipelineType::Graphics);
+
+            std::vector<Turbo::Render::TColorImage> color_attachments = subpass_item.GetColorAttachments();
+            std::vector<Turbo::Render::TImage> input_attachments = subpass_item.GetInputAttachments();
+            Turbo::Render::TDepthStencilImage depth_stencil_attachments = subpass_item.GetDepthStencilAttachment();
+
+            for (Turbo::Render::TColorImage &core_color_attachment_item : color_attachments)
+            {
+                Turbo::Render::TFormat format = core_color_attachment_item.GetFormat();
+                Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
+                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                core_attachments.push_back(color_attachment);
+                core_subpass.AddColorAttachmentReference(index, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+                index = index + 1;
+            }
+
+            for (Turbo::Render::TImage &core_input_attachment_item : input_attachments)
+            {
+                Turbo::Render::TFormat format = core_input_attachment_item.GetFormat();
+                Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
+                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                core_attachments.push_back(input_attachment);
+                core_subpass.AddInputAttachmentReference(index, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
+                index = index + 1;
+            }
+
+            if (depth_stencil_attachments.IsValid())
+            {
+                Turbo::Render::TFormat format = depth_stencil_attachments.GetFormat();
+                Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachments.GetSampleCountBits();
+                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                core_attachments.push_back(depth_stencil_attachment);
+                core_subpass.SetDepthStencilAttachmentReference(index, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+                index = index + 1;
+            }
+
+            core_subpasses.push_back(core_subpass);
+        }
+
+        this->renderPass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
+
+        // How to create FrameBuffer?
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TRenderPassPool::TRenderPassProxy::Create", "Please make sure set valid TContext* parameter");
+    }
 }
 
 void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
 {
     // TODO:Destroy Turbo::Core::TRenderPass
-    // TODO:delete this->renderPass;
+    delete this->renderPass;
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
@@ -49,8 +115,16 @@ bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
     return false;
 }
 
-Turbo::Render::TRenderPassPool::TRenderPassPool()
+Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 {
+    if (context != nullptr)
+    {
+        this->context = context;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TRenderPassPool::TRenderPassPool", "Please make sure set valid TContext* parameter");
+    }
 }
 
 Turbo::Render::TRenderPassPool::~TRenderPassPool()
@@ -288,7 +362,7 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
     // create a new RenderPass/TRenderPassProxy
     this->renderPassProxies.push_back(TRenderPassProxy());
     size_t render_pass_index = this->renderPassProxies.size() - 1;
-    this->renderPassProxies[render_pass_index].Create(renderPass);
+    this->renderPassProxies[render_pass_index].Create(renderPass, this->context);
     return this->renderPassProxies[render_pass_index];
 }
 

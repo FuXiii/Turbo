@@ -2376,3 +2376,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage.h`中增加`typedef enum TSampleCountBits`
   >* `./engine/render`下`TImage.h`中增加`using TSampleCounts = uint32_t`
   >* `./engine/render`下`TImage`中增加`TSampleCountBits GetSampleCountBits() const`成员函数，目前只支持`Turbo::Render::TSampleCountBits::SAMPLE_1_BIT`
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`构造函数增加`TContext *context`参数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中`Create`函数增加`TContext *context`参数
