@@ -2370,3 +2370,6 @@ Turbo是渲染引擎
   >* `./engine/render`下`TRenderPassPool`中增加`void Free(Turbo::Render::TRenderPass &renderPass)`成员函数
   >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`bool IsValid()`成员函数
   
+* 2023/1/26 设计架构
+  >
+  >* `./engine/render`下`TRenderPassPool`更新完善`Find(...)`函数算法

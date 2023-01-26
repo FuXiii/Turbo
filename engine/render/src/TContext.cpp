@@ -60,6 +60,9 @@ Turbo::Render::TRenderPassPool::~TRenderPassPool()
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
+    // first we need to judge if renderPass which input from external was empty we need return empty TRenderPassProxy
+    // if(renderPass.IsEmpty())...
+
     auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxyItem) {
         std::vector<Turbo::Render::TSubpass> render_subpasses = renderPass.GetSubpasses();
         Turbo::Core::TRenderPass *core_render_pass = renderPassProxyItem.renderPass;
@@ -70,7 +73,7 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
 
             size_t render_subpass_count = render_subpasses.size();
             size_t core_subpass_count = core_subpasses.size();
-            if (render_subpass_count == /*<=*/core_subpass_count)
+            if (render_subpass_count == /*<=*/core_subpass_count) // TODO:try to test <=, if available
             {
                 for (uint32_t subpass_index = 0; subpass_index < render_subpass_count; subpass_index++)
                 {
@@ -81,15 +84,59 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
                     std::vector<VkAttachmentReference> *core_input_attachment_references = core_subpass.GetInputAttachmentReferences();
                     VkAttachmentReference *core_depth_stencil_attachment_reference = core_subpass.GetDepthStencilAttachmentReference();
 
-                    std::vector<Turbo::Render::TColorImage> render_color_images = render_subpass.GetColorAttachments();
-                    std::vector<Turbo::Render::TImage> render_input_images = render_subpass.GetInputAttachments();
-                    Turbo::Render::TDepthStencilImage render_depth_stencil_images = render_subpass.GetDepthStencilAttachment();
+                    std::vector<Turbo::Core::TAttachment> core_color_attachments;
+                    for (VkAttachmentReference &core_color_attachment_item : *core_color_attachment_references)
+                    {
+                        core_color_attachments.push_back(core_attachments[core_color_attachment_item.attachment]);
+                    }
+
+                    std::vector<Turbo::Core::TAttachment> core_input_attachments;
+                    for (VkAttachmentReference &core_input_attachment_item : *core_input_attachment_references)
+                    {
+                        core_input_attachments.push_back(core_attachments[core_input_attachment_item.attachment]);
+                    }
+
+                    // Use vector to storage depth stencil the purpose is to determine whether DepthStencilAttachment exists
+                    // usually we will only have one DepthStencilAttachment or without DepthStencilAttachment
+                    std::vector<Turbo::Core::TAttachment> core_depth_stencil_attachments;
+                    if (core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
+                    {
+                        core_depth_stencil_attachments.push_back(core_attachments[core_depth_stencil_attachment_reference->attachment]);
+                    }
+
+                    std::vector<Turbo::Render::TColorImage> render_color_attachments = render_subpass.GetColorAttachments();
+                    std::vector<Turbo::Render::TImage> render_input_attachments = render_subpass.GetInputAttachments();
+                    Turbo::Render::TDepthStencilImage render_depth_stencil_attachment = render_subpass.GetDepthStencilAttachment();
 
                     // To Compare Core:: and Render::
-                    //  size
+                    uint32_t core_color_attachments_count = core_color_attachments.size();
+                    uint32_t core_input_attachments_count = core_input_attachments.size();
+                    uint32_t core_depth_stencil_attachments_count = core_depth_stencil_attachments.size();
+
+                    uint32_t render_color_attachments_count = render_color_attachments.size();
+                    uint32_t render_input_attachments_count = render_input_attachments.size();
+                    uint32_t render_depth_stencil_attachment_count = render_depth_stencil_attachment.IsValid() ? 1 : 0;
+
+                    if (core_color_attachments_count < render_color_attachments_count)
+                    {
+                        return false;
+                    }
+
+                    if (core_input_attachments_count < render_input_attachments_count)
+                    {
+                        return false;
+                    }
+
+                    if (core_depth_stencil_attachments_count < render_depth_stencil_attachment_count)
+                    {
+                        return false;
+                    }
+
+                    // TODO: try to compare attachments between Core and Render
                 }
             }
         }
+
         return false;
     });
 
