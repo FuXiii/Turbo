@@ -167,6 +167,10 @@
   >
   >* `Context::CmdBeginRenderPass`章节下增加`RenderPassProxy(RenderPass代理)`章节
 
+* 2023/1/26
+  >
+  >* `Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass`章节
+
 ---
 
 # Turbo驱动初步
@@ -2227,6 +2231,7 @@ class Context
 对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
 
 ### RenderPass 创建
+
 当调用`Context::BeginRenderPass(...)`后，`Turbo`会去查找是否有已经创建完的`RenderPass`,尝试重复利用已有的`RenderPass`，如果没有找到的话，则创建相应的`RenderPass`。
 
 由于需要查询当前`Context`是否存在相互兼容的`RenderPass`已做到重复利用已有的`RenderPass`，此时需要`Context`中存在一个用于存储`RenderPass`的集合（`Set`）或池子(`Pool`,这个不错)
@@ -2255,7 +2260,14 @@ class Context
 
 由于需要管理`RenderPass`和`FrameBuffer`，所以提供了`RenderPassProxy`类，用于整合管理`RenderPass`和`FrameBuffer`，并由`RenderPassPool`创建和销毁
 
+### Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass
 
+通过用户指定的`Turbo::Render::TRenderPass`在`RenderPassPool`中创建`Turbo::Core::TRenderPass`，对于`Turbo`来说其主要任务有两个
+
+1. 收集各个`Subpass`中的`Attachment`，集成到统一的一个`Attachment`数组中
+2. 计算各个`Subpass`中的`Attachment`相对于`Attachment`数组中的偏移等（`AttachmentReference`）
+
+由于会有重复的`Attachment`(如何判断两个`Attachment`相等：通过查看`Attachment`底层`Image`是否为同一个)，需要剔除重复的`Attachment`项目
 
 ## Shader
 
@@ -2357,9 +2369,11 @@ graph TD;
     PassNodeExecute-->DestroyResource
     DestroyResource--下一个PassNode-->CreateResource
 ```
+
 这里在`销毁不需要的资源数据`时，此时可能用户并没有调用`Flush`，换句话说就是，用户此时可能并没有将指令推送到`GPU`，如果此时销毁了相应的资源，之后再推送指令，由于资源已经销毁了，所以在`销毁不需要的资源数据`时并不能真的去销毁资源，而需要将资源保存下来，等待未来的某一合适的时候销毁。
 
 `Filament`引擎在`销毁不需要的资源数据`时，是将资源保存到了一个`Cache`中，如下：
+
 ```CXX
 //Filament engine code
 void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
@@ -2383,6 +2397,7 @@ void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
     }
 }
 ```
+
 在`Filament`中`mTextureCache`是作为`ResourceAllocator`成员变量来缓存资源文件的，这是一个不错的选择。
 
 目前能想到的资源回收有两个方面：
