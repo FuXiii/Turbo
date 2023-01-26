@@ -133,6 +133,58 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
                     }
 
                     // TODO: try to compare attachments between Core and Render
+                    /*
+                    Vulkan Spec: Two attachment references are compatible if they have matching format and sample count
+                    {
+                        Attachment A;
+                        Attachment B;
+
+                        A == B
+                        {
+                            A.format == B.format;
+                            A.sample == B.sample;
+                        }
+                    }
+
+                    Vulkan Spec: Two arrays of attachment references are compatible if all corresponding pairs of attachments are
+                    compatible. If the arrays are of different lengths, attachment references not present in the smaller
+                    array are treated as VK_ATTACHMENT_UNUSED
+                    {
+                        std::vector<Attachment> A;
+                        std::vector<Attachment> B;
+
+                        A.[0][1][2][3][4][5][6][7][8][9]
+                        B.[0][1][2][3][4][5][/][/][/][/]
+
+                        A == B
+                        {
+                            A.[0] == B.[0];
+                            A.[1] == B.[1];
+                            A.[2] == B.[2];
+                            A.[3] == B.[3];
+                            A.[4] == B.[4];
+                            A.[5] == B.[5];
+                            A.[6] == B.[/];
+                            A.[7] == B.[/];
+                            A.[8] == B.[/];
+                            A.[9] == B.[/];
+                        }
+                    }
+
+                    Vulkan Spec: Two render passes are compatible if their corresponding color, input, resolve, and depth/stencil
+                    attachment references are compatible and if they are otherwise identical except for:
+                    {
+                        RenderPass A;
+                        RenderPass B;
+
+                        A == B
+                        {
+                            A.colors == B.colors
+                        }
+                    }
+                    */
+
+                    auto test = core_color_attachments[0];
                 }
             }
         }
