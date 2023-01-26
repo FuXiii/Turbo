@@ -69,7 +69,7 @@ class TImage
 
     TFormat GetFormat() const;
     uint32_t GetWidth() const;
-    uint32_t GteHeight() const;
+    uint32_t GetHeight() const;
     uint32_t GetDepth() const;
     uint32_t GetLayers() const;
     uint32_t GetMipLevels() const;

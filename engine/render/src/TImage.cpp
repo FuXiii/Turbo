@@ -41,7 +41,7 @@ uint32_t Turbo::Render::TImage::GetWidth() const
     return this->descriptor.width;
 }
 
-uint32_t Turbo::Render::TImage::GteHeight() const
+uint32_t Turbo::Render::TImage::GetHeight() const
 {
     return this->descriptor.height;
 }

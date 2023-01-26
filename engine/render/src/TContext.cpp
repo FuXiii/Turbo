@@ -1,6 +1,10 @@
 #include "render/include/TContext.h"
+#include "TAttachment.h"
+#include "TRenderPass.h"
 #include "render/include/TImage.h"
+#include "render/include/TRenderPass.h"
 #include "vulkan/vulkan_core.h"
+#include <algorithm>
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
@@ -11,10 +15,163 @@
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
+#include <core/include/TRenderPass.h>
 #include <core/include/TVersion.h>
 #include <core/include/TVulkanLoader.h>
+#include <cstdint>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
+#include <vector>
+
+void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
+    // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
+}
+
+void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
+{
+    // TODO:Destroy Turbo::Core::TRenderPass
+    // TODO:delete this->renderPass;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
+{
+}
+
+bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
+{
+    if (this->renderPass != nullptr)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassPool()
+{
+}
+
+Turbo::Render::TRenderPassPool::~TRenderPassPool()
+{
+    // TODO:release this->renderPassProxies;
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
+{
+    // first we need to judge if renderPass which input from external was empty we need return empty TRenderPassProxy
+    // if(renderPass.IsEmpty())...
+
+    auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxyItem) {
+        std::vector<Turbo::Render::TSubpass> render_subpasses = renderPass.GetSubpasses();
+        Turbo::Core::TRenderPass *core_render_pass = renderPassProxyItem.renderPass;
+        if (core_render_pass != nullptr)
+        {
+            std::vector<Turbo::Core::TAttachment> core_attachments = core_render_pass->GetAttachments();
+            std::vector<Turbo::Core::TSubpass> core_subpasses = core_render_pass->GetSubpasses();
+
+            size_t render_subpass_count = render_subpasses.size();
+            size_t core_subpass_count = core_subpasses.size();
+            if (render_subpass_count == /*<=*/core_subpass_count) // TODO:try to test <=, if available
+            {
+                for (uint32_t subpass_index = 0; subpass_index < render_subpass_count; subpass_index++)
+                {
+                    Turbo::Core::TSubpass &core_subpass = core_subpasses[subpass_index];
+                    Turbo::Render::TSubpass &render_subpass = render_subpasses[subpass_index];
+
+                    std::vector<VkAttachmentReference> *core_color_attachment_references = core_subpass.GetColorAttachmentReferences();
+                    std::vector<VkAttachmentReference> *core_input_attachment_references = core_subpass.GetInputAttachmentReferences();
+                    VkAttachmentReference *core_depth_stencil_attachment_reference = core_subpass.GetDepthStencilAttachmentReference();
+
+                    std::vector<Turbo::Core::TAttachment> core_color_attachments;
+                    for (VkAttachmentReference &core_color_attachment_item : *core_color_attachment_references)
+                    {
+                        core_color_attachments.push_back(core_attachments[core_color_attachment_item.attachment]);
+                    }
+
+                    std::vector<Turbo::Core::TAttachment> core_input_attachments;
+                    for (VkAttachmentReference &core_input_attachment_item : *core_input_attachment_references)
+                    {
+                        core_input_attachments.push_back(core_attachments[core_input_attachment_item.attachment]);
+                    }
+
+                    // Use vector to storage depth stencil the purpose is to determine whether DepthStencilAttachment exists
+                    // usually we will only have one DepthStencilAttachment or without DepthStencilAttachment
+                    std::vector<Turbo::Core::TAttachment> core_depth_stencil_attachments;
+                    if (core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
+                    {
+                        core_depth_stencil_attachments.push_back(core_attachments[core_depth_stencil_attachment_reference->attachment]);
+                    }
+
+                    std::vector<Turbo::Render::TColorImage> render_color_attachments = render_subpass.GetColorAttachments();
+                    std::vector<Turbo::Render::TImage> render_input_attachments = render_subpass.GetInputAttachments();
+                    Turbo::Render::TDepthStencilImage render_depth_stencil_attachment = render_subpass.GetDepthStencilAttachment();
+
+                    // To Compare Core:: and Render::
+                    uint32_t core_color_attachments_count = core_color_attachments.size();
+                    uint32_t core_input_attachments_count = core_input_attachments.size();
+                    uint32_t core_depth_stencil_attachments_count = core_depth_stencil_attachments.size();
+
+                    uint32_t render_color_attachments_count = render_color_attachments.size();
+                    uint32_t render_input_attachments_count = render_input_attachments.size();
+                    uint32_t render_depth_stencil_attachment_count = render_depth_stencil_attachment.IsValid() ? 1 : 0;
+
+                    if (core_color_attachments_count < render_color_attachments_count)
+                    {
+                        return false;
+                    }
+
+                    if (core_input_attachments_count < render_input_attachments_count)
+                    {
+                        return false;
+                    }
+
+                    if (core_depth_stencil_attachments_count < render_depth_stencil_attachment_count)
+                    {
+                        return false;
+                    }
+
+                    // TODO: try to compare attachments between Core and Render
+                }
+            }
+        }
+
+        return false;
+    });
+
+    if (find_result != this->renderPassProxies.end())
+    {
+        return *find_result;
+    }
+
+    return TRenderPassProxy();
+}
+
+Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:return a valid TRenderPassProxy
+    // TODO:find a valid RenderPassProxy
+    // TODO:if not found create a new RenderPassProxy/RenderPass
+    // TODO:if found return what we want
+    TRenderPassProxy find_render_pass_proxy = this->Find(renderPass);
+    if (find_render_pass_proxy.IsValid())
+    {
+        return find_render_pass_proxy;
+    }
+
+    // create a new RenderPass/TRenderPassProxy
+    this->renderPassProxies.push_back(TRenderPassProxy());
+    size_t render_pass_index = this->renderPassProxies.size() - 1;
+    this->renderPassProxies[render_pass_index].Create(renderPass);
+    return this->renderPassProxies[render_pass_index];
+}
+
+void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:let renderPass into pool
+    // this->renderPassProxies[x].Destroy();
+}
 
 Turbo::Render::TContext::TContext()
 {

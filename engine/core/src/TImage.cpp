@@ -305,12 +305,22 @@ Turbo::Core::TMemoryTypeInfo Turbo::Core::TImage::GetMemoryTypeInfo()
     return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
 }
 
+bool Turbo::Core::TImage::IsMappable()
+{
+    if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void *Turbo::Core::TImage::Map()
 {
     void *result = nullptr;
     if (this->vmaAllocation != nullptr)
     {
-        if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
+        if (this->IsMappable())
         {
             VmaAllocator *vma_allocator = (VmaAllocator *)(this->device->GetVmaAllocator()->GetVmaAllocator());
             vmaMapMemory(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), &result);
