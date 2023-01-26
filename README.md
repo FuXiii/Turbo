@@ -2373,3 +2373,6 @@ Turbo是渲染引擎
 * 2023/1/26 设计架构
   >
   >* `./engine/render`下`TRenderPassPool`更新完善`Find(...)`函数算法
+  >* `./engine/render`下`TImage.h`中增加`typedef enum TSampleCountBits`
+  >* `./engine/render`下`TImage.h`中增加`using TSampleCounts = uint32_t`
+  >* `./engine/render`下`TImage`中增加`TSampleCountBits GetSampleCountBits() const`成员函数，目前只支持`Turbo::Render::TSampleCountBits::SAMPLE_1_BIT`

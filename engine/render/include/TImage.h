@@ -38,6 +38,18 @@ typedef enum TImageUsageBits
 } TImageUsageBits;
 using TImageUsages = uint32_t;
 
+typedef enum TSampleCountBits
+{
+    SAMPLE_1_BIT = 0x00000001,
+    SAMPLE_2_BIT = 0x00000002,
+    SAMPLE_4_BIT = 0x00000004,
+    SAMPLE_8_BIT = 0x00000008,
+    SAMPLE_16_BIT = 0x00000010,
+    SAMPLE_32_BIT = 0x00000020,
+    SAMPLE_64_BIT = 0x00000040,
+} TSampleCountBits;
+using TSampleCounts = uint32_t;
+
 class TImage
 {
   public:
@@ -75,6 +87,7 @@ class TImage
     uint32_t GetMipLevels() const;
     TImageUsages GetUsages() const;
     TDomain GetDomain() const;
+    TSampleCountBits GetSampleCountBits() const;
     bool IsValid() const;
 };
 

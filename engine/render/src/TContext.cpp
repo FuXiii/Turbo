@@ -106,7 +106,12 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
 
                     std::vector<Turbo::Render::TColorImage> render_color_attachments = render_subpass.GetColorAttachments();
                     std::vector<Turbo::Render::TImage> render_input_attachments = render_subpass.GetInputAttachments();
+                    std::vector<Turbo::Render::TDepthStencilImage> render_depth_stencil_attachments;
                     Turbo::Render::TDepthStencilImage render_depth_stencil_attachment = render_subpass.GetDepthStencilAttachment();
+                    if (render_depth_stencil_attachment.IsValid())
+                    {
+                        render_depth_stencil_attachments.push_back(render_depth_stencil_attachment);
+                    }
 
                     // To Compare Core:: and Render::
                     uint32_t core_color_attachments_count = core_color_attachments.size();
@@ -115,7 +120,7 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
 
                     uint32_t render_color_attachments_count = render_color_attachments.size();
                     uint32_t render_input_attachments_count = render_input_attachments.size();
-                    uint32_t render_depth_stencil_attachment_count = render_depth_stencil_attachment.IsValid() ? 1 : 0;
+                    uint32_t render_depth_stencil_attachment_count = render_depth_stencil_attachments.size();
 
                     if (core_color_attachments_count < render_color_attachments_count)
                     {
@@ -180,12 +185,80 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
                         A == B
                         {
                             A.colors == B.colors
+                            A.inputs == B.inputs
+                            A.depthStencil == B.depthStencil
                         }
                     }
                     */
 
-                    auto test = core_color_attachments[0];
+                    for (uint32_t color_attachment_index = 0; color_attachment_index < render_color_attachments_count; color_attachment_index++)
+                    {
+                        Turbo::Core::TAttachment &core_color_attachment = core_color_attachments[color_attachment_index];
+                        Turbo::Render::TColorImage &render_color_attachment = render_color_attachments[color_attachment_index];
+
+                        Turbo::Core::TFormatType core_format = core_color_attachment.GetFormat().GetFormatType();
+                        Turbo::Core::TFormatType render_format = (Turbo::Core::TFormatType)render_color_attachment.GetFormat();
+
+                        if (core_format != render_format)
+                        {
+                            return false;
+                        }
+
+                        Turbo::Core::TSampleCountBits core_sample_count = core_color_attachment.GetVkSampleCountFlagBits();
+                        Turbo::Core::TSampleCountBits render_sample_count = (Turbo::Core::TSampleCountBits)render_color_attachment.GetSampleCountBits();
+
+                        if (core_sample_count != render_sample_count)
+                        {
+                            return false;
+                        }
+                    }
+
+                    for (uint32_t input_attachment_index = 0; input_attachment_index < render_input_attachments_count; input_attachment_index++)
+                    {
+                        Turbo::Core::TAttachment &core_input_attachment = core_input_attachments[input_attachment_index];
+                        Turbo::Render::TImage &render_input_attachment = render_input_attachments[input_attachment_index];
+
+                        Turbo::Core::TFormatType core_format = core_input_attachment.GetFormat().GetFormatType();
+                        Turbo::Core::TFormatType render_format = (Turbo::Core::TFormatType)render_input_attachment.GetFormat();
+
+                        if (core_format != render_format)
+                        {
+                            return false;
+                        }
+
+                        Turbo::Core::TSampleCountBits core_sample_count = core_input_attachment.GetVkSampleCountFlagBits();
+                        Turbo::Core::TSampleCountBits render_sample_count = (Turbo::Core::TSampleCountBits)render_input_attachment.GetSampleCountBits();
+
+                        if (core_sample_count != render_sample_count)
+                        {
+                            return false;
+                        }
+                    }
+
+                    for (uint32_t depth_stencil_attachment_index = 0; depth_stencil_attachment_index < render_depth_stencil_attachment_count; depth_stencil_attachment_index++)
+                    {
+                        Turbo::Core::TAttachment &core_depth_stencil_attachment = core_depth_stencil_attachments[depth_stencil_attachment_index];
+                        Turbo::Render::TDepthStencilImage &render_depth_stencil_attachment = render_depth_stencil_attachments[depth_stencil_attachment_index];
+
+                        Turbo::Core::TFormatType core_format = core_depth_stencil_attachment.GetFormat().GetFormatType();
+                        Turbo::Core::TFormatType render_format = (Turbo::Core::TFormatType)render_depth_stencil_attachment.GetFormat();
+
+                        if (core_format != render_format)
+                        {
+                            return false;
+                        }
+
+                        Turbo::Core::TSampleCountBits core_sample_count = core_depth_stencil_attachment.GetVkSampleCountFlagBits();
+                        Turbo::Core::TSampleCountBits render_sample_count = (Turbo::Core::TSampleCountBits)render_depth_stencil_attachment.GetSampleCountBits();
+
+                        if (core_sample_count != render_sample_count)
+                        {
+                            return false;
+                        }
+                    }
                 }
+
+                return true;
             }
         }
 
