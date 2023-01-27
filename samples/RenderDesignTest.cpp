@@ -439,7 +439,7 @@ void Test1()
                 if (color_texture_resource.IsValid())                                                        // 判断句柄是否合法（有效）
                 {
                     Turbo::Render::TTexture2D color_texture = resources.Get<Turbo::Render::TTexture2D>(color_texture_resource);
-                    std::cout << "color_texture::Width×Height::" << color_texture.GetWidth() << "×" << color_texture.GetHeight() << std::endl;
+                    std::cout << u"color_texture::Width×Height::" << color_texture.GetWidth() << u"×" << color_texture.GetHeight() << std::endl;
                 }
             }
         });
@@ -511,9 +511,56 @@ void Test1()
 #endif
 }
 
+void Test2()
+{
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    Turbo::Render::TTexture2D color_texture_2d;
+    Turbo::Render::TTexture2D::Descriptor color_texture_2d_descriptor = {};
+    color_texture_2d_descriptor.width = 512;
+    color_texture_2d_descriptor.height = 512;
+    color_texture_2d_descriptor.mipLevels = 1;
+    color_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    color_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture_2d.Create("color_texture_2d", color_texture_2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TDepthTexture2D depth_texture_2d;
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor = {};
+    depth_texture2d_descriptor.width = 512;
+    depth_texture2d_descriptor.height = 512;
+    depth_texture2d_descriptor.mipLevels = 1;
+    depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    depth_texture_2d.Create("depth_texture_2d", depth_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TSubpass subpass0;
+    subpass0.AddColorAttachment(color_texture_2d);
+    subpass0.SetDepthStencilAttachment(depth_texture_2d);
+
+    Turbo::Render::TRenderPass render_pass;
+    render_pass.AddSubpass(subpass0);
+
+    {
+        Turbo::Render::TRenderPassPool render_pass_pool(&context);
+        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_0.IsValid() ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
+
+        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_1.IsValid() ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
+
+        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_2.IsValid() ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+    }
+
+    color_texture_2d.Destroy(&resource_allocator);
+    depth_texture_2d.Destroy(&resource_allocator);
+}
+
 int main()
 {
     Test0();
     Test1();
+    Test2();
     return 0;
 }

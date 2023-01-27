@@ -2386,3 +2386,4 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`中增加`friend class TRenderPassPool`友元类
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中`TRenderPassProxy`中，更新完善`Create(...)`函数
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中，更新完善`~TRenderPassPool()`析构函数
+  >* 更新`./samples`下`RenderDesignTest`示例

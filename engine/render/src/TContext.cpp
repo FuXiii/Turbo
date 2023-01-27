@@ -28,7 +28,9 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
     // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
     // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
 
-    // TODO: 考虑是否剔除重复的Attachment?
+    // TODO: 这里在构建Attachment时需要指定ImageLayout，由于ImageLayout可以有很多种布局，目前并不知道之前Image的布局，目前默认为UNDEFINED。而在Filament中大部分Image的布局都为UNDEFINED或者GENERAL（这个布局用的最多）
+    // TODO: Filament中对于Attachment的initialLayout多为UNDEFINED或者GENERAL，对于finalLayout多为GENERAL，如果作为采样纹理的话则为SHADER_READ_ONLY_OPTIMAL
+    // TODO: 详情请参考Filament中/filament/backend/src/vulkan/VulkanFboCache.cpp : VkRenderPass VulkanFboCache::getRenderPass(RenderPassKey config) noexcept
     if (context != nullptr)
     {
         Turbo::Core::TDevice *device = context->GetDevice();
@@ -70,7 +72,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
                     core_subpass.AddColorAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
                 }
                 else
@@ -81,7 +83,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
                     core_attachments.push_back(color_attachment);
                     core_subpass.AddColorAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
                 }
@@ -111,7 +113,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::ATTACHMENT_OPTIMAL);
                     core_subpass.AddInputAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
                 }
                 else
@@ -122,7 +124,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::ATTACHMENT_OPTIMAL);
                     core_attachments.push_back(input_attachment);
                     core_subpass.AddInputAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
                 }
@@ -152,7 +154,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachment.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
                     core_subpass.SetDepthStencilAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
                 }
                 else
@@ -163,7 +165,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
                     Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachment.GetSampleCountBits();
                     Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
 
-                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
                     core_attachments.push_back(depth_stencil_attachment);
                     core_subpass.SetDepthStencilAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
                 }
@@ -450,9 +452,10 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
     TRenderPassProxy find_render_pass_proxy = this->Find(renderPass);
     if (find_render_pass_proxy.IsValid())
     {
+        std::cout << "Subpass Found" << std::endl;
         return find_render_pass_proxy;
     }
-
+    std::cout << "new Subpass" << std::endl;
     // create a new RenderPass/TRenderPassProxy
     this->renderPassProxies.push_back(TRenderPassProxy());
     size_t render_pass_index = this->renderPassProxies.size() - 1;
