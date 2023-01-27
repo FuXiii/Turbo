@@ -65,6 +65,8 @@ class TImage
         TImageUsages usages;
         TDomain domain;
     };
+    
+    friend class TRenderPassPool;
 
   private:
     Turbo::Core::TImage *image = nullptr;

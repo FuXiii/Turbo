@@ -33,53 +33,140 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
     {
         Turbo::Core::TDevice *device = context->GetDevice();
 
+        std::vector<VkImage> frame_buffer_layout;
         std::vector<Turbo::Core::TAttachment> core_attachments;
         std::vector<Turbo::Core::TSubpass> core_subpasses;
 
         std::vector<Turbo::Render::TSubpass> subpasses = renderPass.GetSubpasses();
         for (Turbo::Render::TSubpass &subpass_item : subpasses)
         {
-            uint32_t index = 0;
             Turbo::Core::TSubpass core_subpass(Turbo::Core::TPipelineType::Graphics);
 
             std::vector<Turbo::Render::TColorImage> color_attachments = subpass_item.GetColorAttachments();
             std::vector<Turbo::Render::TImage> input_attachments = subpass_item.GetInputAttachments();
-            Turbo::Render::TDepthStencilImage depth_stencil_attachments = subpass_item.GetDepthStencilAttachment();
+            Turbo::Render::TDepthStencilImage depth_stencil_attachment = subpass_item.GetDepthStencilAttachment();
 
             for (Turbo::Render::TColorImage &core_color_attachment_item : color_attachments)
             {
-                Turbo::Render::TFormat format = core_color_attachment_item.GetFormat();
-                Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
-                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+                bool is_found = false;
+                uint32_t frame_buffer_layout_index = 0;
+                for (; frame_buffer_layout_index < frame_buffer_layout.size(); frame_buffer_layout_index++)
+                {
+                    VkImage frame_buffer_vk_image = frame_buffer_layout[frame_buffer_layout_index];
+                    if (core_color_attachment_item.IsValid())
+                    {
+                        VkImage attachment_vk_image = core_color_attachment_item.image->GetVkImage();
+                        if (frame_buffer_vk_image == attachment_vk_image)
+                        {
+                            is_found = true;
+                            break;
+                        }
+                    }
+                }
 
-                Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
-                core_attachments.push_back(color_attachment);
-                core_subpass.AddColorAttachmentReference(index, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-                index = index + 1;
+                if (is_found)
+                {
+                    Turbo::Render::TFormat format = core_color_attachment_item.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_subpass.AddColorAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+                }
+                else
+                {
+                    frame_buffer_layout.push_back(core_color_attachment_item.image->GetVkImage());
+
+                    Turbo::Render::TFormat format = core_color_attachment_item.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = core_color_attachment_item.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment color_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_attachments.push_back(color_attachment);
+                    core_subpass.AddColorAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+                }
             }
 
             for (Turbo::Render::TImage &core_input_attachment_item : input_attachments)
             {
-                Turbo::Render::TFormat format = core_input_attachment_item.GetFormat();
-                Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
-                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+                bool is_found = false;
+                uint32_t frame_buffer_layout_index = 0;
+                for (; frame_buffer_layout_index < frame_buffer_layout.size(); frame_buffer_layout_index++)
+                {
+                    VkImage frame_buffer_vk_image = frame_buffer_layout[frame_buffer_layout_index];
+                    if (core_input_attachment_item.IsValid())
+                    {
+                        VkImage attachment_vk_image = core_input_attachment_item.image->GetVkImage();
+                        if (frame_buffer_vk_image == attachment_vk_image)
+                        {
+                            is_found = true;
+                            break;
+                        }
+                    }
+                }
 
-                Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
-                core_attachments.push_back(input_attachment);
-                core_subpass.AddInputAttachmentReference(index, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
-                index = index + 1;
+                if (is_found)
+                {
+                    Turbo::Render::TFormat format = core_input_attachment_item.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_subpass.AddInputAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
+                }
+                else
+                {
+                    frame_buffer_layout.push_back(core_input_attachment_item.image->GetVkImage());
+
+                    Turbo::Render::TFormat format = core_input_attachment_item.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = core_input_attachment_item.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment input_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_attachments.push_back(input_attachment);
+                    core_subpass.AddInputAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::ATTACHMENT_OPTIMAL);
+                }
             }
 
-            if (depth_stencil_attachments.IsValid())
+            if (depth_stencil_attachment.IsValid())
             {
-                Turbo::Render::TFormat format = depth_stencil_attachments.GetFormat();
-                Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachments.GetSampleCountBits();
-                Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+                bool is_found = false;
+                uint32_t frame_buffer_layout_index = 0;
+                for (; frame_buffer_layout_index < frame_buffer_layout.size(); frame_buffer_layout_index++)
+                {
+                    VkImage frame_buffer_vk_image = frame_buffer_layout[frame_buffer_layout_index];
+                    if (depth_stencil_attachment.IsValid())
+                    {
+                        VkImage attachment_vk_image = depth_stencil_attachment.image->GetVkImage();
+                        if (frame_buffer_vk_image == attachment_vk_image)
+                        {
+                            is_found = true;
+                            break;
+                        }
+                    }
+                }
 
-                Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
-                core_attachments.push_back(depth_stencil_attachment);
-                core_subpass.SetDepthStencilAttachmentReference(index, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-                index = index + 1;
+                if (is_found)
+                {
+                    Turbo::Render::TFormat format = depth_stencil_attachment.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachment.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_subpass.SetDepthStencilAttachmentReference(frame_buffer_layout_index, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+                }
+                else
+                {
+                    frame_buffer_layout.push_back(depth_stencil_attachment.image->GetVkImage());
+
+                    Turbo::Render::TFormat format = depth_stencil_attachment.GetFormat();
+                    Turbo::Render::TSampleCountBits sample_count_bits = depth_stencil_attachment.GetSampleCountBits();
+                    Turbo::Core::TFormatInfo format_info = device->GetPhysicalDevice()->GetFormatInfo((Turbo::Core::TFormatType)format);
+
+                    Turbo::Core::TAttachment depth_stencil_attachment(format_info, (Turbo::Core::TSampleCountBits)sample_count_bits, Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Core::TImageLayout::UNDEFINED);
+                    core_attachments.push_back(depth_stencil_attachment);
+                    core_subpass.SetDepthStencilAttachmentReference(frame_buffer_layout.size() - 1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+                }
             }
 
             core_subpasses.push_back(core_subpass);
@@ -98,7 +185,10 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
 void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
 {
     // TODO:Destroy Turbo::Core::TRenderPass
-    delete this->renderPass;
+    if (this->renderPass != nullptr)
+    {
+        delete this->renderPass;
+    }
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
@@ -130,6 +220,10 @@ Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 Turbo::Render::TRenderPassPool::~TRenderPassPool()
 {
     // TODO:release this->renderPassProxies;
+    for (Turbo::Render::TRenderPassPool::TRenderPassProxy &render_pass_proxy_item : this->renderPassProxies)
+    {
+        render_pass_proxy_item.Destroy();
+    }
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)

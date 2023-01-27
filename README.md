@@ -2380,3 +2380,9 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中`Create`函数增加`TContext *context`参数
   >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中更新完善`Create`函数
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2023/1/27 设计架构
+  >
+  >* `./engine/render`下`TImage`中增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中`TRenderPassProxy`中，更新完善`Create(...)`函数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中，更新完善`~TRenderPassPool()`析构函数
