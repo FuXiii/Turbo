@@ -505,13 +505,15 @@ float GetPerlinWorleyCloudDensity(vec3 point, float coverage, BoundingBox boundi
     float base_cloud_with_coverage = remap(base_cloud, 1 - coverage, 1., 0., 1.); // coverage
 
     float final_cloud = base_cloud_with_coverage;
-    if (my_push_constants.isHighFreq)
+    if (my_push_constants.isHighFreq && final_cloud > 0)
     {
-        vec3 high_frequency_worly_noise = texture(sampler3D(worleyNoise, mySampler), sample_point * 0.1, 0).rgb;
+        vec3 high_frequency_worly_noise = texture(sampler3D(worleyNoise, mySampler), sample_point * 8, 0).rgb;
         float high_freq_FBM = (high_frequency_worly_noise.r * 0.625) + (high_frequency_worly_noise.g * 0.25) + (high_frequency_worly_noise.b * 0.125);
-        float high_freq_noise_modifier = mix(high_freq_FBM, 1.0 - high_freq_FBM, clamp(point.y * 10.0, 0, 1));
 
-        final_cloud = remap(base_cloud_with_coverage, high_freq_noise_modifier * 0.2, 1.0, 0.0, 1.0);
+        float one_minus_base_shape = 1 - final_cloud;
+        float detail_erode_weight = pow(one_minus_base_shape, 3);
+
+        final_cloud = final_cloud - high_freq_FBM * detail_erode_weight;
     }
 
     return final_cloud;
@@ -572,8 +574,7 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
-        //int max_step = 6;
-        int max_step = 32;
+        int max_step = 6;
         float step = abs(length(end_pos - start_pos) / 3) / max_step;
         float light_ray_density = 0.0;
 
@@ -619,6 +620,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         int max_step = 128;
         float step = abs(length(end_pos - start_pos)) / max_step;
         vec3 T = vec3(1, 1, 1);
+        float A = 0; // absorptivity
 
         float mu = dot(sun_dir, dir);
         float phase_function = HenyeyGreensteinPhaseFunction(0.5, sun_dir, dir); // 相函数计算
@@ -645,9 +647,11 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
                 vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox) /** (1 - exp(-density))*/;
                 luminance *= sampleSigmaS;
+
                 vec3 transmittance = exp(-sampleSigmaE * step);
                 color += T * ((luminance - luminance * transmittance) / sampleSigmaE);
                 T *= transmittance;
+
                 if (length(T) < 0.01)
                 {
                     break;
@@ -655,11 +659,68 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             }
             //</光照>
         }
+
         return color;
     }
 
     return color;
 }
+
+vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage, float time)
+{
+    vec3 color = vec3(0, 0, 0);
+    BoundingBoxIntersections intersections;
+    bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
+
+    float speed = 0.01;
+    move = move + vec3(speed * time, 0, 0);
+
+    if (is_intersect)
+    {
+        vec3 start_pos = intersections.firstInterectionPos;
+        vec3 end_pos = intersections.secondInterectionPos;
+
+        int max_step = 128;
+        float step = abs(length(end_pos - start_pos)) / max_step;
+
+        float mu = dot(sun_dir, dir);
+        float phase_function = HenyeyGreensteinPhaseFunction(0.5, sun_dir, dir); // 相函数计算
+
+        vec3 sunLight = sunLightColour * my_push_constants.power;
+        vec3 ambient = vec3(0.412, 0.513, 0.607);
+        vec3 radiance = vec3(1, 1, 1);
+
+        vec3 point = start_pos;
+        float T = 1; // transmittance
+        float A = 0; // absorptivity
+
+        for (int i = 0; i < max_step; ++i)
+        {
+            point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
+            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+            if (density > 0)
+            {
+                // T *= exp(-density * step);
+                T *= exp(-density * step); // Beer's Powder
+
+                A = log(1 / T);
+                float E = 2 * exp(-A) * (1 - exp(-A * 2)); // light energy ()
+                color = E * ambient;
+
+                if (T < 0.01)
+                {
+                    break;
+                }
+            }
+        }
+
+        return color;
+    }
+
+    return color;
+}
+
+#define IS_USE_TEST 0
 
 void main()
 {
@@ -703,7 +764,11 @@ void main()
     vec3 rayDir = pixel_pos - cameraPos;
     rayDir = normalize(rayDir);
 
+#if IS_USE_TEST
+    vec3 color = TEST_RayMarchingBoundingBox(cameraPos, rayDir, bounding_box, coverage, iTime);
+#else
     vec3 color = RayMarchingBoundingBox(cameraPos, rayDir, bounding_box, coverage, iTime);
+#endif
 
     outColor = vec4(color, 1.0);
 }

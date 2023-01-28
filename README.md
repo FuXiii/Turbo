@@ -2387,3 +2387,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中`TRenderPassProxy`中，更新完善`Create(...)`函数
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中，更新完善`~TRenderPassPool()`析构函数
   >* 更新`./samples`下`RenderDesignTest`示例
+
+* 2023/1/28 设计架构
+  >
+  >* 更新`./samples`下`VolumetricCloud`示例中的对于`./asset/shaders/volumetric_cloud.frag`中对于高频细节纹理使用的算法
