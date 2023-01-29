@@ -666,6 +666,55 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
     return color;
 }
 
+float TEST_BeerPowder(float density, float transmittance)
+{
+    float absorptivity = log(1 / transmittance);
+    return 2 * exp(-density * absorptivity) * (1 - exp(-density * 2));
+}
+
+float TEST_LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float coverage, BoundingBox boundingBox)
+{
+    float energy = 0;
+
+    BoundingBoxIntersections intersections;
+    bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
+    float T = 1; // transmittance
+    float light_ray_density = 0.0;
+
+    if (is_intersect)
+    {
+        vec3 start_pos = intersections.firstInterectionPos;
+        vec3 end_pos = intersections.secondInterectionPos;
+
+        int max_step = 6;
+        float step = abs(length(end_pos - start_pos) / 3) / max_step;
+
+        vec3 point = start_pos;
+        float A = 0; // absorptivity
+        for (int j = 0; j < max_step; j++)
+        {
+            point = start_pos + dir * step * j;
+            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+            if (density > 0)
+            {
+                light_ray_density += density * step;
+
+                T *= exp(-density * step); // Beer's Powder
+
+                energy = TEST_BeerPowder(light_ray_density, T);
+
+                if (T < 0.01)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return TEST_BeerPowder(light_ray_density, T);
+    // return energy;
+}
+
 vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, float coverage, float time)
 {
     vec3 color = vec3(0, 0, 0);
@@ -674,6 +723,8 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
     float speed = 0.01;
     move = move + vec3(speed * time, 0, 0);
+
+    float luminance = 0;
 
     if (is_intersect)
     {
@@ -693,19 +744,20 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
         vec3 point = start_pos;
         float T = 1; // transmittance
         float A = 0; // absorptivity
-
+        float E = 0; // energy
         for (int i = 0; i < max_step; ++i)
         {
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
-            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+            float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox) * step;
+
             if (density > 0)
             {
-                // T *= exp(-density * step);
-                T *= exp(-density * step); // Beer's Powder
+                float lum = TEST_LightRay(point, sun_dir, mu, vec3(0), coverage, boundingBox);
+                lum *= density * step;
+                float transmittance = exp(-density * step);
+                luminance += transmittance * lum * phase_function;
 
-                A = log(1 / T);
-                float E = 2 * exp(-A) * (1 - exp(-A * 2)); // light energy ()
-                color = E * ambient;
+                T *= transmittance;
 
                 if (T < 0.01)
                 {
@@ -714,13 +766,13 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
             }
         }
 
-        return color;
+        return ambient * luminance * sunLight;
     }
 
     return color;
 }
 
-#define IS_USE_TEST 0
+#define IS_USE_TEST 1
 
 void main()
 {
