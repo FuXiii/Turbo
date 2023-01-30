@@ -50,7 +50,7 @@ void Turbo::Render::TBuffer::Copy(void *src, uint64_t size)
         uint64_t copy_size = this->descriptor.size < size ? this->descriptor.size : size;
 
         Turbo::Core::TMemoryTypeInfo memory_type_info = this->buffer->GetMemoryTypeInfo();
-        if (memory_type_info.IsHostVisible())
+        if (memory_type_info.IsHostVisible() && this->buffer->IsMappable())
         {
             void *buffer_ptr = this->buffer->Map();
             memcpy(buffer_ptr, src, copy_size);

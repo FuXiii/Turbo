@@ -151,9 +151,25 @@
   >
   >* 创建`异步资源回收`章节
 
-* 2023/1/17
+* 2023/1/18
   >
-  >* 创建`Context::CmdBeginRenderPass`章节
+  >* 更新`Context::CmdBeginRenderPass`章节
+  >* 更新`资源的创建与销毁`章节
+  >* 更新`异步资源回收`章节
+
+* 2023/1/22
+  >
+  >* `Context::CmdBeginRenderPass`章节下创建`RenderPass 创建`章节
+  >* `Context::CmdBeginRenderPass`章节下创建`FrameBuffer 创建`章节
+  >* `Context::CmdBeginRenderPass`章节下`FrameBuffer 创建`章节下创建`RenderPassPool`章节
+
+* 2023/1/23
+  >
+  >* `Context::CmdBeginRenderPass`章节下增加`RenderPassProxy(RenderPass代理)`章节
+
+* 2023/1/26
+  >
+  >* 创建`Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass`章节
 
 ---
 
@@ -1008,6 +1024,10 @@ class TResourceAllocator
 >       TImageLayout layout//由Turbo维护，默认值TImageLayout::UNDEFINED
 >)
 >```
+
+目前`TResourceAllocator`分配和销毁`Image`和`Buffer`是直接分配，直接销毁的（这是短期目标），目前每一帧中用到就分配，结束就销毁，但是这并不是一种良构。正常来说分配的`Image`和`Buffer`最终应该在`Context`或者`ResourceAllocator`中存储并使用`Cache`或者`Pool`之类技术存储，这样也能与`异步资源回收`(见`异步资源回收`章节)互相配合。
+
+*注：`异步资源回收`主要是针对`FrameGraph`中的资源进行回收，用户自定义的资源，比如采样纹理之类的还是要自己管理*
 
 ### 资源的所有者端域
 
@@ -2181,7 +2201,7 @@ context->CmdBeginRenderPass(render_pass)
 ```CXX
 [=](const PresentPassData &data, const TResources &resources, void *context) 
 {
-    FrameGraph::RenderPass fg_render_pass = this->GetRenderPass();
+    FrameGraph::RenderPass fg_render_pass = resources.GetRenderPass();
 
     //std::vector<FrameGraph::Subpass> subpasses = fg_render_pass.GetSubpasses();
     //FrameGraph::Attachment attachment = subpasses[x].GetAttachment();
@@ -2209,6 +2229,45 @@ class Context
 ```
 
 对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
+
+### RenderPass 创建
+
+当调用`Context::BeginRenderPass(...)`后，`Turbo`会去查找是否有已经创建完的`RenderPass`,尝试重复利用已有的`RenderPass`，如果没有找到的话，则创建相应的`RenderPass`。
+
+由于需要查询当前`Context`是否存在相互兼容的`RenderPass`已做到重复利用已有的`RenderPass`，此时需要`Context`中存在一个用于存储`RenderPass`的集合（`Set`）或池子(`Pool`,这个不错)
+
+#### RenderPassPool
+
+`Context`下有多个`RenderPass`，存储在`RenderPassPool`中。
+
+`RenderPassPool`应该有如下功能：
+
+* `bool Find(RenderPass& renderPass)`：查询相应的兼容的`RenderPass`，如果存在则返回`true`,并将结果写入到`RenderPass& renderPass`中，如果没找到则返回`false`，在内部会去调用`std::find(...)`函数，所以`class RenderPass`需要实现对于`==`符号重载
+* `RenderPass& Allocate(RenderPass& renderPass)`:先使用`Find(renderPass)`查询一下是否有该`RenderPass`,如果有直接返回相应的`RenderPass`，反之则分配一个`RenderPass`并存入池子中，之后返回创建的`RenderPass`
+* `void Free(RenderPass& renderPass)`：销毁相应的`RenderPass`
+
+对于`RenderPassPool`中存储的`RenderPass`应该关心如下事物（核心思路是适配`Turbo::Core::TRenderPass`）：
+
+* 对应的`Turbo::Core::TRenderPass`
+* 从`Turbo::Render::TRenderPass`中的各种`Subpass`
+* 从`Turbo::Render::TRenderPass`中的各种`Subpass`中指定的`attachment`相关的
+
+### FrameBuffer 创建
+
+一个`RenderPass`下可以绑定多个`FrameBuffer`
+
+### RenderPassProxy(RenderPass代理)
+
+由于需要管理`RenderPass`和`FrameBuffer`，所以提供了`RenderPassProxy`类，用于整合管理`RenderPass`和`FrameBuffer`，并由`RenderPassPool`创建和销毁
+
+### Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass
+
+通过用户指定的`Turbo::Render::TRenderPass`在`RenderPassPool`中创建`Turbo::Core::TRenderPass`，对于`Turbo`来说其主要任务有两个
+
+1. 收集各个`Subpass`中的`Attachment`，集成到统一的一个`Attachment`数组中
+2. 计算各个`Subpass`中的`Attachment`相对于`Attachment`数组中的偏移等（`AttachmentReference`）
+
+由于会有重复的`Attachment`(如何判断两个`Attachment`相等：通过查看`Attachment`底层`Image`是否为同一个)，需要剔除重复的`Attachment`项目
 
 ## Shader
 
@@ -2310,9 +2369,11 @@ graph TD;
     PassNodeExecute-->DestroyResource
     DestroyResource--下一个PassNode-->CreateResource
 ```
+
 这里在`销毁不需要的资源数据`时，此时可能用户并没有调用`Flush`，换句话说就是，用户此时可能并没有将指令推送到`GPU`，如果此时销毁了相应的资源，之后再推送指令，由于资源已经销毁了，所以在`销毁不需要的资源数据`时并不能真的去销毁资源，而需要将资源保存下来，等待未来的某一合适的时候销毁。
 
 `Filament`引擎在`销毁不需要的资源数据`时，是将资源保存到了一个`Cache`中，如下：
+
 ```CXX
 //Filament engine code
 void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
@@ -2336,7 +2397,13 @@ void ResourceAllocator::destroyTexture(TextureHandle h) noexcept {
     }
 }
 ```
+
 在`Filament`中`mTextureCache`是作为`ResourceAllocator`成员变量来缓存资源文件的，这是一个不错的选择。
+
+目前能想到的资源回收有两个方面：
+
+1. 每个资源有个最长生命周期，超过生命周期将自动回收（这个可能需要想一下`Turbo::Core::Image`、`Turbo::Core::TImageView`和`Turbo::Render::TImage`之间如何配合，配合不好可能会出问题）
+2. `ResourceAllocator`提供一个`Gc()`函数，用于定期回收资源
 
 ## Mesh，Material和Drawable
 

@@ -36,8 +36,8 @@ float map(vec3 p) {
 vec3 RayMarch(vec3 origin,vec3 dir)
 {
     vec3 result=vec3(0,0,0);
-
     const int maxstep = 64;
+
     float t = 0; // current distance traveled along ray
     for (int i = 0; i < maxstep; ++i) {
         vec3 p = origin + dir * t; // World space position of sample

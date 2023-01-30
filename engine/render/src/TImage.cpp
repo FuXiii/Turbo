@@ -41,7 +41,7 @@ uint32_t Turbo::Render::TImage::GetWidth() const
     return this->descriptor.width;
 }
 
-uint32_t Turbo::Render::TImage::GteHeight() const
+uint32_t Turbo::Render::TImage::GetHeight() const
 {
     return this->descriptor.height;
 }
@@ -69,6 +69,11 @@ Turbo::Render::TImageUsages Turbo::Render::TImage::GetUsages() const
 Turbo::Render::TDomain Turbo::Render::TImage::GetDomain() const
 {
     return this->descriptor.domain;
+}
+
+Turbo::Render::TSampleCountBits Turbo::Render::TImage::GetSampleCountBits() const
+{
+    return Turbo::Render::TSampleCountBits::SAMPLE_1_BIT;
 }
 
 bool Turbo::Render::TImage::IsValid() const

@@ -43,6 +43,10 @@
   >* 更新`FrameGraph::Subpass`章节
   >* 更新`FrameGraph::Mermaid`章节的示例图
 
+* 2023/1/18
+  >
+  >* 更新`FrameGraph::RenderPass`章节，其中,增加`如何在Execute阶段获得FrameGraph::RenderPass`章节
+
 ## PassNode与RenderPass
 
 在`PassNode::Setup`阶段需要配置当前`PassNode`的各种`Subpass`，之后`Turbo`引擎会根据用户的配置创建`RenderPass`和`FrameBuffer`
@@ -316,6 +320,17 @@ class RenderPass
        
         void AddSubpass(Subpass& subpass);
 };
+```
+
+### 如何在`Execute`阶段获得`FrameGraph::RenderPass`
+
+在`Execute`阶段，回调函数参数有一个`Turbo::FrameGraph::TResources`，可以通过该参数获取`FrameGraph::RenderPass`
+```CXX
+//PassNode::Execute阶段回调
+[=](const ColorPassData &data, const Turbo::FrameGraph::TResources &resources, void *context)
+{
+    FrameGraph::RenderPass render_pass = resources.GetRenderPass();
+}
 ```
 
 ## FrameGraph::Mermaid

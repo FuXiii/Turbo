@@ -133,6 +133,7 @@ class TImage : public Turbo::Core::TVulkanHandle
 
     TMemoryTypeInfo GetMemoryTypeInfo();
 
+    bool IsMappable();
     void *Map();
     void Unmap();
 

@@ -27,6 +27,8 @@ using TVersion = uint32_t;
 struct TNodeHandle
 {
     ID id = TURBO_INVALID_ID;
+
+    bool IsValid();
 };
 
 struct TPass : public TNodeHandle
@@ -137,6 +139,10 @@ class TSubpass
     std::vector<TResource> GetWrites();
     std::vector<TResource> GetReads();
     std::vector<TResource> GetInputs();
+
+    TResource GetWrite(size_t index);
+    TResource GetRead(size_t index);
+    TResource GetInput(size_t index);
 };
 
 class TRenderPass
@@ -154,6 +160,7 @@ class TRenderPass
     void AddSubpass(const TSubpass &subpass);
 
     std::vector<Turbo::FrameGraph::TSubpass> GetSubpasses();
+    Turbo::FrameGraph::TSubpass GetSubpass(size_t index);
 };
 
 class TNode
@@ -337,6 +344,8 @@ class TResources
 
     template <typename T>
     T &Get(TResource resource) const;
+
+    Turbo::FrameGraph::TRenderPass GetRenderPass() const;
 
     // template <typename Virtualizable>
     // const typename Virtualizable::Descriptor &getDescriptor(TResource resource);

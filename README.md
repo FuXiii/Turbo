@@ -2333,3 +2333,65 @@ Turbo是渲染引擎
 * 2023/1/17 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraph.md`
+* 2023/1/18 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* 更新`./.gitmodules`下的`thirdparty/glm`库链接
+  >* 更新`./docs`下的`FAQ.md`
+  >* `./engine/framegraph`下`TResources`中增加`Turbo::FrameGraph::TRenderPass GetRenderPass() const`成员函数
+  >* 更新`./samples`下的`RenderDesignTest.cpp`
+
+* 2023/1/19 设计架构
+  >
+  >* `./engine/framegraph`下`TRenderPass`中增加`Turbo::FrameGraph::TSubpass GetSubpass(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetWrite(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetRead(size_t index)`成员函数
+  >* `./engine/framegraph`下`TSubpass`中增加`TResource GetInput(size_t index)`成员函数
+  >* `./engine/framegraph`下`TNodeHandle`中增加`bool IsValid()`成员函数
+  >* `./engine/render`下`TImage`中`uint32_t GteHeight() const`成员函数，更改成`uint32_t GetHeight() const`。之前拼写错误
+
+* 2023/1/21 设计架构
+  >
+  >* `./engine/core`下`TBuffer`中`Map`函数中有,当想要映射内存时，目前使用的是用户创建`TBuffer`时，是否指定了`HOST_ACCESS_RANDOM`或者`HOST_ACCESS_SEQUENTIAL_WRITE`标志位，如果设置了该标志位说明内存可以进行映射，但是某些移动设备（手机或笔记本等平台端）上的内存是`CPU`与`GPU`共存、共享的。换句话说当你在上层创建一个`GPU`端的内存(此时用户指定的是`DEDICATED_MEMORY`)，在底层也许是`CPU`和`GPU`共享的内存，所以此时根据用户是否指定了`HOST_ACCESS_RANDOM`和`HOST_ACCESS_SEQUENTIAL_WRITE`标志位来判断是否可以`Map`是不合理的，应该查看分配的内存是否有在`host`端能够访问，能访问将返回映射的内存指针，反之则返回`nullptr`,但是当前`VulkanMemoryAllocator`中对于内存分配，如果没有使用`Host`端的相关标志位（`HOST_ACCESS_RANDOM`或者`HOST_ACCESS_SEQUENTIAL_WRITE`），在`VulkanMemoryAllocator`中都被认为是不能进行内存映射的，所以需要在`Turbo::Render::TBuffer::Copy(...)`中增加额外判断，判断内存是否支持映射
+  >* `./engine/core`下`TBuffer`中增加`bool IsMappable()`成员函数
+  >* `./engine/core`下`TBuffer`中`Copy`函数中增加对`this->buffer->IsMappable()`的判断
+  >* `./engine/core`下`TImage`中增加`bool IsMappable()`成员函数
+
+* 2023/1/22 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/render`下`TContext`中增加`class TRenderPassPool`类
+  >* `./engine/render`下`TContext`中`class TRenderPassPool`下增加`class TRenderPassProxy`类
+
+* 2023/1/23 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`void Create(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`void Destroy()`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TRenderPassPool`中`Find(...)`函数更改成`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TRenderPassPool`中增加`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中增加`void Free(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TRenderPassPool`中`TRenderPassProxy`增加`bool IsValid()`成员函数
+  
+* 2023/1/26 设计架构
+  >
+  >* `./engine/render`下`TRenderPassPool`更新完善`Find(...)`函数算法
+  >* `./engine/render`下`TImage.h`中增加`typedef enum TSampleCountBits`
+  >* `./engine/render`下`TImage.h`中增加`using TSampleCounts = uint32_t`
+  >* `./engine/render`下`TImage`中增加`TSampleCountBits GetSampleCountBits() const`成员函数，目前只支持`Turbo::Render::TSampleCountBits::SAMPLE_1_BIT`
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`构造函数增加`TContext *context`参数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中`Create`函数增加`TContext *context`参数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中更新完善`Create`函数
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2023/1/27 设计架构
+  >
+  >* `./engine/render`下`TImage`中增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中`TRenderPassProxy`中，更新完善`Create(...)`函数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中，更新完善`~TRenderPassPool()`析构函数
+  >* 更新`./samples`下`RenderDesignTest`示例
+
+* 2023/1/28 设计架构
+  >
+  >* 更新`./samples`下`VolumetricCloud`示例中的对于`./asset/shaders/volumetric_cloud.frag`中对于高频细节纹理使用的算法
