@@ -578,11 +578,15 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
         float step = abs(length(end_pos - start_pos) / 3) / max_step;
         float light_ray_density = 0.0;
 
+        float T = 1;
+
         vec3 point = start_pos;
         for (int j = 0; j < max_step; j++)
         {
             point = start_pos + dir * step * j;
             float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
+
+            T *= exp(-density * step);
             if (density <= 0.0)
             {
                 break;
@@ -628,6 +632,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         vec3 sunLight = sunLightColour * my_push_constants.power;
 
         vec3 radiance = vec3(1, 1, 1);
+        vec3 ambient = vec3(0.412, 0.513, 0.607);
 
         vec3 point = start_pos;
         for (int i = 0; i < max_step; ++i)
@@ -643,9 +648,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             //<光照>
             if (density > 0.0)
             {
-                vec3 ambient = vec3(0.412, 0.513, 0.607);
-
-                vec3 luminance = /*0.1 **/ ambient + sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox) /** (1 - exp(-density))*/;
+                vec3 luminance = /*0.1 **/ /*ambient +*/ sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox) /** (1 - exp(-density))*/;
                 luminance *= sampleSigmaS;
 
                 vec3 transmittance = exp(-sampleSigmaE * step);
@@ -659,8 +662,6 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             }
             //</光照>
         }
-
-        return color;
     }
 
     return color;
@@ -752,12 +753,17 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
             if (density > 0)
             {
+                /*
                 float lum = TEST_LightRay(point, sun_dir, mu, vec3(0), coverage, boundingBox);
                 lum *= density * step;
                 float transmittance = exp(-density * step);
                 luminance += transmittance * lum * phase_function;
 
                 T *= transmittance;
+                */
+
+                T *= exp(-density * step);
+                color = vec3(T, T, T);
 
                 if (T < 0.01)
                 {
@@ -765,8 +771,6 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
                 }
             }
         }
-
-        return ambient * luminance * sunLight;
     }
 
     return color;
