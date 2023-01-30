@@ -621,7 +621,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
-        int max_step = 128;
+        int max_step = 32;
         float step = abs(length(end_pos - start_pos)) / max_step;
         vec3 T = vec3(1, 1, 1);
         float A = 0; // absorptivity
@@ -675,12 +675,9 @@ float TEST_BeerPowder(float density, float transmittance)
 
 float TEST_LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float coverage, BoundingBox boundingBox)
 {
-    float energy = 0;
-
     BoundingBoxIntersections intersections;
     bool is_intersect = BoundingBoxIntersect(origin, dir, boundingBox, intersections);
     float T = 1; // transmittance
-    float light_ray_density = 0.0;
 
     if (is_intersect)
     {
@@ -688,31 +685,27 @@ float TEST_LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float
         vec3 end_pos = intersections.secondInterectionPos;
 
         int max_step = 6;
-        float step = abs(length(end_pos - start_pos) / 3) / max_step;
+        float step = abs(length(end_pos - start_pos)) / max_step;
 
         vec3 point = start_pos;
         float A = 0; // absorptivity
         for (int j = 0; j < max_step; j++)
         {
-            point = start_pos + dir * step * j;
+            point = start_pos + dir * step * j * hash(dot(point, vec3(12.256, 2.646, 6.356)));
             float density = GetPerlinWorleyCloudDensity(point, coverage, boundingBox);
             if (density > 0)
             {
-                light_ray_density += density * step;
-
-                T *= exp(-density * step); // Beer's Powder
-
-                energy = TEST_BeerPowder(light_ray_density, T);
-
                 if (T < 0.01)
                 {
                     break;
                 }
+
+                T *= exp(-density * step);
             }
         }
     }
 
-    return TEST_BeerPowder(light_ray_density, T);
+    return T * my_push_constants.power;
     // return energy;
 }
 
@@ -732,7 +725,7 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
-        int max_step = 128;
+        int max_step = 32;
         float step = abs(length(end_pos - start_pos)) / max_step;
 
         float mu = dot(sun_dir, dir);
@@ -753,17 +746,18 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
             if (density > 0)
             {
-                /*
-                float lum = TEST_LightRay(point, sun_dir, mu, vec3(0), coverage, boundingBox);
-                lum *= density * step;
-                float transmittance = exp(-density * step);
-                luminance += transmittance * lum * phase_function;
+                T *= 2 * exp(-density * step) * (1 - exp(-density * 2));
 
-                T *= transmittance;
-                */
+                const vec3 albedo = vec3(0.85, 0.82, 0.90);
 
-                T *= exp(-density * step);
-                color = vec3(T, T, T);
+                float tr = T;
+                float sigma_s = 0.5;
+
+                vec3 single_in_scatter = albedo * density * step * TEST_LightRay(point, sun_dir, mu, vec3(0), coverage, boundingBox) * phase_function;
+
+                vec3 fake_multiple_scatt = 0.9 * albedo * density * step * pow(density / 0.1, 0.3) * 2.5 * vec3(0.33, 0.35, 0.34);
+
+                color += T * (single_in_scatter + fake_multiple_scatt) * ambient;
 
                 if (T < 0.01)
                 {
