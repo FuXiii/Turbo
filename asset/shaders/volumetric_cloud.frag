@@ -597,7 +597,7 @@ vec3 LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float cover
 
         vec3 beers_law = MultipleOctaves(light_ray_density, mu, step, sigmaExtinction);
 
-        return mix(beers_law * 2.0 * (1.0 - (exp(-step * light_ray_density * 2.0 * sigmaExtinction))), beers_law, 0.5 + 0.5 * mu);
+        result = mix(beers_law * 2.0 * (1.0 - (exp(-step * light_ray_density * 2.0 * sigmaExtinction))), beers_law, 0.5 + 0.5 * mu);
     }
 
     return result;
@@ -648,17 +648,17 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             //<光照>
             if (density > 0.0)
             {
+                if (length(T) < 0.01)
+                {
+                    break;
+                }
+
                 vec3 luminance = /*0.1 **/ /*ambient +*/ sunLight * phase_function * LightRay(point, sun_dir, mu, sigmaE, coverage, boundingBox) /** (1 - exp(-density))*/;
                 luminance *= sampleSigmaS;
 
                 vec3 transmittance = exp(-sampleSigmaE * step);
                 color += T * ((luminance - luminance * transmittance) / sampleSigmaE);
                 T *= transmittance;
-
-                if (length(T) < 0.01)
-                {
-                    break;
-                }
             }
             //</光照>
         }
@@ -700,7 +700,9 @@ float TEST_LightRay(vec3 origin, vec3 dir, float mu, vec3 sigmaExtinction, float
                     break;
                 }
 
-                T *= exp(-density * step);
+                T *= 2 * exp(-density * step) * (1 - exp(-density * 2));
+
+                // T *= exp(-density * step);
             }
         }
     }
@@ -737,8 +739,6 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
         vec3 point = start_pos;
         float T = 1; // transmittance
-        float A = 0; // absorptivity
-        float E = 0; // energy
         for (int i = 0; i < max_step; ++i)
         {
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
@@ -746,6 +746,11 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
             if (density > 0)
             {
+                if (T < 0.01)
+                {
+                    break;
+                }
+
                 T *= 2 * exp(-density * step) * (1 - exp(-density * 2));
 
                 const vec3 albedo = vec3(0.85, 0.82, 0.90);
@@ -758,11 +763,6 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
                 vec3 fake_multiple_scatt = 0.9 * albedo * density * step * pow(density / 0.1, 0.3) * 2.5 * vec3(0.33, 0.35, 0.34);
 
                 color += T * (single_in_scatter + fake_multiple_scatt) * ambient;
-
-                if (T < 0.01)
-                {
-                    break;
-                }
             }
         }
     }
@@ -770,7 +770,7 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
     return color;
 }
 
-#define IS_USE_TEST 1
+#define IS_USE_TEST 0
 
 void main()
 {
