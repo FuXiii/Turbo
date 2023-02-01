@@ -1522,10 +1522,10 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
 | $d$  | 体积积分中的射线长度或域：$0<t<d$ |
 | $\xi,\zeta$  | 随机数|
-| $L(x,w)$  | 沿$w$方向在$x$位置处的辐射亮度（`Radiance`）*注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中作者称$L(x,w)$为光亮度（`luminance`），此处有冲突。辐射亮度（以瓦特作为研究单元）和光亮度（以流明作为研究单元）是两个不同的物理量*|
+| $L(x,w)$  | 沿 $w$ 方向在 $x$ 位置处的辐射亮度（`Radiance`）*注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中作者称 $L(x,w)$ 为光亮度（`luminance`），此处有冲突。辐射亮度（以瓦特作为研究单元）和光亮度（以流明作为研究单元）是两个不同的物理量*|
 | $L_d(x_d,w)$  | 入射边界的辐射亮度|
 | $L_e(x_d,w)$  | 发射的辐射亮度|
-| $L_s(x_d,w)$  | 沿$w$方向在$x$位置处的外散射辐射亮度|
+| $L_s(x_d,w)$  | 沿 $w$ 方向在 $x$ 位置处的外散射辐射亮度|
 
 ### 3.2 体渲染理论
 
@@ -1535,7 +1535,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
 如果有光子穿过体积体，将会于体积体中的粒子进行碰撞最终照亮该体积体。这些穿过体积体进行碰撞的光子将会为辐射亮度做出贡献。由于不可能去描述体积体中的每一个粒子，所以使用一种碰撞概率场来描述体积体，这表现为粒子碰撞都是随机的。
 
-光子在体积体中发生碰撞的可能性使用系数$\sigma(x)$进行描述，表示在体积体中穿过每单位距离下的碰撞概率密度。碰撞系数的物理单位与长度成反比（这句话不知道是不是这个意思，原文： `The physical unit of a collision coefficient is inverse length`）。另一种方式是使用平均自由程（`mean free path`，*百度百科：在一定的条件下，一个气体分子在连续两次碰撞之间可能通过的各段自由程的平均值，微粒的平均自由程是指微粒与其他微粒碰撞所通过的平均距离。用符号$\lambda$表示，单位为米*）来评估该系数，用于表示两次碰撞之间的平均距离。通常我们认为该系数是一个与位置有关的函数并随着光谱做适当变化。
+光子在体积体中发生碰撞的可能性使用系数 $\sigma(x)$ 进行描述，表示在体积体中穿过每单位距离下的碰撞概率密度。碰撞系数的物理单位与长度成反比（这句话不知道是不是这个意思，原文： `The physical unit of a collision coefficient is inverse length`）。另一种方式是使用平均自由程（`mean free path`，*百度百科：在一定的条件下，一个气体分子在连续两次碰撞之间可能通过的各段自由程的平均值，微粒的平均自由程是指微粒与其他微粒碰撞所通过的平均距离。用符号 $\lambda$ 表示，单位为米*）来评估该系数，用于表示两次碰撞之间的平均距离。通常我们认为该系数是一个与位置有关的函数并随着光谱做适当变化。
 
 ---
 
