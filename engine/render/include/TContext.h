@@ -39,6 +39,7 @@ namespace Render
 class TRenderPass;
 class TComputePipeline;
 class TGraphicsPipeline;
+class TContext;
 
 class TRenderPassPool
 {
@@ -52,7 +53,7 @@ class TRenderPassPool
         Turbo::Core::TRenderPass *renderPass = nullptr;
 
       private:
-        void Create(Turbo::Render::TRenderPass &renderPass);
+        void Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context);
         void Destroy();
 
       public:
@@ -63,13 +64,16 @@ class TRenderPassPool
     };
 
   private:
+    TContext *context = nullptr;
+
+  private:
     std::vector<TRenderPassProxy> renderPassProxies;
 
   private:
     TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass);
 
   public:
-    TRenderPassPool();
+    TRenderPassPool(TContext *context);
     ~TRenderPassPool();
 
     TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass);

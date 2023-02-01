@@ -2329,6 +2329,10 @@ Turbo是渲染引擎
   >* 移除`./samples`下`VulkanTest.cpp`中移除`#include <vcruntime.h>`和`#include <vcruntime_string.h>`头文件，应该是`clangd`的自动头文件补全搞的
   >* `./engine/core`下`TObject.h`中增加`#include <string.h>`头文件`memcpy`，在此头文件声明
 
+* 2023/1/17 设计架构
+  >
+  >* 更新`./docs/Design/`下的`FrameGraph.md`
+  
 * 2023/1/18 设计架构
   >
   >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
@@ -2373,3 +2377,30 @@ Turbo是渲染引擎
 * 2023/1/26 设计架构
   >
   >* `./engine/render`下`TRenderPassPool`更新完善`Find(...)`函数算法
+  >* `./engine/render`下`TImage.h`中增加`typedef enum TSampleCountBits`
+  >* `./engine/render`下`TImage.h`中增加`using TSampleCounts = uint32_t`
+  >* `./engine/render`下`TImage`中增加`TSampleCountBits GetSampleCountBits() const`成员函数，目前只支持`Turbo::Render::TSampleCountBits::SAMPLE_1_BIT`
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`构造函数增加`TContext *context`参数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中`Create`函数增加`TContext *context`参数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool::TRenderPassProxy`中更新完善`Create`函数
+  >* 更新`./docs/Design/`下的`FrameGraphAdvance.md`
+
+* 2023/1/27 设计架构
+  >
+  >* `./engine/render`下`TImage`中增加`friend class TRenderPassPool`友元类
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中`TRenderPassProxy`中，更新完善`Create(...)`函数
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中，更新完善`~TRenderPassPool()`析构函数
+  >* 更新`./samples`下`RenderDesignTest`示例
+
+* 2023/1/28 设计架构
+  >
+  >* 更新`./samples`下`VolumetricCloud`示例中的对于`./asset/shaders/volumetric_cloud.frag`中对于高频细节纹理使用的算法
+
+* 2023/1/31 设计架构
+  >
+  >* 有关`./samples`下`VolumetricCloud`示例中对于体积云光照渲染，总是渲染不出满意的效果。国外常见的体积云渲染的论文、文章之类的也零零散散的看了，大部分的文章套路就是，先把一长串光照传输方程列出来，讲讲朗伯-比尔定律，讲讲`Phase`相函数（米氏散射，H-G散射，瑞利散射，几何散射等等），讲讲内散射、外散射、吸收以及消亡之间的关系，略过了大量的细节，到后文的相关实现，更是略之又略（比如寒霜引擎的那片文章，散射、外散射、吸收以及消亡系数如何计算并没有说明，有的文章直接拿采样密度作为消亡系数，等等很多问题），而且不同文章都有各自的实现（特别是计算采样点到太阳之间的光照，一个人一个写法），很难获得一个统一的、较明确的实现原理和过程（说白了就是，文章的实现和理论有时并不是一一对应的），这就会导致看的越多越迷惑（只能说大致相同，落到细节疑问百出），所以我尝试将`Production Volume Rendering SIGGRAPH 2017 Course`文章（该文章较理论化，原文放到了`./docs`下`volumePaper.pdf`）翻译到`./docs/VolumetricCloud.md`文档中（光照章节），希望在边学边翻译的过程中能解决之前的疑问吧
+  >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/1 设计架构
+  >
+  >* 更新`./docs`下`VolumetricCloud.md`文档
