@@ -100,6 +100,10 @@
   >* 更新`3.2.1 体积特性`章节
   >* 更新`3.2.1.1 参数化消亡和单散射反照率`章节
 
+* 2023/2/3
+  >
+  >* 更新`3.2.1.1 参数化消亡和单散射反照率`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -1522,7 +1526,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $x_t$  | 射线方向上某一位置： $x_t=x+tw$|
 | $\sigma_a(x)$  | 吸收系数（`Absorption coefficient`）|
 | $\sigma_s(x)$  | 散射系数 (`Scattering coefficient`)|
-| $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`) $=\sigma_a(x)+\sigma_s(x)$ |
+| $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`，有时也叫消光系数) $=\sigma_a(x)+\sigma_s(x)$ |
 | $\alpha(x)$  | 单散射反照率 $=\sigma_s(x)/\sigma_t(x)$ |
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
 | $d$  | 体积积分中的射线长度或域：$0<t<d$ |
@@ -1562,7 +1566,12 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 > `自发光`
 > 以体积的方式在体积体中发射辐射，如果不这样的话，得到的结果将更像是一个光源发出光后的结果。发射出来的辐射亮度使用 $L_e(x,w)$ 进行表达，其发射出来的辐射与非体积光源一样会被吸收和散射。如果一个体积体不进行自发光，$L_e(x,w)$ 简单赋成 $0$ 即可，在真实世界中，体积体并不能直接向外自发光，并且 $L_e(x,w)$ 在任意 $w$ 方向上都是一样的（各向同性）
 
-##### 3.2.1.1 参数化消亡和单散射反照率
+##### 3.2.1.1 参数化消亡（`Extinction`）和单散射反照率（`Single Scattering Albedo`）
+
+> `消亡`  
+> 在很多情况下，我们期望吸收系数和散射系数进行不同的参数化。我们可以定义消亡系数为吸收系数与散射系数的和：$\sigma_t=\sigma_a+\sigma_s$ （有时也被叫做衰减系数（`attenuation coefficient`），通常可以用密度来代替）。消亡系数定义了由于吸收和散射导致的辐射净损失。换句话说，消亡碰撞是即发生吸收也发生散射的碰撞，并且我们需要确保散射出去的辐射与`单散射反照率`在光照积分公式中正确调制。
+
+> `单散射反照率`
 
 ---
 
