@@ -103,6 +103,7 @@
 * 2023/2/3
   >
   >* 更新`3.2.1.1 参数化消亡和单散射反照率`章节
+  >* 创建`4 问题`章节，用于记录研究过程中待解决的问题和疑问
 
 ## 概述
 
@@ -1527,7 +1528,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $\sigma_a(x)$  | 吸收系数（`Absorption coefficient`）|
 | $\sigma_s(x)$  | 散射系数 (`Scattering coefficient`)|
 | $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`，有时也叫消光系数) $=\sigma_a(x)+\sigma_s(x)$ |
-| $\alpha(x)$  | 单散射反照率 $=\sigma_s(x)/\sigma_t(x)$ |
+| $\alpha(x)$  | 单散射反照率（`Single scattering albedo`） $=\sigma_s(x)/\sigma_t(x)$ *注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中第`2.2 Albedo`中描述为 $\rho$*|
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
 | $d$  | 体积积分中的射线长度或域：$0<t<d$ |
 | $\xi,\zeta$  | 随机数|
@@ -1571,7 +1572,19 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 > `消亡`  
 > 在很多情况下，我们期望吸收系数和散射系数进行不同的参数化。我们可以定义消亡系数为吸收系数与散射系数的和：$\sigma_t=\sigma_a+\sigma_s$ （有时也被叫做衰减系数（`attenuation coefficient`），通常可以用密度来代替）。消亡系数定义了由于吸收和散射导致的辐射净损失。换句话说，消亡碰撞是即发生吸收也发生散射的碰撞，并且我们需要确保散射出去的辐射与`单散射反照率`在光照积分公式中正确调制。
 
-> `单散射反照率`
+> `单散射反照率`  
+> 单散射反照率对应公式为:  
+> $$\alpha=\frac{\sigma_s}{\sigma_t}$$
+> 其是在消亡系数的基础上更进一步描述体积体的特性， $\alpha$ 与表面反照率（常见叫漫反射）相似，两者都是评估反射总量，用于确认散射的辐射量。当 $\alpha=0$ 时表示所有的辐射都被吸收了（像烧煤的黑烟），当 $\alpha=1$ 时表示没有辐射被吸收，这样就能得到一个无损散射（比如天空中的云彩）
+>
+> 实际上当通过体素或者程序性函数来控制消亡时，使用一个不变的反照率常量就已经可以得到不错的消亡和单散射参数化，并得到不错的体积体结果。这些参数可以在任何计算或存储中进行改变。
+
+
+## 4 问题
+
+人非生而知之者，孰能无惑 •ᴗ•
+
+* $\sigma_t(x)$ 消亡系数为 $\sigma_a+\sigma_s$，其中的 $\sigma_s$ 是一般散射的散射还是外散射的意思？消亡意味着能量的减少，在自发光，外散射，内散射，吸收四种情况中只有吸收和外散射会导致出射的能量减少，自发光和内散射都会导致出射的能量增加。（相关问题`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`等文章中有相关提及，但都不明确）
 
 ---
 
