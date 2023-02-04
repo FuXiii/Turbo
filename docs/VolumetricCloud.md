@@ -785,7 +785,8 @@ struct BoundingBox
 又因为点`i`在过射线，加入射线从`o`点出发，沿着向量 $\vec{r}$ 走了 $l$ 距离到达`i`点，这样可知：  
 ② $i=p+\vec{r}* l$
 
-这样①和②式子联立：  
+这样①和②式子联立：
+  
 $$
 \left\{
 \begin{array}{c}
@@ -806,7 +807,7 @@ $i_x=o_x+r_x l$
 $i_y=o_y+r_y l$  
 $i_z=o_z+r_z l$  
 
-这样$\vec{pi}$ 可展开成③式  
+这样 $\vec{pi}$ 可展开成③式  
 ③ $\vec{pi}=(o_x+r_x l-p_x, o_y+r_y l-p_y, o_z+r_z l-p_z)$  
 
 之后③再与 $\vec{n}$ 求点乘等于零进行展开：  
@@ -814,7 +815,7 @@ $\vec{pi}*\vec{n}=(o_x+r_x l-p_x)\times n_x+(o_y+r_y l-p_y)\times n_y+(o_z+r_z l
 
 最终整理得：  
 
-$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$ 为`p`点坐标，$\vec{o}$ 为`o`点坐标，`*`为点乘
+$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$ 注：$\vec{p}$ 为`p`点坐标，$\vec{o}$ 为`o`点坐标，`*`为点乘
 
 知道了 $l$ 就可以由②式求出交点 $i$ 了。
 
@@ -1535,7 +1536,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $\sigma_a(x)$  | 吸收系数（`Absorption coefficient`）|
 | $\sigma_s(x)$  | 散射系数 (`Scattering coefficient`)|
 | $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`，有时也叫消光系数) $=\sigma_a(x)+\sigma_s(x)$ |
-| $\alpha(x)$  | 单散射反照率（`Single scattering albedo`） $=\sigma_s(x)/\sigma_t(x)$ *注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中第`2.2 Albedo`中描述为 $\rho$*|
+| $\alpha(x)$  | 单散射反照率（`Single scattering albedo`） $=\sigma_s(x)/\sigma_t(x)$ *注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中第`2.2 Albedo`中描述为  $\rho$*|
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
 | $d$  | 体积积分中的射线长度或域： $0 < t < d$ |
 | $\xi,\zeta$  | 随机数|
@@ -1577,7 +1578,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 ##### 3.2.1.1 参数化消亡（`Extinction`）和单散射反照率（`Single Scattering Albedo`）
 
 > `消亡`  
-> 在很多情况下，我们期望吸收系数和散射系数进行不同的参数化。我们可以定义消亡系数为吸收系数与散射系数的和：$\sigma_t=\sigma_a+\sigma_s$ （有时也被叫做衰减系数（`attenuation coefficient`），通常可以用密度来代替）。消亡系数定义了由于吸收和散射导致的辐射净损失。换句话说，消亡碰撞是即发生吸收也发生散射的碰撞，并且我们需要确保散射出去的辐射与`单散射反照率`在光照积分公式中正确调制。
+> 在很多情况下，我们期望吸收系数和散射系数进行不同的参数化。我们可以定义消亡系数为吸收系数与散射系数的和： $\sigma_t=\sigma_a+\sigma_s$ （有时也被叫做衰减系数（`attenuation coefficient`），通常可以用密度来代替）。消亡系数定义了由于吸收和散射导致的辐射净损失。换句话说，消亡碰撞是即发生吸收也发生散射的碰撞，并且我们需要确保散射出去的辐射与`单散射反照率`在光照积分公式中正确调制。
 
 > `单散射反照率`  
 > 单散射反照率对应公式为:  
@@ -1595,7 +1596,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 接下来，我们根据该`RTE`方程的组成结构进行讲解，最终构成整个方程：
 
 >`吸收`  
->对于一条经典辐射束 $L(x,w)$ ，在 $x$ 位置处沿着 $w$ 方向前进，在 $w$ 方向的导数（方向导数，表达式为：$w\cdot\nabla$，其中 $\nabla$ 为梯度，$\cdot$ 为向量点乘 ）与该点处的辐射强度成比例，这个比例系数就是之前介绍的吸收系数 $\sigma_a$ ：
+>对于一条经典辐射束 $L(x,w)$ ，在 $x$ 位置处沿着 $w$ 方向前进，在 $w$ 方向的导数（方向导数，表达式为：$w\cdot\nabla$ ，其中 $\nabla$ 为梯度，$\cdot$ 为向量点乘 ）与该点处的辐射强度成比例，这个比例系数就是之前介绍的吸收系数 $\sigma_a$ ：
 >$$(w\cdot\nabla)L=-\sigma_a(x)L(x,w)\tag{4}$$
 >如上就是三维朗伯-比尔定律微分公式，用于描述由于吸收而减少的辐射亮度
 
@@ -1619,7 +1620,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 >$$辐射亮度=吸收+外散射+自发光+内散射$$
 >$$(w\cdot\nabla)L(x,w)=\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}\frac{+\sigma_a(x)L_e(x,w)}{自发光}\frac{+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'}{内散射}$$
 >
->其中，吸收和外散射可以合并成 $\sigma_t(x)$，$\sigma_t(x) = \sigma_a(x)+\sigma_s(x)$
+>其中，吸收和外散射可以合并成 $\sigma_t(x)$， $\sigma_t(x) = \sigma_a(x)+\sigma_s(x)$
 >
 >$$\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}=\frac{-[\sigma_a(x)+\sigma_s(x)]L(x,w)}{吸收与外散射合并}=\frac{-\sigma_t(x)L(x,w)}{消亡}$$
 >
