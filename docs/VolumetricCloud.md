@@ -100,6 +100,18 @@
   >* 更新`3.2.1 体积特性`章节
   >* 更新`3.2.1.1 参数化消亡和单散射反照率`章节
 
+* 2023/2/3
+  >
+  >* 更新`3.2.1.1 参数化消亡和单散射反照率`章节
+  >* 创建`4 问题`章节，用于记录研究过程中待解决的问题和疑问
+  >* 创建`3.2.2 体积中的光线传输`章节
+  >* 创建`3.2.2.1 辐射传输方程`章节
+  >* 更新`3.2.2.1 辐射传输方程`章节
+
+* 2023/2/4
+  >
+  >* 更新`3.2.2.1 辐射传输方程`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -774,6 +786,7 @@ struct BoundingBox
 ② $i=p+\vec{r}* l$
 
 这样①和②式子联立：
+  
 $$
 \left\{
 \begin{array}{c}
@@ -794,7 +807,7 @@ $i_x=o_x+r_x l$
 $i_y=o_y+r_y l$  
 $i_z=o_z+r_z l$  
 
-这样$\vec{pi}$ 可展开成③式  
+这样 $\vec{pi}$ 可展开成③式  
 ③ $\vec{pi}=(o_x+r_x l-p_x, o_y+r_y l-p_y, o_z+r_z l-p_z)$  
 
 之后③再与 $\vec{n}$ 求点乘等于零进行展开：  
@@ -802,7 +815,7 @@ $\vec{pi}*\vec{n}=(o_x+r_x l-p_x)\times n_x+(o_y+r_y l-p_y)\times n_y+(o_z+r_z l
 
 最终整理得：  
 
-$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$  注：$\vec{p}$ 为`p`点坐标，$\vec{o}$ 为`o`点坐标，`*`为点乘
+$l=\frac{\vec{p}*\vec{n}-\vec{o}*\vec{n}}{\vec{r}*\vec{n}}$ 注：$\vec{p}$ 为`p`点坐标，$\vec{o}$ 为`o`点坐标，`*`为点乘
 
 知道了 $l$ 就可以由②式求出交点 $i$ 了。
 
@@ -1522,10 +1535,10 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $x_t$  | 射线方向上某一位置： $x_t=x+tw$|
 | $\sigma_a(x)$  | 吸收系数（`Absorption coefficient`）|
 | $\sigma_s(x)$  | 散射系数 (`Scattering coefficient`)|
-| $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`) $=\sigma_a(x)+\sigma_s(x)$ |
-| $\alpha(x)$  | 单散射反照率 $=\sigma_s(x)/\sigma_t(x)$ |
+| $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`，有时也叫消光系数) $=\sigma_a(x)+\sigma_s(x)$ |
+| $\alpha(x)$  | 单散射反照率（`Single scattering albedo`） $=\sigma_s(x)/\sigma_t(x)$ *注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中第`2.2 Albedo`中描述为  $\rho$*|
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
-| $d$  | 体积积分中的射线长度或域：$0<t<d$ |
+| $d$  | 体积积分中的射线长度或域： $0 < t < d$ |
 | $\xi,\zeta$  | 随机数|
 | $L(x,w)$  | 沿 $w$ 方向在 $x$ 位置处的辐射亮度（`Radiance`）*注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中作者称 $L(x,w)$ 为光亮度（`luminance`），此处有冲突。辐射亮度（以瓦特作为研究单元）和光亮度（以流明作为研究单元）是两个不同的物理量*|
 | $L_d(x_d,w)$  | 入射边界的辐射亮度|
@@ -1552,17 +1565,88 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
 > `相函数`  
 > 相函数 $f_p(x,w,w')$ 用于描述散射的角度分布并且通常作为与 $\theta$ 有关的一元函数，其中 $\theta$ 夹在 $w$ 与 $w'$ 之间的。并且需要在球面上进行归一化：  
-> $$\int_{S^2}f_p(x,w,w')d\theta=1$$  
+> $$\int_{S^2}f_p(x,w,w')d\theta=1\tag{1}$$  
 > 如果不满足归一化，则会导致散射碰撞的辐射亮度浮动导致不正确。相函数有一个重要特性，与`BSDF`（双向散射分布函数`Bidirectional scattering distribution function`）类似，具有相互性（可逆性）。我们需要在不改变相函数值的情况下能够相互转化方向。在表面渲染中相函数与`BSDF`功能一样，并且能够像3.3.6章节那样作为`BSDF`的一种抽象来使用。对于入射光如果在任意方向上发生的散射概率是等可能的（均匀散射），则称该体积体为各向同性（`isotropic`，观察角度在变而观察到的结果不变），对应得相函数为：
-> $$f_p(x,\theta)=\frac{1}{4\pi}$$
+> $$f_p(x,\theta)=\frac{1}{4\pi}\tag{2}$$
 >对于各向异性（`Anisotropic`，观察角度在变而观察到的结果也在变化）的体积体可以使用米氏方案（`Mie solution`）到麦克斯韦方程组（`Maxwell’s equations`）来得到更精确的结果（米氏散射`Mie scattering`，相函数的一种），或者使用瑞利散射（`Rayleigh`，米氏散射的近似）来等到近似解。由于米氏散射计算非常复杂，在真正生产中，我们往往更多使用亨尼-格林斯坦相函数（`Henyey-Greenstein phase function`，1941年由亨尼和格林斯坦提出）：
->$$f_p(x,\theta)=\frac{1}{4\pi}\frac{1-g^2}{({1+g^2-2gcos\theta})^{\frac{3}{2}}}$$
->其中 $-1<g<1$ ，参数 $g$ 可以认为是散射方向的平均余弦，并且用于控制该相函数的对称性，当 $g<0$ 时为向后散射，当   $g=0$ 时为各向同性散射，当 $g>0$ 时为向前散射。多个系数与该相函数进行组合可以得到复杂相函数的近似解。该相函数还有可以轻松且完美的进行重要性采样的特点
+>$$f_p(x,\theta)=\frac{1}{4\pi}\frac{1-g^2}{({1+g^2-2gcos\theta})^{\frac{3}{2}}}\tag{3}$$
+>其中 $-1 < g < 1$ ，参数 $g$ 可以认为是散射方向的平均余弦，并且用于控制该相函数的对称性，当 $g<0$ 时为向后散射，当   $g=0$ 时为各向同性散射，当 $g>0$ 时为向前散射。多个系数与该相函数进行组合可以得到复杂相函数的近似解。该相函数还有可以轻松且完美的进行重要性采样的特点
 
 > `自发光`
 > 以体积的方式在体积体中发射辐射，如果不这样的话，得到的结果将更像是一个光源发出光后的结果。发射出来的辐射亮度使用 $L_e(x,w)$ 进行表达，其发射出来的辐射与非体积光源一样会被吸收和散射。如果一个体积体不进行自发光，$L_e(x,w)$ 简单赋成 $0$ 即可，在真实世界中，体积体并不能直接向外自发光，并且 $L_e(x,w)$ 在任意 $w$ 方向上都是一样的（各向同性）
 
-##### 3.2.1.1 参数化消亡和单散射反照率
+##### 3.2.1.1 参数化消亡（`Extinction`）和单散射反照率（`Single Scattering Albedo`）
+
+> `消亡`  
+> 在很多情况下，我们期望吸收系数和散射系数进行不同的参数化。我们可以定义消亡系数为吸收系数与散射系数的和： $\sigma_t=\sigma_a+\sigma_s$ （有时也被叫做衰减系数（`attenuation coefficient`），通常可以用密度来代替）。消亡系数定义了由于吸收和散射导致的辐射净损失。换句话说，消亡碰撞是即发生吸收也发生散射的碰撞，并且我们需要确保散射出去的辐射与`单散射反照率`在光照积分公式中正确调制。
+
+> `单散射反照率`  
+> 单散射反照率对应公式为:  
+> $$\alpha=\frac{\sigma_s}{\sigma_t}$$
+> 其是在消亡系数的基础上更进一步描述体积体的特性， $\alpha$ 与表面反照率（常见叫漫反射）相似，两者都是评估反射总量，用于确认散射的辐射量。当 $\alpha=0$ 时表示所有的辐射都被吸收了（像烧煤的黑烟），当 $\alpha=1$ 时表示没有辐射被吸收，这样就能得到一个无损散射（比如天空中的云彩）
+>
+> 实际上当通过体素或者程序性函数来控制消亡时，使用一个不变的反照率常量就已经可以得到不错的消亡和单散射参数化，并得到不错的体积体结果。这些参数可以在任何计算或存储中进行改变。
+
+#### 3.2.2 体积中的光线传输
+
+##### 3.2.2.1 辐射传输方程（`Radiative Transfer Equation`）
+
+辐射传输方程用于定义辐射在体积中的分布，或者简称`RTE`。用于描述包括任何几何边缘和光源在体积中沿着 $w$ 方向，位于 $x$ 点位置处的均衡辐射场（`equilibrium radiance field`） $L(x,w)$
+
+接下来，我们根据该`RTE`方程的组成结构进行讲解，最终构成整个方程：
+
+>`吸收`  
+>
+><div align=center><img src="./images/absorption.png" width=40%></div>
+>
+>对于一条经典辐射束 $L(x,w)$ ，在 $x$ 位置处沿着 $w$ 方向前进，在 $w$ 方向的导数（方向导数，表达式为：$w\cdot\nabla$ ，其中 $\nabla$ 为梯度，$\cdot$ 为向量点乘 ）与该点处的辐射强度成比例，这个比例系数就是之前介绍的吸收系数 $\sigma_a$ ：
+>$$(w\cdot\nabla)L=-\sigma_a(x)L(x,w)\tag{4}$$
+>如上就是三维朗伯-比尔定律微分公式，用于描述由于吸收而减少的辐射亮度
+
+>`外散射`（`Out-Scattering`）
+>
+><div align=center><img src="./images/out_scattering.png" width=40%></div>
+>  
+>对于一条经典辐射束 $L(x,w)$ ，也会由于外散射，将原本在 $w$ 方向的辐射向外散射到其他方向，导致辐射亮度的减少。外散射不会将整个辐射亮度都损失掉，只会在原先的 $w$ 方向上损失，损失的辐射会分布到其他方向或位置上，与吸收一样，外散射损失的辐射也与辐射亮度 $L(x,w)$ 成比例，也就是对应的散射系数 $\sigma_s(x)$ ：
+>$$(w\cdot\nabla)L(x,w)=-\sigma_s(x)L(x,w)\tag{5}$$
+
+>`自发光`  
+>
+><div align=center><img src="./images/emission.png" width=40%></div>
+>  
+>自发光是一个相对独立的部分， $L_e(x,w)$ 用于定义额外增加到 $L(x,w)$ 上的辐射亮度
+>$$(w\cdot\nabla)L=-\sigma_a(x)L_e(x,w)\tag{6}$$
+>请注意像`PBRT`（`Physically Based Rendering: From Theory to Implementation`）之类的很多文章对于自发光的处理有些许不同，这些文章中的自发光并没有使用到吸收系数 $\sigma_a(x)$ ，为了传输方程的统一性和正确性，我们需要在自发光 $L_e(x,w)$ 设置该吸收系数，这对接下来的推导很重要。
+
+>`内散射`（`In-Scattering`）
+>
+><div align=center><img src="./images/in_scattering.png" width=40%></div>
+>
+>内散射是由于点 $x$ 位置处所有其他方向出去的 $w'$ 的外散射又回到了该点，导致原本的辐射束上的辐射亮度得到增加。
+>$$(w\cdot\nabla)L(x,w)=\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{7}$$
+>其中 $S^2$ 代表 $x$ 点四周的一个球邻域，其中 $\sigma_s(x)$ 用于评估四周所有方向进入的辐射散射，这与 $5$ 式中的 $\sigma_s(x)$ 相似。辐射束基本上会吸收从所有其他方向散射到其自身原本方向上的所有辐射。
+
+>`整合辐射传输方程`  
+>我们将每个部分进行啊相加，就得到了最终的辐射传输方程，由于吸收和外散射有一部分可以合并成消亡系数 $\sigma_t(x)$ ，所以最终的辐射传输方程如下:
+>
+>$$辐射亮度=吸收+外散射+自发光+内散射$$
+>$$(w\cdot\nabla)L(x,w)=\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}\frac{+\sigma_a(x)L_e(x,w)}{自发光}\frac{+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'}{内散射}$$
+>
+>其中，吸收和外散射可以合并成 $\sigma_t(x)$， $\sigma_t(x) = \sigma_a(x)+\sigma_s(x)$
+>
+>$$\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}=\frac{-[\sigma_a(x)+\sigma_s(x)]L(x,w)}{吸收与外散射合并}=\frac{-\sigma_t(x)L(x,w)}{消亡}$$
+>
+>得出最终的辐射传输方程：
+>
+>$$(w\cdot\nabla)L(x,w)=-\sigma_t(x)L(x,w)+\sigma_a(x)L_e(x,w)+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{8}$$
+
+## 4 问题
+
+人非生而知之者，孰能无惑 •ᴗ•
+
+* $\sigma_t(x)$ 消亡系数为 $\sigma_a+\sigma_s$，其中的 $\sigma_s$ 是一般散射的散射还是外散射的意思？消亡意味着能量的减少，在自发光，外散射，内散射，吸收四种情况中只有吸收和外散射会导致出射的能量减少，自发光和内散射都会导致出射的能量增加。（相关问题`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`等文章中有相关提及，但都不明确）
+
+* $\sigma_{a/s/t}(x)$ 吸收，散射，消亡系数为与 $x$ 有关的函数，但很多时候都直接使用密度，一个常数，是为了简化计算吗？不简化的话函数应该是什么样的？
 
 ---
 
