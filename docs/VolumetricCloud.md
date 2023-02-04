@@ -1537,7 +1537,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 | $\sigma_t(x)$  | 消亡系数 (`Extinction coefficient`，有时也叫消光系数) $=\sigma_a(x)+\sigma_s(x)$ |
 | $\alpha(x)$  | 单散射反照率（`Single scattering albedo`） $=\sigma_s(x)/\sigma_t(x)$ *注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中第`2.2 Albedo`中描述为 $\rho$*|
 | $f_p(x,w,w')$  | 相函数（`Phase function`）|
-| $d$  | 体积积分中的射线长度或域：$0 < t < d$ |
+| $d$  | 体积积分中的射线长度或域： $0 < t < d$ |
 | $\xi,\zeta$  | 随机数|
 | $L(x,w)$  | 沿 $w$ 方向在 $x$ 位置处的辐射亮度（`Radiance`）*注：在2016年的`Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite`的文章中作者称 $L(x,w)$ 为光亮度（`luminance`），此处有冲突。辐射亮度（以瓦特作为研究单元）和光亮度（以流明作为研究单元）是两个不同的物理量*|
 | $L_d(x_d,w)$  | 入射边界的辐射亮度|
