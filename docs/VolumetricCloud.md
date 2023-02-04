@@ -785,7 +785,7 @@ struct BoundingBox
 又因为点`i`在过射线，加入射线从`o`点出发，沿着向量 $\vec{r}$ 走了 $l$ 距离到达`i`点，这样可知：  
 ② $i=p+\vec{r}* l$
 
-这样①和②式子联立：
+这样①和②式子联立：  
 $$
 \left\{
 \begin{array}{c}
