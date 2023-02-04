@@ -1596,20 +1596,32 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 接下来，我们根据该`RTE`方程的组成结构进行讲解，最终构成整个方程：
 
 >`吸收`  
+>
+><div align=center><img src="./images/absorption.png" width=40%></div>
+>
 >对于一条经典辐射束 $L(x,w)$ ，在 $x$ 位置处沿着 $w$ 方向前进，在 $w$ 方向的导数（方向导数，表达式为：$w\cdot\nabla$ ，其中 $\nabla$ 为梯度，$\cdot$ 为向量点乘 ）与该点处的辐射强度成比例，这个比例系数就是之前介绍的吸收系数 $\sigma_a$ ：
 >$$(w\cdot\nabla)L=-\sigma_a(x)L(x,w)\tag{4}$$
 >如上就是三维朗伯-比尔定律微分公式，用于描述由于吸收而减少的辐射亮度
 
->`外散射`（`Out-Scattering`）  
+>`外散射`（`Out-Scattering`）
+>
+><div align=center><img src="./images/out_scattering.png" width=40%></div>
+>  
 >对于一条经典辐射束 $L(x,w)$ ，也会由于外散射，将原本在 $w$ 方向的辐射向外散射到其他方向，导致辐射亮度的减少。外散射不会将整个辐射亮度都损失掉，只会在原先的 $w$ 方向上损失，损失的辐射会分布到其他方向或位置上，与吸收一样，外散射损失的辐射也与辐射亮度 $L(x,w)$ 成比例，也就是对应的散射系数 $\sigma_s(x)$ ：
 >$$(w\cdot\nabla)L(x,w)=-\sigma_s(x)L(x,w)\tag{5}$$
 
 >`自发光`  
+>
+><div align=center><img src="./images/emission.png" width=40%></div>
+>  
 >自发光是一个相对独立的部分， $L_e(x,w)$ 用于定义额外增加到 $L(x,w)$ 上的辐射亮度
 >$$(w\cdot\nabla)L=-\sigma_a(x)L_e(x,w)\tag{6}$$
 >请注意像`PBRT`（`Physically Based Rendering: From Theory to Implementation`）之类的很多文章对于自发光的处理有些许不同，这些文章中的自发光并没有使用到吸收系数 $\sigma_a(x)$ ，为了传输方程的统一性和正确性，我们需要在自发光 $L_e(x,w)$ 设置该吸收系数，这对接下来的推导很重要。
 
->`内散射`（`In-Scattering`）  
+>`内散射`（`In-Scattering`）
+>
+><div align=center><img src="./images/in_scattering.png" width=40%></div>
+>
 >内散射是由于点 $x$ 位置处所有其他方向出去的 $w'$ 的外散射又回到了该点，导致原本的辐射束上的辐射亮度得到增加。
 >$$(w\cdot\nabla)L(x,w)=\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{7}$$
 >其中 $S^2$ 代表 $x$ 点四周的一个球邻域，其中 $\sigma_s(x)$ 用于评估四周所有方向进入的辐射散射，这与 $5$ 式中的 $\sigma_s(x)$ 相似。辐射束基本上会吸收从所有其他方向散射到其自身原本方向上的所有辐射。
