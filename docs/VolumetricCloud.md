@@ -108,6 +108,10 @@
   >* 创建`3.2.2.1 辐射传输方程`章节
   >* 更新`3.2.2.1 辐射传输方程`章节
 
+* 2023/2/4
+  >
+  >* 更新`3.2.2.1 辐射传输方程`章节
+
 ## 概述
 
 体积云（Volumetric Cloud ），使用体积数据进行绘制云的方法。有别于`广告牌`（Billboard，一种将图片展现在一张面片上的技术）和建立`三维模型`（blender，3dmax建模之类的），由于广告牌只适合离玩家很远的地方渲染云体（离近了明显效果太假），而三维建模方式云体数据量又太大，只适合一朵朵的建，不适合覆盖整个穹顶，进而现在的体积云都是基于`噪音数据`(可理解成随机数)和[光线步进](https://adrianb.io/2016/10/01/raymarching.html)（Raymarch，类似于简化版的光线追踪）的方式进行计算渲染。
@@ -1609,11 +1613,19 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 >$$(w\cdot\nabla)L(x,w)=\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{7}$$
 >其中 $S^2$ 代表 $x$ 点四周的一个球邻域，其中 $\sigma_s(x)$ 用于评估四周所有方向进入的辐射散射，这与 $5$ 式中的 $\sigma_s(x)$ 相似。辐射束基本上会吸收从所有其他方向散射到其自身原本方向上的所有辐射。
 
-`整合辐射传输方程`  
-我们将每个部分进行啊相加，就得到了最终的辐射传输方程，由于吸收和外散射有一部分可以合并成消亡系数 $\sigma_t(x)$ ，所以最终的辐射传输方程如下:
-
-$$最终辐射亮度=吸收+外散射+自发光+内散射$$
-$$(w\cdot\nabla)L(x,w)=-\sigma_t(x)L(x,w)+\sigma_a(x)L_e(x,w)+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{8}$$
+>`整合辐射传输方程`  
+>我们将每个部分进行啊相加，就得到了最终的辐射传输方程，由于吸收和外散射有一部分可以合并成消亡系数 $\sigma_t(x)$ ，所以最终的辐射传输方程如下:
+>
+>$$辐射亮度=吸收+外散射+自发光+内散射$$
+>$$(w\cdot\nabla)L(x,w)=\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}\frac{+\sigma_a(x)L_e(x,w)}{自发光}\frac{+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'}{内散射}$$
+>
+>其中，吸收和外散射可以合并成 $\sigma_t(x)$，$\sigma_t(x) = \sigma_a(x)+\sigma_s(x)$
+>
+>$$\frac{-\sigma_a(x)L(x,w)}{吸收}\frac{-\sigma_s(x)L(x,w)}{外散射}=\frac{-[\sigma_a(x)+\sigma_s(x)]L(x,w)}{吸收与外散射合并}=\frac{-\sigma_t(x)L(x,w)}{消亡}$$
+>
+>得出最终的辐射传输方程：
+>
+>$$(w\cdot\nabla)L(x,w)=-\sigma_t(x)L(x,w)+\sigma_a(x)L_e(x,w)+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{8}$$
 
 ## 4 问题
 
