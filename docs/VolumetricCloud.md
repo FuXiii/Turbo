@@ -1560,11 +1560,11 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
 > `相函数`  
 > 相函数 $f_p(x,w,w')$ 用于描述散射的角度分布并且通常作为与 $\theta$ 有关的一元函数，其中 $\theta$ 夹在 $w$ 与 $w'$ 之间的。并且需要在球面上进行归一化：  
-> $$\int_{S^2}f_p(x,w,w')d\theta=1$$  
+> $$\int_{S^2}f_p(x,w,w')d\theta=1\tag{1}$$  
 > 如果不满足归一化，则会导致散射碰撞的辐射亮度浮动导致不正确。相函数有一个重要特性，与`BSDF`（双向散射分布函数`Bidirectional scattering distribution function`）类似，具有相互性（可逆性）。我们需要在不改变相函数值的情况下能够相互转化方向。在表面渲染中相函数与`BSDF`功能一样，并且能够像3.3.6章节那样作为`BSDF`的一种抽象来使用。对于入射光如果在任意方向上发生的散射概率是等可能的（均匀散射），则称该体积体为各向同性（`isotropic`，观察角度在变而观察到的结果不变），对应得相函数为：
-> $$f_p(x,\theta)=\frac{1}{4\pi}$$
+> $$f_p(x,\theta)=\frac{1}{4\pi}\tag{2}$$
 >对于各向异性（`Anisotropic`，观察角度在变而观察到的结果也在变化）的体积体可以使用米氏方案（`Mie solution`）到麦克斯韦方程组（`Maxwell’s equations`）来得到更精确的结果（米氏散射`Mie scattering`，相函数的一种），或者使用瑞利散射（`Rayleigh`，米氏散射的近似）来等到近似解。由于米氏散射计算非常复杂，在真正生产中，我们往往更多使用亨尼-格林斯坦相函数（`Henyey-Greenstein phase function`，1941年由亨尼和格林斯坦提出）：
->$$f_p(x,\theta)=\frac{1}{4\pi}\frac{1-g^2}{({1+g^2-2gcos\theta})^{\frac{3}{2}}}$$
+>$$f_p(x,\theta)=\frac{1}{4\pi}\frac{1-g^2}{({1+g^2-2gcos\theta})^{\frac{3}{2}}}\tag{3}$$
 >其中 $-1<g<1$ ，参数 $g$ 可以认为是散射方向的平均余弦，并且用于控制该相函数的对称性，当 $g<0$ 时为向后散射，当   $g=0$ 时为各向同性散射，当 $g>0$ 时为向前散射。多个系数与该相函数进行组合可以得到复杂相函数的近似解。该相函数还有可以轻松且完美的进行重要性采样的特点
 
 > `自发光`
@@ -1590,9 +1590,30 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
 接下来，我们根据该`RTE`方程的组成结构进行讲解，最终构成整个方程：
 
-`吸收`
+>`吸收`  
+>对于一条经典辐射束 $L(x,w)$ ，在 $x$ 位置处沿着 $w$ 方向前进，在 $w$ 方向的导数（方向导数，表达式为：$w\cdot\nabla$，其中 $\nabla$ 为梯度，$\cdot$ 为向量点乘 ）与该点处的辐射强度成比例，这个比例系数就是之前介绍的吸收系数 $\sigma_a$ ：
+>$$(w\cdot\nabla)L=-\sigma_a(x)L(x,w)\tag{4}$$
+>如上就是三维朗伯-比尔定律微分公式，用于描述由于吸收而减少的辐射亮度
 
+>`外散射`（`Out-Scattering`）  
+>对于一条经典辐射束 $L(x,w)$ ，也会由于外散射，将原本在 $w$ 方向的辐射向外散射到其他方向，导致辐射亮度的减少。外散射不会将整个辐射亮度都损失掉，只会在原先的 $w$ 方向上损失，损失的辐射会分布到其他方向或位置上，与吸收一样，外散射损失的辐射也与辐射亮度 $L(x,w)$ 成比例，也就是对应的散射系数 $\sigma_s(x)$ ：
+>$$(w\cdot\nabla)L(x,w)=-\sigma_s(x)L(x,w)\tag{5}$$
 
+>`自发光`  
+>自发光是一个相对独立的部分， $L_e(x,w)$ 用于定义额外增加到 $L(x,w)$ 上的辐射亮度
+>$$(w\cdot\nabla)L=-\sigma_a(x)L_e(x,w)\tag{6}$$
+>请注意像`PBRT`（`Physically Based Rendering: From Theory to Implementation`）之类的很多文章对于自发光的处理有些许不同，这些文章中的自发光并没有使用到吸收系数 $\sigma_a(x)$ ，为了传输方程的统一性和正确性，我们需要在自发光 $L_e(x,w)$ 设置该吸收系数，这对接下来的推导很重要。
+
+>`内散射`（`In-Scattering`）  
+>内散射是由于点 $x$ 位置处所有其他方向出去的 $w'$ 的外散射又回到了该点，导致原本的辐射束上的辐射亮度得到增加。
+>$$(w\cdot\nabla)L(x,w)=\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{7}$$
+>其中 $S^2$ 代表 $x$ 点四周的一个球邻域，其中 $\sigma_s(x)$ 用于评估四周所有方向进入的辐射散射，这与 $5$ 式中的 $\sigma_s(x)$ 相似。辐射束基本上会吸收从所有其他方向散射到其自身原本方向上的所有辐射。
+
+`整合辐射传输方程`  
+我们将每个部分进行啊相加，就得到了最终的辐射传输方程，由于吸收和外散射有一部分可以合并成消亡系数 $\sigma_t(x)$ ，所以最终的辐射传输方程如下:
+
+$$最终辐射亮度=吸收+外散射+自发光+内散射$$
+$$(w\cdot\nabla)L(x,w)=-\sigma_t(x)L(x,w)+\sigma_a(x)L_e(x,w)+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{8}$$
 
 ## 4 问题
 
