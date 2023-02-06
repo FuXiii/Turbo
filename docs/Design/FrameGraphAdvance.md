@@ -171,6 +171,10 @@
   >
   >* 创建`Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass`章节
 
+* 2023/2/6
+  >
+  >* 创建`Image的Layout`章节
+
 ---
 
 # Turbo驱动初步
@@ -1690,6 +1694,44 @@ graph TD;
 ```
 
 * 对于`模板`数据，目前暂时不考虑
+
+## Image的Layout
+根据`Vulkan`标准，在创建`Image`时其对应的`initialLayout`，也就是初始化的布局必须是`VK_IMAGE_LAYOUT_UNDEFINED`或者`VK_IMAGE_LAYOUT_PREINITIALIZED`，在此`Turbo`是采用`VK_IMAGE_LAYOUT_UNDEFINED`，但是在之后的使用中（特别是`CommandBuffer`中）需要转换`Image`的`Layout`。在`Vulkan`标准[`12.4 Image Layout`](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#resources-image-layouts)章节中，有如下描述：
+
+>After initialization, applications need not use any layout other than the general layout, though this may produce suboptimal performance on some implementations.
+
+对应译文：
+
+>在`Image`初始化之后（创建之后），应用需要使用通用布局（`VK_IMAGE_LAYOUT_GENERAL`）而不是其他布局，尽管使用通用布局在某些平台实现中会导致次优化（性能没有专用布局那么优化）
+
+也就是说按照`Vulkan`标准来说，使用通用布局是必然。根据`Filament`的源码，其内部也确实使用的是`VK_IMAGE_LAYOUT_GENERAL`布局，但在作为`着色器采样纹理`时使用了专用布局`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`。
+
+```CXX
+//in {filament_dir}/filament/backend/src/vulkan/VulkanUtility.cpp
+VkImageLayout getDefaultImageLayout(TextureUsage usage) 
+{
+    //由于Filement有时需要采样深度纹理获得深度数据（比如SSAO），所以简单使用了VK_IMAGE_LAYOUT_GENERAL布局
+    if (any(usage & TextureUsage::DEPTH_ATTACHMENT)) {
+        return VK_IMAGE_LAYOUT_GENERAL;
+    }
+
+    //由于Filement有时需要将同一个纹理不同miplevel之间互相拷贝（比如Bloom），并且想要避免昂贵的布局转换操作，所以简单使用VK_IMAGE_LAYOUT_GENERAL布局
+    if (any(usage & TextureUsage::COLOR_ATTACHMENT)) {
+        return VK_IMAGE_LAYOUT_GENERAL;
+    }
+
+    // Finally, the layout for an immutable texture is optimal read-only.
+    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+}
+```
+
+对于`Filament`一些额外说明:
+
+* 对于将`CPU`资源拷贝到`GPU`时会将纹理布局转换到`VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL`布局，之后拷贝操作完再将布局转换回来
+* 对于渲染最后的`Present`显示之前，会将图片的当前布局转换成`VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`
+
+*注：在`ImageView`中也有`Layout`，多个不同`ImageView`对于同一个`Image`其`ImageView`的`Layout`可以是多种多样的。这也就是在`Turbo`的设计中，一个`Image`可以对应多个`ImageView`*
+
 
 ## Context上下文
 
