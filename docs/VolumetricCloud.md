@@ -111,6 +111,11 @@
 * 2023/2/4
   >
   >* 更新`3.2.2.1 辐射传输方程`章节
+  >* 创建`3.2.2.2 体渲染方程`章节
+
+* 2023/2/6
+  >
+  >* 更新`3.2.2.2 体渲染方程`章节
 
 ## 概述
 
@@ -1639,6 +1644,16 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 >得出最终的辐射传输方程：
 >
 >$$(w\cdot\nabla)L(x,w)=-\sigma_t(x)L(x,w)+\sigma_a(x)L_e(x,w)+\sigma_s(x)\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{8}$$
+
+##### 3.2.2.2 体渲染方程（`Volume Rendering Equation`）
+
+`RTE`方程使用梯度 $(w\cdot\nabla)$ 来表述向前传输的辐射亮度分布，换句话说就是用于描述辐射束向前传播时发生了什么。`RTE`可以直接使用有限元的方式比如辐射度方法，更多见于有限元方法，而不是光追中的设置，体渲染方程可以描述这种现象（这句话不知道说的啥意思，原文`The RTE can be directly used in finite element methods such as radiosity (Cohen et al. 1993) and more generally in finite element methods, but not in a path tracing setting, The volume rendering equation can provide this formulation`），为了简化符号，将内散射简写成：
+
+$$L_s(x,w)=\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{9}$$
+
+我们在`RTE`两遍进行积分，将式`8`左侧的梯度 $(w\cdot\nabla)$ 以积分的形式挪到右侧，这样就得到了 $L(x,w)$ 的显示方程，该方程就是体渲染方程，简称`VRE`
+
+$$L(x,w)=\int_{t=0}^{d}e^{-\int_{s=0}^{t}\sigma_t(x_s)ds}[\sigma_a(x_t)L_e(x_t,w)+\sigma_s(x_t)L_s(x_t,w)+L_d(x_d,w)]dt\tag{10}$$
 
 ## 4 问题
 
