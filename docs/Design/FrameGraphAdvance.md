@@ -1696,6 +1696,7 @@ graph TD;
 * 对于`模板`数据，目前暂时不考虑
 
 ## Image的Layout
+
 根据`Vulkan`标准，在创建`Image`时其对应的`initialLayout`，也就是初始化的布局必须是`VK_IMAGE_LAYOUT_UNDEFINED`或者`VK_IMAGE_LAYOUT_PREINITIALIZED`，在此`Turbo`是采用`VK_IMAGE_LAYOUT_UNDEFINED`，但是在之后的使用中（特别是`CommandBuffer`中）需要转换`Image`的`Layout`。在`Vulkan`标准[`12.4 Image Layout`](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#resources-image-layouts)章节中，有如下描述：
 
 >After initialization, applications need not use any layout other than the general layout, though this may produce suboptimal performance on some implementations.
@@ -1732,6 +1733,56 @@ VkImageLayout getDefaultImageLayout(TextureUsage usage)
 
 *注：在`ImageView`中也有`Layout`，多个不同`ImageView`对于同一个`Image`其`ImageView`的`Layout`可以是多种多样的。这也就是在`Turbo`的设计中，一个`Image`可以对应多个`ImageView`*
 
+如果是`Turbo`管理`Image`的`Layout`的话，最好是在`CommandBuffer`中记录指令时进行纹理布局管理（因为`Vulkan`是以`CommandBuffer`为核心的架构）。比如：
+
+> `只往纹理中写数据`
+>
+>```mermaid
+>graph LR;
+>    Pass--写-->ColorTexture(["ColorTexture"])
+>    Pass--写-->DepthTexture(["DepthTexture"])
+>```
+>
+>对应的`Layout`可能为：
+>
+>* `ColorTexture`：`VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`
+>* `DepthTexture`：`VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL`
+
+> `只读纹理`
+>
+>```mermaid
+>graph LR;
+>    ColorTexture(["ColorTexture"])--读-->Pass
+>    DepthTexture(["DepthTexture"])--读-->Pass
+>```
+>
+>对应的`Layout`可能为：
+>
+>* `ColorTexture`：`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`
+>* `DepthTexture`：`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`
+
+等等使用情况
+
+*注：纹理的`Layput`有使用指令前的布局转换，有使用中的布局转换，也有使用后的布局转换*
+
+理想的情况：
+
+```CXX
+Texture tex;//VK_IMAGE_LAYOUT_UNDEFINED
+
+command_buffer.BeginRenderPass(render_pass);//此时知道RenderPass对应的FrameBuffer要用到的所有纹理，进行指令前的布局转换
+command_buffer.BindPipelineDescriptorSet(..., tex);//进行指令中的布局转换
+command_buffer.ClearColorImage(..., tex);//进行指令中的布局转换
+command_buffer.ClearDepthStencilImage(..., tex);//进行指令中的布局转换
+command_buffer.CopyBufferToImage(..., tex);//进行指令中的布局转换
+command_buffer.CopyImageToBuffer(..., tex);//进行指令中的布局转换
+command_buffer.CopyImage(..., tex);//进行指令中的布局转换
+command_buffer.BlitImage(..., tex);//进行指令中的布局转换
+...//等等
+command_buffer.EndRenderPass();//进行指令后的布局转换
+```
+
+这需要每个纹理在记录特定`CommandBuffer`的指令前后进行`layout`转换
 
 ## Context上下文
 
