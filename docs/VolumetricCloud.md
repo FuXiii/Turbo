@@ -1651,7 +1651,7 @@ vec3 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
 
 $$L_s(x,w)=\int_{S^2}f_p(x,w,w')L(x,w')dw'\tag{9}$$
 
-我们在`RTE`两遍进行积分，将式`8`左侧的梯度 $(w\cdot\nabla)$ 以积分的形式挪到右侧，这样就得到了 $L(x,w)$ 的显示方程，该方程就是体渲染方程，简称`VRE`
+我们在`RTE`两边进行积分，将式`8`左侧的梯度 $(w\cdot\nabla)$ 以积分的形式挪到右侧，这样就得到了 $L(x,w)$ 的显示方程，该方程就是体渲染方程，简称`VRE`
 
 $$L(x,w)=\int_{t=0}^{d}e^{-\int_{s=0}^{t}\sigma_t(x_s)ds}[\sigma_a(x_t)L_e(x_t,w)+\sigma_s(x_t)L_s(x_t,w)+L_d(x_d,w)]dt\tag{10}$$
 
