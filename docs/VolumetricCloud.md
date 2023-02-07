@@ -1671,7 +1671,7 @@ $$L(x,w)=\int_{t=0}^{d}T(x)[\sigma_a(x_t)L_e(x_t,w)+\sigma_s(x_t)L_s(x_t,w)]dt+T
 
 辐射束射线上任何一个点经由透射率的吸收后都会损失一部分并最终反映到 $L(x,w)$ 中，下图就是展示`VRE`通过式`12`进行表述的示意图，`VRE`可以认为是渲染方程的推广，将其推广成一种体积结构，使用近乎是无穷密度的表面和复杂的相函数进行描述。
 
-<div align=center><img src="./images/vre.png" width=40%></div>
+<div align=center><img src="./images/vre.png"></div>
 
 在蒙特卡洛（`Monte Carlo`）中主要有两种随机方法用于求解`RTE`，在接下来的章节中，我们使用每种方法专用的`VRE`进行讲解。
 
