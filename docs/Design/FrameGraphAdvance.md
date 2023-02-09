@@ -175,6 +175,11 @@
   >
   >* 创建`Image的Layout`章节
 
+* 2023/2/9
+  >
+  >* 更新`FrameBuffer 创建`章节
+  >* 更新`RenderPassProxy(RenderPass代理)`章节
+
 ---
 
 # Turbo驱动初步
@@ -2345,13 +2350,51 @@ class Context
 * 从`Turbo::Render::TRenderPass`中的各种`Subpass`
 * 从`Turbo::Render::TRenderPass`中的各种`Subpass`中指定的`attachment`相关的
 
-### FrameBuffer 创建
-
-一个`RenderPass`下可以绑定多个`FrameBuffer`
-
 ### RenderPassProxy(RenderPass代理)
 
 由于需要管理`RenderPass`和`FrameBuffer`，所以提供了`RenderPassProxy`类，用于整合管理`RenderPass`和`FrameBuffer`，并由`RenderPassPool`创建和销毁
+
+> `新的想法`
+>
+>最近想到一种比较符合直觉的模式：刷新模式（我自己起的名字）
+>
+>由于之前使用`RenderPassPool`来创建`RenderPassProxy`类，`RenderPassProxy`类下面有真正的`RenderPass`，中间多一个`RenderPassProxy`来进行转换总感觉怪怪的，所以想到了如下方式：
+>
+>```CXX
+>/*
+>Turbo::Render::TRenderPass
+>{
+>    friend class TRenderPassPool;//使得TRenderPassPool可以去刷新renderPass成员变量
+>
+>    private:
+>        Turbo::Core::TRenderPass* renderPass=nullptr;//注意：此成员变量为private，为待刷新的数据
+>}
+>*/
+>Turbo::Render::TRenderPass render_pass;//此时其成员变量renderPass（真正的RenderPass现在为空）
+>
+>Turbo::Render::TRenderPassPool render_pass_pool;
+>
+>bool result = render_pass_pool.Allocate(render_pass);//此时进行Turbo::Render::TRenderPass::renderPass成员变量的刷新
+>if(result)
+>{
+>    //创建RenerPass成功
+>    //render_pass的成员变量renderPass将会被TRenderPassPool附上有效值
+>    {
+>        //伪代码
+>        Turbo::Core::TRenderPass* core_render_pass = render_pass.renderPass;
+>        if(core_render_pass != nullptr)
+>        {
+>           ...
+>        }
+>    }
+>    
+>}
+>else
+>{
+>    //创建RenerPass失败
+>    //render_pass的成员变量renderPass仍然为空
+>}
+>```
 
 ### Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass
 
@@ -2361,6 +2404,26 @@ class Context
 2. 计算各个`Subpass`中的`Attachment`相对于`Attachment`数组中的偏移等（`AttachmentReference`）
 
 由于会有重复的`Attachment`(如何判断两个`Attachment`相等：通过查看`Attachment`底层`Image`是否为同一个)，需要剔除重复的`Attachment`项目
+
+### FrameBuffer 创建
+
+一个`RenderPass`下可以绑定多个`FrameBuffer`，在使用`RenderPassPool`得到了一个有效的`RenderPass`后，`Turbo`需要根据用于传入的`RenderPass`配置来查看当前的`RenderPassPool`返回的`RenderPass`是否有支持当前的`FrameBuffer`。对应得流程如下：
+
+```mermaid
+graph TD;
+InputRenderPass["外部输入的RenderPass（配置）"]
+AnValidRenderPass["RenderPassPool返回的一个有效的RenderPass（RenderPassProxy）"]
+FindFrameBuffer{"寻找是否有兼容的FrameBuffer"}
+
+CreateFrameBuffer["创建FrameBuffer"]
+ReturnFrameBuffer["返回FrameBuffer"]
+
+InputRenderPass-->AnValidRenderPass
+AnValidRenderPass-->FindFrameBuffer
+FindFrameBuffer--没找到-->CreateFrameBuffer
+FindFrameBuffer--找到了-->ReturnFrameBuffer
+CreateFrameBuffer-->ReturnFrameBuffer
+```
 
 ## Shader
 

@@ -739,6 +739,11 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
         vec3 point = start_pos;
         float T = 1; // transmittance
+
+        float absorption = 150.;
+        vec3 sun_direction = normalize(vec3(1., 1.0, 1.0));
+        const int nbSampleLight = 6;
+
         for (int i = 0; i < max_step; ++i)
         {
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
@@ -746,23 +751,37 @@ vec3 TEST_RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox,
 
             if (density > 0)
             {
-                if (T < 0.01)
-                {
+                float tmp = density / float(max_step);
+                T *= 1. - tmp * absorption;
+                if (T <= 0.01)
                     break;
+
+                // Light scattering
+                BoundingBoxIntersections light_ray_intersections;
+                bool is_intersect = BoundingBoxIntersect(point, sun_direction, boundingBox, light_ray_intersections);
+                if (is_intersect)
+                {
+                    float Tl = 1.0;
+
+                    vec3 light_start_pos = light_ray_intersections.firstInterectionPos;
+                    vec3 light_end_pos = light_ray_intersections.secondInterectionPos;
+
+                    float light_ray_step = abs(length(end_pos - start_pos)) / nbSampleLight;
+                    vec3 light_point = light_start_pos;
+
+                    for (int j = 0; j < nbSampleLight; j++)
+                    {
+                        light_point += light_ray_step * j * hash(dot(point, vec3(12.256, 2.646, 6.356)));
+                        float densityLight = GetPerlinWorleyCloudDensity(light_point, coverage, boundingBox);
+                        if (densityLight > 0.)
+                            Tl *= 1. - densityLight * absorption / float(max_step);
+                        if (Tl <= 0.01)
+                            break;
+
+                        // Add ambiant + light scattering color
+                        color += vec3(1.) * 50. * tmp * T + vec3(1., .7, .4) * 80. * tmp * T * Tl;
+                    }
                 }
-
-                T *= 2 * exp(-density * step) * (1 - exp(-density * 2));
-
-                const vec3 albedo = vec3(0.85, 0.82, 0.90);
-
-                float tr = T;
-                float sigma_s = 0.5;
-
-                vec3 single_in_scatter = albedo * density * step * TEST_LightRay(point, sun_dir, mu, vec3(0), coverage, boundingBox) * phase_function;
-
-                vec3 fake_multiple_scatt = 0.9 * albedo * density * step * pow(density / 0.1, 0.3) * 2.5 * vec3(0.33, 0.35, 0.34);
-
-                color += T * (single_in_scatter + fake_multiple_scatt) * ambient;
             }
         }
     }
