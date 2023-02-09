@@ -2396,6 +2396,8 @@ class Context
 >}
 >```
 
+在创建完`Turbo::Core::TRenderPass`之后，可以通过`const std::vector<TAttachment> & Turbo::Core::TRenderPass::GetAttachments()`函数获取相应的
+
 ### Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass
 
 通过用户指定的`Turbo::Render::TRenderPass`在`RenderPassPool`中创建`Turbo::Core::TRenderPass`，对于`Turbo`来说其主要任务有两个
