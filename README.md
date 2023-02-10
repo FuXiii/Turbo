@@ -2442,4 +2442,4 @@ Turbo是渲染引擎
   >* `./engine/render`下`TTexture3D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
   >* `./engine/render`下`TDepthTexture2D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
   >* `./engine/render`下`TImage`的`Destroy`成员函数中进行`ImageView`的资源回收
-
+  >* `./engine/render`下`TImage`的`IsValid()`成员函数中增加对`ImageView`的判断

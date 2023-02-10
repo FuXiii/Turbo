@@ -513,6 +513,8 @@ void Test1()
 
 void Test2()
 {
+    std::cout<<"Test2()::Begin......................................................."<<std::endl;
+
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
 
@@ -555,6 +557,8 @@ void Test2()
 
     color_texture_2d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
+
+    std::cout<<"Test2()::End......................................................."<<std::endl;
 }
 
 void Test3()

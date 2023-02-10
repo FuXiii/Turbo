@@ -91,9 +91,9 @@ Turbo::Render::TSampleCountBits Turbo::Render::TImage::GetSampleCountBits() cons
 
 bool Turbo::Render::TImage::IsValid() const
 {
-    if (this->image != nullptr)
+    if (this->image != nullptr && this->imageView != nullptr)
     {
-        if (this->image->GetVkImage() != VK_NULL_HANDLE)
+        if (this->image->GetVkImage() != VK_NULL_HANDLE && this->imageView->GetVkImageView() != VK_NULL_HANDLE)
         {
             return true;
         }
