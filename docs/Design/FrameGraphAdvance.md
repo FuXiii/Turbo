@@ -1847,7 +1847,9 @@ uint32_t baseArrayLayer;
 uint32_t layerCount;
 ```
 
-考虑：这样设计是否为良构？`Turbo::Render::Image`的出现以及其子集`Turbo::Render::TTexture2D`、`Turbo::Render::TTexture3D`和`Turbo::Render::TDepthTexture2D`出现就是为了将繁杂的`Turbo::Core::TImage`和`Turbo::Core::TImageView`进行封装的，所以提供`GetImageView(...)`函数并不是一个好的选择。
+**考虑：这样设计是否为良构？`Turbo::Render::Image`的出现以及其子类`Turbo::Render::TTexture2D`、`Turbo::Render::TTexture3D`和`Turbo::Render::TDepthTexture2D`出现就是为了将繁杂的`Turbo::Core::TImage`和`Turbo::Core::TImageView`进行封装的，所以提供`GetImageView(...)`函数并不是一个好的选择。**
+
+所以在此`Turbo`选择在`Turbo::Render::TImage`中将`Turbo::Core::TImage`和`Turbo::Core::TImageView`统一管理。
 
 ## Context上下文
 
