@@ -2436,9 +2436,9 @@ Turbo是渲染引擎
 * 2023/2/10 设计架构
   >
   >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
-  >* `./engine/render`下`TImage.h`中`TImage`中增加`virtual void CreateImageView()`函数
-  >* `./engine/render`下`TImage.h`中`TImage::Create(...)`中增加对`virtual void CreateImageView()`成员函数的调用
-  >* `./engine/render`下`TTexture2D`中增加`virtual void CreateImageView()`函数
-  >* `./engine/render`下`TTexture3D`中增加`virtual void CreateImageView()`函数
-  >* `./engine/render`下`TDepthTexture2D`中增加`virtual void CreateImageView()`函数
+  >* `./engine/render`下`TImage.h`中`TImage`中增加`virtual void CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TImage.h`中`TImage::Create(...)`中增加对`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`成员函数的调用
+  >* `./engine/render`下`TTexture2D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TTexture3D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TDepthTexture2D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
 

@@ -2,11 +2,13 @@
 #include "render/include/TResourceAllocator.h"
 #include "vulkan/vulkan_core.h"
 #include <core/include/TException.h>
+#include <core/include/TImageView.h>
 #include <core/include/TPhysicalDevice.h>
 
-void Turbo::Render::TImage::CreateImageView()
+Turbo::Core::TImageView *Turbo::Render::TImage::CreateImageView(Turbo::Core::TImage *image)
 {
     // TODO: nothing
+    return nullptr;
 }
 
 void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -23,7 +25,7 @@ void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &de
     }
 
     // TODO:create Turbo::Core::ImageView
-    this->CreateImageView();
+    this->imageView = this->CreateImageView(this->image);
 }
 
 void Turbo::Render::TImage::Destroy(void *allocator)
@@ -497,9 +499,10 @@ void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descrip
     Turbo::Render::TDepthImage::Create(name, depth_image_descriptor, allocator);
 }
 
-void Turbo::Render::TTexture2D::CreateImageView()
+Turbo::Core::TImageView *Turbo::Render::TTexture2D::CreateImageView(Turbo::Core::TImage *image)
 {
     std::cout << "TTexture2D::CreateImageView()" << std::endl;
+    return nullptr;
 }
 
 void Turbo::Render::TTexture2D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -516,9 +519,10 @@ void Turbo::Render::TTexture2D::Create(const std::string &name, const Descriptor
     TColorImage2D::Create(name, color_image2d_descriptor, allocator);
 }
 
-void Turbo::Render::TTexture3D::CreateImageView()
+Turbo::Core::TImageView *Turbo::Render::TTexture3D::CreateImageView(Turbo::Core::TImage *image)
 {
     std::cout << "TTexture3D::CreateImageView()" << std::endl;
+    return nullptr;
 }
 
 void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -534,9 +538,10 @@ void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor
     TColorImage3D::Create(name, color_image3d_descriptor, allocator);
 }
 
-void Turbo::Render::TDepthTexture2D::CreateImageView()
+Turbo::Core::TImageView *Turbo::Render::TDepthTexture2D::CreateImageView(Turbo::Core::TImage *image)
 {
     std::cout << "TDepthTexture2D::CreateImageView()" << std::endl;
+    return nullptr;
 }
 
 void Turbo::Render::TDepthTexture2D::Create(const std::string &name, const Descriptor &descriptor, void *allocator)

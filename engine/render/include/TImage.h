@@ -75,7 +75,7 @@ class TImage
     Descriptor descriptor;
 
   protected:
-    virtual void CreateImageView();
+    virtual Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image);
 
   public:
     TImage() = default;
@@ -234,7 +234,7 @@ class TTexture2D : public TColorImage2D
     };
 
   protected:
-    void CreateImageView() override;
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
 
   public:
     TTexture2D() = default;
@@ -257,7 +257,7 @@ class TTexture3D : public TColorImage3D
     };
 
   protected:
-    void CreateImageView() override;
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
 
   public:
     TTexture3D() = default;
@@ -279,7 +279,7 @@ class TDepthTexture2D : public TDepthImage2D
     };
 
   protected:
-    void CreateImageView() override;
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
 
   public:
     TDepthTexture2D() = default;
