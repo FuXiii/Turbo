@@ -31,6 +31,11 @@ void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &de
 void Turbo::Render::TImage::Destroy(void *allocator)
 {
     // TODO:destroy Turbo::Core::ImageView
+    if (this->imageView != nullptr)
+    {
+        delete this->imageView;
+        this->imageView = nullptr;
+    }
 
     if (allocator != nullptr)
     {
@@ -501,7 +506,6 @@ void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descrip
 
 Turbo::Core::TImageView *Turbo::Render::TTexture2D::CreateImageView(Turbo::Core::TImage *image)
 {
-    std::cout << "TTexture2D::CreateImageView()" << std::endl;
     if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
     {
         return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, 1);
@@ -526,7 +530,11 @@ void Turbo::Render::TTexture2D::Create(const std::string &name, const Descriptor
 
 Turbo::Core::TImageView *Turbo::Render::TTexture3D::CreateImageView(Turbo::Core::TImage *image)
 {
-    std::cout << "TTexture3D::CreateImageView()" << std::endl;
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, 1);
+    }
+
     return nullptr;
 }
 
@@ -545,7 +553,11 @@ void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor
 
 Turbo::Core::TImageView *Turbo::Render::TDepthTexture2D::CreateImageView(Turbo::Core::TImage *image)
 {
-    std::cout << "TDepthTexture2D::CreateImageView()" << std::endl;
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, image->GetMipLevels(), 0, 1);
+    }
+
     return nullptr;
 }
 
