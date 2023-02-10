@@ -502,6 +502,11 @@ void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descrip
 Turbo::Core::TImageView *Turbo::Render::TTexture2D::CreateImageView(Turbo::Core::TImage *image)
 {
     std::cout << "TTexture2D::CreateImageView()" << std::endl;
+    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    {
+        return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, 1);
+    }
+
     return nullptr;
 }
 
