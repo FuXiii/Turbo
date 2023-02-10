@@ -1851,6 +1851,8 @@ uint32_t layerCount;
 
 所以在此`Turbo`选择在`Turbo::Render::TImage`中将`Turbo::Core::TImage`和`Turbo::Core::TImageView`统一管理。
 
+创建`ImageView`最好留给`Turbo::Render::TImage`的子类进行构建，`Turbo::Render::TImage`作为基类提供类似`protected: virtual void CreateImageView(....)`的接口函数，该接口函数会在`Turbo::Render::TImage::Create(...)`函数中创建完`Turbo::Core::TImage`之后调用，用于创建`Turbo::Core::TImageView`
+
 ## Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
