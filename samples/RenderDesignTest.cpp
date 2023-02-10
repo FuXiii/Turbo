@@ -557,10 +557,53 @@ void Test2()
     depth_texture_2d.Destroy(&resource_allocator);
 }
 
+void Test3()
+{
+    std::cout<<"Test3()::Begin......................................................."<<std::endl;
+
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    Turbo::Render::TTexture2D color_texture_2d;
+    Turbo::Render::TTexture2D::Descriptor color_texture_2d_descriptor = {};
+    color_texture_2d_descriptor.width = 512;
+    color_texture_2d_descriptor.height = 512;
+    color_texture_2d_descriptor.mipLevels = 1;
+    color_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
+    color_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture_2d.Create("color_texture_2d", color_texture_2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TTexture3D color_texture_3d;
+    Turbo::Render::TTexture3D::Descriptor color_texture_3d_descriptor = {};
+    color_texture_3d_descriptor.width = 512;
+    color_texture_3d_descriptor.height = 512;
+    color_texture_3d_descriptor.depth = 512;
+    color_texture_3d_descriptor.mipLevels = 1;
+    color_texture_3d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
+    color_texture_3d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture_3d.Create("color_texture_3d", color_texture_3d_descriptor, &resource_allocator);
+
+    Turbo::Render::TDepthTexture2D depth_texture_2d;
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor = {};
+    depth_texture2d_descriptor.width = 512;
+    depth_texture2d_descriptor.height = 512;
+    depth_texture2d_descriptor.mipLevels = 1;
+    depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    depth_texture_2d.Create("depth_texture_2d", depth_texture2d_descriptor, &resource_allocator);
+
+    color_texture_2d.Destroy(&resource_allocator);
+    color_texture_3d.Destroy(&resource_allocator);
+    depth_texture_2d.Destroy(&resource_allocator);
+
+    std::cout<<"Test3()::End......................................................."<<std::endl;
+}
+
 int main()
 {
     Test0();
     Test1();
     Test2();
+    Test3();
     return 0;
 }

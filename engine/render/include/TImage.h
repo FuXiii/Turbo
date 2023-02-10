@@ -65,7 +65,7 @@ class TImage
         TImageUsages usages;
         TDomain domain;
     };
-    
+
     friend class TRenderPassPool;
 
   private:
@@ -73,6 +73,9 @@ class TImage
     Turbo::Core::TImageView *imageView = nullptr;
 
     Descriptor descriptor;
+
+  protected:
+    virtual void CreateImageView();
 
   public:
     TImage() = default;
@@ -230,6 +233,9 @@ class TTexture2D : public TColorImage2D
         TDomain domain;
     };
 
+  protected:
+    void CreateImageView() override;
+
   public:
     TTexture2D() = default;
     ~TTexture2D() = default;
@@ -250,6 +256,9 @@ class TTexture3D : public TColorImage3D
         TDomain domain;
     };
 
+  protected:
+    void CreateImageView() override;
+
   public:
     TTexture3D() = default;
     ~TTexture3D() = default;
@@ -268,6 +277,9 @@ class TDepthTexture2D : public TDepthImage2D
         TImageUsages usages;
         TDomain domain;
     };
+
+  protected:
+    void CreateImageView() override;
 
   public:
     TDepthTexture2D() = default;
