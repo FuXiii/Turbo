@@ -180,6 +180,11 @@
   >* 更新`FrameBuffer 创建`章节
   >* 更新`RenderPassProxy(RenderPass代理)`章节
 
+* 2023/2/10
+  >
+  >* 更新`FrameBuffer 创建`章节
+  >* 创建`Image的ImageView`章节
+
 ---
 
 # Turbo驱动初步
@@ -1789,6 +1794,61 @@ command_buffer.EndRenderPass();//进行指令后的布局转换
 
 这需要每个纹理在记录特定`CommandBuffer`的指令前后进行`layout`转换
 
+## Image的ImageView
+
+在`Image::Create(...)`创建完`Turbo::Core::TImage`之后还没有结束，对于`Vulkan`渲染来说，`ImageView`是必须的。而一个`Image`可以对应多个`ImageView`，并且每个`ImageView`可以对应不同的`Subresource`(相当于`Image`的一个子集)
+
+在每一个`Render::Image`中提供一个`GetImageView(...)`函数：
+
+```mermaid
+graph TD;
+GetImageView["GetImageView(...)"]
+FindImageView["在当前创建完成的多个ImageView集合中找兼容的ImageView，防止重复创建"]
+IsFind{"是否找到了"}
+CreateNewImageView["创建新的ImageView"]
+ReturnImageView["返回已有的ImageView"]
+
+GetImageView-->FindImageView
+FindImageView-->IsFind
+
+IsFind--否-->CreateNewImageView
+IsFind--是-->ReturnImageView
+```
+
+创建一个`ImageView`需要如下参数：
+
+```CXX
+enum ImageViewType
+{
+    1D,
+    2D,
+    3D,
+    CUBE,
+    1D_ARRAY,
+    2D_ARRAY,
+    CUBE_ARRAY
+};
+
+enum
+{
+    COLOR_BIT,
+    DEPTH_BIT,
+    STENCIL_BIT,
+};
+
+//需要的参数如下：
+//Turbo::Core::TImage* image;//该参数通过Turbo::Render::TImage中可获取
+ImageViewType imageViewType;
+//Format format;//该参数通过Turbo::Render::TImage中可获取
+ImageViewAspect aspect;//该参数虽然对外公开，但是可以通过Turbo::Render::TImage和其子类推出来
+uint32_t baseMipLevel;
+uint32_t levelCount;
+uint32_t baseArrayLayer;
+uint32_t layerCount;
+```
+
+考虑：这样设计是否为良构？`Turbo::Render::Image`的出现以及其子集`Turbo::Render::TTexture2D`、`Turbo::Render::TTexture3D`和`Turbo::Render::TDepthTexture2D`出现就是为了将繁杂的`Turbo::Core::TImage`和`Turbo::Core::TImageView`进行封装的，所以提供`GetImageView(...)`函数并不是一个好的选择。
+
 ## Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
@@ -2426,6 +2486,10 @@ FindFrameBuffer--没找到-->CreateFrameBuffer
 FindFrameBuffer--找到了-->ReturnFrameBuffer
 CreateFrameBuffer-->ReturnFrameBuffer
 ```
+
+现在有一个问题：
+
+`FrameBuffer`中对应的`Image`是每一帧都在做变化的，而且一次渲染只能绑定一个`FrameBuffer`，所以`FrameBuffer`的生命周期只在一帧中。
 
 ## Shader
 
