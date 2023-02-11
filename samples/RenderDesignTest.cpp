@@ -513,7 +513,7 @@ void Test1()
 
 void Test2()
 {
-    std::cout<<"Test2()::Begin......................................................."<<std::endl;
+    std::cout << "Test2()::Begin......................................................." << std::endl;
 
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
@@ -545,25 +545,25 @@ void Test2()
 
     {
         Turbo::Render::TRenderPassPool render_pass_pool(&context);
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_0.IsValid() ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
+        bool render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_0 ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
 
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_1.IsValid() ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
+        bool render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_1 ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
 
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_2.IsValid() ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+        bool render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
+        render_pass_proxy_2 ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
     }
 
     color_texture_2d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
 
-    std::cout<<"Test2()::End......................................................."<<std::endl;
+    std::cout << "Test2()::End......................................................." << std::endl;
 }
 
 void Test3()
 {
-    std::cout<<"Test3()::Begin......................................................."<<std::endl;
+    std::cout << "Test3()::Begin......................................................." << std::endl;
 
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
@@ -600,7 +600,7 @@ void Test3()
     color_texture_3d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
 
-    std::cout<<"Test3()::End......................................................."<<std::endl;
+    std::cout << "Test3()::End......................................................." << std::endl;
 }
 
 int main()

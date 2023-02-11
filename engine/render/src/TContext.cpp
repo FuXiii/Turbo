@@ -23,7 +23,51 @@
 #include <stdint.h>
 #include <vector>
 
-void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
+// void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
+// {
+
+// }
+
+// void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
+// {
+// }
+
+// Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
+// {
+// }
+
+// bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
+// {
+//     if (this->renderPass != nullptr)
+//     {
+//         return true;
+//     }
+
+//     return false;
+// }
+
+Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
+{
+    if (context != nullptr)
+    {
+        this->context = context;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TRenderPassPool::TRenderPassPool", "Please make sure set valid TContext* parameter");
+    }
+}
+
+Turbo::Render::TRenderPassPool::~TRenderPassPool()
+{
+    // TODO:release this->renderPassProxies;
+    for (Turbo::Render::TRenderPass &render_pass_item : this->renderPasses)
+    {
+        delete render_pass_item.renderPass;
+    }
+}
+
+void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
 {
     // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
     // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
@@ -174,8 +218,7 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
             core_subpasses.push_back(core_subpass);
         }
 
-        this->renderPass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
-
+        renderPass.renderPass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
         // How to create FrameBuffer?
     }
     else
@@ -184,56 +227,12 @@ void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRe
     }
 }
 
-void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
-{
-    // TODO:Destroy Turbo::Core::TRenderPass
-    if (this->renderPass != nullptr)
-    {
-        delete this->renderPass;
-    }
-}
-
-Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
-{
-}
-
-bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
-{
-    if (this->renderPass != nullptr)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
-{
-    if (context != nullptr)
-    {
-        this->context = context;
-    }
-    else
-    {
-        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TRenderPassPool::TRenderPassPool", "Please make sure set valid TContext* parameter");
-    }
-}
-
-Turbo::Render::TRenderPassPool::~TRenderPassPool()
-{
-    // TODO:release this->renderPassProxies;
-    for (Turbo::Render::TRenderPassPool::TRenderPassProxy &render_pass_proxy_item : this->renderPassProxies)
-    {
-        render_pass_proxy_item.Destroy();
-    }
-}
-
-Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
+bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
     // first we need to judge if renderPass which input from external was empty we need return empty TRenderPassProxy
     // if(renderPass.IsEmpty())...
 
-    auto find_result = std::find_if(this->renderPassProxies.begin(), this->renderPassProxies.end(), [&](TRenderPassProxy &renderPassProxyItem) {
+    auto find_result = std::find_if(this->renderPasses.begin(), this->renderPasses.end(), [&](TRenderPass &renderPassProxyItem) {
         std::vector<Turbo::Render::TSubpass> render_subpasses = renderPass.GetSubpasses();
         Turbo::Core::TRenderPass *core_render_pass = renderPassProxyItem.renderPass;
         if (core_render_pass != nullptr)
@@ -435,32 +434,33 @@ Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool:
         return false;
     });
 
-    if (find_result != this->renderPassProxies.end())
+    if (find_result != this->renderPasses.end())
     {
-        return *find_result;
+        renderPass.renderPass = (*find_result).renderPass;
+        return true;
     }
 
-    return TRenderPassProxy();
+    return false;
 }
 
-Turbo::Render::TRenderPassPool::TRenderPassProxy Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
+bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:return a valid TRenderPassProxy
     // TODO:find a valid RenderPassProxy
     // TODO:if not found create a new RenderPassProxy/RenderPass
     // TODO:if found return what we want
-    TRenderPassProxy find_render_pass_proxy = this->Find(renderPass);
-    if (find_render_pass_proxy.IsValid())
+    bool is_found_render_pass = this->Find(renderPass);
+    if (is_found_render_pass)
     {
         std::cout << "Subpass Found" << std::endl;
-        return find_render_pass_proxy;
+        return true;
     }
+
     std::cout << "new Subpass" << std::endl;
     // create a new RenderPass/TRenderPassProxy
-    this->renderPassProxies.push_back(TRenderPassProxy());
-    size_t render_pass_index = this->renderPassProxies.size() - 1;
-    this->renderPassProxies[render_pass_index].Create(renderPass, this->context);
-    return this->renderPassProxies[render_pass_index];
+    this->CreateRenderPass(renderPass, this->context);
+    this->renderPasses.push_back(renderPass);
+    return true;
 }
 
 void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)

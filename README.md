@@ -2444,3 +2444,14 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`的`Destroy`成员函数中进行`ImageView`的资源回收
   >* `./engine/render`下`TImage`的`IsValid()`成员函数中增加对`ImageView`的判断
   >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/11 设计架构
+  >
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`Turbo::Core::TRenderPass *renderPass = nullptr`成员变量
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`friend class TRenderPassPool;`友元类
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy`移除
+  >* `./engine/render`下`TContext`中将`std::vector<TRenderPassProxy> renderPassProxies`更改成`std::vector<TRenderPass> renderPasses`
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy`中的`void Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`和`void Destroy()`移动到`TRenderPassPool`中，并重命名为`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`和`void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TContext`中将`TRenderPassPool`中移除`void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`更改成`bool Find(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`更改成`bool Allocate(Turbo::Render::TRenderPass &renderPass)`

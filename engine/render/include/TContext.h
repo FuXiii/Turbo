@@ -44,39 +44,39 @@ class TContext;
 class TRenderPassPool
 {
   public:
-    class TRenderPassProxy
-    {
-      public:
-        friend class TRenderPassPool;
+    // class TRenderPassProxy
+    // {
+    //   public:
+    //     friend class TRenderPassPool;
 
-      private:
-        Turbo::Core::TRenderPass *renderPass = nullptr;
+    //   private:
+    //     Turbo::Core::TRenderPass *renderPass = nullptr;
 
-      private:
-        void Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context);
-        void Destroy();
+    //   private:
+    //   public:
+    //     TRenderPassProxy() = default;
+    //     ~TRenderPassProxy();
 
-      public:
-        TRenderPassProxy() = default;
-        ~TRenderPassProxy();
-
-        bool IsValid();
-    };
+    //     bool IsValid();
+    // };
 
   private:
     TContext *context = nullptr;
 
   private:
-    std::vector<TRenderPassProxy> renderPassProxies;
+    std::vector<TRenderPass> renderPasses;
+
+    void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context);
+    //void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass);
 
   private:
-    TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass);
+    bool Find(Turbo::Render::TRenderPass &renderPass);
 
   public:
     TRenderPassPool(TContext *context);
     ~TRenderPassPool();
 
-    TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass);
+    bool Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
 };
 
