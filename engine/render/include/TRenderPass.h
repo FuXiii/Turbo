@@ -53,6 +53,8 @@ class TRenderPass
 
     TRenderPass &AddSubpass(const Turbo::Render::TSubpass &subpass);
     const std::vector<Turbo::Render::TSubpass> &GetSubpasses();
+
+    bool IsValid();
 };
 } // namespace Render
 } // namespace Turbo

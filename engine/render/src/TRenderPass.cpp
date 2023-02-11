@@ -2,6 +2,7 @@
 #include "render/include/TImage.h"
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
+#include <core/include/TRenderPass.h>
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddColorAttachment(const Turbo::Render::TColorImage &colorImage)
 {
@@ -66,4 +67,14 @@ Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::AddSubpass(const Turbo::
 const std::vector<Turbo::Render::TSubpass> &Turbo::Render::TRenderPass::GetSubpasses()
 {
     return this->subpasses;
+}
+
+bool Turbo::Render::TRenderPass::IsValid()
+{
+    if (this->renderPass != nullptr && this->renderPass->GetVkRenderPass() != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+
+    return false;
 }

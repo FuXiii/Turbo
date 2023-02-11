@@ -2455,3 +2455,4 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中将`TRenderPassPool`中移除`void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass)`成员函数
   >* `./engine/render`下`TContext`中将`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`更改成`bool Find(Turbo::Render::TRenderPass &renderPass)`
   >* `./engine/render`下`TContext`中将`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`更改成`bool Allocate(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TRenderPass`中增加`bool IsValid()`函数
