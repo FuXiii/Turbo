@@ -185,6 +185,10 @@
   >* 更新`FrameBuffer 创建`章节
   >* 创建`Image的ImageView`章节
 
+* 2023/2/13
+  >
+  >* 更新`FrameBuffer 创建`章节
+
 ---
 
 # Turbo驱动初步
@@ -2494,6 +2498,12 @@ CreateFrameBuffer-->ReturnFrameBuffer
 现在有一个问题：
 
 `FrameBuffer`中对应的`Image`是每一帧都在做变化的，而且一次渲染只能绑定一个`FrameBuffer`，所以`FrameBuffer`的生命周期只在一帧中。
+
+也就是说在创建完`RenderPass`之后，需要去类似`FrameBufferPool`结构中去找是否有兼容的`FrameBuffer`，如果有的话直接返回，没有的话新创建一个，之后渲染完一帧后回收销毁`FrameBufferPool`中的所有的`FrameBuffer`
+
+*注：根据`Vulkan`标准，创建`FrameBuffer`时，必须指定`RenderPass`（标准规定，是与之兼容的`RenderPass`）。所以在创建`FrameBuffer`前必须创建`RenderPass`*
+
+同`RenderPassPool`创建`RenderPass`类似，`FrameBufferPool`也需要传入`RenderPass`，并将创建结果刷新到`RenderPass`中，这需要`RenderPass`有一个存储刷新`FrameBuffer`的成员变量
 
 ## Shader
 

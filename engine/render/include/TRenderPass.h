@@ -10,6 +10,7 @@ namespace Turbo
 namespace Core
 {
 class TRenderPass;
+class TFramebuffer;
 } // namespace Core
 } // namespace Turbo
 
@@ -43,6 +44,7 @@ class TRenderPass
   private:
     friend class TRenderPassPool;
     Turbo::Core::TRenderPass *renderPass = nullptr;
+    Turbo::Core::TFramebuffer *framebuffer = nullptr;
 
   private:
     std::vector<TSubpass> subpasses;

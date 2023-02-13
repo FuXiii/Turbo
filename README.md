@@ -2456,3 +2456,10 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中将`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`更改成`bool Find(Turbo::Render::TRenderPass &renderPass)`
   >* `./engine/render`下`TContext`中将`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`更改成`bool Allocate(Turbo::Render::TRenderPass &renderPass)`
   >* `./engine/render`下`TRenderPass`中增加`bool IsValid()`函数
+
+* 2023/2/13 设计架构
+  >
+  >* `./engine/render`下`TContext.h`中增加`TFrameBufferPool`类
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员函数`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`修改成`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass)`，其中的`Turbo::Render::TContext *context`在`TRenderPassPool`中存在对应的成员变量
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员变量`std::vector<TRenderPass> renderPasses;`修改成`std::vector<TRenderPass> renderPasses;`
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加``成员变量

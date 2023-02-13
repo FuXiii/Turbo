@@ -12,6 +12,7 @@
 #include <core/include/TDeviceQueue.h>
 #include <core/include/TException.h>
 #include <core/include/TFence.h>
+#include <core/include/TFramebuffer.h>
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
@@ -22,29 +23,6 @@
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
 #include <vector>
-
-// void Turbo::Render::TRenderPassPool::TRenderPassProxy::Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
-// {
-
-// }
-
-// void Turbo::Render::TRenderPassPool::TRenderPassProxy::Destroy()
-// {
-// }
-
-// Turbo::Render::TRenderPassPool::TRenderPassProxy::~TRenderPassProxy()
-// {
-// }
-
-// bool Turbo::Render::TRenderPassPool::TRenderPassProxy::IsValid()
-// {
-//     if (this->renderPass != nullptr)
-//     {
-//         return true;
-//     }
-
-//     return false;
-// }
 
 Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 {
@@ -61,13 +39,15 @@ Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 Turbo::Render::TRenderPassPool::~TRenderPassPool()
 {
     // TODO:release this->renderPassProxies;
-    for (Turbo::Render::TRenderPass &render_pass_item : this->renderPasses)
+    for (Turbo::Core::TRenderPass *render_pass_item : this->renderPasses)
     {
-        delete render_pass_item.renderPass;
+        delete render_pass_item;
     }
+
+    this->context = nullptr;
 }
 
-void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)
+void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO:Create Turbo::Core::TRenderPass from Turbo::Render::TRenderPass
     // TODO:this->renderPass = new Turbo::Core::TRenderPass(...);
@@ -75,9 +55,9 @@ void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass
     // TODO: 这里在构建Attachment时需要指定ImageLayout，由于ImageLayout可以有很多种布局，目前并不知道之前Image的布局，目前默认为UNDEFINED。而在Filament中大部分Image的布局都为UNDEFINED或者GENERAL（这个布局用的最多）
     // TODO: Filament中对于Attachment的initialLayout多为UNDEFINED或者GENERAL，对于finalLayout多为GENERAL，如果作为采样纹理的话则为SHADER_READ_ONLY_OPTIMAL
     // TODO: 详情请参考Filament中/filament/backend/src/vulkan/VulkanFboCache.cpp : VkRenderPass VulkanFboCache::getRenderPass(RenderPassKey config) noexcept
-    if (context != nullptr)
+    if (this->context != nullptr)
     {
-        Turbo::Core::TDevice *device = context->GetDevice();
+        Turbo::Core::TDevice *device = this->context->GetDevice();
 
         std::vector<VkImage> frame_buffer_layout;
         std::vector<Turbo::Core::TAttachment> core_attachments;
@@ -218,7 +198,10 @@ void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass
             core_subpasses.push_back(core_subpass);
         }
 
-        renderPass.renderPass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
+        Turbo::Core::TRenderPass *new_render_pass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
+        renderPass.renderPass = new_render_pass;
+        this->renderPasses.push_back(new_render_pass);
+
         // How to create FrameBuffer?
     }
     else
@@ -232,9 +215,9 @@ bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass
     // first we need to judge if renderPass which input from external was empty we need return empty TRenderPassProxy
     // if(renderPass.IsEmpty())...
 
-    auto find_result = std::find_if(this->renderPasses.begin(), this->renderPasses.end(), [&](TRenderPass &renderPassProxyItem) {
+    auto find_result = std::find_if(this->renderPasses.begin(), this->renderPasses.end(), [&](Turbo::Core::TRenderPass *render_pass_item) {
         std::vector<Turbo::Render::TSubpass> render_subpasses = renderPass.GetSubpasses();
-        Turbo::Core::TRenderPass *core_render_pass = renderPassProxyItem.renderPass;
+        Turbo::Core::TRenderPass *core_render_pass = render_pass_item;
         if (core_render_pass != nullptr)
         {
             std::vector<Turbo::Core::TAttachment> core_attachments = core_render_pass->GetAttachments();
@@ -436,7 +419,7 @@ bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass
 
     if (find_result != this->renderPasses.end())
     {
-        renderPass.renderPass = (*find_result).renderPass;
+        renderPass.renderPass = (*find_result);
         return true;
     }
 
@@ -452,14 +435,11 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     bool is_found_render_pass = this->Find(renderPass);
     if (is_found_render_pass)
     {
-        std::cout << "Subpass Found" << std::endl;
         return true;
     }
 
-    std::cout << "new Subpass" << std::endl;
     // create a new RenderPass/TRenderPassProxy
-    this->CreateRenderPass(renderPass, this->context);
-    this->renderPasses.push_back(renderPass);
+    this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
     return true;
 }
 
@@ -467,6 +447,55 @@ void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass
 {
     // TODO:let renderPass into pool
     // this->renderPassProxies[x].Destroy();
+}
+
+Turbo::Render::TFramebufferPool::TFramebufferPool(TContext *context)
+{
+    if (context != nullptr)
+    {
+        this->context = context;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TFramebufferPool::TFramebufferPool", "Please make sure set valid TContext* parameter");
+    }
+}
+
+Turbo::Render::TFramebufferPool::~TFramebufferPool()
+{
+    for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
+    {
+        delete frame_buffer_item;
+    }
+
+    this->context = nullptr;
+}
+
+void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPass &renderPass)
+{
+    // TODO:Create a new Turbo::Core::TFramebuffer
+    // TODO:add into this->framebuffers
+}
+
+bool Turbo::Render::TFramebufferPool::Find(Turbo::Render::TRenderPass &renderPass)
+{
+    return false;
+}
+
+bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &renderPass)
+{
+    if (this->Find(renderPass))
+    {
+        return true;
+    }
+
+    // TODO:Create a new Framebuffer
+    return false; // TODO: return true
+}
+
+void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPass)
+{
+    //
 }
 
 Turbo::Render::TContext::TContext()
