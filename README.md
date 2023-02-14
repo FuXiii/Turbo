@@ -2472,4 +2472,5 @@ Turbo是渲染引擎
   >* 修改`./engine/core`下`TPhysicalDevice`中`GetSupportImageSampleCounts()`中增加当格式不被支持时的判断
   >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageResourceSize()`中增加当格式不被支持时的判断
   >* `./engine/core`下`TPhysicalDevice`中增加`bool IsFormatSupportImage(...)`成员函数
+  >* `./engine/core`下`TImage`中`InternalCreate()`中增加对于格式是否支持的判断
   >* 
