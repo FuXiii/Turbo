@@ -189,6 +189,10 @@
   >
   >* 更新`FrameBuffer 创建`章节
 
+* 2023/2/14
+  >
+  >* 更新`Context::CmdBeginRenderPass`章节
+
 ---
 
 # Turbo驱动初步
@@ -2395,6 +2399,12 @@ class Context
 ```
 
 对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
+
+`Turbo`对于`RenderPass`中的各种`Subpass`所绑定的`Attachment`，`Turbo`会进行统计，目的是创建与之对应的`FrameBuffer`，所以在此规定一下统计顺序，创建的`FrameBuffer`顺序也与之对应：
+
+1. `Color`附件集
+2. `Input`附件集
+3. `DepthStencil`附件集
 
 ### RenderPass 创建
 
