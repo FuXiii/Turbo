@@ -2463,3 +2463,13 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员函数`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`修改成`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass)`，其中的`Turbo::Render::TContext *context`在`TRenderPassPool`中存在对应的成员变量
   >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员变量`std::vector<TRenderPass> renderPasses;`修改成`std::vector<TRenderPass> renderPasses;`
   >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`Turbo::Core::TFramebuffer *framebuffer`成员变量
+
+* 2023/2/14 设计架构
+  >
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageExtent()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageMipLevels()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageArrayLayers()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetSupportImageSampleCounts()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageResourceSize()`中增加当格式不被支持时的判断
+  >* `./engine/core`下`TPhysicalDevice`中增加`bool IsFormatSupportImage(...)`成员函数
+  >* 
