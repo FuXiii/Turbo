@@ -432,8 +432,7 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     // TODO:find a valid RenderPassProxy
     // TODO:if not found create a new RenderPassProxy/RenderPass
     // TODO:if found return what we want
-    bool is_found_render_pass = this->Find(renderPass);
-    if (is_found_render_pass)
+    if (this->Find(renderPass))
     {
         return true;
     }
@@ -475,6 +474,16 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
 {
     // TODO:Create a new Turbo::Core::TFramebuffer
     // TODO:add into this->framebuffers
+    std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
+
+    std::vector<Turbo::Core::TImageView *> attachments;
+    for (Turbo::Render::TImage &image_item : render_pass_attachments)
+    {
+        attachments.push_back(image_item.imageView);
+    }
+    Turbo::Core::TFramebuffer *new_frame_buffer = new Turbo::Core::TFramebuffer(renderPass.renderPass, attachments);
+    renderPass.framebuffer = new_frame_buffer;
+    this->framebuffers.push_back(new_frame_buffer);
 }
 
 bool Turbo::Render::TFramebufferPool::Find(Turbo::Render::TRenderPass &renderPass)
@@ -524,7 +533,8 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
     }
 
     // TODO:Create a new Framebuffer
-    return false; // TODO: return true
+    this->CreateFramebuffer(renderPass);
+    return true;
 }
 
 void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPass)
