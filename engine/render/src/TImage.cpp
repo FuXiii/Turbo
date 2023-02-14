@@ -102,6 +102,26 @@ bool Turbo::Render::TImage::IsValid() const
     return false;
 }
 
+bool Turbo::Render::TImage::operator==(const TImage &image)
+{
+    if (this->image == image.image)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool Turbo::Render::TImage::operator!=(const TImage &image)
+{
+    if (this->image != image.image)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
 void Turbo::Render::TColorImage::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
 {
     TImage::Descriptor image_descriptor{};

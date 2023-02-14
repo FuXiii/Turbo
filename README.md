@@ -2473,5 +2473,11 @@ Turbo是渲染引擎
   >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageResourceSize()`中增加当格式不被支持时的判断
   >* `./engine/core`下`TPhysicalDevice`中增加`bool IsFormatSupportImage(...)`成员函数
   >* `./engine/core`下`TImage`中`InternalCreate()`中增加对于格式是否支持的判断
+  >* `./engine/render`下`TRenderPass`中增加`friend class TFramebufferPool`使得`TFramebufferPool`在分配之后将结果刷新到`TRenderPass`中
   >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/core`下`TFramebuffer`中增加`std::vector<TImageView *> GetAttachments()`成员函数
+  >* `./engine/render`下`TRenderPass`下增加`std::vector<Turbo::Render::TImage> GetAttachments();`成员函数
+  >* `./engine/render`下`TImage`下增加`bool operator ==(const TImage& image)`成员函数
+  >* `./engine/render`下`TImage`下增加`bool operator !=(const TImage& image)`成员函数
+  >* `./engine/render`下`TImage`下增加`friend class TFramebufferPool`友元类
   >* 

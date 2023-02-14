@@ -479,6 +479,40 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
 
 bool Turbo::Render::TFramebufferPool::Find(Turbo::Render::TRenderPass &renderPass)
 {
+    auto find_result = std::find_if(this->framebuffers.begin(), this->framebuffers.end(), [&](Turbo::Core::TFramebuffer *frame_buffer_item) {
+        Turbo::Core::TFramebuffer *core_frame_buffer = frame_buffer_item;
+        if (core_frame_buffer != nullptr && renderPass.renderPass != nullptr)
+        {
+            std::vector<Turbo::Core::TImageView *> frame_buffer_attachments = core_frame_buffer->GetAttachments();
+            std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
+
+            uint32_t frame_buffer_attachment_count = frame_buffer_attachments.size();
+            uint32_t render_pass_attachment_count = render_pass_attachments.size();
+            if (frame_buffer_attachment_count >= render_pass_attachment_count)
+            {
+                for (uint32_t attachment_index = 0; attachment_index < render_pass_attachment_count; attachment_index++)
+                {
+                    Turbo::Core::TImage *frame_buffer_attachment_image = frame_buffer_attachments[attachment_index]->GetImage();
+                    Turbo::Core::TImage *render_pass_attachment_image = render_pass_attachments[attachment_index].imageView->GetImage();
+
+                    if (frame_buffer_attachment_image != render_pass_attachment_image)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+        return false;
+    });
+
+    if (find_result != this->framebuffers.end())
+    {
+        renderPass.framebuffer = (*find_result);
+        return true;
+    }
+
     return false;
 }
 

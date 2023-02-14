@@ -67,6 +67,7 @@ class TImage
     };
 
     friend class TRenderPassPool;
+    friend class TFramebufferPool;
 
   private:
     Turbo::Core::TImage *image = nullptr;
@@ -94,6 +95,9 @@ class TImage
     TDomain GetDomain() const;
     TSampleCountBits GetSampleCountBits() const;
     bool IsValid() const;
+
+    bool operator==(const TImage &image);
+    bool operator!=(const TImage &image);
 };
 
 class TColorImage : public TImage

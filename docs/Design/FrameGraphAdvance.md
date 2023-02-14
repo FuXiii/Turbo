@@ -2362,6 +2362,8 @@ context->CmdBeginRenderPass(render_pass)
 1. 创建相应的`RenderPass`
 2. 创建相应的`FrameBuffer`
 
+`FrameBuffer`中可以很轻松的得到其中的`Attachment`集合（可以获取对应的`ImageView`），而`RenderPass`需要从各个`Subpass`中统计出来，所以为了方便，`RenderPass`需要提供`std::vector<Turbo::Render::TImage> GetAttachemts()`函数。
+
 对于`RenderPass`和`FrameBuffer`的创建，需要根据`FrameGraph::PassNode::Setup`阶段中声明的各种`Subpass`来创建。
 
 现在有个问题：如何从`PassNode`中将`RenderPass`配置提取出来，并传给`Context`，说白了就是传给`CmdBeginRenderPass(RenderPass)`函数的`RenderPass`参数的实参如何构建？接口如何设计？

@@ -69,6 +69,76 @@ const std::vector<Turbo::Render::TSubpass> &Turbo::Render::TRenderPass::GetSubpa
     return this->subpasses;
 }
 
+std::vector<Turbo::Render::TImage> Turbo::Render::TRenderPass::GetAttachments()
+{
+    std::vector<Turbo::Render::TImage> result;
+
+    for (Turbo::Render::TSubpass &subpass_item : this->subpasses)
+    {
+        std::vector<Turbo::Render::TColorImage> color_images = subpass_item.GetColorAttachments();
+        std::vector<Turbo::Render::TImage> input_images = subpass_item.GetInputAttachments();
+        Turbo::Render::TDepthStencilImage depth_stencil_image = subpass_item.GetDepthStencilAttachment();
+
+        for (Turbo::Render::TColorImage &color_image_item : color_images)
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (color_image_item == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(color_image_item);
+            }
+        }
+
+        for (Turbo::Render::TImage &input_image_item : input_images)
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (input_image_item == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(input_image_item);
+            }
+        }
+
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (depth_stencil_image == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(depth_stencil_image);
+            }
+        }
+    }
+
+    return result;
+}
+
 bool Turbo::Render::TRenderPass::IsValid()
 {
     if (this->renderPass != nullptr && this->renderPass->GetVkRenderPass() != VK_NULL_HANDLE)

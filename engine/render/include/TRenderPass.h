@@ -43,6 +43,9 @@ class TRenderPass
 {
   private:
     friend class TRenderPassPool;
+    friend class TFramebufferPool;
+
+  private:
     Turbo::Core::TRenderPass *renderPass = nullptr;
     Turbo::Core::TFramebuffer *framebuffer = nullptr;
 
@@ -55,6 +58,8 @@ class TRenderPass
 
     TRenderPass &AddSubpass(const Turbo::Render::TSubpass &subpass);
     const std::vector<Turbo::Render::TSubpass> &GetSubpasses();
+
+    std::vector<Turbo::Render::TImage> GetAttachments();
 
     bool IsValid();
 };
