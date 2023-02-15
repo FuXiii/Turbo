@@ -255,50 +255,7 @@ void Test0()
 
     {
         Turbo::FrameGraph::TRenderPass fg_render_pass{};
-        context.BeginRenderPass(fg_render_pass);
-    }
-
-    {
-        Turbo::Render::TTexture2D color_texture2d;
-        Turbo::Render::TTexture2D::Descriptor color_texture2d_descriptor{};
-        color_texture2d_descriptor.width = 1920;
-        color_texture2d_descriptor.height = 1080;
-        color_texture2d_descriptor.mipLevels = 1;
-        color_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
-        color_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        color_texture2d.Create("color_texture2d", color_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TTexture2D normal_texture2d;
-        Turbo::Render::TTexture2D::Descriptor normal_texture2d_descriptor{};
-        normal_texture2d_descriptor.width = 1920;
-        normal_texture2d_descriptor.height = 1080;
-        normal_texture2d_descriptor.mipLevels = 1;
-        normal_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
-        normal_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        normal_texture2d.Create("normal_texture2d", normal_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TDepthTexture2D depth_texture2d;
-        Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor{};
-        depth_texture2d_descriptor.width = 1920;
-        depth_texture2d_descriptor.height = 1080;
-        depth_texture2d_descriptor.mipLevels = 1;
-        depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
-        depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        depth_texture2d.Create("depth_texture2d", depth_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TSubpass subpass0;
-        subpass0.AddColorAttachment(color_texture2d);
-        subpass0.AddColorAttachment(normal_texture2d);
-        subpass0.SetDepthStencilAttachment(depth_texture2d);
-
-        Turbo::Render::TRenderPass render_pass;
-        render_pass.AddSubpass(subpass0);
-
-        context.BeginRenderPass(render_pass);
-
-        depth_texture2d.Destroy(&resource_allocator);
-        normal_texture2d.Destroy(&resource_allocator);
-        color_texture2d.Destroy(&resource_allocator);
+        //context.BeginRenderPass(fg_render_pass);
     }
 
     {
@@ -346,40 +303,6 @@ void Test0()
         delete compute_shader;
         delete vertex_shader;
         delete fragment_shader;
-    }
-
-    {
-        // 这一部分只是示意性代码
-
-        std::cout << "flush Commandbuffer to GPU" << std::endl;
-        Turbo::Render::TGraphicsPipeline some_graphics_pipeline;
-        Turbo::Render::TRenderPass some_render_pass;
-
-        // 进行100万批次指令记录
-        for (uint32_t some_command = 0; some_command < 1000000; some_command++)
-        {
-            context.BeginRenderPass(some_render_pass);
-            context.BindPipeline(some_graphics_pipeline);
-            // context.OtherCmd(....)//其他指令
-            // context.Draw(...)//绘制指令
-            // context.Dispatch(...)//调度指令
-            // context.EndRenderPass(...)
-            if (some_command % 2048 == 0)
-            {
-                context.Flush(); // 每记录2048条记录，将指令推到GPU进行执行
-            }
-        }
-
-        context.Flush();     // 将剩余指令推到GPU进行执行
-        if (context.Wait(1)) // 等待1纳秒，等待之前所有推送到GPU的指令执行完成，返回ture表示所有任务完成，返回false表示有任务在1纳米内没完成
-        {
-            std::cout << "wait GPU run all commandbuffer finished in 1 nanoseconds" << std::endl;
-        }
-        else
-        {
-            context.Wait(UINT64_MAX); // 一直等到所有任务完成
-            std::cout << "wait GPU run all commandbuffer finished" << std::endl;
-        }
     }
 }
 
@@ -584,16 +507,6 @@ void Test3()
     color_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
     color_texture_2d.Create("color_texture_2d", color_texture_2d_descriptor, &resource_allocator);
 
-    Turbo::Render::TTexture3D color_texture_3d;
-    Turbo::Render::TTexture3D::Descriptor color_texture_3d_descriptor = {};
-    color_texture_3d_descriptor.width = 512;
-    color_texture_3d_descriptor.height = 512;
-    color_texture_3d_descriptor.depth = 512;
-    color_texture_3d_descriptor.mipLevels = 1;
-    color_texture_3d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
-    color_texture_3d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-    color_texture_3d.Create("color_texture_3d", color_texture_3d_descriptor, &resource_allocator);
-
     Turbo::Render::TDepthTexture2D depth_texture_2d;
     Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor = {};
     depth_texture2d_descriptor.width = 512;
@@ -604,7 +517,6 @@ void Test3()
     depth_texture_2d.Create("depth_texture_2d", depth_texture2d_descriptor, &resource_allocator);
 
     color_texture_2d.Destroy(&resource_allocator);
-    color_texture_3d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
 
     std::cout << "Test3()::End......................................................." << std::endl;
