@@ -433,24 +433,28 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     // TODO:find a valid RenderPassProxy
     // TODO:if not found create a new RenderPassProxy/RenderPass
     // TODO:if found return what we want
-    if (this->Find(renderPass))
+    if (!renderPass.IsEmpty())
     {
+        if (this->Find(renderPass))
+        {
+            if (this->framebufferPool->Allocate(renderPass))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // create a new RenderPass/TRenderPassProxy
+        this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
         if (this->framebufferPool->Allocate(renderPass))
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
     }
 
-    // create a new RenderPass/TRenderPassProxy
-    this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
-    if (this->framebufferPool->Allocate(renderPass))
-    {
-        return true;
-    }
     return false;
 }
 

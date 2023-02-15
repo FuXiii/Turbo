@@ -255,7 +255,7 @@ void Test0()
 
     {
         Turbo::FrameGraph::TRenderPass fg_render_pass{};
-        //context.BeginRenderPass(fg_render_pass);
+        // context.BeginRenderPass(fg_render_pass);
     }
 
     {
@@ -515,6 +515,15 @@ void Test3()
     depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
     depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
     depth_texture_2d.Create("depth_texture_2d", depth_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TSubpass subpass0;
+    subpass0.AddColorAttachment(color_texture_2d);
+    subpass0.SetDepthStencilAttachment(depth_texture_2d);
+
+    Turbo::Render::TRenderPass render_pass;
+    render_pass.AddSubpass(subpass0);
+
+    context.BeginRenderPass(render_pass);
 
     color_texture_2d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
