@@ -2481,3 +2481,12 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`下增加`bool operator !=(const TImage& image)`成员函数
   >* `./engine/render`下`TImage`下增加`friend class TFramebufferPool`友元类
   >* `./engine/render`下`TContext.h`下的`TFramebufferPool`基本完成
+
+* 2023/2/15 设计架构
+  >
+  >* `./engine/render`下`TRenderPass`中`IsValid()`成员函数，增加对于`Turbo::Core::TFramebuffer *framebuffer`成员变量的判断
+  >* `./engine/render`下`TRenderPassPool`中增加`TFramebufferPool *framebufferPool;`成员变量，增加对于`Turbo::Core::TFramebuffer`的分配
+  >* `./engine/render`下`TRenderPassPool`中增加`Allocate(...)`成员函数，增加对于`Turbo::Core::TFramebuffer`的分配
+  >* `./engine/render`下`TContext`中增加`TRenderPassPool *renderPassPool`成员变量，并在构造函数和析构函数中进行创建和销毁
+  >* `./engine/render`下`TRenderPass`中增加`friend class TContext;`友元类
+  >* `./engine/render`下`TContext`中更新完善`BeginRenderPass(...)`成员函数

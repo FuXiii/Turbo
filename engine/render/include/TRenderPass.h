@@ -44,6 +44,7 @@ class TRenderPass
   private:
     friend class TRenderPassPool;
     friend class TFramebufferPool;
+    friend class TContext;
 
   private:
     Turbo::Core::TRenderPass *renderPass = nullptr;
@@ -61,7 +62,7 @@ class TRenderPass
 
     std::vector<Turbo::Render::TImage> GetAttachments();
 
-    bool IsValid();
+    bool IsValid() const;
 };
 } // namespace Render
 } // namespace Turbo

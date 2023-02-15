@@ -543,16 +543,23 @@ void Test2()
     Turbo::Render::TRenderPass render_pass;
     render_pass.AddSubpass(subpass0);
 
+    Turbo::Render::TRenderPassPool render_pass_pool(&context);
+    bool render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_0 ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
+
+    bool render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_1 ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
+
+    bool render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_2 ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+
+    if (render_pass.IsValid())
     {
-        Turbo::Render::TRenderPassPool render_pass_pool(&context);
-        bool render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_0 ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
-
-        bool render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_1 ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
-
-        bool render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_2 ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+        std::cout << "render_pass is valid" << std::endl;
+    }
+    else
+    {
+        std::cout << "render_pass not valid" << std::endl;
     }
 
     color_texture_2d.Destroy(&resource_allocator);

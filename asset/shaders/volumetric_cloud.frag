@@ -34,8 +34,7 @@ layout(push_constant) uniform my_push_constants_t
     float outScattering;
 
     bool isHighFreq;
-}
-my_push_constants;
+}my_push_constants;
 layout(location = 0) in vec2 uv;
 layout(location = 0) out vec4 outColor;
 

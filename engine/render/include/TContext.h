@@ -42,28 +42,6 @@ class TComputePipeline;
 class TGraphicsPipeline;
 class TContext;
 
-class TRenderPassPool
-{
-  private:
-    TContext *context = nullptr;
-
-  private:
-    std::vector<Turbo::Core::TRenderPass *> renderPasses;
-
-  private:
-    void CreateRenderPass(Turbo::Render::TRenderPass &renderPass);
-    // void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass);
-
-    bool Find(Turbo::Render::TRenderPass &renderPass);
-
-  public:
-    TRenderPassPool(TContext *context);
-    ~TRenderPassPool();
-
-    bool Allocate(Turbo::Render::TRenderPass &renderPass);
-    void Free(Turbo::Render::TRenderPass &renderPass);
-};
-
 class TFramebufferPool
 {
   private:
@@ -79,6 +57,29 @@ class TFramebufferPool
   public:
     TFramebufferPool(TContext *context);
     ~TFramebufferPool();
+
+    bool Allocate(Turbo::Render::TRenderPass &renderPass);
+    void Free(Turbo::Render::TRenderPass &renderPass);
+};
+
+class TRenderPassPool
+{
+  private:
+    TContext *context = nullptr;
+    TFramebufferPool *framebufferPool = nullptr;
+
+  private:
+    std::vector<Turbo::Core::TRenderPass *> renderPasses;
+
+  private:
+    void CreateRenderPass(Turbo::Render::TRenderPass &renderPass);
+    // void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass);
+
+    bool Find(Turbo::Render::TRenderPass &renderPass);
+
+  public:
+    TRenderPassPool(TContext *context);
+    ~TRenderPassPool();
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
@@ -102,6 +103,8 @@ class TContext
     Turbo::Render::TCommandBuffer currentCommandBuffer;
     std::vector<Turbo::Render::TCommandBuffer> commandBuffers;
 
+    TRenderPassPool *renderPassPool = nullptr;
+
   public:
     TContext();
     ~TContext();
@@ -115,8 +118,8 @@ class TContext
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
-    void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
-    void BeginRenderPass(const Turbo::Render::TRenderPass &renderPass);
+    /*TODO: will delete*/ [[deprecated]]void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
+    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
 
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);

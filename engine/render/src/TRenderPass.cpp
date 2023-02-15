@@ -2,6 +2,7 @@
 #include "render/include/TImage.h"
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
+#include <core/include/TFramebuffer.h>
 #include <core/include/TRenderPass.h>
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddColorAttachment(const Turbo::Render::TColorImage &colorImage)
@@ -139,9 +140,9 @@ std::vector<Turbo::Render::TImage> Turbo::Render::TRenderPass::GetAttachments()
     return result;
 }
 
-bool Turbo::Render::TRenderPass::IsValid()
+bool Turbo::Render::TRenderPass::IsValid() const
 {
-    if (this->renderPass != nullptr && this->renderPass->GetVkRenderPass() != VK_NULL_HANDLE)
+    if (this->renderPass != nullptr && this->renderPass->GetVkRenderPass() != VK_NULL_HANDLE && this->framebuffer != nullptr && this->framebuffer->GetVkFramebuffer() != VK_NULL_HANDLE)
     {
         return true;
     }

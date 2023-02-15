@@ -29,6 +29,7 @@ Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
     if (context != nullptr)
     {
         this->context = context;
+        this->framebufferPool = new TFramebufferPool(context);
     }
     else
     {
@@ -39,6 +40,8 @@ Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 Turbo::Render::TRenderPassPool::~TRenderPassPool()
 {
     // TODO:release this->renderPassProxies;
+    delete this->framebufferPool;
+
     for (Turbo::Core::TRenderPass *render_pass_item : this->renderPasses)
     {
         delete render_pass_item;
@@ -201,8 +204,6 @@ void Turbo::Render::TRenderPassPool::CreateRenderPass(Turbo::Render::TRenderPass
         Turbo::Core::TRenderPass *new_render_pass = new Turbo::Core::TRenderPass(device, core_attachments, core_subpasses);
         renderPass.renderPass = new_render_pass;
         this->renderPasses.push_back(new_render_pass);
-
-        // How to create FrameBuffer?
     }
     else
     {
@@ -434,12 +435,23 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     // TODO:if found return what we want
     if (this->Find(renderPass))
     {
-        return true;
+        if (this->framebufferPool->Allocate(renderPass))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     // create a new RenderPass/TRenderPassProxy
     this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
-    return true;
+    if (this->framebufferPool->Allocate(renderPass))
+    {
+        return true;
+    }
+    return false;
 }
 
 void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass)
@@ -533,7 +545,7 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
     }
 
     // TODO:Create a new Framebuffer
-    this->CreateFramebuffer(renderPass);
+    this->CreateFramebuffer(renderPass); // FIXME: if create failed?
     return true;
 }
 
@@ -700,10 +712,14 @@ Turbo::Render::TContext::TContext()
     this->currentCommandBuffer.commandBuffer = this->commandBufferPool->Allocate();
     this->currentCommandBuffer.fence = new Turbo::Core::TFence(this->device);
     this->currentCommandBuffer.commandBuffer->Begin();
+
+    this->renderPassPool = new TRenderPassPool(this);
 }
 
 Turbo::Render::TContext::~TContext()
 {
+    delete this->renderPassPool;
+
     if (this->currentCommandBuffer.commandBuffer != nullptr)
     {
         this->commandBufferPool->Free(this->currentCommandBuffer.commandBuffer);
@@ -870,9 +886,16 @@ void Turbo::Render::TContext::BeginRenderPass(const Turbo::FrameGraph::TRenderPa
     // TODO: convert Turbo::FrameGraph::TRenderPass to Turbo::Render::TRenderPass
 }
 
-void Turbo::Render::TContext::BeginRenderPass(const Turbo::Render::TRenderPass &renderPass)
+void Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &renderPass)
 {
     // TODO: create Turbo::Core::TRenderPass and Turbo::Core::TFramebuffer
+    this->renderPassPool->Allocate(renderPass);
+    if (renderPass.IsValid())
+    {
+        Turbo::Core::TFramebuffer *framebuffer = renderPass.framebuffer;
+        Turbo::Core::TRenderPass *render_pass = renderPass.renderPass;
+        this->currentCommandBuffer.commandBuffer->CmdBeginRenderPass(render_pass, framebuffer);
+    }
 }
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
