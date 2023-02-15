@@ -898,6 +898,11 @@ void Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &render
     }
 }
 
+void Turbo::Render::TContext::EndRenderPass()
+{
+    this->currentCommandBuffer.commandBuffer->CmdEndRenderPass();
+}
+
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
 {
     // TODO: create Turbo::Core::TComputePipeline if didn't create before
