@@ -2490,3 +2490,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中增加`TRenderPassPool *renderPassPool`成员变量，并在构造函数和析构函数中进行创建和销毁
   >* `./engine/render`下`TRenderPass`中增加`friend class TContext;`友元类
   >* `./engine/render`下`TContext`中更新完善`BeginRenderPass(...)`成员函数
+  >* `./engine/render`下`TContext`中更新完善`BeginRenderPass(...)`成员函数
+  >* `./samples`下增加`PushConstantTest`例子，用于测试`Vulkan`的`Push Constant`

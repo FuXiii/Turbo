@@ -186,3 +186,8 @@ add_executable(VulkanTest ./VulkanTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(VulkanTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanTest PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanTest PUBLIC ${LIBS})
+
+add_executable(PushConstantTest ./PushConstantTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PushConstantTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PushConstantTest PUBLIC ${LINK_PARTH})
+target_link_libraries(PushConstantTest PUBLIC ${LIBS})

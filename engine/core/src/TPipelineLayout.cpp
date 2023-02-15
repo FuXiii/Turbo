@@ -32,6 +32,8 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
     vk_pipline_layout_create_info.flags = 0;
     vk_pipline_layout_create_info.setLayoutCount = vk_descriptor_set_layouts.size();
     vk_pipline_layout_create_info.pSetLayouts = vk_descriptor_set_layouts.data();
+
+    // NOTE:In Vulkan Spec:Any two elements of pPushConstantRanges must not include the same stage in stageFlags
     vk_pipline_layout_create_info.pushConstantRangeCount = vk_push_constant_ranges.size();
     vk_pipline_layout_create_info.pPushConstantRanges = vk_push_constant_ranges.data();
 
