@@ -37,6 +37,8 @@ class TSubpass
     const std::vector<Turbo::Render::TColorImage> &GetColorAttachments();
     const std::vector<Turbo::Render::TImage> &GetInputAttachments();
     Turbo::Render::TDepthStencilImage GetDepthStencilAttachment();
+
+    bool IsEmpty() const;
 };
 
 class TRenderPass
@@ -62,6 +64,7 @@ class TRenderPass
 
     std::vector<Turbo::Render::TImage> GetAttachments();
 
+    bool IsEmpty() const;
     bool IsValid() const;
 };
 } // namespace Render

@@ -2492,3 +2492,5 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中更新完善`BeginRenderPass(...)`成员函数
   >* `./samples`下增加`PushConstantTest`例子，用于测试`Vulkan`的`Push Constant`
   >* `./engine/render`下`TContext`中增加`void EndRenderPass();`成员函数
+  >* `./engine/render`下`TRenderPass`中增加`bool IsEmpty() const`成员函数
+  >* `./engine/render`下`TSubpass`中增加`bool IsEmpty() const`成员函数

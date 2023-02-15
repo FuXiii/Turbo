@@ -59,6 +59,26 @@ Turbo::Render::TDepthStencilImage Turbo::Render::TSubpass::GetDepthStencilAttach
     return this->depthStencil;
 }
 
+bool Turbo::Render::TSubpass::IsEmpty() const
+{
+    if (this->colors.size() > 0)
+    {
+        return false;
+    }
+
+    if (this->inputs.size() > 0)
+    {
+        return false;
+    }
+
+    if (this->depthStencil.IsValid())
+    {
+        return false;
+    }
+
+    return false;
+}
+
 Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::AddSubpass(const Turbo::Render::TSubpass &subpass)
 {
     this->subpasses.push_back(subpass);
@@ -138,6 +158,24 @@ std::vector<Turbo::Render::TImage> Turbo::Render::TRenderPass::GetAttachments()
     }
 
     return result;
+}
+
+bool Turbo::Render::TRenderPass::IsEmpty() const
+{
+    if (this->subpasses.size() > 0)
+    {
+        for (const Turbo::Render::TSubpass &render_pass_item : this->subpasses)
+        {
+            if (!render_pass_item.IsEmpty())
+            {
+                return false;
+            }
+        }
+    }
+    else
+    {
+        return true;
+    }
 }
 
 bool Turbo::Render::TRenderPass::IsValid() const
