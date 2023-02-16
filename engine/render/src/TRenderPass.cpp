@@ -172,10 +172,8 @@ bool Turbo::Render::TRenderPass::IsEmpty() const
             }
         }
     }
-    else
-    {
-        return true;
-    }
+    
+    return true;
 }
 
 bool Turbo::Render::TRenderPass::IsValid() const

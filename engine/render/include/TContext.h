@@ -118,9 +118,10 @@ class TContext
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
+    void ClearTexture(Turbo::Render::TTexture2D &texture2D, float r = 0, float g = 0, float b = 0, float a = 0);
+
     /*TODO: will delete*/ [[deprecated]] void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
-    void BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
-    
+    bool BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
     void EndRenderPass();
 
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);

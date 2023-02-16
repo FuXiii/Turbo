@@ -1,6 +1,7 @@
 #include "render/include/TImage.h"
 #include "render/include/TResourceAllocator.h"
 #include "vulkan/vulkan_core.h"
+#include <core/include/TCommandBuffer.h>
 #include <core/include/TException.h>
 #include <core/include/TImageView.h>
 #include <core/include/TPhysicalDevice.h>
@@ -26,6 +27,17 @@ void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &de
 
     // TODO:create Turbo::Core::ImageView
     this->imageView = this->CreateImageView(this->image);
+
+    {
+        // FIXME: Test Code:
+        if (this->IsValid())
+        {
+            Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
+            Turbo::Render::TCommandBuffer command_buffer = resource_allocator->GetContext()->GetCommandBuffer();
+
+            command_buffer.commandBuffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, this->imageView);
+        }
+    }
 }
 
 void Turbo::Render::TImage::Destroy(void *allocator)
@@ -118,7 +130,7 @@ bool Turbo::Render::TImage::operator!=(const TImage &image)
     {
         return true;
     }
-    
+
     return false;
 }
 

@@ -68,6 +68,7 @@ class TImage
 
     friend class TRenderPassPool;
     friend class TFramebufferPool;
+    friend class TContext;
 
   private:
     Turbo::Core::TImage *image = nullptr;
@@ -98,6 +99,13 @@ class TImage
 
     bool operator==(const TImage &image);
     bool operator!=(const TImage &image);
+
+    //<Just For Test, Will Delete>
+    Turbo::Core::TImage *GetImage()
+    {
+        return this->image;
+    }
+    //</Just For Test, Will Delete>
 };
 
 class TColorImage : public TImage

@@ -193,6 +193,10 @@
   >
   >* 更新`Context::CmdBeginRenderPass`章节
 
+* 2023/2/16
+  >
+  >* 更新`Image的Layout`章节
+
 ---
 
 # Turbo驱动初步
@@ -1800,7 +1804,12 @@ command_buffer.BlitImage(..., tex);//进行指令中的布局转换
 command_buffer.EndRenderPass();//进行指令后的布局转换
 ```
 
-这需要每个纹理在记录特定`CommandBuffer`的指令前后进行`layout`转换
+这需要每个纹理在记录特定`CommandBuffer`的指令前后进行`layout`转换（此种方法太麻烦，容易出问题）：
+
+* 每个`CommandBuffer`都有一个表保存所有会用到的`Image`所对应的当前`Layout`，这个表用于记录`Image`的各种`Layout`转换
+* 每个`CommandBuffer`有两个同步函数：`Flash`，`Wait`。在`Wait`时当`CommandBuffer`执行完成后将`Image`的`Layout`同步到`Image`中
+
+还有一种相对简单的方式：在创建`Image`时`Context`中已经存在`CommandBuffer`了，在`Image`创建后会顺便将`Layout`转换指令加入`CommandBuffer`中（此种方法可能有局限性，比如：创建完并且转换指令已经推送到了`CommandBuffer`但是没提交就销毁了该`Image`就会导致`CommandBuffer`在提交时找不到`Image`，虽然这种情况出现是没有意义的）。
 
 ## Image的ImageView
 
