@@ -2503,7 +2503,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TImage`中增加`friend class TContext`友元类
   >* `./engine/render`下`TContext`构造函数中,修改对于`Window`系统中`VK_KHR_WIN32_SURFACES`扩展对应错误的`Bug`
 
-* 2023/2/17 设计架构  
+* 2023/2/17 设计架构
   >
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d)`成员函数，该函数仅用于测试，请谨慎调用
   >* `./samples`下增加`RenderAndFrameGraph`例子，用于测试使用`FrameGraph`来驱动`Turbo`进行绘制。
