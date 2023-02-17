@@ -135,6 +135,8 @@ class TContext
     Turbo::Core::TDevice *GetDevice();
     Turbo::Core::TDeviceQueue *GetDeviceQueue();
     Turbo::Render::TCommandBuffer GetCommandBuffer();
+
+    /*Just For Test*/ Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);
 };
 } // namespace Render
 } // namespace Turbo

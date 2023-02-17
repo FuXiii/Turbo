@@ -99,13 +99,6 @@ class TImage
 
     bool operator==(const TImage &image);
     bool operator!=(const TImage &image);
-
-    //<Just For Test, Will Delete>
-    Turbo::Core::TImage *GetImage()
-    {
-        return this->image;
-    }
-    //</Just For Test, Will Delete>
 };
 
 class TColorImage : public TImage

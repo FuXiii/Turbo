@@ -191,3 +191,8 @@ add_executable(PushConstantTest ./PushConstantTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(PushConstantTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(PushConstantTest PUBLIC ${LINK_PARTH})
 target_link_libraries(PushConstantTest PUBLIC ${LIBS})
+
+add_executable(RenderAndFrameGraph ./RenderAndFrameGraph.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(RenderAndFrameGraph PUBLIC ${INCLUDE_PARTH})
+target_link_directories(RenderAndFrameGraph PUBLIC ${LINK_PARTH})
+target_link_libraries(RenderAndFrameGraph PUBLIC ${LIBS})

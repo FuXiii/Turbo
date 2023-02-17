@@ -1009,3 +1009,13 @@ Turbo::Render::TCommandBuffer Turbo::Render::TContext::GetCommandBuffer()
 {
     return this->currentCommandBuffer;
 }
+
+Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTexture2D texture2d)
+{
+    if (texture2d.IsValid())
+    {
+        return texture2d.image;
+    }
+    
+    return nullptr;
+}
