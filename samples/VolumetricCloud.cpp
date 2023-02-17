@@ -111,7 +111,7 @@ const std::string MY_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shade
 
 const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/volumetric_cloud.frag");
 
 typedef struct POSITION
 {
