@@ -2416,3 +2416,94 @@ Turbo是渲染引擎
 * 2023/2/4 设计架构
   >
   >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/6 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+
+* 2023/2/7 设计架构
+  >
+  >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/8 设计架构
+  >
+  >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/9 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+
+* 2023/2/10 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/render`下`TImage.h`中`TImage`中增加`virtual void CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TImage.h`中`TImage::Create(...)`中增加对`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`成员函数的调用
+  >* `./engine/render`下`TTexture2D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TTexture3D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TDepthTexture2D`中增加`virtual Turbo::Core::TImageView * CreateImageView(Turbo::Core::TImage *image)`函数
+  >* `./engine/render`下`TImage`的`Destroy`成员函数中进行`ImageView`的资源回收
+  >* `./engine/render`下`TImage`的`IsValid()`成员函数中增加对`ImageView`的判断
+  >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/11 设计架构
+  >
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`Turbo::Core::TRenderPass *renderPass = nullptr`成员变量
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`friend class TRenderPassPool;`友元类
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy`移除
+  >* `./engine/render`下`TContext`中将`std::vector<TRenderPassProxy> renderPassProxies`更改成`std::vector<TRenderPass> renderPasses`
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy`中的`void Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`和`void Destroy()`移动到`TRenderPassPool`中，并重命名为`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`和`void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TContext`中将`TRenderPassPool`中移除`void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass)`成员函数
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass)`更改成`bool Find(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TContext`中将`TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass)`更改成`bool Allocate(Turbo::Render::TRenderPass &renderPass)`
+  >* `./engine/render`下`TRenderPass`中增加`bool IsValid()`函数
+
+* 2023/2/13 设计架构
+  >
+  >* `./engine/render`下`TContext.h`中增加`TFrameBufferPool`类
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员函数`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context)`修改成`void CreateRenderPass(Turbo::Render::TRenderPass &renderPass)`，其中的`Turbo::Render::TContext *context`在`TRenderPassPool`中存在对应的成员变量
+  >* `./engine/render`下`TContext.h`中`TRenderPassPool`中的成员变量`std::vector<TRenderPass> renderPasses;`修改成`std::vector<TRenderPass> renderPasses;`
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`中增加`Turbo::Core::TFramebuffer *framebuffer`成员变量
+
+* 2023/2/14 设计架构
+  >
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageExtent()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageMipLevels()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageArrayLayers()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetSupportImageSampleCounts()`中增加当格式不被支持时的判断
+  >* 修改`./engine/core`下`TPhysicalDevice`中`GetMaxImageResourceSize()`中增加当格式不被支持时的判断
+  >* `./engine/core`下`TPhysicalDevice`中增加`bool IsFormatSupportImage(...)`成员函数
+  >* `./engine/core`下`TImage`中`InternalCreate()`中增加对于格式是否支持的判断
+  >* `./engine/render`下`TRenderPass`中增加`friend class TFramebufferPool`使得`TFramebufferPool`在分配之后将结果刷新到`TRenderPass`中
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/core`下`TFramebuffer`中增加`std::vector<TImageView *> GetAttachments()`成员函数
+  >* `./engine/render`下`TRenderPass`下增加`std::vector<Turbo::Render::TImage> GetAttachments();`成员函数
+  >* `./engine/render`下`TImage`下增加`bool operator ==(const TImage& image)`成员函数
+  >* `./engine/render`下`TImage`下增加`bool operator !=(const TImage& image)`成员函数
+  >* `./engine/render`下`TImage`下增加`friend class TFramebufferPool`友元类
+  >* `./engine/render`下`TContext.h`下的`TFramebufferPool`基本完成
+
+* 2023/2/15 设计架构
+  >
+  >* `./engine/render`下`TRenderPass`中`IsValid()`成员函数，增加对于`Turbo::Core::TFramebuffer *framebuffer`成员变量的判断
+  >* `./engine/render`下`TRenderPassPool`中增加`TFramebufferPool *framebufferPool;`成员变量，增加对于`Turbo::Core::TFramebuffer`的分配
+  >* `./engine/render`下`TRenderPassPool`中增加`Allocate(...)`成员函数，增加对于`Turbo::Core::TFramebuffer`的分配
+  >* `./engine/render`下`TContext`中增加`TRenderPassPool *renderPassPool`成员变量，并在构造函数和析构函数中进行创建和销毁
+  >* `./engine/render`下`TRenderPass`中增加`friend class TContext;`友元类
+  >* `./engine/render`下`TContext`中更新完善`BeginRenderPass(...)`成员函数
+  >* `./samples`下增加`PushConstantTest`例子，用于测试`Vulkan`的`Push Constant`
+  >* `./engine/render`下`TContext`中增加`void EndRenderPass();`成员函数
+  >* `./engine/render`下`TRenderPass`中增加`bool IsEmpty() const`成员函数
+  >* `./engine/render`下`TSubpass`中增加`bool IsEmpty() const`成员函数
+
+* 2023/2/16 设计架构
+  >
+  >* `./engine/render`下`TContext`中`BeginRenderPass(...)`成员函数增加`bool`返回结果
+  >* `./engine/render`下`TImage`中`Create()`成员函数中增加`Layout`从`UNDEFINED`转成`GENERAL`的测试代码
+  >* `./engine/render`下`TContext`中增加`void ClearTexture(Turbo::Render::TTexture2D &texture2D, float r = 0, float g = 0, float b = 0, float a = 0)`成员函数
+  >* `./engine/render`下`TImage`中增加`friend class TContext`友元类
+  >* `./engine/render`下`TContext`构造函数中,修改对于`Window`系统中`VK_KHR_WIN32_SURFACES`扩展对应错误的`Bug`
+
+* 2023/2/16 设计架构
+  >
+  >* `./engine/render`下`TContext`中增加`Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d)`成员函数，该函数仅用于测试，请谨慎调用
+  >* `./samples`下增加`RenderAndFrameGraph`例子，用于测试使用`FrameGraph`来驱动`Turbo`进行绘制。

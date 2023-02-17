@@ -20,6 +20,7 @@ class TCommandBufferPool;
 class TCommandBuffer;
 class TFence;
 class TRenderPass;
+class TFramebuffer;
 } // namespace Core
 } // namespace Turbo
 
@@ -41,42 +42,46 @@ class TComputePipeline;
 class TGraphicsPipeline;
 class TContext;
 
-class TRenderPassPool
+class TFramebufferPool
 {
-  public:
-    class TRenderPassProxy
-    {
-      public:
-        friend class TRenderPassPool;
-
-      private:
-        Turbo::Core::TRenderPass *renderPass = nullptr;
-
-      private:
-        void Create(Turbo::Render::TRenderPass &renderPass, Turbo::Render::TContext *context);
-        void Destroy();
-
-      public:
-        TRenderPassProxy() = default;
-        ~TRenderPassProxy();
-
-        bool IsValid();
-    };
-
   private:
     TContext *context = nullptr;
 
   private:
-    std::vector<TRenderPassProxy> renderPassProxies;
+    std::vector<Turbo::Core::TFramebuffer *> framebuffers;
 
   private:
-    TRenderPassProxy Find(Turbo::Render::TRenderPass &renderPass);
+    void CreateFramebuffer(Turbo::Render::TRenderPass &renderPass);
+    bool Find(Turbo::Render::TRenderPass &renderPass);
+
+  public:
+    TFramebufferPool(TContext *context);
+    ~TFramebufferPool();
+
+    bool Allocate(Turbo::Render::TRenderPass &renderPass);
+    void Free(Turbo::Render::TRenderPass &renderPass);
+};
+
+class TRenderPassPool
+{
+  private:
+    TContext *context = nullptr;
+    TFramebufferPool *framebufferPool = nullptr;
+
+  private:
+    std::vector<Turbo::Core::TRenderPass *> renderPasses;
+
+  private:
+    void CreateRenderPass(Turbo::Render::TRenderPass &renderPass);
+    // void DestroyRenderPass(Turbo::Render::TRenderPass &renderPass);
+
+    bool Find(Turbo::Render::TRenderPass &renderPass);
 
   public:
     TRenderPassPool(TContext *context);
     ~TRenderPassPool();
 
-    TRenderPassProxy Allocate(Turbo::Render::TRenderPass &renderPass);
+    bool Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
 };
 
@@ -98,6 +103,8 @@ class TContext
     Turbo::Render::TCommandBuffer currentCommandBuffer;
     std::vector<Turbo::Render::TCommandBuffer> commandBuffers;
 
+    TRenderPassPool *renderPassPool = nullptr;
+
   public:
     TContext();
     ~TContext();
@@ -111,8 +118,11 @@ class TContext
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
 
-    void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
-    void BeginRenderPass(const Turbo::Render::TRenderPass &renderPass);
+    void ClearTexture(Turbo::Render::TTexture2D &texture2D, float r = 0, float g = 0, float b = 0, float a = 0);
+
+    /*TODO: will delete*/ [[deprecated]] void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
+    bool BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
+    void EndRenderPass();
 
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
@@ -125,6 +135,8 @@ class TContext
     Turbo::Core::TDevice *GetDevice();
     Turbo::Core::TDeviceQueue *GetDeviceQueue();
     Turbo::Render::TCommandBuffer GetCommandBuffer();
+
+    /*Just For Test*/ Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);
 };
 } // namespace Render
 } // namespace Turbo

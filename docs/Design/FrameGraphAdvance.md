@@ -171,6 +171,32 @@
   >
   >* 创建`Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass`章节
 
+* 2023/2/6
+  >
+  >* 创建`Image的Layout`章节
+
+* 2023/2/9
+  >
+  >* 更新`FrameBuffer 创建`章节
+  >* 更新`RenderPassProxy(RenderPass代理)`章节
+
+* 2023/2/10
+  >
+  >* 更新`FrameBuffer 创建`章节
+  >* 创建`Image的ImageView`章节
+
+* 2023/2/13
+  >
+  >* 更新`FrameBuffer 创建`章节
+
+* 2023/2/14
+  >
+  >* 更新`Context::CmdBeginRenderPass`章节
+
+* 2023/2/16
+  >
+  >* 更新`Image的Layout`章节
+
 ---
 
 # Turbo驱动初步
@@ -1691,6 +1717,159 @@ graph TD;
 
 * 对于`模板`数据，目前暂时不考虑
 
+## Image的Layout
+
+根据`Vulkan`标准，在创建`Image`时其对应的`initialLayout`，也就是初始化的布局必须是`VK_IMAGE_LAYOUT_UNDEFINED`或者`VK_IMAGE_LAYOUT_PREINITIALIZED`，在此`Turbo`是采用`VK_IMAGE_LAYOUT_UNDEFINED`，但是在之后的使用中（特别是`CommandBuffer`中）需要转换`Image`的`Layout`。在`Vulkan`标准[`12.4 Image Layout`](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#resources-image-layouts)章节中，有如下描述：
+
+>After initialization, applications need not use any layout other than the general layout, though this may produce suboptimal performance on some implementations.
+
+对应译文：
+
+>在`Image`初始化之后（创建之后），应用需要使用通用布局（`VK_IMAGE_LAYOUT_GENERAL`）而不是其他布局，尽管使用通用布局在某些平台实现中会导致次优化（性能没有专用布局那么优化）
+
+也就是说按照`Vulkan`标准来说，使用通用布局是必然。根据`Filament`的源码，其内部也确实使用的是`VK_IMAGE_LAYOUT_GENERAL`布局，但在作为`着色器采样纹理`时使用了专用布局`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`。
+
+```CXX
+//in {filament_dir}/filament/backend/src/vulkan/VulkanUtility.cpp
+VkImageLayout getDefaultImageLayout(TextureUsage usage) 
+{
+    //由于Filement有时需要采样深度纹理获得深度数据（比如SSAO），所以简单使用了VK_IMAGE_LAYOUT_GENERAL布局
+    if (any(usage & TextureUsage::DEPTH_ATTACHMENT)) {
+        return VK_IMAGE_LAYOUT_GENERAL;
+    }
+
+    //由于Filement有时需要将同一个纹理不同miplevel之间互相拷贝（比如Bloom），并且想要避免昂贵的布局转换操作，所以简单使用VK_IMAGE_LAYOUT_GENERAL布局
+    if (any(usage & TextureUsage::COLOR_ATTACHMENT)) {
+        return VK_IMAGE_LAYOUT_GENERAL;
+    }
+
+    // Finally, the layout for an immutable texture is optimal read-only.
+    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+}
+```
+
+对于`Filament`一些额外说明:
+
+* 对于将`CPU`资源拷贝到`GPU`时会将纹理布局转换到`VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL`布局，之后拷贝操作完再将布局转换回来
+* 对于渲染最后的`Present`显示之前，会将图片的当前布局转换成`VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`
+
+*注：在`ImageView`中也有`Layout`，多个不同`ImageView`对于同一个`Image`其`ImageView`的`Layout`可以是多种多样的。这也就是在`Turbo`的设计中，一个`Image`可以对应多个`ImageView`*
+
+如果是`Turbo`管理`Image`的`Layout`的话，最好是在`CommandBuffer`中记录指令时进行纹理布局管理（因为`Vulkan`是以`CommandBuffer`为核心的架构）。比如：
+
+> `只往纹理中写数据`
+>
+>```mermaid
+>graph LR;
+>    Pass--写-->ColorTexture(["ColorTexture"])
+>    Pass--写-->DepthTexture(["DepthTexture"])
+>```
+>
+>对应的`Layout`可能为：
+>
+>* `ColorTexture`：`VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`
+>* `DepthTexture`：`VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL`
+
+> `只读纹理`
+>
+>```mermaid
+>graph LR;
+>    ColorTexture(["ColorTexture"])--读-->Pass
+>    DepthTexture(["DepthTexture"])--读-->Pass
+>```
+>
+>对应的`Layout`可能为：
+>
+>* `ColorTexture`：`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`
+>* `DepthTexture`：`VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`
+
+等等使用情况
+
+*注：纹理的`Layput`有使用指令前的布局转换，有使用中的布局转换，也有使用后的布局转换*
+
+理想的情况：
+
+```CXX
+Texture tex;//VK_IMAGE_LAYOUT_UNDEFINED
+
+command_buffer.BeginRenderPass(render_pass);//此时知道RenderPass对应的FrameBuffer要用到的所有纹理，进行指令前的布局转换
+command_buffer.BindPipelineDescriptorSet(..., tex);//进行指令中的布局转换
+command_buffer.ClearColorImage(..., tex);//进行指令中的布局转换
+command_buffer.ClearDepthStencilImage(..., tex);//进行指令中的布局转换
+command_buffer.CopyBufferToImage(..., tex);//进行指令中的布局转换
+command_buffer.CopyImageToBuffer(..., tex);//进行指令中的布局转换
+command_buffer.CopyImage(..., tex);//进行指令中的布局转换
+command_buffer.BlitImage(..., tex);//进行指令中的布局转换
+...//等等
+command_buffer.EndRenderPass();//进行指令后的布局转换
+```
+
+这需要每个纹理在记录特定`CommandBuffer`的指令前后进行`layout`转换（此种方法太麻烦，容易出问题）：
+
+* 每个`CommandBuffer`都有一个表保存所有会用到的`Image`所对应的当前`Layout`，这个表用于记录`Image`的各种`Layout`转换
+* 每个`CommandBuffer`有两个同步函数：`Flash`，`Wait`。在`Wait`时当`CommandBuffer`执行完成后将`Image`的`Layout`同步到`Image`中
+
+还有一种相对简单的方式：在创建`Image`时`Context`中已经存在`CommandBuffer`了，在`Image`创建后会顺便将`Layout`转换指令加入`CommandBuffer`中（此种方法可能有局限性，比如：创建完并且转换指令已经推送到了`CommandBuffer`但是没提交就销毁了该`Image`就会导致`CommandBuffer`在提交时找不到`Image`，虽然这种情况出现是没有意义的）。
+
+## Image的ImageView
+
+在`Image::Create(...)`创建完`Turbo::Core::TImage`之后还没有结束，对于`Vulkan`渲染来说，`ImageView`是必须的。而一个`Image`可以对应多个`ImageView`，并且每个`ImageView`可以对应不同的`Subresource`(相当于`Image`的一个子集)
+
+在每一个`Render::Image`中提供一个`GetImageView(...)`函数：
+
+```mermaid
+graph TD;
+GetImageView["GetImageView(...)"]
+FindImageView["在当前创建完成的多个ImageView集合中找兼容的ImageView，防止重复创建"]
+IsFind{"是否找到了"}
+CreateNewImageView["创建新的ImageView"]
+ReturnImageView["返回已有的ImageView"]
+
+GetImageView-->FindImageView
+FindImageView-->IsFind
+
+IsFind--否-->CreateNewImageView
+IsFind--是-->ReturnImageView
+```
+
+创建一个`ImageView`需要如下参数：
+
+```CXX
+enum ImageViewType
+{
+    1D,
+    2D,
+    3D,
+    CUBE,
+    1D_ARRAY,
+    2D_ARRAY,
+    CUBE_ARRAY
+};
+
+enum
+{
+    COLOR_BIT,
+    DEPTH_BIT,
+    STENCIL_BIT,
+};
+
+//需要的参数如下：
+//Turbo::Core::TImage* image;//该参数通过Turbo::Render::TImage中可获取
+ImageViewType imageViewType;
+//Format format;//该参数通过Turbo::Render::TImage中可获取
+ImageViewAspect aspect;//该参数虽然对外公开，但是可以通过Turbo::Render::TImage和其子类推出来
+uint32_t baseMipLevel;
+uint32_t levelCount;
+uint32_t baseArrayLayer;
+uint32_t layerCount;
+```
+
+**考虑：这样设计是否为良构？`Turbo::Render::Image`的出现以及其子类`Turbo::Render::TTexture2D`、`Turbo::Render::TTexture3D`和`Turbo::Render::TDepthTexture2D`出现就是为了将繁杂的`Turbo::Core::TImage`和`Turbo::Core::TImageView`进行封装的，所以提供`GetImageView(...)`函数并不是一个好的选择。**
+
+所以在此`Turbo`选择在`Turbo::Render::TImage`中将`Turbo::Core::TImage`和`Turbo::Core::TImageView`统一管理。
+
+创建`ImageView`最好留给`Turbo::Render::TImage`的子类进行构建，`Turbo::Render::TImage`作为基类提供类似`protected: virtual Turbo::Core::TImageView * CreateImageView(....)`的接口函数，该接口函数会在`Turbo::Render::TImage::Create(...)`函数中创建完`Turbo::Core::TImage`之后调用，用于创建`Turbo::Core::TImageView`
+
 ## Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
@@ -2192,6 +2371,8 @@ context->CmdBeginRenderPass(render_pass)
 1. 创建相应的`RenderPass`
 2. 创建相应的`FrameBuffer`
 
+`FrameBuffer`中可以很轻松的得到其中的`Attachment`集合（可以获取对应的`ImageView`），而`RenderPass`需要从各个`Subpass`中统计出来，所以为了方便，`RenderPass`需要提供`std::vector<Turbo::Render::TImage> GetAttachemts()`函数。
+
 对于`RenderPass`和`FrameBuffer`的创建，需要根据`FrameGraph::PassNode::Setup`阶段中声明的各种`Subpass`来创建。
 
 现在有个问题：如何从`PassNode`中将`RenderPass`配置提取出来，并传给`Context`，说白了就是传给`CmdBeginRenderPass(RenderPass)`函数的`RenderPass`参数的实参如何构建？接口如何设计？
@@ -2230,6 +2411,12 @@ class Context
 
 对于`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`，由于`Turbo::FrameGraph::TRenderPass`下`Turbo::FrameGraph::TSubpass`下绑定的各个资源都是资源句柄`id`，对于该资源句柄对应得资源究竟是什么，只有开发用户知道，而这对于`Turbo`来说并不知道，所以更不用说在`void Context::BeginRenderPass(Turbo::FrameGraph::TRenderPass &renderPass)`中解析出对应资源句柄`id`对应得究竟是什么类型的资源。
 
+`Turbo`对于`RenderPass`中的各种`Subpass`所绑定的`Attachment`，`Turbo`会进行统计，目的是创建与之对应的`FrameBuffer`，所以在此规定一下统计顺序，创建的`FrameBuffer`顺序也与之对应：
+
+1. `Color`附件集
+2. `Input`附件集
+3. `DepthStencil`附件集
+
 ### RenderPass 创建
 
 当调用`Context::BeginRenderPass(...)`后，`Turbo`会去查找是否有已经创建完的`RenderPass`,尝试重复利用已有的`RenderPass`，如果没有找到的话，则创建相应的`RenderPass`。
@@ -2252,13 +2439,53 @@ class Context
 * 从`Turbo::Render::TRenderPass`中的各种`Subpass`
 * 从`Turbo::Render::TRenderPass`中的各种`Subpass`中指定的`attachment`相关的
 
-### FrameBuffer 创建
-
-一个`RenderPass`下可以绑定多个`FrameBuffer`
-
 ### RenderPassProxy(RenderPass代理)
 
 由于需要管理`RenderPass`和`FrameBuffer`，所以提供了`RenderPassProxy`类，用于整合管理`RenderPass`和`FrameBuffer`，并由`RenderPassPool`创建和销毁
+
+> `新的想法`
+>
+>最近想到一种比较符合直觉的模式：刷新模式（我自己起的名字）
+>
+>由于之前使用`RenderPassPool`来创建`RenderPassProxy`类，`RenderPassProxy`类下面有真正的`RenderPass`，中间多一个`RenderPassProxy`来进行转换总感觉怪怪的，所以想到了如下方式：
+>
+>```CXX
+>/*
+>Turbo::Render::TRenderPass
+>{
+>    friend class TRenderPassPool;//使得TRenderPassPool可以去刷新renderPass成员变量
+>
+>    private:
+>        Turbo::Core::TRenderPass* renderPass=nullptr;//注意：此成员变量为private，为待刷新的数据
+>}
+>*/
+>Turbo::Render::TRenderPass render_pass;//此时其成员变量renderPass（真正的RenderPass现在为空）
+>
+>Turbo::Render::TRenderPassPool render_pass_pool;
+>
+>bool result = render_pass_pool.Allocate(render_pass);//此时进行Turbo::Render::TRenderPass::renderPass成员变量的刷新
+>if(result)
+>{
+>    //创建RenerPass成功
+>    //render_pass的成员变量renderPass将会被TRenderPassPool附上有效值
+>    {
+>        //伪代码
+>        Turbo::Core::TRenderPass* core_render_pass = render_pass.renderPass;
+>        if(core_render_pass != nullptr)
+>        {
+>           ...
+>        }
+>    }
+>    
+>}
+>else
+>{
+>    //创建RenerPass失败
+>    //render_pass的成员变量renderPass仍然为空
+>}
+>```
+
+在创建完`Turbo::Core::TRenderPass`之后，可以通过`const std::vector<TAttachment> & Turbo::Core::TRenderPass::GetAttachments()`函数获取相应的
 
 ### Turbo::Render::TRenderPass 转 Turbo::Core::TRenderPass
 
@@ -2268,6 +2495,36 @@ class Context
 2. 计算各个`Subpass`中的`Attachment`相对于`Attachment`数组中的偏移等（`AttachmentReference`）
 
 由于会有重复的`Attachment`(如何判断两个`Attachment`相等：通过查看`Attachment`底层`Image`是否为同一个)，需要剔除重复的`Attachment`项目
+
+### FrameBuffer 创建
+
+一个`RenderPass`下可以绑定多个`FrameBuffer`，在使用`RenderPassPool`得到了一个有效的`RenderPass`后，`Turbo`需要根据用于传入的`RenderPass`配置来查看当前的`RenderPassPool`返回的`RenderPass`是否有支持当前的`FrameBuffer`。对应得流程如下：
+
+```mermaid
+graph TD;
+InputRenderPass["外部输入的RenderPass（配置）"]
+AnValidRenderPass["RenderPassPool返回的一个有效的RenderPass（RenderPassProxy）"]
+FindFrameBuffer{"寻找是否有兼容的FrameBuffer"}
+
+CreateFrameBuffer["创建FrameBuffer"]
+ReturnFrameBuffer["返回FrameBuffer"]
+
+InputRenderPass-->AnValidRenderPass
+AnValidRenderPass-->FindFrameBuffer
+FindFrameBuffer--没找到-->CreateFrameBuffer
+FindFrameBuffer--找到了-->ReturnFrameBuffer
+CreateFrameBuffer-->ReturnFrameBuffer
+```
+
+现在有一个问题：
+
+`FrameBuffer`中对应的`Image`是每一帧都在做变化的，而且一次渲染只能绑定一个`FrameBuffer`，所以`FrameBuffer`的生命周期只在一帧中。
+
+也就是说在创建完`RenderPass`之后，需要去类似`FrameBufferPool`结构中去找是否有兼容的`FrameBuffer`，如果有的话直接返回，没有的话新创建一个，之后渲染完一帧后回收销毁`FrameBufferPool`中的所有的`FrameBuffer`
+
+*注：根据`Vulkan`标准，创建`FrameBuffer`时，必须指定`RenderPass`（标准规定，是与之兼容的`RenderPass`）。所以在创建`FrameBuffer`前必须创建`RenderPass`*
+
+同`RenderPassPool`创建`RenderPass`类似，`FrameBufferPool`也需要传入`RenderPass`，并将创建结果刷新到`RenderPass`中，这需要`RenderPass`有一个存储刷新`FrameBuffer`的成员变量
 
 ## Shader
 

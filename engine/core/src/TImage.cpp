@@ -9,6 +9,12 @@
 
 void Turbo::Core::TImage::InternalCreate()
 {
+    bool is_format_support_image = this->device->GetPhysicalDevice()->IsFormatSupportImage(this->format, this->type, this->tiling, this->usages, this->imageFlags);
+    if (!is_format_support_image)
+    {
+        throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TImage::InternalCreate()", "Unsupport format");
+    }
+
     VkImageType vk_image_type = VkImageType::VK_IMAGE_TYPE_1D;
     switch (this->type)
     {

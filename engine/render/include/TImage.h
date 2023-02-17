@@ -65,14 +65,19 @@ class TImage
         TImageUsages usages;
         TDomain domain;
     };
-    
+
     friend class TRenderPassPool;
+    friend class TFramebufferPool;
+    friend class TContext;
 
   private:
     Turbo::Core::TImage *image = nullptr;
     Turbo::Core::TImageView *imageView = nullptr;
 
     Descriptor descriptor;
+
+  protected:
+    virtual Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image);
 
   public:
     TImage() = default;
@@ -91,6 +96,9 @@ class TImage
     TDomain GetDomain() const;
     TSampleCountBits GetSampleCountBits() const;
     bool IsValid() const;
+
+    bool operator==(const TImage &image);
+    bool operator!=(const TImage &image);
 };
 
 class TColorImage : public TImage
@@ -230,6 +238,9 @@ class TTexture2D : public TColorImage2D
         TDomain domain;
     };
 
+  protected:
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
+
   public:
     TTexture2D() = default;
     ~TTexture2D() = default;
@@ -250,6 +261,9 @@ class TTexture3D : public TColorImage3D
         TDomain domain;
     };
 
+  protected:
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
+
   public:
     TTexture3D() = default;
     ~TTexture3D() = default;
@@ -268,6 +282,9 @@ class TDepthTexture2D : public TDepthImage2D
         TImageUsages usages;
         TDomain domain;
     };
+
+  protected:
+    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
 
   public:
     TDepthTexture2D() = default;

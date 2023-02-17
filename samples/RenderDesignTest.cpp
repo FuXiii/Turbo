@@ -189,30 +189,30 @@ void Test0()
 
         std::cout << "======================================== vertex buffer gpu" << std::endl;
 
-        uint32_t create_count = 2048;
-        std::vector<Turbo::Render::TTexture2D> texture2ds(create_count);
-        std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
-        for (uint32_t create_index = 0; create_index < create_count; create_index++)
-        {
-            Turbo::Render::TTexture2D::Descriptor temp_texture_2d_descriptor = {};
-            temp_texture_2d_descriptor.width = 512;
-            temp_texture_2d_descriptor.height = 512;
-            temp_texture_2d_descriptor.mipLevels = 1;
-            temp_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
-            temp_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+        // uint32_t create_count = 2048;
+        // std::vector<Turbo::Render::TTexture2D> texture2ds(create_count);
+        // std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
+        // for (uint32_t create_index = 0; create_index < create_count; create_index++)
+        // {
+        //     Turbo::Render::TTexture2D::Descriptor temp_texture_2d_descriptor = {};
+        //     temp_texture_2d_descriptor.width = 512;
+        //     temp_texture_2d_descriptor.height = 512;
+        //     temp_texture_2d_descriptor.mipLevels = 1;
+        //     temp_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED;
+        //     temp_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
 
-            Turbo::Render::TTexture2D temp_texture_2d;
-            temp_texture_2d.Create("temp_texture_2d", temp_texture_2d_descriptor, &resource_allocator);
-            texture2ds[create_index] = temp_texture_2d;
-        }
-        std::chrono::system_clock::time_point end_time = std::chrono::system_clock::now();
-        std::chrono::duration<double> delta_time = end_time - start_time;
-        std::cout << "create " << create_count << " Turbo::Render::TTexture2D use:" << delta_time.count() << "s" << std::endl;
+        //     Turbo::Render::TTexture2D temp_texture_2d;
+        //     temp_texture_2d.Create("temp_texture_2d", temp_texture_2d_descriptor, &resource_allocator);
+        //     texture2ds[create_index] = temp_texture_2d;
+        // }
+        // std::chrono::system_clock::time_point end_time = std::chrono::system_clock::now();
+        // std::chrono::duration<double> delta_time = end_time - start_time;
+        // std::cout << "create " << create_count << " Turbo::Render::TTexture2D use:" << delta_time.count() << "s" << std::endl;
 
-        for (Turbo::Render::TTexture2D &texture2d_item : texture2ds)
-        {
-            texture2d_item.Destroy(&resource_allocator);
-        }
+        // for (Turbo::Render::TTexture2D &texture2d_item : texture2ds)
+        // {
+        //     texture2d_item.Destroy(&resource_allocator);
+        // }
     }
 
     {
@@ -255,50 +255,7 @@ void Test0()
 
     {
         Turbo::FrameGraph::TRenderPass fg_render_pass{};
-        context.BeginRenderPass(fg_render_pass);
-    }
-
-    {
-        Turbo::Render::TTexture2D color_texture2d;
-        Turbo::Render::TTexture2D::Descriptor color_texture2d_descriptor{};
-        color_texture2d_descriptor.width = 1920;
-        color_texture2d_descriptor.height = 1080;
-        color_texture2d_descriptor.mipLevels = 1;
-        color_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
-        color_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        color_texture2d.Create("color_texture2d", color_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TTexture2D normal_texture2d;
-        Turbo::Render::TTexture2D::Descriptor normal_texture2d_descriptor{};
-        normal_texture2d_descriptor.width = 1920;
-        normal_texture2d_descriptor.height = 1080;
-        normal_texture2d_descriptor.mipLevels = 1;
-        normal_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT;
-        normal_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        normal_texture2d.Create("normal_texture2d", normal_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TDepthTexture2D depth_texture2d;
-        Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor{};
-        depth_texture2d_descriptor.width = 1920;
-        depth_texture2d_descriptor.height = 1080;
-        depth_texture2d_descriptor.mipLevels = 1;
-        depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
-        depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
-        depth_texture2d.Create("depth_texture2d", depth_texture2d_descriptor, &resource_allocator);
-
-        Turbo::Render::TSubpass subpass0;
-        subpass0.AddColorAttachment(color_texture2d);
-        subpass0.AddColorAttachment(normal_texture2d);
-        subpass0.SetDepthStencilAttachment(depth_texture2d);
-
-        Turbo::Render::TRenderPass render_pass;
-        render_pass.AddSubpass(subpass0);
-
-        context.BeginRenderPass(render_pass);
-
-        depth_texture2d.Destroy(&resource_allocator);
-        normal_texture2d.Destroy(&resource_allocator);
-        color_texture2d.Destroy(&resource_allocator);
+        // context.BeginRenderPass(fg_render_pass);
     }
 
     {
@@ -346,40 +303,6 @@ void Test0()
         delete compute_shader;
         delete vertex_shader;
         delete fragment_shader;
-    }
-
-    {
-        // 这一部分只是示意性代码
-
-        std::cout << "flush Commandbuffer to GPU" << std::endl;
-        Turbo::Render::TGraphicsPipeline some_graphics_pipeline;
-        Turbo::Render::TRenderPass some_render_pass;
-
-        // 进行100万批次指令记录
-        for (uint32_t some_command = 0; some_command < 1000000; some_command++)
-        {
-            context.BeginRenderPass(some_render_pass);
-            context.BindPipeline(some_graphics_pipeline);
-            // context.OtherCmd(....)//其他指令
-            // context.Draw(...)//绘制指令
-            // context.Dispatch(...)//调度指令
-            // context.EndRenderPass(...)
-            if (some_command % 2048 == 0)
-            {
-                context.Flush(); // 每记录2048条记录，将指令推到GPU进行执行
-            }
-        }
-
-        context.Flush();     // 将剩余指令推到GPU进行执行
-        if (context.Wait(1)) // 等待1纳秒，等待之前所有推送到GPU的指令执行完成，返回ture表示所有任务完成，返回false表示有任务在1纳米内没完成
-        {
-            std::cout << "wait GPU run all commandbuffer finished in 1 nanoseconds" << std::endl;
-        }
-        else
-        {
-            context.Wait(UINT64_MAX); // 一直等到所有任务完成
-            std::cout << "wait GPU run all commandbuffer finished" << std::endl;
-        }
     }
 }
 
@@ -513,6 +436,8 @@ void Test1()
 
 void Test2()
 {
+    std::cout << "Test2()::Begin......................................................." << std::endl;
+
     Turbo::Render::TContext context;
     Turbo::Render::TResourceAllocator resource_allocator(&context);
 
@@ -541,26 +466,314 @@ void Test2()
     Turbo::Render::TRenderPass render_pass;
     render_pass.AddSubpass(subpass0);
 
+    Turbo::Render::TRenderPassPool render_pass_pool(&context);
+    bool render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_0 ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
+
+    bool render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_1 ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
+
+    bool render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
+    render_pass_proxy_2 ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+
+    if (render_pass.IsValid())
     {
-        Turbo::Render::TRenderPassPool render_pass_pool(&context);
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_0 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_0.IsValid() ? std::cout << "Allocate RenderPass0 Success" << std::endl : std::cout << "Allocate RenderPass0 Faild" << std::endl;
-
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_1 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_1.IsValid() ? std::cout << "Allocate RenderPass1 Success" << std::endl : std::cout << "Allocate RenderPass1 Faild" << std::endl;
-
-        Turbo::Render::TRenderPassPool::TRenderPassProxy render_pass_proxy_2 = render_pass_pool.Allocate(render_pass);
-        render_pass_proxy_2.IsValid() ? std::cout << "Allocate RenderPass2 Success" << std::endl : std::cout << "Allocate RenderPass2 Faild" << std::endl;
+        std::cout << "render_pass is valid" << std::endl;
+    }
+    else
+    {
+        std::cout << "render_pass not valid" << std::endl;
     }
 
     color_texture_2d.Destroy(&resource_allocator);
     depth_texture_2d.Destroy(&resource_allocator);
+
+    std::cout << "Test2()::End......................................................." << std::endl;
+}
+
+void Test3()
+{
+    std::cout << "Test3()::Begin......................................................." << std::endl;
+
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    Turbo::Render::TTexture2D color_texture_2d;
+    Turbo::Render::TTexture2D::Descriptor color_texture_2d_descriptor = {};
+    color_texture_2d_descriptor.width = 512;
+    color_texture_2d_descriptor.height = 512;
+    color_texture_2d_descriptor.mipLevels = 1;
+    color_texture_2d_descriptor.usages = Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT | Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    color_texture_2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    color_texture_2d.Create("color_texture_2d", color_texture_2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TDepthTexture2D depth_texture_2d;
+    Turbo::Render::TDepthTexture2D::Descriptor depth_texture2d_descriptor = {};
+    depth_texture2d_descriptor.width = 512;
+    depth_texture2d_descriptor.height = 512;
+    depth_texture2d_descriptor.mipLevels = 1;
+    depth_texture2d_descriptor.usages = Turbo::Render::TImageUsageBits::DEPTH_STENCIL_ATTACHMENT;
+    depth_texture2d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    depth_texture_2d.Create("depth_texture_2d", depth_texture2d_descriptor, &resource_allocator);
+
+    Turbo::Render::TSubpass subpass0;
+    subpass0.AddColorAttachment(color_texture_2d);
+    subpass0.SetDepthStencilAttachment(depth_texture_2d);
+
+    Turbo::Render::TRenderPass render_pass;
+    render_pass.AddSubpass(subpass0);
+
+    if (context.BeginRenderPass(render_pass))
+    {
+        // context.BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
+        context.EndRenderPass();
+
+        context.ClearTexture(color_texture_2d, 1, 1, 1, 1);
+
+        context.Flush();
+        context.Wait(UINT64_MAX);
+    }
+
+    color_texture_2d.Destroy(&resource_allocator);
+    depth_texture_2d.Destroy(&resource_allocator);
+
+    std::cout << "Test3()::End......................................................." << std::endl;
+}
+
+#include <core/include/TCommandBuffer.h>
+#include <core/include/TDevice.h>
+#include <core/include/TDeviceQueue.h>
+#include <core/include/TFence.h>
+#include <core/include/TImage.h>
+#include <core/include/TImageView.h>
+#include <core/include/TInstance.h>
+#include <core/include/TPipeline.h>
+#include <core/include/TSurface.h>
+#include <core/include/TSwapchain.h>
+#include <core/include/TVulkanLoader.h>
+#include <vulkan/vulkan.h>
+
+#include <GLFW/glfw3.h>
+
+void Test4()
+{
+    std::cout << "Test4()::Begin......................................................." << std::endl;
+    /*
+       [Clear Pass] → Color Texture → [Present Pass]
+       1. 在ClearPass创建一个Texture并使用Clear刷新颜色
+       2. 在PresentPass中将之前刷新的Texture结果拷贝至要显示的纹理中
+       3. 显示
+       4. 重复1-3
+    */
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    if (!glfwInit())
+        return;
+
+    int window_width = 512;
+    int window_height = 512;
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    GLFWwindow *window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
+    VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
+    VkInstance vk_instance = context.GetInstance()->GetVkInstance();
+    VkResult surface_result = glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
+
+    if (vk_surface_khr == VK_NULL_HANDLE)
+    {
+        std::cout << "vk_surface_khr is VK_NULL_HANDLE::" << surface_result << std::endl;
+        return;
+    }
+
+    Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(context.GetDevice(), vk_surface_khr);
+
+    uint32_t max_image_count = surface->GetMaxImageCount();
+    uint32_t min_image_count = surface->GetMinImageCount();
+    uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
+
+    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
+
+    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
+    for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+    {
+        Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        swapchain_image_views.push_back(swapchain_view);
+    }
+
+    int current_width = window_width;
+    int current_height = window_height;
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
+
+        Turbo::FrameGraph::TFrameGraph fg;
+
+        struct ClearPassData
+        {
+            Turbo::FrameGraph::TResource colorTexture;
+        };
+
+        fg.AddPass<ClearPassData>(
+            "ClearPass",
+            [&](Turbo::FrameGraph::TFrameGraph::TBuilder &builder, ClearPassData &data) {
+                data.colorTexture = builder.Create<Turbo::Render::TTexture2D>("ColorTexture", {(uint32_t)current_width, (uint32_t)current_height, 1, Turbo::Render::TImageUsageBits::COLOR_ATTACHMENT | Turbo::Render::TImageUsageBits::TRANSFER_SRC | Turbo::Render::TImageUsageBits::TRANSFER_DST, Turbo::Render::TDomainBits::GPU});
+
+                auto subpass0 = builder.CreateSubpass();
+                data.colorTexture = subpass0.Write(data.colorTexture);
+
+                fg.GetBlackboard()["ColorTexture"] = data.colorTexture;
+            },
+            [&](const ClearPassData &data, const Turbo::FrameGraph::TResources &resources, void *_context) {
+                // TODO:Clear Color Texture
+
+                Turbo::Render::TTexture2D color_texture = resources.Get<Turbo::Render::TTexture2D>(data.colorTexture);
+
+                if (_context != nullptr)
+                {
+                    Turbo::Render::TContext *temp_context = (Turbo::Render::TContext *)_context;
+
+                    auto now_time = glfwGetTime();
+
+                    float r = std::sin(now_time);
+                    float g = std::cos(now_time);
+                    float b = std::cos(now_time + 3.1415926 / 3);
+
+                    temp_context->Flush();
+                    temp_context->Wait(UINT64_MAX);
+
+                    Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
+                    Turbo::Core::TCommandBuffer *cb = temp_context->AllocateCommandBuffer();
+                    cb->Begin();
+                    cb->CmdClearColorImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, r, g, b, 1);
+                    cb->End();
+                    temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
+
+                    fence->WaitUntil();
+
+                    delete fence;
+                    temp_context->FreeCommandBuffer(cb);
+
+                    auto format = color_texture.GetFormat();
+                }
+            });
+
+        struct PresentPassData
+        {
+            Turbo::FrameGraph::TResource colorTexture;
+        };
+
+        fg.AddPass<PresentPassData>(
+            "PresentPass",
+            [&](Turbo::FrameGraph::TFrameGraph::TBuilder &builder, PresentPassData &data) {
+                data.colorTexture = fg.GetBlackboard()["ColorTexture"];
+
+                auto subpass0 = builder.CreateSubpass();
+                data.colorTexture = subpass0.Read(data.colorTexture);
+
+                builder.SideEffect();
+            },
+            [&](const PresentPassData &data, const Turbo::FrameGraph::TResources &resources, void *_context) {
+                // TODO:Present Color Texture
+
+                Turbo::Render::TTexture2D color_texture = resources.Get<Turbo::Render::TTexture2D>(data.colorTexture);
+
+                if (_context != nullptr)
+                {
+                    Turbo::Render::TContext *temp_context = (Turbo::Render::TContext *)_context;
+
+                    // TODO: present
+                    uint32_t index = UINT32_MAX;
+                    Turbo::Core::TFence *acquire_next_image_fence = new Turbo::Core::TFence(temp_context->GetDevice());
+                    Turbo::Core::TResult result = swapchain->AcquireNextImageUntil(nullptr, acquire_next_image_fence, &index);
+                    acquire_next_image_fence->WaitUntil();
+                    delete acquire_next_image_fence;
+                    if (result == Turbo::Core::TResult::SUCCESS)
+                    {
+                        // TODO:Blit Image
+
+                        auto show_target = swapchain_image_views[index];
+
+                        Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
+                        Turbo::Core::TCommandBuffer *cb = temp_context->AllocateCommandBuffer();
+                        cb->Begin();
+                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, show_target);
+                        cb->CmdBlitImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, show_target->GetImage(), Turbo::Core::TImageLayout::GENERAL, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1);
+                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
+                        cb->End();
+                        temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
+
+                        fence->WaitUntil();
+
+                        delete fence;
+                        temp_context->FreeCommandBuffer(cb);
+                        Turbo::Core::TResult result = temp_context->GetDeviceQueue()->Present(swapchain, index);
+                        switch (result)
+                        {
+                        case Turbo::Core::TResult::MISMATCH: {
+                            Turbo::Core::TDevice *device = temp_context->GetDevice();
+                            device->WaitIdle();
+
+                            swapchain_images.clear();
+
+                            for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
+                            {
+                                delete swapchain_image_view_item;
+                            }
+
+                            swapchain_image_views.clear();
+
+                            Turbo::Extension::TSwapchain *old_swapchain = swapchain;
+                            Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
+                            delete old_swapchain;
+
+                            swapchain = new_swapchain;
+
+                            swapchain_images = swapchain->GetImages();
+                            for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+                            {
+                                Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                                swapchain_image_views.push_back(swapchain_view);
+                            }
+
+                            glfwGetWindowSize(window, &current_width, &current_height);
+                        }
+                        break;
+                        default: {
+                        }
+                        break;
+                        }
+                        // std::cout << "Present" << std::endl;
+                    }
+                }
+            });
+
+        fg.Compile();
+        fg.Execute(&context, &resource_allocator);
+    }
+
+    context.GetDevice()->WaitIdle();
+
+    for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
+    {
+        delete swapchain_image_view_item;
+    }
+
+    delete swapchain;
+    delete surface;
+    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(context.GetInstance()->GetVkInstance(), "vkDestroySurfaceKHR");
+    pfn_vk_destroy_surface_khr(context.GetInstance()->GetVkInstance(), vk_surface_khr, nullptr);
+    glfwTerminate();
+    std::cout << "Test4()::End......................................................." << std::endl;
 }
 
 int main()
 {
-    Test0();
-    Test1();
-    Test2();
+    // Test0();
+    // Test1();
+    // Test2();
+    // Test3();
+    Test4();
     return 0;
 }

@@ -13,8 +13,8 @@
 #include "core/include/TShader.h"
 
 #include "core/include/TAttachment.h"
-#include "core/include/TComputePipeline.h"
 #include "core/include/TGraphicsPipeline.h"
+#include "core/include/TPipelineLayout.h"
 #include "core/include/TRenderPass.h"
 #include "core/include/TSubpass.h"
 
@@ -38,24 +38,193 @@
 #include "core/include/TPipelineDescriptorSet.h"
 #include "core/include/TSampler.h"
 
-#include <glm/ext.hpp>
-
 #include "core/include/TVulkanLoader.h"
-#include "glm/fwd.hpp"
-#include "glm/geometric.hpp"
-#include "glm/trigonometric.hpp"
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
-#include <tiny_gltf.h>
 
-#include <ktx.h>
+#include <glm/ext.hpp>
 
 #include <imgui.h>
 
+#include <memory>
+#include <stdio.h>
+#include <string.h>
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
+
+void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
+{
+    std::string save_file_path = "./";
+    std::string save_file_name = name;
+
+    Turbo::Core::TImage *source_image = image;
+
+    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(image->GetDevice(), 0, Turbo::Core::TImageType::DIMENSION_2D, source_image->GetFormat(), source_image->GetWidth(), source_image->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
+
+    Turbo::Core::TCommandBuffer *temp_command_buffer = commandBufferPool->Allocate();
+
+    temp_command_buffer->Begin();
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->CmdCopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
+    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    temp_command_buffer->End();
+
+    Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(image->GetDevice());
+
+    deviceQueue->Submit(nullptr, nullptr, temp_command_buffer, gpu_copy_to_cpu_fence);
+
+    gpu_copy_to_cpu_fence->WaitUntil();
+
+    delete gpu_copy_to_cpu_fence;
+
+    std::string filename;
+    filename.append(save_file_path);
+    filename.append(save_file_name);
+    filename.append(".ppm");
+
+    VkImageSubresource subres = {};
+    subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    subres.mipLevel = 0;
+    subres.arrayLayer = 0;
+    VkSubresourceLayout sr_layout;
+    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+
+    char *ptr = (char *)temp_image->Map();
+
+    ptr += sr_layout.offset;
+    std::ofstream file(filename.c_str(), std::ios::binary);
+
+    file << "P6\n";
+    file << source_image->GetWidth() << " ";
+    file << source_image->GetHeight() << "\n";
+    file << 255 << "\n";
+
+    int x = 0;
+    int y = 0;
+
+    for (y = 0; y < source_image->GetHeight(); y++)
+    {
+        const int *row = (const int *)ptr;
+        int swapped;
+
+        if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
+        {
+            for (x = 0; x < source_image->GetWidth(); x++)
+            {
+                swapped = (*row & 0xff00ff00) | (*row & 0x000000ff) << 16 | (*row & 0x00ff0000) >> 16;
+                file.write((char *)&swapped, 3);
+                row++;
+            }
+        }
+        else if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
+        {
+            for (x = 0; x < source_image->GetWidth(); x++)
+            {
+                file.write((char *)row, 3);
+                row++;
+            }
+        }
+        else
+        {
+            printf("Unrecognized image format - will not write image files");
+            break;
+        }
+
+        ptr += sr_layout.rowPitch;
+    }
+
+    file.close();
+    temp_image->Unmap();
+    delete temp_image;
+    commandBufferPool->Free(temp_command_buffer);
+}
+
+// bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowPitch, unsigned char *dataPtr)
+// {
+//     // PPM format expected from http://netpbm.sourceforge.net/doc/ppm.html
+//     //  1. magic number
+//     //  2. whitespace
+//     //  3. width
+//     //  4. whitespace
+//     //  5. height
+//     //  6. whitespace
+//     //  7. max color value
+//     //  8. whitespace
+//     //  7. data
+
+//     // Comments are not supported, but are detected and we kick out
+//     // Only 8 bits per channel is supported
+//     // If dataPtr is nullptr, only width and height are returned
+
+//     // Read in values from the PPM file as characters to check for comments
+//     char magicStr[3] = {}, heightStr[6] = {}, widthStr[6] = {}, formatStr[6] = {};
+
+// #ifndef __ANDROID__
+//     FILE *fPtr = fopen(filename, "rb");
+// #else
+//     FILE *fPtr = AndroidFopen(filename, "rb");
+// #endif
+//     if (!fPtr)
+//     {
+//         printf("Bad filename in read_ppm: %s\n", filename);
+//         return false;
+//     }
+
+//     // Read the four values from file, accounting with any and all whitepace
+//     int count = fscanf(fPtr, "%s %s %s %s ", magicStr, widthStr, heightStr, formatStr);
+
+//     // Kick out if comments present
+//     if (magicStr[0] == '#' || widthStr[0] == '#' || heightStr[0] == '#' || formatStr[0] == '#')
+//     {
+//         printf("Unhandled comment in PPM file\n");
+//         return false;
+//     }
+
+//     // Only one magic value is valid
+//     if (strncmp(magicStr, "P6", sizeof(magicStr)))
+//     {
+//         printf("Unhandled PPM magic number: %s\n", magicStr);
+//         return false;
+//     }
+
+//     width = atoi(widthStr);
+//     height = atoi(heightStr);
+
+//     // Ensure we got something sane for width/height
+//     static const int saneDimension = 32768; //??
+//     if (width <= 0 || width > saneDimension)
+//     {
+//         printf("Width seems wrong.  Update read_ppm if not: %u\n", width);
+//         return false;
+//     }
+//     if (height <= 0 || height > saneDimension)
+//     {
+//         printf("Height seems wrong.  Update read_ppm if not: %u\n", height);
+//         return false;
+//     }
+
+//     if (dataPtr == nullptr)
+//     {
+//         // If no destination pointer, caller only wanted dimensions
+//         return true;
+//     }
+
+//     // Now read the data
+//     for (int y = 0; y < height; y++)
+//     {
+//         unsigned char *rowPtr = dataPtr;
+//         for (int x = 0; x < width; x++)
+//         {
+//             count = fread(rowPtr, 3, 1, fPtr);
+//             rowPtr[3] = 255; /* Alpha of 1 */
+//             rowPtr += 4;
+//         }
+//         dataPtr += rowPitch;
+//     }
+//     fclose(fPtr);
+
+//     return true;
+// }
 
 std::string ReadTextFile(const std::string &filename)
 {
@@ -105,13 +274,9 @@ const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string MY_PERLIN_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.vert");
 
-const std::string MY_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/worley.comp");
-
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
-
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.frag");
 
 typedef struct POSITION
 {
@@ -119,6 +284,19 @@ typedef struct POSITION
     float y;
     float z;
 } POSITION;
+
+typedef struct COLOR
+{
+    float r;
+    float g;
+    float b;
+} COLOR;
+
+typedef struct POSITION_AND_COLOR
+{
+    POSITION position;
+    COLOR color;
+} POSITION_AND_COLOR;
 
 typedef struct NORMAL
 {
@@ -133,47 +311,28 @@ typedef struct TEXCOORD
     float v;
 } TEXCOORD;
 
-struct MY_PUSH_CONSTANTS_DATA
+typedef struct PUSH_CONSTANT
 {
-    float time;
-    float resolutionX;
-    float resolutionY;
-
-    float cameraPosX;
-    float cameraPosY;
-    float cameraPosZ;
-
-    float lookForwardDirX;
-    float lookForwardDirY;
-    float lookForwardDirZ;
-
-    // bounding box
-    float boxPosX;
-    float boxPosY;
-    float boxPosZ;
-
-    float boxForwardDirX;
-    float boxForwardDirY;
-    float boxForwardDirZ;
-
-    float boxHalfDiagonalVectorX;
-    float boxHalfDiagonalVectorY;
-    float boxHalfDiagonalVectorZ;
-
-    float coverage;
-
-    float power;
-
-    float absorption;
-    float outScattering;
-
-    bool isHighFreq;
-};
+    float a;
+    float b;
+    float c;
+    bool isVertexShader;
+} PUSH_CONSTANT;
 
 int main()
 {
+    PUSH_CONSTANT PUSH_CONSTANT_DATA{};
+    PUSH_CONSTANT_DATA.a = 1;
+    PUSH_CONSTANT_DATA.b = 1;
+    PUSH_CONSTANT_DATA.c = 1;
+    PUSH_CONSTANT_DATA.isVertexShader = true;
 
-    std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+    std::vector<POSITION_AND_COLOR> POSITION_AND_COLOR_DATA;
+    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}});
+    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}});
+    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}});
+
+    float value = 1.0f;
 
     Turbo::Core::TEngine engine;
 
@@ -220,15 +379,15 @@ int main()
         }
     }
 
-    Turbo::Core::TVersion instance_version(1, 2, 0, 0);
+    Turbo::Core::TVersion instance_version(1, 0, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
         return -1;
     GLFWwindow *window;
-    int window_width = 1920 / 2.0;
-    int window_height = 1080 / 2.0;
+    int window_width = 500;
+    int window_height = 500;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
@@ -239,6 +398,7 @@ int main()
     vk_physical_device_features.sampleRateShading = VK_TRUE;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
+    physical_device->GetSupportExtensions();
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
@@ -271,31 +431,25 @@ int main()
     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
+    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    void *value_ptr = value_buffer->Map();
+    memcpy(value_ptr, &value, sizeof(value));
+    value_buffer->Unmap();
+
+    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+    void *vertx_buffer_ptr = vertex_buffer->Map();
+    memcpy(vertx_buffer_ptr, POSITION_AND_COLOR_DATA.data(), sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+    vertex_buffer->Unmap();
+    POSITION_AND_COLOR_DATA.clear();
+
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    uint32_t perlin_worley_noise_3d_image_width = 128;
-    uint32_t perlin_worley_noise_3d_image_height = 128;
-    uint32_t perlin_worley_noise_3d_image_depth = 128;
-    Turbo::Core::TImage *perlin_worley_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, perlin_worley_noise_3d_image_width, perlin_worley_noise_3d_image_height, perlin_worley_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-    Turbo::Core::TImageView *perlin_worley_noise_3d_image_view = new Turbo::Core::TImageView(perlin_worley_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, perlin_worley_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
+    Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
-    uint32_t worley_noise_3d_image_width = 64;
-    uint32_t worley_noise_3d_image_height = 64;
-    uint32_t worley_noise_3d_image_depth = 64;
-    Turbo::Core::TImage *worley_noise_3d_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, worley_noise_3d_image_width, worley_noise_3d_image_height, worley_noise_3d_image_depth, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-    Turbo::Core::TImageView *worley_noise_3d_image_view = new Turbo::Core::TImageView(worley_noise_3d_image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, worley_noise_3d_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-    Turbo::Core::TComputeShader *my_perlin_worley_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_PERLIN_WORLEY_COMPUTE_SHADER_STR);
-    Turbo::Core::TComputeShader *my_worley_computer_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_WORLEY_COMPUTE_SHADER_STR);
-
-    Turbo::Core::TVertexShader *my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
-    Turbo::Core::TFragmentShader *my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
-
-    std::cout << my_perlin_worley_computer_shader->ToString() << std::endl;
-    std::cout << my_worley_computer_shader->ToString() << std::endl;
-    std::cout << my_vertex_shader->ToString() << std::endl;
-    std::cout << my_fragment_shader->ToString() << std::endl;
+    std::cout << vertex_shader->ToString() << std::endl;
+    std::cout << fragment_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -312,16 +466,15 @@ int main()
 
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
+    std::vector<Turbo::Core::TBuffer *> buffers;
+    buffers.push_back(value_buffer);
+
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
-    Turbo::Core::TSubpass subpass1(Turbo::Core::TPipelineType::Graphics);
-    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL); // swapchain color image
-
     std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass);  // subpass 0
-    subpasses.push_back(subpass1); // subpass 1
+    subpasses.push_back(subpass); // subpass 0
 
     Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -332,46 +485,24 @@ int main()
 
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
-    Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
-    position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
-    Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
-    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
-    Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_AND_COLOR), Turbo::Core::TVertexRate::VERTEX);
+    vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, position)); // position
+    vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, color));    // color
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
+    vertex_bindings.push_back(vertex_binding);
 
-    Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
-    Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
+    Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
+    Turbo::Core::TScissor scissor(0, 0, 500, 500);
 
-    Turbo::Core::TGraphicsPipeline *graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
-    Turbo::Core::TPipelineDescriptorSet *graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
+    std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
-    std::vector<Turbo::Core::TImageView *> graphics_pipeline_perlin_worley_image_views;
-    graphics_pipeline_perlin_worley_image_views.push_back(perlin_worley_noise_3d_image_view);
-    graphics_pipeline_descriptor_set->BindData(0, 0, 0, graphics_pipeline_perlin_worley_image_views);
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
 
-    std::vector<Turbo::Core::TImageView *> graphics_pipeline_worley_image_views;
-    graphics_pipeline_worley_image_views.push_back(worley_noise_3d_image_view);
-    graphics_pipeline_descriptor_set->BindData(0, 1, 0, graphics_pipeline_worley_image_views);
-
-    Turbo::Core::TSampler *graphics_pipeline_sampler = new Turbo::Core::TSampler(device);
-    std::vector<Turbo::Core::TSampler *> graphics_pipeline_samplers;
-    graphics_pipeline_samplers.push_back(graphics_pipeline_sampler);
-    graphics_pipeline_descriptor_set->BindData(0, 2, 0, graphics_pipeline_samplers);
-
-    Turbo::Core::TComputePipeline *perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_perlin_worley_computer_shader);
-    Turbo::Core::TComputePipeline *worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_worley_computer_shader);
-
-    std::vector<Turbo::Core::TImageView *> perlin_worley_compute_pipeline_image_views;
-    perlin_worley_compute_pipeline_image_views.push_back(perlin_worley_noise_3d_image_view);
-    Turbo::Core::TPipelineDescriptorSet *perlin_worley_compute_pipeline_descriptor_set = descriptor_pool->Allocate(perlin_worley_compute_pipeline->GetPipelineLayout());
-    perlin_worley_compute_pipeline_descriptor_set->BindData(0, 0, 0, perlin_worley_compute_pipeline_image_views);
-
-    std::vector<Turbo::Core::TImageView *> worley_compute_pipeline_image_views;
-    worley_compute_pipeline_image_views.push_back(worley_noise_3d_image_view);
-    Turbo::Core::TPipelineDescriptorSet *worley_compute_pipeline_descriptor_set = descriptor_pool->Allocate(worley_compute_pipeline->GetPipelineLayout());
-    worley_compute_pipeline_descriptor_set->BindData(0, 0, 0, worley_compute_pipeline_image_views);
+    std::vector<Turbo::Core::TBuffer *> vertex_buffers;
+    vertex_buffers.push_back(vertex_buffer);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -407,7 +538,7 @@ int main()
     std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
     imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     unsigned char *imgui_font_pixels;
     int imgui_font_width, imgui_font_height;
@@ -450,85 +581,16 @@ int main()
     Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
     //</IMGUI>
 
-    float bounding_box_forward_dir[3];
-    bounding_box_forward_dir[0] = 0;
-    bounding_box_forward_dir[1] = 0;
-    bounding_box_forward_dir[2] = 1;
-
-    float bounding_box_pos[3];
-    bounding_box_pos[0] = 0;
-    bounding_box_pos[1] = 20;
-    bounding_box_pos[2] = 0;
-
-    float bounding_box_half_diagonal_vector[3];
-    bounding_box_half_diagonal_vector[0] = 20;
-    bounding_box_half_diagonal_vector[1] = 20;
-    bounding_box_half_diagonal_vector[2] = 20;
-
     bool show_demo_window = true;
-    MY_PUSH_CONSTANTS_DATA my_push_constants_data;
-    my_push_constants_data.time = 0;
-    my_push_constants_data.resolutionX = 1;
-    my_push_constants_data.resolutionY = 1;
-    my_push_constants_data.cameraPosX = 0;
-    my_push_constants_data.cameraPosY = 0;
-    my_push_constants_data.cameraPosZ = 0;
-    my_push_constants_data.lookForwardDirX = 0;
-    my_push_constants_data.lookForwardDirY = 0;
-    my_push_constants_data.lookForwardDirZ = 0;
-    my_push_constants_data.boxPosX = 0;
-    my_push_constants_data.boxPosY = 20;
-    my_push_constants_data.boxPosZ = 0;
-    my_push_constants_data.boxForwardDirX = 0;
-    my_push_constants_data.boxForwardDirY = 0;
-    my_push_constants_data.boxForwardDirZ = 1;
-    my_push_constants_data.boxHalfDiagonalVectorX = 20;
-    my_push_constants_data.boxHalfDiagonalVectorY = 20;
-    my_push_constants_data.boxHalfDiagonalVectorZ = 20;
-    my_push_constants_data.coverage = 0.048f;
-    my_push_constants_data.power = 30;
-    my_push_constants_data.absorption = 0;
-    my_push_constants_data.outScattering = 1;
-    my_push_constants_data.isHighFreq = true;
-
-    glm::vec3 camera_position = glm::vec3(0, 0, 0);
-    glm::vec3 look_forward = glm::vec3(0, 0, 1);
-
-    float horizontal_angle = 0;
-    float vertical_angle = 0;
-
-    glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
-    glm::vec2 current_mouse_pos = glm::vec2(0, 0);
-
-    // before we show the Perlin-Worly 3D texture with graphics pipeline we use compute pipeline to finish the calculation
-    Turbo::Core::TCommandBuffer *compute_command_buffer = command_pool->Allocate();
-
-    compute_command_buffer->Begin();
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, perlin_worley_noise_3d_image_view);
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, worley_noise_3d_image_view);
-    // Compute Pipeline calculate Perlin-Worley Noise into 3D texture
-    compute_command_buffer->CmdBindPipeline(perlin_worley_compute_pipeline);
-    compute_command_buffer->CmdBindPipelineDescriptorSet(perlin_worley_compute_pipeline_descriptor_set);
-    compute_command_buffer->CmdDispatch(perlin_worley_noise_3d_image_width, perlin_worley_noise_3d_image_height, perlin_worley_noise_3d_image_depth);
-
-    compute_command_buffer->CmdBindPipeline(worley_compute_pipeline);
-    compute_command_buffer->CmdBindPipelineDescriptorSet(worley_compute_pipeline_descriptor_set);
-    compute_command_buffer->CmdDispatch(worley_noise_3d_image_width, worley_noise_3d_image_height, worley_noise_3d_image_depth);
-
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, perlin_worley_noise_3d_image_view);
-    compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, worley_noise_3d_image_view);
-    compute_command_buffer->End();
-
-    Turbo::Core::TFence *compute_fence = new Turbo::Core::TFence(device);
-    queue->Submit(nullptr, nullptr, compute_command_buffer, compute_fence);
-    compute_fence->WaitUntil();
-    command_pool->Free(compute_command_buffer);
-    delete compute_fence;
 
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        void *_ptr = value_buffer->Map();
+        memcpy(_ptr, &value, sizeof(value));
+        value_buffer->Unmap();
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
@@ -608,93 +670,24 @@ int main()
                 }
             }
 
-            // UpdateKeyboard
-            {
-                ImVec2 mouse_pos = io.MousePos;
-                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
-                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
-                previous_mouse_pos = current_mouse_pos;
-                mouse_pos_delte.y = -mouse_pos_delte.y;
-
-                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-                if (state == GLFW_PRESS)
-                {
-                    horizontal_angle += mouse_pos_delte.x * 0.2;
-                    vertical_angle += mouse_pos_delte.y * 0.2;
-
-                    if (vertical_angle > 90)
-                    {
-                        vertical_angle = 90;
-                    }
-
-                    if (vertical_angle < -90)
-                    {
-                        vertical_angle = -90;
-                    }
-                }
-
-                float delte_time = io.DeltaTime;
-                float speed = 1;
-
-                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
-                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
-                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
-
-                look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
-                look_forward = glm::normalize(look_forward);
-
-                glm::vec3 forward_dir = look_forward;                  // 向前向量
-                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
-                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
-                up_dir = glm::cross(right_dir, forward_dir);
-
-                right_dir = glm::normalize(right_dir);
-                up_dir = glm::normalize(up_dir);
-
-                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
-                if (key_W_state == GLFW_PRESS)
-                {
-                    // TODO: 向前
-                    camera_position += forward_dir * speed * delte_time;
-                }
-
-                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
-                if (key_A_state == GLFW_PRESS)
-                {
-                    // TODO: 向左
-                    camera_position += -right_dir * speed * delte_time;
-                }
-
-                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
-                if (key_S_state == GLFW_PRESS)
-                {
-                    // TODO: 向后
-                    camera_position += -forward_dir * speed * delte_time;
-                }
-
-                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
-                if (key_D_state == GLFW_PRESS)
-                {
-                    // TODO: 向右
-                    camera_position += right_dir * speed * delte_time;
-                }
-            }
-
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-                ImGui::Text("W,A,S,D to move.");
-                ImGui::Text("Push down and drag mouse right button to rotate view.");
+                static float f = 0.0f;
+                static int counter = 0;
 
-                ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -20, 20);
-                ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
-                ImGui::SliderFloat3("BoundingBox half diagonal vector", bounding_box_half_diagonal_vector, 0, 20);
-                ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
-                ImGui::SliderFloat("Power", &my_push_constants_data.power, 0, 750);
-                ImGui::SliderFloat("Absorption", &my_push_constants_data.absorption, 0, 1);
-                ImGui::SliderFloat("Out scattering", &my_push_constants_data.outScattering, 0, 1);
-                ImGui::Checkbox("Is high frequence", &my_push_constants_data.isHighFreq);
+                ImGui::Begin("Push Constant Test");                                    // Create a window called "Hello, world!" and append into it.
+                ImGui::SliderFloat("value", &value, 0.0f, 1.0f);                       // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::Text("Push Constant:");                                         // Display some text (you can use a format strings too)
+                ImGui::SliderFloat("a", &PUSH_CONSTANT_DATA.a, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("b", &PUSH_CONSTANT_DATA.b, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("c", &PUSH_CONSTANT_DATA.c, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::Checkbox("isVertexShader", &PUSH_CONSTANT_DATA.isVertexShader); // Edit 1 float using a slider from 0.0f to 1.0f
+
+                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+                    counter++;
+                ImGui::SameLine();
+                ImGui::Text("counter = %d", counter);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -711,35 +704,23 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
-
-            // Graphics Pipeline Draw
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
-            command_buffer->CmdBindPipeline(graphics_pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(graphics_pipeline_descriptor_set);
+
+            // Triangle
+            {
+                // Push Constant
+                VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
+                VkPipelineLayout vk_pipeline_layout = pipeline->GetPipelineLayout()->GetVkPipelineLayout();
+                // 如下Turbo::Core::vkCmdPushConstants(...)代码等价于：command_buffer->CmdPushConstants(...)
+                Turbo::Core::vkCmdPushConstants(vk_command_buffer, vk_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PUSH_CONSTANT_DATA), &PUSH_CONSTANT_DATA);
+            }
+
+            command_buffer->CmdBindPipeline(pipeline);
+            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+            command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            my_push_constants_data.time = _time;
-            my_push_constants_data.resolutionX = swapchain->GetWidth();
-            my_push_constants_data.resolutionY = swapchain->GetHeight();
-            my_push_constants_data.cameraPosX = camera_position.x;
-            my_push_constants_data.cameraPosY = camera_position.y;
-            my_push_constants_data.cameraPosZ = camera_position.z;
-            my_push_constants_data.lookForwardDirX = look_forward.x;
-            my_push_constants_data.lookForwardDirY = look_forward.y;
-            my_push_constants_data.lookForwardDirZ = look_forward.z;
-            my_push_constants_data.boxPosX = bounding_box_pos[0];
-            my_push_constants_data.boxPosY = bounding_box_pos[1];
-            my_push_constants_data.boxPosZ = bounding_box_pos[2];
-            my_push_constants_data.boxForwardDirX = bounding_box_forward_dir[0];
-            my_push_constants_data.boxForwardDirY = bounding_box_forward_dir[1];
-            my_push_constants_data.boxForwardDirZ = bounding_box_forward_dir[2];
-            my_push_constants_data.boxHalfDiagonalVectorX = bounding_box_half_diagonal_vector[0];
-            my_push_constants_data.boxHalfDiagonalVectorY = bounding_box_half_diagonal_vector[1];
-            my_push_constants_data.boxHalfDiagonalVectorZ = bounding_box_half_diagonal_vector[2];
-            command_buffer->CmdPushConstants(0, sizeof(my_push_constants_data), &my_push_constants_data);
             command_buffer->CmdDraw(3, 1, 0, 0);
-
-            command_buffer->CmdNextSubpass();
 
             //<IMGUI Rendering>
             ImGui::Render();
@@ -1050,6 +1031,8 @@ int main()
         //</End Rendering>
     }
 
+    ImageSaveToPPM(swapchain_images[0], command_pool, queue, "HelloTriangle");
+
     if (imgui_vertex_buffer != nullptr)
     {
         delete imgui_vertex_buffer;
@@ -1058,8 +1041,6 @@ int main()
     {
         delete imgui_index_buffer;
     }
-    descriptor_pool->Free(graphics_pipeline_descriptor_set);
-    descriptor_pool->Free(perlin_worley_compute_pipeline_descriptor_set);
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     delete imgui_font_image_view;
     delete imgui_font_image;
@@ -1068,36 +1049,26 @@ int main()
     delete imgui_fragment_shader;
     delete imgui_sampler;
 
-    delete worley_compute_pipeline;
-    delete perlin_worley_compute_pipeline;
-    delete graphics_pipeline;
+    descriptor_pool->Free(pipeline_descriptor_set);
+    delete pipeline;
     for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
     {
         delete framebuffer_item;
     }
 
-    delete graphics_pipeline_sampler;
-
     delete render_pass;
 
     delete descriptor_pool;
-    delete my_worley_computer_shader;
-    delete my_perlin_worley_computer_shader;
-    delete my_vertex_shader;
-    delete my_fragment_shader;
+    delete vertex_shader;
+    delete fragment_shader;
     delete depth_image_view;
     delete depth_image;
-
-    delete worley_noise_3d_image_view;
-    delete worley_noise_3d_image;
-
-    delete perlin_worley_noise_3d_image_view;
-    delete perlin_worley_noise_3d_image;
-
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;
     }
+    delete vertex_buffer;
+    delete value_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;
     delete swapchain;

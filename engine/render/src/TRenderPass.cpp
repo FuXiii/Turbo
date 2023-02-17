@@ -2,6 +2,8 @@
 #include "render/include/TImage.h"
 #include <core/include/TCore.h>
 #include <core/include/TException.h>
+#include <core/include/TFramebuffer.h>
+#include <core/include/TRenderPass.h>
 
 Turbo::Render::TSubpass &Turbo::Render::TSubpass::AddColorAttachment(const Turbo::Render::TColorImage &colorImage)
 {
@@ -57,6 +59,26 @@ Turbo::Render::TDepthStencilImage Turbo::Render::TSubpass::GetDepthStencilAttach
     return this->depthStencil;
 }
 
+bool Turbo::Render::TSubpass::IsEmpty() const
+{
+    if (this->colors.size() > 0)
+    {
+        return false;
+    }
+
+    if (this->inputs.size() > 0)
+    {
+        return false;
+    }
+
+    if (this->depthStencil.IsValid())
+    {
+        return false;
+    }
+
+    return false;
+}
+
 Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::AddSubpass(const Turbo::Render::TSubpass &subpass)
 {
     this->subpasses.push_back(subpass);
@@ -66,4 +88,100 @@ Turbo::Render::TRenderPass &Turbo::Render::TRenderPass::AddSubpass(const Turbo::
 const std::vector<Turbo::Render::TSubpass> &Turbo::Render::TRenderPass::GetSubpasses()
 {
     return this->subpasses;
+}
+
+std::vector<Turbo::Render::TImage> Turbo::Render::TRenderPass::GetAttachments()
+{
+    std::vector<Turbo::Render::TImage> result;
+
+    for (Turbo::Render::TSubpass &subpass_item : this->subpasses)
+    {
+        std::vector<Turbo::Render::TColorImage> color_images = subpass_item.GetColorAttachments();
+        std::vector<Turbo::Render::TImage> input_images = subpass_item.GetInputAttachments();
+        Turbo::Render::TDepthStencilImage depth_stencil_image = subpass_item.GetDepthStencilAttachment();
+
+        for (Turbo::Render::TColorImage &color_image_item : color_images)
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (color_image_item == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(color_image_item);
+            }
+        }
+
+        for (Turbo::Render::TImage &input_image_item : input_images)
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (input_image_item == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(input_image_item);
+            }
+        }
+
+        {
+            bool was_in_result = false;
+
+            for (Turbo::Render::TImage &result_image_item : result)
+            {
+                if (depth_stencil_image == result_image_item)
+                {
+                    was_in_result = true;
+                    break;
+                }
+            }
+
+            if (!was_in_result)
+            {
+                result.push_back(depth_stencil_image);
+            }
+        }
+    }
+
+    return result;
+}
+
+bool Turbo::Render::TRenderPass::IsEmpty() const
+{
+    if (this->subpasses.size() > 0)
+    {
+        for (const Turbo::Render::TSubpass &render_pass_item : this->subpasses)
+        {
+            if (!render_pass_item.IsEmpty())
+            {
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+bool Turbo::Render::TRenderPass::IsValid() const
+{
+    if (this->renderPass != nullptr && this->renderPass->GetVkRenderPass() != VK_NULL_HANDLE && this->framebuffer != nullptr && this->framebuffer->GetVkFramebuffer() != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+
+    return false;
 }
