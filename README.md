@@ -2507,3 +2507,4 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d)`成员函数，该函数仅用于测试，请谨慎调用
   >* `./samples`下增加`RenderAndFrameGraph`例子，用于测试使用`FrameGraph`来驱动`Turbo`进行绘制。
+  >* `./samples`下`VolumetricCloud`例子，中用于体积云的着色器文件对应目录被误改了，修正
