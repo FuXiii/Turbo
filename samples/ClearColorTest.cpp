@@ -182,22 +182,13 @@ int main()
             // because we just have one command buffer, so we should reset the command buffer for each frame
             // If we create command buffer for each swapchain image, we don't need to reset it each frame
 
-            Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
-            Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight());
-
-            std::vector<Turbo::Core::TViewport> frame_viewports;
-            frame_viewports.push_back(frame_viewport);
-
-            std::vector<Turbo::Core::TScissor> frame_scissors;
-            frame_scissors.push_back(frame_scissor);
-
             float _time = glfwGetTime();
             float r = (std::sin(_time) + 1) * 0.5;
             float g = (std::cos(_time) + 1) * 0.5;
             float b = (std::cos(_time + 3.1415926 / 3) + 1) * 0.5;
 
             command_buffer->Begin();
-            
+
             // ClearColor
             Turbo::Core::TImageView *current_swapchain_image_view = swapchain_image_views[current_image_index];
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, current_swapchain_image_view);

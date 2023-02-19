@@ -2512,3 +2512,7 @@ Turbo是渲染引擎
 * 2023/2/18 设计架构
   >
   >* `./samples`下增加`ClearColorTest`例子，用于测试`Vulkan`清空颜色测试
+
+* 2023/2/19 设计架构
+  >
+  >* 更新`./docs/Design`下`VolumetricCloud.md`文档
