@@ -2319,11 +2319,28 @@ context->Draw(...);
 
 `VertexBinding`主要用于描述如下：
 
-* `uint32_t binding`：绑定索引
-* `uint32_t stride`：单个数据长度
-* `TVertexRate rate`：相对`VERTEX`顶点（这个用的比较多），还是相对`INSTANCE`实例
+1. `Binding`
+
+    * `uint32_t binding`：绑定索引
+    * `uint32_t stride`：单个数据长度
+    * `TVertexRate rate`：相对`VERTEX`顶点（这个用的比较多），还是相对`INSTANCE`实例
+
+2. `Attribute`（每个`Binding`所对应的的）
+
+    * `uint32_t location`：对应着色器的接口`location`
+    * `TFormatType formatType`：单个数据格式（相对于`Binding::stride`的长度）
+    * `uint32_t offset`：偏移（相对于`Binding::stride`的长度）
+
+![VertexInputBinding](./images/VertexInputBinding.png)
 
 而这些属性主要位于`VertexBuffer`中，这也就是为什么`VertexBinding`与`VertexBuffer`一一对应
+
+其中对应参数的确认阶段：
+
+* `uint32_t Binding::binding`：在调用绑定顶点缓冲集时（`CmdBindVertexBuffers`），可以推出该值
+* `uint32_t Binding::stride`：有两种方式
+    1. 在创建`VertexBuffer`时指定当前顶点缓冲的`stride`值（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+    2. ~~在调用绑定顶点缓冲集时，设置该`stride`值~~(麻烦，在绑定时可能都不知道绑定的`VertexBuffer`中的数据格式)
 
 ## Subpass
 
