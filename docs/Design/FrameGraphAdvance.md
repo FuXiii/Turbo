@@ -197,6 +197,10 @@
   >
   >* 更新`Image的Layout`章节
 
+* 2023/2/20
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+
 ---
 
 # Turbo驱动初步
@@ -2312,6 +2316,14 @@ context->Draw(...);
 如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
 
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
+
+`VertexBinding`主要用于描述如下：
+
+* `uint32_t binding`：绑定索引
+* `uint32_t stride`：单个数据长度
+* `TVertexRate rate`：相对`VERTEX`顶点（这个用的比较多），还是相对`INSTANCE`实例
+
+而这些属性主要位于`VertexBuffer`中，这也就是为什么`VertexBinding`与`VertexBuffer`一一对应
 
 ## Subpass
 
