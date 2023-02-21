@@ -201,6 +201,10 @@
   >
   >* 更新`Pipeline的VertexBinding`章节
 
+* 2023/2/21
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+
 ---
 
 # Turbo驱动初步
@@ -2335,12 +2339,124 @@ context->Draw(...);
 
 而这些属性主要位于`VertexBuffer`中，这也就是为什么`VertexBinding`与`VertexBuffer`一一对应
 
-其中对应参数的确认阶段：
+>`Vulkan`标准有如下规定：
+>
+>```CXX
+>// Provided by VK_VERSION_1_0
+>typedef struct VkPipelineVertexInputStateCreateInfo {
+>    VkStructureType                             sType;
+>    const void*                                 pNext;
+>    VkPipelineVertexInputStateCreateFlags       flags;
+>    uint32_t                                    vertexBindingDescriptionCount;
+>    const VkVertexInputBindingDescription*      pVertexBindingDescriptions;
+>    uint32_t                                    vertexAttributeDescriptionCount;
+>    const VkVertexInputAttributeDescription*    pVertexAttributeDescriptions;
+>} VkPipelineVertexInputStateCreateInfo;
+>
+>```
+>
+>* All elements of `pVertexBindingDescriptions` must describe distinct binding numbers  
+>译：`pVertexBindingDescriptions`中所有成员不能有重复的`uint32_t VkVertexInputBindingDescription::binding`值
+>* All elements of `pVertexAttributeDescriptions` must describe distinct attribute locations  
+>译：`pVertexAttributeDescriptions`中所有成员不能有重复的`uint32_t VkVertexInputAttributeDescription::location`值
+
+其中对应参数的确认阶段来源：
 
 * `uint32_t Binding::binding`：在调用绑定顶点缓冲集时（`CmdBindVertexBuffers`），可以推出该值
 * `uint32_t Binding::stride`：有两种方式
     1. 在创建`VertexBuffer`时指定当前顶点缓冲的`stride`值（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
     2. ~~在调用绑定顶点缓冲集时，设置该`stride`值~~(麻烦，在绑定时可能都不知道绑定的`VertexBuffer`中的数据格式)
+* `TVertexRate Binding::rate`: 在创建`VertexBuffer`时指定（默认为`VERTEX`，如果是实例数据将会设置为`INSTANCE`）
+* `uint32_t Attribute::location`: 在声明`Pipeline`时指定（也就是动态指定）
+* `TFormatType Attribute::formatType`: 在创建`VertexBuffer`时指定（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+* `uint32_t Attribute::offset`: 在创建`VertexBuffer`时指定（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+
+综上则在创建`VertexBuffer`时，需要设置`VertexBuffer`的属性：
+
+* 一个`uint32_t Binding::stride`
+* 一个`TVertexRate Binding::rate`:*（注：由`Vulkan`标准可推出：一个`VertexBuffer`对于`VERTEX`和`INSTANCE`是一元的，也就是说一个`VertexBuffer`要么全是`VERTEX`，要么全是`INSTANCE`，不可能既是`VERTEX`也是`INSTANCE`）*
+* 多个`Attribute`，每个`Attribute`包括：
+    * `TFormatType Attribute::formatType`
+    * `uint32_t Attribute::offset`
+
+声明成伪代码：
+```CXX
+class Attribute
+{
+    TFormatType formatType;
+    uint32_t offset;
+};
+
+class VertexBuffer: public Turbo::Render::TBuffer/*也许会作为Turbo::Render::TBuffer的一个子类*/
+{
+private:
+    uint32_t stride;
+    TVertexRate rate;
+    std::map<std::string, Attribute> attributes;
+
+public:
+    VertexBuffer(uint32_t stride, TVertexRate rate = VERTEX);
+    void AddAttribute(const std::string& attribute, TFormatType formatType, uint32_t offset);
+};
+```
+
+需要在设置`GPU`指令时动态设置的的属性:
+
+* `uint32_t Binding::binding`
+* `uint32_t Attribute::location`：考虑如何对应：对应到哪个`VertexBuffer`的哪个`Attribute`上？参考如下伪代码
+
+声明成伪代码：
+```CXX
+//假如Vertex Shader对于in属性声明如下
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec3 color;
+layout (location = 3) in vec2 uv;
+layout (location = 4) in float weight;
+layout (location = 5) in vec3 tangent;
+
+//Turbo引擎端
+typedef struct vec3
+{
+    float x;
+    float y;
+    float z;
+} vec3;
+
+typedef struct vec2
+{
+    float x;
+    float y;
+} vec2;
+
+typedef struct weight_tangent
+{
+    float weight;
+    vec3 tangent;
+} uv_tangent;
+
+VertexBuffer position_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer normal_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer color_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer uv_buffer(/*stride*/sizeof(vec2));//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer(/*stride*/sizeof(weight_tangent));//rate默认为VERTEX
+
+position_buffer.AddAttribute(/*attribute*/"POSITION", /*formatType*/R32G32B32, /*offset*/0);
+normal_buffer.AddAttribute(/*attribute*/"NORMAL", /*formatType*/R32G32B32, /*offset*/0);
+color_buffer.AddAttribute(/*attribute*/"COLOR", /*formatType*/R32G32B32, /*offset*/0);
+uv_buffer.AddAttribute(/*attribute*/"UV", /*formatType*/R32G32, /*offset*/0);
+weight_and_tangent_buffer.AddAttribute(/*attribute*/"WEIGHT", /*formatType*/R32, /*offset*/offsetof(weight_tangent, weight));
+weight_and_tangent_buffer.AddAttribute(/*attribute*/"TANGENT", /*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent)0);
+
+//Turbo将根据绑定的顶点属性进行解析
+command_buffer->BindVeretxAttribute(position_buffer, "POSITION", /*location*/0);
+command_buffer->BindVeretxAttribute(normal_buffer, "NORMAL", /*location*/1);
+command_buffer->BindVeretxAttribute(color_buffer, "COLOR", /*location*/2);
+command_buffer->BindVeretxAttribute(uv_buffer, "UV",/*location*/3);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "WEIGHT",/*location*/4);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "TANGENT", /*location*/5);
+
+```
 
 ## Subpass
 
