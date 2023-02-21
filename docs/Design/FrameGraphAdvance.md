@@ -2376,10 +2376,11 @@ context->Draw(...);
 * 一个`uint32_t Binding::stride`
 * 一个`TVertexRate Binding::rate`:*（注：由`Vulkan`标准可推出：一个`VertexBuffer`对于`VERTEX`和`INSTANCE`是一元的，也就是说一个`VertexBuffer`要么全是`VERTEX`，要么全是`INSTANCE`，不可能既是`VERTEX`也是`INSTANCE`）*
 * 多个`Attribute`，每个`Attribute`包括：
-    * `TFormatType Attribute::formatType`
-    * `uint32_t Attribute::offset`
+  * `TFormatType Attribute::formatType`
+  * `uint32_t Attribute::offset`
 
 声明成伪代码：
+
 ```CXX
 class Attribute
 {
@@ -2406,6 +2407,7 @@ public:
 * `uint32_t Attribute::location`：考虑如何对应：对应到哪个`VertexBuffer`的哪个`Attribute`上？参考如下伪代码
 
 声明成伪代码：
+
 ```CXX
 //假如Vertex Shader对于in属性声明如下
 layout (location = 0) in vec3 position;
@@ -2506,8 +2508,6 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 ```
 
 `Turbo`考虑优化方式`1`和`2`都提供相应的接口
-
-
 
 ## Subpass
 
