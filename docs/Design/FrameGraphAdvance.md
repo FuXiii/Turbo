@@ -2509,6 +2509,8 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 
 `Turbo`考虑优化方式`1`和`2`都提供相应的接口
 
+在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中
+
 ## Subpass
 
 `Subpass`实际上是多个`Image`的集合，包括如下三种`Image`集
