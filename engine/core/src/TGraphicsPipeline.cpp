@@ -345,7 +345,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_graphics_pipeline_create_info.renderPass = vk_render_pass;
     vk_graphics_pipeline_create_info.subpass = this->subpass;
     vk_graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
-    vk_graphics_pipeline_create_info.basePipelineIndex = 0;
+    vk_graphics_pipeline_create_info.basePipelineIndex = -1;
 
     TDevice *device = this->renderPass->GetDevice();
     VkDevice vk_device = device->GetVkDevice();

@@ -2507,6 +2507,8 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 
 `Turbo`考虑优化方式`1`和`2`都提供相应的接口
 
+
+
 ## Subpass
 
 `Subpass`实际上是多个`Image`的集合，包括如下三种`Image`集
