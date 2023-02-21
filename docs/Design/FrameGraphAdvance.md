@@ -2455,8 +2455,16 @@ command_buffer->BindVeretxAttribute(color_buffer, "COLOR", /*location*/2);
 command_buffer->BindVeretxAttribute(uv_buffer, "UV",/*location*/3);
 command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "WEIGHT",/*location*/4);
 command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "TANGENT", /*location*/5);
-
 ```
+
+如上的设计有弊端：
+
+* 当场景中有大量需要绘制的模型时，光用于描述每一个模型的`VertexBuffer`中的`Attribute`那个字符串（`POSITION`、`NORMAL`等）就有很多，这会占据大量的没有必要的内存，所以将字符串去掉是很有必要的
+
+优化的方式有两种：
+
+1. 将用于`attribute`的字符串改为使用数字标时的`ID`号或索引号，这会大大减少内存使用（大概率会采用此种方案）
+2. 完全抛弃`attribute`的字符串，改为完全动态绑定
 
 ## Subpass
 
