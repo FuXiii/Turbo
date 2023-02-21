@@ -2446,7 +2446,7 @@ normal_buffer.AddAttribute(/*attribute*/"NORMAL", /*formatType*/R32G32B32, /*off
 color_buffer.AddAttribute(/*attribute*/"COLOR", /*formatType*/R32G32B32, /*offset*/0);
 uv_buffer.AddAttribute(/*attribute*/"UV", /*formatType*/R32G32, /*offset*/0);
 weight_and_tangent_buffer.AddAttribute(/*attribute*/"WEIGHT", /*formatType*/R32, /*offset*/offsetof(weight_tangent, weight));
-weight_and_tangent_buffer.AddAttribute(/*attribute*/"TANGENT", /*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent)0);
+weight_and_tangent_buffer.AddAttribute(/*attribute*/"TANGENT", /*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent));
 
 //Turbo将根据绑定的顶点属性进行解析
 command_buffer->BindVeretxAttribute(position_buffer, "POSITION", /*location*/0);
@@ -2463,8 +2463,49 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "TANGENT", /*loca
 
 优化的方式有两种：
 
-1. 将用于`attribute`的字符串改为使用数字标时的`ID`号或索引号，这会大大减少内存使用（大概率会采用此种方案）
+1. 将用于`attribute`的字符串改为使用数字标时的`ID`号或索引号，这会大大减少内存使用
+
+```CXX
+VertexBuffer position_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer normal_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer color_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer uv_buffer(/*stride*/sizeof(vec2));//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer(/*stride*/sizeof(weight_tangent));//rate默认为VERTEX
+
+uint32_t position_id = position_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t normal_id = normal_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t color_id = color_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t uv_id = uv_buffer.AddAttribute(/*formatType*/R32G32, /*offset*/0);
+uint32_t weight_id = weight_and_tangent_buffer.AddAttribute(/*formatType*/R32, /*offset*/offsetof(weight_tangent, weight));
+uint32_t tangent_id = weight_and_tangent_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent));
+
+//Turbo将根据绑定的顶点属性进行解析
+command_buffer->BindVeretxAttribute(position_buffer, position_id, /*location*/0);
+command_buffer->BindVeretxAttribute(normal_buffer, normal_id, /*location*/1);
+command_buffer->BindVeretxAttribute(color_buffer,color_id, /*location*/2);
+command_buffer->BindVeretxAttribute(uv_buffer, uv_id,/*location*/3);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, weight_id,/*location*/4);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*location*/5);
+```
+
 2. 完全抛弃`attribute`的字符串，改为完全动态绑定
+
+```CXX
+VertexBuffer position_buffer();
+VertexBuffer normal_buffer();//rate默认为VERTEX
+VertexBuffer color_buffer();//rate默认为VERTEX
+VertexBuffer uv_buffer();//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer();//rate默认为VERTEX
+
+command_buffer->BindVeretxAttribute(position_buffer, /*stride*/sizeof(vec3), /*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/0);//for position
+command_buffer->BindVeretxAttribute(normal_buffer, /*stride*/sizeof(vec3), /*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/1);//for normal
+command_buffer->BindVeretxAttribute(color_buffer, /*stride*/sizeof(vec3),/*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/2);//for color
+command_buffer->BindVeretxAttribute(uv_buffer, /*stride*/sizeof(vec2), /*formatType*/R32G32, /*offset*/0, /*rate*/VERTEX, /*location*/3);//for uv
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, /*stride*/sizeof(weight_tangent), /*formatType*/R32, /*offset*/offsetof(weight_tangent, weight), /*rate*/VERTEX, /*location*/4);//for weight
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(weight_tangent), /*formatType*/R32G32B32,/*offset*/offsetof(weight_tangent, tangent), /*rate*/VERTEX, /*location*/5);//for tangent
+```
+
+`Turbo`考虑优化方式`1`和`2`都提供相应的接口
 
 ## Subpass
 
