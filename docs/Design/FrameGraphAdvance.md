@@ -205,6 +205,13 @@
   >
   >* 更新`Pipeline的VertexBinding`章节
 
+* 2023/2/22
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+  >* 更新`资源`章节
+  >* 创建`Image`章节
+  >* 创建`Buffer`章节
+
 ---
 
 # Turbo驱动初步
@@ -724,6 +731,8 @@ Image 2;
 >* VertexBuffer
 >* IndexBuffer
 
+### Image
+
 **注：按照`Vulkan`标准：[If imageType is VK_IMAGE_TYPE_3D, arrayLayers must be 1](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VUID-VkImageCreateInfo-imageType-00961)（如果创建三维纹理资源，layer必须是1）**
 
 ```CXX
@@ -741,7 +750,7 @@ enum TFormat//这个枚举放到TFormat.h中作为通用枚举（Buffer也要用
 
 enum TUsageFlagsBits
 {
-    TRANSFER，
+    TRANSFER，//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER用例
     SAMPLED，
     STORAGE，
     COLOR_ATTACHMENT，
@@ -960,6 +969,103 @@ class DepthTexture2D: public DepthImage2D
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
     };
+};
+```
+
+### Buffer
+
+与`Image`类似
+```CXX
+typedef enum TBufferUsageBits
+{
+    TRANSFER_SRC = 0x00000001,//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER_SRC用例
+    TRANSFER_DST = 0x00000002,//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER_DST用例
+    UNIFORM_TEXEL = 0x00000004,
+    STORAGE_TEXEL = 0x00000008,
+    UNIFORM = 0x00000010,
+    STORAGE = 0x00000020,
+    INDEX = 0x00000040,
+    VERTEX = 0x00000080,
+    INDIRECT = 0x00000100,
+} TBufferUsageBits;
+using TBufferUsages = uint32_t;
+
+class TBuffer
+{
+  public:
+    struct Descriptor
+    {
+        TBufferUsages usages;
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+}
+```
+
+计划派生出如下子类：
+
+```CXX
+enum TVertexRate
+{
+    VERTEX,
+    INSTANCE
+};
+
+using AttributeID=uint32_t;
+
+class TVertexBuffer: public TBuffer
+{
+private:
+    uint32_t stride;
+    TVertexRate rate;
+    std::vector<Attribute> attributes;
+
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::VERTEX
+        uint64_t size;
+        TDomain domain;
+
+        uint32_t stride;
+        TVertexRate rate = TVertexRate::VERTEX;//默认值为TVertexRate::VERTEX
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+
+    AttributeID AddAttribute( TFormatType formatType, uint32_t offset);
+};
+
+class TUniformBuffer: public TBuffer
+{
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+};
+
+class TIndexBuffer: public TBuffer
+{
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::INDEX
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
 };
 ```
 
@@ -2490,7 +2596,17 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, weight_id,/*locat
 command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*location*/5);
 ```
 
-2. 完全抛弃`attribute`的字符串，改为完全动态绑定
+2. 完全抛弃`attribute`的字符串，改为完全动态绑定(此种方式类似`OpenGL`的`glVertexAttribPointer`函数)
+
+```CXX
+//OpenGL
+void glVertexAttribPointer(	GLuint index,
+                            GLint size,
+                            GLenum type,
+                            GLboolean normalized,
+                            GLsizei stride,
+                            const GLvoid * pointer);
+```
 
 ```CXX
 VertexBuffer position_buffer();
