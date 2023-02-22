@@ -2528,3 +2528,13 @@ Turbo是渲染引擎
 * 2023/2/22 设计架构
   >
   >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/render`下`TBuffer.h`中增加`TVertexBuffer`类
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`typedef enum TRate`枚举
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`class TAttribute`类
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`std::vector<TVertexBuffer::TAttribute> attributes`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`struct Descriptor`成员结构
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t stride`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate rate`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明` TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)`成员函数

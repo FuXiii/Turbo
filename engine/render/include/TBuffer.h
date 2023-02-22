@@ -5,6 +5,7 @@
 #include "TFormat.h"
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace Turbo
 {
@@ -60,6 +61,52 @@ class TBuffer
 
     void Copy(void *src, uint64_t size);
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size);
+};
+
+using TAttributeID = uint32_t;
+
+class TVertexBuffer
+{
+  public:
+    typedef enum TRate
+    {
+        VERTEX = 0,
+        INSTANCE = 1
+    } TRate;
+
+    class TAttribute
+    {
+      private:
+        Turbo::Render::TFormat format = Turbo::Render::TFormat::UNDEFINED;
+        uint32_t offset = 0;
+
+      public:
+        TAttribute() = default;
+        TAttribute(Turbo::Render::TFormat format, uint32_t offset);
+        ~TAttribute() = default;
+
+        Turbo::Render::TFormat GetFormat();
+        uint32_t GetOffset();
+    };
+
+    std::vector<TVertexBuffer::TAttribute> attributes;
+
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        uint64_t size;
+        TDomain domain;
+    };
+
+  private:
+    uint32_t stride = 0;
+    TRate rate = TRate::VERTEX;
+
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
+    TAttribute GetAttribute(TAttributeID id);
 };
 } // namespace Render
 } // namespace Turbo
