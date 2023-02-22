@@ -78,8 +78,7 @@ class TVertexBuffer : public Turbo::Render::TBuffer
     {
       private:
         Turbo::Render::TFormat format = Turbo::Render::TFormat::UNDEFINED;
-        uint32_t offset = 0;
-
+        uint32_t offset = 0; // FIXME: uint32_t max
       public:
         TAttribute() = default;
         TAttribute(Turbo::Render::TFormat format, uint32_t offset);
@@ -109,6 +108,9 @@ class TVertexBuffer : public Turbo::Render::TBuffer
 
     TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
     TAttribute GetAttribute(TAttributeID id);
+
+    // FIXME: get stride
+    // FIXME: get rate
 };
 } // namespace Render
 } // namespace Turbo
