@@ -65,7 +65,7 @@ class TBuffer
 
 using TAttributeID = uint32_t;
 
-class TVertexBuffer
+class TVertexBuffer : public Turbo::Render::TBuffer
 {
   public:
     typedef enum TRate
@@ -96,6 +96,8 @@ class TVertexBuffer
         // TBufferUsages usages; //manage by Turbo
         uint64_t size;
         TDomain domain;
+        uint32_t stride;
+        TRate rate = TRate::VERTEX;
     };
 
   private:

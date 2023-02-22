@@ -114,3 +114,49 @@ void Turbo::Render::TBuffer::Copy(TBuffer *src, uint64_t srcOffset, uint64_t siz
         resource_allocator->FreeCommandBuffer(command_buffer);
     }
 }
+
+Turbo::Render::TVertexBuffer::TAttribute::TAttribute(Turbo::Render::TFormat format, uint32_t offset)
+{
+    this->format = format;
+    this->offset = offset;
+}
+
+Turbo::Render::TFormat Turbo::Render::TVertexBuffer::TAttribute::GetFormat()
+{
+    return this->format;
+}
+
+uint32_t Turbo::Render::TVertexBuffer::TAttribute::GetOffset()
+{
+    return this->offset;
+}
+
+void Turbo::Render::TVertexBuffer::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    Turbo::Render::TBuffer::Descriptor buffer_descriptor = {};
+    buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST;
+    buffer_descriptor.size = descriptor.size;
+    buffer_descriptor.domain = descriptor.domain;
+
+    this->stride = descriptor.stride;
+    this->rate = descriptor.rate;
+
+    Turbo::Render::TBuffer::Create(name, buffer_descriptor, allocator);
+}
+
+Turbo::Render::TAttributeID Turbo::Render::TVertexBuffer::AddAttribute(Turbo::Render::TFormat format, uint32_t offset)
+{
+    this->attributes.push_back({format, offset});
+    return this->attributes.size() - 1;
+}
+
+Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttribute(TAttributeID id)
+{
+    Turbo::Render::TVertexBuffer::TAttribute result{};
+    if (id > (this->attributes.size() - 1))
+    {
+        return result;
+    }
+
+    return this->attributes[id];
+}
