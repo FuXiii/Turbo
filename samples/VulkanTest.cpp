@@ -52,7 +52,6 @@
 
 #include <core/include/TPipelineCache.h>
 
-
 class TTimer
 {
   private:
@@ -723,6 +722,19 @@ void Test4(Turbo::Core::TDeviceQueue *deviceQueue)
     }
 
     std::cout << "</Test4>" << std::endl;
+}
+
+void Test5(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    std::cout << "<Test5>" << std::endl;
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
 }
 
 int main()

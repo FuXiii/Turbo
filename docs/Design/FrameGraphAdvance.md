@@ -197,6 +197,21 @@
   >
   >* 更新`Image的Layout`章节
 
+* 2023/2/20
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+
+* 2023/2/21
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+
+* 2023/2/22
+  >
+  >* 更新`Pipeline的VertexBinding`章节
+  >* 更新`资源`章节
+  >* 创建`Image`章节
+  >* 创建`Buffer`章节
+
 ---
 
 # Turbo驱动初步
@@ -716,6 +731,8 @@ Image 2;
 >* VertexBuffer
 >* IndexBuffer
 
+### Image
+
 **注：按照`Vulkan`标准：[If imageType is VK_IMAGE_TYPE_3D, arrayLayers must be 1](https://registry.khronos.org/vulkan/specs/1.3/html/chap12.html#VUID-VkImageCreateInfo-imageType-00961)（如果创建三维纹理资源，layer必须是1）**
 
 ```CXX
@@ -733,7 +750,7 @@ enum TFormat//这个枚举放到TFormat.h中作为通用枚举（Buffer也要用
 
 enum TUsageFlagsBits
 {
-    TRANSFER，
+    TRANSFER，//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER用例
     SAMPLED，
     STORAGE，
     COLOR_ATTACHMENT，
@@ -952,6 +969,103 @@ class DepthTexture2D: public DepthImage2D
         TUsages usages;
         TDomain domain;//详见[资源的所有者端域]章节
     };
+};
+```
+
+### Buffer
+
+与`Image`类似
+```CXX
+typedef enum TBufferUsageBits
+{
+    TRANSFER_SRC = 0x00000001,//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER_SRC用例
+    TRANSFER_DST = 0x00000002,//考虑是否由Turbo管理该TUsageFlagsBits::TRANSFER_DST用例
+    UNIFORM_TEXEL = 0x00000004,
+    STORAGE_TEXEL = 0x00000008,
+    UNIFORM = 0x00000010,
+    STORAGE = 0x00000020,
+    INDEX = 0x00000040,
+    VERTEX = 0x00000080,
+    INDIRECT = 0x00000100,
+} TBufferUsageBits;
+using TBufferUsages = uint32_t;
+
+class TBuffer
+{
+  public:
+    struct Descriptor
+    {
+        TBufferUsages usages;
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+}
+```
+
+计划派生出如下子类：
+
+```CXX
+enum TVertexRate
+{
+    VERTEX,
+    INSTANCE
+};
+
+using AttributeID=uint32_t;
+
+class TVertexBuffer: public TBuffer
+{
+private:
+    uint32_t stride;
+    TVertexRate rate;
+    std::vector<Attribute> attributes;
+
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::VERTEX
+        uint64_t size;
+        TDomain domain;
+
+        uint32_t stride;
+        TVertexRate rate = TVertexRate::VERTEX;//默认值为TVertexRate::VERTEX
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+
+    AttributeID AddAttribute( TFormatType formatType, uint32_t offset);
+};
+
+class TUniformBuffer: public TBuffer
+{
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+};
+
+class TIndexBuffer: public TBuffer
+{
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::INDEX
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
 };
 ```
 
@@ -2312,6 +2426,206 @@ context->Draw(...);
 如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
 
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
+
+`VertexBinding`主要用于描述如下：
+
+1. `Binding`
+
+    * `uint32_t binding`：绑定索引
+    * `uint32_t stride`：单个数据长度
+    * `TVertexRate rate`：相对`VERTEX`顶点（这个用的比较多），还是相对`INSTANCE`实例
+
+2. `Attribute`（每个`Binding`所对应的的）
+
+    * `uint32_t location`：对应着色器的接口`location`
+    * `TFormatType formatType`：单个数据格式（相对于`Binding::stride`的长度）
+    * `uint32_t offset`：偏移（相对于`Binding::stride`的长度）
+
+![VertexInputBinding](./images/VertexInputBinding.png)
+
+而这些属性主要位于`VertexBuffer`中，这也就是为什么`VertexBinding`与`VertexBuffer`一一对应
+
+>`Vulkan`标准有如下规定：
+>
+>```CXX
+>// Provided by VK_VERSION_1_0
+>typedef struct VkPipelineVertexInputStateCreateInfo {
+>    VkStructureType                             sType;
+>    const void*                                 pNext;
+>    VkPipelineVertexInputStateCreateFlags       flags;
+>    uint32_t                                    vertexBindingDescriptionCount;
+>    const VkVertexInputBindingDescription*      pVertexBindingDescriptions;
+>    uint32_t                                    vertexAttributeDescriptionCount;
+>    const VkVertexInputAttributeDescription*    pVertexAttributeDescriptions;
+>} VkPipelineVertexInputStateCreateInfo;
+>
+>```
+>
+>* All elements of `pVertexBindingDescriptions` must describe distinct binding numbers  
+>译：`pVertexBindingDescriptions`中所有成员不能有重复的`uint32_t VkVertexInputBindingDescription::binding`值
+>* All elements of `pVertexAttributeDescriptions` must describe distinct attribute locations  
+>译：`pVertexAttributeDescriptions`中所有成员不能有重复的`uint32_t VkVertexInputAttributeDescription::location`值
+
+其中对应参数的确认阶段来源：
+
+* `uint32_t Binding::binding`：在调用绑定顶点缓冲集时（`CmdBindVertexBuffers`），可以推出该值
+* `uint32_t Binding::stride`：有两种方式
+    1. 在创建`VertexBuffer`时指定当前顶点缓冲的`stride`值（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+    2. ~~在调用绑定顶点缓冲集时，设置该`stride`值~~(麻烦，在绑定时可能都不知道绑定的`VertexBuffer`中的数据格式)
+* `TVertexRate Binding::rate`: 在创建`VertexBuffer`时指定（默认为`VERTEX`，如果是实例数据将会设置为`INSTANCE`）
+* `uint32_t Attribute::location`: 在声明`Pipeline`时指定（也就是动态指定）
+* `TFormatType Attribute::formatType`: 在创建`VertexBuffer`时指定（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+* `uint32_t Attribute::offset`: 在创建`VertexBuffer`时指定（采用此方式，作为`VertexBuffer`的一种属性，比较符合直觉）
+
+综上则在创建`VertexBuffer`时，需要设置`VertexBuffer`的属性：
+
+* 一个`uint32_t Binding::stride`
+* 一个`TVertexRate Binding::rate`:*（注：由`Vulkan`标准可推出：一个`VertexBuffer`对于`VERTEX`和`INSTANCE`是一元的，也就是说一个`VertexBuffer`要么全是`VERTEX`，要么全是`INSTANCE`，不可能既是`VERTEX`也是`INSTANCE`）*
+* 多个`Attribute`，每个`Attribute`包括：
+  * `TFormatType Attribute::formatType`
+  * `uint32_t Attribute::offset`
+
+声明成伪代码：
+
+```CXX
+class Attribute
+{
+    TFormatType formatType;
+    uint32_t offset;
+};
+
+class VertexBuffer: public Turbo::Render::TBuffer/*也许会作为Turbo::Render::TBuffer的一个子类*/
+{
+private:
+    uint32_t stride;
+    TVertexRate rate;
+    std::map<std::string, Attribute> attributes;
+
+public:
+    VertexBuffer(uint32_t stride, TVertexRate rate = VERTEX);
+    void AddAttribute(const std::string& attribute, TFormatType formatType, uint32_t offset);
+};
+```
+
+需要在设置`GPU`指令时动态设置的的属性:
+
+* `uint32_t Binding::binding`
+* `uint32_t Attribute::location`：考虑如何对应：对应到哪个`VertexBuffer`的哪个`Attribute`上？参考如下伪代码
+
+声明成伪代码：
+
+```CXX
+//假如Vertex Shader对于in属性声明如下
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec3 color;
+layout (location = 3) in vec2 uv;
+layout (location = 4) in float weight;
+layout (location = 5) in vec3 tangent;
+
+//Turbo引擎端
+typedef struct vec3
+{
+    float x;
+    float y;
+    float z;
+} vec3;
+
+typedef struct vec2
+{
+    float x;
+    float y;
+} vec2;
+
+typedef struct weight_tangent
+{
+    float weight;
+    vec3 tangent;
+} uv_tangent;
+
+VertexBuffer position_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer normal_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer color_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer uv_buffer(/*stride*/sizeof(vec2));//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer(/*stride*/sizeof(weight_tangent));//rate默认为VERTEX
+
+position_buffer.AddAttribute(/*attribute*/"POSITION", /*formatType*/R32G32B32, /*offset*/0);
+normal_buffer.AddAttribute(/*attribute*/"NORMAL", /*formatType*/R32G32B32, /*offset*/0);
+color_buffer.AddAttribute(/*attribute*/"COLOR", /*formatType*/R32G32B32, /*offset*/0);
+uv_buffer.AddAttribute(/*attribute*/"UV", /*formatType*/R32G32, /*offset*/0);
+weight_and_tangent_buffer.AddAttribute(/*attribute*/"WEIGHT", /*formatType*/R32, /*offset*/offsetof(weight_tangent, weight));
+weight_and_tangent_buffer.AddAttribute(/*attribute*/"TANGENT", /*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent));
+
+//Turbo将根据绑定的顶点属性进行解析
+command_buffer->BindVeretxAttribute(position_buffer, "POSITION", /*location*/0);
+command_buffer->BindVeretxAttribute(normal_buffer, "NORMAL", /*location*/1);
+command_buffer->BindVeretxAttribute(color_buffer, "COLOR", /*location*/2);
+command_buffer->BindVeretxAttribute(uv_buffer, "UV",/*location*/3);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "WEIGHT",/*location*/4);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, "TANGENT", /*location*/5);
+```
+
+如上的设计有弊端：
+
+* 当场景中有大量需要绘制的模型时，光用于描述每一个模型的`VertexBuffer`中的`Attribute`那个字符串（`POSITION`、`NORMAL`等）就有很多，这会占据大量的没有必要的内存，所以将字符串去掉是很有必要的
+
+优化的方式有两种：
+
+1. 将用于`attribute`的字符串改为使用数字标时的`ID`号或索引号，这会大大减少内存使用
+
+```CXX
+VertexBuffer position_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer normal_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer color_buffer(/*stride*/sizeof(vec3));//rate默认为VERTEX
+VertexBuffer uv_buffer(/*stride*/sizeof(vec2));//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer(/*stride*/sizeof(weight_tangent));//rate默认为VERTEX
+
+uint32_t position_id = position_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t normal_id = normal_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t color_id = color_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/0);
+uint32_t uv_id = uv_buffer.AddAttribute(/*formatType*/R32G32, /*offset*/0);
+uint32_t weight_id = weight_and_tangent_buffer.AddAttribute(/*formatType*/R32, /*offset*/offsetof(weight_tangent, weight));
+uint32_t tangent_id = weight_and_tangent_buffer.AddAttribute(/*formatType*/R32G32B32, /*offset*/offsetof(weight_tangent, tangent));
+
+//Turbo将根据绑定的顶点属性进行解析
+command_buffer->BindVeretxAttribute(position_buffer, position_id, /*location*/0);
+command_buffer->BindVeretxAttribute(normal_buffer, normal_id, /*location*/1);
+command_buffer->BindVeretxAttribute(color_buffer,color_id, /*location*/2);
+command_buffer->BindVeretxAttribute(uv_buffer, uv_id,/*location*/3);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, weight_id,/*location*/4);
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*location*/5);
+```
+
+2. 完全抛弃`attribute`的字符串，改为完全动态绑定(此种方式类似`OpenGL`的`glVertexAttribPointer`函数)
+
+```CXX
+//OpenGL
+void glVertexAttribPointer(	GLuint index,
+                            GLint size,
+                            GLenum type,
+                            GLboolean normalized,
+                            GLsizei stride,
+                            const GLvoid * pointer);
+```
+
+```CXX
+VertexBuffer position_buffer();
+VertexBuffer normal_buffer();//rate默认为VERTEX
+VertexBuffer color_buffer();//rate默认为VERTEX
+VertexBuffer uv_buffer();//rate默认为VERTEX
+VertexBuffer weight_and_tangent_buffer();//rate默认为VERTEX
+
+command_buffer->BindVeretxAttribute(position_buffer, /*stride*/sizeof(vec3), /*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/0);//for position
+command_buffer->BindVeretxAttribute(normal_buffer, /*stride*/sizeof(vec3), /*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/1);//for normal
+command_buffer->BindVeretxAttribute(color_buffer, /*stride*/sizeof(vec3),/*formatType*/R32G32B32, /*offset*/0, /*rate*/VERTEX, /*location*/2);//for color
+command_buffer->BindVeretxAttribute(uv_buffer, /*stride*/sizeof(vec2), /*formatType*/R32G32, /*offset*/0, /*rate*/VERTEX, /*location*/3);//for uv
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, /*stride*/sizeof(weight_tangent), /*formatType*/R32, /*offset*/offsetof(weight_tangent, weight), /*rate*/VERTEX, /*location*/4);//for weight
+command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(weight_tangent), /*formatType*/R32G32B32,/*offset*/offsetof(weight_tangent, tangent), /*rate*/VERTEX, /*location*/5);//for tangent
+```
+
+`Turbo`考虑优化方式`1`和`2`都提供相应的接口
+
+在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中
 
 ## Subpass
 

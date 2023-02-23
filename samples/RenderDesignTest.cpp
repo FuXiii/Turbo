@@ -636,26 +636,11 @@ void Test4()
 
                     auto now_time = glfwGetTime();
 
-                    float r = std::sin(now_time);
-                    float g = std::cos(now_time);
-                    float b = std::cos(now_time + 3.1415926 / 3);
+                    float r = (std::sin(now_time) + 1) * 0.5;
+                    float g = (std::cos(now_time) + 1) * 0.5;
+                    float b = (std::cos(now_time + 3.1415926 / 3) + 1) * 0.5;
 
-                    temp_context->Flush();
-                    temp_context->Wait(UINT64_MAX);
-
-                    Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
-                    Turbo::Core::TCommandBuffer *cb = temp_context->AllocateCommandBuffer();
-                    cb->Begin();
-                    cb->CmdClearColorImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, r, g, b, 1);
-                    cb->End();
-                    temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
-
-                    fence->WaitUntil();
-
-                    delete fence;
-                    temp_context->FreeCommandBuffer(cb);
-
-                    auto format = color_texture.GetFormat();
+                    temp_context->ClearTexture(color_texture, r, g, b, 1);
                 }
             });
 
@@ -683,6 +668,8 @@ void Test4()
                 {
                     Turbo::Render::TContext *temp_context = (Turbo::Render::TContext *)_context;
 
+                    temp_context->Flush();
+                    temp_context->Wait(UINT64_MAX);
                     // TODO: present
                     uint32_t index = UINT32_MAX;
                     Turbo::Core::TFence *acquire_next_image_fence = new Turbo::Core::TFence(temp_context->GetDevice());
@@ -699,6 +686,7 @@ void Test4()
                         Turbo::Core::TCommandBuffer *cb = temp_context->AllocateCommandBuffer();
                         cb->Begin();
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, show_target);
+                        // cb->CmdClearColorImage(show_target, Turbo::Core::TImageLayout::GENERAL, 1, 0, 0, 1);
                         cb->CmdBlitImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, show_target->GetImage(), Turbo::Core::TImageLayout::GENERAL, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1);
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
                         cb->End();

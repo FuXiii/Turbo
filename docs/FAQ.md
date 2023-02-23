@@ -20,4 +20,9 @@
         git submodule init
         git submodule update
         ```
+* Expression: vector subscript out of range  
 
+  ![dsa](./images/FQA_VectorSubscriptOutOfRange.png)
+
+  * **`原因`**：运行的程序会去读取模型文件（`glTF`文件），如果没找到该模型文件会导致该异常
+  * **`解决方法`**：将代码中的模型文件路径指向`./asset/`目录

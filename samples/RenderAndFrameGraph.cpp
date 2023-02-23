@@ -112,9 +112,9 @@ int main()
 
                     auto now_time = glfwGetTime();
 
-                    float r = std::sin(now_time);
-                    float g = std::cos(now_time);
-                    float b = std::cos(now_time + 3.1415926 / 3);
+                    float r = (std::sin(now_time) + 1) * 0.5;
+                    float g = (std::cos(now_time) + 1) * 0.5;
+                    float b = (std::cos(now_time + 3.1415926 / 3) + 1) * 0.5;
 
                     temp_context->Flush();
                     temp_context->Wait(UINT64_MAX);

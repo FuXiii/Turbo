@@ -127,6 +127,8 @@ Turbo是渲染引擎
 * 如何运行
     1. 由于每个用户输出的目录都不一样，所以`./main.cpp`的示例程序使用的资源文件使用的是相对路径，所有的资源文件都指向`./asset/`目录，请在`./main.cpp`中全局搜索`asset`字符，替换成自己的目录即可。
 
+  *注：如果运行有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
+
 ## Trifles
 
 * 整理一下头文件，有点乱，去掉不必要的头文件
@@ -2508,3 +2510,38 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext`中增加`Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d)`成员函数，该函数仅用于测试，请谨慎调用
   >* `./samples`下增加`RenderAndFrameGraph`例子，用于测试使用`FrameGraph`来驱动`Turbo`进行绘制。
   >* `./samples`下`VolumetricCloud`例子，中用于体积云的着色器文件对应目录被误改了，修正
+
+* 2023/2/18 设计架构
+  >
+  >* `./samples`下增加`ClearColorTest`例子，用于测试`Vulkan`清空颜色测试
+
+* 2023/2/19 设计架构
+  >
+  >* 更新`./docs`下`VolumetricCloud.md`文档
+
+* 2023/2/20 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+
+* 2023/2/21 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+
+* 2023/2/22 设计架构
+  >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/render`下`TBuffer.h`中增加`TVertexBuffer`类
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`typedef enum TRate`枚举
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`class TAttribute`类
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`std::vector<TVertexBuffer::TAttribute> attributes`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`struct Descriptor`成员结构
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t stride`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate rate`成员变量
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明` TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)`成员函数
+
+* 2023/2/22 设计架构
+  >
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride()`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate Getrate()`成员函数

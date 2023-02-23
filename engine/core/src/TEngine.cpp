@@ -10,6 +10,7 @@ void Turbo::Core::TEngine::VerificationInitVulkan()
     }
 
     this->instance = new TInstance();
+
     TPhysicalDevice *best_physical_device = this->instance->GetBestPhysicalDevice();
 
     TVersion vulkan_instance_version = TInstance::GetVulkanInstanceVersion();
@@ -20,7 +21,6 @@ void Turbo::Core::TEngine::VerificationInitVulkan()
     }
     else
     {
-
         if (best_physical_device->GetVkPhysicalDevice() != VK_NULL_HANDLE)
         {
             if (best_physical_device->GetDeviceApiVersion().GetValidVulkanVersion() >= vulkan_instance_version.GetValidVulkanVersion())

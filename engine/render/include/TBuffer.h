@@ -4,7 +4,9 @@
 #include "TDomain.h"
 #include "TFormat.h"
 #include <cstdint>
+#include <limits>
 #include <string>
+#include <vector>
 
 namespace Turbo
 {
@@ -60,6 +62,58 @@ class TBuffer
 
     void Copy(void *src, uint64_t size);
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size);
+};
+
+using TAttributeID = uint32_t;
+
+class TVertexBuffer : public Turbo::Render::TBuffer
+{
+  public:
+    typedef enum TRate
+    {
+        VERTEX = 0,
+        INSTANCE = 1
+    } TRate;
+
+    class TAttribute
+    {
+      private:
+        Turbo::Render::TFormat format = Turbo::Render::TFormat::UNDEFINED;
+        uint32_t offset = std::numeric_limits<uint32_t>::max();
+
+      public:
+        TAttribute() = default;
+        TAttribute(Turbo::Render::TFormat format, uint32_t offset);
+        ~TAttribute() = default;
+
+        Turbo::Render::TFormat GetFormat();
+        uint32_t GetOffset();
+    };
+
+    std::vector<TVertexBuffer::TAttribute> attributes;
+
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        uint64_t size;
+        TDomain domain;
+        uint32_t stride;
+        TRate rate = TRate::VERTEX;
+    };
+
+  private:
+    uint32_t stride = 0;
+    TRate rate = TRate::VERTEX;
+
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
+    TAttribute GetAttribute(TAttributeID id);
+    const std::vector<TVertexBuffer::TAttribute> &GetAttributes();
+
+    uint32_t GetStride();
+    TRate Getrate();
 };
 } // namespace Render
 } // namespace Turbo

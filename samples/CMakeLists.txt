@@ -196,3 +196,8 @@ add_executable(RenderAndFrameGraph ./RenderAndFrameGraph.cpp ${IMGUI_SOURCE_PATH
 target_include_directories(RenderAndFrameGraph PUBLIC ${INCLUDE_PARTH})
 target_link_directories(RenderAndFrameGraph PUBLIC ${LINK_PARTH})
 target_link_libraries(RenderAndFrameGraph PUBLIC ${LIBS})
+
+add_executable(ClearColorTest ./ClearColorTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ClearColorTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ClearColorTest PUBLIC ${LINK_PARTH})
+target_link_libraries(ClearColorTest PUBLIC ${LIBS})

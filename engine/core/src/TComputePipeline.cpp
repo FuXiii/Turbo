@@ -26,7 +26,7 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     vk_compute_pipeline_create_info.stage = vk_pipeline_shader_stage_create_info;
     vk_compute_pipeline_create_info.layout = this->GetPipelineLayout()->GetVkPipelineLayout();
     vk_compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
-    vk_compute_pipeline_create_info.basePipelineIndex = 0;
+    vk_compute_pipeline_create_info.basePipelineIndex = -1;
 
     TDevice *device = computer_shader->GetDevice();
     VkDevice vk_device = device->GetVkDevice();

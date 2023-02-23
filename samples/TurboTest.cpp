@@ -361,6 +361,7 @@ int main()
 
     VkPhysicalDeviceFeatures vk_physical_device_features = {};
     vk_physical_device_features.sampleRateShading = VK_TRUE;
+    vk_physical_device_features.logicOp = VK_TRUE;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     physical_device->GetSupportExtensions();
