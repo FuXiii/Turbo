@@ -4,6 +4,7 @@
 #include "TDomain.h"
 #include "TFormat.h"
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -78,7 +79,8 @@ class TVertexBuffer : public Turbo::Render::TBuffer
     {
       private:
         Turbo::Render::TFormat format = Turbo::Render::TFormat::UNDEFINED;
-        uint32_t offset = 0; // FIXME: uint32_t max
+        uint32_t offset = std::numeric_limits<uint32_t>::max();
+
       public:
         TAttribute() = default;
         TAttribute(Turbo::Render::TFormat format, uint32_t offset);
@@ -108,9 +110,10 @@ class TVertexBuffer : public Turbo::Render::TBuffer
 
     TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
     TAttribute GetAttribute(TAttributeID id);
+    const std::vector<TVertexBuffer::TAttribute> &GetAttributes();
 
-    // FIXME: get stride
-    // FIXME: get rate
+    uint32_t GetStride();
+    TRate Getrate();
 };
 } // namespace Render
 } // namespace Turbo

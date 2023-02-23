@@ -160,3 +160,18 @@ Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttrib
 
     return this->attributes[id];
 }
+
+const std::vector<Turbo::Render::TVertexBuffer::TAttribute> &Turbo::Render::TVertexBuffer::GetAttributes()
+{
+    return this->attributes;
+}
+
+uint32_t Turbo::Render::TVertexBuffer::GetStride()
+{
+    return this->stride;
+}
+
+Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::Getrate()
+{
+    return this->rate;
+}
