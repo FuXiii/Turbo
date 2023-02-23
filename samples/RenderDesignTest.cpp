@@ -756,12 +756,67 @@ void Test4()
     std::cout << "Test4()::End......................................................." << std::endl;
 }
 
+void Test5()
+{
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    struct Position
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    struct UV
+    {
+        float x;
+        float y;
+    };
+
+    struct Normal
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    struct VertexData
+    {
+        Position position;
+        UV uv;
+        Normal normal;
+    };
+
+    float l = 1;
+    float h = l * std::sin(3.1415926 / 6);
+    float w = l * std::cos(3.1415926 / 6);
+
+    std::vector<VertexData> vertexs{{{-w, -h, 0}, {0, 0}, {0, 0, 1}}, {{w, -h, 0}, {1, 0}, {0, 0, 1}}, {{0, l, 0}, {0.5, 1}, {0, 0, 1}}};
+
+    Turbo::Render::TVertexBuffer vertex_buffer;
+    Turbo::Render::TVertexBuffer::Descriptor vertex_buffer_descriptor;
+    vertex_buffer_descriptor.size = sizeof(VertexData) * vertexs.size();
+    vertex_buffer_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    vertex_buffer_descriptor.stride = sizeof(VertexData);
+    vertex_buffer_descriptor.rate = Turbo::Render::TVertexBuffer::TRate::VERTEX;
+
+    Turbo::Render::TAttributeID position_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32B32_SFLOAT*/, offsetof(VertexData, position));
+    Turbo::Render::TAttributeID uv_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32_SFLOAT*/, offsetof(VertexData, uv));
+    Turbo::Render::TAttributeID normal_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32B32_SFLOAT*/, offsetof(VertexData, normal));
+
+    vertex_buffer.Create("vertex_buffer", vertex_buffer_descriptor, &resource_allocator);
+    vertex_buffer.Copy(vertexs.data(), vertex_buffer_descriptor.size);
+    vertex_buffer.Destroy(&resource_allocator);
+}
+
 int main()
 {
     // Test0();
     // Test1();
     // Test2();
     // Test3();
-    Test4();
+    // Test4();
+    Test5();
     return 0;
 }
