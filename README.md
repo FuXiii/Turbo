@@ -2541,7 +2541,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明` TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)`成员函数
 
-* 2023/2/22 设计架构
+* 2023/2/23 设计架构
   >
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride()`成员函数
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate Getrate()`成员函数
