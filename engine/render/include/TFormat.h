@@ -17,7 +17,12 @@ typedef enum class TFormat
     R8G8B8_UNORM = 23,
     B8G8R8_UNORM = 30,
     D32_SFLOAT = 126,
-    D16_UNORM = 124
+    D16_UNORM = 124,
+
+    R32_SFLOAT = 100,
+    R32G32_SFLOAT = 103,
+    R32G32B32_SFLOAT = 106,
+    R32G32B32A32_SFLOAT = 109,
 } TFormat;
 } // namespace Render
 } // namespace Turbo

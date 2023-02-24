@@ -212,6 +212,9 @@
   >* 创建`Image`章节
   >* 创建`Buffer`章节
 
+* 2023/2/24
+  >
+  >* 更新`Format格式`章节
 ---
 
 # Turbo驱动初步
@@ -1084,7 +1087,11 @@ typedef enum class TFormat
     R8G8B8_UNORM,
     B8G8R8_UNORM,
     D32_SFLOAT,
-    D16_UNORM
+    D16_UNORM,
+    R32_SFLOAT,
+    R32G32_SFLOAT,
+    R32G32B32_SFLOAT,
+    R32G32B32A32_SFLOAT,
 }TFormat;
 ```
 

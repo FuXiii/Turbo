@@ -781,18 +781,27 @@ void Test5()
         float z;
     };
 
+    struct Color
+    {
+        float r;
+        float g;
+        float b;
+        float a;
+    };
+
     struct VertexData
     {
         Position position;
         UV uv;
         Normal normal;
+        Color color;
     };
 
     float l = 1;
     float h = l * std::sin(3.1415926 / 6);
     float w = l * std::cos(3.1415926 / 6);
 
-    std::vector<VertexData> vertexs{{{-w, -h, 0}, {0, 0}, {0, 0, 1}}, {{w, -h, 0}, {1, 0}, {0, 0, 1}}, {{0, l, 0}, {0.5, 1}, {0, 0, 1}}};
+    std::vector<VertexData> vertexs{{{-w, -h, 0}, {0, 0}, {0, 0, 1}, {1, 0, 0, 1}}, {{w, -h, 0}, {1, 0}, {0, 0, 1}, {0, 1, 0, 1}}, {{0, l, 0}, {0.5, 1}, {0, 0, 1}, {0, 0, 1, 1}}};
 
     Turbo::Render::TVertexBuffer vertex_buffer;
     Turbo::Render::TVertexBuffer::Descriptor vertex_buffer_descriptor;
@@ -801,9 +810,10 @@ void Test5()
     vertex_buffer_descriptor.stride = sizeof(VertexData);
     vertex_buffer_descriptor.rate = Turbo::Render::TVertexBuffer::TRate::VERTEX;
 
-    Turbo::Render::TAttributeID position_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32B32_SFLOAT*/, offsetof(VertexData, position));
-    Turbo::Render::TAttributeID uv_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32_SFLOAT*/, offsetof(VertexData, uv));
-    Turbo::Render::TAttributeID normal_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::UNDEFINED /*Turbo::Render::TFormat::R32G32B32_SFLOAT*/, offsetof(VertexData, normal));
+    Turbo::Render::TAttributeID position_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32B32_SFLOAT, offsetof(VertexData, position));
+    Turbo::Render::TAttributeID uv_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32_SFLOAT, offsetof(VertexData, uv));
+    Turbo::Render::TAttributeID normal_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32B32_SFLOAT, offsetof(VertexData, normal));
+    Turbo::Render::TAttributeID color_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32B32A32_SFLOAT, offsetof(VertexData, color));
 
     vertex_buffer.Create("vertex_buffer", vertex_buffer_descriptor, &resource_allocator);
     vertex_buffer.Copy(vertexs.data(), vertex_buffer_descriptor.size);

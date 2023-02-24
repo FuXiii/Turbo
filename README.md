@@ -2545,3 +2545,10 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride()`成员函数
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate Getrate()`成员函数
+
+* 2023/2/24 设计架构
+  >
+  >* `./engine/render`下`TFormat.h`中增加`R32_SFLOAT`成员枚举
+  >* `./engine/render`下`TFormat.h`中增加`R32G32_SFLOAT`成员枚举
+  >* `./engine/render`下`TFormat.h`中增加`R32G32B32_SFLOAT`成员枚举
+  >* `./engine/render`下`TFormat.h`中增加`R32G32B32A32_SFLOAT`成员枚举
