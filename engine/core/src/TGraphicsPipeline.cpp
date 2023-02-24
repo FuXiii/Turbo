@@ -35,6 +35,21 @@ uint32_t Turbo::Core::TVertexAttribute::GetOffset()
     return this->offset;
 }
 
+void Turbo::Core::TVertexAttribute::SetLocation(uint32_t location)
+{
+    this->location = location;
+}
+
+void Turbo::Core::TVertexAttribute::SetFormatType(TFormatType formatType)
+{
+    this->formatType = formatType;
+}
+
+void Turbo::Core::TVertexAttribute::SetOffset(uint32_t offset)
+{
+    this->offset = offset;
+}
+
 std::string Turbo::Core::TVertexAttribute::ToString()
 {
     return std::string();
@@ -65,7 +80,22 @@ void Turbo::Core::TVertexBinding::AddAttribute(uint32_t location, TFormatType fo
 
 void Turbo::Core::TVertexBinding::AddAttribute(TVertexAttribute &vertexAttribute)
 {
-    this->vertexAttributes.push_back(vertexAttribute);
+    bool is_had_location = false;
+    for (TVertexAttribute &vertex_attribute_item : this->vertexAttributes)
+    {
+        if (vertex_attribute_item.GetLocation() == vertexAttribute.GetLocation())
+        {
+            is_had_location = true;
+            vertex_attribute_item.SetFormatType(vertexAttribute.GetFormatType());
+            vertex_attribute_item.SetOffset(vertexAttribute.GetOffset());
+            break;
+        }
+    }
+
+    if (!is_had_location)
+    {
+        this->vertexAttributes.push_back(vertexAttribute);
+    }
 }
 
 uint32_t Turbo::Core::TVertexBinding::GetBinding()

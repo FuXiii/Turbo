@@ -21,6 +21,7 @@ class TCommandBuffer;
 class TFence;
 class TRenderPass;
 class TFramebuffer;
+class TVertexBinding;
 } // namespace Core
 } // namespace Turbo
 
@@ -105,6 +106,9 @@ class TContext
 
     TRenderPassPool *renderPassPool = nullptr;
 
+    std::vector<Turbo::Core::TVertexBinding *> vertexBindings;
+    std::vector<Turbo::Core::TBuffer *> vertexBuffers;
+
   public:
     TContext();
     ~TContext();
@@ -122,10 +126,13 @@ class TContext
 
     /*TODO: will delete*/ [[deprecated]] void BeginRenderPass(const Turbo::FrameGraph::TRenderPass &renderPass);
     bool BeginRenderPass(Turbo::Render::TRenderPass &renderPass);
-    void EndRenderPass();
+
+    void BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location);
 
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+
+    void EndRenderPass();
 
     void Flush();
     bool Wait(uint64_t timeout);
@@ -136,7 +143,7 @@ class TContext
     Turbo::Core::TDeviceQueue *GetDeviceQueue();
     Turbo::Render::TCommandBuffer GetCommandBuffer();
 
-    /*Just For Test*/ Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);
+    /*FIXME:Just For Test*/ [[deprecated]] Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);
 };
 } // namespace Render
 } // namespace Turbo

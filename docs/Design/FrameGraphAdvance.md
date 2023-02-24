@@ -215,6 +215,8 @@
 * 2023/2/24
   >
   >* 更新`Format格式`章节
+  >* 更新`Pipeline的VertexBinding`章节
+
 ---
 
 # Turbo驱动初步
@@ -2430,6 +2432,12 @@ context->Draw(...);
 
 ### Pipeline的VertexBinding
 
+>在`Vulkan`标准中对于`VkPipelineVertexInputStateCreateInfo::pVertexAttributeDescriptions`有这样的规定：
+>
+>`All elements of pVertexAttributeDescriptions must describe distinct attribute locations` [来源](https://registry.khronos.org/vulkan/specs/1.3/html/chap21.html#VUID-VkPipelineVertexInputStateCreateInfo-pVertexAttributeDescriptions-00617)
+>
+>翻译过来就是：绑定的`VkVertexInputAttributeDescription::location`不能有重复的
+
 如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
 
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
@@ -2603,7 +2611,7 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, weight_id,/*locat
 command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*location*/5);
 ```
 
-2. 完全抛弃`attribute`的字符串，改为完全动态绑定(此种方式类似`OpenGL`的`glVertexAttribPointer`函数)
+2. 完全抛弃`attribute`的字符串，改为完全动态绑定（此种方式类似`OpenGL`的`glVertexAttribPointer`函数）
 
 ```CXX
 //OpenGL
@@ -2632,7 +2640,9 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 
 `Turbo`考虑优化方式`1`和`2`都提供相应的接口
 
-在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中
+在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中。
+
+*注：根据`Vulkan`标准来看在`DrawCall`指令之前需要绑定所有绘制相关的数据（包括渲染管线和顶点缓存数组），此时`DrawCall`便是是收集统计的好时机*
 
 ## Subpass
 

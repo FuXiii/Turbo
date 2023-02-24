@@ -44,6 +44,8 @@ class TBuffer
         TDomain domain;
     };
 
+    friend class TContext;
+
   private:
     void *allocator = nullptr;
     Turbo::Core::TBuffer *buffer = nullptr;
@@ -62,6 +64,8 @@ class TBuffer
 
     void Copy(void *src, uint64_t size);
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size);
+
+    bool IsValid() const;
 };
 
 using TAttributeID = uint32_t;
@@ -88,6 +92,8 @@ class TVertexBuffer : public Turbo::Render::TBuffer
 
         Turbo::Render::TFormat GetFormat();
         uint32_t GetOffset();
+
+        bool IsValid() const;
     };
 
     std::vector<TVertexBuffer::TAttribute> attributes;
@@ -109,11 +115,11 @@ class TVertexBuffer : public Turbo::Render::TBuffer
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 
     TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
-    TAttribute GetAttribute(TAttributeID id);
+    TAttribute GetAttribute(TAttributeID id) const;
     const std::vector<TVertexBuffer::TAttribute> &GetAttributes();
 
-    uint32_t GetStride();
-    TRate Getrate();
+    uint32_t GetStride() const;
+    TRate GetRate() const;
 };
 } // namespace Render
 } // namespace Turbo

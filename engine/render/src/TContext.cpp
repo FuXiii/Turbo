@@ -13,6 +13,7 @@
 #include <core/include/TException.h>
 #include <core/include/TFence.h>
 #include <core/include/TFramebuffer.h>
+#include <core/include/TGraphicsPipeline.h>
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
@@ -915,9 +916,41 @@ bool Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &render
     return false;
 }
 
-void Turbo::Render::TContext::EndRenderPass()
+void Turbo::Render::TContext::BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location)
 {
-    this->currentCommandBuffer.commandBuffer->CmdEndRenderPass();
+    Turbo::Render::TVertexBuffer::TAttribute attribute = vertexBuffer.GetAttribute(attributeID);
+    if (attribute.IsValid())
+    {
+        if (vertexBuffer.IsValid())
+        {
+            bool is_found_vertex_buffer = false;
+            uint32_t vertex_buffer_index = 0;
+            for (Turbo::Core::TBuffer *vertex_buffer_item : this->vertexBuffers)
+            {
+                if (vertex_buffer_item == vertexBuffer.buffer)
+                {
+                    is_found_vertex_buffer = true;
+                    break;
+                }
+
+                vertex_buffer_index = vertex_buffer_index + 1;
+            }
+
+            if (!is_found_vertex_buffer)
+            {
+                this->vertexBuffers.push_back(vertexBuffer.buffer);
+                vertex_buffer_index = vertex_buffer_index + 1;
+
+                uint32_t stride = vertexBuffer.GetStride();
+                Turbo::Core::TVertexRate vertex_rate = vertexBuffer.GetRate() == Turbo::Render::TVertexBuffer::TRate::VERTEX ? Turbo::Core::TVertexRate::VERTEX : Turbo::Core::TVertexRate::INSTANCE;
+
+                Turbo::Core::TVertexBinding *vertex_binding = new Turbo::Core::TVertexBinding(vertex_buffer_index, stride, vertex_rate);
+                this->vertexBindings.push_back(vertex_binding);
+            }
+
+            this->vertexBindings[vertex_buffer_index]->AddAttribute(location, (Turbo::Core::TFormatType)(attribute.GetFormat()), attribute.GetOffset());
+        }
+    }
 }
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
@@ -928,6 +961,26 @@ void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
     // TODO: create Turbo::Core::TGraphicsPipeline if didn't create before
+}
+
+void Turbo::Render::TContext::EndRenderPass()
+{
+    // TODO: CmdBindVertexBuffers(...)
+
+    // FIXME: delete
+    // FIXME: 在DrawCall绘制时记录顶点缓冲数组指令，之后销毁
+    // FIXME: 销毁放在此处仅用于内存回收
+    {
+        for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
+        {
+            delete vertex_binding_item;
+        }
+    }
+
+    this->vertexBindings.clear();
+    this->vertexBuffers.clear();
+
+    this->currentCommandBuffer.commandBuffer->CmdEndRenderPass();
 }
 
 void Turbo::Render::TContext::Flush()
@@ -1016,6 +1069,6 @@ Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTe
     {
         return texture2d.image;
     }
-    
+
     return nullptr;
 }

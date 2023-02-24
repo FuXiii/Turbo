@@ -115,6 +115,16 @@ void Turbo::Render::TBuffer::Copy(TBuffer *src, uint64_t srcOffset, uint64_t siz
     }
 }
 
+bool Turbo::Render::TBuffer::IsValid() const
+{
+    if (this->buffer != nullptr && this->buffer->GetVkBuffer() != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Turbo::Render::TVertexBuffer::TAttribute::TAttribute(Turbo::Render::TFormat format, uint32_t offset)
 {
     this->format = format;
@@ -129,6 +139,15 @@ Turbo::Render::TFormat Turbo::Render::TVertexBuffer::TAttribute::GetFormat()
 uint32_t Turbo::Render::TVertexBuffer::TAttribute::GetOffset()
 {
     return this->offset;
+}
+
+bool Turbo::Render::TVertexBuffer::TAttribute::IsValid() const
+{
+    if (this->format != Turbo::Render::TFormat::UNDEFINED && this->offset != std::numeric_limits<uint32_t>::max())
+    {
+        return true;
+    }
+    return false;
 }
 
 void Turbo::Render::TVertexBuffer::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -150,7 +169,7 @@ Turbo::Render::TAttributeID Turbo::Render::TVertexBuffer::AddAttribute(Turbo::Re
     return this->attributes.size() - 1;
 }
 
-Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttribute(TAttributeID id)
+Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttribute(TAttributeID id) const
 {
     Turbo::Render::TVertexBuffer::TAttribute result{};
     if (id > (this->attributes.size() - 1))
@@ -166,12 +185,12 @@ const std::vector<Turbo::Render::TVertexBuffer::TAttribute> &Turbo::Render::TVer
     return this->attributes;
 }
 
-uint32_t Turbo::Render::TVertexBuffer::GetStride()
+uint32_t Turbo::Render::TVertexBuffer::GetStride() const
 {
     return this->stride;
 }
 
-Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::Getrate()
+Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::GetRate() const
 {
     return this->rate;
 }

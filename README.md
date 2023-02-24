@@ -2539,16 +2539,27 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate rate`成员变量
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明` TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
-  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)const`成员函数
 
 * 2023/2/23 设计架构
   >
-  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride()`成员函数
-  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate Getrate()`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride() const`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate GetRate()const `成员函数
 
 * 2023/2/24 设计架构
   >
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
   >* `./engine/render`下`TFormat.h`中增加`R32_SFLOAT`成员枚举
   >* `./engine/render`下`TFormat.h`中增加`R32G32_SFLOAT`成员枚举
   >* `./engine/render`下`TFormat.h`中增加`R32G32B32_SFLOAT`成员枚举
   >* `./engine/render`下`TFormat.h`中增加`R32G32B32A32_SFLOAT`成员枚举
+  >* `./engine/render`下`TContext.h`中`TContext`增加`void BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`增加`std::vector<Turbo::Core::TVertexBinding *> vertexBindings`成员变量，用于管理和暂存绑定的顶点信息
+  >* `./engine/render`下`TBuffer.h`中`TBuffer`增加`bool IsValid() const`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TBuffer`增加`friend class TContext;`友元类
+  >* `./engine/render`下`TContext.h`中`TContext`增加`std::vector<Turbo::Core::TBuffer *> vertexBuffers`成员变量，用于管理和暂存绑定的顶点缓冲
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`中`TAttribute`增加`bool IsValid() const;`成员函数
+  >* 修改`./engine/core`下`TVertexBinding`中`AddAttribute(...)`成员函数的算法（防止重复的`location`，如果有重复的`location`，将对应的属性覆盖刷新）
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetLocation(uint32_t location)`成员函数的算法
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetFormatType(TFormatType formatType)`成员函数的算法
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetOffset(uint32_t offset)`成员函数的算法
