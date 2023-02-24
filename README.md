@@ -2560,6 +2560,6 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TContext`增加`std::vector<Turbo::Core::TBuffer *> vertexBuffers`成员变量，用于管理和暂存绑定的顶点缓冲
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`中`TAttribute`增加`bool IsValid() const;`成员函数
   >* 修改`./engine/core`下`TVertexBinding`中`AddAttribute(...)`成员函数的算法（防止重复的`location`，如果有重复的`location`，将对应的属性覆盖刷新）
-  >* `./engine/core`下`TVertexAttribute`中增加`void SetLocation(uint32_t location)`成员函数的算法
-  >* `./engine/core`下`TVertexAttribute`中增加`void SetFormatType(TFormatType formatType)`成员函数的算法
-  >* `./engine/core`下`TVertexAttribute`中增加`void SetOffset(uint32_t offset)`成员函数的算法
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetLocation(uint32_t location)`成员函数
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetFormatType(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TVertexAttribute`中增加`void SetOffset(uint32_t offset)`成员函数
