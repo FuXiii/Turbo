@@ -21,6 +21,7 @@
 #include <core/include/TImage.h>
 #include <core/include/TImageView.h>
 #include <core/include/TInstance.h>
+#include <core/include/TPhysicalDevice.h>
 #include <core/include/TPipeline.h>
 #include <core/include/TSurface.h>
 #include <core/include/TSwapchain.h>
@@ -66,6 +67,17 @@ int main()
     uint32_t max_image_count = surface->GetMaxImageCount();
     uint32_t min_image_count = surface->GetMinImageCount();
     uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
+
+    Turbo::Core::TFormatInfo format_info = context.GetPhysicalDevice()->GetFormatInfo(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
+    if (format_info.IsOptimalTilingSupportBlitDst())
+    {
+        bool is_format_support_image = context.GetPhysicalDevice()->IsFormatSupportImage(Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, 0);
+        if (!is_format_support_image)
+        {
+            std::cout << "Swapchain Unsupport Format" << std::endl;
+            return 0;
+        }
+    }
 
     Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
     std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
@@ -168,7 +180,6 @@ int main()
                     if (result == Turbo::Core::TResult::SUCCESS)
                     {
                         // TODO:Blit Image
-
                         auto show_target = swapchain_image_views[index];
 
                         Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
@@ -176,7 +187,7 @@ int main()
                         cb->Begin();
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, show_target);
                         cb->CmdBlitImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, show_target->GetImage(), Turbo::Core::TImageLayout::GENERAL, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1);
-                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
+                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
                         cb->End();
                         temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
 
@@ -185,6 +196,7 @@ int main()
                         delete fence;
                         temp_context->FreeCommandBuffer(cb);
                         Turbo::Core::TResult result = temp_context->GetDeviceQueue()->Present(swapchain, index);
+
                         switch (result)
                         {
                         case Turbo::Core::TResult::MISMATCH: {

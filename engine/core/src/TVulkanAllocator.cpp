@@ -36,22 +36,22 @@ void Turbo::Core::TVulkanAllocator::Destory()
 
 void *VKAPI_PTR Turbo::Core::TVulkanAllocator::Allocate(void *pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    // std::cout << "TAllocator::Allocation"
-    //           << " Alignment::" << alignment << " Size::" << (size / 1024.0f) << " KB" << std::endl;
+    //std::cout << "TAllocator::Allocation"
+    //          << " Alignment::" << alignment << " Size::" << (size / 1024.0f) << " KB" << std::endl;
 
     return Turbo::Core::TAllocator::Allocate(size, alignment);
 }
 
 void *VKAPI_PTR Turbo::Core::TVulkanAllocator::Reallocate(void *pUserData, void *pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    // std::cout << "TAllocator::Reallocation" << std::endl;
+    //std::cout << "TAllocator::Reallocation" << std::endl;
 
     return Turbo::Core::TAllocator::Reallocate(pOriginal, size, alignment);
 }
 
 void VKAPI_PTR Turbo::Core::TVulkanAllocator::Free(void *pUserData, void *pMemory)
 {
-    // std::cout << "TAllocator::Free" << std::endl;
+    //std::cout << "TAllocator::Free" << std::endl;
 
     return Turbo::Core::TAllocator::Free(pMemory);
 }

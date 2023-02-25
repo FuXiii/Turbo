@@ -2538,13 +2538,13 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t stride`成员变量
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate rate`成员变量
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
-  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明` TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset)`成员函数
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TAttribute GetAttribute(TAttributeID id)const`成员函数
 
 * 2023/2/23 设计架构
   >
   >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`uint32_t GetStride() const`成员函数
-  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate GetRate()const `成员函数
+  >* `./engine/render`下`TBuffer.h`中`TVertexBuffer`类中声明`TRate GetRate()const`成员函数
 
 * 2023/2/24 设计架构
   >
@@ -2563,3 +2563,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVertexAttribute`中增加`void SetLocation(uint32_t location)`成员函数
   >* `./engine/core`下`TVertexAttribute`中增加`void SetFormatType(TFormatType formatType)`成员函数
   >* `./engine/core`下`TVertexAttribute`中增加`void SetOffset(uint32_t offset)`成员函数
+
+* 2023/2/25 设计架构
+  >
+  >* 修正`./samples`下`RenderAndFrameGraph.md`文档，由于`Layout`转换`Bug`导致什么也不显示。
