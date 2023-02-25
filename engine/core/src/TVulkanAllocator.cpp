@@ -5,6 +5,7 @@ Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::instance = nullptr
 
 Turbo::Core::TVulkanAllocator::TVulkanAllocator()
 {
+    TVulkanAllocator::vkAllocationCallbacks.pUserData = nullptr;
     TVulkanAllocator::vkAllocationCallbacks.pfnAllocation = &TVulkanAllocator::Allocate;
     TVulkanAllocator::vkAllocationCallbacks.pfnReallocation = &TVulkanAllocator::Reallocate;
     TVulkanAllocator::vkAllocationCallbacks.pfnFree = &TVulkanAllocator::Free;
@@ -43,26 +44,26 @@ void *VKAPI_PTR Turbo::Core::TVulkanAllocator::Allocate(void *pUserData, size_t 
 
 void *VKAPI_PTR Turbo::Core::TVulkanAllocator::Reallocate(void *pUserData, void *pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    //std::cout << "TAllocator::Reallocation" << std::endl;
+    // std::cout << "TAllocator::Reallocation" << std::endl;
 
     return Turbo::Core::TAllocator::Reallocate(pOriginal, size, alignment);
 }
 
 void VKAPI_PTR Turbo::Core::TVulkanAllocator::Free(void *pUserData, void *pMemory)
 {
-    //std::cout << "TAllocator::Free" << std::endl;
+    // std::cout << "TAllocator::Free" << std::endl;
 
     return Turbo::Core::TAllocator::Free(pMemory);
 }
 
 void VKAPI_PTR Turbo::Core::TVulkanAllocator::InternalAllocationNotification(void *pUserData, size_t size, VkInternalAllocationType allocationType, VkSystemAllocationScope allocationScope)
 {
-    //std::cout << "TAllocator::InternalAllocationNotification" << std::endl;
+    // std::cout << "TAllocator::InternalAllocationNotification" << std::endl;
 }
 
 void VKAPI_PTR Turbo::Core::TVulkanAllocator::InternalFreeNotification(void *pUserData, size_t size, VkInternalAllocationType allocationType, VkSystemAllocationScope allocationScope)
 {
-    //std::cout << "TAllocator::InternalFreeNotification" << std::endl;
+    // std::cout << "TAllocator::InternalFreeNotification" << std::endl;
 }
 
 VkAllocationCallbacks *Turbo::Core::TVulkanAllocator::GetVkAllocationCallbacks()
@@ -72,5 +73,5 @@ VkAllocationCallbacks *Turbo::Core::TVulkanAllocator::GetVkAllocationCallbacks()
 
 std::string Turbo::Core::TVulkanAllocator::ToString()
 {
-	return std::string();
+    return std::string();
 }
