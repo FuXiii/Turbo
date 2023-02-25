@@ -2566,4 +2566,4 @@ Turbo是渲染引擎
 
 * 2023/2/25 设计架构
   >
-  >* 修正`./samples`下`RenderAndFrameGraph.md`文档，由于`Layout`转换`Bug`导致什么也不显示。
+  >* 修正`./samples`下`RenderAndFrameGraph.cpp`示例中，由于`Layout`转换`Bug`导致什么也不显示。
