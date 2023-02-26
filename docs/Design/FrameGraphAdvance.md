@@ -217,6 +217,11 @@
   >* 更新`Format格式`章节
   >* 更新`Pipeline的VertexBinding`章节
 
+* 2023/2/26
+  >
+  >* 创建`绑定Pipeline`章节
+  >* 创建`绑定Pipeline的DescriptorSet`章节
+
 ---
 
 # Turbo驱动初步
@@ -980,6 +985,7 @@ class DepthTexture2D: public DepthImage2D
 ### Buffer
 
 与`Image`类似
+
 ```CXX
 typedef enum TBufferUsageBits
 {
@@ -2615,7 +2621,7 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*loc
 
 ```CXX
 //OpenGL
-void glVertexAttribPointer(	GLuint index,
+void glVertexAttribPointer( GLuint index,
                             GLint size,
                             GLenum type,
                             GLboolean normalized,
@@ -2643,6 +2649,66 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中。
 
 *注：根据`Vulkan`标准来看在`DrawCall`指令之前需要绑定所有绘制相关的数据（包括渲染管线和顶点缓存数组），此时`DrawCall`便是是收集统计的好时机*
+
+### 绑定Pipeline的DescriptorSet
+
+对于`Pipeline`能够正确执行，还需要将对应的各种`layout (set = M, binding = N) uniform UNIFORM_TYPE UNIFORM_NAME[T]`属性进行绑定，`Turbo`将会提供`BindDescriptor(uint32_t set, uint32_t binding, std::vector<各种uinform资源类型>)`接口进行对应资源绑定
+
+在`Turbo`中将所有绑定的资源都视为可一次性绑定多个资源，也就是
+
+```CXX
+//shader
+layout (set = M, binding = N) uniform UNIFORM_TYPE UNIFORM_NAME[T]
+
+//host
+context.BindDescriptor(uint32_t set, uint32_t binding, std::vector<各种uinform资源类型>)
+```
+
+就算绑定的资源只有一个，也视为`size`为`1`的数组进行设置（这与`Turbo`的`Code`层相一致）
+
+在`Turbo`的`Core`层，需要创建完`Pipeline`才能进行`Descriptor`相关资源数据的绑定，所以在调用`BindDescriptor(...)`时，内部是使用了一个树状结构先将用户绑定的`Descriptor`进行缓存。
+
+目前`Turbo`应该提供如下基本`Descriptor`绑定
+
+* `Buffer`: 对应`GLSL`中`uniform Buffer{...}Buffer;`。最终存储为`std::vector<TBuffer *>`
+* `std::pair<TImage, TSampler>`: 对应`GLSL`中`uniform sampler2D xxx;`。最终存储为`std::vector<std::pair<TImageView *, TSampler *>>`
+* `TImage`: 对应`GLSL`中`uniform texture2D xxx;`。最终存储为`std::vector<TImageView *>`
+* `Sampler`: 对应`GLSL`中`uniform sampler xxx;`。最终存储为`std::vector<TSampler *>`
+
+问题来了，对于不同的类型`Turbo`如何进行不同类型的`Descriptor`缓存呢？(泛型编程可能是一个解决方法，但是有点麻烦，不直观)
+
+一种比较直接的方式就是使用`Map`直接记录对应`Descriptor`数组：
+
+```CXX
+//Turbo的内部维护结构
+struct DescriptorID
+{
+    uint32_t set = MAX;
+    uint32_t binding = MAX;
+}
+
+std::map<DescriptorID, std::vector<TBuffer *>> bufferMap;
+std::map<DescriptorID, std::vector<std::pair<TImageView *, TSampler *>>> imageCombineWithSamplerMap;
+std::map<DescriptorID, std::vector<TImageView *>> sampleImageMap;
+std::map<DescriptorID, std::vector<TSampler *>> samplerMap;
+
+//对应的Context对外接口
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<TBuffer>);//在bufferMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<std::pair<TImage, TSampler>>);//在bimageCombineWithSamplerMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<TImage>);//在sampleImageMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<Sampler>);//在samplerMap中进行缓存
+```
+
+这有一个问题：用户在一次`DrawCall`时重复性绑定，如下
+
+```CXX
+BindDescriptor(0, 0, some_buffers);//在bufferMap中进行缓存
+BindDescriptor(0, 0, some_images);//在sampleImageMap中进行缓存
+```
+
+用户在同一个`set`和`binding`下绑定了不同类型的`Descriptor`，虽然此行为在`Vulkan`标准中不被允许，但在`Turbo`中将会进行覆盖操作，这就需要`Turbo`记录某某`set`和`binding`下的`Descriptor`是否已经被绑在了哪个类型的缓存里，如果已经绑定了，将原来的绑定解除，进行新的绑定，反之则直接绑定。这需要`Turbo`内部提供一个数组结构用于记录某某`set`和`binding`被绑定到了哪个缓冲中
+
+### 绑定Pipeline
 
 ## Subpass
 
