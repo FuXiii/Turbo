@@ -222,6 +222,10 @@
   >* 创建`绑定Pipeline`章节
   >* 创建`绑定Pipeline的DescriptorSet`章节
 
+* 2023/2/27
+  >
+  >* 更新`绑定Pipeline的DescriptorSet`章节
+
 ---
 
 # Turbo驱动初步
@@ -2689,13 +2693,13 @@ struct DescriptorID
 
 std::map<DescriptorID, std::vector<TBuffer *>> bufferMap;
 std::map<DescriptorID, std::vector<std::pair<TImageView *, TSampler *>>> imageCombineWithSamplerMap;
-std::map<DescriptorID, std::vector<TImageView *>> sampleImageMap;
+std::map<DescriptorID, std::vector<TImageView *>> sampledImageMap;
 std::map<DescriptorID, std::vector<TSampler *>> samplerMap;
 
 //对应的Context对外接口
 BindDescriptor(uint32_t set, uint32_t binding, std::vector<TBuffer>);//在bufferMap中进行缓存
 BindDescriptor(uint32_t set, uint32_t binding, std::vector<std::pair<TImage, TSampler>>);//在bimageCombineWithSamplerMap中进行缓存
-BindDescriptor(uint32_t set, uint32_t binding, std::vector<TImage>);//在sampleImageMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<TImage>);//在sampledImageMap中进行缓存
 BindDescriptor(uint32_t set, uint32_t binding, std::vector<Sampler>);//在samplerMap中进行缓存
 ```
 
@@ -2703,10 +2707,61 @@ BindDescriptor(uint32_t set, uint32_t binding, std::vector<Sampler>);//在sample
 
 ```CXX
 BindDescriptor(0, 0, some_buffers);//在bufferMap中进行缓存
-BindDescriptor(0, 0, some_images);//在sampleImageMap中进行缓存
+BindDescriptor(0, 0, some_images);//在sampledImageMap中进行缓存
 ```
 
-用户在同一个`set`和`binding`下绑定了不同类型的`Descriptor`，虽然此行为在`Vulkan`标准中不被允许，但在`Turbo`中将会进行覆盖操作，这就需要`Turbo`记录某某`set`和`binding`下的`Descriptor`是否已经被绑在了哪个类型的缓存里，如果已经绑定了，将原来的绑定解除，进行新的绑定，反之则直接绑定。这需要`Turbo`内部提供一个数组结构用于记录某某`set`和`binding`被绑定到了哪个缓冲中
+用户在同一个`set`和`binding`下绑定了不同类型的`Descriptor`，虽然此行为在`Vulkan`标准中不被允许，但在`Turbo`中将会进行覆盖操作，这就需要`Turbo`记录某某`set`和`binding`下的`Descriptor`是否已经被绑在了哪个类型的缓存里，如果已经绑定了，将原来的绑定解除，进行新的绑定，反之则直接绑定。这需要`Turbo`内部提供一个数据结构用于记录某某`set`和`binding`被绑定到了哪个缓冲中。
+
+可能的结构为：
+```CXX
+enum DescriptorType
+{
+    UNIFROM_BUFFER,//表示相应数据缓存在bufferMap中
+    COMBINED_IMAGE_SAMPLER,//表示相应数据缓存在imageCombineWithSamplerMap中
+    SAMPLED_IMAGE,//表示相应数据缓存在sampledImageMap中
+    SAMPLER,//表示相应数据缓存在samplerMap中
+};
+
+class BindingMap
+{
+    std::map<uint32_t binding, DescriptorType> bindings;
+};
+
+class SetMap
+{
+    std::map<uint32_t set, BindingMap> sets;
+};
+```
+
+这样`Turbo`的判断流程大致如下：
+
+```mermaid
+graph TD;
+
+Input["传入set号, binding号, std::vector<各种uinform资源类型>"]
+IsSetMapHasSet{"SetMap中是否存有传入的Set号"}
+
+IsBindingMapHasBinding{"BindingMap中是否存有传入的Binding号"}
+AddNewSetAndBinding["增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存"]
+
+subgraph RefreshSetAndBindgMap
+    RemoveDescriptorBinding["将对应的描述符数据从相应缓存中移除"]
+    AddDescriptorBinding["将对应的描述符数据添加到相应缓存中"]
+    UpdateSetBindingMap["更新Set和Binding的相应记录"]
+
+    RemoveDescriptorBinding-->AddDescriptorBinding
+    AddDescriptorBinding-->UpdateSetBindingMap
+end
+
+AddNewBinding["增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存 "]
+
+Input-->IsSetMapHasSet
+IsSetMapHasSet--是-->IsBindingMapHasBinding
+IsSetMapHasSet--否-->AddNewSetAndBinding
+
+IsBindingMapHasBinding--是-->RefreshSetAndBindgMap
+IsBindingMapHasBinding--否-->AddNewBinding
+```
 
 ### 绑定Pipeline
 
