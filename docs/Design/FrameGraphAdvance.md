@@ -2744,7 +2744,7 @@ IsSetMapHasSet{"SetMap中是否存有传入的Set号"}
 IsBindingMapHasBinding{"BindingMap中是否存有传入的Binding号"}
 AddNewSetAndBinding["增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存"]
 
-subgraph RefreshSetAndBindgMap
+subgraph RefreshSetAndBindgMap["更新Set和Binding对应的缓存"]
     RemoveDescriptorBinding["将对应的描述符数据从相应缓存中移除"]
     AddDescriptorBinding["将对应的描述符数据添加到相应缓存中"]
     UpdateSetBindingMap["更新Set和Binding的相应记录"]
