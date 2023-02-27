@@ -2782,6 +2782,18 @@ class Context
 
 ### Pipeline创建
 
+`ComputePipeline`创建需要如下数据:
+
+* `ComputerShader`：来源于绑定的`ComputePipeline`中
+
+`GraphicsPipeline`创建需要如下数据:
+
+* `RenderPass`：来源于`BeginRenderPass(...)`中
+* `subpass`：来源于`NextSubpass()`中
+* `std::vector<TVertexBinding>`：来源于绑定的`BindVeretxAttribute`中
+* `std::vector<TShader *> &shaders`：来源于绑定的`GraphicsPipeline`中
+* `各种渲染配置（包括Topology，PolygonMode，CullModes等等）`：来源于绑定的`GraphicsPipeline`中
+
 ## Subpass
 
 `Subpass`实际上是多个`Image`的集合，包括如下三种`Image`集
