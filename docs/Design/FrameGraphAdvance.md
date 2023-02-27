@@ -225,6 +225,8 @@
 * 2023/2/27
   >
   >* 更新`绑定Pipeline的DescriptorSet`章节
+  >* 更新`绑定Pipeline`章节
+  >* 创建`Pipeline创建`章节
 
 ---
 
@@ -2764,6 +2766,21 @@ IsBindingMapHasBinding--否-->AddNewBinding
 ```
 
 ### 绑定Pipeline
+
+`Turbo`的`Context`中分别存有用于计算管线和图形管线的管线缓存
+
+```CXX
+class Context
+{
+    TComputePipeline compute_pipeline;
+    TGraphicsPipeline graphics_pipeline;
+
+    std::vector<Turbo::Core::TPipeline*> pipeline;//所有创建的管线
+}
+```
+当用户绑定管线，其实就是更新相应的`TComputePipeline compute_pipeline`和`TGraphicsPipeline graphics_pipeline`
+
+### Pipeline创建
 
 ## Subpass
 
