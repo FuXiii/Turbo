@@ -228,6 +228,10 @@
   >* 更新`绑定Pipeline`章节
   >* 创建`Pipeline创建`章节
 
+* 2023/2/28
+  >
+  >* 创建`DrawCall`章节
+  >* 创建`Dispatch`章节
 ---
 
 # Turbo驱动初步
@@ -3006,6 +3010,45 @@ CreateFrameBuffer-->ReturnFrameBuffer
 *注：根据`Vulkan`标准，创建`FrameBuffer`时，必须指定`RenderPass`（标准规定，是与之兼容的`RenderPass`）。所以在创建`FrameBuffer`前必须创建`RenderPass`*
 
 同`RenderPassPool`创建`RenderPass`类似，`FrameBufferPool`也需要传入`RenderPass`，并将创建结果刷新到`RenderPass`中，这需要`RenderPass`有一个存储刷新`FrameBuffer`的成员变量
+
+## DrawCall
+
+最经典的`DrawCall`就是`vkCmdDraw`和`vkCmdDrawIndexed`，对于`Turbo`为`Draw(...)`和`DrawIndexed(...)`
+
+此时对于调用`DrawCall`，`Turbo`会收集之前用户设置的数据，并对相关资源进行`创建`，`记录`相关指令，最后`清空`相关资源。
+
+对于`创建`：
+
+* 创建`GraphicsPipeline`
+    * 收集`RenderPass`：来源于`BeginRenderPass(...)`中
+    * 收集`subpass`：来源于`NextSubpass()`
+    * 收集`std::vector<TVertexBinding>`：来源于`BindVeretxAttribute(...)`
+    * 收集`std::vector<TShader *> &shaders`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+    * 收集`Pipeline属性（Topology，Polygon，CullModes等）`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+
+    *注：一帧结束后销毁*
+
+* 创建`TPipelineDescriptorSet`
+    * 通过`TDescriptorPool`的`Allocate(TPipelineLayout*)`函数
+    * 传入的`TPipelineLayout`从之前创建的`Pipeline`获得
+    * 通过`TPipelineDescriptorSet`的`BindData`将数据绑定进去，数据来源于`BindDescriptor(...)`
+
+    *注：一帧结束后回收*
+
+对于`记录`：
+
+* 记录`CmdBindPipeline(...)`指令，来源于之前创建的`GraphicsPipeline`
+* 记录`CmdBindPipelineDescriptorSet(...)`指令，来源于之前创建的`TPipelineDescriptorSet`
+* 记录`CmdBindVertexBuffers(...)`指令，来源于之前调用`BindVeretxAttribute`中的绑定
+* 记录`DrawCall`指令(`CmdDraw`和`CmdDrawIndexed`)，来源于用户对于`DrawCall`的调用
+
+对于`清空`：
+* 清空由于`BindVeretxAttribute(...)`记录的`VertexBuffer`和`std::vector<TVertexBinding>`
+* 清空由于`BindDescriptor(...)`记录的`Descriptor`和相关记录结构
+
+*注：如果用户在绑定完`VeretxAttribute`和`Descriptor`之后没有再调用相关绑定函数接口，`Turbo`调用`DrawCall`将不会再收集更新相关指令，因为相关指令没有更新的必要，默认使用之前的绑定结果。（如果新的渲染与之前的绑定的数据不兼容的话将会因不符合`Vulkan`标准而出问题）*
+
+## Dispatch
 
 ## Shader
 
