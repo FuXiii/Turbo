@@ -233,6 +233,7 @@
   >* 创建`DrawCall`章节
   >* 创建`Dispatch`章节
   >* 更新`Buffer`章节中的`TIndexBuffer`
+  
 ---
 
 # Turbo驱动初步
@@ -2728,6 +2729,7 @@ BindDescriptor(0, 0, some_images);//在sampledImageMap中进行缓存
 用户在同一个`set`和`binding`下绑定了不同类型的`Descriptor`，虽然此行为在`Vulkan`标准中不被允许，但在`Turbo`中将会进行覆盖操作，这就需要`Turbo`记录某某`set`和`binding`下的`Descriptor`是否已经被绑在了哪个类型的缓存里，如果已经绑定了，将原来的绑定解除，进行新的绑定，反之则直接绑定。这需要`Turbo`内部提供一个数据结构用于记录某某`set`和`binding`被绑定到了哪个缓冲中。
 
 可能的结构为：
+
 ```CXX
 enum DescriptorType
 {
@@ -2791,6 +2793,7 @@ class Context
     std::vector<Turbo::Core::TPipeline*> pipeline;//所有创建的管线
 }
 ```
+
 当用户绑定管线，其实就是更新相应的`TComputePipeline compute_pipeline`和`TGraphicsPipeline graphics_pipeline`
 
 ### Pipeline创建
@@ -3029,18 +3032,18 @@ CreateFrameBuffer-->ReturnFrameBuffer
 对于`创建`：
 
 * 创建`GraphicsPipeline`
-    * 收集`RenderPass`：来源于`BeginRenderPass(...)`中
-    * 收集`subpass`：来源于`NextSubpass()`
-    * 收集`std::vector<TVertexBinding>`：来源于`BindVeretxAttribute(...)`
-    * 收集`std::vector<TShader *> &shaders`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
-    * 收集`Pipeline属性（Topology，Polygon，CullModes等）`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+  * 收集`RenderPass`：来源于`BeginRenderPass(...)`中
+  * 收集`subpass`：来源于`NextSubpass()`
+  * 收集`std::vector<TVertexBinding>`：来源于`BindVeretxAttribute(...)`
+  * 收集`std::vector<TShader *> &shaders`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+  * 收集`Pipeline属性（Topology，Polygon，CullModes等）`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
 
     *注：一帧结束后销毁*
 
 * 创建`TPipelineDescriptorSet`
-    * 通过`TDescriptorPool`的`Allocate(TPipelineLayout*)`函数
-    * 传入的`TPipelineLayout`从之前创建的`Pipeline`获得
-    * 通过`TPipelineDescriptorSet`的`BindData`将数据绑定进去，数据来源于`BindDescriptor(...)`
+  * 通过`TDescriptorPool`的`Allocate(TPipelineLayout*)`函数
+  * 传入的`TPipelineLayout`从之前创建的`Pipeline`获得
+  * 通过`TPipelineDescriptorSet`的`BindData`将数据绑定进去，数据来源于`BindDescriptor(...)`
 
     *注：一帧结束后回收*
 
@@ -3052,6 +3055,7 @@ CreateFrameBuffer-->ReturnFrameBuffer
 * 记录`DrawCall`指令(`CmdDraw`和`CmdDrawIndexed`)，来源于用户对于`DrawCall`的调用
 
 对于`清空`：
+
 * 清空由于`BindVeretxAttribute(...)`记录的`VertexBuffer`和`std::vector<TVertexBinding>`
 * 清空由于`BindDescriptor(...)`记录的`Descriptor`和相关记录结构
 
