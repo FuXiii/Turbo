@@ -121,6 +121,34 @@ class TVertexBuffer : public Turbo::Render::TBuffer
     uint32_t GetStride() const;
     TRate GetRate() const;
 };
+
+class TIndexBuffer : public Turbo::Render::TBuffer
+{
+  public:
+    typedef enum TIndexType
+    {
+        UINT16 = 0,
+        UINT32 = 1
+    } TIndexType;
+
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        uint64_t size;
+        TDomain domain;
+        uint32_t stride;
+        TIndexType type = TIndexType::UINT32;
+    };
+
+  private:
+    TIndexType type = TIndexType::UINT32;
+
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    TIndexType GetIndexType() const;
+};
+
 } // namespace Render
 } // namespace Turbo
 #endif // !TURBO_RENDER_TBUFFER_H

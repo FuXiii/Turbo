@@ -2579,3 +2579,4 @@ Turbo是渲染引擎
 * 2023/2/28 设计架构
   >
   >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/render`下`TBuffer.h`中新增`TIndexBuffer`类，继承自`Turbo::Render::TBuffer`。用于代表索引缓冲

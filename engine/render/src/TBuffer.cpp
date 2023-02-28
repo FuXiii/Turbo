@@ -194,3 +194,20 @@ Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::GetRate() cons
 {
     return this->rate;
 }
+
+void Turbo::Render::TIndexBuffer::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    Turbo::Render::TBuffer::Descriptor buffer_descriptor = {};
+    buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST;
+    buffer_descriptor.size = descriptor.size;
+    buffer_descriptor.domain = descriptor.domain;
+
+    this->type = descriptor.type;
+
+    Turbo::Render::TBuffer::Create(name, buffer_descriptor, allocator);
+}
+
+Turbo::Render::TIndexBuffer::TIndexType Turbo::Render::TIndexBuffer::GetIndexType() const
+{
+    return this->type;
+}
