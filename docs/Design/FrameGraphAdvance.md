@@ -232,6 +232,7 @@
   >
   >* 创建`DrawCall`章节
   >* 创建`Dispatch`章节
+  >* 更新`Buffer`章节中的`TIndexBuffer`
 ---
 
 # Turbo驱动初步
@@ -1078,11 +1079,19 @@ public:
 class TIndexBuffer: public TBuffer
 {
 public:
+    enum class IndexType
+    {
+        UINT16,
+        UINT32
+    };
+
+public:
     struct Descriptor
     {
         //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::INDEX
         uint64_t size;
         TDomain domain;
+        IndexType indexType;
     };
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
