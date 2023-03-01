@@ -1114,7 +1114,7 @@ public:
 };
 ```
 
-或者说提供一个模板类型的`UniformBuffer`:
+或者说提供一个模板类型的`UniformBuffer`（这样的弊端就是一个`UniformBuffer`只能对应一种`struct`，好处就是方便直接）:
 
 ```CXX
 template<class T>

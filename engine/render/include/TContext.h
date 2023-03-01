@@ -134,7 +134,11 @@ class TContext
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
-    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TImage>& images);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture2D &texture2D);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture3D &texture3D);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TUniformBuffer>& uniformBuffers);
 
     void EndRenderPass();
 

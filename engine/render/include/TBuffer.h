@@ -147,12 +147,32 @@ class TIndexBuffer : public Turbo::Render::TBuffer
     void Copy(void *src, uint64_t size) = delete;
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
 
-    void Copy(const std::vector<uint16_t>& indexs);
-    void Copy(const std::vector<uint32_t>& indexs);
+    void Copy(const std::vector<uint16_t> &indexs);
+    void Copy(const std::vector<uint32_t> &indexs);
 
     TIndexType GetIndexType() const;
 };
 
+template <typename T, std::enable_if_t<std::is_class<T>::value, bool> = true>
+class TUniformBuffer : public Turbo::Render::TBuffer
+{
+  public:
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        // uint64_t size;//manage by T
+        TDomain domain;
+    };
+
+  private:
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    void Copy(void *src, uint64_t size) = delete;
+    void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
+
+    void Copy(const T &uniform);
+};
 } // namespace Render
 } // namespace Turbo
 #endif // !TURBO_RENDER_TBUFFER_H
