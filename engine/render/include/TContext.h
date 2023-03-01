@@ -104,8 +104,10 @@ class TContext
     Turbo::Render::TCommandBuffer currentCommandBuffer;
     std::vector<Turbo::Render::TCommandBuffer> commandBuffers;
 
+    // for BeginRenderPass(...)
     TRenderPassPool *renderPassPool = nullptr;
 
+    // for BindVeretxAttribute(...)
     std::vector<Turbo::Core::TVertexBinding *> vertexBindings;
     std::vector<Turbo::Core::TBuffer *> vertexBuffers;
 
@@ -131,6 +133,8 @@ class TContext
 
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+
+    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TImage>& images);
 
     void EndRenderPass();
 

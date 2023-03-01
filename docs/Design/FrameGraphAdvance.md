@@ -233,7 +233,11 @@
   >* 创建`DrawCall`章节
   >* 创建`Dispatch`章节
   >* 更新`Buffer`章节中的`TIndexBuffer`
-  
+
+* 2023/3/1
+  >
+  >* `Buffer`章节中增加`TUniformBuffer`
+
 ---
 
 # Turbo驱动初步
@@ -1030,6 +1034,8 @@ class TBuffer
 
 计划派生出如下子类：
 
+#### VertexBuffer
+
 ```CXX
 enum TVertexRate
 {
@@ -1062,21 +1068,10 @@ public:
 
     AttributeID AddAttribute( TFormatType formatType, uint32_t offset);
 };
+```
+#### IndexBuffer
 
-class TUniformBuffer: public TBuffer
-{
-public:
-    struct Descriptor
-    {
-        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
-        uint64_t size;
-        TDomain domain;
-    };
-
-    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
-    void Destroy(void *allocator);
-};
-
+```CXX
 class TIndexBuffer: public TBuffer
 {
 public:
@@ -1098,6 +1093,43 @@ public:
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
     void Destroy(void *allocator);
 };
+```
+
+#### UniformBuffer
+
+`UniformBuffer`常见于存储一个`Struct`中的数据
+
+```CXX
+class TUniformBuffer: public TBuffer
+{
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
+        uint64_t size;
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+};
+```
+
+或者说提供一个模板类型的`UniformBuffer`:
+
+```CXX
+template<class T>
+class TUniformBuffer: public TBuffer
+{
+    public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
+        //uint64_t size;//由模板 sizeof(T)推出
+        TDomain domain;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+}
 ```
 
 ## Format格式
