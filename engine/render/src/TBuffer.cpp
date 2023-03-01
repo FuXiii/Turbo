@@ -202,12 +202,42 @@ void Turbo::Render::TIndexBuffer::Create(const std::string &name, const Descript
     buffer_descriptor.size = descriptor.size;
     buffer_descriptor.domain = descriptor.domain;
 
-    this->type = descriptor.type;
-
     Turbo::Render::TBuffer::Create(name, buffer_descriptor, allocator);
 }
 
 Turbo::Render::TIndexBuffer::TIndexType Turbo::Render::TIndexBuffer::GetIndexType() const
 {
-    return this->type;
+    return this->indexType;
+}
+
+void Turbo::Render::TIndexBuffer::Copy(const std::vector<uint16_t> &indexs)
+{
+    uint64_t src_size = indexs.size() * sizeof(uint16_t);
+    uint64_t local_size = this->GetSize();
+    if (src_size > local_size)
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), local_size);
+    }
+    else
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), src_size);
+    }
+
+    this->indexType = TIndexType::UINT16;
+}
+
+void Turbo::Render::TIndexBuffer::Copy(const std::vector<uint32_t> &indexs)
+{
+    uint64_t src_size = indexs.size() * sizeof(uint32_t);
+    uint64_t local_size = this->GetSize();
+    if (src_size > local_size)
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), local_size);
+    }
+    else
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), src_size);
+    }
+
+    this->indexType = TIndexType::UINT32;
 }

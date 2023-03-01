@@ -136,15 +136,19 @@ class TIndexBuffer : public Turbo::Render::TBuffer
         // TBufferUsages usages; //manage by Turbo
         uint64_t size;
         TDomain domain;
-        uint32_t stride;
-        TIndexType type = TIndexType::UINT32;
     };
 
   private:
-    TIndexType type = TIndexType::UINT32;
+    TIndexType indexType = TIndexType::UINT32;
 
   public:
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    void Copy(void *src, uint64_t size) = delete;
+    void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
+
+    void Copy(const std::vector<uint16_t>& indexs);
+    void Copy(const std::vector<uint32_t>& indexs);
 
     TIndexType GetIndexType() const;
 };

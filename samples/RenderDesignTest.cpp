@@ -688,7 +688,7 @@ void Test4()
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, show_target);
                         // cb->CmdClearColorImage(show_target, Turbo::Core::TImageLayout::GENERAL, 1, 0, 0, 1);
                         cb->CmdBlitImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, show_target->GetImage(), Turbo::Core::TImageLayout::GENERAL, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1);
-                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
+                        cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
                         cb->End();
                         temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
 
@@ -820,6 +820,23 @@ void Test5()
     vertex_buffer.Destroy(&resource_allocator);
 }
 
+void Test6()
+{
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    std::vector<uint32_t> indexs;
+    indexs.push_back(0);
+    indexs.push_back(1);
+    indexs.push_back(2);
+
+    Turbo::Render::TIndexBuffer index_buffer;
+
+    index_buffer.Create("index_buffer", {indexs.size() * sizeof(uint32_t), Turbo::Render::TDomainBits::GPU}, &resource_allocator);
+    index_buffer.Copy(indexs);
+    index_buffer.Destroy(&resource_allocator);
+}
+
 int main()
 {
     // Test0();
@@ -828,5 +845,6 @@ int main()
     // Test3();
     // Test4();
     Test5();
+    Test6();
     return 0;
 }

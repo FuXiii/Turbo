@@ -2580,3 +2580,8 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
   >* `./engine/render`下`TBuffer.h`中新增`TIndexBuffer`类，继承自`Turbo::Render::TBuffer`。用于代表索引缓冲
+
+* 2023/3/1 设计架构
+  >
+  >* `./engine/render`下`TBuffer.h`中`TIndexBuffer`类中增加`void Copy(const std::vector<uint32_t>& indexs)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TIndexBuffer`类中增加`void Copy(const std::vector<uint16_t>& indexs)`成员函数
