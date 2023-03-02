@@ -139,6 +139,7 @@ class TContext
     //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds);
     //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture3D &texture3D);
     //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TUniformBuffer>& uniformBuffers);
+    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TUniformBuffer& uniformBuffer);
 
     void EndRenderPass();
 
