@@ -165,13 +165,25 @@ class TUniformBuffer : public Turbo::Render::TBuffer
     };
 
   private:
+    // T data;
+
   public:
-    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+    {
+        Turbo::Render::TBuffer::Descriptor buffer_descriptor = {};
+        buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST;
+        buffer_descriptor.size = sizeof(T);
+        buffer_descriptor.domain = descriptor.domain;
+    }
 
     void Copy(void *src, uint64_t size) = delete;
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
 
-    void Copy(const T &uniform);
+    void Copy(const T &uniform)
+    {
+        uint64_t size = sizeof(T);
+        Turbo::Render::TBuffer::Copy((void *)&uniform, size);
+    }
 };
 } // namespace Render
 } // namespace Turbo

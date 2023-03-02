@@ -837,6 +837,32 @@ void Test6()
     index_buffer.Destroy(&resource_allocator);
 }
 
+void Test7()
+{
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    struct UniformStruct
+    {
+        float a;
+        int b;
+        double c;
+        uint32_t d;
+    };
+
+    UniformStruct us;
+    us.a = 1;
+    us.b = 2;
+    us.c = 3;
+    us.d = 4;
+
+    Turbo::Render::TUniformBuffer<UniformStruct> uniform_buffer;
+
+    uniform_buffer.Create("uniform_buffer", {Turbo::Render::TDomainBits::BOTH}, &resource_allocator);
+    uniform_buffer.Copy(us);
+    uniform_buffer.Destroy(&resource_allocator);
+}
+
 int main()
 {
     // Test0();
@@ -846,5 +872,6 @@ int main()
     // Test4();
     Test5();
     Test6();
+    Test7();
     return 0;
 }

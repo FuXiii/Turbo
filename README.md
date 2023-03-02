@@ -2586,3 +2586,8 @@ Turbo是渲染引擎
   >* `./engine/render`下`TBuffer.h`中`TIndexBuffer`类中增加`void Copy(const std::vector<uint32_t>& indexs)`成员函数
   >* `./engine/render`下`TBuffer.h`中`TIndexBuffer`类中增加`void Copy(const std::vector<uint16_t>& indexs)`成员函数
   >* `./engine/render`下`TBuffer.h`中增加`TUniformBuffer`类
+
+* 2023/3/2 设计架构
+  >
+  >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`类增加`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
+  >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`类增加`void Copy(const T &uniform)`成员函数
