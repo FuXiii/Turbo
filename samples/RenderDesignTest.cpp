@@ -863,6 +863,39 @@ void Test7()
     uniform_buffer.Destroy(&resource_allocator);
 }
 
+void Test8()
+{
+    Turbo::Render::TContext context;
+    Turbo::Render::TResourceAllocator resource_allocator(&context);
+
+    Turbo::Render::TTexture2D texture0;
+    Turbo::Render::TTexture2D::Descriptor texture0_descriptor = {};
+    texture0_descriptor.width = 512;
+    texture0_descriptor.height = 512;
+    texture0_descriptor.mipLevels = 1;
+    texture0_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED | Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    texture0_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    texture0.Create("texture0", texture0_descriptor, &resource_allocator);
+
+    Turbo::Render::TTexture2D texture1;
+    Turbo::Render::TTexture2D::Descriptor texture1_descriptor = {};
+    texture1_descriptor.width = 512;
+    texture1_descriptor.height = 512;
+    texture1_descriptor.mipLevels = 1;
+    texture1_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED | Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    texture1_descriptor.domain = Turbo::Render::TDomainBits::GPU;
+    texture1.Create("texture1", texture1_descriptor, &resource_allocator);
+
+    std::vector<Turbo::Render::TTexture2D> textures;
+    textures.push_back(texture0);
+    textures.push_back(texture1);
+
+    context.BindDescriptor(0, 0, textures);
+
+    texture1.Destroy(&resource_allocator);
+    texture0.Destroy(&resource_allocator);
+}
+
 int main()
 {
     // Test0();
@@ -873,5 +906,6 @@ int main()
     Test5();
     Test6();
     Test7();
+    Test8();
     return 0;
 }
