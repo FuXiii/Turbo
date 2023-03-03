@@ -3,6 +3,7 @@
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
 #include "TImage.h"
+#include <map>
 #include <stdint.h>
 #include <vector>
 
@@ -15,6 +16,8 @@ class TPhysicalDevice;
 class TDevice;
 class TDeviceQueue;
 class TImage;
+class TImageView;
+class TSampler;
 class TBuffer;
 class TCommandBufferPool;
 class TCommandBuffer;
@@ -111,6 +114,64 @@ class TContext
     std::vector<Turbo::Core::TVertexBinding *> vertexBindings;
     std::vector<Turbo::Core::TBuffer *> vertexBuffers;
 
+    // for BindDescriptor(...)
+    using TSetID = uint32_t;
+    using TBindingID = uint32_t;
+    typedef enum class TDescriptorMapType
+    {
+        UNDEFINED,
+        UNIFROM_BUFFER_MAP,
+        COMBINED_IMAGE_SAMPLER_MAP,
+        SAMPLED_IMAGE_MAP,
+        SAMPLER_MAP,
+    } TDescriptorMapType;
+
+    typedef struct TDescriptorID
+    {
+        TSetID set = std::numeric_limits<uint32_t>::max();
+        TBindingID binding = std::numeric_limits<uint32_t>::max();
+
+        /*
+          struct TDescriptorIDCmp
+          {
+                bool operator()(const TDescriptorID &lhs, const TDescriptorID &rhs) const
+              {
+                    if (lhs.set != rhs.set)
+                  {
+                        return lhs.set < rhs.set;
+                  }
+  
+          if (lhs.binding != rhs.binding)
+                  {
+                        return lhs.binding < rhs.binding;
+                  }
+                  return false;
+              }
+          };
+        */
+
+        bool operator()(const TDescriptorID &lhs, const TDescriptorID &rhs) const
+        {
+            if (lhs.set != rhs.set)
+            {
+                return lhs.set < rhs.set;
+            }
+
+            if (lhs.binding != rhs.binding)
+            {
+                return lhs.binding < rhs.binding;
+            }
+            return false;
+        }
+    } TDescriptorID;
+
+    std::map<TDescriptorID, std::vector<Turbo::Core::TBuffer *>, TDescriptorID> uniformBufferMap;
+    std::map<TDescriptorID, std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>>, TDescriptorID> combinedImageSamplerMap;
+    std::map<TDescriptorID, std::vector<Turbo::Core::TImageView *>, TDescriptorID> sampledImageMap;
+    std::map<TDescriptorID, std::vector<Turbo::Core::TSampler *>, TDescriptorID> samplerMap;
+
+    std::map<TSetID, std::map<TBindingID, TDescriptorMapType>> descriptorMap;
+
   public:
     TContext();
     ~TContext();
@@ -134,12 +195,18 @@ class TContext
     void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
-    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds);
-    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture2D &texture2D);
-    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds);
-    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture3D &texture3D);
-    //void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TUniformBuffer>& uniformBuffers);
-    //void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TUniformBuffer& uniformBuffer);
+    void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds);
+    void BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture2D &texture2D);
+    void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds);
+    void BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture3D &texture3D);
+    template <typename T>
+    void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TUniformBuffer<T>> &uniformBuffers)
+    {
+    }
+    template <typename T>
+    void BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TUniformBuffer<T> &uniformBuffer)
+    {
+    }
 
     void EndRenderPass();
 

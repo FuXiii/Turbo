@@ -2591,3 +2591,21 @@ Turbo是渲染引擎
   >
   >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`类增加`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
   >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`类增加`void Copy(const T &uniform)`成员函数
+
+* 2023/3/3 设计架构
+  >
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture2D &texture2D)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TTexture3D &texture3D)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`template <typename T>void BindDescriptor(uint32_t set, uint32_t binding, const std::vector<Turbo::Render::TUniformBuffer<T>> &uniformBuffers)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`template <typename T>void BindDescriptor(uint32_t set, uint32_t binding, const Turbo::Render::TUniformBuffer<T> &uniformBuffer)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`using TSetID = uint32_t`成员声明
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`using TBindingID = uint32_t`成员声明
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`typedef enum class TDescriptorMapType`成员枚举
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`typedef struct TDescriptorID`成员结构体声明
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<Turbo::Core::TBuffer *>, TDescriptorID> uniformBufferMap`成员变量
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>>, TDescriptorID> combinedImageSamplerMap`成员变量
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<Turbo::Core::TImageView *>, TDescriptorID> sampledImageMap`成员变量
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<Turbo::Core::TSampler *>, TDescriptorID> samplerMap`成员变量
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TSetID, std::map<TBindingID, TDescriptorMapType>> descriptorMap`成员变量

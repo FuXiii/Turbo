@@ -2716,7 +2716,7 @@ layout (set = M, binding = N) uniform UNIFORM_TYPE UNIFORM_NAME[T]
 context.BindDescriptor(uint32_t set, uint32_t binding, std::vector<各种uinform资源类型>)
 ```
 
-就算绑定的资源只有一个，也视为`size`为`1`的数组进行设置（这与`Turbo`的`Code`层相一致）
+就算绑定的资源只有一个，也视为`size`为`1`的数组进行设置（这与`Turbo`的`Core`层相一致）
 
 在`Turbo`的`Core`层，需要创建完`Pipeline`才能进行`Descriptor`相关资源数据的绑定，所以在调用`BindDescriptor(...)`时，内部是使用了一个树状结构先将用户绑定的`Descriptor`进行缓存。
 
