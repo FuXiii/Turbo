@@ -201,3 +201,8 @@ add_executable(ClearColorTest ./ClearColorTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(ClearColorTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ClearColorTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ClearColorTest PUBLIC ${LIBS})
+
+add_executable(VulkanAllocatorTest ./VulkanAllocatorTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanAllocatorTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanAllocatorTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanAllocatorTest PUBLIC ${LIBS})
