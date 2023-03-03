@@ -140,7 +140,7 @@ class TContext
                   {
                         return lhs.set < rhs.set;
                   }
-  
+
           if (lhs.binding != rhs.binding)
                   {
                         return lhs.binding < rhs.binding;
@@ -161,6 +161,7 @@ class TContext
             {
                 return lhs.binding < rhs.binding;
             }
+            
             return false;
         }
     } TDescriptorID;

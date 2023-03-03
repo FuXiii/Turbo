@@ -998,15 +998,37 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
             }
 
             // TODO:更新到目标【描述符资源数组】中
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at({set, binding});
+            for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+            {
+                sampled_images.push_back(texture_2d_item.imageView);
+            }
+
+            // 更新绑定类型
+            binding_map->second = TDescriptorMapType::SAMPLED_IMAGE_MAP;
         }
         else
         {
             // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
+            // 说明找到了Set，但没有Binding
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+            for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+            {
+                sampled_images.push_back(texture_2d_item.imageView);
+            }
+
+            set_map->second[binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
         }
     }
     else
     {
         // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
+        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+        for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+        {
+            sampled_images.push_back(texture_2d_item.imageView);
+        }
+        this->descriptorMap[set][binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
     }
 }
 
