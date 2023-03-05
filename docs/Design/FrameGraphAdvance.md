@@ -238,6 +238,10 @@
   >
   >* `Buffer`章节中增加`TUniformBuffer`
 
+* 2023/3/5
+  >
+  >* 创建`Sampler`章节
+
 ---
 
 # Turbo驱动初步
@@ -1069,6 +1073,7 @@ public:
     AttributeID AddAttribute( TFormatType formatType, uint32_t offset);
 };
 ```
+
 #### IndexBuffer
 
 ```CXX
@@ -2050,6 +2055,32 @@ uint32_t layerCount;
 所以在此`Turbo`选择在`Turbo::Render::TImage`中将`Turbo::Core::TImage`和`Turbo::Core::TImageView`统一管理。
 
 创建`ImageView`最好留给`Turbo::Render::TImage`的子类进行构建，`Turbo::Render::TImage`作为基类提供类似`protected: virtual Turbo::Core::TImageView * CreateImageView(....)`的接口函数，该接口函数会在`Turbo::Render::TImage::Create(...)`函数中创建完`Turbo::Core::TImage`之后调用，用于创建`Turbo::Core::TImageView`
+
+## Sampler
+
+对于着色器`Shader`，想要采样纹理，需要一个采样器（`Sampler`），而`Sampler`也与`Image`和`Buffer`一样，当成一种资源创建
+
+```CXX
+class TSampler
+{
+    struct Descriptor
+    {
+        TFilter minFilter = TFilter::LINEAR;
+        TFilter magFilter = TFilter::LINEAR;
+        TMipmapMode mipmapMode = TMipmapMode::LINEAR;
+        TAddressMode addressModeU = TAddressMode::REPEAT;
+        TAddressMode addressModeV = TAddressMode::REPEAT;
+        TAddressMode addressModeW = TAddressMode::REPEAT; 
+        TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE;
+        float mipLodBias = 0.0f;
+        float minLod = 0.0f;
+        float maxLod = 0.0f;
+    };
+
+void Create(const std::string &name, const Image::Descriptor &descriptor,void* allocator);
+void Destroy();
+};
+```
 
 ## Context上下文
 

@@ -2609,3 +2609,25 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<Turbo::Core::TImageView *>, TDescriptorID> sampledImageMap`成员变量
   >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TDescriptorID, std::vector<Turbo::Core::TSampler *>, TDescriptorID> samplerMap`成员变量
   >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::map<TSetID, std::map<TBindingID, TDescriptorMapType>> descriptorMap`成员变量
+
+* 2023/3/5 设计架构
+  >
+  >* `./engine/render`下`TContext.h`中`TContext`类中，更新实现`BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture2D &texture2D)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，更新实现`BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，更新实现`BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture3D &texture3D)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，更新实现`template <typename T>void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TUniformBuffer<T>> &uniformBuffers)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，更新实现`template <typename T>void BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TUniformBuffer<T> &uniformBuffer)`成员函数
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
+  >* `./engine/render`下增加`TSampler.h`和`TSampler.cpp`用于表示`Sampler`
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`typedef enum class TFilter`成员枚举
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`typedef enum class TMipmapMode`成员枚举
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`typedef enum class TAddressMode`成员枚举
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`Turbo::Core::TSampler *sampler = nullptr`成员变量
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`struct Descriptor`成员声明
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`friend class TContext`友元类
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`void *allocator = nullptr`成员变量
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`Turbo::Core::TSampler *sampler = nullptr`成员变量
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`Descriptor descriptor`成员变量
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`void Destroy(void *allocator)`成员函数
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`bool IsValid() const`成员函数

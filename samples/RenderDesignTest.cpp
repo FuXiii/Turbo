@@ -890,8 +890,41 @@ void Test8()
     textures.push_back(texture0);
     textures.push_back(texture1);
 
-    context.BindDescriptor(0, 0, textures);
+    Turbo::Render::TTexture3D texture_3d_0;
+    Turbo::Render::TTexture3D::Descriptor texture_3d_descriptor = {};
+    texture_3d_descriptor.width = 512;
+    texture_3d_descriptor.height = 512;
+    texture_3d_descriptor.depth = 512;
+    texture_3d_descriptor.mipLevels = 1;
+    texture_3d_descriptor.usages = Turbo::Render::TImageUsageBits::SAMPLED | Turbo::Render::TImageUsageBits::TRANSFER_DST;
+    texture_3d_descriptor.domain = Turbo::Render::TDomainBits::GPU;
 
+    texture_3d_0.Create("texture_3d_0", texture_3d_descriptor, &resource_allocator);
+
+    struct UniformStruct
+    {
+        float a;
+        int b;
+        double c;
+        uint32_t d;
+    };
+
+    UniformStruct us;
+    us.a = 1;
+    us.b = 2;
+    us.c = 3;
+    us.d = 4;
+
+    Turbo::Render::TUniformBuffer<UniformStruct> uniform_buffer;
+
+    uniform_buffer.Create("uniform_buffer", {Turbo::Render::TDomainBits::BOTH}, &resource_allocator);
+    uniform_buffer.Copy(us);
+    context.BindDescriptor(0, 0, textures);
+    context.BindDescriptor(0, 1, texture_3d_0);
+    context.BindDescriptor(0, 2, uniform_buffer);
+
+    uniform_buffer.Destroy(&resource_allocator);
+    texture_3d_0.Destroy(&resource_allocator);
     texture1.Destroy(&resource_allocator);
     texture0.Destroy(&resource_allocator);
 }
