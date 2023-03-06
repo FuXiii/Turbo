@@ -7,7 +7,7 @@ void Turbo::Render::TSampler::Create(const std::string &name, const Descriptor &
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
-        // this->sampler = resource_allocator->CreateBuffer(descriptor); //FIXME: Create Sampler
+        this->sampler = resource_allocator->CreateSampler(descriptor);
         this->allocator = allocator;
         this->descriptor = descriptor;
     }
@@ -18,7 +18,7 @@ void Turbo::Render::TSampler::Destroy(void *allocator)
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
-        //resource_allocator->DestroyBuffer(this->sampler); //FIXME: Destroy Sampler
+        resource_allocator->DestroySampler(this->sampler);
     }
 }
 

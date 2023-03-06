@@ -52,3 +52,13 @@ void Turbo::Render::TResourceAllocator::FreeCommandBuffer(Turbo::Core::TCommandB
 {
     this->context->FreeCommandBuffer(commandBuffer);
 }
+
+Turbo::Core::TSampler *Turbo::Render::TResourceAllocator::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
+{
+    return this->context->CreateSampler(descriptor);
+}
+
+void Turbo::Render::TResourceAllocator::DestroySampler(Turbo::Core::TSampler *sampler)
+{
+    this->context->DestroySampler(sampler);
+}

@@ -10,6 +10,7 @@
 #include <render/include/TPipeline.h>
 #include <render/include/TRenderPass.h>
 #include <render/include/TResourceAllocator.h>
+#include <render/include/TSampler.h>
 #include <sstream>
 #include <stdint.h>
 #include <vector>
@@ -919,10 +920,15 @@ void Test8()
 
     uniform_buffer.Create("uniform_buffer", {Turbo::Render::TDomainBits::BOTH}, &resource_allocator);
     uniform_buffer.Copy(us);
+
+    Turbo::Render::TSampler sampler;
+    sampler.Create("sampler", {}, &resource_allocator);
+
     context.BindDescriptor(0, 0, textures);
     context.BindDescriptor(0, 1, texture_3d_0);
     context.BindDescriptor(0, 2, uniform_buffer);
 
+    sampler.Destroy(&resource_allocator);
     uniform_buffer.Destroy(&resource_allocator);
     texture_3d_0.Destroy(&resource_allocator);
     texture1.Destroy(&resource_allocator);

@@ -3,6 +3,7 @@
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
 #include "TImage.h"
+#include "TSampler.h"
 #include <map>
 #include <stdint.h>
 #include <vector>
@@ -177,14 +178,17 @@ class TContext
     TContext();
     ~TContext();
 
-    Turbo::Core::TImage *CreateImage(const TImage::Descriptor &descriptor);
+    Turbo::Core::TImage *CreateImage(const Turbo::Render::TImage::Descriptor &descriptor);
     void DestroyImage(Turbo::Core::TImage *image);
     // Turbo::Core::TImage *CreateCubeImage(uint32_t width, uint32_t height,uint32_t depth,uint32_t layer/*, flags,TImage*/);
-    Turbo::Core::TBuffer *CreateBuffer(const TBuffer::Descriptor &descriptor);
+    Turbo::Core::TBuffer *CreateBuffer(const Turbo::Render::TBuffer::Descriptor &descriptor);
     void DestroyBuffer(Turbo::Core::TBuffer *buffer);
 
     Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
     void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
+
+    Turbo::Core::TSampler *CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor);
+    void DestroySampler(Turbo::Core::TSampler *sampler);
 
     void ClearTexture(Turbo::Render::TTexture2D &texture2D, float r = 0, float g = 0, float b = 0, float a = 0);
 

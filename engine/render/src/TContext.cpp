@@ -18,6 +18,7 @@
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TRenderPass.h>
+#include <core/include/TSampler.h>
 #include <core/include/TVersion.h>
 #include <core/include/TVulkanLoader.h>
 #include <cstdint>
@@ -884,6 +885,19 @@ Turbo::Core::TCommandBuffer *Turbo::Render::TContext::AllocateCommandBuffer()
 void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
 {
     this->commandBufferPool->Free(commandBuffer);
+}
+
+Turbo::Core::TSampler *Turbo::Render::TContext::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
+{
+    return new Turbo::Core::TSampler(this->device, (Turbo::Core::TFilter)descriptor.min, (Turbo::Core::TFilter)descriptor.max, (Turbo::Core::TMipmapMode)descriptor.mipmap, (Turbo::Core::TAddressMode)descriptor.U, (Turbo::Core::TAddressMode)descriptor.V, (Turbo::Core::TAddressMode)descriptor.W);
+}
+
+void Turbo::Render::TContext::DestroySampler(Turbo::Core::TSampler *sampler)
+{
+    if (sampler != nullptr && sampler->GetVkSampler() != VK_NULL_HANDLE)
+    {
+        delete sampler;
+    }
 }
 
 void Turbo::Render::TContext::ClearTexture(Turbo::Render::TTexture2D &texture2D, float r, float g, float b, float a)

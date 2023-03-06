@@ -2631,3 +2631,12 @@ Turbo是渲染引擎
   >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
   >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`void Destroy(void *allocator)`成员函数
   >* `./engine/render`下`TSampler.h`中`TSampler`类中增加`bool IsValid() const`成员函数
+
+* 2023/3/6 设计架构
+  >
+  >* `./engine/render`下`TResourceAllocator.h`中`TResourceAllocator`类中，增加`Turbo::Core::TSampler *CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)`成员函数
+  >* `./engine/render`下`TResourceAllocator.h`中`TResourceAllocator`类中，增加`void DestroySampler(Turbo::Core::TSampler *sampler)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，增加`Turbo::Core::TSampler *CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)`成员函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中，增加`void DestroySampler(Turbo::Core::TSampler *sampler)`成员函数
+    >* `./engine/render`下`TSampler.h`中`TSampler`类中更新`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
+  >* `./engine/render`下`TSampler.h`中`TSampler`类中更新`void Destroy(void *allocator)`成员函数
