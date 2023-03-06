@@ -29,5 +29,5 @@ bool Turbo::Render::TSampler::IsValid() const
         return true;
     }
 
-    return true;
+    return false;
 }
