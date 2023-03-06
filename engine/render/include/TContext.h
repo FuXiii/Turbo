@@ -281,6 +281,9 @@ class TContext
         this->BindDescriptor(set, binding, uniform_buffers);
     }
 
+    // void Draw();
+    // void DrawIndexed();
+
     void EndRenderPass();
 
     void Flush();

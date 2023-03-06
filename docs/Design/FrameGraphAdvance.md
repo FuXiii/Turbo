@@ -242,6 +242,10 @@
   >
   >* 创建`Sampler`章节
 
+* 2023/3/6
+  >
+  >* 更新`DrawCall`章节
+
 ---
 
 # Turbo驱动初步
@@ -3123,6 +3127,49 @@ CreateFrameBuffer-->ReturnFrameBuffer
 * 清空由于`BindDescriptor(...)`记录的`Descriptor`和相关记录结构
 
 *注：如果用户在绑定完`VeretxAttribute`和`Descriptor`之后没有再调用相关绑定函数接口，`Turbo`调用`DrawCall`将不会再收集更新相关指令，因为相关指令没有更新的必要，默认使用之前的绑定结果。（如果新的渲染与之前的绑定的数据不兼容的话将会因不符合`Vulkan`标准而出问题）*
+
+由于创建`Pipeline`和记录渲染指令都位于`DrawCall`中，所以需要在`DrawCall`中提供防止重复创建`Pipeline`的功能，比如：
+
+```CXX
+...
+context.Draw(....);
+context.Draw(....);
+context.Draw(....);
+context.NextSubpass();
+...
+```
+在如上的三次渲染中，如果不防止重复创建`Pipeline`的话将会创建三次`Pipeline`。这就需要在绘制时判断，当前绑定的`Pipeline`是否已被创建。
+
+在`Vulkan`标准中，一个`Pipeline`内部属性对应如下：
+
+* `RenderPass`：当前`Pipeline`属于哪个`RenderPass`
+* `Subpass`：当前`Pipeline`属于当前`RenderPass`下的哪个`Subpass`
+* `Shaders`：当前`Pipeline`对应的着色器
+
+每当绘制时，`DrawCall`是知道当前位于哪个`RenderPass`下的哪个`Subpass`下使用哪个`Pipeline`的，所以每次`DrawCall`需要判断当前渲染指令下，在当前`RenderPass`下的当前`Subpass`下是否有与绑定的`Pipeline`兼容的已创建的`Pipeline`，如果有直接使用，如果没有新建一个
+
+```mermaid
+graph TD;
+DrawCall["DrawCal(...)"]
+NavigateCurrentRenderPass["定位到当前RenderPass"]
+NavigateCurrentSubpass["定位到当前Subpass"]
+IsHadCompatiblePipeline{"是否有兼容的Pipeline"}
+
+UseCompatiblePipeline["使用兼容性的Pipeline"]
+CreateNewPipeline["创建新的Pipeline"]
+
+ReturnUse["返回使用"]
+
+DrawCall-->NavigateCurrentRenderPass
+NavigateCurrentRenderPass-->NavigateCurrentSubpass
+NavigateCurrentSubpass-->IsHadCompatiblePipeline
+IsHadCompatiblePipeline--是-->UseCompatiblePipeline
+IsHadCompatiblePipeline--否-->CreateNewPipeline
+UseCompatiblePipeline-->ReturnUse
+CreateNewPipeline-->ReturnUse
+```
+
+提供一个`PipelinePool`也许是一个好方法
 
 ## Dispatch
 

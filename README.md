@@ -2640,3 +2640,4 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TContext`类中，增加`void DestroySampler(Turbo::Core::TSampler *sampler)`成员函数
     >* `./engine/render`下`TSampler.h`中`TSampler`类中更新`void Create(const std::string &name, const Descriptor &descriptor, void *allocator)`成员函数
   >* `./engine/render`下`TSampler.h`中`TSampler`类中更新`void Destroy(void *allocator)`成员函数
+  >* 更新`./docs/Design`下`FrameGraphAdvance.md`文档
