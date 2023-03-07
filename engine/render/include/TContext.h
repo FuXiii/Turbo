@@ -53,6 +53,8 @@ class TPipelinePool
   private:
     std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap;
 
+    bool Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+
   public:
     TPipelinePool() = default;
     ~TPipelinePool() = default;

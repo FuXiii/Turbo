@@ -2647,4 +2647,6 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中增加`TPipelinePool`类
   >* `./engine/render`下`TContext.h`中`TPipelinePool`类中增加`std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap`成员变量
   >* `./engine/render`下`TContext.h`中`TPipelinePool`类中增加`bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
+  >* `./engine/render`下`TContext.h`中`TPipelinePool`类中增加`bool Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
   >* `./engine/render`下`TContext.h`中`TPipelinePool`类中增加`void Free(Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
+  >* `./engine/render`下`TRenderPass.h`中`TRenderPass`类中增加`friend class TPipelinePool`友元类

@@ -26,6 +26,28 @@
 #include <stdint.h>
 #include <vector>
 
+bool Turbo::Render::TPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    if (renderPass.IsValid())
+    {
+        auto render_passs_map = this->graphicsPipelineMap.find(renderPass.renderPass);
+        if (render_passs_map != this->graphicsPipelineMap.end())
+        {
+            auto subpass_map = render_passs_map->second.find(subpass);
+            if (subpass_map != render_passs_map->second.end())
+            {
+                for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_map->second)
+                {
+                    //TODO: find compatible pipeline
+                    return false;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 {
     if (context != nullptr)
