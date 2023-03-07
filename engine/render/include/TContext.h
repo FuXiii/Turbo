@@ -26,6 +26,7 @@ class TFence;
 class TRenderPass;
 class TFramebuffer;
 class TVertexBinding;
+class TGraphicsPipeline;
 } // namespace Core
 } // namespace Turbo
 
@@ -46,6 +47,19 @@ class TRenderPass;
 class TComputePipeline;
 class TGraphicsPipeline;
 class TContext;
+
+class TPipelinePool
+{
+  private:
+    std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap;
+
+  public:
+    TPipelinePool() = default;
+    ~TPipelinePool() = default;
+
+    bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+    void Free(Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+};
 
 class TFramebufferPool
 {
