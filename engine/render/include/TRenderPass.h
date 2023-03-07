@@ -46,7 +46,7 @@ class TRenderPass
   private:
     friend class TRenderPassPool;
     friend class TFramebufferPool;
-    friend class TPipelinePool;
+    friend class TGraphicsPipelinePool;
     friend class TContext;
 
   private:

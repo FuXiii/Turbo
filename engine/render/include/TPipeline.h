@@ -5,6 +5,15 @@
 
 namespace Turbo
 {
+namespace Core
+{
+class TComputePipeline;
+class TGraphicsPipeline;
+} // namespace Core
+} // namespace Turbo
+
+namespace Turbo
+{
 namespace Render
 {
 class TComputeShader;
@@ -32,6 +41,11 @@ class TComputePipeline : public TPipeline
 
 class TGraphicsPipeline : public TPipeline
 {
+  private:
+    friend class TGraphicsPipelinePool;
+
+    Turbo::Core::TGraphicsPipeline *graphicsPipeline = nullptr;
+
   public:
     typedef enum class TTopology
     {

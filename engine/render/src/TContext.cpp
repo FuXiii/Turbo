@@ -26,7 +26,11 @@
 #include <stdint.h>
 #include <vector>
 
-bool Turbo::Render::TPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+}
+
+bool Turbo::Render::TGraphicsPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
     if (renderPass.IsValid())
     {
@@ -38,13 +42,24 @@ bool Turbo::Render::TPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, 
             {
                 for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_map->second)
                 {
-                    //TODO: find compatible pipeline
+                    // TODO: find compatible pipeline
                     return false;
                 }
             }
         }
     }
 
+    return false;
+}
+
+bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    if (this->Find(renderPass, subpass, graphicsPipeline))
+    {
+        return true;
+    }
+
+    this->CreateGraphicsPipeline(graphicsPipeline);
     return false;
 }
 
