@@ -28,6 +28,11 @@
 
 void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
+    if (this->context != nullptr)
+    {
+        Turbo::Core::TDevice *device = this->context->GetDevice();
+        
+    }
 }
 
 bool Turbo::Render::TGraphicsPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
@@ -50,6 +55,18 @@ bool Turbo::Render::TGraphicsPipelinePool::Find(Turbo::Render::TRenderPass &rend
     }
 
     return false;
+}
+
+Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool(TContext *context)
+{
+    if (context != nullptr)
+    {
+        this->context = context;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool", "Please make sure set valid TContext* parameter");
+    }
 }
 
 bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)

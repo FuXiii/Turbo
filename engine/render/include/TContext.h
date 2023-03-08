@@ -51,14 +51,17 @@ class TContext;
 class TGraphicsPipelinePool
 {
   private:
+    TContext *context = nullptr;
+
     // TODO: 需要一个类似于快表的数据结构来加速查询
     std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap;
 
+  private:
     void CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline);
     bool Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
   public:
-    TGraphicsPipelinePool() = default;
+    TGraphicsPipelinePool(TContext *context);
     ~TGraphicsPipelinePool() = default;
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);

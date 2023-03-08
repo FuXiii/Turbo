@@ -2653,3 +2653,8 @@ Turbo是渲染引擎
   >* `./engine/render`下`TRenderPass.h`中`TRenderPass`类中增加`friend class TGraphicsPipelinePool`友元类
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`friend class TGraphicsPipelinePool`友元类
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`Turbo::Core::TGraphicsPipeline *graphicsPipeline = nullptr`成员变量
+  
+* 2023/3/7 设计架构
+  >
+  >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`TContext *context`成员变量
+  >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`TGraphicsPipelinePool(TContext *context)`构造函数
