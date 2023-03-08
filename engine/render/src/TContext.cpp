@@ -1,10 +1,11 @@
 #include "render/include/TContext.h"
-#include "TAttachment.h"
-#include "TRenderPass.h"
 #include "render/include/TImage.h"
+#include "render/include/TPipeline.h"
 #include "render/include/TRenderPass.h"
+#include "render/include/TShader.h"
 #include "vulkan/vulkan_core.h"
 #include <algorithm>
+#include <core/include/TAttachment.h>
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
@@ -26,15 +27,92 @@
 #include <stdint.h>
 #include <vector>
 
-void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+// FIXME:没有实现完全
+void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
     if (this->context != nullptr)
     {
         Turbo::Core::TDevice *device = this->context->GetDevice();
-        
+
+        Turbo::Core::TRenderPass *render_pass = renderPass.renderPass;
+
+        std::vector<Turbo::Core::TVertexBinding *> vertex_binding_ptrs = this->context->GetVertexBindings();
+
+        std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
+        for (Turbo::Core::TVertexBinding *vertex_binding_ptr_item : vertex_binding_ptrs)
+        {
+            vertex_bindings.push_back(*vertex_binding_ptr_item);
+        }
+
+        Turbo::Render::TVertexShader *render_vertex_shader = graphicsPipeline.GetVertexShader();
+        Turbo::Render::TFragmentShader *render_fragment_shader = graphicsPipeline.GetFragmentShader();
+        if (render_vertex_shader == nullptr || render_fragment_shader == nullptr)
+        {
+            // FIXME: retur false;//create failed
+            throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline", "Please make sure set valid shader");
+        }
+
+        // TRenderPass *renderPass,
+        // uint32_t subpass,
+        // std::vector<TVertexBinding> &vertexBindings,
+        // TVertexShader *vertexShader,
+        // TFragmentShader *fragmentShader,
+        // TTopologyType topology = TTopologyType::TRIANGLE_LIST,
+        // bool primitiveRestartEnable = false,
+        // bool depthClampEnable = false,
+        // bool rasterizerDiscardEnable = false,
+        // TPolygonMode polygonMode = TPolygonMode::FILL,
+        // TCullModes cullMode = TCullModeBits::MODE_BACK_BIT,
+        // TFrontFace frontFace = TFrontFace::CLOCKWISE,
+        // bool depthBiasEnable = false,
+        // float depthBiasConstantFactor = 0,
+        // float depthBiasClamp = 0,
+        // float depthBiasSlopeFactor = 0,
+        // float lineWidth = 1,
+        // bool multisampleEnable = false,
+        // TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT,
+        // bool depthTestEnable = true,
+        // bool depthWriteEnable = true,
+        // TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL,
+        // bool depthBoundsTestEnable = false,
+        // bool stencilTestEnable = false,
+        // TStencilOp frontFailOp = TStencilOp::KEEP,
+        // TStencilOp frontPassOp = TStencilOp::KEEP,
+        // TStencilOp frontDepthFailOp = TStencilOp::KEEP,
+        // TCompareOp frontCompareOp = TCompareOp::ALWAYS,
+        // uint32_t frontCompareMask = 0,
+        // uint32_t frontWriteMask = 0,
+        // uint32_t frontReference = 0,
+        // TStencilOp backFailOp = TStencilOp::KEEP,
+        // TStencilOp backPassOp = TStencilOp::KEEP,
+        // TStencilOp backDepthFailOp = TStencilOp::KEEP,
+        // TCompareOp backCompareOp = TCompareOp::ALWAYS,
+        // uint32_t backCompareMask = 0,
+        // uint32_t backWriteMask = 0,
+        // uint32_t backReference = 0,
+        // float minDepthBounds = 0,
+        // float maxDepthBounds = 0,
+        // bool logicOpEnable = false,
+        // TLogicOp logicOp = TLogicOp::NO_OP,
+        // bool blendEnable = false,
+        // TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO,
+        // TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO,
+        // TBlendOp colorBlendOp = TBlendOp::ADD,
+        // TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO,
+        // TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO,
+        // TBlendOp alphaBlendOp = TBlendOp::ADD,
+        // float constantR = 1,
+        // float constantG = 1,
+        // float constantB = 1,
+        // float constantA = 1
+
+        Turbo::Core::TGraphicsPipeline *new_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, subpass, vertex_bindings, render_vertex_shader->GetVertexShader(), render_fragment_shader->GetFragmentShader());
+        this->graphicsPipelineMap[renderPass.renderPass][subpass].push_back(new_graphics_pipeline);
+        graphicsPipeline.graphicsPipeline = new_graphics_pipeline;
     }
 }
 
+// FIXME:没有实现完全
 bool Turbo::Render::TGraphicsPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
     if (renderPass.IsValid())
@@ -76,8 +154,24 @@ bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &
         return true;
     }
 
-    this->CreateGraphicsPipeline(graphicsPipeline);
-    return false;
+    this->CreateGraphicsPipeline(renderPass, subpass, graphicsPipeline);
+    return true;
+}
+
+void Turbo::Render::TGraphicsPipelinePool::GC()
+{
+    for (auto &render_pass_item : this->graphicsPipelineMap)
+    {
+        for (auto &subpass_item : render_pass_item.second)
+        {
+            for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
+            {
+                delete graphics_pipeline_item;
+            }
+        }
+    }
+
+    this->graphicsPipelineMap.clear();
 }
 
 Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
@@ -520,6 +614,11 @@ void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass
     // this->renderPassProxies[x].Destroy();
 }
 
+void Turbo::Render::TRenderPassPool::GC()
+{
+    this->framebufferPool->GC();
+}
+
 Turbo::Render::TFramebufferPool::TFramebufferPool(TContext *context)
 {
     if (context != nullptr)
@@ -612,6 +711,16 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
 void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPass)
 {
     //
+}
+
+void Turbo::Render::TFramebufferPool::GC()
+{
+    for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
+    {
+        delete frame_buffer_item;
+    }
+
+    this->framebuffers.clear();
 }
 
 Turbo::Render::TContext::TContext()
@@ -1183,6 +1292,10 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
     this->BindDescriptor(set, binding, texture3ds);
 }
 
+void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+{
+}
+
 void Turbo::Render::TContext::EndRenderPass()
 {
     // TODO: CmdBindVertexBuffers(...)
@@ -1276,6 +1389,11 @@ Turbo::Core::TDevice *Turbo::Render::TContext::GetDevice()
 Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
 {
     return this->graphicsQueue;
+}
+
+std::vector<Turbo::Core::TVertexBinding *> Turbo::Render::TContext::GetVertexBindings()
+{
+    return this->vertexBindings;
 }
 
 Turbo::Render::TCommandBuffer Turbo::Render::TContext::GetCommandBuffer()

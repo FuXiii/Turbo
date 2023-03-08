@@ -229,13 +229,20 @@ class TGraphicsPipeline : public TPipeline
     TGraphicsPipeline &SetVertexShader(Turbo::Render::TVertexShader *vertexShader);
     TGraphicsPipeline &SetFragmentShader(Turbo::Render::TFragmentShader *fragmentShader);
 
+    Turbo::Render::TVertexShader *GetVertexShader();
+    Turbo::Render::TFragmentShader *GetFragmentShader();
+
     // VkPipelineInputAssemblyStateCreateInfo
     TGraphicsPipeline &SetTopology(TTopology topology);
     TGraphicsPipeline &SetPrimitiveRestartEnable(bool primitiveRestartEnable);
 
+    TTopology GetTopology();
+    bool GetPrimitiveRestartEnable();
+
     // VkPipelineTessellationStateCreateInfo
     // TODO:注：Turbo::Core目前不支持该属性，需要Turbo::Core提供相关实现
     TGraphicsPipeline &SetPatchControlPoints(uint32_t patchControlPoints);
+    uint32_t GetPatchControlPoints();
 
     // VkPipelineRasterizationStateCreateInfo
     TGraphicsPipeline &SetDepthClampEnable(bool depthClampEnable);
@@ -248,6 +255,17 @@ class TGraphicsPipeline : public TPipeline
     TGraphicsPipeline &SetDepthBiasClamp(float depthBiasClamp);
     TGraphicsPipeline &SetDepthBiasSlopeFactor(float depthBiasSlopeFactor);
     TGraphicsPipeline &SetLineWidth(float lineWidth);
+
+    bool GetDepthClampEnable();
+    bool GetRasterizerDiscardEnable();
+    TPolygon GetPolygon();
+    TCull GetCull();
+    TFront GetFront();
+    bool GetDepthBiasEnable();
+    float GetDepthBiasConstantFactor();
+    float GetDepthBiasClamp();
+    float GetDepthBiasSlopeFactor();
+    float GetLineWidth();
 
     // VkPipelineDepthStencilStateCreateInfo
     TGraphicsPipeline &SetDepthTestEnable(bool depthTestEnable);
@@ -275,6 +293,31 @@ class TGraphicsPipeline : public TPipeline
     TGraphicsPipeline &SetMinDepthBounds(float minDepthBounds);
     TGraphicsPipeline &SetMaxDepthBounds(float maxDepthBounds);
 
+    bool GetDepthTestEnable();
+    bool GetDepthWriteEnable();
+    TCompareOp GetDepthCompareOp();
+    bool GetDepthBoundsTestEnable();
+    bool GetStencilTestEnable();
+
+    TStencilOp GetStencilFrontFailOp();
+    TStencilOp GetStencilFrontPassOp();
+    TStencilOp GetStencilFrontDepthFailOp();
+    TCompareOp GetStencilFrontCompareOp();
+    uint32_t GetStencilFrontCompareMask();
+    uint32_t GetStencilFrontWriteMask();
+    uint32_t GetStencilFrontReference();
+
+    TStencilOp GetStencilBackFailOp();
+    TStencilOp GetStencilBackPassOp();
+    TStencilOp GetStencilBackDepthFailOp();
+    TCompareOp GetStencilBackCompareOp();
+    uint32_t GetStencilBackCompareMask();
+    uint32_t GetStencilBackWriteMask();
+    uint32_t GetStencilBackReference();
+
+    float GetMinDepthBounds();
+    float GetMaxDepthBounds();
+
     // VkPipelineColorBlendStateCreateInfo
     TGraphicsPipeline &SetLogicOpEnable(bool logicOpEnable);
     TGraphicsPipeline &SetLogicOp(TLogicOp logicOp);
@@ -285,6 +328,16 @@ class TGraphicsPipeline : public TPipeline
     TGraphicsPipeline &SetSrcAlphaBlendFactor(TBlendFactor srcAlphaBlendFactor);
     TGraphicsPipeline &SetDstAlphaBlendFactor(TBlendFactor dstAlphaBlendFactor);
     TGraphicsPipeline &SetAlphaBlendOp(TBlendOp alphaBlendOp);
+
+    bool GetLogicOpEnable();
+    TLogicOp GetLogicOp();
+    bool GetBlendEnable();
+    TBlendFactor GetSrcColorBlendFactor();
+    TBlendFactor GetDstColorBlendFactor();
+    TBlendOp GetColorBlendOp();
+    TBlendFactor GetSrcAlphaBlendFactor();
+    TBlendFactor GetDstAlphaBlendFactor();
+    TBlendOp GetAlphaBlendOp();
 };
 } // namespace Render
 } // namespace Turbo

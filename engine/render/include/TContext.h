@@ -57,7 +57,7 @@ class TGraphicsPipelinePool
     std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap;
 
   private:
-    void CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+    void CreateGraphicsPipeline(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
     bool Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
   public:
@@ -66,6 +66,8 @@ class TGraphicsPipelinePool
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
     void Free(Turbo::Render::TGraphicsPipeline &graphicsPipeline);
+
+    void GC();
 };
 
 class TFramebufferPool
@@ -86,6 +88,8 @@ class TFramebufferPool
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
+
+    void GC();
 };
 
 class TRenderPassPool
@@ -109,6 +113,8 @@ class TRenderPassPool
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass);
     void Free(Turbo::Render::TRenderPass &renderPass);
+
+    void GC();
 };
 
 typedef struct TCommandBuffer
@@ -302,7 +308,7 @@ class TContext
         this->BindDescriptor(set, binding, uniform_buffers);
     }
 
-    // void Draw();
+    void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
     // void DrawIndexed();
 
     void EndRenderPass();
@@ -314,6 +320,7 @@ class TContext
     Turbo::Core::TPhysicalDevice *GetPhysicalDevice();
     Turbo::Core::TDevice *GetDevice();
     Turbo::Core::TDeviceQueue *GetDeviceQueue();
+    std::vector<Turbo::Core::TVertexBinding *> GetVertexBindings();
     Turbo::Render::TCommandBuffer GetCommandBuffer();
 
     /*FIXME:Just For Test*/ [[deprecated]] Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);

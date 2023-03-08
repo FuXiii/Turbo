@@ -43,6 +43,16 @@ Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetFragmentS
     return *this;
 }
 
+Turbo::Render::TVertexShader *Turbo::Render::TGraphicsPipeline::GetVertexShader()
+{
+    return this->vertexShader;
+}
+
+Turbo::Render::TFragmentShader *Turbo::Render::TGraphicsPipeline::GetFragmentShader()
+{
+    return this->fragmentShader;
+}
+
 Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetTopology(TTopology topology)
 {
     this->topology = topology;
@@ -55,10 +65,25 @@ Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetPrimitive
     return *this;
 }
 
+Turbo::Render::TGraphicsPipeline::TTopology Turbo::Render::TGraphicsPipeline::GetTopology()
+{
+    return this->topology;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetPrimitiveRestartEnable()
+{
+    return this->primitiveRestartEnable;
+}
+
 Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetPatchControlPoints(uint32_t patchControlPoints)
 {
     this->patchControlPoints = patchControlPoints;
     return *this;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetPatchControlPoints()
+{
+    return this->patchControlPoints;
 }
 
 Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetDepthClampEnable(bool depthClampEnable)
@@ -119,6 +144,56 @@ Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetLineWidth
 {
     this->lineWidth = lineWidth;
     return *this;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetDepthClampEnable()
+{
+    return this->depthClampEnable;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetRasterizerDiscardEnable()
+{
+    return this->rasterizerDiscardEnable;
+}
+
+Turbo::Render::TGraphicsPipeline::TPolygon Turbo::Render::TGraphicsPipeline::GetPolygon()
+{
+    return this->polygon;
+}
+
+Turbo::Render::TGraphicsPipeline::TCull Turbo::Render::TGraphicsPipeline::GetCull()
+{
+    return this->cull;
+}
+
+Turbo::Render::TGraphicsPipeline::TFront Turbo::Render::TGraphicsPipeline::GetFront()
+{
+    return this->front;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetDepthBiasEnable()
+{
+    return this->depthBiasEnable;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetDepthBiasConstantFactor()
+{
+    return this->depthBiasConstantFactor;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetDepthBiasClamp()
+{
+    return this->depthBiasClamp;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetDepthBiasSlopeFactor()
+{
+    return this->depthBiasSlopeFactor;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetLineWidth()
+{
+    return this->lineWidth;
 }
 
 Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetDepthTestEnable(bool depthTestEnable)
@@ -247,6 +322,107 @@ Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetMaxDepthB
     return *this;
 }
 
+bool Turbo::Render::TGraphicsPipeline::GetDepthTestEnable()
+{
+    return this->depthTestEnable;
+}
+bool Turbo::Render::TGraphicsPipeline::GetDepthWriteEnable()
+{
+    return this->depthWriteEnable;
+}
+Turbo::Render::TGraphicsPipeline::TCompareOp Turbo::Render::TGraphicsPipeline::GetDepthCompareOp()
+{
+    return this->depthCompareOp;
+}
+bool Turbo::Render::TGraphicsPipeline::GetDepthBoundsTestEnable()
+{
+    return this->depthBoundsTestEnable;
+}
+bool Turbo::Render::TGraphicsPipeline::GetStencilTestEnable()
+{
+    return this->stencilTestEnable;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilFrontFailOp()
+{
+    return this->frontFailOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilFrontPassOp()
+{
+    return this->frontPassOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilFrontDepthFailOp()
+{
+    return this->frontDepthFailOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TCompareOp Turbo::Render::TGraphicsPipeline::GetStencilFrontCompareOp()
+{
+    return this->frontCompareOp;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilFrontCompareMask()
+{
+    return this->frontCompareMask;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilFrontWriteMask()
+{
+    return this->frontWriteMask;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilFrontReference()
+{
+    return this->frontReference;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilBackFailOp()
+{
+    return this->backFailOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilBackPassOp()
+{
+    return this->backPassOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TStencilOp Turbo::Render::TGraphicsPipeline::GetStencilBackDepthFailOp()
+{
+    return this->backDepthFailOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TCompareOp Turbo::Render::TGraphicsPipeline::GetStencilBackCompareOp()
+{
+    return this->backCompareOp;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilBackCompareMask()
+{
+    return this->backCompareMask;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilBackWriteMask()
+{
+    return this->backWriteMask;
+}
+
+uint32_t Turbo::Render::TGraphicsPipeline::GetStencilBackReference()
+{
+    return this->backReference;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetMinDepthBounds()
+{
+    return this->minDepthBounds;
+}
+
+float Turbo::Render::TGraphicsPipeline::GetMaxDepthBounds()
+{
+    return this->maxDepthBounds;
+}
+
 Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetLogicOpEnable(bool logicOpEnable)
 {
     this->logicOpEnable = logicOpEnable;
@@ -299,4 +475,49 @@ Turbo::Render::TGraphicsPipeline &Turbo::Render::TGraphicsPipeline::SetAlphaBlen
 {
     this->alphaBlendOp = alphaBlendOp;
     return *this;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetLogicOpEnable()
+{
+    return this->logicOpEnable;
+}
+
+Turbo::Render::TGraphicsPipeline::TLogicOp Turbo::Render::TGraphicsPipeline::GetLogicOp()
+{
+    return this->logicOp;
+}
+
+bool Turbo::Render::TGraphicsPipeline::GetBlendEnable()
+{
+    return this->blendEnable;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendFactor Turbo::Render::TGraphicsPipeline::GetSrcColorBlendFactor()
+{
+    return this->srcColorBlendFactor;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendFactor Turbo::Render::TGraphicsPipeline::GetDstColorBlendFactor()
+{
+    return this->dstColorBlendFactor;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendOp Turbo::Render::TGraphicsPipeline::GetColorBlendOp()
+{
+    return this->colorBlendOp;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendFactor Turbo::Render::TGraphicsPipeline::GetSrcAlphaBlendFactor()
+{
+    return this->srcAlphaBlendFactor;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendFactor Turbo::Render::TGraphicsPipeline::GetDstAlphaBlendFactor()
+{
+    return this->dstAlphaBlendFactor;
+}
+
+Turbo::Render::TGraphicsPipeline::TBlendOp Turbo::Render::TGraphicsPipeline::GetAlphaBlendOp()
+{
+    return this->alphaBlendOp;
 }

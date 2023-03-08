@@ -2648,13 +2648,66 @@ Turbo是渲染引擎
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap`成员变量
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`bool Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
-  >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`void CreateGraphicsPipeline(Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
+  >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`void CreateGraphicsPipeline(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`void Free(Turbo::Render::TGraphicsPipeline &graphicsPipeline)`成员函数
   >* `./engine/render`下`TRenderPass.h`中`TRenderPass`类中增加`friend class TGraphicsPipelinePool`友元类
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`friend class TGraphicsPipelinePool`友元类
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`Turbo::Core::TGraphicsPipeline *graphicsPipeline = nullptr`成员变量
   
-* 2023/3/7 设计架构
+* 2023/3/8 设计架构
   >
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`TContext *context`成员变量
   >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`TGraphicsPipelinePool(TContext *context)`构造函数
+  >* `./engine/render`下`TContext.h`中`TContext`类中增加`std::vector<Turbo::Core::TVertexBinding *> GetVertexBindings()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`Turbo::Render::TVertexShader *GetVertexShader()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`Turbo::Render::TFragmentShader *GetFragmentShader()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TTopology GetTopology()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetPrimitiveRestartEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetPatchControlPoints()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetDepthClampEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetRasterizerDiscardEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TPolygon GetPolygon()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TCull GetCull()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TFront GetFront()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetDepthBiasEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetDepthBiasConstantFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetDepthBiasClamp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetDepthBiasSlopeFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetLineWidth()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetDepthTestEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetDepthWriteEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TCompareOp GetDepthCompareOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetDepthBoundsTestEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetStencilTestEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilFrontFailOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilFrontPassOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilFrontDepthFailOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TCompareOp GetStencilFrontCompareOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilFrontCompareMask()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilFrontWriteMask()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilFrontReference()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilBackFailOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilBackPassOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TStencilOp GetStencilBackDepthFailOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TCompareOp GetStencilBackCompareOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilBackCompareMask()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilBackWriteMask()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`uint32_t GetStencilBackReference()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetMinDepthBounds()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`float GetMaxDepthBounds()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetLogicOpEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TLogicOp GetLogicOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`bool GetBlendEnable()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetSrcColorBlendFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetDstColorBlendFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendOp GetColorBlendOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetSrcAlphaBlendFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetDstAlphaBlendFactor()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendOp GetAlphaBlendOp()`成员函数
+  >* `./engine/render`下`TShader.h`中`TComputeShader`类中增加`Turbo::Core::TComputeShader * GetComputeShader()`成员函数
+  >* `./engine/render`下`TShader.h`中`TVertexShader`类中增加`Turbo::Core::TVertexShader * GetVertexShader()`成员函数
+  >* `./engine/render`下`TShader.h`中`TFragmentShader`类中增加`Turbo::Core::TFragmentShader * GetFragmentShader()`成员函数
+    >* `./engine/render`下`TContext.h`中`TContext`类中增加`void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)`成员函数
+    >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`void GC()`成员函数
+    >* `./engine/render`下`TContext.h`中`TFramebufferPool`类中增加`void GC()`成员函数
+    >* `./engine/render`下`TContext.h`中`TRenderPassPool`类中增加`void GC()`成员函数
