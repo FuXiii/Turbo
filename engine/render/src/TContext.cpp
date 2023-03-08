@@ -1140,10 +1140,10 @@ void Turbo::Render::TContext::BindVeretxAttribute(const Turbo::Render::TVertexBu
     }
 }
 
-// void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
-// {
-//     // TODO: create Turbo::Core::TComputePipeline if didn't create before
-// }
+void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
+{
+    // TODO: create Turbo::Core::TComputePipeline if didn't create before
+}
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
@@ -1321,6 +1321,16 @@ void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount,
     this->currentCommandBuffer.commandBuffer->CmdSetViewport(viewports);
     this->currentCommandBuffer.commandBuffer->CmdSetScissor(scissors);
     this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+
+    {
+        for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
+        {
+            delete vertex_binding_item;
+        }
+    }
+
+    this->vertexBindings.clear();
+    this->vertexBuffers.clear();
 }
 
 void Turbo::Render::TContext::EndRenderPass()
@@ -1440,4 +1450,6 @@ Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTe
 
 void Turbo::Render::TContext::GC()
 {
+    this->graphicsPipelinePool->GC();
+    this->renderPassPool->GC();
 }

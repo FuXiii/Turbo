@@ -232,7 +232,7 @@ class TContext
 
     void BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location);
 
-    // void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
+    void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
     void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds);
