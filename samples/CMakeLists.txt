@@ -206,3 +206,8 @@ add_executable(VulkanAllocatorTest ./VulkanAllocatorTest.cpp ${IMGUI_SOURCE_PATH
 target_include_directories(VulkanAllocatorTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanAllocatorTest PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanAllocatorTest PUBLIC ${LIBS})
+
+add_executable(ShaderIncludeTest ./ShaderIncludeTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ShaderIncludeTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ShaderIncludeTest PUBLIC ${LINK_PARTH})
+target_link_libraries(ShaderIncludeTest PUBLIC ${LIBS})
