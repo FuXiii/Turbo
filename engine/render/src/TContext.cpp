@@ -1307,7 +1307,7 @@ void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount,
     this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline);
     this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
 
-    // this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+    // this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//TODO: 待实现
     this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
 
     Turbo::Core::TViewport viewport(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight(), 0, 1);
