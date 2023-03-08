@@ -324,6 +324,8 @@ class TContext
     Turbo::Render::TCommandBuffer GetCommandBuffer();
 
     /*FIXME:Just For Test*/ [[deprecated]] Turbo::Core::TImage *GetTextureImage(Turbo::Render::TTexture2D texture2d);
+
+    void GC();
 };
 } // namespace Render
 } // namespace Turbo

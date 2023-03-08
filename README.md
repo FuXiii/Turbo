@@ -2711,3 +2711,4 @@ Turbo是渲染引擎
     >* `./engine/render`下`TContext.h`中`TGraphicsPipelinePool`类中增加`void GC()`成员函数
     >* `./engine/render`下`TContext.h`中`TFramebufferPool`类中增加`void GC()`成员函数
     >* `./engine/render`下`TContext.h`中`TRenderPassPool`类中增加`void GC()`成员函数
+    >* `./engine/render`下`TContext.h`中增加`void GC()`成员函数

@@ -1294,6 +1294,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 
 void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
+    
 }
 
 void Turbo::Render::TContext::EndRenderPass()
@@ -1409,4 +1410,9 @@ Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTe
     }
 
     return nullptr;
+}
+
+void Turbo::Render::TContext::GC()
+{
+
 }
