@@ -2704,6 +2704,7 @@ Turbo是渲染引擎
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetSrcAlphaBlendFactor()`成员函数
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendFactor GetDstAlphaBlendFactor()`成员函数
   >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TBlendOp GetAlphaBlendOp()`成员函数
+  >* `./engine/render`下`TPipeline.h`中`TGraphicsPipeline`类中增加`TGraphicsPipeline`友元类
   >* `./engine/render`下`TShader.h`中`TComputeShader`类中增加`Turbo::Core::TComputeShader * GetComputeShader()`成员函数
   >* `./engine/render`下`TShader.h`中`TVertexShader`类中增加`Turbo::Core::TVertexShader * GetVertexShader()`成员函数
   >* `./engine/render`下`TShader.h`中`TFragmentShader`类中增加`Turbo::Core::TFragmentShader * GetFragmentShader()`成员函数
@@ -2712,3 +2713,7 @@ Turbo是渲染引擎
     >* `./engine/render`下`TContext.h`中`TFramebufferPool`类中增加`void GC()`成员函数
     >* `./engine/render`下`TContext.h`中`TRenderPassPool`类中增加`void GC()`成员函数
     >* `./engine/render`下`TContext.h`中增加`void GC()`成员函数
+    >* `./engine/render`下`TContext.h`中增加`TGraphicsPipelinePool *graphicsPipelinePool`成员变量
+    >* `./engine/render`下`TContext.h`中增加`Turbo::Render::TGraphicsPipeline currentGraphicsPipeline`成员变量
+    >* `./engine/render`下`TContext.h`中增加`Turbo::Render::TRenderPass currentRenderPass`成员变量
+    >* `./engine/render`下`TContext.h`中增加`uint32_t currentSubpass`成员变量

@@ -3,6 +3,8 @@
 #define TURBO_RENDER_TCONTEXT_H
 #include "TBuffer.h"
 #include "TImage.h"
+#include "TPipeline.h"
+#include "TRenderPass.h"
 #include "TSampler.h"
 #include <map>
 #include <stdint.h>
@@ -62,7 +64,7 @@ class TGraphicsPipelinePool
 
   public:
     TGraphicsPipelinePool(TContext *context);
-    ~TGraphicsPipelinePool() = default;
+    ~TGraphicsPipelinePool();
 
     bool Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
     void Free(Turbo::Render::TGraphicsPipeline &graphicsPipeline);
@@ -137,6 +139,7 @@ class TContext
 
     // for BeginRenderPass(...)
     TRenderPassPool *renderPassPool = nullptr;
+    Turbo::Render::TRenderPass currentRenderPass;
 
     // for BindVeretxAttribute(...)
     std::vector<Turbo::Core::TVertexBinding *> vertexBindings;
@@ -201,6 +204,11 @@ class TContext
 
     std::map<TSetID, std::map<TBindingID, TDescriptorMapType>> descriptorMap;
 
+    // for Pipeline
+    uint32_t currentSubpass = 0;
+    TGraphicsPipelinePool *graphicsPipelinePool = nullptr;
+    Turbo::Render::TGraphicsPipeline currentGraphicsPipeline;
+
   public:
     TContext();
     ~TContext();
@@ -224,7 +232,7 @@ class TContext
 
     void BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location);
 
-    void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
+    // void BindPipeline(const Turbo::Render::TComputePipeline &computePipeline);
     void BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline);
 
     void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds);

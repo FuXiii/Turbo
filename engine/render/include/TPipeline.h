@@ -43,6 +43,7 @@ class TGraphicsPipeline : public TPipeline
 {
   private:
     friend class TGraphicsPipelinePool;
+    friend class TContext;
 
     Turbo::Core::TGraphicsPipeline *graphicsPipeline = nullptr;
 

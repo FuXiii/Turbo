@@ -20,7 +20,9 @@
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TRenderPass.h>
 #include <core/include/TSampler.h>
+#include <core/include/TScissor.h>
 #include <core/include/TVersion.h>
+#include <core/include/TViewport.h>
 #include <core/include/TVulkanLoader.h>
 #include <cstdint>
 #include <framegraph/include/TFrameGraph.hpp>
@@ -145,6 +147,11 @@ Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool(TContext *context)
     {
         throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool", "Please make sure set valid TContext* parameter");
     }
+}
+
+Turbo::Render::TGraphicsPipelinePool::~TGraphicsPipelinePool()
+{
+    this->GC();
 }
 
 bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
@@ -883,10 +890,12 @@ Turbo::Render::TContext::TContext()
     this->currentCommandBuffer.commandBuffer->Begin();
 
     this->renderPassPool = new TRenderPassPool(this);
+    this->graphicsPipelinePool = new TGraphicsPipelinePool(this);
 }
 
 Turbo::Render::TContext::~TContext()
 {
+    delete this->graphicsPipelinePool;
     delete this->renderPassPool;
 
     if (this->currentCommandBuffer.commandBuffer != nullptr)
@@ -1086,6 +1095,7 @@ bool Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &render
             Turbo::Core::TFramebuffer *framebuffer = renderPass.framebuffer;
             Turbo::Core::TRenderPass *render_pass = renderPass.renderPass;
             this->currentCommandBuffer.commandBuffer->CmdBeginRenderPass(render_pass, framebuffer);
+            this->currentRenderPass = renderPass;
             return true;
         }
     }
@@ -1130,14 +1140,14 @@ void Turbo::Render::TContext::BindVeretxAttribute(const Turbo::Render::TVertexBu
     }
 }
 
-void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
-{
-    // TODO: create Turbo::Core::TComputePipeline if didn't create before
-}
+// void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
+// {
+//     // TODO: create Turbo::Core::TComputePipeline if didn't create before
+// }
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
-    // TODO: create Turbo::Core::TGraphicsPipeline if didn't create before
+    this->currentGraphicsPipeline = graphicsPipeline;
 }
 
 void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds)
@@ -1294,7 +1304,23 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 
 void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
-    
+    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline);
+    this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
+
+    // this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+    this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
+
+    Turbo::Core::TViewport viewport(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight(), 0, 1);
+    std::vector<Turbo::Core::TViewport> viewports;
+    viewports.push_back(viewport);
+
+    Turbo::Core::TScissor scissor(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight());
+    std::vector<Turbo::Core::TScissor> scissors;
+    scissors.push_back(scissor);
+
+    this->currentCommandBuffer.commandBuffer->CmdSetViewport(viewports);
+    this->currentCommandBuffer.commandBuffer->CmdSetScissor(scissors);
+    this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
 void Turbo::Render::TContext::EndRenderPass()
@@ -1414,5 +1440,4 @@ Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTe
 
 void Turbo::Render::TContext::GC()
 {
-
 }
