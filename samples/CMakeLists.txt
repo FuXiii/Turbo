@@ -211,3 +211,8 @@ add_executable(ShaderIncludeTest ./ShaderIncludeTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(ShaderIncludeTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ShaderIncludeTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ShaderIncludeTest PUBLIC ${LIBS})
+
+add_executable(GreenFieldDiorama ./GreenFieldDiorama.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(GreenFieldDiorama PUBLIC ${INCLUDE_PARTH})
+target_link_directories(GreenFieldDiorama PUBLIC ${LINK_PARTH})
+target_link_libraries(GreenFieldDiorama PUBLIC ${LIBS})
