@@ -7,13 +7,14 @@
 [![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
 
 Turbo是渲染引擎
+
 ```
  _____               _            
 /__   \ _   _  _ __ | |__    ___  
   / /\/| | | || '__|| '_ \  / _ \ 
  / /   | |_| || |   | |_) || (_) |
  \/     \__,_||_|   |_.__/  \___/ 
-```                              
+```
 
 ## Platform
 
@@ -2731,3 +2732,4 @@ Turbo是渲染引擎
   >* `./engine/core`下`TShader.h`中`TVertexShader`类构造函数增加`const std::vector<std::string>& includePaths`形参，用于将着色器`#include`文件路径传入进行解析
   >* `./engine/core`下`TShader.h`中`TFragmentShader`类构造函数增加`const std::vector<std::string>& includePaths`形参，用于将着色器`#include`文件路径传入进行解析
   >* `./engine/core`下`TShader.h`中`TComputeShader`类构造函数增加`const std::vector<std::string>& includePaths`形参，用于将着色器`#include`文件路径传入进行解析
+  >* `./samples`下增加`ShaderIncludeTest`示例，用于测试着色器的`#include`特性
