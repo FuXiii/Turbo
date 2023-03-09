@@ -59,9 +59,11 @@ std::string ReadTextFile(const std::string &filename)
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
- std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.vert");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.vert");
 
- std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.frag");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.frag");
+
+const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
 
 typedef struct POSITION
 {
@@ -217,7 +219,7 @@ int main()
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
-    Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
+    Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR, {SHADER_INCLUDE_PATH});
 
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
@@ -292,7 +294,8 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-
+        _time = glfwGetTime();
+        value = _time;
         void *_ptr = value_buffer->Map();
         memcpy(_ptr, &value, sizeof(value));
         value_buffer->Unmap();
