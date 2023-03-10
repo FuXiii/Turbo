@@ -31,8 +31,7 @@ void main()
     float iTime = ShaderInputs.time;
     vec2 iMouse = vec2(ShaderInputs.mouseX, ShaderInputs.mouseY);
     vec2 iResolution = vec2(ShaderInputs.resolutionX, ShaderInputs.resolutionY);
-    vec2 fragCoord = vec2(uv.x * iResolution.x, uv.y * iResolution.y);
-    // vec2 fragCoord = vec2(uv.x * iResolution.x, (1 - uv.y) * iResolution.y);
+    vec2 fragCoord = vec2(uv.x * iResolution.x, (1 - uv.y) * iResolution.y);
 
     gTime = ShaderInputs.time;
 
