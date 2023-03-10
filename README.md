@@ -2733,3 +2733,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TShader.h`中`TFragmentShader`类构造函数增加`const std::vector<std::string>& includePaths`形参，用于将着色器`#include`文件路径传入进行解析
   >* `./engine/core`下`TShader.h`中`TComputeShader`类构造函数增加`const std::vector<std::string>& includePaths`形参，用于将着色器`#include`文件路径传入进行解析
   >* `./samples`下增加`ShaderIncludeTest`示例，用于测试着色器的`#include`特性
+
+* 2023/3/10 设计架构
+  >
+  >* `./samples`下增加`GreenFieldDiorama`示例，用于测试多通道，颜色附件，纹理采样，着色器`#include`等
