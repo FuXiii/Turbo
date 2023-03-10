@@ -88,139 +88,10 @@ const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = "#version 450\n"
-                                       "layout (push_constant) uniform my_push_constants_t\n"
-                                       "{"
-                                       "   float time;\n"
-                                       "   float resolutionX;\n"
-                                       "   float resolutionY;\n"
-                                       "   float mouseX;\n"
-                                       "   float mouseY;\n"
-                                       "} my_push_constants;\n"
-                                       "layout (location = 0) in vec2 uv;\n"
-                                       "layout (location = 0) out vec4 outColor;\n"
-                                       "mat2 mm2(in float a){float c = cos(a), s = sin(a);return mat2(c,s,-s,c);}\n"
-                                       "mat2 m2 = mat2(0.95534, 0.29552, -0.29552, 0.95534);\n"
-                                       "float tri(in float x){return clamp(abs(fract(x)-.5),0.01,0.49);}\n"
-                                       "vec2 tri2(in vec2 p){return vec2(tri(p.x)+tri(p.y),tri(p.y+tri(p.x)));}\n"
-                                       "\n"
-                                       "float triNoise2d(in vec2 p, float spd)\n"
-                                       "{\n"
-                                       "    float z=1.8;\n"
-                                       "    float z2=2.5;\n"
-                                       "	float rz = 0.;\n"
-                                       "    p *= mm2(p.x*0.06);\n"
-                                       "    vec2 bp = p;\n"
-                                       "	for (float i=0.; i<5.; i++ )\n"
-                                       "	{\n"
-                                       "        vec2 dg = tri2(bp*1.85)*.75;\n"
-                                       "        dg *= mm2(my_push_constants.time*spd);\n"
-                                       "        p -= dg/z2;\n"
-                                       "\n"
-                                       "        bp *= 1.3;\n"
-                                       "        z2 *= .45;\n"
-                                       "        z *= .42;\n"
-                                       "		p *= 1.21 + (rz-1.0)*.02;\n"
-                                       "        \n"
-                                       "        rz += tri(p.x+tri(p.y))*z;\n"
-                                       "        p*= -m2;\n"
-                                       "	}\n"
-                                       "    return clamp(1./pow(rz*29., 1.3),0.,.55);\n"
-                                       "}\n"
-                                       "float hash21(in vec2 n){ return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }\n"
-                                       "vec4 aurora(vec3 ro, vec3 rd)\n"
-                                       "{\n"
-                                       "    vec4 col = vec4(0);\n"
-                                       "    vec4 avgCol = vec4(0);\n"
-                                       "    for(float i=0.;i<50.;i++)\n"
-                                       "    {\n"
-                                       "        float of = 0.006*hash21(gl_FragCoord.xy)*smoothstep(0.,15., i);\n"
-                                       "        float pt = ((.8+pow(i,1.4)*.002)-ro.y)/(rd.y*2.+0.4);\n"
-                                       "        pt -= of;\n"
-                                       "    	vec3 bpos = ro + pt*rd;\n"
-                                       "        vec2 p = bpos.zx;\n"
-                                       "        float rzt = triNoise2d(p, 0.06);\n"
-                                       "        vec4 col2 = vec4(0,0,0, rzt);\n"
-                                       "        col2.rgb = (sin(1.-vec3(2.15,-.5, 1.2)+i*0.043)*0.5+0.5)*rzt;\n"
-                                       "        avgCol =  mix(avgCol, col2, .5);\n"
-                                       "        col += avgCol*exp2(-i*0.065 - 2.5)*smoothstep(0.,5., i);\n"
-                                       "        \n"
-                                       "    }\n"
-                                       "    \n"
-                                       "    col *= (clamp(rd.y*15.+.4,0.,1.));\n"
-                                       "    return col*1.8;\n"
-                                       "}\n"
-                                       "//-------------------Background and Stars--------------------\n"
-                                       "vec3 nmzHash33(vec3 q)\n"
-                                       "{\n"
-                                       "    uvec3 p = uvec3(ivec3(q));\n"
-                                       "    p = p*uvec3(374761393U, 1103515245U, 668265263U) + p.zxy + p.yzx;\n"
-                                       "    p = p.yzx*(p.zxy^(p >> 3U));\n"
-                                       "    return vec3(p^(p >> 16U))*(1.0/vec3(0xffffffffU));\n"
-                                       "}\n"
-                                       "\n"
-                                       "vec3 stars(in vec3 p)\n"
-                                       "{\n"
-                                       "    vec3 c = vec3(0.);\n"
-                                       "    vec2 iResolution = vec2(my_push_constants.resolutionX,my_push_constants.resolutionY);\n"
-                                       "    float res = iResolution.x*1.;\n"
-                                       "    \n"
-                                       "	for (float i=0.;i<4.;i++)\n"
-                                       "    {\n"
-                                       "        vec3 q = fract(p*(.15*res))-0.5;\n"
-                                       "        vec3 id = floor(p*(.15*res));\n"
-                                       "        vec2 rn = nmzHash33(id).xy;\n"
-                                       "        float c2 = 1.-smoothstep(0.,.6,length(q));\n"
-                                       "        c2 *= step(rn.x,.0005+i*i*0.001);\n"
-                                       "        c += c2*(mix(vec3(1.0,0.49,0.1),vec3(0.75,0.9,1.),rn.y)*0.1+0.9);\n"
-                                       "        p *= 1.3;\n"
-                                       "    }\n"
-                                       "    return c*c*.8;\n"
-                                       "}\n"
-                                       "vec3 bg(in vec3 rd)\n"
-                                       "{\n"
-                                       "    float sd = dot(normalize(vec3(-0.5, -0.6, 0.9)), rd)*0.5+0.5;\n"
-                                       "    sd = pow(sd, 5.);\n"
-                                       "    vec3 col = mix(vec3(0.05,0.1,0.2), vec3(0.1,0.05,0.2), sd);\n"
-                                       "    return col*.63;\n"
-                                       "}\n"
-                                       "void main() {\n"
-                                       "    float iTime = my_push_constants.time;\n"
-                                       "    vec2 iMouse = vec2(my_push_constants.mouseX, my_push_constants.mouseY);\n"
-                                       "    vec2 iResolution = vec2(my_push_constants.resolutionX,my_push_constants.resolutionY);\n"
-                                       "    vec2 fragCoord = vec2(uv.x*iResolution.x,uv.y*iResolution.y);\n"
-                                       "    vec2 q = fragCoord.xy / iResolution.xy;\n"
-                                       "    vec2 p = q - 0.5;\n"
-                                       "    p.x*=iResolution.x/iResolution.y;\n"
-                                       "    vec3 ro = vec3(0,0,-6.7);\n"
-                                       "    vec3 rd = normalize(vec3(p,1.3));\n"
-                                       "    vec2 mo = iMouse.xy / iResolution.xy-.5;\n"
-                                       "    mo = (mo==vec2(-.5))?mo=vec2(-0.1,0.1):mo;\n"
-                                       "    mo.x *= iResolution.x/iResolution.y;\n"
-                                       "    rd.yz *= mm2(mo.y);\n"
-                                       "    rd.xz *= mm2(mo.x + sin(iTime*0.05)*0.2);\n"
-                                       "    vec3 col = vec3(0.);\n"
-                                       "    vec3 brd = rd;\n"
-                                       "    float fade = smoothstep(0.,0.01,abs(brd.y))*0.1+0.9;\n"
-                                       "    col = bg(rd)*fade;\n"
-                                       "    if (rd.y > 0.){\n"
-                                       "        vec4 aur = smoothstep(0.,1.5,aurora(ro,rd))*fade;\n"
-                                       "        col += stars(rd);\n"
-                                       "        col = col*(1.-aur.a) + aur.rgb;\n"
-                                       "    }\n"
-                                       "    else //Reflections\n"
-                                       "    {\n"
-                                       "        rd.y = abs(rd.y);\n"
-                                       "        col = bg(rd)*fade*0.6;\n"
-                                       "        vec4 aur = smoothstep(0.0,2.5,aurora(ro,rd));\n"
-                                       "        col += stars(rd)*0.1;\n"
-                                       "        col = col*(1.-aur.a) + aur.rgb;\n"
-                                       "        vec3 pos = ro + ((0.5-ro.y)/rd.y)*rd;\n"
-                                       "        float nz2 = triNoise2d(pos.xz*vec2(.5,.7), 0.);\n"
-                                       "        col += mix(vec3(0.2,0.25,0.5)*0.08,vec3(0.3,0.3,0.5)*0.7, nz2*0.4);\n"
-                                       "    }\n"
-                                       "    outColor=vec4(col,1.0);\n"
-                                       "}\n";
+const std::string MY_BUFFER_A_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GreenFieldDiorama/BufferA.frag");
+const std::string MY_BUFFER_B_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GreenFieldDiorama/BufferB.frag");
+const std::string MY_IMAGE_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GreenFieldDiorama/Image.frag");
+const std::string SHADER_INCLUDE_PATH = "../../asset/shaders/GreenFieldDiorama";
 
 typedef struct POSITION
 {
@@ -355,11 +226,13 @@ int main()
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TShader *my_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
-    Turbo::Core::TShader *my_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
+    Turbo::Core::TVertexShader *my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
+    Turbo::Core::TFragmentShader *my_buffer_a_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_BUFFER_A_FRAG_SHADER_STR, {SHADER_INCLUDE_PATH});
+    Turbo::Core::TFragmentShader *my_buffer_b_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_BUFFER_B_FRAG_SHADER_STR, {SHADER_INCLUDE_PATH});
+    Turbo::Core::TFragmentShader *my_image_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_IMAGE_FRAG_SHADER_STR, {SHADER_INCLUDE_PATH});
 
     std::cout << my_vertex_shader->ToString() << std::endl;
-    std::cout << my_fragment_shader->ToString() << std::endl;
+    std::cout << my_buffer_a_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -408,7 +281,7 @@ int main()
     Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
     Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
 
-    std::vector<Turbo::Core::TShader *> shaders{my_vertex_shader, my_fragment_shader};
+    std::vector<Turbo::Core::TShader *> shaders{my_vertex_shader, my_buffer_a_shader};
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
@@ -959,7 +832,9 @@ int main()
 
     delete descriptor_pool;
     delete my_vertex_shader;
-    delete my_fragment_shader;
+    delete my_buffer_b_shader;
+    delete my_image_shader;
+    delete my_buffer_a_shader;
     delete depth_image_view;
     delete depth_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)

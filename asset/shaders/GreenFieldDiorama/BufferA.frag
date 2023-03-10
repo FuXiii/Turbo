@@ -13,7 +13,7 @@ layout(push_constant) uniform ShaderInputsStruct
 ShaderInputs;
 
 layout(location = 0) in vec2 uv;
-layout(location = 0) out vec4 outColor;//BufferA
+layout(location = 0) out vec4 outColor; // BufferA
 
 #include "Common.glsl"
 
@@ -32,6 +32,7 @@ void main()
     vec2 iMouse = vec2(ShaderInputs.mouseX, ShaderInputs.mouseY);
     vec2 iResolution = vec2(ShaderInputs.resolutionX, ShaderInputs.resolutionY);
     vec2 fragCoord = vec2(uv.x * iResolution.x, uv.y * iResolution.y);
+    // vec2 fragCoord = vec2(uv.x * iResolution.x, (1 - uv.y) * iResolution.y);
 
     gTime = ShaderInputs.time;
 
