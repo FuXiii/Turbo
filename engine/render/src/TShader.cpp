@@ -47,6 +47,11 @@ Turbo::Render::TComputeShader::~TComputeShader()
     delete this->computeShader;
 }
 
+Turbo::Core::TComputeShader *Turbo::Render::TComputeShader::GetComputeShader()
+{
+    return this->computeShader;
+}
+
 Turbo::Render::TVertexShader::TVertexShader(Turbo::Render::TContext *context, TShader::TLanguage language, const std::string &code)
 {
     if (context != nullptr)
@@ -91,6 +96,11 @@ Turbo::Render::TVertexShader::~TVertexShader()
     delete this->vertexShader;
 }
 
+Turbo::Core::TVertexShader *Turbo::Render::TVertexShader::GetVertexShader()
+{
+    return this->vertexShader;
+}
+
 Turbo::Render::TFragmentShader::TFragmentShader(Turbo::Render::TContext *context, TShader::TLanguage language, const std::string &code)
 {
     if (context != nullptr)
@@ -133,4 +143,9 @@ Turbo::Render::TFragmentShader::TFragmentShader(TContext *context, size_t size, 
 Turbo::Render::TFragmentShader::~TFragmentShader()
 {
     delete fragmentShader;
+}
+
+Turbo::Core::TFragmentShader *Turbo::Render::TFragmentShader::GetFragmentShader()
+{
+    return this->fragmentShader;
 }

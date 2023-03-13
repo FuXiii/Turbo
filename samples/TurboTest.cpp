@@ -745,9 +745,10 @@ int main()
 
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+            command_buffer->CmdBindPipeline(pipeline);
 
             // Square
-            command_buffer->CmdBindPipeline(pipeline);
+            //command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);

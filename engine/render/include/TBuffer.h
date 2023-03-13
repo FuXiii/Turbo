@@ -44,6 +44,8 @@ class TBuffer
         TDomain domain;
     };
 
+    friend class TContext;
+
   private:
     void *allocator = nullptr;
     Turbo::Core::TBuffer *buffer = nullptr;
@@ -62,6 +64,8 @@ class TBuffer
 
     void Copy(void *src, uint64_t size);
     void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size);
+
+    bool IsValid() const;
 };
 
 using TAttributeID = uint32_t;
@@ -88,6 +92,8 @@ class TVertexBuffer : public Turbo::Render::TBuffer
 
         Turbo::Render::TFormat GetFormat();
         uint32_t GetOffset();
+
+        bool IsValid() const;
     };
 
     std::vector<TVertexBuffer::TAttribute> attributes;
@@ -109,11 +115,75 @@ class TVertexBuffer : public Turbo::Render::TBuffer
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
 
     TAttributeID AddAttribute(Turbo::Render::TFormat format, uint32_t offset);
-    TAttribute GetAttribute(TAttributeID id);
+    TAttribute GetAttribute(TAttributeID id) const;
     const std::vector<TVertexBuffer::TAttribute> &GetAttributes();
 
-    uint32_t GetStride();
-    TRate Getrate();
+    uint32_t GetStride() const;
+    TRate GetRate() const;
+};
+
+class TIndexBuffer : public Turbo::Render::TBuffer
+{
+  public:
+    typedef enum TIndexType
+    {
+        UINT16 = 0,
+        UINT32 = 1
+    } TIndexType;
+
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        uint64_t size;
+        TDomain domain;
+    };
+
+  private:
+    TIndexType indexType = TIndexType::UINT32;
+
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+
+    void Copy(void *src, uint64_t size) = delete;
+    void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
+
+    void Copy(const std::vector<uint16_t> &indexs);
+    void Copy(const std::vector<uint32_t> &indexs);
+
+    TIndexType GetIndexType() const;
+};
+
+template <typename T, std::enable_if_t<std::is_class<T>::value, bool> = true>
+class TUniformBuffer : public Turbo::Render::TBuffer
+{
+  public:
+    struct Descriptor
+    {
+        // TBufferUsages usages; //manage by Turbo
+        // uint64_t size;//manage by T
+        TDomain domain;
+    };
+
+  private:
+    // T data;
+
+  public:
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+    {
+        Turbo::Render::TBuffer::Descriptor buffer_descriptor = {};
+        buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST;
+        buffer_descriptor.size = sizeof(T);
+        buffer_descriptor.domain = descriptor.domain;
+    }
+
+    void Copy(void *src, uint64_t size) = delete;
+    void Copy(TBuffer *src, uint64_t srcOffset, uint64_t size) = delete;
+
+    void Copy(const T &uniform)
+    {
+        uint64_t size = sizeof(T);
+        Turbo::Render::TBuffer::Copy((void *)&uniform, size);
+    }
 };
 } // namespace Render
 } // namespace Turbo

@@ -10,6 +10,7 @@
 #include <spirv_hlsl.hpp>
 
 #include <SPIRV/GlslangToSpv.h>
+#include <StandAlone/DirStackFileIncluder.h>
 #include <glslang/Include/BaseTypes.h>
 #include <glslang/Public/ShaderLang.h>
 
@@ -686,7 +687,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
     }
 }
 
-Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::string &entryPoint)
+Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint)
 {
     // glslang to spir-v
     if (device != nullptr)
@@ -820,10 +821,27 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         shader_glslang.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_0);
         EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
 
-        if (!shader_glslang.parse(&resources /*glslang::DefaultTBuiltInResource*/, 100, false, messages))
+        DirStackFileIncluder dir_stack_file_includer = {};
+        if (includePaths.size() > 0)
         {
-            std::string log_messgae(shader_glslang.getInfoLog());
-            throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
+            for (const std::string &include_path_item : includePaths)
+            {
+                dir_stack_file_includer.pushExternalLocalDirectory(include_path_item);
+            }
+
+            if (!shader_glslang.parse(&resources /*glslang::DefaultTBuiltInResource*/, 100, false, messages, dir_stack_file_includer))
+            {
+                std::string log_messgae(shader_glslang.getInfoLog());
+                throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
+            }
+        }
+        else
+        {
+            if (!shader_glslang.parse(&resources /*glslang::DefaultTBuiltInResource*/, 100, false, messages))
+            {
+                std::string log_messgae(shader_glslang.getInfoLog());
+                throw Turbo::Core::TException(TResult::SHADER_PARSE_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
+            }
         }
 
         glslang::TProgram program;
@@ -1069,7 +1087,7 @@ std::string Turbo::Core::TShader::ToString()
     return glsl.compile();
 }
 
-Turbo::Core::TVertexShader::TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, entryPoint)
+Turbo::Core::TVertexShader::TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, includePaths, entryPoint)
 {
 }
 
@@ -1077,7 +1095,7 @@ Turbo::Core::TVertexShader::TVertexShader(TDevice *device, size_t size, uint32_t
 {
 }
 
-Turbo::Core::TFragmentShader::TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, language, code, entryPoint)
+Turbo::Core::TFragmentShader::TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, language, code, includePaths, entryPoint)
 {
 }
 
@@ -1085,7 +1103,7 @@ Turbo::Core::TFragmentShader::TFragmentShader(TDevice *device, size_t size, uint
 {
 }
 
-Turbo::Core::TComputeShader::TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, language, code, entryPoint)
+Turbo::Core::TComputeShader::TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, language, code, includePaths, entryPoint)
 {
 }
 

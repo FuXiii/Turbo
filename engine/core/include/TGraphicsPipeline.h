@@ -29,6 +29,10 @@ class TVertexAttribute : public Turbo::Core::TInfo
     TFormatType GetFormatType();
     uint32_t GetOffset();
 
+    void SetLocation(uint32_t location);
+    void SetFormatType(TFormatType formatType);
+    void SetOffset(uint32_t offset);
+
   public:
     virtual std::string ToString() override;
 };

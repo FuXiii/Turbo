@@ -73,7 +73,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     void InternalParseSpirV();
 
   public:
-    TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
     TShader(TDevice *device, TShaderType type, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
     ~TShader();
@@ -105,21 +105,21 @@ class TShader : public Turbo::Core::TVulkanHandle
 class TVertexShader : public Turbo::Core::TShader
 {
   public:
-    TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
     TVertexShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
 class TFragmentShader : public Turbo::Core::TShader
 {
   public:
-    TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
     TFragmentShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
 class TComputeShader : public Turbo::Core::TShader
 {
   public:
-    TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::string &entryPoint = "main");
+    TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
     TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 

@@ -1,10 +1,11 @@
 #include "render/include/TContext.h"
-#include "TAttachment.h"
-#include "TRenderPass.h"
 #include "render/include/TImage.h"
+#include "render/include/TPipeline.h"
 #include "render/include/TRenderPass.h"
+#include "render/include/TShader.h"
 #include "vulkan/vulkan_core.h"
 #include <algorithm>
+#include <core/include/TAttachment.h>
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
@@ -13,16 +14,172 @@
 #include <core/include/TException.h>
 #include <core/include/TFence.h>
 #include <core/include/TFramebuffer.h>
+#include <core/include/TGraphicsPipeline.h>
 #include <core/include/TImage.h>
 #include <core/include/TInstance.h>
 #include <core/include/TPhysicalDevice.h>
 #include <core/include/TRenderPass.h>
+#include <core/include/TSampler.h>
+#include <core/include/TScissor.h>
 #include <core/include/TVersion.h>
+#include <core/include/TViewport.h>
 #include <core/include/TVulkanLoader.h>
 #include <cstdint>
 #include <framegraph/include/TFrameGraph.hpp>
 #include <stdint.h>
 #include <vector>
+
+// FIXME:没有实现完全
+void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    if (this->context != nullptr)
+    {
+        Turbo::Core::TDevice *device = this->context->GetDevice();
+
+        Turbo::Core::TRenderPass *render_pass = renderPass.renderPass;
+
+        std::vector<Turbo::Core::TVertexBinding *> vertex_binding_ptrs = this->context->GetVertexBindings();
+
+        std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
+        for (Turbo::Core::TVertexBinding *vertex_binding_ptr_item : vertex_binding_ptrs)
+        {
+            vertex_bindings.push_back(*vertex_binding_ptr_item);
+        }
+
+        Turbo::Render::TVertexShader *render_vertex_shader = graphicsPipeline.GetVertexShader();
+        Turbo::Render::TFragmentShader *render_fragment_shader = graphicsPipeline.GetFragmentShader();
+        if (render_vertex_shader == nullptr || render_fragment_shader == nullptr)
+        {
+            // FIXME: retur false;//create failed
+            throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline", "Please make sure set valid shader");
+        }
+
+        // TRenderPass *renderPass,
+        // uint32_t subpass,
+        // std::vector<TVertexBinding> &vertexBindings,
+        // TVertexShader *vertexShader,
+        // TFragmentShader *fragmentShader,
+        // TTopologyType topology = TTopologyType::TRIANGLE_LIST,
+        // bool primitiveRestartEnable = false,
+        // bool depthClampEnable = false,
+        // bool rasterizerDiscardEnable = false,
+        // TPolygonMode polygonMode = TPolygonMode::FILL,
+        // TCullModes cullMode = TCullModeBits::MODE_BACK_BIT,
+        // TFrontFace frontFace = TFrontFace::CLOCKWISE,
+        // bool depthBiasEnable = false,
+        // float depthBiasConstantFactor = 0,
+        // float depthBiasClamp = 0,
+        // float depthBiasSlopeFactor = 0,
+        // float lineWidth = 1,
+        // bool multisampleEnable = false,
+        // TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT,
+        // bool depthTestEnable = true,
+        // bool depthWriteEnable = true,
+        // TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL,
+        // bool depthBoundsTestEnable = false,
+        // bool stencilTestEnable = false,
+        // TStencilOp frontFailOp = TStencilOp::KEEP,
+        // TStencilOp frontPassOp = TStencilOp::KEEP,
+        // TStencilOp frontDepthFailOp = TStencilOp::KEEP,
+        // TCompareOp frontCompareOp = TCompareOp::ALWAYS,
+        // uint32_t frontCompareMask = 0,
+        // uint32_t frontWriteMask = 0,
+        // uint32_t frontReference = 0,
+        // TStencilOp backFailOp = TStencilOp::KEEP,
+        // TStencilOp backPassOp = TStencilOp::KEEP,
+        // TStencilOp backDepthFailOp = TStencilOp::KEEP,
+        // TCompareOp backCompareOp = TCompareOp::ALWAYS,
+        // uint32_t backCompareMask = 0,
+        // uint32_t backWriteMask = 0,
+        // uint32_t backReference = 0,
+        // float minDepthBounds = 0,
+        // float maxDepthBounds = 0,
+        // bool logicOpEnable = false,
+        // TLogicOp logicOp = TLogicOp::NO_OP,
+        // bool blendEnable = false,
+        // TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO,
+        // TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO,
+        // TBlendOp colorBlendOp = TBlendOp::ADD,
+        // TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO,
+        // TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO,
+        // TBlendOp alphaBlendOp = TBlendOp::ADD,
+        // float constantR = 1,
+        // float constantG = 1,
+        // float constantB = 1,
+        // float constantA = 1
+
+        Turbo::Core::TGraphicsPipeline *new_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, subpass, vertex_bindings, render_vertex_shader->GetVertexShader(), render_fragment_shader->GetFragmentShader());
+        this->graphicsPipelineMap[renderPass.renderPass][subpass].push_back(new_graphics_pipeline);
+        graphicsPipeline.graphicsPipeline = new_graphics_pipeline;
+    }
+}
+
+// FIXME:没有实现完全
+bool Turbo::Render::TGraphicsPipelinePool::Find(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    if (renderPass.IsValid())
+    {
+        auto render_passs_map = this->graphicsPipelineMap.find(renderPass.renderPass);
+        if (render_passs_map != this->graphicsPipelineMap.end())
+        {
+            auto subpass_map = render_passs_map->second.find(subpass);
+            if (subpass_map != render_passs_map->second.end())
+            {
+                for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_map->second)
+                {
+                    // TODO: find compatible pipeline
+                    return false;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool(TContext *context)
+{
+    if (context != nullptr)
+    {
+        this->context = context;
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Render::TGraphicsPipelinePool::TGraphicsPipelinePool", "Please make sure set valid TContext* parameter");
+    }
+}
+
+Turbo::Render::TGraphicsPipelinePool::~TGraphicsPipelinePool()
+{
+    this->GC();
+}
+
+bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline)
+{
+    if (this->Find(renderPass, subpass, graphicsPipeline))
+    {
+        return true;
+    }
+
+    this->CreateGraphicsPipeline(renderPass, subpass, graphicsPipeline);
+    return true;
+}
+
+void Turbo::Render::TGraphicsPipelinePool::GC()
+{
+    for (auto &render_pass_item : this->graphicsPipelineMap)
+    {
+        for (auto &subpass_item : render_pass_item.second)
+        {
+            for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
+            {
+                delete graphics_pipeline_item;
+            }
+        }
+    }
+
+    this->graphicsPipelineMap.clear();
+}
 
 Turbo::Render::TRenderPassPool::TRenderPassPool(TContext *context)
 {
@@ -252,7 +409,7 @@ bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass
                     // Use vector to storage depth stencil the purpose is to determine whether DepthStencilAttachment exists
                     // usually we will only have one DepthStencilAttachment or without DepthStencilAttachment
                     std::vector<Turbo::Core::TAttachment> core_depth_stencil_attachments;
-                    if (core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
+                    if (core_depth_stencil_attachment_reference != nullptr && core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
                     {
                         core_depth_stencil_attachments.push_back(core_attachments[core_depth_stencil_attachment_reference->attachment]);
                     }
@@ -464,6 +621,11 @@ void Turbo::Render::TRenderPassPool::Free(Turbo::Render::TRenderPass &renderPass
     // this->renderPassProxies[x].Destroy();
 }
 
+void Turbo::Render::TRenderPassPool::GC()
+{
+    this->framebufferPool->GC();
+}
+
 Turbo::Render::TFramebufferPool::TFramebufferPool(TContext *context)
 {
     if (context != nullptr)
@@ -491,7 +653,7 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
     // TODO:Create a new Turbo::Core::TFramebuffer
     // TODO:add into this->framebuffers
     std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
-
+    
     std::vector<Turbo::Core::TImageView *> attachments;
     for (Turbo::Render::TImage &image_item : render_pass_attachments)
     {
@@ -556,6 +718,16 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
 void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPass)
 {
     //
+}
+
+void Turbo::Render::TFramebufferPool::GC()
+{
+    for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
+    {
+        delete frame_buffer_item;
+    }
+
+    this->framebuffers.clear();
 }
 
 Turbo::Render::TContext::TContext()
@@ -718,10 +890,12 @@ Turbo::Render::TContext::TContext()
     this->currentCommandBuffer.commandBuffer->Begin();
 
     this->renderPassPool = new TRenderPassPool(this);
+    this->graphicsPipelinePool = new TGraphicsPipelinePool(this);
 }
 
 Turbo::Render::TContext::~TContext()
 {
+    delete this->graphicsPipelinePool;
     delete this->renderPassPool;
 
     if (this->currentCommandBuffer.commandBuffer != nullptr)
@@ -885,6 +1059,19 @@ void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *com
     this->commandBufferPool->Free(commandBuffer);
 }
 
+Turbo::Core::TSampler *Turbo::Render::TContext::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
+{
+    return new Turbo::Core::TSampler(this->device, (Turbo::Core::TFilter)descriptor.min, (Turbo::Core::TFilter)descriptor.max, (Turbo::Core::TMipmapMode)descriptor.mipmap, (Turbo::Core::TAddressMode)descriptor.U, (Turbo::Core::TAddressMode)descriptor.V, (Turbo::Core::TAddressMode)descriptor.W);
+}
+
+void Turbo::Render::TContext::DestroySampler(Turbo::Core::TSampler *sampler)
+{
+    if (sampler != nullptr && sampler->GetVkSampler() != VK_NULL_HANDLE)
+    {
+        delete sampler;
+    }
+}
+
 void Turbo::Render::TContext::ClearTexture(Turbo::Render::TTexture2D &texture2D, float r, float g, float b, float a)
 {
     if (texture2D.IsValid())
@@ -908,6 +1095,7 @@ bool Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &render
             Turbo::Core::TFramebuffer *framebuffer = renderPass.framebuffer;
             Turbo::Core::TRenderPass *render_pass = renderPass.renderPass;
             this->currentCommandBuffer.commandBuffer->CmdBeginRenderPass(render_pass, framebuffer);
+            this->currentRenderPass = renderPass;
             return true;
         }
     }
@@ -915,9 +1103,41 @@ bool Turbo::Render::TContext::BeginRenderPass(Turbo::Render::TRenderPass &render
     return false;
 }
 
-void Turbo::Render::TContext::EndRenderPass()
+void Turbo::Render::TContext::BindVeretxAttribute(const Turbo::Render::TVertexBuffer &vertexBuffer, Turbo::Render::TAttributeID attributeID, uint32_t location)
 {
-    this->currentCommandBuffer.commandBuffer->CmdEndRenderPass();
+    Turbo::Render::TVertexBuffer::TAttribute attribute = vertexBuffer.GetAttribute(attributeID);
+    if (attribute.IsValid())
+    {
+        if (vertexBuffer.IsValid())
+        {
+            bool is_found_vertex_buffer = false;
+            uint32_t vertex_buffer_index = 0;
+            for (Turbo::Core::TBuffer *vertex_buffer_item : this->vertexBuffers)
+            {
+                if (vertex_buffer_item == vertexBuffer.buffer)
+                {
+                    is_found_vertex_buffer = true;
+                    break;
+                }
+
+                vertex_buffer_index = vertex_buffer_index + 1;
+            }
+
+            if (!is_found_vertex_buffer)
+            {
+                this->vertexBuffers.push_back(vertexBuffer.buffer);
+                vertex_buffer_index = this->vertexBuffers.size() - 1;
+
+                uint32_t stride = vertexBuffer.GetStride();
+                Turbo::Core::TVertexRate vertex_rate = vertexBuffer.GetRate() == Turbo::Render::TVertexBuffer::TRate::VERTEX ? Turbo::Core::TVertexRate::VERTEX : Turbo::Core::TVertexRate::INSTANCE;
+
+                Turbo::Core::TVertexBinding *vertex_binding = new Turbo::Core::TVertexBinding(vertex_buffer_index, stride, vertex_rate);
+                this->vertexBindings.push_back(vertex_binding);
+            }
+
+            this->vertexBindings[vertex_buffer_index]->AddAttribute(location, (Turbo::Core::TFormatType)(attribute.GetFormat()), attribute.GetOffset());
+        }
+    }
 }
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline &computePipeline)
@@ -927,7 +1147,210 @@ void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TComputePipeline
 
 void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipeline &graphicsPipeline)
 {
-    // TODO: create Turbo::Core::TGraphicsPipeline if didn't create before
+    this->currentGraphicsPipeline = graphicsPipeline;
+}
+
+void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds)
+{
+    auto set_map = this->descriptorMap.find(set);
+    if (set_map != this->descriptorMap.end())
+    {
+        auto binding_map = set_map->second.find(binding);
+        if (binding_map != set_map->second.end())
+        {
+            // TODO:更新Set和Binding对应的缓存
+            // 说明之前已有描述符资源绑定到此，需要在之前的【描述符资源数组】中移除并更新到目标【描述符资源数组】中
+            TDescriptorMapType descriptor_map_type = binding_map->second;
+            switch (descriptor_map_type)
+            {
+            case TDescriptorMapType::UNDEFINED: {
+            }
+            break;
+            case TDescriptorMapType::UNIFROM_BUFFER_MAP: {
+                this->uniformBufferMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::COMBINED_IMAGE_SAMPLER_MAP: {
+                this->combinedImageSamplerMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::SAMPLED_IMAGE_MAP: {
+                this->sampledImageMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::SAMPLER_MAP: {
+                this->samplerMap.at({set, binding}).clear();
+            }
+            break;
+            }
+
+            // TODO:更新到目标【描述符资源数组】中
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at({set, binding});
+            for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+            {
+                sampled_images.push_back(texture_2d_item.imageView);
+            }
+
+            // 更新绑定类型
+            binding_map->second = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+        }
+        else
+        {
+            // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
+            // 说明找到了Set，但没有Binding
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+            for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+            {
+                sampled_images.push_back(texture_2d_item.imageView);
+            }
+
+            set_map->second[binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+        }
+    }
+    else
+    {
+        // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
+        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+        for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
+        {
+            sampled_images.push_back(texture_2d_item.imageView);
+        }
+        this->descriptorMap[set][binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+    }
+}
+
+void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture2D &texture2D)
+{
+    std::vector<Turbo::Render::TTexture2D> texture2ds;
+    texture2ds.push_back(texture2D);
+    this->BindDescriptor(set, binding, texture2ds);
+}
+
+void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds)
+{
+    auto set_map = this->descriptorMap.find(set);
+    if (set_map != this->descriptorMap.end())
+    {
+        auto binding_map = set_map->second.find(binding);
+        if (binding_map != set_map->second.end())
+        {
+            // TODO:更新Set和Binding对应的缓存
+            // 说明之前已有描述符资源绑定到此，需要在之前的【描述符资源数组】中移除并更新到目标【描述符资源数组】中
+            TDescriptorMapType descriptor_map_type = binding_map->second;
+            switch (descriptor_map_type)
+            {
+            case TDescriptorMapType::UNDEFINED: {
+            }
+            break;
+            case TDescriptorMapType::UNIFROM_BUFFER_MAP: {
+                this->uniformBufferMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::COMBINED_IMAGE_SAMPLER_MAP: {
+                this->combinedImageSamplerMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::SAMPLED_IMAGE_MAP: {
+                this->sampledImageMap.at({set, binding}).clear();
+            }
+            break;
+            case TDescriptorMapType::SAMPLER_MAP: {
+                this->samplerMap.at({set, binding}).clear();
+            }
+            break;
+            }
+
+            // TODO:更新到目标【描述符资源数组】中
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at({set, binding});
+            for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
+            {
+                sampled_images.push_back(texture_3d_item.imageView);
+            }
+
+            // 更新绑定类型
+            binding_map->second = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+        }
+        else
+        {
+            // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
+            // 说明找到了Set，但没有Binding
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+            for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
+            {
+                sampled_images.push_back(texture_3d_item.imageView);
+            }
+
+            set_map->second[binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+        }
+    }
+    else
+    {
+        // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
+        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+        for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
+        {
+            sampled_images.push_back(texture_3d_item.imageView);
+        }
+        this->descriptorMap[set][binding] = TDescriptorMapType::SAMPLED_IMAGE_MAP;
+    }
+}
+
+void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const Turbo::Render::TTexture3D &texture3D)
+{
+    std::vector<Turbo::Render::TTexture3D> texture3ds;
+    texture3ds.push_back(texture3D);
+    this->BindDescriptor(set, binding, texture3ds);
+}
+
+void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+{
+    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline);
+    this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
+
+    // this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//TODO: 待实现
+    this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
+
+    Turbo::Core::TViewport viewport(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight(), 0, 1);
+    std::vector<Turbo::Core::TViewport> viewports;
+    viewports.push_back(viewport);
+
+    Turbo::Core::TScissor scissor(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight());
+    std::vector<Turbo::Core::TScissor> scissors;
+    scissors.push_back(scissor);
+
+    this->currentCommandBuffer.commandBuffer->CmdSetViewport(viewports);
+    this->currentCommandBuffer.commandBuffer->CmdSetScissor(scissors);
+    this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+
+    {
+        for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
+        {
+            delete vertex_binding_item;
+        }
+    }
+
+    this->vertexBindings.clear();
+    this->vertexBuffers.clear();
+}
+
+void Turbo::Render::TContext::EndRenderPass()
+{
+    // TODO: CmdBindVertexBuffers(...)
+
+    // FIXME: delete
+    // FIXME: 在DrawCall绘制时记录顶点缓冲数组指令，之后销毁
+    // FIXME: 销毁放在此处仅用于内存回收
+    {
+        for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
+        {
+            delete vertex_binding_item;
+        }
+    }
+
+    this->vertexBindings.clear();
+    this->vertexBuffers.clear();
+
+    this->currentCommandBuffer.commandBuffer->CmdEndRenderPass();
 }
 
 void Turbo::Render::TContext::Flush()
@@ -981,6 +1404,10 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
         this->commandBufferPool->Free(command_buffer_item.commandBuffer);
     }
 
+    /*
+        TODO:这里是回收资源的好去处(此时CommandBuffer已经执行完成，可以回收不再使用的资源了)
+    */
+
     this->commandBuffers.clear();
     return true;
 }
@@ -1005,6 +1432,11 @@ Turbo::Core::TDeviceQueue *Turbo::Render::TContext::GetDeviceQueue()
     return this->graphicsQueue;
 }
 
+std::vector<Turbo::Core::TVertexBinding *> Turbo::Render::TContext::GetVertexBindings()
+{
+    return this->vertexBindings;
+}
+
 Turbo::Render::TCommandBuffer Turbo::Render::TContext::GetCommandBuffer()
 {
     return this->currentCommandBuffer;
@@ -1016,6 +1448,12 @@ Turbo::Core::TImage *Turbo::Render::TContext::GetTextureImage(Turbo::Render::TTe
     {
         return texture2d.image;
     }
-    
+
     return nullptr;
+}
+
+void Turbo::Render::TContext::GC()
+{
+    this->graphicsPipelinePool->GC();
+    this->renderPassPool->GC();
 }

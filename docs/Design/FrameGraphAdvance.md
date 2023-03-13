@@ -212,6 +212,40 @@
   >* 创建`Image`章节
   >* 创建`Buffer`章节
 
+* 2023/2/24
+  >
+  >* 更新`Format格式`章节
+  >* 更新`Pipeline的VertexBinding`章节
+
+* 2023/2/26
+  >
+  >* 创建`绑定Pipeline`章节
+  >* 创建`绑定Pipeline的DescriptorSet`章节
+
+* 2023/2/27
+  >
+  >* 更新`绑定Pipeline的DescriptorSet`章节
+  >* 更新`绑定Pipeline`章节
+  >* 创建`Pipeline创建`章节
+
+* 2023/2/28
+  >
+  >* 创建`DrawCall`章节
+  >* 创建`Dispatch`章节
+  >* 更新`Buffer`章节中的`TIndexBuffer`
+
+* 2023/3/1
+  >
+  >* `Buffer`章节中增加`TUniformBuffer`
+
+* 2023/3/5
+  >
+  >* 创建`Sampler`章节
+
+* 2023/3/6
+  >
+  >* 更新`DrawCall`章节
+
 ---
 
 # Turbo驱动初步
@@ -975,6 +1009,7 @@ class DepthTexture2D: public DepthImage2D
 ### Buffer
 
 与`Image`类似
+
 ```CXX
 typedef enum TBufferUsageBits
 {
@@ -1006,6 +1041,8 @@ class TBuffer
 ```
 
 计划派生出如下子类：
+
+#### VertexBuffer
 
 ```CXX
 enum TVertexRate
@@ -1039,7 +1076,39 @@ public:
 
     AttributeID AddAttribute( TFormatType formatType, uint32_t offset);
 };
+```
 
+#### IndexBuffer
+
+```CXX
+class TIndexBuffer: public TBuffer
+{
+public:
+    enum class IndexType
+    {
+        UINT16,
+        UINT32
+    };
+
+public:
+    struct Descriptor
+    {
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::INDEX
+        uint64_t size;
+        TDomain domain;
+        IndexType indexType;
+    };
+
+    void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
+    void Destroy(void *allocator);
+};
+```
+
+#### UniformBuffer
+
+`UniformBuffer`常见于存储一个`Struct`中的数据
+
+```CXX
 class TUniformBuffer: public TBuffer
 {
 public:
@@ -1051,22 +1120,25 @@ public:
     };
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
-    void Destroy(void *allocator);
 };
+```
 
-class TIndexBuffer: public TBuffer
+或者说提供一个模板类型的`UniformBuffer`（这样的弊端就是一个`UniformBuffer`只能对应一种`struct`，好处就是方便直接）:
+
+```CXX
+template<class T>
+class TUniformBuffer: public TBuffer
 {
-public:
+    public:
     struct Descriptor
     {
-        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::INDEX
-        uint64_t size;
+        //TBufferUsages usages;//由Turbo管理，将会默认包括TBufferUsageBits::UNIFORM
+        //uint64_t size;//由模板 sizeof(T)推出
         TDomain domain;
     };
 
     void Create(const std::string &name, const Descriptor &descriptor, void *allocator);
-    void Destroy(void *allocator);
-};
+}
 ```
 
 ## Format格式
@@ -1084,7 +1156,11 @@ typedef enum class TFormat
     R8G8B8_UNORM,
     B8G8R8_UNORM,
     D32_SFLOAT,
-    D16_UNORM
+    D16_UNORM,
+    R32_SFLOAT,
+    R32G32_SFLOAT,
+    R32G32B32_SFLOAT,
+    R32G32B32A32_SFLOAT,
 }TFormat;
 ```
 
@@ -1984,6 +2060,32 @@ uint32_t layerCount;
 
 创建`ImageView`最好留给`Turbo::Render::TImage`的子类进行构建，`Turbo::Render::TImage`作为基类提供类似`protected: virtual Turbo::Core::TImageView * CreateImageView(....)`的接口函数，该接口函数会在`Turbo::Render::TImage::Create(...)`函数中创建完`Turbo::Core::TImage`之后调用，用于创建`Turbo::Core::TImageView`
 
+## Sampler
+
+对于着色器`Shader`，想要采样纹理，需要一个采样器（`Sampler`），而`Sampler`也与`Image`和`Buffer`一样，当成一种资源创建
+
+```CXX
+class TSampler
+{
+    struct Descriptor
+    {
+        TFilter minFilter = TFilter::LINEAR;
+        TFilter magFilter = TFilter::LINEAR;
+        TMipmapMode mipmapMode = TMipmapMode::LINEAR;
+        TAddressMode addressModeU = TAddressMode::REPEAT;
+        TAddressMode addressModeV = TAddressMode::REPEAT;
+        TAddressMode addressModeW = TAddressMode::REPEAT; 
+        TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE;
+        float mipLodBias = 0.0f;
+        float minLod = 0.0f;
+        float maxLod = 0.0f;
+    };
+
+void Create(const std::string &name, const Image::Descriptor &descriptor,void* allocator);
+void Destroy();
+};
+```
+
 ## Context上下文
 
 `Context`上下文中有整个`Turbo`的`Vulkan`环境，包括`Core::TInstance`、`Core::TPhysicalDevice`、`Core::TDevice`、`Core::TDeviceQueue`和各种`CommandBuffer`环境等
@@ -2423,6 +2525,12 @@ context->Draw(...);
 
 ### Pipeline的VertexBinding
 
+>在`Vulkan`标准中对于`VkPipelineVertexInputStateCreateInfo::pVertexAttributeDescriptions`有这样的规定：
+>
+>`All elements of pVertexAttributeDescriptions must describe distinct attribute locations` [来源](https://registry.khronos.org/vulkan/specs/1.3/html/chap21.html#VUID-VkPipelineVertexInputStateCreateInfo-pVertexAttributeDescriptions-00617)
+>
+>翻译过来就是：绑定的`VkVertexInputAttributeDescription::location`不能有重复的
+
 如前文所说，在创建`Pipeline`时需要指定`std::vector<Turbo::Core::TVertexBinding>`，而顶点属性现在存在于绑定的`VertexBuffer`中，其实还有一个地方：那就是`Shader`中，当用户创建完`VertexShader`后，`Turbo`其实在`VertexShader`中存有有着色器的`in`属性变量，也就是说`Turbo`知道该`Shader`需要什么样的`TVertexBinding`
 
 按照`Shader`中的`in`变量声明来构建相应的`TVertexBinding`，应该算是一个好主意，但是会有一个问题：就是顶点着色器中的`in`声明需要与`VertexBuffer`对应上才行，而这种对应，`Turbo`并不能进行干预，只能用户自己写`Shader`时将`in`声明的变量与绑定的`VertexBuffer`相对应。换句话就是`Turbo`并不能干预用户如何实现`Shader`代码
@@ -2596,11 +2704,11 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, weight_id,/*locat
 command_buffer->BindVeretxAttribute(weight_and_tangent_buffer, tangent_id, /*location*/5);
 ```
 
-2. 完全抛弃`attribute`的字符串，改为完全动态绑定(此种方式类似`OpenGL`的`glVertexAttribPointer`函数)
+2. 完全抛弃`attribute`的字符串，改为完全动态绑定（此种方式类似`OpenGL`的`glVertexAttribPointer`函数）
 
 ```CXX
 //OpenGL
-void glVertexAttribPointer(	GLuint index,
+void glVertexAttribPointer( GLuint index,
                             GLint size,
                             GLenum type,
                             GLboolean normalized,
@@ -2625,7 +2733,149 @@ command_buffer->BindVeretxAttribute(weight_and_tangent_buffe, /*stride*/sizeof(w
 
 `Turbo`考虑优化方式`1`和`2`都提供相应的接口
 
-在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中
+在调用`BindVeretxAttribute`时`Turbo`不会真的将`VertexBuffer`塞入`CommandBuffer`，只有在绑定了`pipeline`并且调用了绘制指令时才会去真正的构建`Pipeline`和将`VertexBuffer`塞入`CommandBuffer`中。
+
+*注：根据`Vulkan`标准来看在`DrawCall`指令之前需要绑定所有绘制相关的数据（包括渲染管线和顶点缓存数组），此时`DrawCall`便是是收集统计的好时机*
+
+### 绑定Pipeline的DescriptorSet
+
+对于`Pipeline`能够正确执行，还需要将对应的各种`layout (set = M, binding = N) uniform UNIFORM_TYPE UNIFORM_NAME[T]`属性进行绑定，`Turbo`将会提供`BindDescriptor(uint32_t set, uint32_t binding, std::vector<各种uinform资源类型>)`接口进行对应资源绑定
+
+在`Turbo`中将所有绑定的资源都视为可一次性绑定多个资源，也就是
+
+```CXX
+//shader
+layout (set = M, binding = N) uniform UNIFORM_TYPE UNIFORM_NAME[T]
+
+//host
+context.BindDescriptor(uint32_t set, uint32_t binding, std::vector<各种uinform资源类型>)
+```
+
+就算绑定的资源只有一个，也视为`size`为`1`的数组进行设置（这与`Turbo`的`Core`层相一致）
+
+在`Turbo`的`Core`层，需要创建完`Pipeline`才能进行`Descriptor`相关资源数据的绑定，所以在调用`BindDescriptor(...)`时，内部是使用了一个树状结构先将用户绑定的`Descriptor`进行缓存。
+
+目前`Turbo`应该提供如下基本`Descriptor`绑定
+
+* `Buffer`: 对应`GLSL`中`uniform Buffer{...}Buffer;`。最终存储为`std::vector<TBuffer *>`
+* `std::pair<TImage, TSampler>`: 对应`GLSL`中`uniform sampler2D xxx;`。最终存储为`std::vector<std::pair<TImageView *, TSampler *>>`
+* `TImage`: 对应`GLSL`中`uniform texture2D xxx;`。最终存储为`std::vector<TImageView *>`
+* `Sampler`: 对应`GLSL`中`uniform sampler xxx;`。最终存储为`std::vector<TSampler *>`
+
+问题来了，对于不同的类型`Turbo`如何进行不同类型的`Descriptor`缓存呢？(泛型编程可能是一个解决方法，但是有点麻烦，不直观)
+
+一种比较直接的方式就是使用`Map`直接记录对应`Descriptor`数组：
+
+```CXX
+//Turbo的内部维护结构
+struct DescriptorID
+{
+    uint32_t set = MAX;
+    uint32_t binding = MAX;
+}
+
+std::map<DescriptorID, std::vector<TBuffer *>> bufferMap;
+std::map<DescriptorID, std::vector<std::pair<TImageView *, TSampler *>>> imageCombineWithSamplerMap;
+std::map<DescriptorID, std::vector<TImageView *>> sampledImageMap;
+std::map<DescriptorID, std::vector<TSampler *>> samplerMap;
+
+//对应的Context对外接口
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<TBuffer>);//在bufferMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<std::pair<TImage, TSampler>>);//在bimageCombineWithSamplerMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<TImage>);//在sampledImageMap中进行缓存
+BindDescriptor(uint32_t set, uint32_t binding, std::vector<Sampler>);//在samplerMap中进行缓存
+```
+
+这有一个问题：用户在一次`DrawCall`时重复性绑定，如下
+
+```CXX
+BindDescriptor(0, 0, some_buffers);//在bufferMap中进行缓存
+BindDescriptor(0, 0, some_images);//在sampledImageMap中进行缓存
+```
+
+用户在同一个`set`和`binding`下绑定了不同类型的`Descriptor`，虽然此行为在`Vulkan`标准中不被允许，但在`Turbo`中将会进行覆盖操作，这就需要`Turbo`记录某某`set`和`binding`下的`Descriptor`是否已经被绑在了哪个类型的缓存里，如果已经绑定了，将原来的绑定解除，进行新的绑定，反之则直接绑定。这需要`Turbo`内部提供一个数据结构用于记录某某`set`和`binding`被绑定到了哪个缓冲中。
+
+可能的结构为：
+
+```CXX
+enum DescriptorType
+{
+    UNIFROM_BUFFER,//表示相应数据缓存在bufferMap中
+    COMBINED_IMAGE_SAMPLER,//表示相应数据缓存在imageCombineWithSamplerMap中
+    SAMPLED_IMAGE,//表示相应数据缓存在sampledImageMap中
+    SAMPLER,//表示相应数据缓存在samplerMap中
+};
+
+class BindingMap
+{
+    std::map<uint32_t binding, DescriptorType> bindings;
+};
+
+class SetMap
+{
+    std::map<uint32_t set, BindingMap> sets;
+};
+```
+
+这样`Turbo`的判断流程大致如下：
+
+```mermaid
+graph TD;
+
+Input["传入set号, binding号, std::vector<各种uinform资源类型>"]
+IsSetMapHasSet{"SetMap中是否存有传入的Set号"}
+
+IsBindingMapHasBinding{"BindingMap中是否存有传入的Binding号"}
+AddNewSetAndBinding["增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存"]
+
+subgraph RefreshSetAndBindgMap["更新Set和Binding对应的缓存"]
+    RemoveDescriptorBinding["将对应的描述符数据从相应缓存中移除"]
+    AddDescriptorBinding["将对应的描述符数据添加到相应缓存中"]
+    UpdateSetBindingMap["更新Set和Binding的相应记录"]
+
+    RemoveDescriptorBinding-->AddDescriptorBinding
+    AddDescriptorBinding-->UpdateSetBindingMap
+end
+
+AddNewBinding["增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存 "]
+
+Input-->IsSetMapHasSet
+IsSetMapHasSet--是-->IsBindingMapHasBinding
+IsSetMapHasSet--否-->AddNewSetAndBinding
+
+IsBindingMapHasBinding--是-->RefreshSetAndBindgMap
+IsBindingMapHasBinding--否-->AddNewBinding
+```
+
+### 绑定Pipeline
+
+`Turbo`的`Context`中分别存有用于计算管线和图形管线的管线缓存
+
+```CXX
+class Context
+{
+    TComputePipeline compute_pipeline;
+    TGraphicsPipeline graphics_pipeline;
+
+    std::vector<Turbo::Core::TPipeline*> pipeline;//所有创建的管线
+}
+```
+
+当用户绑定管线，其实就是更新相应的`TComputePipeline compute_pipeline`和`TGraphicsPipeline graphics_pipeline`
+
+### Pipeline创建
+
+`ComputePipeline`创建需要如下数据:
+
+* `ComputerShader`：来源于绑定的`ComputePipeline`中
+
+`GraphicsPipeline`创建需要如下数据:
+
+* `RenderPass`：来源于`BeginRenderPass(...)`中
+* `subpass`：来源于`NextSubpass()`中
+* `std::vector<TVertexBinding>`：来源于绑定的`BindVeretxAttribute`中
+* `std::vector<TShader *> &shaders`：来源于绑定的`GraphicsPipeline`中
+* `各种渲染配置（包括Topology，PolygonMode，CullModes等等）`：来源于绑定的`GraphicsPipeline`中
 
 ## Subpass
 
@@ -2839,6 +3089,89 @@ CreateFrameBuffer-->ReturnFrameBuffer
 *注：根据`Vulkan`标准，创建`FrameBuffer`时，必须指定`RenderPass`（标准规定，是与之兼容的`RenderPass`）。所以在创建`FrameBuffer`前必须创建`RenderPass`*
 
 同`RenderPassPool`创建`RenderPass`类似，`FrameBufferPool`也需要传入`RenderPass`，并将创建结果刷新到`RenderPass`中，这需要`RenderPass`有一个存储刷新`FrameBuffer`的成员变量
+
+## DrawCall
+
+最经典的`DrawCall`就是`vkCmdDraw`和`vkCmdDrawIndexed`，对于`Turbo`为`Draw(...)`和`DrawIndexed(...)`
+
+此时对于调用`DrawCall`，`Turbo`会收集之前用户设置的数据，并对相关资源进行`创建`，`记录`相关指令，最后`清空`相关资源。
+
+对于`创建`：
+
+* 创建`GraphicsPipeline`
+  * 收集`RenderPass`：来源于`BeginRenderPass(...)`中
+  * 收集`subpass`：来源于`NextSubpass()`
+  * 收集`std::vector<TVertexBinding>`：来源于`BindVeretxAttribute(...)`
+  * 收集`std::vector<TShader *> &shaders`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+  * 收集`Pipeline属性（Topology，Polygon，CullModes等）`：来源于`BindPipeine(...)`所绑定的`GraphicsPipeline`中
+
+    *注：一帧结束后销毁*
+
+* 创建`TPipelineDescriptorSet`
+  * 通过`TDescriptorPool`的`Allocate(TPipelineLayout*)`函数
+  * 传入的`TPipelineLayout`从之前创建的`Pipeline`获得
+  * 通过`TPipelineDescriptorSet`的`BindData`将数据绑定进去，数据来源于`BindDescriptor(...)`
+
+    *注：一帧结束后回收*
+
+对于`记录`：
+
+* 记录`CmdBindPipeline(...)`指令，来源于之前创建的`GraphicsPipeline`
+* 记录`CmdBindPipelineDescriptorSet(...)`指令，来源于之前创建的`TPipelineDescriptorSet`
+* 记录`CmdBindVertexBuffers(...)`指令，来源于之前调用`BindVeretxAttribute`中的绑定
+* 记录`DrawCall`指令(`CmdDraw`和`CmdDrawIndexed`)，来源于用户对于`DrawCall`的调用
+
+对于`清空`：
+
+* 清空由于`BindVeretxAttribute(...)`记录的`VertexBuffer`和`std::vector<TVertexBinding>`
+* 清空由于`BindDescriptor(...)`记录的`Descriptor`和相关记录结构
+
+*注：如果用户在绑定完`VeretxAttribute`和`Descriptor`之后没有再调用相关绑定函数接口，`Turbo`调用`DrawCall`将不会再收集更新相关指令，因为相关指令没有更新的必要，默认使用之前的绑定结果。（如果新的渲染与之前的绑定的数据不兼容的话将会因不符合`Vulkan`标准而出问题）*
+
+由于创建`Pipeline`和记录渲染指令都位于`DrawCall`中，所以需要在`DrawCall`中提供防止重复创建`Pipeline`的功能，比如：
+
+```CXX
+...
+context.Draw(....);
+context.Draw(....);
+context.Draw(....);
+context.NextSubpass();
+...
+```
+在如上的三次渲染中，如果不防止重复创建`Pipeline`的话将会创建三次`Pipeline`。这就需要在绘制时判断，当前绑定的`Pipeline`是否已被创建。
+
+在`Vulkan`标准中，一个`Pipeline`内部属性对应如下：
+
+* `RenderPass`：当前`Pipeline`属于哪个`RenderPass`
+* `Subpass`：当前`Pipeline`属于当前`RenderPass`下的哪个`Subpass`
+* `Shaders`：当前`Pipeline`对应的着色器
+
+每当绘制时，`DrawCall`是知道当前位于哪个`RenderPass`下的哪个`Subpass`下使用哪个`Pipeline`的，所以每次`DrawCall`需要判断当前渲染指令下，在当前`RenderPass`下的当前`Subpass`下是否有与绑定的`Pipeline`兼容的已创建的`Pipeline`，如果有直接使用，如果没有新建一个
+
+```mermaid
+graph TD;
+DrawCall["DrawCal(...)"]
+NavigateCurrentRenderPass["定位到当前RenderPass"]
+NavigateCurrentSubpass["定位到当前Subpass"]
+IsHadCompatiblePipeline{"是否有兼容的Pipeline"}
+
+UseCompatiblePipeline["使用兼容性的Pipeline"]
+CreateNewPipeline["创建新的Pipeline"]
+
+ReturnUse["返回使用"]
+
+DrawCall-->NavigateCurrentRenderPass
+NavigateCurrentRenderPass-->NavigateCurrentSubpass
+NavigateCurrentSubpass-->IsHadCompatiblePipeline
+IsHadCompatiblePipeline--是-->UseCompatiblePipeline
+IsHadCompatiblePipeline--否-->CreateNewPipeline
+UseCompatiblePipeline-->ReturnUse
+CreateNewPipeline-->ReturnUse
+```
+
+提供一个`PipelinePool`也许是一个好方法
+
+## Dispatch
 
 ## Shader
 

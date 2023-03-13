@@ -115,6 +115,16 @@ void Turbo::Render::TBuffer::Copy(TBuffer *src, uint64_t srcOffset, uint64_t siz
     }
 }
 
+bool Turbo::Render::TBuffer::IsValid() const
+{
+    if (this->buffer != nullptr && this->buffer->GetVkBuffer() != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Turbo::Render::TVertexBuffer::TAttribute::TAttribute(Turbo::Render::TFormat format, uint32_t offset)
 {
     this->format = format;
@@ -129,6 +139,15 @@ Turbo::Render::TFormat Turbo::Render::TVertexBuffer::TAttribute::GetFormat()
 uint32_t Turbo::Render::TVertexBuffer::TAttribute::GetOffset()
 {
     return this->offset;
+}
+
+bool Turbo::Render::TVertexBuffer::TAttribute::IsValid() const
+{
+    if (this->format != Turbo::Render::TFormat::UNDEFINED && this->offset != std::numeric_limits<uint32_t>::max())
+    {
+        return true;
+    }
+    return false;
 }
 
 void Turbo::Render::TVertexBuffer::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
@@ -150,7 +169,7 @@ Turbo::Render::TAttributeID Turbo::Render::TVertexBuffer::AddAttribute(Turbo::Re
     return this->attributes.size() - 1;
 }
 
-Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttribute(TAttributeID id)
+Turbo::Render::TVertexBuffer::TAttribute Turbo::Render::TVertexBuffer::GetAttribute(TAttributeID id) const
 {
     Turbo::Render::TVertexBuffer::TAttribute result{};
     if (id > (this->attributes.size() - 1))
@@ -166,12 +185,59 @@ const std::vector<Turbo::Render::TVertexBuffer::TAttribute> &Turbo::Render::TVer
     return this->attributes;
 }
 
-uint32_t Turbo::Render::TVertexBuffer::GetStride()
+uint32_t Turbo::Render::TVertexBuffer::GetStride() const
 {
     return this->stride;
 }
 
-Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::Getrate()
+Turbo::Render::TVertexBuffer::TRate Turbo::Render::TVertexBuffer::GetRate() const
 {
     return this->rate;
+}
+
+void Turbo::Render::TIndexBuffer::Create(const std::string &name, const Descriptor &descriptor, void *allocator)
+{
+    Turbo::Render::TBuffer::Descriptor buffer_descriptor = {};
+    buffer_descriptor.usages = Turbo::Render::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Render::TBufferUsageBits::BUFFER_TRANSFER_DST;
+    buffer_descriptor.size = descriptor.size;
+    buffer_descriptor.domain = descriptor.domain;
+
+    Turbo::Render::TBuffer::Create(name, buffer_descriptor, allocator);
+}
+
+Turbo::Render::TIndexBuffer::TIndexType Turbo::Render::TIndexBuffer::GetIndexType() const
+{
+    return this->indexType;
+}
+
+void Turbo::Render::TIndexBuffer::Copy(const std::vector<uint16_t> &indexs)
+{
+    uint64_t src_size = indexs.size() * sizeof(uint16_t);
+    uint64_t local_size = this->GetSize();
+    if (src_size > local_size)
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), local_size);
+    }
+    else
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), src_size);
+    }
+
+    this->indexType = TIndexType::UINT16;
+}
+
+void Turbo::Render::TIndexBuffer::Copy(const std::vector<uint32_t> &indexs)
+{
+    uint64_t src_size = indexs.size() * sizeof(uint32_t);
+    uint64_t local_size = this->GetSize();
+    if (src_size > local_size)
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), local_size);
+    }
+    else
+    {
+        Turbo::Render::TBuffer::Copy((void *)indexs.data(), src_size);
+    }
+
+    this->indexType = TIndexType::UINT32;
 }

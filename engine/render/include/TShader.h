@@ -50,6 +50,8 @@ class TComputeShader : public TShader
     TComputeShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TComputeShader(TContext *context, size_t size, uint32_t *code);
     ~TComputeShader();
+
+    Turbo::Core::TComputeShader * GetComputeShader();
 };
 
 class TVertexShader : public TShader
@@ -61,6 +63,8 @@ class TVertexShader : public TShader
     TVertexShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TVertexShader(TContext *context, size_t size, uint32_t *code);
     ~TVertexShader();
+
+    Turbo::Core::TVertexShader * GetVertexShader();
 };
 
 class TFragmentShader : public TShader
@@ -72,6 +76,8 @@ class TFragmentShader : public TShader
     TFragmentShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TFragmentShader(TContext *context, size_t size, uint32_t *code);
     ~TFragmentShader();
+
+    Turbo::Core::TFragmentShader * GetFragmentShader();
 };
 } // namespace Render
 } // namespace Turbo

@@ -201,3 +201,23 @@ add_executable(ClearColorTest ./ClearColorTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(ClearColorTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ClearColorTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ClearColorTest PUBLIC ${LIBS})
+
+add_executable(VulkanAllocatorTest ./VulkanAllocatorTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanAllocatorTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanAllocatorTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanAllocatorTest PUBLIC ${LIBS})
+
+add_executable(ShaderIncludeTest ./ShaderIncludeTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ShaderIncludeTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ShaderIncludeTest PUBLIC ${LINK_PARTH})
+target_link_libraries(ShaderIncludeTest PUBLIC ${LIBS})
+
+add_executable(GreenFieldDiorama ./GreenFieldDiorama.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(GreenFieldDiorama PUBLIC ${INCLUDE_PARTH})
+target_link_directories(GreenFieldDiorama PUBLIC ${LINK_PARTH})
+target_link_libraries(GreenFieldDiorama PUBLIC ${LIBS})
+
+add_executable(PureHelloTriangleAndFrameGraph ./PureHelloTriangleAndFrameGraph.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PureHelloTriangleAndFrameGraph PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PureHelloTriangleAndFrameGraph PUBLIC ${LINK_PARTH})
+target_link_libraries(PureHelloTriangleAndFrameGraph PUBLIC ${LIBS})
