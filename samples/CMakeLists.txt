@@ -216,3 +216,8 @@ add_executable(GreenFieldDiorama ./GreenFieldDiorama.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(GreenFieldDiorama PUBLIC ${INCLUDE_PARTH})
 target_link_directories(GreenFieldDiorama PUBLIC ${LINK_PARTH})
 target_link_libraries(GreenFieldDiorama PUBLIC ${LIBS})
+
+add_executable(PureHelloTriangleAndFrameGraph ./PureHelloTriangleAndFrameGraph.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(PureHelloTriangleAndFrameGraph PUBLIC ${INCLUDE_PARTH})
+target_link_directories(PureHelloTriangleAndFrameGraph PUBLIC ${LINK_PARTH})
+target_link_libraries(PureHelloTriangleAndFrameGraph PUBLIC ${LIBS})

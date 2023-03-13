@@ -138,6 +138,7 @@ std::vector<Turbo::Render::TImage> Turbo::Render::TRenderPass::GetAttachments()
             }
         }
 
+        if (depth_stencil_image.IsValid())
         {
             bool was_in_result = false;
 
@@ -172,7 +173,7 @@ bool Turbo::Render::TRenderPass::IsEmpty() const
             }
         }
     }
-    
+
     return true;
 }
 

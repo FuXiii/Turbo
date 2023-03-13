@@ -409,7 +409,7 @@ bool Turbo::Render::TRenderPassPool::Find(Turbo::Render::TRenderPass &renderPass
                     // Use vector to storage depth stencil the purpose is to determine whether DepthStencilAttachment exists
                     // usually we will only have one DepthStencilAttachment or without DepthStencilAttachment
                     std::vector<Turbo::Core::TAttachment> core_depth_stencil_attachments;
-                    if (core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
+                    if (core_depth_stencil_attachment_reference != nullptr && core_depth_stencil_attachment_reference->attachment != UINT32_MAX)
                     {
                         core_depth_stencil_attachments.push_back(core_attachments[core_depth_stencil_attachment_reference->attachment]);
                     }
@@ -653,7 +653,7 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
     // TODO:Create a new Turbo::Core::TFramebuffer
     // TODO:add into this->framebuffers
     std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
-
+    
     std::vector<Turbo::Core::TImageView *> attachments;
     for (Turbo::Render::TImage &image_item : render_pass_attachments)
     {
@@ -1126,7 +1126,7 @@ void Turbo::Render::TContext::BindVeretxAttribute(const Turbo::Render::TVertexBu
             if (!is_found_vertex_buffer)
             {
                 this->vertexBuffers.push_back(vertexBuffer.buffer);
-                vertex_buffer_index = vertex_buffer_index + 1;
+                vertex_buffer_index = this->vertexBuffers.size() - 1;
 
                 uint32_t stride = vertexBuffer.GetStride();
                 Turbo::Core::TVertexRate vertex_rate = vertexBuffer.GetRate() == Turbo::Render::TVertexBuffer::TRate::VERTEX ? Turbo::Core::TVertexRate::VERTEX : Turbo::Core::TVertexRate::INSTANCE;
@@ -1403,6 +1403,10 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
         delete command_buffer_item.fence;
         this->commandBufferPool->Free(command_buffer_item.commandBuffer);
     }
+
+    /*
+        TODO:这里是回收资源的好去处(此时CommandBuffer已经执行完成，可以回收不再使用的资源了)
+    */
 
     this->commandBuffers.clear();
     return true;

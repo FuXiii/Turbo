@@ -2737,3 +2737,10 @@ Turbo是渲染引擎
 * 2023/3/10 设计架构
   >
   >* `./samples`下增加`GreenFieldDiorama`示例，用于测试多通道，颜色附件，纹理采样，着色器`#include`等
+
+* 2023/3/13 设计架构
+  >
+  >* 修正`./engine/render`下`TRenderPass`类中`GetAttachments()`对于深度模板纹理的信息收集`Bug`
+  >* 修正`./engine/render`下`TContext`类中`BindVeretxAttribute()`对于顶点绑定索引的计算错误`Bug`
+  >* 修正`./engine/render`下`TRenderPassPool`类中`Find()`对于深度模板附件未对空指针进行检查`Bug`
+  >* `./samples`下增加`PureHelloTriangleAndFrameGraph`示例，用于测试基于`FrameGraph`驱动`Turbo`绘制一个纯三角形
