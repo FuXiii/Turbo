@@ -272,7 +272,6 @@ int main()
                         }
                         break;
                         }
-                        // std::cout << "Present" << std::endl;
                     }
                 }
             });
