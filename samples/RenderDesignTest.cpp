@@ -1158,7 +1158,6 @@ void Test9()
                         }
                         break;
                         default: {
-                            context.GC();
                         }
                         break;
                         }
@@ -1169,6 +1168,8 @@ void Test9()
 
         fg.Compile();
         fg.Execute(&context, &resource_allocator);
+
+        context.GC();
     }
 
     context.GetDevice()->WaitIdle();
