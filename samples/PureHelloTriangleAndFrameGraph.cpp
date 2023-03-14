@@ -268,7 +268,6 @@ int main()
                         }
                         break;
                         default: {
-                            context.GC();
                         }
                         break;
                         }
@@ -278,6 +277,7 @@ int main()
 
         fg.Compile();
         fg.Execute(&context, &resource_allocator);
+        context.GC();
     }
 
     context.GetDevice()->WaitIdle();
