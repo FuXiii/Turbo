@@ -1108,7 +1108,6 @@ void Test9()
                     if (result == Turbo::Core::TResult::SUCCESS)
                     {
                         // TODO:Blit Image
-
                         auto show_target = swapchain_image_views[index];
 
                         Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
@@ -1129,6 +1128,7 @@ void Test9()
                         switch (result)
                         {
                         case Turbo::Core::TResult::MISMATCH: {
+                            context.GC();
                             Turbo::Core::TDevice *device = temp_context->GetDevice();
                             device->WaitIdle();
 

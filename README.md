@@ -2744,3 +2744,7 @@ Turbo是渲染引擎
   >* 修正`./engine/render`下`TContext`类中`BindVeretxAttribute()`对于顶点绑定索引的计算错误`Bug`
   >* 修正`./engine/render`下`TRenderPassPool`类中`Find()`对于深度模板附件未对空指针进行检查`Bug`
   >* `./samples`下增加`PureHelloTriangleAndFrameGraph`示例，用于测试基于`FrameGraph`驱动`Turbo`绘制一个纯三角形
+
+* 2023/3/14 设计架构
+  >
+  >* 修正`./samples`下`PureHelloTriangleAndFrameGraph`示例，在改变窗口大小时导致的`VkImageView`无效的`Bug`，该`Bug`的原因是一帧结束，并且当窗口大小改变时没有及时回收`FrameBuffer`的资源
