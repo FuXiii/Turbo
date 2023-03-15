@@ -167,6 +167,7 @@ bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &
 
 void Turbo::Render::TGraphicsPipelinePool::GC()
 {
+    std::cout<<"Clear All GraphicsPipeline"<<std::endl;
     for (auto &render_pass_item : this->graphicsPipelineMap)
     {
         for (auto &subpass_item : render_pass_item.second)
@@ -594,6 +595,7 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     {
         if (this->Find(renderPass))
         {
+            std::cout << "RenderPass Found" << std::endl;
             if (this->framebufferPool->Allocate(renderPass))
             {
                 return true;
@@ -604,6 +606,7 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
             }
         }
 
+        std::cout << "RenderPass Not Found, Create a RenderPass" << std::endl;
         // create a new RenderPass/TRenderPassProxy
         this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
         if (this->framebufferPool->Allocate(renderPass))
@@ -653,7 +656,7 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
     // TODO:Create a new Turbo::Core::TFramebuffer
     // TODO:add into this->framebuffers
     std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
-    
+
     std::vector<Turbo::Core::TImageView *> attachments;
     for (Turbo::Render::TImage &image_item : render_pass_attachments)
     {
@@ -707,10 +710,13 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
 {
     if (this->Find(renderPass))
     {
+        std::cout << "Framebuffer Found" << std::endl;
+
         return true;
     }
 
     // TODO:Create a new Framebuffer
+    std::cout << "Framebuffer Not Found, Create a Framebuffer" << std::endl;
     this->CreateFramebuffer(renderPass); // FIXME: if create failed?
     return true;
 }
@@ -722,6 +728,8 @@ void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPas
 
 void Turbo::Render::TFramebufferPool::GC()
 {
+    std::cout << "Clear All Framebuffer" << std::endl;
+
     for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
     {
         delete frame_buffer_item;
