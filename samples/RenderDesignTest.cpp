@@ -1066,7 +1066,7 @@ void Test9()
                 context.BindVeretxAttribute(vertex_buffer, position_attribute_id, 0);
                 context.BindVeretxAttribute(vertex_buffer, color_attribute_id, 1);
                 context.BindPipeline(graphics_pipeline);
-                context.Draw(3, 1, 0, 0);
+                context.Draw(3, 1, 0, 0); //FIXME: <<<---此时发生了内存泄漏
                 context.EndRenderPass();
 
                 context.Flush();
