@@ -57,7 +57,7 @@ Turbo是渲染引擎
 ![Core](https://img.shields.io/badge/Core-初步完成-brightgreen?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::Core`
-* 文档：`./docs/TurboDesign.drawio:Core`
+* 文档：`./docs/TurboDesign.drawio:Core`和`./docs/Design/Core.md`
 * 目录：`./engine/core`
 * 依赖：独立模块，无依赖。
 * 说明：`Core`作为核心模块直接与`Vulkan`沟通，是上层与`Vulkan`底层最直接的桥梁，`Turbo`中所有的`GPU`相关工作最终都会从上层回到`Core`层。
@@ -2748,3 +2748,7 @@ Turbo是渲染引擎
 * 2023/3/14 设计架构
   >
   >* 修正`./samples`下`PureHelloTriangleAndFrameGraph`示例，在改变窗口大小时导致的`VkImageView`无效的`Bug`，该`Bug`的原因是一帧结束，并且当窗口大小改变时没有及时回收`FrameBuffer`的资源
+
+* 2023/3/15 设计架构
+  >
+  >* `./docs/Design`下增加`Core.md`文档。用于记录`Turbo`核心的相关设计
