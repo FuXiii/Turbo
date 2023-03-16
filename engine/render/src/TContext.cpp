@@ -1315,7 +1315,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
     this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline); // FIXME: <<<---此时发生了内存泄漏!!!
-    // this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
+    this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
 
     //////////////////////this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set); //FIXME: 待实现
     this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
@@ -1330,7 +1330,7 @@ void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount,
 
     this->currentCommandBuffer.commandBuffer->CmdSetViewport(viewports);
     this->currentCommandBuffer.commandBuffer->CmdSetScissor(scissors);
-    // this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+    this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
 
     {
         for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
