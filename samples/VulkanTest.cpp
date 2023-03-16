@@ -151,7 +151,7 @@ void PAUSE(const std::string &message)
 {
     std::cout << message << std::endl;
     // system("pause");
-    std::cin.get();
+    // std::cin.get();
 }
 
 void Test0(Turbo::Core::TDeviceQueue *deviceQueue)
@@ -785,12 +785,13 @@ void Test6(Turbo::Core::TDeviceQueue *deviceQueue)
         uint32_t create_count = UINT32_MAX;
         for (uint32_t index = 0; index < create_count; index++)
         {
-            // FIXME:有内存泄漏！！！！
-            // Turbo::Core::TGraphicsPipeline *temp_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_binding, vs, fs);
-            // delete temp_graphics_pipeline;
+            // 将会调用 vkCreateDescriptorSetLayout(...), vkCreatePipelineLayout(...) 和 vkCreateGraphicsPipelines(...)
+            Turbo::Core::TGraphicsPipeline *temp_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_binding, vs, fs);
 
-            Turbo::Core::TPipeline *temp = new Turbo::Core::TPipeline(device, vs, fs);
-            delete temp;
+            // 将会调用 vkDestroyPipeline(...), vkDestroyPipelineLayout(...) 和 vkDestroyDescriptorSetLayout(...)
+            delete temp_graphics_pipeline;
+
+            std::cout << index << std::endl;
         }
         PAUSE("End Create TGraphicsPipeline");
     }
