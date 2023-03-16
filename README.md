@@ -2757,3 +2757,4 @@ Turbo是渲染引擎
 * 2023/3/16 设计架构
   >
   >* 尝试解决`内存泄漏`的`Bug`
+  >* 经过多次测试和探索，`内存泄漏`位于`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`函数内部，而这一部分属于显卡驱动范畴，大概率是`GPU`驱动`Bug`
