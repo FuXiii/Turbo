@@ -151,7 +151,7 @@ void PAUSE(const std::string &message)
 {
     std::cout << message << std::endl;
     // system("pause");
-    // std::cin.get();
+    std::cin.get();
 }
 
 void Test0(Turbo::Core::TDeviceQueue *deviceQueue)
@@ -805,6 +805,44 @@ void Test6(Turbo::Core::TDeviceQueue *deviceQueue)
     PAUSE("Init destroy finished");
 }
 
+void Test7(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    uint32_t create_count = UINT32_MAX;
+    for (uint32_t index = 0; index < create_count; index++)
+    {
+        VkPipelineLayoutCreateInfo vk_pipeline_layout_create_info = {};
+        vk_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        vk_pipeline_layout_create_info.pNext = nullptr;
+        vk_pipeline_layout_create_info.flags = 0;
+        vk_pipeline_layout_create_info.setLayoutCount = 0;
+        vk_pipeline_layout_create_info.pSetLayouts = nullptr;
+        vk_pipeline_layout_create_info.pushConstantRangeCount = 0;
+        vk_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+
+        VkPipelineLayout vk_pipeline_layout = VK_NULL_HANDLE;
+        VkResult result = device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
+        if (result == VkResult::VK_SUCCESS)
+        {
+            device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
+            std::cout << index << std::endl;
+        }
+        else
+        {
+            PAUSE("vkCreatePipelineLayout failed!!!");
+            return;
+        }
+    }
+}
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -879,9 +917,9 @@ int main()
     // Test3(queue);
     // Test4(queue);
     // Test5(queue);
-    PAUSE("Begin Test6");
-    Test6(queue);
-    PAUSE("End Test6");
+    // Test6(queue);
+
+    Test7(queue);
 
     delete device;
     delete instance;
