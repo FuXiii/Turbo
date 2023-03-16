@@ -111,6 +111,7 @@ void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render:
         Turbo::Core::TGraphicsPipeline *new_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, subpass, vertex_bindings, render_vertex_shader->GetVertexShader(), render_fragment_shader->GetFragmentShader());
         this->graphicsPipelineMap[renderPass.renderPass][subpass].push_back(new_graphics_pipeline);
         graphicsPipeline.graphicsPipeline = new_graphics_pipeline;
+        std::cout << "create GraphicsPipeline:" << new_graphics_pipeline << std::endl;
     }
 }
 
@@ -174,7 +175,8 @@ void Turbo::Render::TGraphicsPipelinePool::GC()
         {
             for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
             {
-                delete graphics_pipeline_item;
+                std::cout << "delete GraphicsPipeline:" << graphics_pipeline_item << std::endl;
+                delete graphics_pipeline_item; // FIXME: <<<---此时发生了内存泄漏
             }
         }
     }
@@ -1312,8 +1314,8 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 
 void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
-    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline); //FIXME: <<<---此时发生了内存泄漏!!!
-    this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
+    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline); // FIXME: <<<---此时发生了内存泄漏!!!
+    // this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
 
     //////////////////////this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set); //FIXME: 待实现
     this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
@@ -1328,7 +1330,7 @@ void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount,
 
     this->currentCommandBuffer.commandBuffer->CmdSetViewport(viewports);
     this->currentCommandBuffer.commandBuffer->CmdSetScissor(scissors);
-    this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+    // this->currentCommandBuffer.commandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
 
     {
         for (Turbo::Core::TVertexBinding *vertex_binding_item : this->vertexBindings)
