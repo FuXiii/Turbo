@@ -70,12 +70,12 @@ Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, std::vector<TDesc
 
 Turbo::Core::TPipelineLayout::~TPipelineLayout()
 {
+    this->InternalDestroy();
+
     for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
     {
         delete descriptor_set_layout_item;
     }
-
-    this->InternalDestroy();
 }
 
 const std::vector<Turbo::Core::TDescriptorSetLayout *> &Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()

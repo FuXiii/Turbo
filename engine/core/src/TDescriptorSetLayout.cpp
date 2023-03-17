@@ -72,14 +72,23 @@ Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TDevice *device, std::ve
     }
 }
 
-uint32_t Turbo::Core::TDescriptorSetLayout::GetSet()
-{
-    return this->descriptors[0]->GetSet();
-}
-
 Turbo::Core::TDescriptorSetLayout::~TDescriptorSetLayout()
 {
     this->InternalDestroy();
+
+    // TODO: release Turbo::Core::TNaNDescriptor
+    for (TDescriptor *depcriptor_item : this->descriptors)
+    {
+        if (depcriptor_item->GetShader() == nullptr) // this is Turbo::Core::TNaNDescriptor
+        {
+            delete depcriptor_item;
+        }
+    }
+}
+
+uint32_t Turbo::Core::TDescriptorSetLayout::GetSet()
+{
+    return this->descriptors[0]->GetSet();
 }
 
 VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayout()

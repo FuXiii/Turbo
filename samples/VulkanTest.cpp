@@ -147,6 +147,13 @@ void WriteBinaryFile(const std::string &filename, const uint32_t count, const st
     file.close();
 }
 
+void PAUSE(const std::string &message)
+{
+    std::cout << message << std::endl;
+    // system("pause");
+    std::cin.get();
+}
+
 void Test0(Turbo::Core::TDeviceQueue *deviceQueue)
 {
     std::cout << "<Test0>" << std::endl;
@@ -735,6 +742,105 @@ void Test5(Turbo::Core::TDeviceQueue *deviceQueue)
     VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
     VkDevice vk_device = device->GetVkDevice();
     VkQueue vk_queue = deviceQueue->GetVkQueue();
+    std::cout << "</Test5>" << std::endl;
+}
+
+void Test6(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    PAUSE("Init env finished");
+
+    const std::string vert_shader_str = ReadTextFile("../../asset/shaders/shader_base.vert");
+    const std::string fragment_shader_str = ReadTextFile("../../asset/shaders/shader_base.frag");
+
+    Turbo::Core::TVertexShader *vs = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, vert_shader_str);
+    Turbo::Core::TFragmentShader *fs = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, fragment_shader_str);
+
+    Turbo::Core::TImage *color_attachment_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 512, 512, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+    Turbo::Core::TImageView *color_attachment_image_view = new Turbo::Core::TImageView(color_attachment_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_attachment_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+    std::vector<Turbo::Core::TAttachment> attachments;
+    attachments.push_back({color_attachment_image_view->GetFormat(), Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL});
+
+    Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
+    subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+
+    std::vector<Turbo::Core::TSubpass> subpasses;
+    subpasses.push_back(subpass);
+
+    Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachments, subpasses);
+    std::vector<Turbo::Core::TVertexBinding> vertex_binding;
+    PAUSE("Init create finished");
+
+    {
+        PAUSE("Begin Create TGraphicsPipeline");
+        uint32_t create_count = UINT32_MAX;
+        for (uint32_t index = 0; index < create_count; index++)
+        {
+            // 将会调用 vkCreateDescriptorSetLayout(...), vkCreatePipelineLayout(...) 和 vkCreateGraphicsPipelines(...)
+            Turbo::Core::TGraphicsPipeline *temp_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_binding, vs, fs);
+
+            // 将会调用 vkDestroyPipeline(...), vkDestroyPipelineLayout(...) 和 vkDestroyDescriptorSetLayout(...)
+            delete temp_graphics_pipeline;
+
+            std::cout << index << std::endl;
+        }
+        PAUSE("End Create TGraphicsPipeline");
+    }
+
+    delete render_pass;
+    delete color_attachment_image_view;
+    delete color_attachment_image;
+    delete fs;
+    delete vs;
+
+    PAUSE("Init destroy finished");
+}
+
+void Test7(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+
+    uint32_t create_count = UINT32_MAX;
+    for (uint32_t index = 0; index < create_count; index++)
+    {
+        VkPipelineLayoutCreateInfo vk_pipeline_layout_create_info = {};
+        vk_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        vk_pipeline_layout_create_info.pNext = nullptr;
+        vk_pipeline_layout_create_info.flags = 0;
+        vk_pipeline_layout_create_info.setLayoutCount = 0;
+        vk_pipeline_layout_create_info.pSetLayouts = nullptr;
+        vk_pipeline_layout_create_info.pushConstantRangeCount = 0;
+        vk_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+
+        VkPipelineLayout vk_pipeline_layout = VK_NULL_HANDLE;
+        VkResult result = device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
+        if (result == VkResult::VK_SUCCESS)
+        {
+            device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
+            std::cout << index << std::endl;
+        }
+        else
+        {
+            PAUSE("vkCreatePipelineLayout failed!!!");
+            return;
+        }
+    }
 }
 
 int main()
@@ -805,11 +911,15 @@ int main()
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
-    Test0(queue);
-    // Test1(queue);
-    Test2(queue);
-    Test3(queue);
-    Test4(queue);
+    // Test0(queue);
+    //  Test1(queue);
+    // Test2(queue);
+    // Test3(queue);
+    // Test4(queue);
+    // Test5(queue);
+    // Test6(queue);
+
+    Test7(queue);
 
     delete device;
     delete instance;

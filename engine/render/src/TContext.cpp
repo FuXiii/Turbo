@@ -173,7 +173,7 @@ void Turbo::Render::TGraphicsPipelinePool::GC()
         {
             for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
             {
-                delete graphics_pipeline_item;
+                delete graphics_pipeline_item; // FIXME: <<<---此时发生了内存泄漏
             }
         }
     }
@@ -594,6 +594,7 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     {
         if (this->Find(renderPass))
         {
+            std::cout << "RenderPass Found" << std::endl;
             if (this->framebufferPool->Allocate(renderPass))
             {
                 return true;
@@ -653,7 +654,7 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
     // TODO:Create a new Turbo::Core::TFramebuffer
     // TODO:add into this->framebuffers
     std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
-    
+
     std::vector<Turbo::Core::TImageView *> attachments;
     for (Turbo::Render::TImage &image_item : render_pass_attachments)
     {
@@ -1304,10 +1305,10 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 
 void Turbo::Render::TContext::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
-    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline);
+    this->graphicsPipelinePool->Allocate(this->currentRenderPass, this->currentSubpass, this->currentGraphicsPipeline); // FIXME: <<<---此时发生了内存泄漏!!!
     this->currentCommandBuffer.commandBuffer->CmdBindPipeline(this->currentGraphicsPipeline.graphicsPipeline);
 
-    // this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);//TODO: 待实现
+    //////////////////////this->currentCommandBuffer.commandBuffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set); //FIXME: 待实现
     this->currentCommandBuffer.commandBuffer->CmdBindVertexBuffers(this->vertexBuffers);
 
     Turbo::Core::TViewport viewport(0, 0, this->currentRenderPass.framebuffer->GetWidth(), this->currentRenderPass.framebuffer->GetHeight(), 0, 1);

@@ -86,6 +86,7 @@ void Turbo::Core::TPipeline::InternalCreate()
                 while ((current_set + 1) != next_set)
                 {
                     current_set = current_set + 1;
+                    // FIXME: need delete in [TPipelineLayout::~TPipelineLayout()]. TNaNDescriptor [name] is <NaN> and [shader] is <nullptr>
                     descriptor_set_map[current_set].push_back(new TNaNDescriptor(current_set));
                 }
             }

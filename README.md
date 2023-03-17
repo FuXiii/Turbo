@@ -57,7 +57,7 @@ Turbo是渲染引擎
 ![Core](https://img.shields.io/badge/Core-初步完成-brightgreen?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::Core`
-* 文档：`./docs/TurboDesign.drawio:Core`
+* 文档：`./docs/TurboDesign.drawio:Core`和`./docs/Design/Core.md`
 * 目录：`./engine/core`
 * 依赖：独立模块，无依赖。
 * 说明：`Core`作为核心模块直接与`Vulkan`沟通，是上层与`Vulkan`底层最直接的桥梁，`Turbo`中所有的`GPU`相关工作最终都会从上层回到`Core`层。
@@ -2748,3 +2748,18 @@ Turbo是渲染引擎
 * 2023/3/14 设计架构
   >
   >* 修正`./samples`下`PureHelloTriangleAndFrameGraph`示例，在改变窗口大小时导致的`VkImageView`无效的`Bug`，该`Bug`的原因是一帧结束，并且当窗口大小改变时没有及时回收`FrameBuffer`的资源
+
+* 2023/3/15 设计架构
+  >
+  >* `./docs/Design`下增加`Core.md`文档。用于记录`Turbo`核心的相关设计
+  >* 尝试解决`内存泄漏`的`Bug`
+
+* 2023/3/16 设计架构
+  >
+  >* 尝试解决`内存泄漏`的`Bug`
+  >* 经过多次测试和探索，`内存泄漏`位于`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`函数内部，而这一部分属于显卡驱动范畴，大概率是`GPU`驱动`Bug`
+
+* 2023/3/17 设计架构
+  >
+  >* 确定`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`发生的内存泄漏是`NVIDIA GPU`驱动`Bug`，`Game Ready Driver`驱动版本为`531.29`发布日期为`2023/03/14`
+  >* 修正添加`./engine/core`下`TDescriptorSetLayout`类中`~TDescriptorSetLayout()`成员函数对于`Turbo::Core::TNaNDescriptor`资源内存的释放回收。
