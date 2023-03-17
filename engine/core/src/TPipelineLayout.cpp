@@ -74,7 +74,6 @@ Turbo::Core::TPipelineLayout::~TPipelineLayout()
 
     for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
     {
-        std::cout << "TPipelineLayout::~TPipelineLayout()::delete descriptor_set_layout_item" << std::endl;
         delete descriptor_set_layout_item;
     }
 }

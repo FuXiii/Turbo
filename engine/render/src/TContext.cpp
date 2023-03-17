@@ -111,7 +111,6 @@ void Turbo::Render::TGraphicsPipelinePool::CreateGraphicsPipeline(Turbo::Render:
         Turbo::Core::TGraphicsPipeline *new_graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, subpass, vertex_bindings, render_vertex_shader->GetVertexShader(), render_fragment_shader->GetFragmentShader());
         this->graphicsPipelineMap[renderPass.renderPass][subpass].push_back(new_graphics_pipeline);
         graphicsPipeline.graphicsPipeline = new_graphics_pipeline;
-        std::cout << "create GraphicsPipeline:" << new_graphics_pipeline << std::endl;
     }
 }
 
@@ -168,14 +167,12 @@ bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &
 
 void Turbo::Render::TGraphicsPipelinePool::GC()
 {
-    std::cout << "Clear All GraphicsPipeline" << std::endl;
     for (auto &render_pass_item : this->graphicsPipelineMap)
     {
         for (auto &subpass_item : render_pass_item.second)
         {
             for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
             {
-                std::cout << "delete GraphicsPipeline:" << graphics_pipeline_item << std::endl;
                 delete graphics_pipeline_item; // FIXME: <<<---此时发生了内存泄漏
             }
         }
@@ -608,7 +605,6 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
             }
         }
 
-        std::cout << "RenderPass Not Found, Create a RenderPass" << std::endl;
         // create a new RenderPass/TRenderPassProxy
         this->CreateRenderPass(renderPass); // FIXME:maybe create failed?
         if (this->framebufferPool->Allocate(renderPass))
@@ -712,13 +708,10 @@ bool Turbo::Render::TFramebufferPool::Allocate(Turbo::Render::TRenderPass &rende
 {
     if (this->Find(renderPass))
     {
-        std::cout << "Framebuffer Found" << std::endl;
-
         return true;
     }
 
     // TODO:Create a new Framebuffer
-    std::cout << "Framebuffer Not Found, Create a Framebuffer" << std::endl;
     this->CreateFramebuffer(renderPass); // FIXME: if create failed?
     return true;
 }
@@ -730,8 +723,6 @@ void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPas
 
 void Turbo::Render::TFramebufferPool::GC()
 {
-    std::cout << "Clear All Framebuffer" << std::endl;
-
     for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
     {
         delete frame_buffer_item;

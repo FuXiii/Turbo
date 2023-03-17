@@ -2758,3 +2758,8 @@ Turbo是渲染引擎
   >
   >* 尝试解决`内存泄漏`的`Bug`
   >* 经过多次测试和探索，`内存泄漏`位于`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`函数内部，而这一部分属于显卡驱动范畴，大概率是`GPU`驱动`Bug`
+
+* 2023/3/17 设计架构
+  >
+  >* 确定`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`发生的内存泄漏是`NVIDIA GPU`驱动`Bug`，`Game Ready Driver`驱动版本为`531.29`发布日期为`2023/03/14`
+  >* 修正添加`./engine/core`下`TDescriptorSetLayout`类中`~TDescriptorSetLayout()`成员函数对于`Turbo::Core::TNaNDescriptor`资源内存的释放回收。
