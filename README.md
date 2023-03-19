@@ -2763,3 +2763,9 @@ Turbo是渲染引擎
   >
   >* 确定`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`发生的内存泄漏是`NVIDIA GPU`驱动`Bug`，`Game Ready Driver`驱动版本为`531.29`发布日期为`2023/03/14`
   >* 修正添加`./engine/core`下`TDescriptorSetLayout`类中`~TDescriptorSetLayout()`成员函数对于`Turbo::Core::TNaNDescriptor`资源内存的释放回收。
+
+* 2023/3/19 设计架构
+  >
+  >* `./samples`下增加`VulkanDynamicRenderingTest`示例，用于测试`Vulkan`的`Dynamic Rendering`特性
+  >* `./engine/core`下`TExtensionInfo`中`TExtensionType`增加`VK_KHR_DYNAMIC_RENDERING`扩展
+  >* `./engine/core`下`TExtensionInfo`中`TAllExtensionNames`增加`VK_KHR_dynamic_rendering`名称

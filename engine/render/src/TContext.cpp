@@ -594,7 +594,6 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     {
         if (this->Find(renderPass))
         {
-            std::cout << "RenderPass Found" << std::endl;
             if (this->framebufferPool->Allocate(renderPass))
             {
                 return true;
