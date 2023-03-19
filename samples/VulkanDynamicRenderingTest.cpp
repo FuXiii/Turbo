@@ -275,7 +275,10 @@ int main()
         }
     }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan_13_features = {};
+    vk_physical_device_vulkan_13_features.dynamicRendering = VK_TRUE;
+
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features, vk_physical_device_vulkan_13_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     // Get Dynamic Rendering Function

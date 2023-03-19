@@ -2769,3 +2769,4 @@ Turbo是渲染引擎
   >* `./samples`下增加`VulkanDynamicRenderingTest`示例，用于测试`Vulkan`的`Dynamic Rendering`特性
   >* `./engine/core`下`TExtensionInfo`中`TExtensionType`增加`VK_KHR_DYNAMIC_RENDERING`扩展
   >* `./engine/core`下`TExtensionInfo`中`TAllExtensionNames`增加`VK_KHR_dynamic_rendering`名称
+  >* 更新`./docs/Design/Core.md`文档
