@@ -242,8 +242,8 @@ int main()
     Turbo::Core::TVersion support_instance_version = Turbo::Core::TInstance::GetVulkanInstanceVersion();
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &support_instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
-    
-    physical_device->GetDeviceFeatures();
+
+    physical_device->GetDeviceFeatures(); // 需要能够获取Vulkan1.0到1.3的特性
 
     if (!glfwInit())
         return -1;
@@ -261,7 +261,6 @@ int main()
 
     bool is_have_vk_khr_dynamic_rendering_extension = false;
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    physical_device->GetSupportExtensions();
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
