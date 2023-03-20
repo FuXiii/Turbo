@@ -39,12 +39,14 @@ void vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice                            physicalDevice,
     VkPhysicalDeviceFeatures2*                  pFeatures);
 ```
+
 ```CXX
 // Provided by VK_KHR_get_physical_device_properties2
 void vkGetPhysicalDeviceFeatures2KHR(
     VkPhysicalDevice                            physicalDevice,
     VkPhysicalDeviceFeatures2*                  pFeatures);
 ```
+
 ```CXX
 // Provided by VK_VERSION_1_1
 typedef struct VkPhysicalDeviceFeatures2 {
@@ -53,6 +55,7 @@ typedef struct VkPhysicalDeviceFeatures2 {
     VkPhysicalDeviceFeatures    features;
 } VkPhysicalDeviceFeatures2;
 ```
+
 ```CXX
 // Provided by VK_KHR_get_physical_device_properties2
 typedef VkPhysicalDeviceFeatures2 VkPhysicalDeviceFeatures2KHR;
@@ -86,6 +89,7 @@ typedef struct VkPhysicalDeviceDynamicRenderingFeatures {
     VkBool32           dynamicRendering;
 } VkPhysicalDeviceDynamicRenderingFeatures;
 ```
+
 并且`VkPhysicalDeviceDynamicRenderingFeatures`也可以用于`VkDeviceCreateInfo`的`pNext`链中，用于激活`DynamicRendering`特性
 
 ## Dynamic Rendering
@@ -101,17 +105,20 @@ void vkCmdBeginRendering(
     VkCommandBuffer                             commandBuffer,
     const VkRenderingInfo*                      pRenderingInfo);
 ```
+
 ```CXX
 // Provided by VK_KHR_dynamic_rendering
 void vkCmdBeginRenderingKHR(
     VkCommandBuffer                             commandBuffer,
     const VkRenderingInfo*                      pRenderingInfo);
 ```
+
 ```CXX
 // Provided by VK_VERSION_1_3
 void vkCmdEndRendering(
     VkCommandBuffer                             commandBuffer);
 ```
+
 ```CXX
 // Provided by VK_KHR_dynamic_rendering
 void vkCmdEndRenderingKHR(

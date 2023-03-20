@@ -2775,3 +2775,17 @@ Turbo是渲染引擎
 * 2023/3/20 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下的`TPhysicalDeviceInfo`类中的`TPhysicalDeviceFeatures`更改成`VkPhysicalDeviceFeatures`
+  >* `./engine/core`下的`TPhysicalDevice`类中的`TPhysicalDeviceFeatures GetDeviceFeatures()`更改成`VkPhysicalDeviceFeatures GetDeviceFeatures()`
+  >* `./engine/core`下的`TCore.h`中移除`typedef VkPhysicalDeviceFeatures TPhysicalDeviceFeatures`声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中增加`class TPhysicalDeviceFeatures`类型，内部增加如下声明：
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加``成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool geometryShader`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool tessellationShader`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool sampleRateShading`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthClamp`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthBiasClamp`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool wideLines`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool fillModeNonSolid`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool timelineSemaphore`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员声明
