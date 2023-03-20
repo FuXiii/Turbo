@@ -2770,3 +2770,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TExtensionInfo`中`TExtensionType`增加`VK_KHR_DYNAMIC_RENDERING`扩展
   >* `./engine/core`下`TExtensionInfo`中`TAllExtensionNames`增加`VK_KHR_dynamic_rendering`名称
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/20 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档

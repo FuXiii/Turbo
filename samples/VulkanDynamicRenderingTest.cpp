@@ -242,6 +242,8 @@ int main()
     Turbo::Core::TVersion support_instance_version = Turbo::Core::TInstance::GetVulkanInstanceVersion();
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &support_instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    
+    physical_device->GetDeviceFeatures();
 
     if (!glfwInit())
         return -1;
