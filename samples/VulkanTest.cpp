@@ -843,6 +843,18 @@ void Test7(Turbo::Core::TDeviceQueue *deviceQueue)
     }
 }
 
+void Test8(Turbo::Core::TDeviceQueue *deviceQueue)
+{
+    Turbo::Core::TDevice *device = deviceQueue->GetDevice();
+    Turbo::Core::TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+    Turbo::Core::TInstance *instance = physical_device->GetInstance();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = deviceQueue->GetVkQueue();
+}
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -892,7 +904,7 @@ int main()
         }
     }
 
-    Turbo::Core::TVersion instance_version(1, 0, 0, 0);
+    Turbo::Core::TVersion instance_version(1, 3, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
     std::cout << "Physical Device:" << physical_device->GetDeviceName() << std::endl;
@@ -919,7 +931,8 @@ int main()
     // Test5(queue);
     // Test6(queue);
 
-    Test7(queue);
+    //Test7(queue);
+    Test8(queue);
 
     delete device;
     delete instance;

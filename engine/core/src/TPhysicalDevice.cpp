@@ -149,7 +149,34 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.sparseProperties = physicalDeviceProperties.sparseProperties;
 
     // Feature
+    // For Vulkan1.0
     Turbo::Core::vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
+    // For Vulkan1.1
+    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan_1_1_features = {};
+    vk_physical_device_vulkan_1_1_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+    vk_physical_device_vulkan_1_1_features.pNext = nullptr;
+    // For Vulkan1.2
+    VkPhysicalDeviceVulkan12Features vk_physical_device_vulkan_1_2_features = {};
+    vk_physical_device_vulkan_1_2_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    vk_physical_device_vulkan_1_2_features.pNext = &vk_physical_device_vulkan_1_1_features;
+    // For Vulkan1.3
+    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan_1_3_features = {};
+    vk_physical_device_vulkan_1_3_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    vk_physical_device_vulkan_1_3_features.pNext = &vk_physical_device_vulkan_1_2_features;
+
+    VkPhysicalDeviceFeatures2 vk_physical_device_features2 = {};
+    vk_physical_device_features2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    vk_physical_device_features2.pNext = &vk_physical_device_vulkan_1_3_features;
+    vk_physical_device_features2.features = {};
+
+    Turbo::Core::vkGetPhysicalDeviceFeatures2(this->vkPhysicalDevice, &vk_physical_device_features2);
+
+    this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
+    this->info.vulkan11Feature.pNext = nullptr;
+    this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
+    this->info.vulkan12Feature.pNext = nullptr;
+    this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
+    this->info.vulkan13Feature.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()

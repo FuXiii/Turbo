@@ -151,6 +151,7 @@ PFN_vkWaitForFences Turbo::Core::vkWaitForFences = nullptr;
 
 #if defined(VK_VERSION_1_1)
 PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
+PFN_vkGetPhysicalDeviceFeatures2 Turbo::Core::vkGetPhysicalDeviceFeatures2 = nullptr;
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -222,6 +223,10 @@ void Turbo::Core::TVulkanLoader::LoadAllInstanceFunctions(TInstance *instance)
     Turbo::Core::vkCreateDevice = this->LoadInstanceFunction<PFN_vkCreateDevice>(vk_instance, "vkCreateDevice");
 
     Turbo::Core::vkGetDeviceProcAddr = this->LoadInstanceFunction<PFN_vkGetDeviceProcAddr>(vk_instance, "vkGetDeviceProcAddr");
+#endif
+
+#if defined(VK_VERSION_1_1)
+    Turbo::Core::vkGetPhysicalDeviceFeatures2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>(vk_instance, "vkGetPhysicalDeviceFeatures2");
 #endif
 }
 

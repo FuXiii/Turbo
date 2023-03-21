@@ -2789,3 +2789,12 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool timelineSemaphore`成员变量声明
   >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员变量声明
   >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`virtual std::string ToString() override`成员函数声明
+
+* 2023/3/20 设计架构
+  >
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan11Features vulkan11Feature`成员变量
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan12Features vulkan12Feature`成员变量
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan13Features vulkan13Feature`成员变量
+  >* `./engine/core`下的`TVulkanLoader.h`中增加`extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
+  >* `./engine/core`下的`TVulkanLoader.h`中`TVulkanLoader`类中`LoadAllInstanceFunctions(TInstance *instance)`增加对于`Turbo::Core::vkGetPhysicalDeviceFeatures2`函数的获取
+  >* `./engine/core`下的`TPhysicalDevice.h`中`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对于`VkPhysicalDeviceVulkan11Features`，`VkPhysicalDeviceVulkan12Features`和`VkPhysicalDeviceVulkan13Features`数据的获取
