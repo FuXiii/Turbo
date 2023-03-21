@@ -2779,13 +2779,13 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TPhysicalDevice`类中的`TPhysicalDeviceFeatures GetDeviceFeatures()`更改成`VkPhysicalDeviceFeatures GetDeviceFeatures()`
   >* `./engine/core`下的`TCore.h`中移除`typedef VkPhysicalDeviceFeatures TPhysicalDeviceFeatures`声明
   >* `./engine/core`下的`TPhysicalDevice.h`中增加`class TPhysicalDeviceFeatures`类型，内部增加如下声明：
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加``成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool geometryShader`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool tessellationShader`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool sampleRateShading`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthClamp`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthBiasClamp`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool wideLines`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool fillModeNonSolid`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool timelineSemaphore`成员声明
-  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool geometryShader`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool tessellationShader`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool sampleRateShading`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthClamp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthBiasClamp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool wideLines`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool fillModeNonSolid`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool timelineSemaphore`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`virtual std::string ToString() override`成员函数声明

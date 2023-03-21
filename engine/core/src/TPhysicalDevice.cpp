@@ -5,6 +5,11 @@
 #include "TInstance.h"
 #include "TVulkanLoader.h"
 
+std::string Turbo::Core::TPhysicalDeviceFeatures::ToString()
+{
+    return std::string();
+}
+
 void Turbo::Core::TPhysicalDevice::CalculatePerformanceScore()
 {
     switch (this->info.type)
