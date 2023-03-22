@@ -2811,4 +2811,4 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`VkPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
   >* `./engine/core`下的`TDevice.h`中`class TDevice`中增加`TPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
   >* `./engine/core`下的`TDevice.h`中`class TDevice`中`InternalCreate()`成员函数中增加对于`Vulkan1.1`，`Vulkan1.2`和`Vulkan1.3`的`Feature`激活
-
+  >* `./engine/core`下的`TVulkanLoader.h`中`class TVulkanLoader`中增加对于`vkCmdBeginRendering`和`vkCmdEndRendering`两个函数的获取

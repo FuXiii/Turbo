@@ -154,6 +154,11 @@ PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr
 PFN_vkGetPhysicalDeviceFeatures2 Turbo::Core::vkGetPhysicalDeviceFeatures2 = nullptr;
 #endif
 
+#if defined(VK_VERSION_1_3)
+PFN_vkCmdBeginRendering Turbo::Core::vkCmdBeginRendering = nullptr;
+PFN_vkCmdEndRendering Turbo::Core::vkCmdEndRendering = nullptr;
+#endif
+
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
 
 Turbo::Core::TVulkanLoader::TVulkanLoader()
@@ -357,6 +362,11 @@ void Turbo::Core::TVulkanLoader::LoadAllDeviceFunctions(TInstance *instance)
     Turbo::Core::vkUpdateDescriptorSets = this->LoadInstanceFunction<PFN_vkUpdateDescriptorSets>(vk_instance, "vkUpdateDescriptorSets");
     Turbo::Core::vkWaitForFences = this->LoadInstanceFunction<PFN_vkWaitForFences>(vk_instance, "vkWaitForFences");
 #endif
+
+#if defined(VK_VERSION_1_3)
+    Turbo::Core::vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(instance, "vkCmdBeginRendering");
+    Turbo::Core::vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(instance, "vkCmdEndRendering");
+#endif
 }
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::Instance()
@@ -530,6 +540,11 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     device_driver.vkUnmapMemory = this->LoadDeviceFunction<PFN_vkUnmapMemory>(device, "vkUnmapMemory");
     device_driver.vkUpdateDescriptorSets = this->LoadDeviceFunction<PFN_vkUpdateDescriptorSets>(device, "vkUpdateDescriptorSets");
     device_driver.vkWaitForFences = this->LoadDeviceFunction<PFN_vkWaitForFences>(device, "vkWaitForFences");
+#endif
+
+#if defined(VK_VERSION_1_3)
+    device_driver.vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
+    device_driver.vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
 #endif
 
     return device_driver;
