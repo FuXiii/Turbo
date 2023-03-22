@@ -904,7 +904,7 @@ int main()
         }
     }
 
-    Turbo::Core::TVersion instance_version(1, 0, 0, 0);
+    Turbo::Core::TVersion instance_version(1, 3, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
     std::cout << "Physical Device:" << physical_device->GetDeviceName() << std::endl;
