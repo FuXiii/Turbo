@@ -29,8 +29,11 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool depthBiasClamp = false;
     bool wideLines = false;
     bool fillModeNonSolid = false;
+    bool samplerAnisotropy = false;
     bool timelineSemaphore = false;
     bool dynamicRendering = false;
+
+    bool logicOp = false;
 
   public:
     virtual std::string ToString() override;
@@ -114,7 +117,8 @@ class TPhysicalDevice : public TVulkanHandle
     // T GetDeviceLimit(/*enume key*/);
     // VkPhysicalDeviceSparseProperties
     // GetDeviceSparseProperties();
-    VkPhysicalDeviceFeatures GetDeviceFeatures();
+
+    TPhysicalDeviceFeatures GetDeviceFeatures();
     // bool IsDeviceSupportFeature(enume key);
 
     size_t GetSupportExtensionCount();

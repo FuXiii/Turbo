@@ -103,9 +103,35 @@ void Turbo::Core::TDevice::InternalCreate()
         enable_extension_names[enable_extension_index] = this->enabledExtensions[enable_extension_index].GetName().c_str();
     }
 
+    // feature
+    VkPhysicalDeviceFeatures vk_physical_device_features = {};
+    vk_physical_device_features.geometryShader = this->enabledFeatures.geometryShader ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.tessellationShader = this->enabledFeatures.tessellationShader ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.sampleRateShading = this->enabledFeatures.sampleRateShading ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.depthClamp = this->enabledFeatures.depthClamp ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.depthBiasClamp = this->enabledFeatures.depthBiasClamp ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.wideLines = this->enabledFeatures.wideLines ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.fillModeNonSolid = this->enabledFeatures.fillModeNonSolid ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.samplerAnisotropy = this->enabledFeatures.samplerAnisotropy ? VK_TRUE : VK_FALSE;
+    vk_physical_device_features.logicOp = this->enabledFeatures.logicOp ? VK_TRUE : VK_FALSE;
+
+    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan11_features = {};
+    vk_physical_device_vulkan11_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+    vk_physical_device_vulkan11_features.pNext = nullptr;
+
+    VkPhysicalDeviceVulkan12Features vk_physical_device_vulkan12_features = {};
+    vk_physical_device_vulkan12_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    vk_physical_device_vulkan12_features.pNext = &vk_physical_device_vulkan11_features;
+    vk_physical_device_vulkan12_features.timelineSemaphore = this->enabledFeatures.timelineSemaphore ? VK_TRUE : VK_FALSE;
+
+    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan13_features = {};
+    vk_physical_device_vulkan13_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    vk_physical_device_vulkan13_features.pNext = &vk_physical_device_vulkan12_features;
+    vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
+
     VkDeviceCreateInfo vk_device_create_info = {};
     vk_device_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    vk_device_create_info.pNext = nullptr;
+    vk_device_create_info.pNext = &vk_physical_device_vulkan13_features;
     vk_device_create_info.flags = 0;
     vk_device_create_info.queueCreateInfoCount = vk_device_queue_create_infos.size();
     vk_device_create_info.pQueueCreateInfos = vk_device_queue_create_infos.data();
@@ -113,7 +139,7 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_device_create_info.ppEnabledLayerNames = enable_layer_names.data();
     vk_device_create_info.enabledExtensionCount = enable_extension_count;
     vk_device_create_info.ppEnabledExtensionNames = enable_extension_names.data();
-    vk_device_create_info.pEnabledFeatures = &this->enabledFeatures;
+    vk_device_create_info.pEnabledFeatures = &vk_physical_device_features;
 
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     VkResult result = Turbo::Core::vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
@@ -124,7 +150,7 @@ void Turbo::Core::TDevice::InternalCreate()
 
     // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
     this->deviceDriver = new TDeviceDriver();
-    *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this);
+    *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this); // TODO:load dynamic rendering function
 
     if (this->vmaAllocator != nullptr)
     {
@@ -163,7 +189,7 @@ void Turbo::Core::TDevice::InternalDestroy()
     }
 }
 
-Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, VkPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
 {
     /*
     Vulkan Spec::1.2.156
@@ -188,10 +214,6 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
         if (enabledFeatures != nullptr)
         {
             this->enabledFeatures = *enabledFeatures;
-        }
-        else
-        {
-            this->enabledFeatures = {0};
         }
 
         this->InternalCreate();
@@ -301,7 +323,7 @@ bool Turbo::Core::TDevice::IsEnabledExtension(TExtensionType extensionType)
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-VkPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures()
+Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures()
 {
     return this->enabledFeatures;
 }

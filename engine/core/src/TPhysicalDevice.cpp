@@ -687,9 +687,24 @@ VkPhysicalDeviceLimits Turbo::Core::TPhysicalDevice::GetDeviceLimits()
     return this->info.limits;
 }
 
-VkPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeatures()
+Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeatures()
 {
-    return this->info.features;
+    TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.geometryShader = this->info.features.geometryShader == VK_TRUE ? true : false;
+    physical_device_features.tessellationShader = this->info.features.tessellationShader == VK_TRUE ? true : false;
+    physical_device_features.sampleRateShading = this->info.features.sampleRateShading == VK_TRUE ? true : false;
+    physical_device_features.depthClamp = this->info.features.depthClamp == VK_TRUE ? true : false;
+    physical_device_features.depthBiasClamp = this->info.features.depthBiasClamp == VK_TRUE ? true : false;
+    physical_device_features.wideLines = this->info.features.wideLines == VK_TRUE ? true : false;
+    physical_device_features.fillModeNonSolid = this->info.features.fillModeNonSolid == VK_TRUE ? true : false;
+    physical_device_features.samplerAnisotropy = this->info.features.samplerAnisotropy == VK_TRUE ? true : false;
+    physical_device_features.logicOp = this->info.features.logicOp == VK_TRUE ? true : false;
+
+    physical_device_features.timelineSemaphore = this->info.vulkan12Feature.timelineSemaphore == VK_TRUE ? true : false;
+
+    physical_device_features.dynamicRendering = this->info.vulkan13Feature.dynamicRendering == VK_TRUE ? true : false;
+
+    return physical_device_features;
 }
 
 Turbo::Core::TVendorInfo Turbo::Core::TPhysicalDevice::GetVendor()

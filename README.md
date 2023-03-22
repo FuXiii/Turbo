@@ -2798,3 +2798,17 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TVulkanLoader.h`中增加`extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
   >* `./engine/core`下的`TVulkanLoader.h`中`TVulkanLoader`类中`LoadAllInstanceFunctions(TInstance *instance)`增加对于`Turbo::Core::vkGetPhysicalDeviceFeatures2`函数的获取
   >* `./engine/core`下的`TPhysicalDevice.h`中`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对于`VkPhysicalDeviceVulkan11Features`，`VkPhysicalDeviceVulkan12Features`和`VkPhysicalDeviceVulkan13Features`数据的获取
+
+* 2023/3/22 设计架构
+  >
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool samplerAnisotropy`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool logicOp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDevice`移除`VkPhysicalDeviceFeatures GetDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDevice`增加`TPhysicalDeviceFeatures GetDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`TDevice(TPhysicalDevice *, std::vector<TLayerInfo> *, std::vector<TExtensionInfo> *, VkPhysicalDeviceFeatures *)`构造函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`VkPhysicalDeviceFeatures enabledFeatures`成员变量
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中增加`TPhysicalDeviceFeatures enabledFeatures`成员变量
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`VkPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中增加`TPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中`InternalCreate()`成员函数中增加对于`Vulkan1.1`，`Vulkan1.2`和`Vulkan1.3`的`Feature`激活
+

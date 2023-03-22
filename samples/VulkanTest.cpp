@@ -919,8 +919,8 @@ int main()
         }
     }
 
-    VkPhysicalDeviceFeatures vk_physical_device_features = {};
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     // Test0(queue);
@@ -931,7 +931,7 @@ int main()
     // Test5(queue);
     // Test6(queue);
 
-    //Test7(queue);
+    // Test7(queue);
     Test8(queue);
 
     delete device;

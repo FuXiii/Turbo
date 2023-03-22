@@ -66,9 +66,9 @@ Turbo::Core::TSampler::TSampler(TDevice *device, TFilter minFilter, TFilter magF
 
         TPhysicalDevice *physical_device = this->device->GetPhysicalDevice();
 
-        if (physical_device->GetDeviceFeatures().samplerAnisotropy == VK_TRUE)
+        if (physical_device->GetDeviceFeatures().samplerAnisotropy == true)
         {
-            if (this->device->GetEnableDeviceFeatures().samplerAnisotropy == VK_TRUE)
+            if (this->device->GetEnableDeviceFeatures().samplerAnisotropy == true)
             {
                 this->anisotropyEnable = true;
                 this->maxAnisotropy = physical_device->GetDeviceLimits().maxSamplerAnisotropy;

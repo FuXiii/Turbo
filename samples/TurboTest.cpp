@@ -359,9 +359,9 @@ int main()
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
-    VkPhysicalDeviceFeatures vk_physical_device_features = {};
-    vk_physical_device_features.sampleRateShading = VK_TRUE;
-    vk_physical_device_features.logicOp = VK_TRUE;
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.sampleRateShading = true;
+    physical_device_features.logicOp = true;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     physical_device->GetSupportExtensions();
@@ -374,7 +374,7 @@ int main()
         }
     }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
@@ -748,7 +748,7 @@ int main()
             command_buffer->CmdBindPipeline(pipeline);
 
             // Square
-            //command_buffer->CmdBindPipeline(pipeline);
+            // command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdPushConstants(0, sizeof(push_constant_data), &push_constant_data);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
