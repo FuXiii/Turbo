@@ -103,6 +103,8 @@ void Turbo::Core::TDevice::InternalCreate()
         enable_extension_names[enable_extension_index] = this->enabledExtensions[enable_extension_index].GetName().c_str();
     }
 
+    void *vk_device_create_info_p_next = nullptr;
+
     // feature
     VkPhysicalDeviceFeatures vk_physical_device_features = {};
     vk_physical_device_features.geometryShader = this->enabledFeatures.geometryShader ? VK_TRUE : VK_FALSE;
@@ -115,23 +117,48 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_features.samplerAnisotropy = this->enabledFeatures.samplerAnisotropy ? VK_TRUE : VK_FALSE;
     vk_physical_device_features.logicOp = this->enabledFeatures.logicOp ? VK_TRUE : VK_FALSE;
 
-    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan11_features = {};
+    // We need to compare current Vulkan Instance Version
+    Turbo::Core::TVersion vulkan_version = this->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
+
+    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan11_features = {}; // Vulkan1.2
     vk_physical_device_vulkan11_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
     vk_physical_device_vulkan11_features.pNext = nullptr;
 
-    VkPhysicalDeviceVulkan12Features vk_physical_device_vulkan12_features = {};
+    VkPhysicalDeviceVulkan12Features vk_physical_device_vulkan12_features = {}; // Vulkan1.2
     vk_physical_device_vulkan12_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-    vk_physical_device_vulkan12_features.pNext = &vk_physical_device_vulkan11_features;
+    vk_physical_device_vulkan12_features.pNext = nullptr;
     vk_physical_device_vulkan12_features.timelineSemaphore = this->enabledFeatures.timelineSemaphore ? VK_TRUE : VK_FALSE;
 
-    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan13_features = {};
+    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan13_features = {}; // Vulkan1.3
     vk_physical_device_vulkan13_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-    vk_physical_device_vulkan13_features.pNext = &vk_physical_device_vulkan12_features;
+    vk_physical_device_vulkan13_features.pNext = nullptr;
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
+
+    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
+    {
+        vk_physical_device_vulkan12_features.pNext = &vk_physical_device_vulkan11_features;
+        vk_device_create_info_p_next = &vk_physical_device_vulkan12_features;
+    }
+    else
+    {
+        // TODO: Not support Vulkan 1.1 and Vulkan 1.2 feature
+        this->enabledFeatures.timelineSemaphore = false;
+    }
+
+    if (vulkan_version >= Turbo::Core::TVersion(1, 3, 0, 0))
+    {
+        vk_physical_device_vulkan13_features.pNext = &vk_physical_device_vulkan12_features;
+        vk_device_create_info_p_next = &vk_physical_device_vulkan13_features;
+    }
+    else
+    {
+        // TODO: Not support Vulkan 1.3 feature
+        this->enabledFeatures.dynamicRendering = false;
+    }
 
     VkDeviceCreateInfo vk_device_create_info = {};
     vk_device_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    vk_device_create_info.pNext = &vk_physical_device_vulkan13_features;
+    vk_device_create_info.pNext = vk_device_create_info_p_next;
     vk_device_create_info.flags = 0;
     vk_device_create_info.queueCreateInfoCount = vk_device_queue_create_infos.size();
     vk_device_create_info.pQueueCreateInfos = vk_device_queue_create_infos.data();
