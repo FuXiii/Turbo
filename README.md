@@ -2790,7 +2790,7 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员变量声明
   >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`virtual std::string ToString() override`成员函数声明
 
-* 2023/3/20 设计架构
+* 2023/3/21 设计架构
   >
   >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan11Features vulkan11Feature`成员变量
   >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan12Features vulkan12Feature`成员变量
