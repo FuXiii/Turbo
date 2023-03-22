@@ -243,8 +243,6 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &support_instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    physical_device->GetDeviceFeatures(); // 需要能够获取Vulkan1.0到1.3的特性
-
     if (!glfwInit())
         return -1;
     GLFWwindow *window;
@@ -276,32 +274,47 @@ int main()
         }
     }
 
-    VkPhysicalDeviceVulkan13Features vk_physical_device_vulkan_13_features = {};
-    vk_physical_device_vulkan_13_features.dynamicRendering = VK_TRUE;
+    if (!physical_device->GetDeviceFeatures().dynamicRendering)
+    {
+        if (!is_have_vk_khr_dynamic_rendering_extension)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
+        }
+    }
+    else
+    {
+        if (instance->GetVulkanVersion() < Turbo::Core::TVersion(1, 3, 0, 0))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
+        }
+    }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features, vk_physical_device_vulkan_13_features);
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.dynamicRendering = true;
+
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     // Get Dynamic Rendering Function
     struct VkDynamicRenderingDriver
     {
-        PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR = nullptr;
-        PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR = nullptr;
-        // PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr; //for Vulkan1.3
-        // PFN_vkCmdEndRendering vkCmdEndRendering = nullptr; //for Vulkan1.3
+        // PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR = nullptr;
+        // PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR = nullptr;
+        PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr; // for Vulkan1.3
+        PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;     // for Vulkan1.3
     };
 
     VkDynamicRenderingDriver vk_dynamic_rendering_driver = {};
     if (is_have_vk_khr_dynamic_rendering_extension)
     {
-        vk_dynamic_rendering_driver.vkCmdBeginRenderingKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRenderingKHR>(device, "vkCmdBeginRenderingKHR");
-        vk_dynamic_rendering_driver.vkCmdEndRenderingKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRenderingKHR>(device, "vkCmdEndRenderingKHR");
+        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRenderingKHR>(device, "vkCmdBeginRenderingKHR");
+        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRenderingKHR>(device, "vkCmdEndRenderingKHR");
     }
 
     if (instance->GetVulkanVersion() >= Turbo::Core::TVersion(1, 3, 0, 0))
     {
-        vk_dynamic_rendering_driver.vkCmdBeginRenderingKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
-        vk_dynamic_rendering_driver.vkCmdEndRenderingKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
+        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
+        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
     }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
