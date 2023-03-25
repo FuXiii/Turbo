@@ -149,6 +149,13 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.sparseProperties = physicalDeviceProperties.sparseProperties;
 
     // Feature
+    // If the pNext chain includes a VkPhysicalDeviceVulkan13Features structure, then it must not include a VkPhysicalDeviceDynamicRenderingFeatures
+    //  // For VK_KHR_dynamic_rendering
+    //  VkPhysicalDeviceDynamicRenderingFeaturesKHR vk_physical_device_dynamic_rendering_features_khr = {};
+    //  vk_physical_device_dynamic_rendering_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+    //  vk_physical_device_dynamic_rendering_features_khr.pNext = nullptr;
+    //  vk_physical_device_dynamic_rendering_features_khr.dynamicRendering = VK_FALSE;
+
     // For Vulkan1.0
     Turbo::Core::vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
     // For Vulkan1.1

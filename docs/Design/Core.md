@@ -9,11 +9,15 @@
 
 * 2023/3/20
   >
-  >* 创更新`Device Feature`章节
+  >* 创建更新`Device Feature`章节
 
 * 2023/3/22
   >
-  >* 创更新`Dynamic Rendering的Pipeline`章节
+  >* 创建更新`Dynamic Rendering的Pipeline`章节
+
+* 2023/3/25
+  >
+  >* 更新`Dynamic Rendering的Pipeline`章节
 
 ---
 
@@ -139,4 +143,19 @@ void vkCmdEndRenderingKHR(
 
 2. 从`TPipeline`派生出一个新的类`TRenderingPipeline`（内容和`TGraphicsPipeline`基本相同），专门用于适配支持`Dynamic Rendering`的`Pipeline`
 
-根据`Vulkan`标准创建支持`Dynamic Rendering`需要在创建`Graphics Pipeline`时指定`VkPipelineRenderingCreateInfoKHR`（对于扩展）或者`VkPipelineRenderingCreateInfo`（对于标准），所以采用方式`1`中从`TGraphicsPipeline`派生一个`TRenderingPipeline`比较符合一般直觉
+根据`Vulkan`标准创建支持`Dynamic Rendering`需要在创建`Graphics Pipeline`时指定`VkPipelineRenderingCreateInfoKHR`（对于扩展）或者`VkPipelineRenderingCreateInfo`（对于标准），所以采用方式`2`中从`TPipeline`派生一个`TRenderingPipeline`比较符合一般直觉
+
+```CXX
+// Provided by VK_VERSION_1_3
+typedef struct VkPipelineRenderingCreateInfo {
+  VkStructureType sType;
+  const void* pNext;
+  uint32_t viewMask;
+  uint32_t colorAttachmentCount;
+  const VkFormat* pColorAttachmentFormats;
+  VkFormat depthAttachmentFormat;
+  VkFormat stencilAttachmentFormat;
+} VkPipelineRenderingCreateInfo;
+```
+
+对于`Dynamic Rendering`需要指定的附件`Attachment`仅仅为对应的`VkFormat`

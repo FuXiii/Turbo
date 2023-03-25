@@ -2813,3 +2813,9 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TDevice.h`中`class TDevice`中`InternalCreate()`成员函数中增加对于`Vulkan1.1`，`Vulkan1.2`和`Vulkan1.3`的`Feature`激活
   >* `./engine/core`下的`TVulkanLoader.h`中`class TVulkanLoader`中增加对于`vkCmdBeginRendering`和`vkCmdEndRendering`两个函数的获取
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/25 设计架构
+  >
+  >* `./engine/core`下的新建`TRenderingPipeline.h`和`TRenderingPipeline.cpp`
+  >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingPipeline`类
+  >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingAttachments`类
