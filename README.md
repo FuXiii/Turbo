@@ -2819,3 +2819,65 @@ Turbo是渲染引擎
   >* `./engine/core`下的新建`TRenderingPipeline.h`和`TRenderingPipeline.cpp`
   >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingPipeline`类
   >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingAttachments`类
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`std::vector<TFormatType> colorAttachmentFormats`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`TFormatType depthAttachmentFormat`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`TFormatType stencilAttachmentFormat`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void AddColorAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void SetDepthAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void SetStencilAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const std::vector<TFormatType> &GetColorAttachmentFormats() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const TFormatType &GetDepthAttachmentFormat() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const TFormatType &GetStencilAttachmentFormat() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加``成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TRenderingAttachments renderingAttachments`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TTopologyType topology`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool primitiveRestartEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`std::vector<TVertexBinding> vertexBindings`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthClampEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool rasterizerDiscardEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TPolygonMode polygonMode`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCullModes cullMode`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TFrontFace frontFace`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthBiasEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasConstantFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasClamp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasSlopeFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float lineWidth`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool multisampleEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TSampleCountBits sample`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthWriteEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp depthCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthBoundsTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool stencilTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontPassOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontDepthFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp frontCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontCompareMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontWriteMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontReference`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backPassOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backDepthFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp backCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backCompareMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backWriteMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backReference`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float minDepthBounds`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float maxDepthBounds`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool logicOpEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TLogicOp logicOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool blendEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor srcColorBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor dstColorBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendOp colorBlendOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor srcAlphaBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor dstAlphaBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendOp alphaBlendOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantR`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantG`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantB`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantA`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`virtual void InternalCreate() override`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)`成员函数

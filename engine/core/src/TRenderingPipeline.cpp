@@ -8,6 +8,36 @@
 #include "TVulkanLoader.h"
 #include "vulkan/vulkan_core.h"
 
+void Turbo::Core::TRenderingAttachments::AddColorAttachmentFormat(TFormatType formatType)
+{
+    this->colorAttachmentFormats.push_back(formatType);
+}
+
+void Turbo::Core::TRenderingAttachments::SetDepthAttachmentFormat(TFormatType formatType)
+{
+    this->depthAttachmentFormat = formatType;
+}
+
+void Turbo::Core::TRenderingAttachments::SetStencilAttachmentFormat(TFormatType formatType)
+{
+    this->stencilAttachmentFormat = formatType;
+}
+
+const std::vector<Turbo::Core::TFormatType> &Turbo::Core::TRenderingAttachments::GetColorAttachmentFormats() const
+{
+    return this->colorAttachmentFormats;
+}
+
+const Turbo::Core::TFormatType &Turbo::Core::TRenderingAttachments::GetDepthAttachmentFormat() const
+{
+    return this->depthAttachmentFormat;
+}
+
+const Turbo::Core::TFormatType &Turbo::Core::TRenderingAttachments::GetStencilAttachmentFormat() const
+{
+    return this->stencilAttachmentFormat;
+}
+
 void Turbo::Core::TRenderingPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
@@ -198,11 +228,14 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
     vk_pipline_color_blend_attachment_state.alphaBlendOp = (VkBlendOp)this->alphaBlendOp;
     vk_pipline_color_blend_attachment_state.colorWriteMask = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
 
+    // In Vulkan1.3 Specification:
     // If renderPass is VK_NULL_HANDLE and the pipeline is being created with fragment output
     // interface state, pColorBlendState->attachmentCount must be equal to
     // VkPipelineRenderingCreateInfo::colorAttachmentCount
-    TSubpass _subpass = this->renderPass->GetSubpass(this->subpass);
-    uint32_t color_blend_attachment_count = _subpass.GetColorAttachmentReferences()->size();
+
+    std::vector<Turbo::Core::TFormatType> color_attachment_formats = this->renderingAttachments.GetColorAttachmentFormats();
+
+    uint32_t color_blend_attachment_count = color_attachment_formats.size();
     std::vector<VkPipelineColorBlendAttachmentState> vk_pipeline_color_blend_attachment_states;
     for (uint32_t color_belnd_attachment_index = 0; color_belnd_attachment_index < color_blend_attachment_count; color_belnd_attachment_index++)
     {
@@ -238,11 +271,18 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
     vk_pipeline_dynamic_state_create_info.dynamicStateCount = vk_dynamic_states.size();
     vk_pipeline_dynamic_state_create_info.pDynamicStates = vk_dynamic_states.data();
 
-    void *pNext = nullptr;
+    VkPipelineRenderingCreateInfo vk_pipeline_rendering_create_info = {};
+    vk_pipeline_rendering_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    vk_pipeline_rendering_create_info.pNext = nullptr;
+    vk_pipeline_rendering_create_info.viewMask = 0;
+    vk_pipeline_rendering_create_info.colorAttachmentCount = color_attachment_formats.size();
+    vk_pipeline_rendering_create_info.pColorAttachmentFormats = (const VkFormat *)color_attachment_formats.data();
+    vk_pipeline_rendering_create_info.depthAttachmentFormat = (VkFormat)this->renderingAttachments.GetDepthAttachmentFormat();
+    vk_pipeline_rendering_create_info.stencilAttachmentFormat = (VkFormat)this->renderingAttachments.GetStencilAttachmentFormat();
 
     VkGraphicsPipelineCreateInfo vk_graphics_pipeline_create_info = {};
     vk_graphics_pipeline_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    vk_graphics_pipeline_create_info.pNext = nullptr;
+    vk_graphics_pipeline_create_info.pNext = &vk_pipeline_rendering_create_info;
     vk_graphics_pipeline_create_info.flags = 0;
     vk_graphics_pipeline_create_info.stageCount = vk_pipeline_shader_stage_create_infos.size();
     vk_graphics_pipeline_create_info.pStages = vk_pipeline_shader_stage_create_infos.data();
@@ -281,11 +321,14 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
     }
 }
 
-Turbo::Core::TRenderingPipeline::TRenderingPipeline(std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
+Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
 {
     Turbo::Core::TPhysicalDeviceFeatures physical_device_feature = vertexShader->GetDevice()->GetEnableDeviceFeatures();
     if (physical_device_feature.dynamicRendering)
     {
+        // VkPipelineRenderingCreateInfo
+        this->renderingAttachments = renderingAttachments;
+
         // VkPipelineVertexInputStateCreateInfo
         this->vertexBindings = vertexBindings;
 

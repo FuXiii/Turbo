@@ -17,6 +17,7 @@
 #include "core/include/TAttachment.h"
 #include "core/include/TGraphicsPipeline.h"
 #include "core/include/TRenderPass.h"
+#include "core/include/TRenderingPipeline.h"
 #include "core/include/TSubpass.h"
 
 #include "core/include/TDescriptorPool.h"
@@ -919,7 +920,10 @@ int main()
         }
     }
 
+    Turbo::Core::TPhysicalDeviceFeatures device_support_feature = physical_device->GetDeviceFeatures();
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    //physical_device_features.dynamicRendering = device_support_feature.dynamicRendering;
+
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 

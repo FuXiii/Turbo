@@ -15,6 +15,7 @@
 #include "core/include/TAttachment.h"
 #include "core/include/TGraphicsPipeline.h"
 #include "core/include/TRenderPass.h"
+#include "core/include/TRenderingPipeline.h"
 #include "core/include/TSubpass.h"
 
 #include "core/include/TDescriptorPool.h"
@@ -388,7 +389,8 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
 
     // TODO: we need to create Dynamic Rendering Pipeline
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    // Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    Turbo::Core::TRenderingPipeline *rendering_pipeline = new Turbo::Core::TRenderingPipeline();
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
