@@ -352,8 +352,8 @@ int main()
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
-    Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
+    Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
+    Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
@@ -389,10 +389,13 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
 
     // TODO: we need to create Dynamic Rendering Pipeline
-    // Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
-    Turbo::Core::TRenderingPipeline *rendering_pipeline = new Turbo::Core::TRenderingPipeline();
+    Turbo::Core::TRenderingAttachments rendering_attachments = {};
+    rendering_attachments.AddColorAttachmentFormat(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
+    rendering_attachments.SetDepthAttachmentFormat(Turbo::Core::TFormatType::D32_SFLOAT);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    Turbo::Core::TRenderingPipeline *rendering_pipeline = new Turbo::Core::TRenderingPipeline(rendering_attachments, vertex_bindings, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(rendering_pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
@@ -431,17 +434,20 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
-            command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+            VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
 
-            // Triangle
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(frame_viewports);
-            command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDraw(3, 1, 0, 0);
+            // VkRenderingInfo rendering_info = {};
+            // vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
 
-            command_buffer->CmdEndRenderPass();
+            // // Triangle
+            // command_buffer->CmdBindPipeline(rendering_pipeline);
+            // command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+            // command_buffer->CmdBindVertexBuffers(vertex_buffers);
+            // command_buffer->CmdSetViewport(frame_viewports);
+            // command_buffer->CmdSetScissor(frame_scissors);
+            // command_buffer->CmdDraw(3, 1, 0, 0);
+
+            // vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
@@ -571,7 +577,7 @@ int main()
     ImageSaveToPPM(swapchain_images[0], command_pool, queue, "PureHelloTriangle");
 
     descriptor_pool->Free(pipeline_descriptor_set);
-    delete pipeline;
+    delete rendering_pipeline;
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;

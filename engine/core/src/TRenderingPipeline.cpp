@@ -321,6 +321,14 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
     }
 }
 
+void Turbo::Core::TRenderingPipeline::InternalDestroy()
+{
+    TDevice *device = this->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    device->GetDeviceDriver()->vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
+}
+
 Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
 {
     Turbo::Core::TPhysicalDeviceFeatures physical_device_feature = vertexShader->GetDevice()->GetEnableDeviceFeatures();
@@ -408,4 +416,9 @@ Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TRenderingAttachments 
     {
         throw Turbo::Core::TException(TResult::UNSUPPORTED, "The Dynamic Rendering did not enabled", "Please check the Dynamic Rendering feature");
     }
+}
+
+Turbo::Core::TRenderingPipeline::~TRenderingPipeline()
+{
+    this->InternalDestroy();
 }
