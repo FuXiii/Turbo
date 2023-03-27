@@ -437,18 +437,18 @@ int main()
             VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
 
             VkClearColorValue vk_clear_color_value = {};
-            {
-                vk_clear_color_value.int32[0] = (int32_t)0;
-                vk_clear_color_value.int32[1] = (int32_t)0;
-                vk_clear_color_value.int32[2] = (int32_t)0;
-                vk_clear_color_value.int32[3] = (int32_t)0;
-            }
-            {
-                vk_clear_color_value.uint32[0] = (uint32_t)0;
-                vk_clear_color_value.uint32[1] = (uint32_t)0;
-                vk_clear_color_value.uint32[2] = (uint32_t)0;
-                vk_clear_color_value.uint32[3] = (uint32_t)0;
-            }
+            // {
+            //     vk_clear_color_value.int32[0] = (int32_t)0;
+            //     vk_clear_color_value.int32[1] = (int32_t)0;
+            //     vk_clear_color_value.int32[2] = (int32_t)0;
+            //     vk_clear_color_value.int32[3] = (int32_t)0;
+            // }
+            // {
+            //     vk_clear_color_value.uint32[0] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[1] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[2] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[3] = (uint32_t)0;
+            // }
             {
                 vk_clear_color_value.float32[0] = 0;
                 vk_clear_color_value.float32[1] = 0;
@@ -456,17 +456,35 @@ int main()
                 vk_clear_color_value.float32[3] = 0;
             }
 
-            VkRenderingAttachmentInfo vk_rendering_attachment_info = {};
-            vk_rendering_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            vk_rendering_attachment_info.pNext = nullptr;
-            vk_rendering_attachment_info.imageView = swapchain_image_views[current_image_index]->GetVkImageView();
-            vk_rendering_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            vk_rendering_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
-            vk_rendering_attachment_info.resolveImageView = VK_NULL_HANDLE;
-            vk_rendering_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            vk_rendering_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-            vk_rendering_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-            vk_rendering_attachment_info.clearValue.color = vk_clear_color_value;
+            VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
+            vk_clear_depth_stencil_value.depth = 1;
+            // vk_clear_depth_stencil_value.stencil = 0;
+
+            VkRenderingAttachmentInfo color_attachment_info = {};
+            color_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            color_attachment_info.pNext = nullptr;
+            color_attachment_info.imageView = swapchain_image_views[current_image_index]->GetVkImageView();
+            color_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            color_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            color_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            color_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            color_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+            color_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+            color_attachment_info.clearValue.color = vk_clear_color_value;
+            // color_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
+
+            VkRenderingAttachmentInfo depth_attachment_info = {};
+            depth_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            depth_attachment_info.pNext = nullptr;
+            depth_attachment_info.imageView = depth_image_view->GetVkImageView();
+            depth_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            depth_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            depth_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            depth_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            depth_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depth_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+            // depth_attachment_info.clearValue.color = vk_clear_color_value;
+            depth_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
 
             VkRenderingInfo rendering_info = {};
             rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -476,9 +494,12 @@ int main()
             rendering_info.layerCount = 1;
             rendering_info.viewMask = 0;
             rendering_info.colorAttachmentCount = 1;
-            rendering_info.pColorAttachments = &vk_rendering_attachment_info;
-            rendering_info.pDepthAttachment = nullptr;
+            rendering_info.pColorAttachments = &color_attachment_info;
+            rendering_info.pDepthAttachment = &depth_attachment_info;
             rendering_info.pStencilAttachment = nullptr;
+
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, swapchain_image_views[current_image_index]);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_ATTACHMENT_OPTIMAL, depth_image_view);
 
             vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
 
@@ -491,6 +512,9 @@ int main()
             command_buffer->CmdDraw(3, 1, 0, 0);
 
             vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
+
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, swapchain_image_views[current_image_index]);
+
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
