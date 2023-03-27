@@ -43,7 +43,11 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
     TPipelineCacheUUID pipelineCacheUUID;
     VkPhysicalDeviceLimits limits;
     VkPhysicalDeviceSparseProperties sparseProperties;
-    TPhysicalDeviceFeatures features;
+
+    VkPhysicalDeviceFeatures features;
+    VkPhysicalDeviceVulkan11Features vulkan11Feature;
+    VkPhysicalDeviceVulkan12Features vulkan12Feature;
+    VkPhysicalDeviceVulkan13Features vulkan13Feature;
 
     std::vector<TLayerInfo> supportLayers;
     std::vector<TExtensionInfo> supportExtensions;

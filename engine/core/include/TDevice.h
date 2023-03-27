@@ -1,13 +1,13 @@
 #pragma once
 #ifndef TURBO_CORE_TDEVICE_H
 #define TURBO_CORE_TDEVICE_H
+#include "TPhysicalDevice.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
 {
 namespace Core
 {
-class TPhysicalDevice;
 class TDeviceCreateInfo;
 class TQueueFamilyInfo;
 class TDeviceQueue;
@@ -36,7 +36,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     T_VULKAN_HANDLE_DATA std::vector<TLayerInfo> enabledLayers;
     T_VULKAN_HANDLE_DATA std::vector<TExtensionInfo> enabledExtensions;
-    T_VULKAN_HANDLE_DATA VkPhysicalDeviceFeatures enabledFeatures;
+    T_VULKAN_HANDLE_DATA TPhysicalDeviceFeatures enabledFeatures;
 
     TDeviceDriver *deviceDriver = nullptr;
 
@@ -50,7 +50,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
 
   public:
-    explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, VkPhysicalDeviceFeatures *enabledFeatures = nullptr);
+    explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
     ~TDevice();
 
   public:
@@ -66,7 +66,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     bool IsEnabledExtension(std::string extensionName);
     bool IsEnabledExtension(TExtensionType extensionType);
 
-    VkPhysicalDeviceFeatures GetEnableDeviceFeatures();
+    TPhysicalDeviceFeatures GetEnableDeviceFeatures();
 
     TVmaAllocator *GetVmaAllocator();
 

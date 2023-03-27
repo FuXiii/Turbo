@@ -187,8 +187,8 @@ int main()
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
-    VkPhysicalDeviceFeatures vk_physical_device_features = {};
-    vk_physical_device_features.sampleRateShading = VK_TRUE;
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.sampleRateShading = true;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
@@ -200,7 +200,7 @@ int main()
         }
     }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);

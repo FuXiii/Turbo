@@ -19,6 +19,26 @@ typedef enum class TDriver
 } TDriverEnum;
 //</未实现，该功能为Vulkan 1.2版本功能>
 
+class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
+{
+  public:
+    bool geometryShader = false;
+    bool tessellationShader = false;
+    bool sampleRateShading = false;
+    bool depthClamp = false;
+    bool depthBiasClamp = false;
+    bool wideLines = false;
+    bool fillModeNonSolid = false;
+    bool samplerAnisotropy = false;
+    bool timelineSemaphore = false;
+    bool dynamicRendering = false;
+
+    bool logicOp = false;
+
+  public:
+    virtual std::string ToString() override;
+};
+
 class TInstance;
 class TPhysicalDeviceInfo;
 class TQueueFamilyInfo;
@@ -94,11 +114,12 @@ class TPhysicalDevice : public TVulkanHandle
     TPipelineCacheUUID GetDevicePiplineCacheUUID();
     TPhysicalDeviceLimits GetDeviceLimits();
     // template <typename T>
-    // T GetDeviceLimit(/*enume key*/);//<<--��ȡ�ض�������,����ʵ�֡�����ʹ�ã���-ֵ�Ի�ö������ѯ
+    // T GetDeviceLimit(/*enume key*/);
     // VkPhysicalDeviceSparseProperties
-    // GetDeviceSparseProperties();//<<--����VkPhysicalDeviceSparseProperties�д洢��5��boolֵ�������Ƿ�ֱ���г���
-    TPhysicalDeviceFeatures GetDeviceFeatures(); //ֱ�ӷ������е�����
-    // bool IsDeviceSupportFeature(enume key);//<<--����ʹ�ã���-ֵ����ѯ
+    // GetDeviceSparseProperties();
+
+    TPhysicalDeviceFeatures GetDeviceFeatures();
+    // bool IsDeviceSupportFeature(enume key);
 
     size_t GetSupportExtensionCount();
     std::vector<TExtensionInfo> GetSupportExtensions();

@@ -594,7 +594,6 @@ bool Turbo::Render::TRenderPassPool::Allocate(Turbo::Render::TRenderPass &render
     {
         if (this->Find(renderPass))
         {
-            std::cout << "RenderPass Found" << std::endl;
             if (this->framebufferPool->Allocate(renderPass))
             {
                 return true;
@@ -880,9 +879,10 @@ Turbo::Render::TContext::TContext()
         enable_device_extensions.push_back(vk_khr_swapchain_extension);
     }
 
-    VkPhysicalDeviceFeatures vk_physical_device_features = {VK_FALSE};
-    vk_physical_device_features.sampleRateShading = VK_TRUE;
-    this->device = new Turbo::Core::TDevice(this->physicalDevice, nullptr, &enable_device_extensions, &vk_physical_device_features);
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.sampleRateShading = true;
+    
+    this->device = new Turbo::Core::TDevice(this->physicalDevice, nullptr, &enable_device_extensions, &physical_device_features);
     this->graphicsQueue = this->device->GetBestGraphicsQueue();
 
     this->commandBufferPool = new Turbo::Core::TCommandBufferPool(this->graphicsQueue);

@@ -15,6 +15,7 @@
 #include "core/include/TAttachment.h"
 #include "core/include/TGraphicsPipeline.h"
 #include "core/include/TRenderPass.h"
+#include "core/include/TRenderingPipeline.h"
 #include "core/include/TSubpass.h"
 
 #include "core/include/TDescriptorPool.h"
@@ -239,8 +240,8 @@ int main()
         }
     }
 
-    Turbo::Core::TVersion instance_version(1, 0, 0, 0);
-    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
+    Turbo::Core::TVersion support_instance_version = Turbo::Core::TInstance::GetVulkanInstanceVersion();
+    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &support_instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
@@ -254,11 +255,11 @@ int main()
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
-    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
-    physical_device_features.sampleRateShading = true;
+    VkPhysicalDeviceFeatures vk_physical_device_features = {};
+    vk_physical_device_features.sampleRateShading = VK_TRUE;
 
+    bool is_have_vk_khr_dynamic_rendering_extension = false;
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    physical_device->GetSupportExtensions();
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
@@ -266,10 +267,56 @@ int main()
         {
             enable_device_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_DYNAMIC_RENDERING)
+        {
+            is_have_vk_khr_dynamic_rendering_extension = true;
+            std::cout << "Enable:" << extension.GetName() << std::endl;
+            enable_device_extensions.push_back(extension);
+        }
     }
+
+    if (!physical_device->GetDeviceFeatures().dynamicRendering)
+    {
+        if (!is_have_vk_khr_dynamic_rendering_extension)
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
+        }
+    }
+    else
+    {
+        if (instance->GetVulkanVersion() < Turbo::Core::TVersion(1, 3, 0, 0))
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
+        }
+    }
+
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
+    physical_device_features.dynamicRendering = true;
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
+
+    // Get Dynamic Rendering Function
+    struct VkDynamicRenderingDriver
+    {
+        // PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR = nullptr;
+        // PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR = nullptr;
+        PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr; // for Vulkan1.3
+        PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;     // for Vulkan1.3
+    };
+
+    VkDynamicRenderingDriver vk_dynamic_rendering_driver = {};
+    if (is_have_vk_khr_dynamic_rendering_extension)
+    {
+        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRenderingKHR>(device, "vkCmdBeginRenderingKHR");
+        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRenderingKHR>(device, "vkCmdEndRenderingKHR");
+    }
+
+    if (instance->GetVulkanVersion() >= Turbo::Core::TVersion(1, 3, 0, 0))
+    {
+        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
+        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
+    }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
@@ -329,22 +376,6 @@ int main()
     std::vector<Turbo::Core::TBuffer *> buffers;
     buffers.push_back(value_buffer);
 
-    Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
-    subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
-    subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
-
-    std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass); // subpass 0
-
-    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
-    Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-
-    std::vector<Turbo::Core::TAttachment> attachemts;
-    attachemts.push_back(swapchain_color_attachment);
-    attachemts.push_back(depth_attachment);
-
-    Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
-
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_AND_COLOR), Turbo::Core::TVertexRate::VERTEX);
     vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, position)); // position
     vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, color));    // color
@@ -355,24 +386,20 @@ int main()
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
 
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    // TODO: we need to create Dynamic Rendering Pipeline
+    Turbo::Core::TRenderingAttachments rendering_attachments = {};
+    rendering_attachments.AddColorAttachmentFormat(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
+    rendering_attachments.SetDepthAttachmentFormat(Turbo::Core::TFormatType::D32_SFLOAT);
+
+    Turbo::Core::TRenderingPipeline *rendering_pipeline = new Turbo::Core::TRenderingPipeline(rendering_attachments, vertex_bindings, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(rendering_pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(vertex_buffer);
-
-    std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
-    for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
-    {
-        std::vector<Turbo::Core::TImageView *> image_views;
-        image_views.push_back(swapchain_image_view_item);
-        image_views.push_back(depth_image_view);
-
-        Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
-        swpachain_framebuffers.push_back(swapchain_framebuffer);
-    }
 
     bool show_demo_window = true;
 
@@ -407,17 +434,89 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
-            command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+            VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
+
+            VkClearColorValue vk_clear_color_value = {};
+            // {
+            //     vk_clear_color_value.int32[0] = (int32_t)0;
+            //     vk_clear_color_value.int32[1] = (int32_t)0;
+            //     vk_clear_color_value.int32[2] = (int32_t)0;
+            //     vk_clear_color_value.int32[3] = (int32_t)0;
+            // }
+            // {
+            //     vk_clear_color_value.uint32[0] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[1] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[2] = (uint32_t)0;
+            //     vk_clear_color_value.uint32[3] = (uint32_t)0;
+            // }
+            {
+                vk_clear_color_value.float32[0] = 0;
+                vk_clear_color_value.float32[1] = 0;
+                vk_clear_color_value.float32[2] = 0;
+                vk_clear_color_value.float32[3] = 0;
+            }
+
+            VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
+            vk_clear_depth_stencil_value.depth = 1;
+            // vk_clear_depth_stencil_value.stencil = 0;
+
+            Turbo::Core::TImageView *current_image_view = swapchain_image_views[current_image_index];
+
+            VkRenderingAttachmentInfo color_attachment_info = {};
+            color_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            color_attachment_info.pNext = nullptr;
+            color_attachment_info.imageView = current_image_view->GetVkImageView();
+            color_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            color_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            color_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            color_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            color_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+            color_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+            color_attachment_info.clearValue.color = vk_clear_color_value;
+            // color_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
+
+            VkRenderingAttachmentInfo depth_attachment_info = {};
+            depth_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            depth_attachment_info.pNext = nullptr;
+            depth_attachment_info.imageView = depth_image_view->GetVkImageView();
+            depth_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            depth_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            depth_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            depth_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            depth_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depth_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+            // depth_attachment_info.clearValue.color = vk_clear_color_value;
+            depth_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
+
+            VkRenderingInfo rendering_info = {};
+            rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
+            rendering_info.pNext = nullptr;
+            rendering_info.flags = 0;
+            rendering_info.renderArea = VkRect2D{0, 0, current_image_view->GetImage()->GetWidth(), current_image_view->GetImage()->GetHeight()};
+            rendering_info.layerCount = 1;
+            rendering_info.viewMask = 0;
+            rendering_info.colorAttachmentCount = 1;
+            rendering_info.pColorAttachments = &color_attachment_info;
+            rendering_info.pDepthAttachment = &depth_attachment_info;
+            rendering_info.pStencilAttachment = nullptr;
+
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_image_view);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_ATTACHMENT_OPTIMAL, depth_image_view);
+
+            vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
 
             // Triangle
-            command_buffer->CmdBindPipeline(pipeline);
+            command_buffer->CmdBindPipeline(rendering_pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdDraw(3, 1, 0, 0);
 
-            command_buffer->CmdEndRenderPass();
+            vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
+
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, current_image_view);
+
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
@@ -457,13 +556,6 @@ int main()
                 delete depth_image_view;
                 delete depth_image;
 
-                // destroy framebuffer
-                for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
-                {
-                    delete frame_buffer_item;
-                }
-                swpachain_framebuffers.clear();
-
                 // recreate swapchain
                 Turbo::Extension::TSwapchain *old_swapchain = swapchain;
                 Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
@@ -482,17 +574,6 @@ int main()
                 // recreate depth image and view
                 depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
                 depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
-
-                // recreate framebuffer
-                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-                {
-                    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
-                    swapchain_image_views.push_back(image_view_item);
-                    swapchain_image_views.push_back(depth_image_view);
-
-                    Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
-                    swpachain_framebuffers.push_back(swapchain_framebuffer);
-                }
             }
             break;
             default: {
@@ -532,13 +613,6 @@ int main()
             delete depth_image_view;
             delete depth_image;
 
-            // destroy framebuffer
-            for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
-            {
-                delete frame_buffer_item;
-            }
-            swpachain_framebuffers.clear();
-
             // recreate swapchain
             Turbo::Extension::TSwapchain *old_swapchain = swapchain;
             Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
@@ -557,17 +631,6 @@ int main()
             // recreate depth image and view
             depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
             depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
-
-            // recreate framebuffer
-            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-            {
-                std::vector<Turbo::Core::TImageView *> swapchain_image_views;
-                swapchain_image_views.push_back(image_view_item);
-                swapchain_image_views.push_back(depth_image_view);
-
-                Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
-                swpachain_framebuffers.push_back(swapchain_framebuffer);
-            }
         }
         break;
         default: {
@@ -583,14 +646,7 @@ int main()
     ImageSaveToPPM(swapchain_images[0], command_pool, queue, "PureHelloTriangle");
 
     descriptor_pool->Free(pipeline_descriptor_set);
-    delete pipeline;
-    for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
-    {
-        delete framebuffer_item;
-    }
-
-    delete render_pass;
-
+    delete rendering_pipeline;
     delete descriptor_pool;
     delete vertex_shader;
     delete fragment_shader;

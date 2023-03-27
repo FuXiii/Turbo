@@ -57,7 +57,7 @@ Turbo是渲染引擎
 ![Core](https://img.shields.io/badge/Core-初步完成-brightgreen?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::Core`
-* 文档：`./docs/TurboDesign.drawio:Core`和`./docs/Design/Core.md`
+* 文档：`./docs/TurboDesign.drawio:Core`和[Core.md](./docs/Design/Core.md)
 * 目录：`./engine/core`
 * 依赖：独立模块，无依赖。
 * 说明：`Core`作为核心模块直接与`Vulkan`沟通，是上层与`Vulkan`底层最直接的桥梁，`Turbo`中所有的`GPU`相关工作最终都会从上层回到`Core`层。
@@ -65,7 +65,7 @@ Turbo是渲染引擎
 ![FrameGraph](https://img.shields.io/badge/FrameGraph-初步完成-brightgreen?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::FrameGraph`
-* 文档：`./docs/TurboDesign.drawio:FrameGraph`和`./docs/Design/FrameGraph.md`
+* 文档：`./docs/TurboDesign.drawio:FrameGraph`和[FrameGraph.md](./docs/Design/FrameGraph.md)
 * 目录：`./engine/framegraph`
 * 依赖：独立模块，无依赖。
 * 说明：`FrameGraph`用于描述一帧中的资源、渲染配置和渲染指令
@@ -73,7 +73,7 @@ Turbo是渲染引擎
 ![Render](https://img.shields.io/badge/Render-开发中-orange?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::Render`
-* 文档：`./docs/Design/FrameGraphAdvance.md`
+* 文档：[FrameGraphAdvance.md](./docs/Design/FrameGraphAdvance.md)
 * 目录：`./engine/render`
 * 依赖：`Core`和`FrameGraph`。
 * 说明：由于直接使用`Core`层进行渲染相对来说还是会比较繁琐吃力一些，`Render`模块的出现就是将`Core`和`FrameGraph`结合起来，提供更加方便的工作流，将开发者从繁杂的`Core`层脱离出来，提供更加简单易用的设计架构
@@ -81,10 +81,11 @@ Turbo是渲染引擎
 ## Build
 
 * 首先您需要知道的：
+  * `Turbo`目前主要有两个分支：`master`和`dev`。其中`master`是主分支，确保可以正常编译和使用，而`dev`分支会经常开发新功能，想看开发推进的可以查看`dev`分支，但不保证能够正常编译。
   * `Turbo`引擎被设计成各种模块，有`Core`核心模块, 有`FrameGraph`模块等。
   * 目前`Turbo`的核心模块基本完成(未完成部分和相关问题请参考下面的`RoadMap`章节和`docs/Issue.md`文档)
   * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，您可以直接将他拷贝出来放到自己的工程中
-  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`。该文件中有最新的核心实例代码，同时也是引擎的一部分。
+  * `Turbo`引擎会使用核心进行渲染，有关如何使用该核心，目前可以参考`./main.cpp`和`./samples`文件夹下各个示例。该文件中有最新的核心实例代码，同时也是引擎的一部分。
   * 核心会用到的第三方库为：
     * `glslang` : 用于将`Shader`代码字符串编译成`Spir-V`
     * `SPIRV-Cross` : 用于解析`Spir-V`,获取`Shader`中相关声明
@@ -2763,3 +2764,129 @@ Turbo是渲染引擎
   >
   >* 确定`vkCreatePipelineLayout`和`vkDestroyPipelineLayout`发生的内存泄漏是`NVIDIA GPU`驱动`Bug`，`Game Ready Driver`驱动版本为`531.29`发布日期为`2023/03/14`
   >* 修正添加`./engine/core`下`TDescriptorSetLayout`类中`~TDescriptorSetLayout()`成员函数对于`Turbo::Core::TNaNDescriptor`资源内存的释放回收。
+
+* 2023/3/19 设计架构
+  >
+  >* `./samples`下增加`VulkanDynamicRenderingTest`示例，用于测试`Vulkan`的`Dynamic Rendering`特性
+  >* `./engine/core`下`TExtensionInfo`中`TExtensionType`增加`VK_KHR_DYNAMIC_RENDERING`扩展
+  >* `./engine/core`下`TExtensionInfo`中`TAllExtensionNames`增加`VK_KHR_dynamic_rendering`名称
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/20 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下的`TPhysicalDeviceInfo`类中的`TPhysicalDeviceFeatures`更改成`VkPhysicalDeviceFeatures`
+  >* `./engine/core`下的`TPhysicalDevice`类中的`TPhysicalDeviceFeatures GetDeviceFeatures()`更改成`VkPhysicalDeviceFeatures GetDeviceFeatures()`
+  >* `./engine/core`下的`TCore.h`中移除`typedef VkPhysicalDeviceFeatures TPhysicalDeviceFeatures`声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中增加`class TPhysicalDeviceFeatures`类型，内部增加如下声明：
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool geometryShader`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool tessellationShader`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool sampleRateShading`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthClamp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool depthBiasClamp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool wideLines`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool fillModeNonSolid`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool timelineSemaphore`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool dynamicRendering`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`virtual std::string ToString() override`成员函数声明
+
+* 2023/3/21 设计架构
+  >
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan11Features vulkan11Feature`成员变量
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan12Features vulkan12Feature`成员变量
+  >* `./engine/core`下的`TPhysicalDeviceInfo.h`中的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceVulkan13Features vulkan13Feature`成员变量
+  >* `./engine/core`下的`TVulkanLoader.h`中增加`extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
+  >* `./engine/core`下的`TVulkanLoader.h`中`TVulkanLoader`类中`LoadAllInstanceFunctions(TInstance *instance)`增加对于`Turbo::Core::vkGetPhysicalDeviceFeatures2`函数的获取
+  >* `./engine/core`下的`TPhysicalDevice.h`中`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对于`VkPhysicalDeviceVulkan11Features`，`VkPhysicalDeviceVulkan12Features`和`VkPhysicalDeviceVulkan13Features`数据的获取
+
+* 2023/3/22 设计架构
+  >
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool samplerAnisotropy`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`增加`bool logicOp`成员变量声明
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDevice`移除`VkPhysicalDeviceFeatures GetDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TPhysicalDevice.h`中`class TPhysicalDevice`增加`TPhysicalDeviceFeatures GetDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`TDevice(TPhysicalDevice *, std::vector<TLayerInfo> *, std::vector<TExtensionInfo> *, VkPhysicalDeviceFeatures *)`构造函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`VkPhysicalDeviceFeatures enabledFeatures`成员变量
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中增加`TPhysicalDeviceFeatures enabledFeatures`成员变量
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中移除`VkPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中增加`TPhysicalDeviceFeatures GetEnableDeviceFeatures()`成员函数
+  >* `./engine/core`下的`TDevice.h`中`class TDevice`中`InternalCreate()`成员函数中增加对于`Vulkan1.1`，`Vulkan1.2`和`Vulkan1.3`的`Feature`激活
+  >* `./engine/core`下的`TVulkanLoader.h`中`class TVulkanLoader`中增加对于`vkCmdBeginRendering`和`vkCmdEndRendering`两个函数的获取
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/25 设计架构
+  >
+  >* `./engine/core`下的新建`TRenderingPipeline.h`和`TRenderingPipeline.cpp`
+  >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingPipeline`类
+  >* `./engine/core`下`TRenderingPipeline.h`中增加声明`TRenderingAttachments`类
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`std::vector<TFormatType> colorAttachmentFormats`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`TFormatType depthAttachmentFormat`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`TFormatType stencilAttachmentFormat`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void AddColorAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void SetDepthAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`void SetStencilAttachmentFormat(TFormatType formatType)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const std::vector<TFormatType> &GetColorAttachmentFormats() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const TFormatType &GetDepthAttachmentFormat() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingAttachments`类中增加`const TFormatType &GetStencilAttachmentFormat() const`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加``成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TRenderingAttachments renderingAttachments`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TTopologyType topology`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool primitiveRestartEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`std::vector<TVertexBinding> vertexBindings`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthClampEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool rasterizerDiscardEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TPolygonMode polygonMode`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCullModes cullMode`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TFrontFace frontFace`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthBiasEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasConstantFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasClamp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float depthBiasSlopeFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float lineWidth`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool multisampleEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TSampleCountBits sample`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthWriteEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp depthCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool depthBoundsTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool stencilTestEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontPassOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp frontDepthFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp frontCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontCompareMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontWriteMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t frontReference`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backPassOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TStencilOp backDepthFailOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TCompareOp backCompareOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backCompareMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backWriteMask`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`uint32_t backReference`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float minDepthBounds`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float maxDepthBounds`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool logicOpEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TLogicOp logicOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`bool blendEnable`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor srcColorBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor dstColorBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendOp colorBlendOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor srcAlphaBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendFactor dstAlphaBlendFactor`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`TBlendOp alphaBlendOp`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantR`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantG`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantB`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`float constantA`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`virtual void InternalCreate() override`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)`成员函数
+
+* 2023/3/26 设计架构
+  >
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`virtual void InternalDestroy() override`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`~TRenderingPipeline()`析构函数
+
+* 2023/3/27 设计架构
+  >
+  >* 完成`./sample`下的`VulkanDynamicRenderingTest`示例
