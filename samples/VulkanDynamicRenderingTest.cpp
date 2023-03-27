@@ -450,10 +450,10 @@ int main()
             //     vk_clear_color_value.uint32[3] = (uint32_t)0;
             // }
             {
-                vk_clear_color_value.float32[0] = 0;
+                vk_clear_color_value.float32[0] = 1;
                 vk_clear_color_value.float32[1] = 0;
                 vk_clear_color_value.float32[2] = 0;
-                vk_clear_color_value.float32[3] = 0;
+                vk_clear_color_value.float32[3] = 1;
             }
 
             VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
