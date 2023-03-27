@@ -2886,3 +2886,7 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`virtual void InternalDestroy() override`成员函数
   >* `./engine/core`下`TRenderingPipeline.h`中`TRenderingPipeline`类中增加`~TRenderingPipeline()`析构函数
+
+* 2023/3/27 设计架构
+  >
+  >* 完成`./sample`下的`VulkanDynamicRenderingTest`示例
