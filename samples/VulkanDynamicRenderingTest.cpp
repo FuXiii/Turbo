@@ -436,18 +436,61 @@ int main()
             command_buffer->Begin();
             VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
 
-            // VkRenderingInfo rendering_info = {};
-            // vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
+            VkClearColorValue vk_clear_color_value = {};
+            {
+                vk_clear_color_value.int32[0] = (int32_t)0;
+                vk_clear_color_value.int32[1] = (int32_t)0;
+                vk_clear_color_value.int32[2] = (int32_t)0;
+                vk_clear_color_value.int32[3] = (int32_t)0;
+            }
+            {
+                vk_clear_color_value.uint32[0] = (uint32_t)0;
+                vk_clear_color_value.uint32[1] = (uint32_t)0;
+                vk_clear_color_value.uint32[2] = (uint32_t)0;
+                vk_clear_color_value.uint32[3] = (uint32_t)0;
+            }
+            {
+                vk_clear_color_value.float32[0] = 0;
+                vk_clear_color_value.float32[1] = 0;
+                vk_clear_color_value.float32[2] = 0;
+                vk_clear_color_value.float32[3] = 0;
+            }
 
-            // // Triangle
-            // command_buffer->CmdBindPipeline(rendering_pipeline);
-            // command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            // command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            // command_buffer->CmdSetViewport(frame_viewports);
-            // command_buffer->CmdSetScissor(frame_scissors);
-            // command_buffer->CmdDraw(3, 1, 0, 0);
+            VkRenderingAttachmentInfo vk_rendering_attachment_info = {};
+            vk_rendering_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            vk_rendering_attachment_info.pNext = nullptr;
+            vk_rendering_attachment_info.imageView = swapchain_image_views[current_image_index]->GetVkImageView();
+            vk_rendering_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            vk_rendering_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            vk_rendering_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            vk_rendering_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            vk_rendering_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+            vk_rendering_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+            vk_rendering_attachment_info.clearValue.color = vk_clear_color_value;
 
-            // vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
+            VkRenderingInfo rendering_info = {};
+            rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
+            rendering_info.pNext = nullptr;
+            rendering_info.flags = 0;
+            rendering_info.renderArea = VkRect2D{0, 0, 1, 1};
+            rendering_info.layerCount = 1;
+            rendering_info.viewMask = 0;
+            rendering_info.colorAttachmentCount = 1;
+            rendering_info.pColorAttachments = &vk_rendering_attachment_info;
+            rendering_info.pDepthAttachment = nullptr;
+            rendering_info.pStencilAttachment = nullptr;
+
+            vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
+
+            // Triangle
+            command_buffer->CmdBindPipeline(rendering_pipeline);
+            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+            command_buffer->CmdBindVertexBuffers(vertex_buffers);
+            command_buffer->CmdSetViewport(frame_viewports);
+            command_buffer->CmdSetScissor(frame_scissors);
+            command_buffer->CmdDraw(3, 1, 0, 0);
+
+            vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
