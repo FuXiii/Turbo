@@ -450,20 +450,22 @@ int main()
             //     vk_clear_color_value.uint32[3] = (uint32_t)0;
             // }
             {
-                vk_clear_color_value.float32[0] = 1;
+                vk_clear_color_value.float32[0] = 0;
                 vk_clear_color_value.float32[1] = 0;
                 vk_clear_color_value.float32[2] = 0;
-                vk_clear_color_value.float32[3] = 1;
+                vk_clear_color_value.float32[3] = 0;
             }
 
             VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
             vk_clear_depth_stencil_value.depth = 1;
             // vk_clear_depth_stencil_value.stencil = 0;
 
+            Turbo::Core::TImageView *current_image_view = swapchain_image_views[current_image_index];
+
             VkRenderingAttachmentInfo color_attachment_info = {};
             color_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
             color_attachment_info.pNext = nullptr;
-            color_attachment_info.imageView = swapchain_image_views[current_image_index]->GetVkImageView();
+            color_attachment_info.imageView = current_image_view->GetVkImageView();
             color_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             color_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
             color_attachment_info.resolveImageView = VK_NULL_HANDLE;
@@ -490,7 +492,7 @@ int main()
             rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
             rendering_info.pNext = nullptr;
             rendering_info.flags = 0;
-            rendering_info.renderArea = VkRect2D{0, 0, 1, 1};
+            rendering_info.renderArea = VkRect2D{0, 0, current_image_view->GetImage()->GetWidth(), current_image_view->GetImage()->GetHeight()};
             rendering_info.layerCount = 1;
             rendering_info.viewMask = 0;
             rendering_info.colorAttachmentCount = 1;
@@ -498,7 +500,7 @@ int main()
             rendering_info.pDepthAttachment = &depth_attachment_info;
             rendering_info.pStencilAttachment = nullptr;
 
-            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, swapchain_image_views[current_image_index]);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_image_view);
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_ATTACHMENT_OPTIMAL, depth_image_view);
 
             vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
@@ -513,7 +515,7 @@ int main()
 
             vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
 
-            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, swapchain_image_views[current_image_index]);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, current_image_view);
 
             command_buffer->End();
 
