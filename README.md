@@ -2890,3 +2890,8 @@ Turbo是渲染引擎
 * 2023/3/27 设计架构
   >
   >* 完成`./sample`下的`VulkanDynamicRenderingTest`示例
+
+* 2023/3/29 设计架构
+  >
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`重命名为`class TAttachmentsFormats`
+  >* 更新`./docs/Design/Core.md`文档

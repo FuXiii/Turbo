@@ -389,7 +389,7 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
 
     // TODO: we need to create Dynamic Rendering Pipeline
-    Turbo::Core::TRenderingAttachments rendering_attachments = {};
+    Turbo::Core::TAttachmentsFormats rendering_attachments = {};
     rendering_attachments.AddColorAttachmentFormat(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
     rendering_attachments.SetDepthAttachmentFormat(Turbo::Core::TFormatType::D32_SFLOAT);
 

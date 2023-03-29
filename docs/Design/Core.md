@@ -19,6 +19,11 @@
   >
   >* 更新`Dynamic Rendering的Pipeline`章节
 
+* 2023/3/29
+  >
+  >* 更新`Dynamic Rendering的Pipeline`章节
+  >* 创建`Dynamic Rendering的渲染`章节
+
 ---
 
 ## Device Feature
@@ -100,6 +105,8 @@ typedef struct VkPhysicalDeviceDynamicRenderingFeatures {
 
 并且`VkPhysicalDeviceDynamicRenderingFeatures`也可以用于`VkDeviceCreateInfo`的`pNext`链中，用于激活`DynamicRendering`特性
 
+*注：按照`Vulkan1.3`的标准，如果`VkDeviceCreateInfo::pNext`中已经链上了`VkPhysicalDeviceVulkan13Features`则不能再链接`VkPhysicalDeviceDynamicRenderingFeatures`*
+
 ## Dynamic Rendering
 
 对于`Vulkan`中的`Dynamic Rendering`主要如下函数
@@ -146,6 +153,18 @@ void vkCmdEndRenderingKHR(
 根据`Vulkan`标准创建支持`Dynamic Rendering`需要在创建`Graphics Pipeline`时指定`VkPipelineRenderingCreateInfoKHR`（对于扩展）或者`VkPipelineRenderingCreateInfo`（对于标准），所以采用方式`2`中从`TPipeline`派生一个`TRenderingPipeline`比较符合一般直觉
 
 ```CXX
+//in Turbo::Core
+class TRenderingPipeline : public Turbo::Core::TPipeline
+{
+  //大部分与TGraphicsPipeline一样
+  //不需要指定RenderPass
+  //不需要指定Subpass
+};
+```
+
+创建`Dynamic Rendering Pipeline`时不需要指定`RenderPass`和`Subpass`了，只需要指定要使用的附件`Attachment`的格式
+
+```CXX
 // Provided by VK_VERSION_1_3
 typedef struct VkPipelineRenderingCreateInfo {
   VkStructureType sType;
@@ -158,4 +177,76 @@ typedef struct VkPipelineRenderingCreateInfo {
 } VkPipelineRenderingCreateInfo;
 ```
 
-对于`Dynamic Rendering`需要指定的附件`Attachment`仅仅为对应的`VkFormat`
+对于`Dynamic Rendering`需要指定的附件`Attachment`仅仅为对应的`VkFormat`。为此声明一个`TAttachmentsFormats`用于记录各个附件的格式
+
+```CXX
+//in Turbo::Core
+class TAttachmentsFormats
+{
+  private:
+    std::vector<TFormatType> colorAttachmentFormats;
+    TFormatType depthAttachmentFormat = TFormatType::UNDEFINED;
+    TFormatType stencilAttachmentFormat = TFormatType::UNDEFINED;
+
+    void AddColorAttachmentFormat(TFormatType formatType);
+    void SetDepthAttachmentFormat(TFormatType formatType);
+    void SetStencilAttachmentFormat(TFormatType formatType);
+};
+```
+
+### Dynamic Rendering的渲染
+
+对于`Dynamic Rendering`的渲染最基本的就两个调用函数：
+
+```CXX
+// Provided by VK_VERSION_1_3
+void vkCmdBeginRendering(
+    VkCommandBuffer                             commandBuffer,
+    const VkRenderingInfo*                      pRenderingInfo);
+```
+```CXX
+// Provided by VK_VERSION_1_3
+void vkCmdEndRendering(
+    VkCommandBuffer                             commandBuffer);
+```
+
+而对于`vkCmdBeginRendering`在渲染时需要指定`VkRenderingInfo`
+
+```CXX
+// Provided by VK_VERSION_1_3
+typedef struct VkRenderingInfo {
+    VkStructureType                     sType;
+    const void*                         pNext;
+    VkRenderingFlags                    flags;
+    VkRect2D                            renderArea;
+    uint32_t                            layerCount;
+    uint32_t                            viewMask;
+    uint32_t                            colorAttachmentCount;
+    const VkRenderingAttachmentInfo*    pColorAttachments;
+    const VkRenderingAttachmentInfo*    pDepthAttachment;
+    const VkRenderingAttachmentInfo*    pStencilAttachment;
+} VkRenderingInfo;
+```
+
+默认情况下`viewMask`设置为`0`表示所有的附件的`layer`都按照`layerCount`的值来设置。最终要的是设置`VkRenderingAttachmentInfo`用于指定真正的附件。
+
+```CXX
+// Provided by VK_VERSION_1_3
+typedef struct VkRenderingAttachmentInfo {
+    VkStructureType          sType;
+    const void*              pNext;
+    VkImageView              imageView;
+    VkImageLayout            imageLayout;
+    VkResolveModeFlagBits    resolveMode;
+    VkImageView              resolveImageView;
+    VkImageLayout            resolveImageLayout;
+    VkAttachmentLoadOp       loadOp;
+    VkAttachmentStoreOp      storeOp;
+    VkClearValue             clearValue;
+} VkRenderingAttachmentInfo;
+```
+
+对于`Dynamic Rendering`一个附件需要指定
+
+* 
+

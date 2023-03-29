@@ -8,7 +8,7 @@ namespace Turbo
 namespace Core
 {
 
-class TRenderingAttachments
+class TAttachmentsFormats
 {
   private:
     std::vector<TFormatType> colorAttachmentFormats;
@@ -16,8 +16,8 @@ class TRenderingAttachments
     TFormatType stencilAttachmentFormat = TFormatType::UNDEFINED;
 
   public:
-    TRenderingAttachments() = default;
-    ~TRenderingAttachments() = default;
+    TAttachmentsFormats() = default;
+    ~TAttachmentsFormats() = default;
 
     void AddColorAttachmentFormat(TFormatType formatType);
     void SetDepthAttachmentFormat(TFormatType formatType);
@@ -31,7 +31,7 @@ class TRenderingAttachments
 class TRenderingPipeline : public Turbo::Core::TPipeline
 {
   private:
-    TRenderingAttachments renderingAttachments;
+    TAttachmentsFormats renderingAttachments;
 
     TTopologyType topology;
     bool primitiveRestartEnable;
@@ -97,7 +97,7 @@ class TRenderingPipeline : public Turbo::Core::TPipeline
     virtual void InternalDestroy() override;
 
   public:
-    TRenderingPipeline(const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = true, bool depthWriteEnable = true, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0, bool logicOpEnable = false, TLogicOp logicOp = TLogicOp::NO_OP, bool blendEnable = false, TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO, TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO, TBlendOp colorBlendOp = TBlendOp::ADD, TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO, TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO, TBlendOp alphaBlendOp = TBlendOp::ADD, float constantR = 1, float constantG = 1, float constantB = 1, float constantA = 1);
+    TRenderingPipeline(const TAttachmentsFormats &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = true, bool depthWriteEnable = true, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0, bool logicOpEnable = false, TLogicOp logicOp = TLogicOp::NO_OP, bool blendEnable = false, TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO, TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO, TBlendOp colorBlendOp = TBlendOp::ADD, TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO, TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO, TBlendOp alphaBlendOp = TBlendOp::ADD, float constantR = 1, float constantG = 1, float constantB = 1, float constantA = 1);
     // Pipeline Cache version
     //TRenderingPipeline(TPipelineCache* pipelineCache, const TRenderingAttachments &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology = TTopologyType::TRIANGLE_LIST, bool primitiveRestartEnable = false, bool depthClampEnable = false, bool rasterizerDiscardEnable = false, TPolygonMode polygonMode = TPolygonMode::FILL, TCullModes cullMode = TCullModeBits::MODE_BACK_BIT, TFrontFace frontFace = TFrontFace::CLOCKWISE, bool depthBiasEnable = false, float depthBiasConstantFactor = 0, float depthBiasClamp = 0, float depthBiasSlopeFactor = 0, float lineWidth = 1, bool multisampleEnable = false, TSampleCountBits sample = TSampleCountBits::SAMPLE_1_BIT, bool depthTestEnable = true, bool depthWriteEnable = true, TCompareOp depthCompareOp = TCompareOp::LESS_OR_EQUAL, bool depthBoundsTestEnable = false, bool stencilTestEnable = false, TStencilOp frontFailOp = TStencilOp::KEEP, TStencilOp frontPassOp = TStencilOp::KEEP, TStencilOp frontDepthFailOp = TStencilOp::KEEP, TCompareOp frontCompareOp = TCompareOp::ALWAYS, uint32_t frontCompareMask = 0, uint32_t frontWriteMask = 0, uint32_t frontReference = 0, TStencilOp backFailOp = TStencilOp::KEEP, TStencilOp backPassOp = TStencilOp::KEEP, TStencilOp backDepthFailOp = TStencilOp::KEEP, TCompareOp backCompareOp = TCompareOp::ALWAYS, uint32_t backCompareMask = 0, uint32_t backWriteMask = 0, uint32_t backReference = 0, float minDepthBounds = 0, float maxDepthBounds = 0, bool logicOpEnable = false, TLogicOp logicOp = TLogicOp::NO_OP, bool blendEnable = false, TBlendFactor srcColorBlendFactor = TBlendFactor::ZERO, TBlendFactor dstColorBlendFactor = TBlendFactor::ZERO, TBlendOp colorBlendOp = TBlendOp::ADD, TBlendFactor srcAlphaBlendFactor = TBlendFactor::ZERO, TBlendFactor dstAlphaBlendFactor = TBlendFactor::ZERO, TBlendOp alphaBlendOp = TBlendOp::ADD, float constantR = 1, float constantG = 1, float constantB = 1, float constantA = 1);
     ~TRenderingPipeline();
