@@ -384,6 +384,42 @@ void Turbo::Core::TCommandBufferBase::CmdEndRenderPass()
     this->currentRenderPass = nullptr;
 }
 
+void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachments &renderingAttachment)
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().dynamicRendering)
+    {
+        VkRenderingInfo vk_rendering_info = {};
+        vk_rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        vk_rendering_info.pNext = nullptr;
+        vk_rendering_info.flags = 0;
+        vk_rendering_info.renderArea;
+        vk_rendering_info.layerCount;
+        vk_rendering_info.viewMask = 0;
+        vk_rendering_info.colorAttachmentCount;
+        vk_rendering_info.pColorAttachments;
+        vk_rendering_info.pDepthAttachment;
+        vk_rendering_info.pStencilAttachment;
+
+        if (device->GetDeviceDriver()->vkCmdBeginRendering != nullptr)
+        {
+            // device->GetDeviceDriver()->vkCmdBeginRendering(this->vkCommandBuffer, &vk_rendering_info);
+        }
+    }
+}
+
+void Turbo::Core::TCommandBufferBase::CmdEndRendering()
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().dynamicRendering)
+    {
+        if (device->GetDeviceDriver()->vkCmdEndRendering != nullptr)
+        {
+            // device->GetDeviceDriver()->vkCmdEndRendering(this->vkCommandBuffer);
+        }
+    }
+}
+
 bool Turbo::Core::TCommandBufferBase::End()
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();

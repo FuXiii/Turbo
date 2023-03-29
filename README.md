@@ -2894,4 +2894,10 @@ Turbo是渲染引擎
 * 2023/3/29 设计架构
   >
   >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`重命名为`class TAttachmentsFormats`
+  >* `./engine/core`下`TRenderingPipeline.h`中增加`class TRenderingAttachments`
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdEndRendering()`成员函数
   >* 更新`./docs/Design/Core.md`文档
+
+  
+    

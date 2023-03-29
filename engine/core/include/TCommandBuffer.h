@@ -20,6 +20,7 @@ class TViewport;
 class TScissor;
 class TDescriptorSet;
 class TPipelineDescriptorSet;
+class TRenderingAttachments;
 
 typedef enum class TCommandBufferLevel
 {
@@ -78,6 +79,12 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
     void CmdNextSubpass();
     void CmdEndRenderPass();
+
+    //<Dynamic Rendering>
+    void CmdBeginRendering(const TRenderingAttachments &renderingAttachment);
+    void CmdEndRendering();
+    //</Dynamic Rendering>
+
     bool End();
     bool Reset();
 
