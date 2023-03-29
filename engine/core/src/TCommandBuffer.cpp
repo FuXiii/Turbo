@@ -166,7 +166,6 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         }
         else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
         {
-
             TFormatDataTypes format_data_types = format_info.GetFormatDataType();
 
             VkClearColorValue vk_clear_color_value = {};

@@ -2893,11 +2893,19 @@ Turbo是渲染引擎
 
 * 2023/3/29 设计架构
   >
-  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`重命名为`class TAttachmentsFormats`
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`重命名为`class TAttachmentsFormat`
   >* `./engine/core`下`TRenderingPipeline.h`中增加`class TRenderingAttachments`
   >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数
   >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdEndRendering()`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中增加`typedef enum TResolveModeBits`枚举
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`struct TRenderingAttachment`结构体声明
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`std::vector<TRenderingAttachment> colorAttachments`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`TRenderingAttachment depthAttachment`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`TRenderingAttachment stencilAttachment`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void AddColorAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void AddColorAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetDepthAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetDepthAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
   >* 更新`./docs/Design/Core.md`文档
-
-  
-    
