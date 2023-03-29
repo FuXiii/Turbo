@@ -8,6 +8,57 @@
 #include "TVulkanLoader.h"
 #include "vulkan/vulkan_core.h"
 
+void Turbo::Core::TRenderingAttachments::AddColorAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+{
+    TRenderingAttachment rendering_attachment = {};
+    rendering_attachment.imageView = imageView;
+    rendering_attachment.layout = layout;
+    rendering_attachment.resolveImageView = resolveImageView;
+    rendering_attachment.resolveLayout = resolveLayout;
+    rendering_attachment.resolveModeBits = resolveModeBits;
+    rendering_attachment.loadOp = loadOp;
+    rendering_attachment.storeOp = storeOp;
+
+    this->colorAttachments.push_back(rendering_attachment);
+}
+
+void Turbo::Core::TRenderingAttachments::AddColorAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+{
+    this->AddColorAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
+}
+
+void Turbo::Core::TRenderingAttachments::SetDepthAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+{
+    this->depthAttachment.imageView = imageView;
+    this->depthAttachment.layout = layout;
+    this->depthAttachment.resolveImageView = resolveImageView;
+    this->depthAttachment.resolveLayout = resolveLayout;
+    this->depthAttachment.resolveModeBits = resolveModeBits;
+    this->depthAttachment.loadOp = loadOp;
+    this->depthAttachment.storeOp = storeOp;
+}
+
+void Turbo::Core::TRenderingAttachments::SetDepthAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+{
+    this->SetDepthAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
+}
+
+void Turbo::Core::TRenderingAttachments::SetStencilAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+{
+    this->stencilAttachment.imageView = imageView;
+    this->stencilAttachment.layout = layout;
+    this->stencilAttachment.resolveImageView = resolveImageView;
+    this->stencilAttachment.resolveLayout = resolveLayout;
+    this->stencilAttachment.resolveModeBits = resolveModeBits;
+    this->stencilAttachment.loadOp = loadOp;
+    this->stencilAttachment.storeOp = storeOp;
+}
+
+void Turbo::Core::TRenderingAttachments::SetStencilAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+{
+    this->SetStencilAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
+}
+
 void Turbo::Core::TAttachmentsFormat::AddColorAttachmentFormat(TFormatType formatType)
 {
     this->colorAttachmentFormats.push_back(formatType);
