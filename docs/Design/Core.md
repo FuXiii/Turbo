@@ -246,7 +246,17 @@ typedef struct VkRenderingAttachmentInfo {
 } VkRenderingAttachmentInfo;
 ```
 
-对于`Dynamic Rendering`一个附件需要指定
+为此声明一个`TRenderingAttachments`用于记录各个附件
 
-* 
 
+为了在`Turbo`中能够执行`Dynamic Rendering`指令，`TCommandBufferBase`中需要提供相应接口。
+
+```CXX
+//in Turbo::Core::TCommandBufferBase
+void CmdBeginRendering(const TRenderingAttachments& renderingAttachment);
+```
+
+```CXX
+//in Turbo::Core::TCommandBufferBase
+void CmdEndRendering();
+```
