@@ -81,7 +81,7 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdEndRenderPass();
 
     //<Dynamic Rendering>
-    void CmdBeginRendering(const TRenderingAttachments &renderingAttachment);
+    void CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     void CmdEndRendering();
     //</Dynamic Rendering>
 

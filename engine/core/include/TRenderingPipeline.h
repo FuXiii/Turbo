@@ -24,6 +24,9 @@ typedef enum TResolveModeBits
 class TRenderingAttachments
 {
   private:
+    friend class TCommandBufferBase;
+
+  private:
     struct TRenderingAttachment
     {
         TImageView *imageView = nullptr;

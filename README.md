@@ -2909,3 +2909,10 @@ Turbo是渲染引擎
   >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
   >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/30 设计架构
+  >
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`friend class TCommandBufferBase`友元类声明，使得在`TCommandBufferBase`中记录指令时能够访问到对应数据
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`完善实现`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`完善实现`void CmdEndRendering()`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`中`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数增加形参为`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)`
