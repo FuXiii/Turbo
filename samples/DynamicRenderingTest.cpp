@@ -258,7 +258,6 @@ int main()
     VkPhysicalDeviceFeatures vk_physical_device_features = {};
     vk_physical_device_features.sampleRateShading = VK_TRUE;
 
-    bool is_have_vk_khr_dynamic_rendering_extension = false;
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
@@ -267,27 +266,11 @@ int main()
         {
             enable_device_extensions.push_back(extension);
         }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_DYNAMIC_RENDERING)
-        {
-            is_have_vk_khr_dynamic_rendering_extension = true;
-            std::cout << "Enable:" << extension.GetName() << std::endl;
-            enable_device_extensions.push_back(extension);
-        }
     }
 
-    if (!physical_device->GetDeviceFeatures().dynamicRendering)
+    if (instance->GetVulkanVersion() < Turbo::Core::TVersion(1, 3, 0, 0))
     {
-        if (!is_have_vk_khr_dynamic_rendering_extension)
-        {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
-        }
-    }
-    else
-    {
-        if (instance->GetVulkanVersion() < Turbo::Core::TVersion(1, 3, 0, 0))
-        {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
-        }
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not Support Vulkan Dynamic Rendering");
     }
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
@@ -295,28 +278,6 @@ int main()
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
-
-    // Get Dynamic Rendering Function
-    struct VkDynamicRenderingDriver
-    {
-        // PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR = nullptr;
-        // PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR = nullptr;
-        PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr; // for Vulkan1.3
-        PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;     // for Vulkan1.3
-    };
-
-    VkDynamicRenderingDriver vk_dynamic_rendering_driver = {};
-    if (is_have_vk_khr_dynamic_rendering_extension)
-    {
-        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRenderingKHR>(device, "vkCmdBeginRenderingKHR");
-        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRenderingKHR>(device, "vkCmdEndRenderingKHR");
-    }
-
-    if (instance->GetVulkanVersion() >= Turbo::Core::TVersion(1, 3, 0, 0))
-    {
-        vk_dynamic_rendering_driver.vkCmdBeginRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
-        vk_dynamic_rendering_driver.vkCmdEndRendering = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
-    }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
@@ -390,8 +351,8 @@ int main()
 
     // TODO: we need to create Dynamic Rendering Pipeline
     Turbo::Core::TAttachmentsFormat rendering_attachments = {};
-    rendering_attachments.AddColorAttachmentFormat(Turbo::Core::TFormatType::B8G8R8A8_SRGB);
-    rendering_attachments.SetDepthAttachmentFormat(Turbo::Core::TFormatType::D32_SFLOAT);
+    rendering_attachments.AddColorAttachmentFormat(swapchain_image_views[0]->GetFormat().GetFormatType());
+    rendering_attachments.SetDepthAttachmentFormat(depth_image_view->GetFormat().GetFormatType());
 
     Turbo::Core::TRenderingPipeline *rendering_pipeline = new Turbo::Core::TRenderingPipeline(rendering_attachments, vertex_bindings, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
@@ -424,6 +385,8 @@ int main()
             // because we just have one command buffer, so we should reset the command buffer for each frame
             // If we create command buffer for each swapchain image, we don't need to reset it each frame
 
+            Turbo::Core::TImageView *current_image_view = swapchain_image_views[current_image_index];
+
             Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
             Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight());
 
@@ -434,76 +397,15 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
-            VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
-
-            VkClearColorValue vk_clear_color_value = {};
-            // {
-            //     vk_clear_color_value.int32[0] = (int32_t)0;
-            //     vk_clear_color_value.int32[1] = (int32_t)0;
-            //     vk_clear_color_value.int32[2] = (int32_t)0;
-            //     vk_clear_color_value.int32[3] = (int32_t)0;
-            // }
-            // {
-            //     vk_clear_color_value.uint32[0] = (uint32_t)0;
-            //     vk_clear_color_value.uint32[1] = (uint32_t)0;
-            //     vk_clear_color_value.uint32[2] = (uint32_t)0;
-            //     vk_clear_color_value.uint32[3] = (uint32_t)0;
-            // }
-            {
-                vk_clear_color_value.float32[0] = 0;
-                vk_clear_color_value.float32[1] = 0;
-                vk_clear_color_value.float32[2] = 0;
-                vk_clear_color_value.float32[3] = 0;
-            }
-
-            VkClearDepthStencilValue vk_clear_depth_stencil_value = {};
-            vk_clear_depth_stencil_value.depth = 1;
-            // vk_clear_depth_stencil_value.stencil = 0;
-
-            Turbo::Core::TImageView *current_image_view = swapchain_image_views[current_image_index];
-
-            VkRenderingAttachmentInfo color_attachment_info = {};
-            color_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            color_attachment_info.pNext = nullptr;
-            color_attachment_info.imageView = current_image_view->GetVkImageView();
-            color_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            color_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
-            color_attachment_info.resolveImageView = VK_NULL_HANDLE;
-            color_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            color_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-            color_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-            color_attachment_info.clearValue.color = vk_clear_color_value;
-            // color_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
-
-            VkRenderingAttachmentInfo depth_attachment_info = {};
-            depth_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            depth_attachment_info.pNext = nullptr;
-            depth_attachment_info.imageView = depth_image_view->GetVkImageView();
-            depth_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-            depth_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
-            depth_attachment_info.resolveImageView = VK_NULL_HANDLE;
-            depth_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            depth_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-            depth_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-            // depth_attachment_info.clearValue.color = vk_clear_color_value;
-            depth_attachment_info.clearValue.depthStencil = vk_clear_depth_stencil_value;
-
-            VkRenderingInfo rendering_info = {};
-            rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
-            rendering_info.pNext = nullptr;
-            rendering_info.flags = 0;
-            rendering_info.renderArea = VkRect2D{0, 0, current_image_view->GetImage()->GetWidth(), current_image_view->GetImage()->GetHeight()};
-            rendering_info.layerCount = 1;
-            rendering_info.viewMask = 0;
-            rendering_info.colorAttachmentCount = 1;
-            rendering_info.pColorAttachments = &color_attachment_info;
-            rendering_info.pDepthAttachment = &depth_attachment_info;
-            rendering_info.pStencilAttachment = nullptr;
 
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_image_view);
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_ATTACHMENT_OPTIMAL, depth_image_view);
 
-            vk_dynamic_rendering_driver.vkCmdBeginRendering(vk_command_buffer, &rendering_info);
+            Turbo::Core::TRenderingAttachments rendering_attachments;
+            rendering_attachments.AddColorAttachment(current_image_view, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE);
+            rendering_attachments.SetDepthAttachment(depth_image_view, Turbo::Core::TImageLayout::DEPTH_ATTACHMENT_OPTIMAL, Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE);
+
+            command_buffer->CmdBeginRendering(rendering_attachments);
 
             // Triangle
             command_buffer->CmdBindPipeline(rendering_pipeline);
@@ -513,7 +415,7 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
             command_buffer->CmdDraw(3, 1, 0, 0);
 
-            vk_dynamic_rendering_driver.vkCmdEndRendering(vk_command_buffer);
+            command_buffer->CmdEndRendering();
 
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, current_image_view);
 

@@ -10,6 +10,7 @@
 #include "TPipelineDescriptorSet.h"
 #include "TPipelineLayout.h"
 #include "TRenderPass.h"
+#include "TRenderingPipeline.h"
 #include "TScissor.h"
 #include "TShader.h"
 #include "TSubpass.h"
@@ -166,7 +167,6 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         }
         else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
         {
-
             TFormatDataTypes format_data_types = format_info.GetFormatDataType();
 
             VkClearColorValue vk_clear_color_value = {};
@@ -382,6 +382,201 @@ void Turbo::Core::TCommandBufferBase::CmdEndRenderPass()
     device->GetDeviceDriver()->vkCmdEndRenderPass(this->vkCommandBuffer);
     this->currentPipeline = nullptr;
     this->currentRenderPass = nullptr;
+}
+
+void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().dynamicRendering)
+    {
+        std::vector<VkRenderingAttachmentInfo> color_attachment_infos;
+        for (const Turbo::Core::TRenderingAttachments::TRenderingAttachment &rendering_attach_item : renderingAttachment.colorAttachments)
+        {
+            VkRenderingAttachmentInfo vk_rendering_attachment_info;
+            vk_rendering_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            vk_rendering_attachment_info.pNext = nullptr;
+            vk_rendering_attachment_info.imageView = VK_NULL_HANDLE;
+            vk_rendering_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            if (rendering_attach_item.imageView != nullptr)
+            {
+                vk_rendering_attachment_info.imageView = rendering_attach_item.imageView->GetVkImageView();
+                vk_rendering_attachment_info.imageLayout = static_cast<VkImageLayout>(rendering_attach_item.layout);
+            }
+
+            vk_rendering_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+            vk_rendering_attachment_info.resolveImageView = VK_NULL_HANDLE;
+            vk_rendering_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            if (rendering_attach_item.resolveImageView != nullptr)
+            {
+                vk_rendering_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(rendering_attach_item.resolveModeBits);
+                vk_rendering_attachment_info.resolveImageView = rendering_attach_item.resolveImageView->GetVkImageView();
+                vk_rendering_attachment_info.resolveImageLayout = static_cast<VkImageLayout>(rendering_attach_item.resolveLayout);
+            }
+
+            vk_rendering_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            vk_rendering_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            vk_rendering_attachment_info.clearValue = {};
+            if (rendering_attach_item.imageView != nullptr)
+            {
+                vk_rendering_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(rendering_attach_item.loadOp);
+                vk_rendering_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(rendering_attach_item.storeOp);
+
+                Turbo::Core::TFormatType format_type = rendering_attach_item.imageView->GetFormat().GetFormatType();
+                TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+                TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_type);
+                Turbo::Core::TFormatInfo format_info = physical_device->GetFormatInfo(format_type);
+                TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+
+                VkClearColorValue vk_clear_color_value = {};
+                if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                {
+                    vk_clear_color_value.int32[0] = (int32_t)0;
+                    vk_clear_color_value.int32[1] = (int32_t)0;
+                    vk_clear_color_value.int32[2] = (int32_t)0;
+                    vk_clear_color_value.int32[3] = (int32_t)0;
+                }
+                else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                {
+                    vk_clear_color_value.uint32[0] = (uint32_t)0;
+                    vk_clear_color_value.uint32[1] = (uint32_t)0;
+                    vk_clear_color_value.uint32[2] = (uint32_t)0;
+                    vk_clear_color_value.uint32[3] = (uint32_t)0;
+                }
+                else
+                {
+                    vk_clear_color_value.float32[0] = 0;
+                    vk_clear_color_value.float32[1] = 0;
+                    vk_clear_color_value.float32[2] = 0;
+                    vk_clear_color_value.float32[3] = 0;
+                }
+
+                VkClearValue vk_clear_value = {};
+                vk_clear_value.color = vk_clear_color_value;
+
+                vk_rendering_attachment_info.clearValue = vk_clear_value;
+            }
+
+            color_attachment_infos.push_back(vk_rendering_attachment_info);
+        }
+
+        VkRenderingAttachmentInfo depth_attachment_info = {};
+        depth_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        depth_attachment_info.pNext = nullptr;
+        depth_attachment_info.imageView = VK_NULL_HANDLE;
+        depth_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        if (renderingAttachment.depthAttachment.imageView != nullptr)
+        {
+            depth_attachment_info.imageView = renderingAttachment.depthAttachment.imageView->GetVkImageView();
+            depth_attachment_info.imageLayout = static_cast<VkImageLayout>(renderingAttachment.depthAttachment.layout);
+        }
+        depth_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+        depth_attachment_info.resolveImageView = VK_NULL_HANDLE;
+        depth_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        if (renderingAttachment.depthAttachment.resolveImageView != nullptr)
+        {
+            depth_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(renderingAttachment.depthAttachment.resolveModeBits);
+            depth_attachment_info.resolveImageView = renderingAttachment.depthAttachment.resolveImageView->GetVkImageView();
+            depth_attachment_info.resolveImageLayout = static_cast<VkImageLayout>(renderingAttachment.depthAttachment.resolveLayout);
+        }
+        depth_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depth_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depth_attachment_info.clearValue = {};
+        if (renderingAttachment.depthAttachment.imageView != nullptr)
+        {
+            depth_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(renderingAttachment.depthAttachment.loadOp);
+            depth_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(renderingAttachment.depthAttachment.storeOp);
+            depth_attachment_info.clearValue.depthStencil.depth = 1.0f;
+        }
+
+        VkRenderingAttachmentInfo stencil_attachment_info = {};
+        stencil_attachment_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        stencil_attachment_info.pNext = nullptr;
+        stencil_attachment_info.imageView = VK_NULL_HANDLE;
+        stencil_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        if (renderingAttachment.stencilAttachment.imageView != nullptr)
+        {
+            stencil_attachment_info.imageView = renderingAttachment.stencilAttachment.imageView->GetVkImageView();
+            stencil_attachment_info.imageLayout = static_cast<VkImageLayout>(renderingAttachment.stencilAttachment.layout);
+        }
+        stencil_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
+        stencil_attachment_info.resolveImageView = VK_NULL_HANDLE;
+        stencil_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        if (renderingAttachment.stencilAttachment.resolveImageView != nullptr)
+        {
+            stencil_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(renderingAttachment.stencilAttachment.resolveModeBits);
+            stencil_attachment_info.resolveImageView = renderingAttachment.stencilAttachment.resolveImageView->GetVkImageView();
+            stencil_attachment_info.resolveImageLayout = static_cast<VkImageLayout>(renderingAttachment.stencilAttachment.resolveLayout);
+        }
+        stencil_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        stencil_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        stencil_attachment_info.clearValue = {};
+        if (renderingAttachment.stencilAttachment.imageView != nullptr)
+        {
+            stencil_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(renderingAttachment.stencilAttachment.loadOp);
+            stencil_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(renderingAttachment.stencilAttachment.storeOp);
+            stencil_attachment_info.clearValue.depthStencil.stencil = 0;
+        }
+
+        VkRenderingInfo vk_rendering_info = {};
+        vk_rendering_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDERING_INFO;
+        vk_rendering_info.pNext = nullptr;
+        vk_rendering_info.flags = 0;
+        vk_rendering_info.renderArea.offset.x = offsetX;
+        vk_rendering_info.renderArea.offset.y = offsetY;
+        vk_rendering_info.renderArea.extent.width = width;
+        vk_rendering_info.renderArea.extent.height = height;
+        Turbo::Core::TImage *color_attachment_first_image = nullptr;
+        if (!renderingAttachment.colorAttachments.empty())
+        {
+            if (renderingAttachment.colorAttachments[0].imageView != nullptr)
+            {
+                color_attachment_first_image = renderingAttachment.colorAttachments[0].imageView->GetImage();
+            }
+        }
+        if (width == TURBO_WHOLE_EXTENT)
+        {
+            if (color_attachment_first_image != nullptr)
+            {
+                vk_rendering_info.renderArea.extent.width = color_attachment_first_image->GetWidth();
+            }
+        }
+        if (height == TURBO_WHOLE_EXTENT)
+        {
+            if (color_attachment_first_image != nullptr)
+            {
+                vk_rendering_info.renderArea.extent.height = color_attachment_first_image->GetHeight();
+            }
+        }
+        vk_rendering_info.layerCount = 0;
+        if (color_attachment_first_image != nullptr)
+        {
+            vk_rendering_info.layerCount = color_attachment_first_image->GetArrayLayers();
+        }
+        vk_rendering_info.viewMask = 0;
+        vk_rendering_info.colorAttachmentCount = color_attachment_infos.size();
+        vk_rendering_info.pColorAttachments = color_attachment_infos.data();
+        vk_rendering_info.pDepthAttachment = &depth_attachment_info;
+        vk_rendering_info.pStencilAttachment = &stencil_attachment_info;
+
+        PFN_vkCmdBeginRendering pfn_vkCmdBeginRendering = device->GetDeviceDriver()->vkCmdBeginRendering;
+        if (pfn_vkCmdBeginRendering != nullptr)
+        {
+            pfn_vkCmdBeginRendering(this->vkCommandBuffer, &vk_rendering_info);
+        }
+    }
+}
+
+void Turbo::Core::TCommandBufferBase::CmdEndRendering()
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().dynamicRendering)
+    {
+        PFN_vkCmdEndRendering pfn_vkCmdEndRendering = device->GetDeviceDriver()->vkCmdEndRendering;
+        if (pfn_vkCmdEndRendering != nullptr)
+        {
+            pfn_vkCmdEndRendering(this->vkCommandBuffer);
+        }
+    }
 }
 
 bool Turbo::Core::TCommandBufferBase::End()

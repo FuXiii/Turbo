@@ -226,3 +226,8 @@ add_executable(VulkanDynamicRenderingTest ./VulkanDynamicRenderingTest.cpp ${IMG
 target_include_directories(VulkanDynamicRenderingTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanDynamicRenderingTest PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanDynamicRenderingTest PUBLIC ${LIBS})
+
+add_executable(DynamicRenderingTest ./DynamicRenderingTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(DynamicRenderingTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(DynamicRenderingTest PUBLIC ${LINK_PARTH})
+target_link_libraries(DynamicRenderingTest PUBLIC ${LIBS})

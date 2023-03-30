@@ -2890,3 +2890,31 @@ Turbo是渲染引擎
 * 2023/3/27 设计架构
   >
   >* 完成`./sample`下的`VulkanDynamicRenderingTest`示例
+
+* 2023/3/29 设计架构
+  >
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`重命名为`class TAttachmentsFormat`
+  >* `./engine/core`下`TRenderingPipeline.h`中增加`class TRenderingAttachments`
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`增加`void CmdEndRendering()`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中增加`typedef enum TResolveModeBits`枚举
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`struct TRenderingAttachment`结构体声明
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`std::vector<TRenderingAttachment> colorAttachments`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`TRenderingAttachment depthAttachment`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`TRenderingAttachment stencilAttachment`成员变量
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void AddColorAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void AddColorAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetDepthAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetDepthAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`void SetStencilAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)`成员函数
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/3/30 设计架构
+  >
+  >* `./engine/core`下`TRenderingPipeline.h`中`class TRenderingAttachments`中增加`friend class TCommandBufferBase`友元类声明，使得在`TCommandBufferBase`中记录指令时能够访问到对应数据
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`完善实现`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`完善实现`void CmdEndRendering()`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`中`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数增加形参为`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)`
+  >* `./samples`中增加`DynamicRenderingTest`例子，用于测试`Turbo`封装的`Vulkan1.3`中`Dynamic Rendering`特性
+
