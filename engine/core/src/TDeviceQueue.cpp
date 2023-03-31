@@ -54,6 +54,7 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
     this->device->GetDeviceDriver()->vkGetDeviceQueue(vk_device, queue_family_index, this->index, &this->vkQueue);
 
     // TODO: load vkQueuePresentKHR function
+    // FIXME: If not enable swapchain extension we can not load this function
     this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
 
     for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
@@ -88,7 +89,7 @@ Turbo::Core::TDeviceQueue::TDeviceQueue(TDevice *device, TQueueFamilyInfo &queue
 
             this->device->InternalRebuild();
 
-            //更新TPhysicalDevice下的可用queue的数量
+            // 更新TPhysicalDevice下的可用queue的数量
             device->physicalDevice->AvailableQueueCountMinusOneByQueueFamilyIndex(this->queueFamily.GetIndex());
         }
         else

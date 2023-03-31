@@ -2,6 +2,7 @@
 
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
+#include <vulkan/vulkan_win32.h>
 #endif
 
 #include <assert.h>
@@ -19,6 +20,9 @@ PFN_vkDestroyDevice vk_DestroyDevice = nullptr;
 PFN_vkGetDeviceProcAddr vk_GetDeviceProcAddr = nullptr;
 PFN_vkCreatePipelineLayout vk_CreatePipelineLayout = nullptr;
 PFN_vkDestroyPipelineLayout vk_DestroyPipelineLayout = nullptr;
+PFN_vkGetDeviceQueue vk_GetDeviceQueue = nullptr;
+PFN_vkGetPhysicalDeviceQueueFamilyProperties vk_GetPhysicalDeviceQueueFamilyProperties = nullptr;
+PFN_vkQueuePresentKHR vk_QueuePresentKHR = nullptr;
 
 void *VKAPI_PTR Allocation(void *pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
@@ -59,15 +63,27 @@ int main()
     vk_application_info.engineVersion = 0;
     vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
 
+    std::vector<std::string> enable_instance_layers;
+    enable_instance_layers.push_back("VK_LAYER_KHRONOS_validation");
+    std::vector<const char *> instance_enabled_layer_names;
+    instance_enabled_layer_names.push_back(enable_instance_layers[0].c_str());
+
+    std::vector<std::string> enable_instance_extensions;
+    enable_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    enable_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+    std::vector<const char *> instance_enabled_extension_names;
+    instance_enabled_extension_names.push_back(enable_instance_extensions[0].c_str());
+    instance_enabled_extension_names.push_back(enable_instance_extensions[1].c_str());
+
     VkInstanceCreateInfo vk_instance_create_info = {};
     vk_instance_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     vk_instance_create_info.pNext = nullptr;
     vk_instance_create_info.flags = 0;
     vk_instance_create_info.pApplicationInfo = &vk_application_info;
-    vk_instance_create_info.enabledLayerCount = 0;
-    vk_instance_create_info.ppEnabledLayerNames = nullptr;
-    vk_instance_create_info.enabledExtensionCount = 0;
-    vk_instance_create_info.ppEnabledExtensionNames = nullptr;
+    vk_instance_create_info.enabledLayerCount = instance_enabled_layer_names.size();
+    vk_instance_create_info.ppEnabledLayerNames = instance_enabled_layer_names.data();
+    vk_instance_create_info.enabledExtensionCount = instance_enabled_extension_names.size();
+    vk_instance_create_info.ppEnabledExtensionNames = instance_enabled_extension_names.data();
 
     VkAllocationCallbacks vk_allocation_callbacks = {};
     vk_allocation_callbacks.pUserData = nullptr;
@@ -103,6 +119,9 @@ int main()
     vk_GetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)vk_GetInstanceProcAddr(instance, "vkGetDeviceProcAddr");
     assert(vk_GetDeviceProcAddr && "vkGetDeviceProcAddr");
 
+    vk_GetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vk_GetInstanceProcAddr(instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+    assert(vk_GetPhysicalDeviceQueueFamilyProperties && "vkGetPhysicalDeviceQueueFamilyProperties");
+
     uint32_t physcial_device_count = 0;
     result = vk_EnumeratePhysicalDevices(instance, &physcial_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS)
@@ -118,6 +137,7 @@ int main()
     }
 
     VkPhysicalDevice target_physical_device = VK_NULL_HANDLE;
+    std::string target_physical_device_name;
     for (VkPhysicalDevice physcail_devices_item : physcail_devices)
     {
         VkPhysicalDeviceProperties vk_physical_device_properties = {};
@@ -126,11 +146,13 @@ int main()
         if (vk_physical_device_properties.deviceType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
         {
             target_physical_device = physcail_devices_item;
+            target_physical_device_name = std::string(vk_physical_device_properties.deviceName);
             break;
         }
         else if (vk_physical_device_properties.deviceType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
         {
             target_physical_device = physcail_devices_item;
+            target_physical_device_name = std::string(vk_physical_device_properties.deviceName);
         }
     }
 
@@ -138,17 +160,46 @@ int main()
     {
         throw std::exception("Not found suitable GPU");
     }
+    std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
+
+    uint32_t queue_family_count = 0;
+    vk_GetPhysicalDeviceQueueFamilyProperties(target_physical_device, &queue_family_count, nullptr);
+    std::vector<VkQueueFamilyProperties> vk_queue_family_properties(queue_family_count);
+    vk_GetPhysicalDeviceQueueFamilyProperties(target_physical_device, &queue_family_count, vk_queue_family_properties.data());
+
+    std::vector<VkDeviceQueueCreateInfo> vk_device_queue_create_infos;
+    float queue_prioritie = 0;
+    for (uint32_t queue_family_index = 0; queue_family_index < vk_queue_family_properties.size(); queue_family_index++)
+    {
+        if (vk_queue_family_properties[queue_family_index].queueCount > 0)
+        {
+            VkDeviceQueueCreateInfo vk_device_queue_create_info = {};
+            vk_device_queue_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            vk_device_queue_create_info.pNext = nullptr;
+            vk_device_queue_create_info.flags = 0;
+            vk_device_queue_create_info.queueFamilyIndex = queue_family_index;
+            vk_device_queue_create_info.queueCount = 1;
+            vk_device_queue_create_info.pQueuePriorities = &queue_prioritie;
+
+            vk_device_queue_create_infos.push_back(vk_device_queue_create_info);
+        }
+    }
+
+    std::vector<std::string> enable_device_extensions;
+    enable_device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    std::vector<const char *> device_enabled_extension_names;
+    device_enabled_extension_names.push_back(enable_device_extensions[0].c_str());
 
     VkDeviceCreateInfo vk_device_create_info = {};
     vk_device_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     vk_device_create_info.pNext = nullptr;
     vk_device_create_info.flags = 0;
-    vk_device_create_info.queueCreateInfoCount = 0;
-    vk_device_create_info.pQueueCreateInfos = nullptr;
+    vk_device_create_info.queueCreateInfoCount = vk_device_queue_create_infos.size();
+    vk_device_create_info.pQueueCreateInfos = vk_device_queue_create_infos.data();
     vk_device_create_info.enabledLayerCount = 0;
     vk_device_create_info.ppEnabledLayerNames = nullptr;
-    vk_device_create_info.enabledExtensionCount = 0;
-    vk_device_create_info.ppEnabledExtensionNames = nullptr;
+    vk_device_create_info.enabledExtensionCount = device_enabled_extension_names.size();
+    vk_device_create_info.ppEnabledExtensionNames = device_enabled_extension_names.data();
     vk_device_create_info.pEnabledFeatures = nullptr;
 
     VkDevice vk_device = VK_NULL_HANDLE;
@@ -159,11 +210,25 @@ int main()
     }
     std::cout << "vkCreateDevice success" << std::endl;
 
+    vk_GetDeviceQueue = (PFN_vkGetDeviceQueue)vk_GetDeviceProcAddr(vk_device, "vkGetDeviceQueue");
+    assert(vk_GetDeviceQueue && "vkGetDeviceQueue");
+
     vk_CreatePipelineLayout = (PFN_vkCreatePipelineLayout)vk_GetDeviceProcAddr(vk_device, "vkCreatePipelineLayout");
     assert(vk_CreatePipelineLayout && "vkCreatePipelineLayout");
 
     vk_DestroyPipelineLayout = (PFN_vkDestroyPipelineLayout)vk_GetDeviceProcAddr(vk_device, "vkDestroyPipelineLayout");
     assert(vk_DestroyPipelineLayout && "vkDestroyPipelineLayout");
+
+    vk_QueuePresentKHR = (PFN_vkQueuePresentKHR)vk_GetDeviceProcAddr(vk_device, "vkQueuePresentKHR");
+    assert(vk_QueuePresentKHR && "vkQueuePresentKHR");
+
+    std::vector<VkQueue> vk_queues;
+    for (VkDeviceQueueCreateInfo &vk_device_queue_create_info_item : vk_device_queue_create_infos)
+    {
+        VkQueue vk_queue = VK_NULL_HANDLE;
+        vk_GetDeviceQueue(vk_device, vk_device_queue_create_info_item.queueFamilyIndex, 0, &vk_queue);
+        vk_queues.push_back(vk_queue);
+    }
 
     uint32_t index = 0;
     uint32_t loop_count = UINT32_MAX;
