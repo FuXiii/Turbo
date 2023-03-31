@@ -169,7 +169,7 @@ int main()
 
     std::vector<VkDeviceQueueCreateInfo> vk_device_queue_create_infos;
     float queue_prioritie = 0;
-    for (uint32_t queue_family_index = 0; queue_family_index < vk_queue_family_properties.size(); queue_family_index++)
+    for (uint32_t queue_family_index = 0; queue_family_index < queue_family_count; queue_family_index++)
     {
         if (vk_queue_family_properties[queue_family_index].queueCount > 0)
         {
