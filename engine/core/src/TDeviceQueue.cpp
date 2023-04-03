@@ -56,7 +56,14 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
     // TODO: load vkQueuePresentKHR function
     // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
     // FIXME: vkQueuePresentKHR
-    this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
+    if (this->device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+    {
+        this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Core::TDeviceQueue::InternalCreate()", "Please enable the VK_KHR_swapchain extension");
+    }
 
     for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
     {
