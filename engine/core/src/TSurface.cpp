@@ -224,7 +224,6 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
         // FIXME: vkGetPhysicalDeviceSurfaceFormatsKHR
         // FIXME: vkGetPhysicalDeviceSurfacePresentModesKHR
         this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
-
         this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
         this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
         this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
@@ -254,10 +253,20 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *d
         this->waylandSurface = surface;
 
         Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+
+        // FIXME: If instance not enable VK_KHR_wayland_surface extension we can not load:
+        // FIXME: vkCreateWaylandSurfaceKHR
+        // FIXME: vkGetPhysicalDeviceWaylandPresentationSupportKHR
         this->vkCreateWaylandSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateWaylandSurfaceKHR>(instance, "vkCreateWaylandSurfaceKHR");
-        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceWaylandPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR>(instance, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
 
+        // FIXME: If instance not enable VK_KHR_surface extension we can not load:
+        // FIXME: vkDestroySurfaceKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceSupportKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceFormatsKHR
+        // FIXME: vkGetPhysicalDeviceSurfacePresentModesKHR
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
         this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
         this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
@@ -281,10 +290,20 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connectio
         this->xcbWindow = window;
 
         Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+
+        // FIXME: If instance not enable VK_KHR_xcb_surface extension we can not load:
+        // FIXME: vkCreateXcbSurfaceKHR
+        // FIXME: vkGetPhysicalDeviceXcbPresentationSupportKHR
         this->vkCreateXcbSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateXcbSurfaceKHR>(instance, "vkCreateXcbSurfaceKHR");
-        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceXcbPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR>(instance, "vkGetPhysicalDeviceXcbPresentationSupportKHR");
 
+        // FIXME: If instance not enable VK_KHR_surface extension we can not load:
+        // FIXME: vkDestroySurfaceKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceSupportKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceFormatsKHR
+        // FIXME: vkGetPhysicalDeviceSurfacePresentModesKHR
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
         this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
         this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
@@ -308,10 +327,20 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, Display *dpy,
         this->xlibWindow = window;
 
         Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+
+        // FIXME: If instance not enable VK_KHR_xlib_surface extension we can not load:
+        // FIXME: vkCreateXlibSurfaceKHR
+        // FIXME: vkGetPhysicalDeviceXlibPresentationSupportKHR
         this->vkCreateXlibSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateXlibSurfaceKHR>(instance, "vkCreateXlibSurfaceKHR");
-        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceXlibPresentationSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR>(instance, "vkGetPhysicalDeviceXlibPresentationSupportKHR");
 
+        // FIXME: If instance not enable VK_KHR_surface extension we can not load:
+        // FIXME: vkDestroySurfaceKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceSupportKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceFormatsKHR
+        // FIXME: vkGetPhysicalDeviceSurfacePresentModesKHR
+        this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
         this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
         this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
         this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
@@ -341,6 +370,12 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR 
         this->vkSurfaceKHR = vkSurfaceKHR;
 
         Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        // FIXME: If instance not enable VK_KHR_surface extension we can not load:
+        // FIXME: vkDestroySurfaceKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceSupportKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+        // FIXME: vkGetPhysicalDeviceSurfaceFormatsKHR
+        // FIXME: vkGetPhysicalDeviceSurfacePresentModesKHR
         this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
         this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
         this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");

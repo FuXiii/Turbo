@@ -169,6 +169,12 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     if (surface != nullptr)
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
+
+        // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
+        // FIXME: vkCreateSwapchainKHR
+        // FIXME: vkDestroySwapchainKHR
+        // FIXME: vkGetSwapchainImagesKHR
+        // FIXME: vkAcquireNextImageKHR
         this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
         this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
         this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
@@ -200,6 +206,11 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     if (surface != nullptr)
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
+        // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
+        // FIXME: vkCreateSwapchainKHR
+        // FIXME: vkDestroySwapchainKHR
+        // FIXME: vkGetSwapchainImagesKHR
+        // FIXME: vkAcquireNextImageKHR
         this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
         this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
         this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
@@ -271,6 +282,11 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
             throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
         }
 
+        // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
+        // FIXME: vkCreateSwapchainKHR
+        // FIXME: vkDestroySwapchainKHR
+        // FIXME: vkGetSwapchainImagesKHR
+        // FIXME: vkAcquireNextImageKHR
         this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
         this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
         this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
@@ -317,6 +333,11 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
             throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
         }
 
+        // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
+        // FIXME: vkCreateSwapchainKHR
+        // FIXME: vkDestroySwapchainKHR
+        // FIXME: vkGetSwapchainImagesKHR
+        // FIXME: vkAcquireNextImageKHR
         this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
         this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
         this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
@@ -371,6 +392,11 @@ Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
     if (oldSwapchain != nullptr)
     {
         Turbo::Core::TDevice *device = oldSwapchain->GetSurface()->GetDevice();
+        // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
+        // FIXME: vkCreateSwapchainKHR
+        // FIXME: vkDestroySwapchainKHR
+        // FIXME: vkGetSwapchainImagesKHR
+        // FIXME: vkAcquireNextImageKHR
         this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
         this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
         this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
