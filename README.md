@@ -2918,3 +2918,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`中`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数增加形参为`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)`
   >* `./samples`中增加`DynamicRenderingTest`例子，用于测试`Turbo`封装的`Vulkan1.3`中`Dynamic Rendering`特性
 
+* 2023/4/3 设计架构
+  >
+  >* `./engine/core`下`TSurface`构造函数中增加对于`Surface`扩展是否已经激活的判断
+  >* `./engine/core`下`TSwapchain`构造函数中增加对于`Swapchain`扩展是否已经激活的判断
+
