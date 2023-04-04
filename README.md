@@ -2926,3 +2926,4 @@ Turbo是渲染引擎
 * 2023/4/4 设计架构
   >
   >* `./asset/images`下增加`RockCliffLayered`文件夹，用于存储`RockCliffLayered`的`PBR`纹理
+  >* `./samples`中增加`NormalTexture`例子，用于尝试使用法线纹理获得切线空间的法线
