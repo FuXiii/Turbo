@@ -2923,3 +2923,6 @@ Turbo是渲染引擎
   >* `./engine/core`下`TSurface`构造函数中增加对于`Surface`扩展是否已经激活的判断
   >* `./engine/core`下`TSwapchain`构造函数中增加对于`Swapchain`扩展是否已经激活的判断
 
+* 2023/4/4 设计架构
+  >
+  >* `./asset/images`下增加`RockCliffLayered`文件夹，用于存储`RockCliffLayered`的`PBR`纹理
