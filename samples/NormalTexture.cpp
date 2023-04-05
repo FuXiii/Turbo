@@ -89,6 +89,14 @@ typedef struct NORMAL
     float z;
 } NORMAL;
 
+typedef struct TANGENT
+{
+    float x;
+    float y;
+    float z;
+    float w;
+} TANGENT;
+
 typedef struct TEXCOORD
 {
     float u;
@@ -134,6 +142,7 @@ int main()
     std::vector<POSITION> POSITION_data;
     std::vector<NORMAL> NORMAL_data;
     std::vector<TEXCOORD> TEXCOORD_data;
+    std::vector<TANGENT> TANGENT_data;
     std::vector<uint32_t> INDICES_data;
     {
         tinygltf::Model model;
@@ -141,25 +150,29 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        // bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "C:/Users/g1018/Desktop/material_sphere.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
         tinygltf::Primitive &primitive = mesh.primitives[0];
-        int mode = primitive.mode;                                          // 4 is triangle
-        int position_accesser_index = primitive.attributes["POSITION"];     // 0
-        int normal_accesser_index = primitive.attributes["NORMAL"];         // 1
-        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"]; // 2
-        int indices_accesser_index = primitive.indices;                     // 3
+        int mode = primitive.mode;
+        int position_accesser_index = primitive.attributes["POSITION"];
+        int normal_accesser_index = primitive.attributes["NORMAL"];
+        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
+        int tangent_accesser_index = primitive.attributes["TANGENT"];
+        int indices_accesser_index = primitive.indices;
         tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
         tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
         tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
         tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
+        tinygltf::Accessor &tangent_accessor = model.accessors[tangent_accesser_index];
 
         tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
         tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
         tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
         tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
+        tinygltf::BufferView &tangent_buffer_view = model.bufferViews[tangent_accessor.bufferView];
 
         int position_buffer_index = position_buffer_view.buffer;
         size_t position_buffer_byteLength = position_buffer_view.byteLength;
@@ -181,15 +194,22 @@ int main()
         int indices_buffer_byteOffset = indices_buffer_view.byteOffset;
         int indices_type = indices_accessor.type;
 
+        int tangent_buffer_index = tangent_buffer_view.buffer;
+        size_t tangent_buffer_byteLength = tangent_buffer_view.byteLength;
+        int tangent_buffer_byteOffset = tangent_buffer_view.byteOffset;
+        int tangent_type = tangent_accessor.type;
+
         tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
         tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
         tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
         tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
+        tinygltf::Buffer &tangent_buffer = model.buffers[tangent_buffer_index];
 
         std::vector<unsigned char> &position_data = position_buffer.data;
         std::vector<unsigned char> &normal_data = normal_buffer.data;
         std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
         std::vector<unsigned char> &indices_data = indices_buffer.data;
+        std::vector<unsigned char> &tangent_data = tangent_buffer.data;
 
         std::vector<unsigned short> temp_indices_data;
 
@@ -197,11 +217,13 @@ int main()
         NORMAL_data.resize(normal_buffer_byteLength / sizeof(NORMAL));
         TEXCOORD_data.resize(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
         temp_indices_data.resize(indices_buffer_byteLength / sizeof(unsigned short));
+        TANGENT_data.resize(tangent_buffer_byteLength / sizeof(TANGENT));
 
         memcpy(POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
         memcpy(NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
         memcpy(TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
         memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
+        memcpy(TANGENT_data.data(), tangent_data.data() + tangent_buffer_byteOffset, tangent_buffer_byteLength);
 
         for (unsigned short &temp_indices_item : temp_indices_data)
         {
@@ -354,10 +376,16 @@ int main()
     index_buffer->Unmap();
     INDICES_data.clear();
 
+    Turbo::Core::TBuffer *tangent_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TANGENT) * TANGENT_data.size());
+    void *tangent_buffer_ptr = tangent_buffer->Map();
+    memcpy(tangent_buffer_ptr, TANGENT_data.data(), sizeof(TANGENT) * TANGENT_data.size());
+    tangent_buffer->Unmap();
+    TANGENT_data.clear();
+
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = "../../asset/images/RockCliffLayered/normal.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -470,11 +498,14 @@ int main()
     normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
     Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
     texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    Turbo::Core::TVertexBinding tangent_binding(3, sizeof(TANGENT), Turbo::Core::TVertexRate::VERTEX);
+    tangent_binding.AddAttribute(3, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0); // tangent
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
     vertex_bindings.push_back(position_binding);
     vertex_bindings.push_back(normal_binding);
     vertex_bindings.push_back(texcoord_binding);
+    vertex_bindings.push_back(tangent_binding);
 
     Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
     Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
@@ -501,6 +532,7 @@ int main()
     vertex_buffers.push_back(position_buffer);
     vertex_buffers.push_back(normal_buffer);
     vertex_buffers.push_back(texcoord_buffer);
+    vertex_buffers.push_back(tangent_buffer);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -578,15 +610,15 @@ int main()
     Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
     //</IMGUI>
 
-    glm::vec3 camera_position = glm::vec3(-1.0828, -1.73026, 2.79357);
+    glm::vec3 camera_position = glm::vec3(1.00025, -1.50862, -2.52088);
 
-    float horizontal_angle = 201.2;
-    float vertical_angle = 29.4;
+    float horizontal_angle = 383.2;
+    float vertical_angle = 28;
 
     glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
     glm::vec2 current_mouse_pos = glm::vec2(0, 0);
 
-    float angle = 180;
+    float angle = 0;
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -1152,6 +1184,7 @@ int main()
     }
     delete index_buffer;
     delete position_buffer;
+    delete tangent_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
     delete my_buffer;
