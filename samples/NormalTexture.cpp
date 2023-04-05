@@ -46,7 +46,7 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include <tiny_gltf.h>
 
-#include <ktx.h>
+#include <ktxvulkan.h>
 
 #include <imgui.h>
 
@@ -123,7 +123,7 @@ int main()
     // float value = -10.0f;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.value = -5;
+    my_buffer_data.value = 1;
     my_buffer_data.camPos.x = 0;
     my_buffer_data.camPos.y = 0;
     my_buffer_data.camPos.z = 0;
@@ -357,13 +357,12 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
 
         ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
-
         if (ktx_texture == nullptr)
         {
             throw std::runtime_error("Couldn't load texture");
@@ -372,6 +371,7 @@ int main()
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+        VkFormat ktx_texture_vkFormat = ktxTexture_GetVkFormat(ktx_texture);
 
         ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
         ktx_size_t ktx_texture_size = ktx_texture->dataSize;
@@ -381,7 +381,7 @@ int main()
         memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
         ktx_staging_buffer->Unmap();
 
-        ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+        ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, (Turbo::Core::TFormatType)ktx_texture_vkFormat /*R8G8B8A8_UNORM*/, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
 
         Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
         ktx_command_buffer->Begin();
@@ -774,8 +774,8 @@ int main()
                 ImGui::Begin("NormalTexture");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                   // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("angle", &angle, 0.0f, 360);           // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
