@@ -817,6 +817,10 @@ void Test7(Turbo::Core::TDeviceQueue *deviceQueue)
     VkDevice vk_device = device->GetVkDevice();
     VkQueue vk_queue = deviceQueue->GetVkQueue();
 
+    PFN_vkCreatePipelineLayout _vkCreatePipelineLayout = (PFN_vkCreatePipelineLayout)Turbo::Core::vkGetDeviceProcAddr(vk_device, "vkCreatePipelineLayout");
+    PFN_vkDestroyPipelineLayout _vkDestroyPipelineLayout = (PFN_vkDestroyPipelineLayout)Turbo::Core::vkGetDeviceProcAddr(vk_device, "vkDestroyPipelineLayout");
+    std::cout << physical_device->GetDeviceName() << std::endl;
+
     uint32_t create_count = UINT32_MAX;
     for (uint32_t index = 0; index < create_count; index++)
     {
@@ -830,17 +834,16 @@ void Test7(Turbo::Core::TDeviceQueue *deviceQueue)
         vk_pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
         VkPipelineLayout vk_pipeline_layout = VK_NULL_HANDLE;
-        VkResult result = device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
-        if (result == VkResult::VK_SUCCESS)
+        // VkResult result = device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
+        VkResult result = _vkCreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
+        if (result != VkResult::VK_SUCCESS)
         {
-            device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
-            std::cout << index << std::endl;
-        }
-        else
-        {
-            PAUSE("vkCreatePipelineLayout failed!!!");
+            throw std::exception("vkCreatePipelineLayout failed");
             return;
         }
+        // device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
+        _vkDestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
+        std::cout << index << std::endl;
     }
 }
 
@@ -922,7 +925,7 @@ int main()
 
     Turbo::Core::TPhysicalDeviceFeatures device_support_feature = physical_device->GetDeviceFeatures();
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
-    //physical_device_features.dynamicRendering = device_support_feature.dynamicRendering;
+    // physical_device_features.dynamicRendering = device_support_feature.dynamicRendering;
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
@@ -935,8 +938,8 @@ int main()
     // Test5(queue);
     // Test6(queue);
 
-    // Test7(queue);
-    Test8(queue);
+    Test7(queue);
+    // Test8(queue);
 
     delete device;
     delete instance;
