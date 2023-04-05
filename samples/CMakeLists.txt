@@ -236,3 +236,8 @@ add_executable(NormalTexture ./NormalTexture.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(NormalTexture PUBLIC ${INCLUDE_PARTH})
 target_link_directories(NormalTexture PUBLIC ${LINK_PARTH})
 target_link_libraries(NormalTexture PUBLIC ${LIBS})
+
+add_executable(BRDF ./BRDF.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(BRDF PUBLIC ${INCLUDE_PARTH})
+target_link_directories(BRDF PUBLIC ${LINK_PARTH})
+target_link_libraries(BRDF PUBLIC ${LIBS})

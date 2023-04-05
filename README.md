@@ -2931,3 +2931,4 @@ Turbo是渲染引擎
 * 2023/4/5 设计架构
   >
   >* `./samples`中更新完善`NormalTexture`例子
+  >* `./samples`中增加`BRDF`例子，用于尝试实现常见的`PBR`纹理流程渲染
