@@ -16,14 +16,15 @@ Matrixs;
 layout(location = 0) out vec3 position;
 layout(location = 1) out vec3 normal;
 layout(location = 2) out vec2 uv;
-layout(location = 3) out vec3 tangent;
+layout(location = 3) out mat3 TBN;
 
 void main()
 {
     gl_Position = Matrixs.p * Matrixs.v * Matrixs.m * vec4(POSITION, 1.0);
-    position =  (Matrixs.m * vec4(POSITION, 1.0)).xyz;
+    position = (Matrixs.m * vec4(POSITION, 1.0)).xyz;
     normal = normalize((Matrixs.m * vec4(NORMAL, 0.0)).xyz);
-    //tangent = normalize((Matrixs.m * vec4(TANGENT.xyz, 0.0)).xyz);
-    tangent = normalize((Matrixs.m * TANGENT).xyz);
+    vec3 tangent = normalize((Matrixs.m * vec4(TANGENT.xyz, 0.0)).xyz);
+    vec3 bitangent = normalize(cross(tangent, normal));
+    TBN = mat3(tangent, bitangent, normal);
     uv = UV;
 }
