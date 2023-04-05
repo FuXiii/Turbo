@@ -28,6 +28,9 @@ void main()
     vec3 n = normalize(normal_color * 2 - 1);
     n = normalize(TBN * n);
     vec3 diffuse = albedo_color * max(dot(n, -l), 0);
-    vec3 ambient = vec3(0., 0., 0.);
-    outColor = MyBuffer.value * vec4(ambient + diffuse, 1.0);
+    vec3 ambient = vec3(0.0, 0.0, 0.0);
+
+    vec3 color = MyBuffer.value * (ambient + diffuse);
+    color = pow(color * .4, vec3(1. / 2.2));
+    outColor = vec4(color, 1.0);
 }

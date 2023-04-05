@@ -24,7 +24,7 @@ void main()
     position = (Matrixs.m * vec4(POSITION, 1.0)).xyz;
     normal = normalize((Matrixs.m * vec4(NORMAL, 0.0)).xyz);
     vec3 tangent = normalize((Matrixs.m * vec4(TANGENT.xyz, 0.0)).xyz);
-    vec3 bitangent = normalize(cross(tangent, normal));
+    vec3 bitangent = normalize(cross(normal, tangent));
     TBN = mat3(tangent, bitangent, normal);
     uv = UV;
 }
