@@ -124,6 +124,9 @@ int main()
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.value = -5;
+    my_buffer_data.camPos.x = 0;
+    my_buffer_data.camPos.y = 0;
+    my_buffer_data.camPos.z = 0;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -322,10 +325,10 @@ int main()
     memcpy(mvp_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
     matrixs_buffer->Unmap();
 
-    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    void *value_ptr = value_buffer->Map();
-    memcpy(value_ptr, &my_buffer_data, sizeof(my_buffer_data));
-    value_buffer->Unmap();
+    Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    void *my_buffer_ptr = my_buffer->Map();
+    memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
+    my_buffer->Unmap();
 
     Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
     void *position_buffer_ptr = position_buffer->Map();
@@ -435,7 +438,7 @@ int main()
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     std::vector<Turbo::Core::TBuffer *> buffers;
-    buffers.push_back(value_buffer);
+    buffers.push_back(my_buffer);
 
     std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
     matrixs_buffers.push_back(matrixs_buffer);
@@ -445,7 +448,7 @@ int main()
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
     Turbo::Core::TSubpass subpass1(Turbo::Core::TPipelineType::Graphics);
-    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL); // swapchain color image
+    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);               // swapchain color image
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
     std::vector<Turbo::Core::TSubpass> subpasses;
@@ -490,8 +493,9 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    pipeline_descriptor_set->BindData(1, 0, 0, my_textures);
-    pipeline_descriptor_set->BindData(1, 1, 0, my_samples);
+    pipeline_descriptor_set->BindData(0, 1, 0, my_textures);
+    pipeline_descriptor_set->BindData(0, 2, 0, my_samples);
+    pipeline_descriptor_set->BindData(0, 3, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -574,8 +578,13 @@ int main()
     Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
     //</IMGUI>
 
-    bool show_demo_window = true;
-    bool is_shouw_depth = false;
+    glm::vec3 camera_position = glm::vec3(-1.0828, -1.73026, 2.79357);
+
+    float horizontal_angle = 201.2;
+    float vertical_angle = 29.4;
+
+    glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
+    glm::vec2 current_mouse_pos = glm::vec2(0, 0);
 
     float angle = 180;
     float _time = glfwGetTime();
@@ -583,26 +592,13 @@ int main()
     {
         glfwPollEvents();
 
-        my_buffer_data.camPos.x = 0;
-        my_buffer_data.camPos.y = 0;
-        my_buffer_data.camPos.z = -my_buffer_data.value;
+        my_buffer_data.camPos.x = camera_position.x;
+        my_buffer_data.camPos.y = camera_position.y;
+        my_buffer_data.camPos.z = camera_position.z;
 
-        void *_ptr = value_buffer->Map();
+        void *_ptr = my_buffer->Map();
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
-        value_buffer->Unmap();
-
-        model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, my_buffer_data.value));
-        projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
-
-        matrixs_buffer_data.m = model;
-        matrixs_buffer_data.v = view;
-        matrixs_buffer_data.p = projection;
-
-        _ptr = matrixs_buffer->Map();
-        memcpy(_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
-        matrixs_buffer->Unmap();
+        my_buffer->Unmap();
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
@@ -682,26 +678,104 @@ int main()
                 }
             }
 
+            // UpdateKeyboard
+            {
+                ImVec2 mouse_pos = io.MousePos;
+                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
+                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
+                previous_mouse_pos = current_mouse_pos;
+                mouse_pos_delte.y = mouse_pos_delte.y;
+
+                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+                if (state == GLFW_PRESS)
+                {
+                    horizontal_angle += mouse_pos_delte.x * 0.2;
+                    vertical_angle += mouse_pos_delte.y * 0.2;
+
+                    if (vertical_angle > 90)
+                    {
+                        vertical_angle = 90;
+                    }
+
+                    if (vertical_angle < -90)
+                    {
+                        vertical_angle = -90;
+                    }
+                }
+
+                float delte_time = io.DeltaTime;
+                float speed = 1;
+
+                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
+                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
+
+                glm::vec3 look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
+                look_forward = glm::normalize(look_forward);
+
+                glm::vec3 forward_dir = look_forward;                  // 向前向量
+                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
+                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
+                up_dir = glm::cross(right_dir, forward_dir);
+
+                right_dir = glm::normalize(right_dir);
+                up_dir = glm::normalize(up_dir);
+
+                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
+                if (key_W_state == GLFW_PRESS)
+                {
+                    // TODO: 向前
+                    camera_position += forward_dir * speed * delte_time;
+                }
+
+                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
+                if (key_A_state == GLFW_PRESS)
+                {
+                    // TODO: 向左
+                    camera_position += -right_dir * speed * delte_time;
+                }
+
+                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
+                if (key_S_state == GLFW_PRESS)
+                {
+                    // TODO: 向后
+                    camera_position += -forward_dir * speed * delte_time;
+                }
+
+                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
+                if (key_D_state == GLFW_PRESS)
+                {
+                    // TODO: 向右
+                    camera_position += right_dir * speed * delte_time;
+                }
+
+                model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+
+                glm::vec3 look_point = camera_position + forward_dir;
+                view = glm::lookAt(camera_position, look_point, up_dir);
+                projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
+
+                matrixs_buffer_data.m = model;
+                matrixs_buffer_data.v = view;
+                matrixs_buffer_data.p = projection;
+
+                _ptr = matrixs_buffer->Map();
+                memcpy(_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
+                matrixs_buffer->Unmap();
+            }
+
             ImGui::NewFrame();
 
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-                ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-                ImGui::Checkbox("Is show depth", &is_shouw_depth);
-
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                               // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-
-                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-                    counter++;
-                ImGui::SameLine();
-                ImGui::Text("counter = %d", counter);
-
+                ImGui::Begin("NormalTexture");
+                ImGui::Text("W,A,S,D to move.");
+                ImGui::Text("Push down and drag mouse right button to rotate view.");
+                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                   // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1080,7 +1154,7 @@ int main()
     delete position_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
-    delete value_buffer;
+    delete my_buffer;
     delete matrixs_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;
