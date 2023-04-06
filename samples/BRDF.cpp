@@ -383,10 +383,12 @@ int main()
     tangent_buffer->Unmap();
     TANGENT_data.clear();
 
+    std::string pbr_texture_prefix_path = "../../asset/images/RockCliffLayered/";
+
     Turbo::Core::TImage *albedo_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = pbr_texture_prefix_path + "albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -444,7 +446,7 @@ int main()
     Turbo::Core::TImage *roughness_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/roughness.ktx";
+        std::string ktx_filename = pbr_texture_prefix_path + "roughness.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -502,7 +504,7 @@ int main()
     Turbo::Core::TImage *normal_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/normal.ktx";
+        std::string ktx_filename = pbr_texture_prefix_path + "normal.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;

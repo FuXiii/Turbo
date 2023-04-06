@@ -20,37 +20,24 @@ layout(set = 0, binding = 5) uniform MYBUFFER
 MyBuffer;
 layout(location = 0) out vec4 outColor;
 
-#define MEDIUMP_FLT_MAX 65504.0
-#define saturateMediump(x) min(x, MEDIUMP_FLT_MAX)
-
-float D_GGX(const vec3 n, const vec3 h, float roughness)
+float D_GGX(float NoH, float roughness)
 {
-    vec3 NxH = cross(n, h);
-    float a = dot(n, h) * roughness;
-    float k = roughness / (dot(NxH, NxH) + a * a);
-    float d = k * k * (1.0 / PI);
-    return saturateMediump(d);
+    float a = NoH * roughness;
+    float k = roughness / (1.0 - NoH * NoH + a * a);
+    return k * k * (1.0 / PI);
+}
+
+vec3 F_Schlick(float VoH, vec3 f0)
+{
+    return f0 + (vec3(1.0) - f0) * pow(1.0 - VoH, 5.0);
 }
 
 float V_SmithGGXCorrelated(float NoV, float NoL, float roughness)
 {
     float a2 = roughness * roughness;
-    float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
-    float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
+    float GGXL = NoV * sqrt((-NoL * a2 + NoL) * NoL + a2);
+    float GGXV = NoL * sqrt((-NoV * a2 + NoV) * NoV + a2);
     return 0.5 / (GGXV + GGXL);
-}
-
-float V_SmithGGXCorrelatedFast(float NoV, float NoL, float roughness)
-{
-    float a = roughness;
-    float GGXV = NoL * (NoV * (1.0 - a) + a);
-    float GGXL = NoV * (NoL * (1.0 - a) + a);
-    return 0.5 / (GGXV + GGXL);
-}
-
-vec3 F_Schlick(float VoH, vec3 f0, vec3 f90)
-{
-    return f0 + (f90 - f0) * pow(1.0 - VoH, 5.0);
 }
 
 float Fd_Lambert()
@@ -58,39 +45,49 @@ float Fd_Lambert()
     return 1.0 / PI;
 }
 
-vec3 Fd_Burley(float NoV, float NoL, float LoH, float roughness)
+vec3 GammaToLiner(vec3 color)
 {
-    float f90 = 0.5 + 2.0 * roughness * LoH * LoH;
-    vec3 lightScatter = F_Schlick(NoL, vec3(1.0, 1.0, 1.0), vec3(f90, f90, f90));
-    vec3 viewScatter = F_Schlick(NoV, vec3(1.0, 1.0, 1.0), vec3(f90, f90, f90));
-    return lightScatter * viewScatter * (1.0 / PI);
+    vec3 line_color = color;
+    line_color.r <= 0.04045 ? line_color.r = color.r / 12.92 : line_color.r = pow((color.r + 0.055) / 1.055, 2.4);
+    line_color.g <= 0.04045 ? line_color.g = color.g / 12.92 : line_color.g = pow((color.g + 0.055) / 1.055, 2.4);
+    line_color.b <= 0.04045 ? line_color.b = color.b / 12.92 : line_color.b = pow((color.b + 0.055) / 1.055, 2.4);
+    return line_color;
+}
+
+vec3 LinearToGamma(vec3 color)
+{
+    color = color / (color + vec3(1.0));
+    return pow(color * .4, vec3(1. / 2.2));
 }
 
 void main()
 {
-    vec2 uv = UV * MyBuffer.value * 3;
+    vec2 uv = UV * MyBuffer.value;
     vec3 cameraPos = vec3(MyBuffer.cameraPosX, MyBuffer.cameraPosY, MyBuffer.cameraPosZ);
-    vec3 normal_color = texture(sampler2D(normalTexture, mySampler), vec2(uv.x, 1 - uv.y), 0).rgb;
-    vec3 albedo_color = texture(sampler2D(albedoTexture, mySampler), uv, 0).rgb;
-    vec3 roughness_color = texture(sampler2D(roughnessTexture, mySampler), uv, 0).rgb;
+    // vec3 normal_color = GammaToLiner(texture(sampler2D(normalTexture, mySampler), vec2(uv.x, 1 - uv.y), 0).rgb);
+    vec3 normal_color = GammaToLiner(texture(sampler2D(normalTexture, mySampler), uv, 0).rgb);
+    vec3 albedo_color = GammaToLiner(texture(sampler2D(albedoTexture, mySampler), uv, 0).rgb);
+    vec3 roughness_color = GammaToLiner(texture(sampler2D(roughnessTexture, mySampler), uv, 0).rgb);
 
-    vec3 l = normalize(vec3(-1, -1, -1));
-    vec3 v = normalize(POSITION - cameraPos);
+    vec3 l = normalize(vec3(1, 1, 1));
+    vec3 v = normalize(cameraPos - POSITION);
     vec3 n = normalize(TBN * (normal_color * 2 - 1));
-    // vec3 n = NORMAL;
-    vec3 h = normalize(-v + l);
+    vec3 h = normalize(v + l);
 
-    float D = D_GGX(n, h, /*MyBuffer.roughness*/ roughness_color.x);
-    // float V = V_SmithGGXCorrelatedFast(dot(n, -v), dot(n, l), /*MyBuffer.roughness*/roughness_color.x);
-    float V = V_SmithGGXCorrelated(dot(n, -v), dot(n, l), /*MyBuffer.roughness*/ roughness_color.x);
-    vec3 F = F_Schlick(dot(-v, h), vec3(0.56, 0.57, 0.58), vec3(1, 1, 1));
+    float NoV = abs(dot(n, v)) + 1e-5;
+    float NoL = clamp(dot(n, l), 0.0, 1.0);
+    float NoH = clamp(dot(n, h), 0.0, 1.0);
+    float LoH = clamp(dot(l, h), 0.0, 1.0);
+    float VoH = clamp(dot(v, h), 0.0, 1.0);
+
+    float D = D_GGX(NoH, roughness_color.x);
+    float V = V_SmithGGXCorrelated(NoV, NoL, roughness_color.x);
+    vec3 F = F_Schlick(LoH, vec3(0.04, 0.04, 0.04));
 
     vec3 BRDF_specular = D * V * F;
+    vec3 BRDF_diffuse = albedo_color * Fd_Lambert();
 
-    vec3 diffuse = albedo_color * Fd_Burley(dot(n, -v), dot(n, l), dot(h, l), /*MyBuffer.roughness*/ roughness_color.x);
-    vec3 ambient = vec3(0.0, 0.0, 0.0);
-
-    vec3 color = ambient + diffuse + BRDF_specular;
-    color = pow(color * .4, vec3(1. / 2.2));
+    vec3 color = BRDF_diffuse + BRDF_specular;
+    color = LinearToGamma(color);
     outColor = vec4(color, 1.0);
 }
