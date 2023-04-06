@@ -346,7 +346,7 @@ int main()
     memcpy(mvp_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
     matrixs_buffer->Unmap();
 
-    Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
+    Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(my_buffer_data));
     void *my_buffer_ptr = my_buffer->Map();
     memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
     my_buffer->Unmap();

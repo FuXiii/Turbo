@@ -2932,3 +2932,7 @@ Turbo是渲染引擎
   >
   >* `./samples`中更新完善`NormalTexture`例子
   >* `./samples`中增加`BRDF`例子，用于尝试实现常见的`PBR`纹理流程渲染
+
+* 2023/4/6 设计架构
+  >
+  >* `./samples`中修改`NormalTexture`例子中`my_buffer`的`TBuffer`的大小值，之前是`sizeof(float)`应该为`sizeof(my_buffer_data)`此为一个`Bug`，现修正。
