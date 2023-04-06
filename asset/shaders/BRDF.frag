@@ -68,28 +68,29 @@ vec3 Fd_Burley(float NoV, float NoL, float LoH, float roughness)
 
 void main()
 {
+    vec2 uv = UV * MyBuffer.value * 3;
     vec3 cameraPos = vec3(MyBuffer.cameraPosX, MyBuffer.cameraPosY, MyBuffer.cameraPosZ);
-    vec3 normal_color = texture(sampler2D(normalTexture, mySampler), vec2(UV.x, 1 - UV.y), 0).rgb;
-    vec3 albedo_color = texture(sampler2D(albedoTexture, mySampler), UV, 0).rgb;
-    vec3 roughness_color = texture(sampler2D(roughnessTexture, mySampler), UV, 0).rgb;
+    vec3 normal_color = texture(sampler2D(normalTexture, mySampler), vec2(uv.x, 1 - uv.y), 0).rgb;
+    vec3 albedo_color = texture(sampler2D(albedoTexture, mySampler), uv, 0).rgb;
+    vec3 roughness_color = texture(sampler2D(roughnessTexture, mySampler), uv, 0).rgb;
 
     vec3 l = normalize(vec3(-1, -1, -1));
     vec3 v = normalize(POSITION - cameraPos);
     vec3 n = normalize(TBN * (normal_color * 2 - 1));
-    //vec3 n = NORMAL;
+    // vec3 n = NORMAL;
     vec3 h = normalize(-v + l);
 
-    float D = D_GGX(n, h, /*MyBuffer.roughness*/roughness_color.x);
+    float D = D_GGX(n, h, /*MyBuffer.roughness*/ roughness_color.x);
     // float V = V_SmithGGXCorrelatedFast(dot(n, -v), dot(n, l), /*MyBuffer.roughness*/roughness_color.x);
-    float V = V_SmithGGXCorrelated(dot(n, -v), dot(n, l), /*MyBuffer.roughness*/roughness_color.x);
+    float V = V_SmithGGXCorrelated(dot(n, -v), dot(n, l), /*MyBuffer.roughness*/ roughness_color.x);
     vec3 F = F_Schlick(dot(-v, h), vec3(0.56, 0.57, 0.58), vec3(1, 1, 1));
 
     vec3 BRDF_specular = D * V * F;
 
-    vec3 diffuse = albedo_color * Fd_Burley(dot(n, -v), dot(n, l), dot(h, l), /*MyBuffer.roughness*/roughness_color.x);
+    vec3 diffuse = albedo_color * Fd_Burley(dot(n, -v), dot(n, l), dot(h, l), /*MyBuffer.roughness*/ roughness_color.x);
     vec3 ambient = vec3(0.0, 0.0, 0.0);
 
-    vec3 color = MyBuffer.value * (ambient + diffuse /*+ BRDF_specular*/);
+    vec3 color = ambient + diffuse + BRDF_specular;
     color = pow(color * .4, vec3(1. / 2.2));
     outColor = vec4(color, 1.0);
 }
