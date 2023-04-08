@@ -241,3 +241,8 @@ add_executable(BRDF ./BRDF.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(BRDF PUBLIC ${INCLUDE_PARTH})
 target_link_directories(BRDF PUBLIC ${LINK_PARTH})
 target_link_libraries(BRDF PUBLIC ${LIBS})
+
+add_executable(CPPMultithreading ./CPPMultithreading.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(CPPMultithreading PUBLIC ${INCLUDE_PARTH})
+target_link_directories(CPPMultithreading PUBLIC ${LINK_PARTH})
+target_link_libraries(CPPMultithreading PUBLIC ${LIBS})

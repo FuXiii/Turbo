@@ -2943,4 +2943,4 @@ Turbo是渲染引擎
 
 * 2023/4/8 设计架构
   >
-  >* `./samples`中更新完善`BRDF`例子,增加`metallic`可控变量
+  >* `./samples`中增加`CPPMultithreading`例子，用于研究`C++`的多线程特性
