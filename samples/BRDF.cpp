@@ -115,7 +115,7 @@ struct MY_BUFFER_DATA
 {
     float value;
     POSITION camPos;
-    float roughness;
+    float metallic;
 };
 
 struct MATRIXS_BUFFER_DATA
@@ -136,7 +136,7 @@ int main()
     my_buffer_data.camPos.x = 0;
     my_buffer_data.camPos.y = 0;
     my_buffer_data.camPos.z = 0;
-    my_buffer_data.roughness = 0.03;
+    my_buffer_data.metallic = 0.0;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -935,7 +935,7 @@ int main()
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);                   // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1);         // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("roughness", &my_buffer_data.roughness, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("metallic", &my_buffer_data.metallic, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }

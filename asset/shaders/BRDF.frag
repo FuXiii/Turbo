@@ -15,7 +15,7 @@ layout(set = 0, binding = 5) uniform MYBUFFER
     float cameraPosX;
     float cameraPosY;
     float cameraPosZ;
-    float roughness;
+    float metallic;
 }
 MyBuffer;
 layout(location = 0) out vec4 outColor;
@@ -117,7 +117,7 @@ void main()
 
     float roughness = roughness_color.r;
 
-    float metallic = 0;
+    float metallic = MyBuffer.metallic;
     float a = roughness * roughness;
     vec3 albedo = albedo_color;
 
