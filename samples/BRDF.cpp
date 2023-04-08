@@ -72,8 +72,8 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/NormalTexture.vert");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/NormalTexture.frag");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/BRDF.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/BRDF.frag");
 
 typedef struct POSITION
 {
@@ -115,6 +115,7 @@ struct MY_BUFFER_DATA
 {
     float value;
     POSITION camPos;
+    float metallic;
 };
 
 struct MATRIXS_BUFFER_DATA
@@ -135,6 +136,7 @@ int main()
     my_buffer_data.camPos.x = 0;
     my_buffer_data.camPos.y = 0;
     my_buffer_data.camPos.z = 0;
+    my_buffer_data.metallic = 0.0;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -381,10 +383,12 @@ int main()
     tangent_buffer->Unmap();
     TANGENT_data.clear();
 
+    std::string pbr_texture_prefix_path = "../../asset/images/RockCliffLayered/";
+
     Turbo::Core::TImage *albedo_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = pbr_texture_prefix_path + "albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -439,10 +443,68 @@ int main()
     //</KTX Texture>
     Turbo::Core::TImageView *albedo_texture_view = new Turbo::Core::TImageView(albedo_ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, albedo_ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, albedo_ktx_image->GetMipLevels(), 0, 1);
 
+    Turbo::Core::TImage *roughness_ktx_image = nullptr;
+    //<KTX Texture>
+    {
+        std::string ktx_filename = pbr_texture_prefix_path + "roughness.ktx";
+
+        ktxTexture *ktx_texture;
+        KTX_error_code ktx_result;
+
+        ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        if (ktx_texture == nullptr)
+        {
+            throw std::runtime_error("Couldn't load texture");
+        }
+
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+        VkFormat ktx_texture_vkFormat = ktxTexture_GetVkFormat(ktx_texture);
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        roughness_ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, (Turbo::Core::TFormatType)ktx_texture_vkFormat /*R8G8B8A8_UNORM*/, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, roughness_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+        {
+            uint32_t copy_width = ktx_texture_width >> mip_index;
+            uint32_t copy_height = ktx_texture_height >> mip_index;
+            uint32_t copy_mip_level = mip_index;
+            ktx_size_t copy_buffer_offset = 0;
+            ktx_result = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, 0, &copy_buffer_offset);
+            ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, roughness_ktx_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, 1);
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, roughness_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX Texture>
+    Turbo::Core::TImageView *roughness_ktx_image_view = new Turbo::Core::TImageView(roughness_ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, roughness_ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, roughness_ktx_image->GetMipLevels(), 0, 1);
+
     Turbo::Core::TImage *normal_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/normal.ktx";
+        std::string ktx_filename = pbr_texture_prefix_path + "normal.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -576,6 +638,9 @@ int main()
     std::vector<Turbo::Core::TImageView *> albedo_textures;
     albedo_textures.push_back(albedo_texture_view);
 
+    std::vector<Turbo::Core::TImageView *> roughness_textures;
+    roughness_textures.push_back(roughness_ktx_image_view);
+
     std::vector<Turbo::Core::TSampler *> my_samples;
     my_samples.push_back(sampler);
 
@@ -586,8 +651,9 @@ int main()
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
     pipeline_descriptor_set->BindData(0, 1, 0, normal_textures);
     pipeline_descriptor_set->BindData(0, 2, 0, albedo_textures);
-    pipeline_descriptor_set->BindData(0, 3, 0, my_samples);
-    pipeline_descriptor_set->BindData(0, 4, 0, buffers);
+    pipeline_descriptor_set->BindData(0, 3, 0, roughness_textures);
+    pipeline_descriptor_set->BindData(0, 4, 0, my_samples);
+    pipeline_descriptor_set->BindData(0, 5, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -864,11 +930,12 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("NormalTexture");
+                ImGui::Begin("BRDF");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);           // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                   // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1);         // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("metallic", &my_buffer_data.metallic, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1239,6 +1306,8 @@ int main()
     delete sampler;
     delete albedo_texture_view;
     delete albedo_ktx_image;
+    delete roughness_ktx_image_view;
+    delete roughness_ktx_image;
     delete normal_texture_view;
     delete normal_ktx_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
