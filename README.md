@@ -2944,3 +2944,8 @@ Turbo是渲染引擎
 * 2023/4/8 设计架构
   >
   >* `./samples`中增加`CPPMultithreading`例子，用于研究`C++`的多线程特性
+
+* 2023/4/10 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档，研究`Vulkan`中的细分着色器。
+
