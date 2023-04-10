@@ -27,6 +27,8 @@
 * 2023/4/10
   >
   >* 创建`Tessellation`章节
+  >* 创建`Device Tessellation Feature`章节
+  >* 创建`Tessellation Graphics Pipeline`章节
 
 ---
 
@@ -281,6 +283,43 @@ void CmdEndRendering();
 2. 生成细分图元（不可编程） Tessellation Primitive Generator
 3. 细分评估（计算）着色器（可编程） Tessellation Evaluation Shader
 
+### Device Tessellation Feature
+`Vulkan`中想要使用细分特性，需要查看和激活对应的设备`feature`。有关的细分的`feature`如下：
+
+```CXX
+//in VkPhysicalDeviceFeatures
+VkBool32    tessellationShader;
+VkBool32    shaderTessellationAndGeometryPointSize;
+```
+
+* 如果设备获取的特性中`tessellationShader`为`VK_FALSE`的话，说明该设备不支持细分特性。
+* `shaderTessellationAndGeometryPointSize`用于说明细分控制着色器和细分评估着色器和几何着色器中的内置变量`PointSize`是否有效可用，如果为`VK_FALSE`的话相关着色器禁止对其进行读写
+
+```CXX
+//in VkPhysicalDeviceVulkan11Features 
+VkBool32           multiviewTessellationShader;
+```
+
+* `multiviewTessellationShader`用于说明一个`RenderPass`中的细分着色器是否支持`multiview rendering`，如果该特性为`VK_FALSE`的话，对于`view mask`非零的管线其不能包括任何细分着色器
+
+```CXX
+//in VkPhysicalDeviceVulkan12Features 
+VkBool32           shaderOutputLayer;
+```
+
+* `shaderOutputLayer` indicates whether the implementation supports the ShaderLayer SPIR-V capability enabling variables decorated with the Layer built-in to be exported from vertex or tessellation evaluation shaders. If this feature is not enabled, the Layer built-in decoration must not be used on outputs in vertex or tessellation evaluation shaders.（没看懂干啥的，好像是顶点着色器和细分着评估色器中有个内置`Layer`声明，这个`shaderOutputLayer`好像是用来指示这个内置`Layer`声明能不能用）
+
+还有一个特性需要明确一下：
+
+```CXX
+//in VkPhysicalDeviceFeatures  
+VkBool32           fillModeNonSolid;
+```
+
+* `fillModeNonSolid`用于说明是否支持点`point`和线框`wireframe`的填充模式，如果该特性不支持的话`VK_POLYGON_MODE_POINT`和`VK_POLYGON_MODE_LINE`是不能使用的（很多时候是将模型渲染成线框看细分结果）
+
+### Tessellation Graphics Pipeline
+
 根据`Vulkan`标准，细分着色器是指定于:
 
 ```CXX
@@ -292,7 +331,7 @@ const VkPipelineShaderStageCreateInfo* pStages;
 
 ```CXX
 //位于VkGraphicsPipelineCreateInfo中
-const VkPipelineTessellationStateCreateInfo*     pTessellationState;
+const VkPipelineTessellationStateCreateInfo* pTessellationState;
 ```
 
 根据`Vulkan`标准，有如下要求：
@@ -327,3 +366,4 @@ const VkPipelineTessellationStateCreateInfo*     pTessellationState;
 * 如果想要使用细分特性，必须同时指定对应的细分控制着色器和细分评估着色器
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效值
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`必须是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
+
