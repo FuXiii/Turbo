@@ -123,6 +123,20 @@ class TComputeShader : public Turbo::Core::TShader
     TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
+class TTessellationControlShader : public Turbo::Core::TShader
+{
+  public:
+    TTessellationControlShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTessellationControlShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TTessellationEvaluationShader : public Turbo::Core::TShader
+{
+  public:
+    TTessellationEvaluationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTessellationEvaluationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADER_H

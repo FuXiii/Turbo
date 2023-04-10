@@ -1110,3 +1110,19 @@ Turbo::Core::TComputeShader::TComputeShader(TDevice *device, TShaderLanguage lan
 Turbo::Core::TComputeShader::TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, size, code, entryPoint)
 {
 }
+
+Turbo::Core::TTessellationControlShader::TTessellationControlShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TTessellationControlShader::TTessellationControlShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, size, code, entryPoint)
+{
+}
