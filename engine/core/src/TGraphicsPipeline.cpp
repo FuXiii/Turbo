@@ -375,6 +375,10 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     {
         vk_graphics_pipeline_create_info.pTessellationState = &vk_pipeline_tessellation_state_create_info;
     }
+    else
+    {
+        // throw exception?
+    }
     vk_graphics_pipeline_create_info.pViewportState = &vk_pipeline_viewport_state_create_info;
     vk_graphics_pipeline_create_info.pRasterizationState = &vk_pipeline_rasteriaztion_state_create_info;
     vk_graphics_pipeline_create_info.pMultisampleState = &vk_pipeline_multi_sample_state_create_info;

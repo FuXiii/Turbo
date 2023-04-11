@@ -37,18 +37,18 @@
 #include "core/include/TPipelineDescriptorSet.h"
 #include "core/include/TSampler.h"
 
-#include "core/include/TVulkanLoader.h"
-
 #include <glm/ext.hpp>
 
+#include "core/include/TVulkanLoader.h"
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
+#include <tiny_gltf.h>
+
+#include <ktxvulkan.h>
+
 #include <imgui.h>
-
-#include <memory>
-#include <stdio.h>
-#include <string.h>
-
-static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
-static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
 std::string ReadTextFile(const std::string &filename)
 {
@@ -66,31 +66,14 @@ std::string ReadTextFile(const std::string &filename)
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
+static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 0, binding = 0) uniform bufferVals {\n"
-                                    "    float value;\n"
-                                    "} myBufferVals;\n"
-                                    "layout (location = 0) in vec3 pos;\n"
-                                    "layout (location = 1) in vec3 color;"
-                                    "layout (location = 2) out vec3 outColor;"
-                                    "layout (location = 3) out float outValue;\n"
-                                    "void main() {\n"
-                                    "   gl_Position = vec4(myBufferVals.value*pos,1);\n"
-                                    "   outColor = color;\n"
-                                    "   outValue = myBufferVals.value;\n"
-                                    "}\n";
-
-const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (location = 2) in vec3 inColor;\n"
-                                    "layout (location = 3) in float inValue;\n"
-                                    "layout (location = 0) out vec4 outColor;\n"
-                                    "void main() {\n"
-                                    "   outColor = vec4(inColor,1);\n"
-                                    "}\n";
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/BRDF.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/BRDF.frag");
 
 typedef struct POSITION
 {
@@ -99,19 +82,6 @@ typedef struct POSITION
     float z;
 } POSITION;
 
-typedef struct COLOR
-{
-    float r;
-    float g;
-    float b;
-} COLOR;
-
-typedef struct POSITION_AND_COLOR
-{
-    POSITION position;
-    COLOR color;
-} POSITION_AND_COLOR;
-
 typedef struct NORMAL
 {
     float x;
@@ -119,21 +89,149 @@ typedef struct NORMAL
     float z;
 } NORMAL;
 
+typedef struct TANGENT
+{
+    float x;
+    float y;
+    float z;
+    float w;
+} TANGENT;
+
 typedef struct TEXCOORD
 {
     float u;
     float v;
 } TEXCOORD;
 
+struct PUSH_CONSTANT_DATA
+{
+    float alpha;
+    float metallic;
+    float roughness;
+    float intensity;
+};
+
+struct MY_BUFFER_DATA
+{
+    float value;
+    POSITION camPos;
+    float metallic;
+};
+
+struct MATRIXS_BUFFER_DATA
+{
+    glm::mat4 m;
+    glm::mat4 v;
+    glm::mat4 p;
+};
+
 int main()
 {
-    std::vector<POSITION_AND_COLOR> POSITION_AND_COLOR_DATA;
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}});
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}});
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}});
+    std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
-    float value = 1.0f;
+    MY_BUFFER_DATA my_buffer_data = {};
+    my_buffer_data.value = 1;
+    my_buffer_data.camPos.x = 0;
+    my_buffer_data.camPos.y = 0;
+    my_buffer_data.camPos.z = 0;
+    my_buffer_data.metallic = 0.0;
 
+    MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
+
+    //<gltf for material_sphere>
+    std::vector<POSITION> POSITION_data;
+    std::vector<NORMAL> NORMAL_data;
+    std::vector<TEXCOORD> TEXCOORD_data;
+    std::vector<TANGENT> TANGENT_data;
+    std::vector<uint32_t> INDICES_data;
+    {
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
+        std::string err;
+        std::string warn;
+
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        const tinygltf::Scene &scene = model.scenes[model.defaultScene];
+        tinygltf::Node &node = model.nodes[scene.nodes[0]];
+        tinygltf::Mesh &mesh = model.meshes[node.mesh];
+        tinygltf::Primitive &primitive = mesh.primitives[0];
+        int mode = primitive.mode;
+        int position_accesser_index = primitive.attributes["POSITION"];
+        int normal_accesser_index = primitive.attributes["NORMAL"];
+        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
+        int tangent_accesser_index = primitive.attributes["TANGENT"];
+        int indices_accesser_index = primitive.indices;
+        tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
+        tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
+        tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
+        tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
+        tinygltf::Accessor &tangent_accessor = model.accessors[tangent_accesser_index];
+
+        tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
+        tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
+        tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
+        tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
+        tinygltf::BufferView &tangent_buffer_view = model.bufferViews[tangent_accessor.bufferView];
+
+        int position_buffer_index = position_buffer_view.buffer;
+        size_t position_buffer_byteLength = position_buffer_view.byteLength;
+        int position_buffer_byteOffset = position_buffer_view.byteOffset;
+        int position_type = position_accessor.type;
+
+        int normal_buffer_index = normal_buffer_view.buffer;
+        size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
+        int normal_buffer_byteOffset = normal_buffer_view.byteOffset;
+        int normal_type = normal_accessor.type;
+
+        int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
+        size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
+        int texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
+        int texcoord_0_type = texcoord_0_accessor.type;
+
+        int indices_buffer_index = indices_buffer_view.buffer;
+        size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
+        int indices_buffer_byteOffset = indices_buffer_view.byteOffset;
+        int indices_type = indices_accessor.type;
+
+        int tangent_buffer_index = tangent_buffer_view.buffer;
+        size_t tangent_buffer_byteLength = tangent_buffer_view.byteLength;
+        int tangent_buffer_byteOffset = tangent_buffer_view.byteOffset;
+        int tangent_type = tangent_accessor.type;
+
+        tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
+        tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
+        tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
+        tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
+        tinygltf::Buffer &tangent_buffer = model.buffers[tangent_buffer_index];
+
+        std::vector<unsigned char> &position_data = position_buffer.data;
+        std::vector<unsigned char> &normal_data = normal_buffer.data;
+        std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
+        std::vector<unsigned char> &indices_data = indices_buffer.data;
+        std::vector<unsigned char> &tangent_data = tangent_buffer.data;
+
+        std::vector<unsigned short> temp_indices_data;
+
+        POSITION_data.resize(position_buffer_byteLength / sizeof(POSITION));
+        NORMAL_data.resize(normal_buffer_byteLength / sizeof(NORMAL));
+        TEXCOORD_data.resize(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
+        temp_indices_data.resize(indices_buffer_byteLength / sizeof(unsigned short));
+        TANGENT_data.resize(tangent_buffer_byteLength / sizeof(TANGENT));
+
+        memcpy(POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
+        memcpy(NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
+        memcpy(TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
+        memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
+        memcpy(TANGENT_data.data(), tangent_data.data() + tangent_buffer_byteOffset, tangent_buffer_byteLength);
+
+        for (unsigned short &temp_indices_item : temp_indices_data)
+        {
+            INDICES_data.push_back(temp_indices_item);
+        }
+    }
+    //</gltf for material_sphere>
+
+    uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
     Turbo::Core::TLayerInfo khronos_validation;
@@ -179,15 +277,15 @@ int main()
         }
     }
 
-    Turbo::Core::TVersion instance_version(1, 0, 0, 0);
+    Turbo::Core::TVersion instance_version(1, 2, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
         return -1;
     GLFWwindow *window;
-    int window_width = 500;
-    int window_height = 500;
+    int window_width = 1920 / 2.0;
+    int window_height = 1080 / 2.0;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
@@ -214,7 +312,6 @@ int main()
     }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    physical_device->GetSupportExtensions();
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
@@ -247,16 +344,235 @@ int main()
     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
-    Turbo::Core::TBuffer *value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
-    void *value_ptr = value_buffer->Map();
-    memcpy(value_ptr, &value, sizeof(value));
-    value_buffer->Unmap();
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
-    void *vertx_buffer_ptr = vertex_buffer->Map();
-    memcpy(vertx_buffer_ptr, POSITION_AND_COLOR_DATA.data(), sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
-    vertex_buffer->Unmap();
-    POSITION_AND_COLOR_DATA.clear();
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+
+    glm::mat4 projection = glm::mat4(1.0f);
+    projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
+
+    matrixs_buffer_data.m = model;
+    matrixs_buffer_data.v = view;
+    matrixs_buffer_data.p = projection;
+
+    Turbo::Core::TBuffer *matrixs_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs_buffer_data));
+    void *mvp_ptr = matrixs_buffer->Map();
+    memcpy(mvp_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
+    matrixs_buffer->Unmap();
+
+    Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(my_buffer_data));
+    void *my_buffer_ptr = my_buffer->Map();
+    memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
+    my_buffer->Unmap();
+
+    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
+    void *position_buffer_ptr = position_buffer->Map();
+    memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
+    position_buffer->Unmap();
+    POSITION_data.clear();
+
+    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
+    void *normal_buffer_ptr = normal_buffer->Map();
+    memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
+    normal_buffer->Unmap();
+    NORMAL_data.clear();
+
+    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
+    void *texcoord_buffer_ptr = texcoord_buffer->Map();
+    memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
+    texcoord_buffer->Unmap();
+    TEXCOORD_data.clear();
+
+    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
+    void *index_buffer_ptr = index_buffer->Map();
+    memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
+    index_buffer->Unmap();
+    INDICES_data.clear();
+
+    Turbo::Core::TBuffer *tangent_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TANGENT) * TANGENT_data.size());
+    void *tangent_buffer_ptr = tangent_buffer->Map();
+    memcpy(tangent_buffer_ptr, TANGENT_data.data(), sizeof(TANGENT) * TANGENT_data.size());
+    tangent_buffer->Unmap();
+    TANGENT_data.clear();
+
+    std::string pbr_texture_prefix_path = "../../asset/images/RockCliffLayered/";
+
+    Turbo::Core::TImage *albedo_ktx_image = nullptr;
+    //<KTX Texture>
+    {
+        std::string ktx_filename = pbr_texture_prefix_path + "albedo.ktx";
+
+        ktxTexture *ktx_texture;
+        KTX_error_code ktx_result;
+
+        ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        if (ktx_texture == nullptr)
+        {
+            throw std::runtime_error("Couldn't load texture");
+        }
+
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+        VkFormat ktx_texture_vkFormat = ktxTexture_GetVkFormat(ktx_texture);
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        albedo_ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, (Turbo::Core::TFormatType)ktx_texture_vkFormat /*R8G8B8A8_UNORM*/, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, albedo_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+        {
+            uint32_t copy_width = ktx_texture_width >> mip_index;
+            uint32_t copy_height = ktx_texture_height >> mip_index;
+            uint32_t copy_mip_level = mip_index;
+            ktx_size_t copy_buffer_offset = 0;
+            ktx_result = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, 0, &copy_buffer_offset);
+            ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, albedo_ktx_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, 1);
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, albedo_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX Texture>
+    Turbo::Core::TImageView *albedo_texture_view = new Turbo::Core::TImageView(albedo_ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, albedo_ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, albedo_ktx_image->GetMipLevels(), 0, 1);
+
+    Turbo::Core::TImage *roughness_ktx_image = nullptr;
+    //<KTX Texture>
+    {
+        std::string ktx_filename = pbr_texture_prefix_path + "roughness.ktx";
+
+        ktxTexture *ktx_texture;
+        KTX_error_code ktx_result;
+
+        ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        if (ktx_texture == nullptr)
+        {
+            throw std::runtime_error("Couldn't load texture");
+        }
+
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+        VkFormat ktx_texture_vkFormat = ktxTexture_GetVkFormat(ktx_texture);
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        roughness_ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, (Turbo::Core::TFormatType)ktx_texture_vkFormat /*R8G8B8A8_UNORM*/, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, roughness_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+        {
+            uint32_t copy_width = ktx_texture_width >> mip_index;
+            uint32_t copy_height = ktx_texture_height >> mip_index;
+            uint32_t copy_mip_level = mip_index;
+            ktx_size_t copy_buffer_offset = 0;
+            ktx_result = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, 0, &copy_buffer_offset);
+            ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, roughness_ktx_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, 1);
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, roughness_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX Texture>
+    Turbo::Core::TImageView *roughness_ktx_image_view = new Turbo::Core::TImageView(roughness_ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, roughness_ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, roughness_ktx_image->GetMipLevels(), 0, 1);
+
+    Turbo::Core::TImage *normal_ktx_image = nullptr;
+    //<KTX Texture>
+    {
+        std::string ktx_filename = pbr_texture_prefix_path + "normal.ktx";
+
+        ktxTexture *ktx_texture;
+        KTX_error_code ktx_result;
+
+        ktx_result = ktxTexture_CreateFromNamedFile(ktx_filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        if (ktx_texture == nullptr)
+        {
+            throw std::runtime_error("Couldn't load texture");
+        }
+
+        uint32_t ktx_texture_width = ktx_texture->baseWidth;
+        uint32_t ktx_texture_height = ktx_texture->baseHeight;
+        uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
+        VkFormat ktx_texture_vkFormat = ktxTexture_GetVkFormat(ktx_texture);
+
+        ktx_uint8_t *ktx_texture_data = ktx_texture->pData;
+        ktx_size_t ktx_texture_size = ktx_texture->dataSize;
+
+        Turbo::Core::TBuffer *ktx_staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, ktx_texture_size);
+        void *ktx_ptr = ktx_staging_buffer->Map();
+        memcpy(ktx_ptr, ktx_texture_data, ktx_texture_size);
+        ktx_staging_buffer->Unmap();
+
+        normal_ktx_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, (Turbo::Core::TFormatType)ktx_texture_vkFormat /*R8G8B8A8_UNORM*/, ktx_texture_width, ktx_texture_height, 1, ktx_texture_mip_levels, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+        Turbo::Core::TCommandBuffer *ktx_command_buffer = command_pool->Allocate();
+        ktx_command_buffer->Begin();
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, normal_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        for (uint32_t mip_index = 0; mip_index < ktx_texture_mip_levels; mip_index++)
+        {
+            uint32_t copy_width = ktx_texture_width >> mip_index;
+            uint32_t copy_height = ktx_texture_height >> mip_index;
+            uint32_t copy_mip_level = mip_index;
+            ktx_size_t copy_buffer_offset = 0;
+            ktx_result = ktxTexture_GetImageOffset(ktx_texture, mip_index, 0, 0, &copy_buffer_offset);
+            ktx_command_buffer->CmdCopyBufferToImage(ktx_staging_buffer, normal_ktx_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, copy_width, copy_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, 1);
+        }
+        ktx_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, normal_ktx_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, ktx_texture_mip_levels, 0, 1);
+        ktx_command_buffer->End();
+
+        Turbo::Core::TFence *ktx_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, ktx_command_buffer, ktx_fence);
+
+        ktx_fence->WaitUntil();
+
+        delete ktx_fence;
+        delete ktx_staging_buffer;
+        command_pool->Free(ktx_command_buffer);
+        ktxTexture_Destroy(ktx_texture);
+    }
+    //</KTX Texture>
+    Turbo::Core::TImageView *normal_texture_view = new Turbo::Core::TImageView(normal_ktx_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, normal_ktx_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, normal_ktx_image->GetMipLevels(), 0, 1);
+    Turbo::Core::TSampler *sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, normal_ktx_image->GetMipLevels());
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
@@ -283,14 +599,22 @@ int main()
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     std::vector<Turbo::Core::TBuffer *> buffers;
-    buffers.push_back(value_buffer);
+    buffers.push_back(my_buffer);
+
+    std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
+    matrixs_buffers.push_back(matrixs_buffer);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
+    Turbo::Core::TSubpass subpass1(Turbo::Core::TPipelineType::Graphics);
+    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);               // swapchain color image
+    subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
+
     std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass); // subpass 0
+    subpasses.push_back(subpass);  // subpass 0
+    subpasses.push_back(subpass1); // subpass 1
 
     Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -301,24 +625,55 @@ int main()
 
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
-    Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_AND_COLOR), Turbo::Core::TVertexRate::VERTEX);
-    vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, position)); // position
-    vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, color));    // color
+    Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
+    position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
+    Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
+    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
+    Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
+    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
+    Turbo::Core::TVertexBinding tangent_binding(3, sizeof(TANGENT), Turbo::Core::TVertexRate::VERTEX);
+    tangent_binding.AddAttribute(3, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0); // tangent
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
-    vertex_bindings.push_back(vertex_binding);
+    vertex_bindings.push_back(position_binding);
+    vertex_bindings.push_back(normal_binding);
+    vertex_bindings.push_back(texcoord_binding);
+    vertex_bindings.push_back(tangent_binding);
 
-    Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
-    Turbo::Core::TScissor scissor(0, 0, 500, 500);
+    Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
+    Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
 
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+
+    std::vector<Turbo::Core::TImageView *> normal_textures;
+    normal_textures.push_back(normal_texture_view);
+
+    std::vector<Turbo::Core::TImageView *> albedo_textures;
+    albedo_textures.push_back(albedo_texture_view);
+
+    std::vector<Turbo::Core::TImageView *> roughness_textures;
+    roughness_textures.push_back(roughness_ktx_image_view);
+
+    std::vector<Turbo::Core::TSampler *> my_samples;
+    my_samples.push_back(sampler);
+
+    std::vector<Turbo::Core::TImageView *> input_attachment_depths;
+    input_attachment_depths.push_back(depth_image_view);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
+    pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
+    pipeline_descriptor_set->BindData(0, 1, 0, normal_textures);
+    pipeline_descriptor_set->BindData(0, 2, 0, albedo_textures);
+    pipeline_descriptor_set->BindData(0, 3, 0, roughness_textures);
+    pipeline_descriptor_set->BindData(0, 4, 0, my_samples);
+    pipeline_descriptor_set->BindData(0, 5, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
-    vertex_buffers.push_back(vertex_buffer);
+    vertex_buffers.push_back(position_buffer);
+    vertex_buffers.push_back(normal_buffer);
+    vertex_buffers.push_back(texcoord_buffer);
+    vertex_buffers.push_back(tangent_buffer);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -338,7 +693,6 @@ int main()
     ImGui::StyleColorsDark();
 
     Turbo::Core::TSampler *imgui_sampler = new Turbo::Core::TSampler(device);
-
     Turbo::Core::TShader *imgui_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
     Turbo::Core::TShader *imgui_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
 
@@ -354,7 +708,7 @@ int main()
     std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
     imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     unsigned char *imgui_font_pixels;
     int imgui_font_width, imgui_font_height;
@@ -397,16 +751,27 @@ int main()
     Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
     //</IMGUI>
 
-    bool show_demo_window = true;
+    glm::vec3 camera_position = glm::vec3(1.00025, -1.50862, -2.52088);
 
+    float horizontal_angle = 383.2;
+    float vertical_angle = 28;
+
+    glm::vec2 previous_mouse_pos = glm::vec2(0, 0);
+    glm::vec2 current_mouse_pos = glm::vec2(0, 0);
+
+    float angle = 0;
     float _time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
-        void *_ptr = value_buffer->Map();
-        memcpy(_ptr, &value, sizeof(value));
-        value_buffer->Unmap();
+        my_buffer_data.camPos.x = camera_position.x;
+        my_buffer_data.camPos.y = camera_position.y;
+        my_buffer_data.camPos.z = camera_position.z;
+
+        void *_ptr = my_buffer->Map();
+        memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
+        my_buffer->Unmap();
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
@@ -486,23 +851,105 @@ int main()
                 }
             }
 
+            // UpdateKeyboard
+            {
+                ImVec2 mouse_pos = io.MousePos;
+                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
+                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
+                previous_mouse_pos = current_mouse_pos;
+                mouse_pos_delte.y = mouse_pos_delte.y;
+
+                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+                if (state == GLFW_PRESS)
+                {
+                    horizontal_angle += mouse_pos_delte.x * 0.2;
+                    vertical_angle += mouse_pos_delte.y * 0.2;
+
+                    if (vertical_angle > 90)
+                    {
+                        vertical_angle = 90;
+                    }
+
+                    if (vertical_angle < -90)
+                    {
+                        vertical_angle = -90;
+                    }
+                }
+
+                float delte_time = io.DeltaTime;
+                float speed = 1;
+
+                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
+                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
+
+                glm::vec3 look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
+                look_forward = glm::normalize(look_forward);
+
+                glm::vec3 forward_dir = look_forward;                  // 向前向量
+                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
+                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
+                up_dir = glm::cross(right_dir, forward_dir);
+
+                right_dir = glm::normalize(right_dir);
+                up_dir = glm::normalize(up_dir);
+
+                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
+                if (key_W_state == GLFW_PRESS)
+                {
+                    // TODO: 向前
+                    camera_position += forward_dir * speed * delte_time;
+                }
+
+                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
+                if (key_A_state == GLFW_PRESS)
+                {
+                    // TODO: 向左
+                    camera_position += -right_dir * speed * delte_time;
+                }
+
+                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
+                if (key_S_state == GLFW_PRESS)
+                {
+                    // TODO: 向后
+                    camera_position += -forward_dir * speed * delte_time;
+                }
+
+                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
+                if (key_D_state == GLFW_PRESS)
+                {
+                    // TODO: 向右
+                    camera_position += right_dir * speed * delte_time;
+                }
+
+                model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+
+                glm::vec3 look_point = camera_position + forward_dir;
+                view = glm::lookAt(camera_position, look_point, up_dir);
+                projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
+
+                matrixs_buffer_data.m = model;
+                matrixs_buffer_data.v = view;
+                matrixs_buffer_data.p = projection;
+
+                _ptr = matrixs_buffer->Map();
+                memcpy(_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
+                matrixs_buffer->Unmap();
+            }
+
             ImGui::NewFrame();
 
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-                ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-                ImGui::SliderFloat("value", &value, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-
-                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-                    counter++;
-                ImGui::SameLine();
-                ImGui::Text("counter = %d", counter);
-
+                ImGui::Begin("BRDF");
+                ImGui::Text("W,A,S,D to move.");
+                ImGui::Text("Push down and drag mouse right button to rotate view.");
+                ImGui::SliderFloat("angle", &angle, 0.0f, 360);                 // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1);       // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("metallic", &my_buffer_data.metallic, 0, 1); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -520,13 +967,16 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
-            // Triangle
+            // material_sphere
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDraw(3, 1, 0, 0);
+            command_buffer->CmdBindIndexBuffer(index_buffer);
+            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+
+            command_buffer->CmdNextSubpass();
 
             //<IMGUI Rendering>
             ImGui::Render();
@@ -867,12 +1317,24 @@ int main()
     delete fragment_shader;
     delete depth_image_view;
     delete depth_image;
+    delete sampler;
+    delete albedo_texture_view;
+    delete albedo_ktx_image;
+    delete roughness_ktx_image_view;
+    delete roughness_ktx_image;
+    delete normal_texture_view;
+    delete normal_ktx_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;
     }
-    delete vertex_buffer;
-    delete value_buffer;
+    delete index_buffer;
+    delete position_buffer;
+    delete tangent_buffer;
+    delete normal_buffer;
+    delete texcoord_buffer;
+    delete my_buffer;
+    delete matrixs_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;
     delete swapchain;

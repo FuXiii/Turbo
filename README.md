@@ -2955,3 +2955,10 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`uint32_t patchControlPoints`成员变量
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`构造函数
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`的`InternalCreate()`成员函数中增加对`VkPipelineTessellationStateCreateInfo`的设置
+
+* 2023/4/11 设计架构
+  >
+  >* `./asset/shaders`中增加`TessellationTest.vert`细分示例使用的顶点着色器
+  >* `./asset/shaders`中增加`TessellationTest.tesc`细分示例使用的细分控制着色器
+  >* `./asset/shaders`中增加`TessellationTest.tese`细分示例使用的细分评估着色器
+  >* `./asset/shaders`中增加`TessellationTest.frag`细分示例使用的片元着色器
