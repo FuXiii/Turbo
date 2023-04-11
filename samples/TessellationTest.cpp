@@ -125,10 +125,10 @@ int main()
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.inner0 = 2;
-    my_buffer_data.outer0 = 2;
-    my_buffer_data.outer1 = 2;
-    my_buffer_data.outer2 = 2;
+    my_buffer_data.inner0 = 0;
+    my_buffer_data.outer0 = 1;
+    my_buffer_data.outer1 = 1;
+    my_buffer_data.outer2 = 1;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
