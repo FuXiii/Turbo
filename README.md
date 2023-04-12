@@ -2973,3 +2973,4 @@ Turbo是渲染引擎
   >* `./asset/shaders`中增加`GeometryTest.vert`几何着色器示例使用的顶点着色器
   >* `./asset/shaders`中增加`GeometryTest.geom`几何着色器示例使用的几何着色器
   >* `./asset/shaders`中增加`GeometryTest.frag`几何着色器示例使用的片元着色器
+  >* `./engine/core`下`TDescriptorSetLayout.h`中`class TDescriptorSetLayout`中`InternalCreate()`成员函数中增加对于重复`Binding`描述符号的检查筛选，并且合并不同着色器使用相同描述符的`ShaderStageFlag`

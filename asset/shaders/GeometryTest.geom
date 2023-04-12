@@ -6,7 +6,7 @@ layout(location = 1) in vec3 NORMAL[];
 
 const float MAGNITUDE = 0.04;
 
-layout(set = 0, binding = 1) uniform MATRIXS
+layout(set = 0, binding = 0) uniform MATRIXS
 {
     mat4 m;
     mat4 v;

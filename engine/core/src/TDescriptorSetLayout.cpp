@@ -8,30 +8,47 @@
 
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()
 {
-    uint32_t binding_count = this->descriptors.size();
+    std::map</*binding*/ uint32_t, std::vector<TDescriptor *>> binding_map;
+    for (TDescriptor *descriptor_item : this->descriptors)
+    {
+        uint32_t binding = descriptor_item->GetBinding();
+        TShader *shader = descriptor_item->GetShader();
+        if (shader != nullptr)
+        {
+            binding_map[binding].push_back(descriptor_item);
+        }
+    }
 
     std::vector<VkDescriptorSetLayoutBinding> bindings;
-    bindings.resize(binding_count);
-
-    for (uint32_t binding_index = 0; binding_index < binding_count; binding_index++)
+    for (auto &descriptors_item : binding_map)
     {
-        TDescriptor *descriptor = this->descriptors[binding_index];
-        TShader *shader = descriptor->GetShader();
-        if (descriptor != nullptr)
+        std::vector<Turbo::Core::TDescriptor *> &descriptors = descriptors_item.second;
+        if (descriptors.size() > 0)
         {
-            bindings[binding_index].binding = descriptor->GetBinding();
-            bindings[binding_index].descriptorType = descriptor->GetVkDescriptorType();
-            bindings[binding_index].descriptorCount = descriptor->GetCount();
-            bindings[binding_index].stageFlags = VK_SHADER_STAGE_ALL;
-            if (shader != nullptr)
+            TDescriptor *descriptor = descriptors[0];
+            if (descriptor != nullptr)
             {
-                bindings[binding_index].stageFlags = descriptor->GetShader()->GetVkShaderStageFlags();
+                VkDescriptorSetLayoutBinding vk_descriptor_set_layout_binding = {};
+                vk_descriptor_set_layout_binding.binding = descriptor->GetBinding();
+                vk_descriptor_set_layout_binding.descriptorType = descriptor->GetVkDescriptorType();
+                vk_descriptor_set_layout_binding.descriptorCount = descriptor->GetCount();
+                vk_descriptor_set_layout_binding.stageFlags = 0;
+                for (TDescriptor *descriptor_item : descriptors)
+                {
+                    TShader *shader = descriptor_item->GetShader();
+                    if (shader != nullptr)
+                    {
+                        vk_descriptor_set_layout_binding.stageFlags |= descriptor_item->GetShader()->GetVkShaderStageFlags();
+                    }
+                }
+                vk_descriptor_set_layout_binding.pImmutableSamplers = nullptr;
+
+                bindings.push_back(vk_descriptor_set_layout_binding);
             }
-            bindings[binding_index].pImmutableSamplers = nullptr;
-        }
-        else
-        {
-            throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
+            else
+            {
+                throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
+            }
         }
     }
 
@@ -39,7 +56,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
     descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     descriptorSetLayoutCreateInfo.pNext = nullptr;
     descriptorSetLayoutCreateInfo.flags = 0;
-    descriptorSetLayoutCreateInfo.bindingCount = binding_count;
+    descriptorSetLayoutCreateInfo.bindingCount = bindings.size();
     descriptorSetLayoutCreateInfo.pBindings = bindings.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
