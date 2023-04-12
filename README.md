@@ -2948,4 +2948,18 @@ Turbo是渲染引擎
 * 2023/4/10 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档，研究`Vulkan`中的细分着色器。
+  >* `./samples`中增加`TessellationTest`例子，用于研究测试`Vulkan`的细分特性
+  >* `./engine/core`下`TShader.h`中增加`class TTessellationControlShader`类
+  >* `./engine/core`下`TShader.h`中增加`class TTessellationEvaluationShader`类
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, uint32_t patchControlPoints, ...)`构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`uint32_t patchControlPoints`成员变量
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`的`InternalCreate()`成员函数中增加对`VkPipelineTessellationStateCreateInfo`的设置
 
+* 2023/4/11 设计架构
+  >
+  >* `./asset/shaders`中增加`TessellationTest.vert`细分示例使用的顶点着色器
+  >* `./asset/shaders`中增加`TessellationTest.tesc`细分示例使用的细分控制着色器
+  >* `./asset/shaders`中增加`TessellationTest.tese`细分示例使用的细分评估着色器
+  >* `./asset/shaders`中增加`TessellationTest.frag`细分示例使用的片元着色器
+  >* `./samples`中完成`TessellationTest`例子

@@ -246,3 +246,8 @@ add_executable(CPPMultithreading ./CPPMultithreading.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(CPPMultithreading PUBLIC ${INCLUDE_PARTH})
 target_link_directories(CPPMultithreading PUBLIC ${LINK_PARTH})
 target_link_libraries(CPPMultithreading PUBLIC ${LIBS})
+
+add_executable(TessellationTest ./TessellationTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(TessellationTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(TessellationTest PUBLIC ${LINK_PARTH})
+target_link_libraries(TessellationTest PUBLIC ${LIBS})

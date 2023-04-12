@@ -169,7 +169,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     }
 
     VkPipelineVertexInputStateCreateInfo vk_pipeline_vertex_input_state_create_info = {};
-    vk_pipeline_vertex_input_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vk_pipeline_vertex_input_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vk_pipeline_vertex_input_state_create_info.pNext = nullptr;
     vk_pipeline_vertex_input_state_create_info.flags = 0;
     vk_pipeline_vertex_input_state_create_info.vertexBindingDescriptionCount = vk_vertex_input_binding_descriptions.size();
@@ -178,7 +178,7 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_pipeline_vertex_input_state_create_info.pVertexAttributeDescriptions = vk_vertex_input_attribute_descriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo vk_pipeline_input_assembly_state_create_info = {};
-    vk_pipeline_input_assembly_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    vk_pipeline_input_assembly_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     vk_pipeline_input_assembly_state_create_info.pNext = nullptr;
     vk_pipeline_input_assembly_state_create_info.flags = 0;
     vk_pipeline_input_assembly_state_create_info.topology = (VkPrimitiveTopology)this->topology;
@@ -187,6 +187,12 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     {
         vk_pipeline_input_assembly_state_create_info.primitiveRestartEnable = VK_TRUE;
     }
+
+    VkPipelineTessellationStateCreateInfo vk_pipeline_tessellation_state_create_info = {};
+    vk_pipeline_tessellation_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+    vk_pipeline_tessellation_state_create_info.pNext = nullptr;
+    vk_pipeline_tessellation_state_create_info.flags = 0;
+    vk_pipeline_tessellation_state_create_info.patchControlPoints = this->patchControlPoints;
 
     std::vector<VkViewport> vk_viewports;
     VkViewport vk_viewport = {};
@@ -365,6 +371,14 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     vk_graphics_pipeline_create_info.pVertexInputState = &vk_pipeline_vertex_input_state_create_info;
     vk_graphics_pipeline_create_info.pInputAssemblyState = &vk_pipeline_input_assembly_state_create_info;
     vk_graphics_pipeline_create_info.pTessellationState = nullptr;
+    if (this->topology == Turbo::Core::TTopologyType::PATCH_LIST && this->patchControlPoints > 0)
+    {
+        vk_graphics_pipeline_create_info.pTessellationState = &vk_pipeline_tessellation_state_create_info;
+    }
+    else
+    {
+        // throw exception?
+    }
     vk_graphics_pipeline_create_info.pViewportState = &vk_pipeline_viewport_state_create_info;
     vk_graphics_pipeline_create_info.pRasterizationState = &vk_pipeline_rasteriaztion_state_create_info;
     vk_graphics_pipeline_create_info.pMultisampleState = &vk_pipeline_multi_sample_state_create_info;
@@ -515,6 +529,97 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint3
 
         // VkPipelineTessellationStateCreateInfo
         // 目前为 nullptr
+
+        // VkPipelineViewportStateCreateInfo
+        // dynamic
+
+        // VkPipelineRasterizationStateCreateInfo
+        this->depthClampEnable = depthClampEnable;
+        this->rasterizerDiscardEnable = rasterizerDiscardEnable;
+        this->polygonMode = polygonMode;
+        this->cullMode = cullMode;
+        this->frontFace = frontFace;
+        this->depthBiasEnable = depthBiasEnable;
+        this->depthBiasConstantFactor = depthBiasConstantFactor;
+        this->depthBiasClamp = depthBiasClamp;
+        this->depthBiasSlopeFactor = depthBiasSlopeFactor;
+        this->lineWidth = lineWidth;
+
+        // VkPipelineMultisampleStateCreateInfo
+        this->multisampleEnable = multisampleEnable;
+        this->sample = sample;
+
+        // VkPipelineDepthStencilStateCreateInfo
+        this->depthTestEnable = depthTestEnable;
+        this->depthWriteEnable = depthWriteEnable;
+        this->depthCompareOp = depthCompareOp;
+        this->depthBoundsTestEnable = depthBoundsTestEnable;
+        this->stencilTestEnable = stencilTestEnable;
+        this->frontFailOp = frontFailOp;
+        this->frontPassOp = frontPassOp;
+        this->frontDepthFailOp = frontDepthFailOp;
+        this->frontCompareOp = frontCompareOp;
+        this->frontCompareMask = frontCompareMask;
+        this->frontWriteMask = frontWriteMask;
+        this->frontReference = frontReference;
+        this->backFailOp = backFailOp;
+        this->backPassOp = backPassOp;
+        this->backDepthFailOp = backDepthFailOp;
+        this->backCompareOp = backCompareOp;
+        this->backCompareMask = backCompareMask;
+        this->backWriteMask = backWriteMask;
+        this->backReference = backReference;
+        this->minDepthBounds = minDepthBounds;
+        this->maxDepthBounds = maxDepthBounds;
+
+        // VkPipelineColorBlendStateCreateInfo
+        this->logicOpEnable = logicOpEnable;
+        this->logicOp = logicOp;
+        this->blendEnable = blendEnable;
+        this->srcColorBlendFactor = srcColorBlendFactor;
+        this->dstColorBlendFactor = dstColorBlendFactor;
+        this->colorBlendOp = colorBlendOp;
+        this->srcAlphaBlendFactor = srcAlphaBlendFactor;
+        this->dstAlphaBlendFactor = dstAlphaBlendFactor;
+        this->alphaBlendOp = alphaBlendOp;
+        this->constantR = constantR;
+        this->constantG = constantG;
+        this->constantB = constantB;
+        this->constantA = constantA;
+
+        // VkPipelineDynamicStateCreateInfo
+        //  目前为 viewport scissor linewidth
+
+        // VkPipelineLayout VkGraphicsPipelineCreateInfo::layout
+        // 使用传进来的Shader来创建
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TGraphicsPipeline::TGraphicsPipeline");
+    }
+}
+
+Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, uint32_t patchControlPoints, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, tessellationControlShader, tessellationEvaluationShader, fragmentShader)
+{
+    if (renderPass != nullptr)
+    {
+        // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
+        this->renderPass = renderPass;
+
+        // uint32_t VkGraphicsPipelineCreateInfo::subpass
+        this->subpass = subpass;
+
+        // VkPipelineVertexInputStateCreateInfo
+        this->vertexBindings = vertexBindings;
+
+        // VkPipelineInputAssemblyStateCreateInfo
+        this->topology = Turbo::Core::TTopologyType::PATCH_LIST;
+        this->primitiveRestartEnable = primitiveRestartEnable;
+
+        // VkPipelineTessellationStateCreateInfo
+        this->patchControlPoints = patchControlPoints;
 
         // VkPipelineViewportStateCreateInfo
         // dynamic
