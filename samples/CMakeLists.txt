@@ -231,3 +231,23 @@ add_executable(DynamicRenderingTest ./DynamicRenderingTest.cpp ${IMGUI_SOURCE_PA
 target_include_directories(DynamicRenderingTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(DynamicRenderingTest PUBLIC ${LINK_PARTH})
 target_link_libraries(DynamicRenderingTest PUBLIC ${LIBS})
+
+add_executable(NormalTexture ./NormalTexture.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(NormalTexture PUBLIC ${INCLUDE_PARTH})
+target_link_directories(NormalTexture PUBLIC ${LINK_PARTH})
+target_link_libraries(NormalTexture PUBLIC ${LIBS})
+
+add_executable(BRDF ./BRDF.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(BRDF PUBLIC ${INCLUDE_PARTH})
+target_link_directories(BRDF PUBLIC ${LINK_PARTH})
+target_link_libraries(BRDF PUBLIC ${LIBS})
+
+add_executable(CPPMultithreading ./CPPMultithreading.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(CPPMultithreading PUBLIC ${INCLUDE_PARTH})
+target_link_directories(CPPMultithreading PUBLIC ${LINK_PARTH})
+target_link_libraries(CPPMultithreading PUBLIC ${LIBS})
+
+add_executable(TessellationTest ./TessellationTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(TessellationTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(TessellationTest PUBLIC ${LINK_PARTH})
+target_link_libraries(TessellationTest PUBLIC ${LIBS})

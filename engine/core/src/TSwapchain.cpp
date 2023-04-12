@@ -169,10 +169,17 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     if (surface != nullptr)
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
-        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
-        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
-        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
-        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+        {
+            this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+            this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+            this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+            this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
+        }
 
         this->surface = surface;
         this->minImageCount = minImageCount;
@@ -200,10 +207,17 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     if (surface != nullptr)
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
-        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
-        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
-        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
-        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+        {
+            this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+            this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+            this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+            this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
+        }
 
         this->surface = surface;
         this->minImageCount = minImageCount;
@@ -271,10 +285,17 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
             throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
         }
 
-        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
-        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
-        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
-        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+        {
+            this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+            this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+            this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+            this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
+        }
 
         this->surface = surface;
         this->minImageCount = minImageCount;
@@ -317,10 +338,17 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
             throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSwapchain::TSwapchain", "device is invalid");
         }
 
-        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
-        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
-        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
-        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+        {
+            this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+            this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+            this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+            this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
+        }
 
         this->surface = surface;
         this->minImageCount = minImageCount;
@@ -371,11 +399,18 @@ Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
     if (oldSwapchain != nullptr)
     {
         Turbo::Core::TDevice *device = oldSwapchain->GetSurface()->GetDevice();
-        this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
-        this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
-        this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
-        this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
-
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+        {
+            this->vkCreateSwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateSwapchainKHR>(device, "vkCreateSwapchainKHR");
+            this->vkGetSwapchainImagesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetSwapchainImagesKHR>(device, "vkGetSwapchainImagesKHR");
+            this->vkDestroySwapchainKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkDestroySwapchainKHR>(device, "vkDestroySwapchainKHR");
+            this->vkAcquireNextImageKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkAcquireNextImageKHR>(device, "vkAcquireNextImageKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
+        }
+        
         this->surface = oldSwapchain->GetSurface();
         this->minImageCount = oldSwapchain->GetMinImageCount();
         this->format = oldSwapchain->GetFormat();

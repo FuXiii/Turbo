@@ -24,6 +24,12 @@
   >* 更新`Dynamic Rendering的Pipeline`章节
   >* 创建`Dynamic Rendering的渲染`章节
 
+* 2023/4/10
+  >
+  >* 创建`Tessellation`章节
+  >* 创建`Device Tessellation Feature`章节
+  >* 创建`Tessellation Graphics Pipeline`章节
+
 ---
 
 ## Device Feature
@@ -266,3 +272,103 @@ void CmdBeginRendering(const TRenderingAttachments& renderingAttachment);
 //in Turbo::Core::TCommandBufferBase
 void CmdEndRendering();
 ```
+
+## Tessellation 
+
+细分（`Tessellation`）。用于细分网格。
+
+细分流程分为如下三个阶段：
+
+1. 细分控制着色器（可编程） Tessellation Control Shader
+2. 生成细分图元（不可编程） Tessellation Primitive Generator
+3. 细分评估（计算）着色器（可编程） Tessellation Evaluation Shader
+
+### Device Tessellation Feature
+`Vulkan`中想要使用细分特性，需要查看和激活对应的设备`feature`。有关的细分的`feature`如下：
+
+```CXX
+//in VkPhysicalDeviceFeatures
+VkBool32    tessellationShader;
+VkBool32    shaderTessellationAndGeometryPointSize;
+```
+
+* 如果设备获取的特性中`tessellationShader`为`VK_FALSE`的话，说明该设备不支持细分特性。
+* `shaderTessellationAndGeometryPointSize`用于说明细分控制着色器和细分评估着色器和几何着色器中的内置变量`PointSize`是否有效可用，如果为`VK_FALSE`的话相关着色器禁止对其进行读写
+
+```CXX
+//in VkPhysicalDeviceVulkan11Features 
+VkBool32           multiviewTessellationShader;
+```
+
+* `multiviewTessellationShader`用于说明一个`RenderPass`中的细分着色器是否支持`multiview rendering`，如果该特性为`VK_FALSE`的话，对于`view mask`非零的管线其不能包括任何细分着色器
+
+```CXX
+//in VkPhysicalDeviceVulkan12Features 
+VkBool32           shaderOutputLayer;
+```
+
+* `shaderOutputLayer` indicates whether the implementation supports the ShaderLayer SPIR-V capability enabling variables decorated with the Layer built-in to be exported from vertex or tessellation evaluation shaders. If this feature is not enabled, the Layer built-in decoration must not be used on outputs in vertex or tessellation evaluation shaders.（没看懂干啥的，好像是顶点着色器和细分着评估色器中有个内置`Layer`声明，这个`shaderOutputLayer`好像是用来指示这个内置`Layer`声明能不能用）
+
+还有一个特性需要明确一下：
+
+```CXX
+//in VkPhysicalDeviceFeatures  
+VkBool32           fillModeNonSolid;
+```
+
+* `fillModeNonSolid`用于说明是否支持点`point`和线框`wireframe`的填充模式，如果该特性不支持的话`VK_POLYGON_MODE_POINT`和`VK_POLYGON_MODE_LINE`是不能使用的（很多时候是将模型渲染成线框看细分结果）
+
+### Tessellation Graphics Pipeline
+
+根据`Vulkan`标准，细分着色器是指定于:
+
+```CXX
+//位于VkGraphicsPipelineCreateInfo中
+const VkPipelineShaderStageCreateInfo* pStages;
+```
+
+对于`Tessellation`的配置是指定于：
+
+```CXX
+//位于VkGraphicsPipelineCreateInfo中
+const VkPipelineTessellationStateCreateInfo* pTessellationState;
+```
+
+根据`Vulkan`标准，有如下要求：
+
+>[VUID-VkGraphicsPipelineCreateInfo-pStages-00729](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00729)  
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage, it `must` include a tessellation evaluation shader stage
+>
+>如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分控制着色器话，`VkGraphicsPipelineCreateInfo`中的`pStages`必须也包含一个细分评估着色器
+
+>[VUID-VkGraphicsPipelineCreateInfo-pStages-00730](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00730)  
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation evaluation shader stage, it `must` include a tessellation control shader stage
+>
+>如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分评估着色器话，`VkGraphicsPipelineCreateInfo`中的`pStages`必须也包含一个细分控制着色器
+
+>[VUID-VkGraphicsPipelineCreateInfo-pStages-00731](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00731)  
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage and a tessellation evaluation shader stage, pTessellationState `must` be a valid pointer to a valid `VkPipelineTessellationStateCreateInfo `structure
+>
+>如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分控制着色器和细分评估着色器的话，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效的`VkPipelineTessellationStateCreateInfo`结构值
+
+>[VUID-VkGraphicsPipelineCreateInfo-pStages-00736](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00736)  
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes tessellation shader stages, the `topology` member of pInputAssembly `must` be `VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
+>
+>如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分着色器的话，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`成员值必须是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
+
+>[VUID-VkGraphicsPipelineCreateInfo-topology-00737](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-topology-00737)  
+>If the pipeline is being created with `pre-rasterization shader state` and the topology member of `pInputAssembly` is `VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`, pStages `must` include tessellation shader stages
+>
+>如果，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`成员值是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`的话，`VkGraphicsPipelineCreateInfo`中的`pStages`中必须包括细分着色器
+
+>[VUID-VkPipelineTessellationStateCreateInfo-patchControlPoints-01214](https://registry.khronos.org/vulkan/specs/1.3/html/chap22.html#VUID-VkPipelineTessellationStateCreateInfo-patchControlPoints-01214)  
+>`patchControlPoints` must be greater than zero and less than or equal to `VkPhysicalDeviceLimits::maxTessellationPatchSize`
+>
+>如果，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`中的`patchControlPoints`成员变量必须大于`0`，并且小于等于`VkPhysicalDeviceLimits::maxTessellationPatchSize`
+
+综上：
+
+* 如果想要使用细分特性，必须同时指定对应的细分控制着色器和细分评估着色器
+* 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效值
+* 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`必须是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
+

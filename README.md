@@ -2918,3 +2918,48 @@ Turbo是渲染引擎
   >* `./engine/core`下`TCommandBuffer.h`中`class TCommandBufferBase`中`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment)`成员函数增加形参为`void CmdBeginRendering(const TRenderingAttachments &renderingAttachment, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)`
   >* `./samples`中增加`DynamicRenderingTest`例子，用于测试`Turbo`封装的`Vulkan1.3`中`Dynamic Rendering`特性
 
+* 2023/4/3 设计架构
+  >
+  >* `./engine/core`下`TSurface`构造函数中增加对于`Surface`扩展是否已经激活的判断
+  >* `./engine/core`下`TSwapchain`构造函数中增加对于`Swapchain`扩展是否已经激活的判断
+
+* 2023/4/4 设计架构
+  >
+  >* `./asset/images`下增加`RockCliffLayered`文件夹，用于存储`RockCliffLayered`的`PBR`纹理
+  >* `./samples`中增加`NormalTexture`例子，用于尝试使用法线纹理获得切线空间的法线
+
+* 2023/4/5 设计架构
+  >
+  >* `./samples`中更新完善`NormalTexture`例子
+  >* `./samples`中增加`BRDF`例子，用于尝试实现常见的`PBR`纹理流程渲染
+
+* 2023/4/6 设计架构
+  >
+  >* `./samples`中修改`NormalTexture`例子中`my_buffer`的`TBuffer`的大小值，之前是`sizeof(float)`应该为`sizeof(my_buffer_data)`此为一个`Bug`，现修正。
+
+* 2023/4/7 设计架构
+  >
+  >* `./samples`中更新完善`BRDF`例子
+
+* 2023/4/8 设计架构
+  >
+  >* `./samples`中增加`CPPMultithreading`例子，用于研究`C++`的多线程特性
+
+* 2023/4/10 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档，研究`Vulkan`中的细分着色器。
+  >* `./samples`中增加`TessellationTest`例子，用于研究测试`Vulkan`的细分特性
+  >* `./engine/core`下`TShader.h`中增加`class TTessellationControlShader`类
+  >* `./engine/core`下`TShader.h`中增加`class TTessellationEvaluationShader`类
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, uint32_t patchControlPoints, ...)`构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`uint32_t patchControlPoints`成员变量
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`的`InternalCreate()`成员函数中增加对`VkPipelineTessellationStateCreateInfo`的设置
+
+* 2023/4/11 设计架构
+  >
+  >* `./asset/shaders`中增加`TessellationTest.vert`细分示例使用的顶点着色器
+  >* `./asset/shaders`中增加`TessellationTest.tesc`细分示例使用的细分控制着色器
+  >* `./asset/shaders`中增加`TessellationTest.tese`细分示例使用的细分评估着色器
+  >* `./asset/shaders`中增加`TessellationTest.frag`细分示例使用的片元着色器
+  >* `./samples`中完成`TessellationTest`例子

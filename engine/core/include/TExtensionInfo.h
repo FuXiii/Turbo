@@ -238,7 +238,7 @@ class TExtensionInfo : public TInfo
     friend class TLayerInfo;
     friend class TInstanceCreateInfo;
     friend class TDeviceCreateInfo;
-    friend class TPhysicalDeviceProxy; // �Ƿ�û��
+    friend class TPhysicalDeviceProxy;
 
   private:
     TExtensionType extensionType;
