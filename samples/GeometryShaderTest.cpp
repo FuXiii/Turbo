@@ -463,7 +463,7 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, matrixs_buffers);
+    //pipeline_descriptor_set->BindData(0, 1, 0, matrixs_buffers);
     //pipeline_descriptor_set->BindData(0, 1, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
