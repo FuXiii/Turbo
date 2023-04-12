@@ -2970,3 +2970,6 @@ Turbo是渲染引擎
   >* `./samples`中增加`GeometryShaderTest`例子，用于测试研究`Vulkan`中的几何着色器特性
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, ...)`支持几何着色器的构造函数
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`支持几何着色器的构造函数
+  >* `./asset/shaders`中增加`GeometryTest.vert`几何着色器示例使用的顶点着色器
+  >* `./asset/shaders`中增加`GeometryTest.geom`几何着色器示例使用的几何着色器
+  >* `./asset/shaders`中增加`GeometryTest.frag`几何着色器示例使用的片元着色器

@@ -72,10 +72,9 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.vert");
-const std::string TESC_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.tesc");
-const std::string TESE_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.tese");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
+const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.tesc");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
 
 typedef struct POSITION
 {
@@ -392,8 +391,7 @@ int main()
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
-    Turbo::Core::TTessellationControlShader *tessellation_control_shader = new Turbo::Core::TTessellationControlShader(device, Turbo::Core::TShaderLanguage::GLSL, TESC_SHADER_STR);
-    Turbo::Core::TTessellationEvaluationShader *tessellation_evaluation_shader = new Turbo::Core::TTessellationEvaluationShader(device, Turbo::Core::TShaderLanguage::GLSL, TESE_SHADER_STR);
+    Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
@@ -458,7 +456,7 @@ int main()
 
     uint32_t patch_control_points = 3;
     Turbo::Core::TPolygonMode polygon_mode = Turbo::Core::TPolygonMode::FILL;
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, tessellation_control_shader, tessellation_evaluation_shader, fragment_shader, patch_control_points, false, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, geometry_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     std::vector<Turbo::Core::TImageView *> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
@@ -1110,8 +1108,7 @@ int main()
 
     delete descriptor_pool;
     delete vertex_shader;
-    delete tessellation_control_shader;
-    delete tessellation_evaluation_shader;
+    delete geometry_shader;
     delete fragment_shader;
     delete depth_image_view;
     delete depth_image;
