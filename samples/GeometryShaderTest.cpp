@@ -73,7 +73,7 @@ const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
 const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.tesc");
+const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
 const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
 
 typedef struct POSITION
@@ -462,8 +462,9 @@ int main()
     input_attachment_depths.push_back(depth_image_view);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
+    pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
     pipeline_descriptor_set->BindData(0, 1, 0, matrixs_buffers);
+    //pipeline_descriptor_set->BindData(0, 1, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
