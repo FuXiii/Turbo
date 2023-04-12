@@ -18,6 +18,7 @@ class TFragmentShader;
 class TComputeShader;
 class TTessellationControlShader;
 class TTessellationEvaluationShader;
+class TGeometryShader;
 class TDescriptorSetLayout;
 class TPipelineLayout;
 class TPipelineCache;
@@ -71,6 +72,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     [[deprecated]] TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr);
     TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
     TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
     // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
     TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline

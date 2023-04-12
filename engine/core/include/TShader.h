@@ -137,6 +137,13 @@ class TTessellationEvaluationShader : public Turbo::Core::TShader
     TTessellationEvaluationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
+class TGeometryShader : public Turbo::Core::TShader
+{
+  public:
+    TGeometryShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TGeometryShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADER_H

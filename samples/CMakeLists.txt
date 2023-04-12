@@ -251,3 +251,8 @@ add_executable(TessellationTest ./TessellationTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(TessellationTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(TessellationTest PUBLIC ${LINK_PARTH})
 target_link_libraries(TessellationTest PUBLIC ${LIBS})
+
+add_executable(GeometryShaderTest ./GeometryShaderTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(GeometryShaderTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(GeometryShaderTest PUBLIC ${LINK_PARTH})
+target_link_libraries(GeometryShaderTest PUBLIC ${LIBS})

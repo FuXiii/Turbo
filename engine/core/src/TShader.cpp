@@ -1126,3 +1126,11 @@ Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(TDevic
 Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, size, code, entryPoint)
 {
 }
+
+Turbo::Core::TGeometryShader::TGeometryShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TGeometryShader::TGeometryShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, size, code, entryPoint)
+{
+}
