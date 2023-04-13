@@ -4,8 +4,6 @@ layout(line_strip, max_vertices = 6) out;
 
 layout(location = 1) in vec3 NORMAL[];
 
-const float MAGNITUDE = 0.04;
-
 layout(set = 0, binding = 0) uniform MATRIXS
 {
     mat4 m;
@@ -14,11 +12,17 @@ layout(set = 0, binding = 0) uniform MATRIXS
 }
 Matrixs;
 
+layout(set = 0, binding = 1) uniform MYBUFFER
+{
+    float scale;
+}
+MyBuffer;
+
 void GenerateLine(int index)
 {
     gl_Position = Matrixs.p * gl_in[index].gl_Position;
     EmitVertex();
-    gl_Position = Matrixs.p * (gl_in[index].gl_Position + vec4(NORMAL[index], 0.0) * MAGNITUDE);
+    gl_Position = Matrixs.p * (gl_in[index].gl_Position + vec4(NORMAL[index], 0.0) * MyBuffer.scale);
     EmitVertex();
     EndPrimitive();
 }
@@ -26,6 +30,4 @@ void GenerateLine(int index)
 void main()
 {
     GenerateLine(0);
-    // GenerateLine(1);
-    // GenerateLine(2);
 }

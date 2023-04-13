@@ -106,10 +106,7 @@ typedef struct TEXCOORD
 
 struct MY_BUFFER_DATA
 {
-    int inner0;
-    int outer0;
-    int outer1;
-    int outer2;
+    float scale;
 };
 
 struct MATRIXS_BUFFER_DATA
@@ -124,10 +121,7 @@ int main()
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.inner0 = 0;
-    my_buffer_data.outer0 = 1;
-    my_buffer_data.outer1 = 1;
-    my_buffer_data.outer2 = 1;
+    my_buffer_data.scale = 0.03;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -299,8 +293,6 @@ int main()
         throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry shader feature");
     }
 
-    uint32_t max_tessellation_generation_level = physical_device->GetDeviceLimits().maxTessellationGenerationLevel;
-
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
@@ -409,8 +401,8 @@ int main()
 
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
-    std::vector<Turbo::Core::TBuffer *> buffers;
-    buffers.push_back(my_buffer);
+    std::vector<Turbo::Core::TBuffer *> my_buffers;
+    my_buffers.push_back(my_buffer);
 
     std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
     matrixs_buffers.push_back(matrixs_buffer);
@@ -463,8 +455,7 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    //pipeline_descriptor_set->BindData(0, 1, 0, matrixs_buffers);
-    //pipeline_descriptor_set->BindData(0, 1, 0, buffers);
+    pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -737,14 +728,11 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("BRDF");
+                ImGui::Begin("GeometryShaderTest");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderInt("inner 0", &my_buffer_data.inner0, 0, max_tessellation_generation_level);
-                ImGui::SliderInt("outer 0", &my_buffer_data.outer0, 1, max_tessellation_generation_level);
-                ImGui::SliderInt("outer 1", &my_buffer_data.outer1, 1, max_tessellation_generation_level);
-                ImGui::SliderInt("outer 2", &my_buffer_data.outer2, 1, max_tessellation_generation_level);
+                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
