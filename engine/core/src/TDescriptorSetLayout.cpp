@@ -52,16 +52,16 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
         }
     }
 
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
-    descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorSetLayoutCreateInfo.pNext = nullptr;
-    descriptorSetLayoutCreateInfo.flags = 0;
-    descriptorSetLayoutCreateInfo.bindingCount = bindings.size();
-    descriptorSetLayoutCreateInfo.pBindings = bindings.data();
+    VkDescriptorSetLayoutCreateInfo vk_descriptor_set_layout_create_info={};
+    vk_descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    vk_descriptor_set_layout_create_info.pNext = nullptr;
+    vk_descriptor_set_layout_create_info.flags = 0;
+    vk_descriptor_set_layout_create_info.bindingCount = bindings.size();
+    vk_descriptor_set_layout_create_info.pBindings = bindings.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = this->device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &descriptorSetLayoutCreateInfo, allocator, &this->vkDescriptorSetLayout);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &vk_descriptor_set_layout_create_info, allocator, &this->vkDescriptorSetLayout);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorSetLayout::InternalCreate::vkCreateDescriptorSetLayout");
