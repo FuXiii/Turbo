@@ -45,9 +45,9 @@
 
 - `Turbo::Core::TShader`中对于`code`的二进制数据是一直存在于内存的，对于`Vulkan`标准来说，这部分二进制数据在`VkShaderModule`创建完之后是没有意义的，目前该部分数据，仅仅是用于`ToString()`时转成`Shader`可读代码输出，无其他有用性。
 
-- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，目前还缺少对于`storage image`, `subpass input(input attachemnt)`和`storage buffer`
+- `Turbo::Core::TShader`中对于`VkDescriptor`的支持，目前还缺少对于`storage buffer`
 
-- <font color=orange>**[ 🛠 ] now**</font> 实现 `subpass input(input attachemnt)`相关特性，完成延迟渲染相关功能
+- <font color=green>**[ ✓ ]2022/5/30**</font> ~~实现 `subpass input(input attachemnt)`相关特性，完成延迟渲染相关功能~~
 
 - <font color=green>**[ ✓ ]2022/5/14**</font> ~~`Turbo::Core::TShader`中对于`VkDescriptor`的支持，开始适配`texture`，`sampler`。~~
 
@@ -86,7 +86,7 @@
 
 - `Turbo::Core::TCommandBuffer`很多指令未实现，待实现
 
-- `Second Command Buffer`目前`Turbo`不支持
+- <font color=green>**[ ✓ ]2022/8/18**</font> ~~`Second Command Buffer`目前`Turbo`不支持~~
 
 - 尝试重载`TSubpass`的`operator >>`用于构成渲染链，比如：(也许放到FrameGraph层是个不错的选择)
 
@@ -124,13 +124,13 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - `TSampler`的`VkCompareOp compareOp`特性目前固定为`VK_FALSE`,等统一设计深度测试那一部分再展开
 
-- 当前`TSurface`只支持`Windows`平台，其他平台未实现，但留了接口
+- 当前`TSurface`只支持`Windows`，`Linux`平台，其他平台未实现，但留了接口
 
-- 第三方库`glm`对于`MVP`矩阵异常的问题
+- <font color=green>**[ ✓ ]2022/11/18**</font> ~~第三方库`glm`对于`MVP`矩阵异常的问题~~
 
 - 当前`DescriptorSet`设计总感觉不合理，会冗余，应该搞个池子
 
-- 使用加载动态库的方式加载`Vulkan`库
+- <font color=green>**[ ✓ ]2022/7/25**</font> ~~使用加载动态库的方式加载`Vulkan`库~~
 
 - `TCommandBuffer::CmdPushConstants(...)`中的`ShaderStages`进一步研究，现在写的有问题
 
@@ -169,7 +169,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - `Turbo`中目前还有很多跨平台的内容没有填补，正常没有实现的需要抛出`throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED,...)`异常,帮助跨平台开发提示
 
-- `TVulkanLoader`需要适配`Linux`系统
+- <font color=green>**[ ✓ ]2022/11/15**</font> ~~`TVulkanLoader`需要适配`Linux`系统~~
 
 - 考虑是否将外部引入的`VkSurfaceKHR`中在`TSurface`析构时顺便销毁，目前外部引入的`VkSurfaceKHR`，需要在外部自己销毁
 
@@ -207,4 +207,4 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2022/12/17**</font> ~~修改`./engine/core`下`TBuffer`和`TImage`对于`TFormatInfo`参数的构造函数，更改成使用`TFormatType formatType`参数构造~~
 
-- `./engine/core`下`TGraphicsPipeline`中`VkPipelineTessellationStateCreateInfo`目前没有提供支持，需要实现相关接口，提供功能
+- <font color=green>**[ ✓ ]2023/4/11**</font> ~~`./engine/core`下`TGraphicsPipeline`中`VkPipelineTessellationStateCreateInfo`目前没有提供支持，需要实现相关接口，提供功能~~
