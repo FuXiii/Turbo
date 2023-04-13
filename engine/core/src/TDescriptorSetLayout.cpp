@@ -8,43 +8,60 @@
 
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()
 {
-    uint32_t binding_count = this->descriptors.size();
-
-    std::vector<VkDescriptorSetLayoutBinding> bindings;
-    bindings.resize(binding_count);
-
-    for (uint32_t binding_index = 0; binding_index < binding_count; binding_index++)
+    std::map</*binding*/ uint32_t, std::vector<TDescriptor *>> binding_map;
+    for (TDescriptor *descriptor_item : this->descriptors)
     {
-        TDescriptor *descriptor = this->descriptors[binding_index];
-        TShader *shader = descriptor->GetShader();
-        if (descriptor != nullptr)
+        uint32_t binding = descriptor_item->GetBinding();
+        TShader *shader = descriptor_item->GetShader();
+        if (shader != nullptr)
         {
-            bindings[binding_index].binding = descriptor->GetBinding();
-            bindings[binding_index].descriptorType = descriptor->GetVkDescriptorType();
-            bindings[binding_index].descriptorCount = descriptor->GetCount();
-            bindings[binding_index].stageFlags = VK_SHADER_STAGE_ALL;
-            if (shader != nullptr)
-            {
-                bindings[binding_index].stageFlags = descriptor->GetShader()->GetVkShaderStageFlags();
-            }
-            bindings[binding_index].pImmutableSamplers = nullptr;
-        }
-        else
-        {
-            throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
+            binding_map[binding].push_back(descriptor_item);
         }
     }
 
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
-    descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorSetLayoutCreateInfo.pNext = nullptr;
-    descriptorSetLayoutCreateInfo.flags = 0;
-    descriptorSetLayoutCreateInfo.bindingCount = binding_count;
-    descriptorSetLayoutCreateInfo.pBindings = bindings.data();
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+    for (auto &descriptors_item : binding_map)
+    {
+        std::vector<Turbo::Core::TDescriptor *> &descriptors = descriptors_item.second;
+        if (descriptors.size() > 0)
+        {
+            TDescriptor *descriptor = descriptors[0];
+            if (descriptor != nullptr)
+            {
+                VkDescriptorSetLayoutBinding vk_descriptor_set_layout_binding = {};
+                vk_descriptor_set_layout_binding.binding = descriptor->GetBinding();
+                vk_descriptor_set_layout_binding.descriptorType = descriptor->GetVkDescriptorType();
+                vk_descriptor_set_layout_binding.descriptorCount = descriptor->GetCount();
+                vk_descriptor_set_layout_binding.stageFlags = 0;
+                for (TDescriptor *descriptor_item : descriptors)
+                {
+                    TShader *shader = descriptor_item->GetShader();
+                    if (shader != nullptr)
+                    {
+                        vk_descriptor_set_layout_binding.stageFlags |= descriptor_item->GetShader()->GetVkShaderStageFlags();
+                    }
+                }
+                vk_descriptor_set_layout_binding.pImmutableSamplers = nullptr;
+
+                bindings.push_back(vk_descriptor_set_layout_binding);
+            }
+            else
+            {
+                throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
+            }
+        }
+    }
+
+    VkDescriptorSetLayoutCreateInfo vk_descriptor_set_layout_create_info={};
+    vk_descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    vk_descriptor_set_layout_create_info.pNext = nullptr;
+    vk_descriptor_set_layout_create_info.flags = 0;
+    vk_descriptor_set_layout_create_info.bindingCount = bindings.size();
+    vk_descriptor_set_layout_create_info.pBindings = bindings.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = this->device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &descriptorSetLayoutCreateInfo, allocator, &this->vkDescriptorSetLayout);
+    VkResult result = this->device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &vk_descriptor_set_layout_create_info, allocator, &this->vkDescriptorSetLayout);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorSetLayout::InternalCreate::vkCreateDescriptorSetLayout");
