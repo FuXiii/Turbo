@@ -19,5 +19,5 @@ void main()
 {
     gl_Position = Matrixs.v * Matrixs.m * vec4(POSITION, 1.0);
     mat3 normalMatrix = mat3(transpose(inverse(Matrixs.v * Matrixs.m)));
-    normal = normalize(vec3(vec4(normalMatrix * NORMAL, 0.0)));;
+    normal = normalize(vec3(vec4(normalMatrix * NORMAL, 0.0)));
 }

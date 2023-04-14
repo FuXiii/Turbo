@@ -178,6 +178,26 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+{
+    if (device != nullptr && vertexShader != nullptr && tessellationControlShader != nullptr && tessellationEvaluationShader != nullptr && geometryShader != nullptr && fragmentShader != nullptr)
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaders.push_back(vertexShader);
+        this->shaders.push_back(tessellationControlShader);
+        this->shaders.push_back(tessellationEvaluationShader);
+        this->shaders.push_back(geometryShader);
+        this->shaders.push_back(fragmentShader);
+        this->pipelineCache = pipelineCache;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
 Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && computeShader != nullptr)

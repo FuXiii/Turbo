@@ -72,9 +72,11 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationAndGeometry.vert");
+const std::string TESC_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationAndGeometry.tesc");
+const std::string TESE_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationAndGeometry.tese");
+const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationAndGeometry.geom");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationAndGeometry.frag");
 
 typedef struct POSITION
 {
@@ -106,7 +108,13 @@ typedef struct TEXCOORD
 
 struct MY_BUFFER_DATA
 {
+    int inner0;
+    int outer0;
+    int outer1;
+    int outer2;
     float scale;
+    float time;
+    float value;
 };
 
 struct MATRIXS_BUFFER_DATA
@@ -121,7 +129,12 @@ int main()
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.scale = 0.03;
+    my_buffer_data.inner0 = 0;
+    my_buffer_data.outer0 = 1;
+    my_buffer_data.outer1 = 1;
+    my_buffer_data.outer2 = 1;
+    my_buffer_data.scale = 0.01;
+    my_buffer_data.value = 0.1;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -282,6 +295,17 @@ int main()
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
 
     Turbo::Core::TPhysicalDeviceFeatures physcial_device_support_features = physical_device->GetDeviceFeatures();
+    if (physcial_device_support_features.tessellationShader)
+    {
+        physical_device_features.tessellationShader = true;
+    }
+    else
+    {
+        glfwTerminate();
+        delete instance;
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support tessellation feature");
+    }
+
     if (physcial_device_support_features.geometryShader)
     {
         physical_device_features.geometryShader = true;
@@ -290,8 +314,15 @@ int main()
     {
         glfwTerminate();
         delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry shader feature");
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry feature");
     }
+
+    if (physcial_device_support_features.fillModeNonSolid)
+    {
+        physical_device_features.fillModeNonSolid = true;
+    }
+
+    uint32_t max_tessellation_generation_level = physical_device->GetDeviceLimits().maxTessellationGenerationLevel;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
@@ -383,6 +414,8 @@ int main()
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
+    Turbo::Core::TTessellationControlShader *tessellation_control_shader = new Turbo::Core::TTessellationControlShader(device, Turbo::Core::TShaderLanguage::GLSL, TESC_SHADER_STR);
+    Turbo::Core::TTessellationEvaluationShader *tessellation_evaluation_shader = new Turbo::Core::TTessellationEvaluationShader(device, Turbo::Core::TShaderLanguage::GLSL, TESE_SHADER_STR);
     Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
@@ -401,8 +434,8 @@ int main()
 
     Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
-    std::vector<Turbo::Core::TBuffer *> my_buffers;
-    my_buffers.push_back(my_buffer);
+    std::vector<Turbo::Core::TBuffer *> buffers;
+    buffers.push_back(my_buffer);
 
     std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
     matrixs_buffers.push_back(matrixs_buffer);
@@ -448,14 +481,18 @@ int main()
 
     uint32_t patch_control_points = 3;
     Turbo::Core::TPolygonMode polygon_mode = Turbo::Core::TPolygonMode::FILL;
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, geometry_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    if (physical_device_features.fillModeNonSolid)
+    {
+        polygon_mode = Turbo::Core::TPolygonMode::LINE;
+    }
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, tessellation_control_shader, tessellation_evaluation_shader, geometry_shader, fragment_shader, patch_control_points, false, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     std::vector<Turbo::Core::TImageView *> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
+    pipeline_descriptor_set->BindData(0, 1, 0, buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -552,6 +589,8 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        my_buffer_data.time = glfwGetTime();
 
         void *_ptr = my_buffer->Map();
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
@@ -728,11 +767,16 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("GeometryShaderTest");
+                ImGui::Begin("TessellationAndGeometry");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::SliderInt("inner 0", &my_buffer_data.inner0, 0, max_tessellation_generation_level);
+                ImGui::SliderInt("outer 0", &my_buffer_data.outer0, 1, max_tessellation_generation_level);
+                ImGui::SliderInt("outer 1", &my_buffer_data.outer1, 1, max_tessellation_generation_level);
+                ImGui::SliderInt("outer 2", &my_buffer_data.outer2, 1, max_tessellation_generation_level);
+                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.01, 1);
+                ImGui::SliderFloat("value", &my_buffer_data.value, 0, 1);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1098,6 +1142,8 @@ int main()
 
     delete descriptor_pool;
     delete vertex_shader;
+    delete tessellation_control_shader;
+    delete tessellation_evaluation_shader;
     delete geometry_shader;
     delete fragment_shader;
     delete depth_image_view;
