@@ -30,6 +30,12 @@
   >* 创建`Device Tessellation Feature`章节
   >* 创建`Tessellation Graphics Pipeline`章节
 
+* 2023/4/16
+  >
+  >* 创建`Mesh Shader`章节
+  >* 创建`Mesh Shader 接口函数`章节
+  >* 创建`Mesh Shader Feature`章节
+
 ---
 
 ## Device Feature
@@ -210,6 +216,7 @@ void vkCmdBeginRendering(
     VkCommandBuffer                             commandBuffer,
     const VkRenderingInfo*                      pRenderingInfo);
 ```
+
 ```CXX
 // Provided by VK_VERSION_1_3
 void vkCmdEndRendering(
@@ -273,7 +280,7 @@ void CmdBeginRendering(const TRenderingAttachments& renderingAttachment);
 void CmdEndRendering();
 ```
 
-## Tessellation 
+## Tessellation
 
 细分（`Tessellation`）。用于细分网格。
 
@@ -284,6 +291,7 @@ void CmdEndRendering();
 3. 细分评估（计算）着色器（可编程） Tessellation Evaluation Shader
 
 ### Device Tessellation Feature
+
 `Vulkan`中想要使用细分特性，需要查看和激活对应的设备`feature`。有关的细分的`feature`如下：
 
 ```CXX
@@ -347,7 +355,7 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 >如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分评估着色器话，`VkGraphicsPipelineCreateInfo`中的`pStages`必须也包含一个细分控制着色器
 
 >[VUID-VkGraphicsPipelineCreateInfo-pStages-00731](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00731)  
->If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage and a tessellation evaluation shader stage, pTessellationState `must` be a valid pointer to a valid `VkPipelineTessellationStateCreateInfo `structure
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage and a tessellation evaluation shader stage, pTessellationState `must` be a valid pointer to a valid `VkPipelineTessellationStateCreateInfo`structure
 >
 >如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分控制着色器和细分评估着色器的话，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效的`VkPipelineTessellationStateCreateInfo`结构值
 
@@ -372,3 +380,86 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效值
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`必须是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
 
+## Mesh Shader
+
+`Mesh Shader`在`Vulkan`中作为`NVIDIA`显卡上的一个设备扩展，被命名为`VK_NV_mesh_shader`。该扩展依赖于`VK_KHR_get_physical_device_properties2`扩展
+
+有两种新的可编程着色器
+
+* Task Shader
+* Mesh Shader
+
+这两个着色器可以用于替代如下过程
+
+* 获取顶点属性
+* 顶点着色器
+* 细分着色器
+* 几何着色器
+
+同时该扩展同时会开启`SPV_NV_mesh_shader`的`SPIR-V`扩展
+
+### Mesh Shader Feature
+
+需要查看设备是否支持`Mesh Shader`特性，之后再去激活相关特性。对于特性获取有两种方式：
+
+1. 通过`Vulkan 1.1`的`vkGetPhysicalDeviceFeatures2`函数：
+
+    ```CXX
+    // Provided by VK_VERSION_1_1
+    void vkGetPhysicalDeviceFeatures2(
+      VkPhysicalDevice physicalDevice,
+      VkPhysicalDeviceFeatures2* pFeatures);
+
+    ```
+
+2. 通过`VK_KHR_get_physical_device_properties2`扩展获得：
+
+    ```CXX
+    // Provided by VK_KHR_get_physical_device_properties2
+    void vkGetPhysicalDeviceFeatures2(
+      VkPhysicalDevice physicalDevice,
+      VkPhysicalDeviceFeatures2* pFeatures);
+
+    ```
+
+### Mesh Shader 接口函数
+
+新增如下接口函数
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksIndirectCountNV(
+  VkCommandBuffer commandBuffer,
+  VkBuffer buffer,
+  VkDeviceSize offset,
+  VkBuffer countBuffer,
+  VkDeviceSize countBufferOffset,
+  uint32_t maxDrawCount,
+  uint32_t stride)
+```
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksIndirectNV(
+  VkCommandBuffer commandBuffer,
+  VkBuffer buffer,
+  VkDeviceSize offset,
+  uint32_t drawCount,
+  uint32_t stride);
+
+```
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksNV(
+  VkCommandBuffer commandBuffer,
+  uint32_t taskCount,
+  uint32_t firstTask);
+```
+
+主要看一下`vkCmdDrawMeshTasksNV`函数，其中
+
+* `taskCount`是设置本地工作组（`local workgroup`）在`X`轴处的数量，对于`Y`轴和`Z`轴其数量隐示默认为`1`
+* `firstTask`是`X`轴上的第一个工作组的`ID`
+
+当`vkCmdDrawMeshTasksNV`被调用时会有`taskCount`个本地工作组组成全局工作组
