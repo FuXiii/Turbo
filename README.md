@@ -2986,10 +2986,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, uint32_t patchControlPoints, ...)`支持细分和几何着色器的构造函数
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr)`支持细分和几何着色器的构造函数
 
-
-
-  
-
-
-
-  
+* 2023/4/16 设计架构
+  >
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的细分着色器的图形管线构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass*renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TGeometryShader*geometryShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的几何着色器的图形管线构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass*renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader*tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader*geometryShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的细分和几何着色器的图形管线构造函数
