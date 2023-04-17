@@ -41,8 +41,56 @@ void VKAPI_PTR Free(void *pUserData, void *pMemory)
     return _aligned_free(pMemory);
 }
 
-void Test0(VkInstance vkInstance, VkDevice vkDevice, const std::vector<VkQueue> &vkQueues)
+void Test0(VkInstance vkInstance, VkPhysicalDevice vkPhysicalDevice, VkDevice vkDevice, const std::vector<VkQueue> &vkQueues)
 {
+    VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
+    vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+    vk_physical_device_mesh_shader_features_nv.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_nv.taskShader = false;
+    vk_physical_device_mesh_shader_features_nv.meshShader = false;
+
+    VkPhysicalDeviceFeatures2 vk_physical_device_features_2 = {};
+    vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    vk_physical_device_features_2.pNext = &vk_physical_device_mesh_shader_features_nv;
+    vk_physical_device_features_2.features = {};
+
+    vk_GetPhysicalDeviceFeatures2(vkPhysicalDevice, &vk_physical_device_features_2);
+
+    if (vk_physical_device_features_2.features.textureCompressionASTC_LDR)
+    {
+        std::cout << "textureCompressionASTC_LDR::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "textureCompressionASTC_LDR::False" << std::endl;
+    }
+
+    if (vk_physical_device_features_2.features.pipelineStatisticsQuery)
+    {
+        std::cout << "pipelineStatisticsQuery::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "pipelineStatisticsQuery::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_nv.taskShader)
+    {
+        std::cout << "taskShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "taskShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_nv.meshShader)
+    {
+        std::cout << "meshShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "meshShader::False" << std::endl;
+    }
 }
 
 int main()
@@ -186,57 +234,6 @@ int main()
         std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
     }
 
-    {
-        VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
-        vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
-        vk_physical_device_mesh_shader_features_nv.pNext = nullptr;
-        vk_physical_device_mesh_shader_features_nv.taskShader = false;
-        vk_physical_device_mesh_shader_features_nv.meshShader = false;
-
-        VkPhysicalDeviceFeatures2 vk_physical_device_features_2 = {};
-        vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-        vk_physical_device_features_2.pNext = &vk_physical_device_mesh_shader_features_nv;
-        vk_physical_device_features_2.features = {};
-
-        vk_GetPhysicalDeviceFeatures2(target_physical_device, &vk_physical_device_features_2);
-
-        if (vk_physical_device_features_2.features.textureCompressionASTC_LDR)
-        {
-            std::cout << "textureCompressionASTC_LDR::True" << std::endl;
-        }
-        else
-        {
-            std::cout << "textureCompressionASTC_LDR::False" << std::endl;
-        }
-
-        if (vk_physical_device_features_2.features.pipelineStatisticsQuery)
-        {
-            std::cout << "pipelineStatisticsQuery::True" << std::endl;
-        }
-        else
-        {
-            std::cout << "pipelineStatisticsQuery::False" << std::endl;
-        }
-
-        if (vk_physical_device_mesh_shader_features_nv.taskShader)
-        {
-            std::cout << "taskShader::True" << std::endl;
-        }
-        else
-        {
-            std::cout << "taskShader::False" << std::endl;
-        }
-
-        if (vk_physical_device_mesh_shader_features_nv.meshShader)
-        {
-            std::cout << "meshShader::True" << std::endl;
-        }
-        else
-        {
-            std::cout << "meshShader::False" << std::endl;
-        }
-    }
-
     uint32_t queue_family_count = 0;
     vk_GetPhysicalDeviceQueueFamilyProperties(target_physical_device, &queue_family_count, nullptr);
     std::vector<VkQueueFamilyProperties> vk_queue_family_properties(queue_family_count);
@@ -306,7 +303,7 @@ int main()
     }
 
     // TODO: Test Code ...
-    Test0(vk_instance, vk_device, vk_queues);
+    Test0(vk_instance, target_physical_device, vk_device, vk_queues);
 
     vk_DestroyDevice(vk_device, nullptr);
     std::cout << "vkDestroyDevice success" << std::endl;
