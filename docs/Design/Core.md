@@ -36,6 +36,10 @@
   >* 创建`Mesh Shader 接口函数`章节
   >* 创建`Mesh Shader Feature`章节
 
+* 2023/4/16
+  >
+  >* 更新`Mesh Shader`章节
+
 ---
 
 ## Device Feature
@@ -397,6 +401,8 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 * 几何着色器
 
 同时该扩展同时会开启`SPV_NV_mesh_shader`的`SPIR-V`扩展
+
+`Vulkan`中还有一个名为`VK_EXT_mesh_shader`的设备扩展，该扩展为更加通用的扩展。与`VK_NV_mesh_shader`不完全一样，有区别。
 
 ### Mesh Shader Feature
 
