@@ -1,5 +1,5 @@
-#include <vulkan/vulkan_core.h>
-
+#include <vulkan/vulkan.h>
+// #include <vulkan/vulkan_core.h>
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
@@ -46,50 +46,86 @@ void Test0(VkInstance vkInstance, VkPhysicalDevice vkPhysicalDevice, VkDevice vk
     VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
     vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
     vk_physical_device_mesh_shader_features_nv.pNext = nullptr;
-    vk_physical_device_mesh_shader_features_nv.taskShader = false;
-    vk_physical_device_mesh_shader_features_nv.meshShader = false;
+    vk_physical_device_mesh_shader_features_nv.taskShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_nv.meshShader = VK_FALSE;
+
+    VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
+    vk_physical_device_mesh_shader_features_ext.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    vk_physical_device_mesh_shader_features_ext.pNext = &vk_physical_device_mesh_shader_features_nv;
+    vk_physical_device_mesh_shader_features_ext.taskShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.primitiveFragmentShadingRateMeshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShaderQueries = VK_FALSE;
 
     VkPhysicalDeviceFeatures2 vk_physical_device_features_2 = {};
     vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    vk_physical_device_features_2.pNext = &vk_physical_device_mesh_shader_features_nv;
+    vk_physical_device_features_2.pNext = &vk_physical_device_mesh_shader_features_ext;
     vk_physical_device_features_2.features = {};
 
     vk_GetPhysicalDeviceFeatures2(vkPhysicalDevice, &vk_physical_device_features_2);
 
-    if (vk_physical_device_features_2.features.textureCompressionASTC_LDR)
-    {
-        std::cout << "textureCompressionASTC_LDR::True" << std::endl;
-    }
-    else
-    {
-        std::cout << "textureCompressionASTC_LDR::False" << std::endl;
-    }
-
-    if (vk_physical_device_features_2.features.pipelineStatisticsQuery)
-    {
-        std::cout << "pipelineStatisticsQuery::True" << std::endl;
-    }
-    else
-    {
-        std::cout << "pipelineStatisticsQuery::False" << std::endl;
-    }
-
     if (vk_physical_device_mesh_shader_features_nv.taskShader)
     {
-        std::cout << "taskShader::True" << std::endl;
+        std::cout << "NV_taskShader::True" << std::endl;
     }
     else
     {
-        std::cout << "taskShader::False" << std::endl;
+        std::cout << "NV_taskShader::False" << std::endl;
     }
 
     if (vk_physical_device_mesh_shader_features_nv.meshShader)
     {
-        std::cout << "meshShader::True" << std::endl;
+        std::cout << "NV_meshShader::True" << std::endl;
     }
     else
     {
-        std::cout << "meshShader::False" << std::endl;
+        std::cout << "NV_meshShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_ext.taskShader)
+    {
+        std::cout << "EXT_taskShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "EXT_taskShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_ext.meshShader)
+    {
+        std::cout << "EXT_meshShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "EXT_meshShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_ext.multiviewMeshShader)
+    {
+        std::cout << "EXT_multiviewMeshShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "EXT_multiviewMeshShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_ext.primitiveFragmentShadingRateMeshShader)
+    {
+        std::cout << "EXT_primitiveFragmentShadingRateMeshShader::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "EXT_primitiveFragmentShadingRateMeshShader::False" << std::endl;
+    }
+
+    if (vk_physical_device_mesh_shader_features_ext.meshShaderQueries)
+    {
+        std::cout << "EXT_meshShaderQueries::True" << std::endl;
+    }
+    else
+    {
+        std::cout << "EXT_meshShaderQueries::False" << std::endl;
     }
 }
 
