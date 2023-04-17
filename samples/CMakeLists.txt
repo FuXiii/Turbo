@@ -261,8 +261,3 @@ add_executable(TessellationAndGeometry ./TessellationAndGeometry.cpp ${IMGUI_SOU
 target_include_directories(TessellationAndGeometry PUBLIC ${INCLUDE_PARTH})
 target_link_directories(TessellationAndGeometry PUBLIC ${LINK_PARTH})
 target_link_libraries(TessellationAndGeometry PUBLIC ${LIBS})
-
-add_executable(VulkanFeatureTest ./VulkanFeatureTest.cpp ${IMGUI_SOURCE_PATH})
-target_include_directories(VulkanFeatureTest PUBLIC ${INCLUDE_PARTH})
-target_link_directories(VulkanFeatureTest PUBLIC ${LINK_PARTH})
-target_link_libraries(VulkanFeatureTest PUBLIC ${LIBS})

@@ -2993,3 +2993,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass*renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader*tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader*geometryShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的细分和几何着色器的图形管线构造函数
   >* 更新`./docs/Design/Core.md`文档，研究`Mesh Shader`。
   >* `./samples`中增加`VulkanFeatureTest`例子，用于研究`Vulkan`特性
+
+* 2023/4/16 设计架构
+  >
+  >* `./samples`中移除`VulkanFeatureTest`例子，改用`VulkanTest`进行`Vulkan`接口测试
