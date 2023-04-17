@@ -14,6 +14,7 @@ PFN_vkGetInstanceProcAddr vk_GetInstanceProcAddr = nullptr;
 PFN_vkCreateInstance vk_CreateInstance = nullptr;
 PFN_vkDestroyInstance vk_DestroyInstance = nullptr;
 PFN_vkGetPhysicalDeviceFeatures2KHR vk_GetPhysicalDeviceFeatures2KHR = nullptr;
+PFN_vkGetPhysicalDeviceFeatures2 vk_GetPhysicalDeviceFeatures2 = nullptr;
 PFN_vkEnumeratePhysicalDevices vk_EnumeratePhysicalDevices = nullptr;
 PFN_vkGetPhysicalDeviceProperties vk_GetPhysicalDeviceProperties = nullptr;
 PFN_vkCreateDevice vk_CreateDevice = nullptr;
@@ -77,7 +78,7 @@ int main()
     enable_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
     enable_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     {
-        enable_instance_extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+        // enable_instance_extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     }
     std::vector<const char *> instance_enabled_extension_names;
     for (const std::string &instance_extension : enable_instance_extensions)
@@ -109,10 +110,17 @@ int main()
     {
         throw std::exception("vkCreateInstance failed");
     }
+    else
+    {
+        std::cout << "vkCreateInstance success" << std::endl;
+    }
 
-    std::cout << "vkCreateInstance success" << std::endl;
-    vk_GetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)vk_GetInstanceProcAddr(vk_instance, "vkGetPhysicalDeviceFeatures2KHR");
-    assert(vk_GetPhysicalDeviceFeatures2KHR && "vkGetPhysicalDeviceFeatures2KHR");
+    // vk_GetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)vk_GetInstanceProcAddr(vk_instance, "vkGetPhysicalDeviceFeatures2KHR");
+    // assert(vk_GetPhysicalDeviceFeatures2KHR && "vkGetPhysicalDeviceFeatures2KHR");
+    {
+        vk_GetPhysicalDeviceFeatures2 = (PFN_vkGetPhysicalDeviceFeatures2)vk_GetInstanceProcAddr(vk_instance, "vkGetPhysicalDeviceFeatures2");
+        assert(vk_GetPhysicalDeviceFeatures2 && "vkGetPhysicalDeviceFeatures2");
+    }
 
     vk_DestroyInstance = (PFN_vkDestroyInstance)vk_GetInstanceProcAddr(vk_instance, "vkDestroyInstance");
     assert(vk_DestroyInstance && "vkDestroyInstance");
@@ -173,7 +181,61 @@ int main()
     {
         throw std::exception("Not found suitable GPU");
     }
-    std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
+    else
+    {
+        std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
+    }
+
+    {
+        VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
+        vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+        vk_physical_device_mesh_shader_features_nv.pNext = nullptr;
+        vk_physical_device_mesh_shader_features_nv.taskShader = false;
+        vk_physical_device_mesh_shader_features_nv.meshShader = false;
+
+        VkPhysicalDeviceFeatures2 vk_physical_device_features_2 = {};
+        vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        vk_physical_device_features_2.pNext = &vk_physical_device_mesh_shader_features_nv;
+        vk_physical_device_features_2.features = {};
+
+        vk_GetPhysicalDeviceFeatures2(target_physical_device, &vk_physical_device_features_2);
+
+        if (vk_physical_device_features_2.features.textureCompressionASTC_LDR)
+        {
+            std::cout << "textureCompressionASTC_LDR::True" << std::endl;
+        }
+        else
+        {
+            std::cout << "textureCompressionASTC_LDR::False" << std::endl;
+        }
+
+        if (vk_physical_device_features_2.features.pipelineStatisticsQuery)
+        {
+            std::cout << "pipelineStatisticsQuery::True" << std::endl;
+        }
+        else
+        {
+            std::cout << "pipelineStatisticsQuery::False" << std::endl;
+        }
+
+        if (vk_physical_device_mesh_shader_features_nv.taskShader)
+        {
+            std::cout << "taskShader::True" << std::endl;
+        }
+        else
+        {
+            std::cout << "taskShader::False" << std::endl;
+        }
+
+        if (vk_physical_device_mesh_shader_features_nv.meshShader)
+        {
+            std::cout << "meshShader::True" << std::endl;
+        }
+        else
+        {
+            std::cout << "meshShader::False" << std::endl;
+        }
+    }
 
     uint32_t queue_family_count = 0;
     vk_GetPhysicalDeviceQueueFamilyProperties(target_physical_device, &queue_family_count, nullptr);
