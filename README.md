@@ -3001,4 +3001,6 @@ Turbo是渲染引擎
 
 * 2023/4/18 设计架构
   >
-  >* 更新`./engine/core/include`下的`TVulkanLoader.h`中`TVulkanLoader`类中的`GetVulkanVersion()`函数，将其更改为静态函数，并更新内部算法
+  >* 更新`./engine/core`下的`TVulkanLoader.h`中`TVulkanLoader`类中的`GetVulkanVersion()`函数，将其更改为静态函数，并更新内部算法
+  >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`IsSupportVulkan()`函数
+  >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`GetVulkanInstanceVersion()`函数

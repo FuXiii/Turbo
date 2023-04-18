@@ -1,3 +1,4 @@
+#include "core/include/TInstance.h"
 #include <vulkan/vulkan.h>
 // #include <vulkan/vulkan_core.h>
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
@@ -131,6 +132,8 @@ void Test0(VkInstance vkInstance, VkPhysicalDevice vkPhysicalDevice, VkDevice vk
 
 int main()
 {
+    std::cout << "IsSupportVulkan:" << Turbo::Core::TInstance::IsSupportVulkan() << std::endl;
+    std::cout << "Vulkan:" << Turbo::Core::TInstance::GetVulkanInstanceVersion().ToString() << std::endl;
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
     HMODULE library = LoadLibraryA("vulkan-1.dll");
     if (!library)

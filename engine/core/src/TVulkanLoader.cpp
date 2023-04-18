@@ -419,7 +419,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader::GetVulkanVersion()", "Please implement this platform definition");
 #endif
 
-    auto uinstall_vulkan_lib_fun = [&]() {
+    auto uinstall_vulkan_lib = [&]() {
 #ifdef TURBO_PLATFORM_WINDOWS
         if (library)
         {
@@ -437,7 +437,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
 
     if (!vk_get_instance_proc_addr)
     {
-        uinstall_vulkan_lib_fun();
+        uinstall_vulkan_lib();
         return TVersion(0, 0, 0, 0);
     }
 
@@ -448,11 +448,11 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         VkResult result = vk_enumerate_instance_version(&vulkan_version);
         if (result != VkResult::VK_SUCCESS)
         {
-            uinstall_vulkan_lib_fun();
+            uinstall_vulkan_lib();
             return TVersion(0, 0, 0, 0);
         }
 
-        uinstall_vulkan_lib_fun();
+        uinstall_vulkan_lib();
         return TVersion(VK_VERSION_MAJOR(vulkan_version), VK_VERSION_MINOR(vulkan_version), VK_VERSION_PATCH(vulkan_version), 0);
     }
 
@@ -460,7 +460,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     PFN_vkCreateInstance vk_create_instance = (PFN_vkCreateInstance)vk_get_instance_proc_addr(VK_NULL_HANDLE, "vkCreateInstance");
     if (!vk_create_instance)
     {
-        uinstall_vulkan_lib_fun();
+        uinstall_vulkan_lib();
         return TVersion(0, 0, 0, 0);
     }
 
@@ -487,19 +487,19 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     VkResult result = vk_create_instance(&vk_instance_create_info, nullptr, &vk_instance);
     if (result != VkResult::VK_SUCCESS)
     {
-        uinstall_vulkan_lib_fun();
+        uinstall_vulkan_lib();
         return TVersion(0, 0, 0, 0);
     }
 
     PFN_vkDestroyInstance vk_destroy_instance = (PFN_vkDestroyInstance)vk_get_instance_proc_addr(vk_instance, "vkDestroyInstance");
     if (!vk_destroy_instance)
     {
-        uinstall_vulkan_lib_fun();
+        uinstall_vulkan_lib();
         throw Turbo::Core::TException(TResult::FAIL);
     }
 
     vk_destroy_instance(vk_instance, nullptr);
-    uinstall_vulkan_lib_fun();
+    uinstall_vulkan_lib();
     return TVersion(1, 0, 0, 0);
 }
 
