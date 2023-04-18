@@ -36,11 +36,97 @@
   >* 创建`Mesh Shader 接口函数`章节
   >* 创建`Mesh Shader Feature`章节
 
-* 2023/4/16
+* 2023/4/17
   >
   >* 更新`Mesh Shader`章节
 
+* 2023/4/18
+  >
+  >* 创建`获取 Vulkan API`章节
+  >* 创建`实例级别`章节
+  >* 创建`物理设备级别`章节
+  >* 创建`设备级别`章节
+  >* 创建`获取Vulkan版本`章节
+  >* 创建`是否支持Vulkan`章节
+
 ---
+
+## 获取 Vulkan API
+
+由于`Vulkan`中有三种级别的函数
+
+* 实例级别（instance-level）的函数
+* 物理设备级别（physical-device-level）的函数
+* 设备级别（device-level）的函数
+
+### 实例级别
+
+实例级别的函数广义上是指`Vulkan`中的所有可使用`VkInstance`，`VkPhysicalDevice`，`VkDevice`，`VkQueue`或者`VkCommandBuffer`调度的函数，并且在获取这些函数时需要传递一个有效`VkInstance`。
+
+其中有一些函数比较特殊，为全局函数，在获取时不需要传递有效`VkInstance`，直接传递`VK_NULL_HANDLE`既可以有效获取：
+
+* vkEnumerateInstanceVersion
+* vkEnumerateInstanceExtensionProperties
+* vkEnumerateInstanceLayerProperties
+* vkCreateInstance
+
+### 物理设备级别
+### 设备级别
+
+## 获取Vulkan版本
+
+由于历史原因，在`Vulkan1.0`版本中获取不到系统支持的`Vulkan`版本，只能获取到显卡设备支持的`Vulkan`版本，后来在`Vulkan1.1`后增加了`vkEnumerateInstanceVersion`函数来获取`Vulkan`版本，而`vkEnumerateInstanceVersion`为全局函数，可能会返回`nullptr`（当系统只支持`Vulkan1.0`时）。所以需要有一个判断流程用于获取`Vulkan`版本
+
+```mermaid
+graph TD;
+LoadVulkanLib("加载Vulkan动态库")
+IsLoadVulkanLib{"是否加载"}
+ReturnVersion000("返回版本号0.0.0")
+GetvkEnumerateInstanceVersion("获取vkEnumerateInstanceVersion函数")
+IsGetvkEnumerateInstanceVersion{"是否获取到"}
+GetvkCreateInstance("获取vkCreateInstance函数")
+IsGetvkCreateInstance{"是否获取到"}
+IsCreateVkInstance{"是否成功创建VkInstance"}
+GetvkDestroyInstance("获取vkDestroyInstance函数")
+IsGetvkDestroyInstance{"是否获取到"}
+
+LoadVulkanLib-->IsLoadVulkanLib
+IsLoadVulkanLib--"加载成功（注：返回前卸载）"-->GetvkEnumerateInstanceVersion
+IsLoadVulkanLib--加载失败-->ReturnVersion000
+
+GetvkEnumerateInstanceVersion-->IsGetvkEnumerateInstanceVersion
+IsGetvkEnumerateInstanceVersion--成功获取-->ReturnSupportVersion("返回支持的Vulkan版本")
+IsGetvkEnumerateInstanceVersion--获取失败-->GetvkCreateInstance
+
+GetvkCreateInstance-->IsGetvkCreateInstance
+IsGetvkCreateInstance--成功获取-->TryToCreateVkInstance("尝试创建VkInstance1.0")
+IsGetvkCreateInstance--获取失败-->ReturnVersion000
+
+TryToCreateVkInstance-->IsCreateVkInstance
+IsCreateVkInstance--成功创建-->GetvkDestroyInstance
+IsCreateVkInstance--创建失败-->ReturnVersion000
+
+GetvkDestroyInstance-->IsGetvkDestroyInstance
+IsGetvkDestroyInstance--成功获取-->DestroyInstance("销毁之前创建的VkInstance")
+IsGetvkDestroyInstance--获取失败-->ReturnException("返回一个异常")
+
+DestroyInstance-->ReturnSupportVersion1.0("返回支持的Vulkan1.0")
+```
+
+## 是否支持Vulkan
+
+通过获取`Vulkan`版本判断
+
+```mermaid
+graph TD;
+GetVulkanVersion("获取Vulkan版本")
+IfGetVersion000OrGetException{"返回版本0.0.0或者抛出异常"}
+
+
+GetVulkanVersion-->IfGetVersion000OrGetException
+IfGetVersion000OrGetException--是-->ReturnFalse("返回不支持Vulkan")
+IfGetVersion000OrGetException--否-->ReturnTrue("返回支持Vulkan")
+```
 
 ## Device Feature
 

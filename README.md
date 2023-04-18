@@ -2994,7 +2994,11 @@ Turbo是渲染引擎
   >* 更新`./docs/Design/Core.md`文档，研究`Mesh Shader`。
   >* `./samples`中增加`VulkanFeatureTest`例子，用于研究`Vulkan`特性
 
-* 2023/4/16 设计架构
+* 2023/4/17 设计架构
   >
   >* `./samples`中移除`VulkanFeatureTest`例子，改用`VulkanTest`进行`Vulkan`接口测试
   >* 更新`./engine/core/include`下的`Vulkan`头文件，当前的`VK_HEADER_VERSION`为`204`有点老，更新到`247`，并且增加`Vulkan`的`vk_video`头文件夹
+
+* 2023/4/18 设计架构
+  >
+  >* 更新`./engine/core/include`下的`TVulkanLoader.h`中`TVulkanLoader`类中的`GetVulkanVersion()`函数，将其更改为静态函数，并更新内部算法

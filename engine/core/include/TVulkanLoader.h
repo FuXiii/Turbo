@@ -323,6 +323,8 @@ class TVulkanLoader : public TObject
     static TVulkanLoader *Instance();
     static void Destroy();
 
+    static TVersion GetVulkanVersion();
+
     void LoadAll(TInstance *instance);
 
     template <typename Function>
@@ -342,8 +344,6 @@ class TVulkanLoader : public TObject
 
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name);
-
-    TVersion GetVulkanVersion();
 
     TDeviceDriver LoadDeviceDriver(TDevice *device);
 

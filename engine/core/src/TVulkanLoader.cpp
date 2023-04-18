@@ -231,6 +231,7 @@ void Turbo::Core::TVulkanLoader::LoadAllInstanceFunctions(TInstance *instance)
 #endif
 
 #if defined(VK_VERSION_1_1)
+    // FIXME:vkGetPhysicalDeviceFeatures2 is physcial-device-level function
     Turbo::Core::vkGetPhysicalDeviceFeatures2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>(vk_instance, "vkGetPhysicalDeviceFeatures2");
 #endif
 }
@@ -395,25 +396,85 @@ void Turbo::Core::TVulkanLoader::LoadAll(TInstance *instance)
 
 Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
 {
-    uint32_t version = 0;
-
-#if defined(VK_VERSION_1_1)
-    PFN_vkEnumerateInstanceVersion pfn_vk_enumerate_instance_version = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(nullptr, "vkEnumerateInstanceVersion");
-    if (pfn_vk_enumerate_instance_version != nullptr && pfn_vk_enumerate_instance_version(&version) == VkResult::VK_SUCCESS)
+#ifdef TURBO_PLATFORM_WINDOWS
+    HMODULE library = LoadLibraryA("vulkan-1.dll");
+#elif defined(TURBO_PLATFORM_LINUX)
+    void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+    if (!library)
     {
-        uint32_t major = VK_VERSION_MAJOR(version);
-        uint32_t minor = VK_VERSION_MINOR(version);
-        uint32_t patch = VK_VERSION_PATCH(version);
-
-        return TVersion(major, minor, patch, 0);
+        library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     }
+#else
+    throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader::GetVulkanVersion()", "Please implement this platform definition");
 #endif
-    if (TInstance::IsSupportVulkan())
+    if (!library)
     {
-        return TVersion(1, 0, 0, 0);
+        return TVersion(0, 0, 0, 0);
     }
 
-    return TVersion(0, 0, 0, 0);
+    PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
+    if (!vk_get_instance_proc_addr)
+    {
+        // TODO: Uninstall Vulkan Lib
+        return TVersion(0, 0, 0, 0);
+    }
+
+    PFN_vkEnumerateInstanceVersion vk_enumerate_instance_version = (PFN_vkEnumerateInstanceVersion)vk_get_instance_proc_addr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+    if (vk_enumerate_instance_version)
+    {
+        uint32_t vulkan_version = 0;
+        VkResult result = vk_enumerate_instance_version(&vulkan_version);
+        if (result != VkResult::VK_SUCCESS)
+        {
+            // TODO: Uninstall Vulkan Lib
+            return TVersion(0, 0, 0, 0);
+        }
+
+        // TODO: Uninstall Vulkan Lib
+        return TVersion(VK_VERSION_MAJOR(vulkan_version), VK_VERSION_MINOR(vulkan_version), VK_VERSION_PATCH(vulkan_version), 0);
+    }
+
+    // TODO:try to create Vulkan1.0
+    PFN_vkCreateInstance vk_create_instance = (PFN_vkCreateInstance)vk_get_instance_proc_addr(VK_NULL_HANDLE, "vkCreateInstance");
+    if (!vk_create_instance)
+    {
+        // TODO: Uninstall Vulkan Lib
+        return TVersion(0, 0, 0, 0);
+    }
+
+    VkApplicationInfo vk_application_info = {};
+    vk_application_info.sType = VkStructureType::VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    vk_application_info.pNext = nullptr;
+    vk_application_info.pApplicationName = nullptr;
+    vk_application_info.applicationVersion = 0;
+    vk_application_info.pEngineName = nullptr;
+    vk_application_info.engineVersion = 0;
+    vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+
+    VkInstanceCreateInfo vk_instance_create_info = {};
+    vk_instance_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    vk_instance_create_info.pNext = nullptr;
+    vk_instance_create_info.flags = 0;
+    vk_instance_create_info.pApplicationInfo = &vk_application_info;
+    vk_instance_create_info.enabledLayerCount = 0;
+    vk_instance_create_info.ppEnabledLayerNames = nullptr;
+    vk_instance_create_info.enabledExtensionCount = 0;
+    vk_instance_create_info.ppEnabledExtensionNames = nullptr;
+
+    VkInstance vk_instance = VK_NULL_HANDLE;
+    VkResult result = vk_create_instance(&vk_instance_create_info, nullptr, &vk_instance);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        // TODO: Uninstall Vulkan Lib
+        return TVersion(0, 0, 0, 0);
+    }
+
+    PFN_vkDestroyInstance vk_destroy_instance = (PFN_vkDestroyInstance)vk_get_instance_proc_addr(vk_instance, "vkDestroyInstance");
+    if (!vk_destroy_instance)
+    {
+        // TODO: Uninstall Vulkan Lib
+        throw Turbo::Core::TException(TResult::FAIL);
+    }
 }
 
 Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
