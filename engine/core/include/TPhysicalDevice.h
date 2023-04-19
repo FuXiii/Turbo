@@ -44,6 +44,9 @@ class TPhysicalDeviceInfo;
 class TQueueFamilyInfo;
 class TDevice;
 
+struct TPhysicalDeviceFunctionTable;
+using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable;
+
 class TPhysicalDevice : public TVulkanHandle
 {
   public:
@@ -77,6 +80,8 @@ class TPhysicalDevice : public TVulkanHandle
     T_VULKAN_HANDLE_REFRESH_DATA uint32_t bestProtectedQueueFamilyIndex = UINT32_MAX;
 
     T_VULKAN_HANDLE_REFRESH_DATA std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap;
+
+    TPhysicalDeviceDriver *physicalDeviceDriver = nullptr;
 
   private:
     void CalculatePerformanceScore();

@@ -3012,3 +3012,6 @@ Turbo是渲染引擎
   >* `./engine/core`下`TCore.h`中增加`#define VULKAN_PHYSICAL_DEVICE_API`声明
   >* `./engine/core`下`TVulkanLoader.h`中增加`struct TPhysicalDeviceFunctionTable`声明
   >* `./engine/core`下`TVulkanLoader.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中增加`struct TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TPhysicalDeviceDriver *physicalDeviceDriver`成员变量
