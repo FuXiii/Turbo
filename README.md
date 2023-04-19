@@ -110,7 +110,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
-    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14适配完成))
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14 `Linux`适配完成))
       >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
@@ -3015,3 +3015,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPhysicalDevice.h`中增加`struct TPhysicalDeviceFunctionTable`声明
   >* `./engine/core`下`TPhysicalDevice.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
   >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TPhysicalDeviceDriver *physicalDeviceDriver`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`const TPhysicalDeviceDriver* GetPhysicalDeviceDriver()`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`中`TVulkanLoader`类中增加`TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)`成员函数
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalCreate()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量的构建和初始化
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalDestroy()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量回收释放
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中使用`TPhysicalDeviceDriver* physicalDeviceDriver`进行`Vulkan`函数调用

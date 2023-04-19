@@ -379,6 +379,7 @@ class TVulkanLoader : public TObject
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name);
 
+    TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice);
     TDeviceDriver LoadDeviceDriver(TDevice *device);
 
     virtual std::string ToString() override;

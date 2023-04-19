@@ -195,6 +195,8 @@ class TPhysicalDevice : public TVulkanHandle
     TFormatFeatures GetBufferFeatures(TFormatType formatType);
     TFormatFeatures GetBufferFeatures(TFormatInfo &format);
 
+    const TPhysicalDeviceDriver* GetPhysicalDeviceDriver();
+
     virtual std::string ToString() override;
 };
 } // namespace Core
