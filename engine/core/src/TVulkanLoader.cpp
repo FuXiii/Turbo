@@ -150,13 +150,9 @@ PFN_vkWaitForFences Turbo::Core::vkWaitForFences = nullptr;
 #endif
 
 #if defined(VK_VERSION_1_1)
-PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
-PFN_vkGetPhysicalDeviceFeatures2 Turbo::Core::vkGetPhysicalDeviceFeatures2 = nullptr;
 #endif
 
 #if defined(VK_VERSION_1_3)
-PFN_vkCmdBeginRendering Turbo::Core::vkCmdBeginRendering = nullptr;
-PFN_vkCmdEndRendering Turbo::Core::vkCmdEndRendering = nullptr;
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -200,7 +196,6 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 #endif
 
 #if defined(VK_VERSION_1_1)
-    Turbo::Core::vkEnumerateInstanceVersion = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
 #endif
     //</loade global commands function>
 }
@@ -231,8 +226,6 @@ void Turbo::Core::TVulkanLoader::LoadAllInstanceFunctions(TInstance *instance)
 #endif
 
 #if defined(VK_VERSION_1_1)
-    // FIXME:vkGetPhysicalDeviceFeatures2 is physcial-device-level function
-    Turbo::Core::vkGetPhysicalDeviceFeatures2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>(vk_instance, "vkGetPhysicalDeviceFeatures2");
 #endif
 }
 
@@ -365,8 +358,6 @@ void Turbo::Core::TVulkanLoader::LoadAllDeviceFunctions(TInstance *instance)
 #endif
 
 #if defined(VK_VERSION_1_3)
-    Turbo::Core::vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(instance, "vkCmdBeginRendering");
-    Turbo::Core::vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(instance, "vkCmdEndRendering");
 #endif
 }
 

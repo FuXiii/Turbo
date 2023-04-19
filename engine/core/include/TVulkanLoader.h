@@ -154,13 +154,9 @@ extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
 #endif
 
 #if defined(VK_VERSION_1_1)
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2;
 #endif
 
 #if defined(VK_VERSION_1_3)
-extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRendering vkCmdBeginRendering;
-extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRendering vkCmdEndRendering;
 #endif
 
 struct TPhysicalDeviceFunctionTable

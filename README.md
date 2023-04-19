@@ -3020,3 +3020,7 @@ Turbo是渲染引擎
   >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalCreate()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量的构建和初始化
   >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalDestroy()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量回收释放
   >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中使用`TPhysicalDeviceDriver* physicalDeviceDriver`进行`Vulkan`函数调用
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdBeginRendering vkCmdBeginRendering`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdEndRendering vkCmdEndRendering`声明
