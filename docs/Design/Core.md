@@ -49,15 +49,23 @@
   >* 创建`获取Vulkan版本`章节
   >* 创建`是否支持Vulkan`章节
 
+* 2023/4/19
+  >
+  >* 更新`获取 Vulkan API`章节
+  >* 更新`物理设备级别`章节
+  >* 更新`设备级别`章节
+
 ---
 
 ## 获取 Vulkan API
 
 由于`Vulkan`中有三种级别的函数
 
-* 实例级别（instance-level）的函数
-* 物理设备级别（physical-device-level）的函数
-* 设备级别（device-level）的函数
+* 实例级别（instance-level）的函数（使用`vkGetInstanceProcAddr`获取）
+* 物理设备级别（physical-device-level）的函数（使用`vkGetInstanceProcAddr`获取）
+* 设备级别（device-level）的函数（使用`vkGetDeviceProcAddr`获取）
+
+随着`Vulkan`的发展版本的更新，会随着版本的更新增加新的函数，如果创建`VkInstance`时指定的版本和获取的函数的`Vulkan`发布版本早的话，就算返回了有效函数也不应该使用（但有例外，见下文`物理设备级别`章节），比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkBindBufferMemory2`函数，此时就算返回的函数可用也不应该使用。
 
 ### 实例级别
 
@@ -71,7 +79,14 @@
 * vkCreateInstance
 
 ### 物理设备级别
+
+物理设备级别的函数是指接口函数第一个参数是`VkPhysicalDevice`的函数，比如`vkGetPhysicalDeviceProperties`或者`vkGetPhysicalDeviceFeatures`等函数。
+
+物理设备级别函数的获取有特例，可以获取`Vulkan`高版本的物理设备级别函数进行使用（前提是物理设备支持高版本的`Vulkan`）。比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkGetPhysicalDeviceFeatures2`函数，如果设备支持高版本的`Vulkan`并且返回正常则可使用该函数，反之则不行
+
 ### 设备级别
+
+设备级别的函数是指接口函数第一个参数是`VkDevice`，`VkQueue`或`VkCommandBuffer`的函数，比如`vkCmdDraw`或`vkCreateBuffer`等。
 
 ## 获取Vulkan版本
 

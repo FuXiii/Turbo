@@ -47,6 +47,7 @@ namespace Core
 
 #define VULKAN_GLOBAL_API
 #define VULKAN_INSTANCE_API
+#define VULKAN_PHYSICAL_DEVICE_API
 #define VULKAN_DEVICE_API
 
 #define VULKAN_CORE

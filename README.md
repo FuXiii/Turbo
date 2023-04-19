@@ -3005,3 +3005,10 @@ Turbo是渲染引擎
   >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`IsSupportVulkan()`函数
   >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`GetVulkanInstanceVersion()`函数
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/4/19 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TCore.h`中增加`#define VULKAN_PHYSICAL_DEVICE_API`声明
+  >* `./engine/core`下`TVulkanLoader.h`中增加`struct TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TVulkanLoader.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
