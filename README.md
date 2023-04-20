@@ -3024,3 +3024,19 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
   >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdBeginRendering vkCmdBeginRendering`声明
   >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdEndRendering vkCmdEndRendering`声明
+
+* 2023/4/20 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV meshShaderFeaturesNV`的成员变量
+  >* `./engine/core`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对`VkPhysicalDeviceMeshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV`的特性获取和赋值
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderNV`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderNV`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool multiviewMeshShaderEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool primitiveFragmentShadingRateMeshShaderEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderQueriesEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures()`中增加对`Mesh Shader`特性的赋值
+  >* `./samples`中增加`MeshShaderTest`例子，用于研究`Mesh Shader`
+  >* `./engine/core`下`TDevice`类中`InternalCreate()`中增加对`Mesh Shader`特性的赋值
+  

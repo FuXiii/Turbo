@@ -120,7 +120,7 @@ void Turbo::Core::TDevice::InternalCreate()
     // We need to compare current Vulkan Instance Version
     Turbo::Core::TVersion vulkan_version = this->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
 
-    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan11_features = {}; // Vulkan1.2
+    VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan11_features = {}; // Vulkan1.1
     vk_physical_device_vulkan11_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
     vk_physical_device_vulkan11_features.pNext = nullptr;
 
@@ -134,6 +134,34 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.pNext = nullptr;
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
+    // for Extensions feature...
+    VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
+    vk_physical_device_mesh_shader_features_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    vk_physical_device_mesh_shader_features_ext.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_ext.taskShader = this->enabledFeatures.taskShaderEXT ? VK_TRUE : VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShader = this->enabledFeatures.meshShaderEXT ? VK_TRUE : VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = this->enabledFeatures.multiviewMeshShaderEXT ? VK_TRUE : VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.primitiveFragmentShadingRateMeshShader = this->enabledFeatures.primitiveFragmentShadingRateMeshShaderEXT ? VK_TRUE : VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShaderQueries = this->enabledFeatures.meshShaderQueriesEXT ? VK_TRUE : VK_FALSE;
+
+    VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
+    vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+    vk_physical_device_mesh_shader_features_nv.pNext = &vk_physical_device_mesh_shader_features_ext;
+    vk_physical_device_mesh_shader_features_nv.taskShader = this->enabledFeatures.taskShaderNV ? VK_TRUE : VK_FALSE;
+    vk_physical_device_mesh_shader_features_nv.meshShader = this->enabledFeatures.meshShaderNV ? VK_TRUE : VK_FALSE;
+
+    vk_device_create_info_p_next = &vk_physical_device_mesh_shader_features_nv;
+
+    if (vulkan_version >= Turbo::Core::TVersion(1, 1, 0, 0))
+    {
+        vk_physical_device_vulkan11_features.pNext = &vk_physical_device_mesh_shader_features_nv;
+        vk_device_create_info_p_next = &vk_physical_device_vulkan11_features;
+    }
+    else
+    {
+        // TODO: Not support Vulkan 1.1 feature
+    }
+
     if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
     {
         vk_physical_device_vulkan12_features.pNext = &vk_physical_device_vulkan11_features;
@@ -141,7 +169,7 @@ void Turbo::Core::TDevice::InternalCreate()
     }
     else
     {
-        // TODO: Not support Vulkan 1.1 and Vulkan 1.2 feature
+        // TODO: Not support Vulkan 1.2 feature
         this->enabledFeatures.timelineSemaphore = false;
     }
 

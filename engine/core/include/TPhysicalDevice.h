@@ -33,6 +33,14 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool timelineSemaphore = false;
     bool dynamicRendering = false;
 
+    bool taskShaderNV = false;
+    bool meshShaderNV = false;
+    bool taskShaderEXT = false;
+    bool meshShaderEXT = false;
+    bool multiviewMeshShaderEXT = false;
+    bool primitiveFragmentShadingRateMeshShaderEXT = false;
+    bool meshShaderQueriesEXT = false;
+
     bool logicOp = false;
 
   public:
@@ -195,7 +203,7 @@ class TPhysicalDevice : public TVulkanHandle
     TFormatFeatures GetBufferFeatures(TFormatType formatType);
     TFormatFeatures GetBufferFeatures(TFormatInfo &format);
 
-    const TPhysicalDeviceDriver* GetPhysicalDeviceDriver();
+    const TPhysicalDeviceDriver *GetPhysicalDeviceDriver();
 
     virtual std::string ToString() override;
 };
