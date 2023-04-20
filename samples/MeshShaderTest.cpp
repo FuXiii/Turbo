@@ -268,17 +268,6 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    if (!glfwInit())
-        return -1;
-    GLFWwindow *window;
-    int window_width = 1920 / 2.0;
-    int window_height = 1080 / 2.0;
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
-    VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
-    VkInstance vk_instance = instance->GetVkInstance();
-    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
-
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
 
     Turbo::Core::TPhysicalDeviceFeatures physcial_device_support_features = physical_device->GetDeviceFeatures();
@@ -353,6 +342,17 @@ int main()
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
+
+    if (!glfwInit())
+        return -1;
+    GLFWwindow *window;
+    int window_width = 1920 / 2.0;
+    int window_height = 1080 / 2.0;
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
+    VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
+    VkInstance vk_instance = instance->GetVkInstance();
+    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
