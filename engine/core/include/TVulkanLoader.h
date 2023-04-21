@@ -323,6 +323,14 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr;
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;
 #endif
+
+#if defined(VK_EXT_mesh_shader)
+
+#endif
+
+#if defined(VK_NV_mesh_shader)
+
+#endif
 };
 using TDeviceDriver = TDeviceFunctionTable;
 

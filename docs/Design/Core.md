@@ -55,6 +55,11 @@
   >* 更新`物理设备级别`章节
   >* 更新`设备级别`章节
 
+* 2023/4/21
+  >
+  >* 更新`Mesh Shader`章节
+  >* 创建`Vulkan标准和扩展`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -141,6 +146,44 @@ IfGetVersion000OrGetException{"返回版本0.0.0或者抛出异常"}
 GetVulkanVersion-->IfGetVersion000OrGetException
 IfGetVersion000OrGetException--是-->ReturnFalse("返回不支持Vulkan")
 IfGetVersion000OrGetException--否-->ReturnTrue("返回支持Vulkan")
+```
+
+## Vulkan标准和扩展
+
+随着`Vulkan`的发展，每一个`Vulkan`核心版本都会发布新的扩展，并在下一个`Vulkan`核心版中将之前的一部分扩展提升为核心，而`Turbo`也需要随着`Vulkan`的发展进行适配。首要原则是能使用核心标准，尽量使用核心标准，如果设备支持的核心标准过低（导致高版本的`Vulkan`核心功能还处于扩展状态），尝试获取扩展（在用户开启对应扩展功能之后才去获取扩展功能，否则就算用户使用`Turbo`调用了扩展函数，`Turbo`也不会做任何扩展函数调用）
+
+```mermaid
+graph TD;
+
+ThrowException0("抛出异常")
+ThrowException1("抛出异常")
+Start(("开始"))
+IfSupportInVulkanCore{"Vulkan核心是否支持该功能\n(通过当前实例的版本)"}
+UseVulkanCore("使用Vulkan核心")
+GetCoreVulkanAPI("获取Vulkan核心API")
+IsGetLegalVulkanCoreAPI{"是否获得合法Vulkan核心API指针"}
+UseLegalVulkanCoreAPI("使用合法Vulkan核心API指针")
+
+IfEnableExtension{"是否计划激活对应功能扩展"}
+IfSupportExtension{"设备是否支持对应功能扩展"}
+Donothing("什么都不做\n（此时对应的扩展函数指针为nullptr，Turbo在判断对应的函数指针为nullptr后直接调过）")
+GetExtensionVulkanAPI("获取Vulkan扩展API")
+IsExtensionVulkanAPILegal{"是否获得合法Vulkan扩展API指针"}
+UseLegalVulkanExtensionAPI("使用合法Vulkan扩展API指针")
+
+Start-->IfSupportInVulkanCore
+IfSupportInVulkanCore--支持-->UseVulkanCore-->GetCoreVulkanAPI-->IsGetLegalVulkanCoreAPI
+IsGetLegalVulkanCoreAPI--不合法-->ThrowException0
+IsGetLegalVulkanCoreAPI--合法-->UseLegalVulkanCoreAPI
+IfSupportInVulkanCore--不支持-->IfEnableExtension
+
+IfEnableExtension--未计划激活-->Donothing
+IfEnableExtension--计划激活-->IfSupportExtension--支持-->GetExtensionVulkanAPI
+IfSupportExtension--不支持-->Donothing
+
+GetExtensionVulkanAPI-->IsExtensionVulkanAPILegal
+IsExtensionVulkanAPILegal--不合法-->ThrowException1
+IsExtensionVulkanAPILegal--合法-->UseLegalVulkanExtensionAPI
 ```
 
 ## Device Feature
@@ -504,6 +547,15 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 同时该扩展同时会开启`SPV_NV_mesh_shader`的`SPIR-V`扩展
 
 `Vulkan`中还有一个名为`VK_EXT_mesh_shader`的设备扩展，该扩展为更加通用的扩展。与`VK_NV_mesh_shader`不完全一样，有区别。
+
+其中`VK_NV_mesh_shader`依赖`VK_KHR_get_physical_device_properties2`扩展
+* `VK_KHR_get_physical_device_properties2`在`Vulkan1.1`标准中被提升为核心标准
+
+其中`VK_EXT_mesh_shader`依赖`VK_KHR_spirv_1_4`扩展
+* `VK_KHR_spirv_1_4`在`Vulkan1.2`标准中被提升为核心标准
+* `VK_KHR_spirv_1_4`依赖`VK_KHR_shader_float_controls`扩展
+* `VK_KHR_shader_float_controls`在`Vulkan1.2`标准中被提升为核心标准
+* `VK_KHR_shader_float_controls`依赖`VK_KHR_get_physical_device_properties2`扩展
 
 ### Mesh Shader Feature
 

@@ -3040,3 +3040,6 @@ Turbo是渲染引擎
   >* `./samples`中增加`MeshShaderTest`例子，用于研究`Mesh Shader`
   >* `./engine/core`下`TDevice`类中`InternalCreate()`中增加对`Mesh Shader`特性的赋值
   
+* 2023/4/21 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
