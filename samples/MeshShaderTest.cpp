@@ -330,6 +330,12 @@ int main()
         throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support VulkanEXT mesh shader feature");
     }
 
+    bool is_support_vk_ext_mesh_shader = false;
+    Turbo::Core::TExtensionInfo vk_ext_mesh_shader_extension_info;
+
+    bool is_support_vk_nv_mesh_shader = false;
+    Turbo::Core::TExtensionInfo vk_nv_mesh_shader_extension_info;
+
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
@@ -338,6 +344,33 @@ int main()
         {
             enable_device_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_EXT_MESH_SHADER)
+        {
+            vk_ext_mesh_shader_extension_info = extension;
+            is_support_vk_ext_mesh_shader = true;
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_NV_MESH_SHADER)
+        {
+            vk_nv_mesh_shader_extension_info = extension;
+            is_support_vk_nv_mesh_shader = true;
+        }
+    }
+
+    if (!is_support_vk_ext_mesh_shader || !is_support_vk_nv_mesh_shader)
+    {
+        glfwTerminate();
+        delete instance;
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support mesh shader extension");
+    }
+
+    if (is_support_vk_ext_mesh_shader)
+    {
+        enable_device_extensions.push_back(vk_ext_mesh_shader_extension_info);
+    }
+
+    if (is_support_vk_nv_mesh_shader)
+    {
+        enable_device_extensions.push_back(vk_nv_mesh_shader_extension_info);
     }
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
