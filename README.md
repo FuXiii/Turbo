@@ -3043,3 +3043,11 @@ Turbo是渲染引擎
 * 2023/4/21 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TExtensionInfo.h`中`TExtensionType`枚举中增加`VK_EXT_MESH_SHADER`枚举量
+  >* `./engine/core`下`TExtensionInfo.cpp`中`TAllExtensionNames`数组中增加`VK_EXT_mesh_shader`字符串
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectCountNV vkCmdDrawMeshTasksIndirectCountNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取

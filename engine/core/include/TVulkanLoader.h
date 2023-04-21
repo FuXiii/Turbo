@@ -325,11 +325,15 @@ struct TDeviceFunctionTable
 #endif
 
 #if defined(VK_EXT_mesh_shader)
-
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT = nullptr;
 #endif
 
 #if defined(VK_NV_mesh_shader)
-
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectCountNV vkCmdDrawMeshTasksIndirectCountNV = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV = nullptr;
 #endif
 };
 using TDeviceDriver = TDeviceFunctionTable;

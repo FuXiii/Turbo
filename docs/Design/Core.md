@@ -150,14 +150,16 @@ IfGetVersion000OrGetException--否-->ReturnTrue("返回支持Vulkan")
 
 ## Vulkan标准和扩展
 
-随着`Vulkan`的发展，每一个`Vulkan`核心版本都会发布新的扩展，并在下一个`Vulkan`核心版中将之前的一部分扩展提升为核心，而`Turbo`也需要随着`Vulkan`的发展进行适配。首要原则是能使用核心标准，尽量使用核心标准，如果设备支持的核心标准过低（导致高版本的`Vulkan`核心功能还处于扩展状态），尝试获取扩展（在用户开启对应扩展功能之后才去获取扩展功能，否则就算用户使用`Turbo`调用了扩展函数，`Turbo`也不会做任何扩展函数调用）
+随着`Vulkan`的发展，每一个`Vulkan`核心版本都会发布新的扩展，并在下一个`Vulkan`核心版中将之前的一部分扩展提升为核心，而`Turbo`也需要随着`Vulkan`的发展进行适配。首要原则是能使用核心标准，尽量使用核心标准，如果设备支持的核心标准过低（导致高版本的`Vulkan`核心功能还处于扩展状态），尝试获取扩展（在用户开启对应扩展功能之后才去获取扩展功能，否则就算用户使用`Turbo`调用了扩展函数，`Turbo`也不会做任何扩展函数调用）。
+
+如果低版本的`Vulkan`实例获取高版本的`Vulkan`核心`API`，所有的高版本的函数皆为`nullptr`，即使调用也不做任何事情。（注：`Vulkan1.0`版本的核心`API`一定不能为`nullptr`）
 
 ```mermaid
 graph TD;
 
 ThrowException0("抛出异常")
 ThrowException1("抛出异常")
-Start(("开始"))
+Start(("Vulkan\n核心和扩展"))
 IfSupportInVulkanCore{"Vulkan核心是否支持该功能\n(通过当前实例的版本)"}
 UseVulkanCore("使用Vulkan核心")
 GetCoreVulkanAPI("获取Vulkan核心API")
