@@ -85,6 +85,14 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdEndRendering();
     //</Dynamic Rendering>
 
+    //<VK_EXT_mesh_shader>
+    void CmdDrawMeshTasksEXT(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+    //</VK_EXT_mesh_shader>
+
+    //<VK_NV_mesh_shader>
+    void CmdDrawMeshTasksNV(uint32_t taskCount, uint32_t firstTask);
+    //</VK_NV_mesh_shader>
+
     bool End();
     bool Reset();
 

@@ -3029,13 +3029,13 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV meshShaderFeaturesNV`的成员变量
   >* `./engine/core`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对`VkPhysicalDeviceMeshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV`的特性获取和赋值
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderNV`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderNV`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderEXT`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderEXT`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool multiviewMeshShaderEXT`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool primitiveFragmentShadingRateMeshShaderEXT`成员变量 
-  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderQueriesEXT`成员变量 
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderNV`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderNV`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool multiviewMeshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool primitiveFragmentShadingRateMeshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderQueriesEXT`成员变量
   >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures()`中增加对`Mesh Shader`特性的赋值
   >* `./samples`中增加`MeshShaderTest`例子，用于研究`Mesh Shader`
   >* `./engine/core`下`TDevice`类中`InternalCreate()`中增加对`Mesh Shader`特性的赋值
@@ -3051,3 +3051,5 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectCountNV vkCmdDrawMeshTasksIndirectCountNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
   >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
   >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksEXT(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksNV(uint32_t taskCount, uint32_t firstTask)`成员函数
