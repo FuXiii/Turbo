@@ -70,7 +70,7 @@
 * 物理设备级别（physical-device-level）的函数（使用`vkGetInstanceProcAddr`获取）
 * 设备级别（device-level）的函数（使用`vkGetDeviceProcAddr`获取）
 
-随着`Vulkan`的发展版本的更新，会随着版本的更新增加新的函数，如果创建`VkInstance`时指定的版本和获取的函数的`Vulkan`发布版本早的话，就算返回了有效函数也不应该使用（但有例外，见下文`物理设备级别`章节），比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkBindBufferMemory2`函数，此时就算返回的函数可用也不应该使用。
+随着`Vulkan`的发展版本的更新，会随着版本的更新增加新的函数，如果创建`VkInstance`时指定的版本和物理设备获取的函数的`Vulkan`发布版本（`VkPhysicalDeviceProperties::apiVersion`）早的话，就算返回了有效函数也不应该使用（但有例外，见下文`物理设备级别`章节），比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkBindBufferMemory2`函数，此时就算返回的函数可用也不应该使用。
 
 ### 实例级别
 
