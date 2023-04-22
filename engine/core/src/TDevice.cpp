@@ -61,6 +61,34 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue 
     return nullptr;
 }
 
+void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies()
+{
+    TVersion vulkan_version = this->physicalDevice->GetInstance()->GetVulkanVersion().GetValidVulkanVersion();
+    if (this->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
+    {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
+            {
+                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4);
+                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
+                {
+                    this->enabledExtensions.push_back(extension);
+                }
+            }
+
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
+            {
+                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4);
+                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
+                {
+                    this->enabledExtensions.push_back(extension);
+                }
+            }
+        }
+    }
+}
+
 void Turbo::Core::TDevice::InternalCreate()
 {
     std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->GetDeviceQueueFamilyInfos();
@@ -95,6 +123,8 @@ void Turbo::Core::TDevice::InternalCreate()
     {
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
     }
+
+    this->InspectExtensionAndVersionDependencies();
 
     size_t enable_extension_count = this->enabledExtensions.size();
     std::vector<const char *> enable_extension_names(enable_extension_count);

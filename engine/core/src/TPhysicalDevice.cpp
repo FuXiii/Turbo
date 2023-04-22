@@ -771,6 +771,21 @@ std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSuppor
     return this->info.supportExtensions;
 }
 
+Turbo::Core::TExtensionInfo Turbo::Core::TPhysicalDevice::GetExtensionByType(TExtensionType extensionType)
+{
+    TExtensionInfo result;
+    for (TExtensionInfo &type_item : this->info.supportExtensions)
+    {
+        if (type_item.GetExtensionType() == extensionType)
+        {
+            result = type_item;
+            break;
+        }
+    }
+
+    return result;
+}
+
 bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
 {
     if (!extensionName.empty())

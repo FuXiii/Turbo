@@ -3053,3 +3053,9 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
   >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksEXT(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)`成员函数
   >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksNV(uint32_t taskCount, uint32_t firstTask)`成员函数
+
+* 2023/4/22 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中增加`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中`InternalCreate()`成员函数中增加对于设备扩展依赖的检查
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数

@@ -136,6 +136,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     size_t GetSupportExtensionCount();
     std::vector<TExtensionInfo> GetSupportExtensions();
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
     bool IsSupportExtension(std::string extensionName);
     bool IsSupportExtension(TExtensionType extensionType);
 
