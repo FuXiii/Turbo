@@ -14,3 +14,6 @@
 [submodule "thirdparty/glfw"]
 	path = thirdparty/glfw
 	url = git@github.com:glfw/glfw.git
+[submodule "engine/core/thirdparty/glslang"]
+	path = engine/core/thirdparty/glslang
+	url = git@github.com:KhronosGroup/glslang.git

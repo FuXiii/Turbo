@@ -3076,3 +3076,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TShader.h`中增加`TMeshShader`类，用于表示`Mesh Shader`
   >* `./asset/shaders`中增加`MeshShaderTest.mesh`的网格着色器文件
   >* `./asset/shaders`中增加`MeshShaderTest.frag`的片元着色器文件
+
+* 2023/4/24 设计架构
+  >
+  >* `./engine/core/thirdparty`下的`glslang`库改成`git`的`submodule`进行管理，随着`Vulkan`的版本升级，`glslang`也会跟随更新使得符合`Vulkan`的新标准（这样`Mesh Shader`就支持解析相应`GLSL`扩展了）
