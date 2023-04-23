@@ -74,7 +74,9 @@ const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 
 const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
 const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
+
+const std::string MESH_SHADER_STR = ReadTextFile("../../asset/shaders/MeshShaderTest.mesh");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/MeshShaderTest.frag");
 
 typedef struct POSITION
 {
@@ -467,6 +469,8 @@ int main()
     Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
+    Turbo::Core::TMeshShader *mesh_shader = new Turbo::Core::TMeshShader(device, Turbo::Core::TShaderLanguage::GLSL, MESH_SHADER_STR);
+    std::cout << mesh_shader->ToString() << std::endl;
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
@@ -1180,6 +1184,7 @@ int main()
     delete descriptor_pool;
     delete vertex_shader;
     delete geometry_shader;
+    delete mesh_shader;
     delete fragment_shader;
     delete depth_image_view;
     delete depth_image;

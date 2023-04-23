@@ -3074,4 +3074,5 @@ Turbo是渲染引擎
   >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlagBits()`成员函数中增加对于`Turbo::Core::TShaderType::MESH`到`VK_SHADER_STAGE_MESH_BIT_EXT`的转换
   >* `./engine/core`下`TShader.h`中增加`TTaskShader`类，用于表示`Task Shader`
   >* `./engine/core`下`TShader.h`中增加`TMeshShader`类，用于表示`Mesh Shader`
-
+  >* `./asset/shaders`中增加`MeshShaderTest.mesh`的网格着色器文件
+  >* `./asset/shaders`中增加`MeshShaderTest.frag`的片元着色器文件
