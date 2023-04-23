@@ -471,6 +471,7 @@ int main()
 
     Turbo::Core::TMeshShader *mesh_shader = new Turbo::Core::TMeshShader(device, Turbo::Core::TShaderLanguage::GLSL, MESH_SHADER_STR);
     std::cout << mesh_shader->ToString() << std::endl;
+    
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
