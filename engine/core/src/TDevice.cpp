@@ -76,10 +76,31 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies()
                     this->enabledExtensions.push_back(extension);
                 }
             }
+        }
+    }
 
+    if (this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
+    {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
             if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
             {
-                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4);
+                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
+                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
+                {
+                    this->enabledExtensions.push_back(extension);
+                }
+            }
+        }
+    }
+
+    if (this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
+    {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+            {
+                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
                 if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
                 {
                     this->enabledExtensions.push_back(extension);

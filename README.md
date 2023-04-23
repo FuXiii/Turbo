@@ -3059,3 +3059,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TDevice.h`中`TDevice`类中增加`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
   >* `./engine/core`下`TDevice.h`中`TDevice`类中`InternalCreate()`成员函数中增加对于设备扩展依赖的检查
   >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数
+
+* 2023/4/23 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中更新`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
