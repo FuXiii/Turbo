@@ -3064,3 +3064,14 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TDevice.h`中`TDevice`类中更新`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
   >* `./engine/core`下`TShader.h`中`TShader`类中更新`TShader(...)`构造函数中对于`glslang::EShTargetClientVersion`和`glslang::EShTargetLanguageVersion`的设置，如果想使用`Mesh Shader`特性，`Spir-V`的版本需要大于等于`1.4`
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`TASK`枚举值，用于`Task Shader`
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`MESH`枚举值，用于`Mesh Shader`
+  >* `./engine/core`下`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`增加对于`Turbo::Core::TShaderType::TASK`到`EShLanguage::EShLangTaskNV`的转换
+  >* `./engine/core`下`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`增加对于`Turbo::Core::TShaderType::MESH`到`EShLanguage::EShLangMeshNV`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlags()`成员函数中增加对于`Turbo::Core::TShaderType::TASK`到`VK_SHADER_STAGE_TASK_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlags()`成员函数中增加对于`Turbo::Core::TShaderType::MESH`到`VK_SHADER_STAGE_MESH_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlagBits()`成员函数中增加对于`Turbo::Core::TShaderType::TASK`到`VK_SHADER_STAGE_TASK_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlagBits()`成员函数中增加对于`Turbo::Core::TShaderType::MESH`到`VK_SHADER_STAGE_MESH_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中增加`TTaskShader`类，用于表示`Task Shader`
+  >* `./engine/core`下`TShader.h`中增加`TMeshShader`类，用于表示`Mesh Shader`
+

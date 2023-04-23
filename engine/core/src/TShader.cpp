@@ -68,6 +68,12 @@ EShLanguage TShaderTypeToGlslangEShLanguage(Turbo::Core::TShaderType type)
     case Turbo::Core::TShaderType::COMPUTE:
         return EShLanguage::EShLangCompute;
         break;
+    case Turbo::Core::TShaderType::TASK:
+        return EShLanguage::EShLangTaskNV; // FIXME:新版本的glslang中有EShLangTaskNV = EShLangTask的声明
+        break;
+    case Turbo::Core::TShaderType::MESH:
+        return EShLanguage::EShLangMeshNV; // FIXME:新版本的glslang中有EShLangMeshNV = EShLangMesh的声明
+        break;
     }
 
     return EShLanguage::EShLangVertex;
@@ -1006,6 +1012,14 @@ VkShaderStageFlags Turbo::Core::TShader::GetVkShaderStageFlags()
         return VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
     }
     break;
+    case Turbo::Core::TShaderType::TASK: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT;
+    }
+    break;
+    case Turbo::Core::TShaderType::MESH: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
+    }
+    break;
     }
 
     return VkShaderStageFlagBits::VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
@@ -1037,6 +1051,14 @@ VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits()
     break;
     case Turbo::Core::TShaderType::COMPUTE: {
         return VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
+    }
+    break;
+    case Turbo::Core::TShaderType::TASK: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT;
+    }
+    break;
+    case Turbo::Core::TShaderType::MESH: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
     }
     break;
     }
@@ -1163,5 +1185,21 @@ Turbo::Core::TGeometryShader::TGeometryShader(TDevice *device, TShaderLanguage l
 }
 
 Turbo::Core::TGeometryShader::TGeometryShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TTaskShader::TTaskShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TTaskShader::TTaskShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TMeshShader::TMeshShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TMeshShader::TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, size, code, entryPoint)
 {
 }
