@@ -79,6 +79,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies()
         }
     }
 
+    // FIXME: require at least Vulkan1.1
     if (this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
     {
         if (vulkan_version < TVersion(1, 2, 0, 0))

@@ -817,8 +817,39 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
         const char *code_c_str = code.c_str();
         shader_glslang.setStrings(&code_c_str, 1);
         shader_glslang.setEnvInput(esh_source, esh_language, glslang::EShClient::EShClientVulkan, 100);
-        shader_glslang.setEnvClient(glslang::EShClient::EShClientVulkan, glslang::EShTargetClientVersion::EShTargetVulkan_1_0);
-        shader_glslang.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_0);
+
+        glslang::EShTargetClientVersion esh_target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+        glslang::EShTargetLanguageVersion esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+        Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion().GetValidVulkanVersion();
+        if (vulkan_version == Turbo::Core::TVersion(1, 0, 0, 0))
+        {
+            esh_target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+            esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+        }
+        else if (vulkan_version == Turbo::Core::TVersion(1, 1, 0, 0))
+        {
+            esh_target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+            esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_3;
+        }
+        else if (vulkan_version == Turbo::Core::TVersion(1, 2, 0, 0))
+        {
+            esh_target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+            esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_5;
+        }
+        else if (vulkan_version == Turbo::Core::TVersion(1, 3, 0, 0))
+        {
+            esh_target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+            esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_6;
+        }
+        if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SPIRV_1_4))
+        {
+            if ((uint32_t)(esh_target_language_version) < (uint32_t)(glslang::EShTargetLanguageVersion::EShTargetSpv_1_4))
+            {
+                esh_target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_4;
+            }
+        }
+        shader_glslang.setEnvClient(glslang::EShClient::EShClientVulkan, esh_target_client_version);
+        shader_glslang.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, esh_target_language_version);
         EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
 
         DirStackFileIncluder dir_stack_file_includer = {};

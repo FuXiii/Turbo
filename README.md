@@ -3063,3 +3063,4 @@ Turbo是渲染引擎
 * 2023/4/23 设计架构
   >
   >* `./engine/core`下`TDevice.h`中`TDevice`类中更新`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
+  >* `./engine/core`下`TShader.h`中`TShader`类中更新`TShader(...)`构造函数中对于`glslang::EShTargetClientVersion`和`glslang::EShTargetLanguageVersion`的设置，如果想使用`Mesh Shader`特性，`Spir-V`的版本需要大于等于`1.4`
