@@ -11,6 +11,7 @@ add_library(${PROJECT_NAME} STATIC
 $<TARGET_OBJECTS:VulkanMemoryAllocator>
 $<TARGET_OBJECTS:MachineIndependent>
 $<TARGET_OBJECTS:glslang>
+$<TARGET_OBJECTS:glslang-default-resource-limits>
 $<TARGET_OBJECTS:OGLCompiler>
 $<TARGET_OBJECTS:OSDependent>
 $<TARGET_OBJECTS:GenericCodeGen>

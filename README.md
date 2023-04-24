@@ -3080,3 +3080,7 @@ Turbo是渲染引擎
 * 2023/4/24 设计架构
   >
   >* `./engine/core/thirdparty`下的`glslang`库改成`git`的`submodule`进行管理，随着`Vulkan`的版本升级，`glslang`也会跟随更新使得符合`Vulkan`的新标准（这样`Mesh Shader`就支持解析相应`GLSL`扩展了）
+  >* `./engine/core`下的`TShader.cpp`中增加`glslang/Public/ShaderLang.h`头文件，用于使用`glslang`中`GetDefaultResource()`函数
+  >* `./engine/core`下的`CMakeLists.txt`中增加`glslang-default-resource-limits`库包含
+  >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中从`hader_glslang.parse(&resources, ...)`修改为`shader_glslang.parse(GetDefaultResources(), ...)`
+  >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中移除`TBuiltInResource resources`的声明和相关使用
