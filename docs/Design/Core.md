@@ -634,3 +634,22 @@ void vkCmdDrawMeshTasksNV(
 当创建`GraphicsPipeline`图形管线时使用`Mesh Shader`有一些限值
 
 * 对于`VkGraphicsPipelineCreateInfo::pVertexInputState`如果使用了`Mesh Shader`的话这个参数将会被忽略
+* 对于`VkGraphicsPipelineCreateInfo::pInputAssemblyState `如果使用了`Mesh Shader`的话这个参数将会被忽略
+* 对于`VkGraphicsPipelineCreateInfo::pStages`中指定的`Shader`只能是一下两种组合不能混合使用：
+  ```mermaid
+  graph LR
+  style id0 stroke-dasharray: 5 5
+  MeshShader
+  id0(TaskShader)-->MeshShader
+  ```
+  ```mermaid
+  graph LR
+  style id0 stroke-dasharray: 5 5
+  style id1 stroke-dasharray: 5 5
+  style id2 stroke-dasharray: 5 5
+  VertxShader
+
+  FragmentShader
+  VertxShader-->id0(TessellationControlShader)-->id1(TessellationEvaluationShader)-->id2(GeometryShader)-->FragmentShader
+  ```
+* 如果使用了`Mesh Shader`的话`VkGraphicsPipelineCreateInfo::pDynamicStates`中不能包含`VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY`，`VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE`，`VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`，`VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`，`VK_DYNAMIC_STATE_VERTEX_INPUT_EXT`
