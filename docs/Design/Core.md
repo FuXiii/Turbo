@@ -60,6 +60,10 @@
   >* 更新`Mesh Shader`章节
   >* 创建`Vulkan标准和扩展`章节
 
+* 2023/4/24
+  >
+  >* 创建`Mesh Shader GraphicsPipeline`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -577,7 +581,7 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 
     ```CXX
     // Provided by VK_KHR_get_physical_device_properties2
-    void vkGetPhysicalDeviceFeatures2(
+    void vkGetPhysicalDeviceFeatures2KHR(
       VkPhysicalDevice physicalDevice,
       VkPhysicalDeviceFeatures2* pFeatures);
 
@@ -624,3 +628,9 @@ void vkCmdDrawMeshTasksNV(
 * `firstTask`是`X`轴上的第一个工作组的`ID`
 
 当`vkCmdDrawMeshTasksNV`被调用时会有`taskCount`个本地工作组组成全局工作组
+
+### Mesh Shader GraphicsPipeline
+
+当创建`GraphicsPipeline`图形管线时使用`Mesh Shader`有一些限值
+
+* 对于`VkGraphicsPipelineCreateInfo::pVertexInputState`如果使用了`Mesh Shader`的话这个参数将会被忽略

@@ -3086,3 +3086,4 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中移除`TBuiltInResource resources`的声明和相关使用
   >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangTaskNV`更改为`EShLangTask`
   >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangMeshNV`更改为`EShLangMesh`
+  >* 更新`./docs/Design/Core.md`文档
