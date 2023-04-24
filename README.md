@@ -3084,3 +3084,5 @@ Turbo是渲染引擎
   >* `./engine/core`下的`CMakeLists.txt`中增加`glslang-default-resource-limits`库包含
   >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中从`hader_glslang.parse(&resources, ...)`修改为`shader_glslang.parse(GetDefaultResources(), ...)`
   >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中移除`TBuiltInResource resources`的声明和相关使用
+  >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangTaskNV`更改为`EShLangTask`
+  >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangMeshNV`更改为`EShLangMesh`

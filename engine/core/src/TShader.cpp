@@ -70,10 +70,10 @@ EShLanguage TShaderTypeToGlslangEShLanguage(Turbo::Core::TShaderType type)
         return EShLanguage::EShLangCompute;
         break;
     case Turbo::Core::TShaderType::TASK:
-        return EShLanguage::EShLangTaskNV; // FIXME:新版本的glslang中有EShLangTaskNV = EShLangTask的声明
+        return EShLanguage::EShLangTask;
         break;
     case Turbo::Core::TShaderType::MESH:
-        return EShLanguage::EShLangMeshNV; // FIXME:新版本的glslang中有EShLangMeshNV = EShLangMesh的声明
+        return EShLanguage::EShLangMesh;
         break;
     }
 
