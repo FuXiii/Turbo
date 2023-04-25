@@ -72,9 +72,6 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-
 const std::string MESH_SHADER_STR = ReadTextFile("../../asset/shaders/MeshShaderTest.mesh");
 const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/MeshShaderTest.frag");
 
@@ -123,104 +120,8 @@ int main()
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.scale = 0.03;
+    my_buffer_data.scale = 1;
 
-    MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
-
-    //<gltf for material_sphere>
-    std::vector<POSITION> POSITION_data;
-    std::vector<NORMAL> NORMAL_data;
-    std::vector<TEXCOORD> TEXCOORD_data;
-    std::vector<TANGENT> TANGENT_data;
-    std::vector<uint32_t> INDICES_data;
-    {
-        tinygltf::Model model;
-        tinygltf::TinyGLTF loader;
-        std::string err;
-        std::string warn;
-
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
-        const tinygltf::Scene &scene = model.scenes[model.defaultScene];
-        tinygltf::Node &node = model.nodes[scene.nodes[0]];
-        tinygltf::Mesh &mesh = model.meshes[node.mesh];
-        tinygltf::Primitive &primitive = mesh.primitives[0];
-        int mode = primitive.mode;
-        int position_accesser_index = primitive.attributes["POSITION"];
-        int normal_accesser_index = primitive.attributes["NORMAL"];
-        int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
-        int tangent_accesser_index = primitive.attributes["TANGENT"];
-        int indices_accesser_index = primitive.indices;
-        tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
-        tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
-        tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
-        tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
-        tinygltf::Accessor &tangent_accessor = model.accessors[tangent_accesser_index];
-
-        tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
-        tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
-        tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
-        tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
-        tinygltf::BufferView &tangent_buffer_view = model.bufferViews[tangent_accessor.bufferView];
-
-        int position_buffer_index = position_buffer_view.buffer;
-        size_t position_buffer_byteLength = position_buffer_view.byteLength;
-        int position_buffer_byteOffset = position_buffer_view.byteOffset;
-        int position_type = position_accessor.type;
-
-        int normal_buffer_index = normal_buffer_view.buffer;
-        size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
-        int normal_buffer_byteOffset = normal_buffer_view.byteOffset;
-        int normal_type = normal_accessor.type;
-
-        int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
-        size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
-        int texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
-        int texcoord_0_type = texcoord_0_accessor.type;
-
-        int indices_buffer_index = indices_buffer_view.buffer;
-        size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
-        int indices_buffer_byteOffset = indices_buffer_view.byteOffset;
-        int indices_type = indices_accessor.type;
-
-        int tangent_buffer_index = tangent_buffer_view.buffer;
-        size_t tangent_buffer_byteLength = tangent_buffer_view.byteLength;
-        int tangent_buffer_byteOffset = tangent_buffer_view.byteOffset;
-        int tangent_type = tangent_accessor.type;
-
-        tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
-        tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
-        tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
-        tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
-        tinygltf::Buffer &tangent_buffer = model.buffers[tangent_buffer_index];
-
-        std::vector<unsigned char> &position_data = position_buffer.data;
-        std::vector<unsigned char> &normal_data = normal_buffer.data;
-        std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
-        std::vector<unsigned char> &indices_data = indices_buffer.data;
-        std::vector<unsigned char> &tangent_data = tangent_buffer.data;
-
-        std::vector<unsigned short> temp_indices_data;
-
-        POSITION_data.resize(position_buffer_byteLength / sizeof(POSITION));
-        NORMAL_data.resize(normal_buffer_byteLength / sizeof(NORMAL));
-        TEXCOORD_data.resize(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
-        temp_indices_data.resize(indices_buffer_byteLength / sizeof(unsigned short));
-        TANGENT_data.resize(tangent_buffer_byteLength / sizeof(TANGENT));
-
-        memcpy(POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
-        memcpy(NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
-        memcpy(TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
-        memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
-        memcpy(TANGENT_data.data(), tangent_data.data() + tangent_buffer_byteOffset, tangent_buffer_byteLength);
-
-        for (unsigned short &temp_indices_item : temp_indices_data)
-        {
-            INDICES_data.push_back(temp_indices_item);
-        }
-    }
-    //</gltf for material_sphere>
-
-    uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
     Turbo::Core::TLayerInfo khronos_validation;
@@ -273,27 +174,11 @@ int main()
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
 
     Turbo::Core::TPhysicalDeviceFeatures physcial_device_support_features = physical_device->GetDeviceFeatures();
-    if (physcial_device_support_features.geometryShader)
-    {
-        physical_device_features.geometryShader = true;
-    }
-    else
-    {
-        glfwTerminate();
-        delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry shader feature");
-    }
 
     if (physcial_device_support_features.taskShaderNV)
     {
         physical_device_features.taskShaderNV = true;
         std::cout << "Support NVIDIA task shader feature" << std::endl;
-    }
-    else
-    {
-        glfwTerminate();
-        delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support NVIDIA task shader feature");
     }
 
     if (physcial_device_support_features.meshShaderNV)
@@ -301,23 +186,11 @@ int main()
         physical_device_features.meshShaderNV = true;
         std::cout << "Support NVIDIA mesh shader feature" << std::endl;
     }
-    else
-    {
-        glfwTerminate();
-        delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support NVIDIA mesh shader feature");
-    }
 
     if (physcial_device_support_features.taskShaderEXT)
     {
         physical_device_features.taskShaderEXT = true;
         std::cout << "Support VulkanEXT task shader feature" << std::endl;
-    }
-    else
-    {
-        glfwTerminate();
-        delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support VulkanEXT task shader feature");
     }
 
     if (physcial_device_support_features.meshShaderEXT)
@@ -325,11 +198,12 @@ int main()
         physical_device_features.meshShaderEXT = true;
         std::cout << "Support VulkanEXT mesh shader feature" << std::endl;
     }
-    else
+
+    if (!physcial_device_support_features.meshShaderNV && !physcial_device_support_features.meshShaderEXT)
     {
         glfwTerminate();
         delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support VulkanEXT mesh shader feature");
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support NVIDIA or VulkanEXT mesh shader feature");
     }
 
     bool is_support_vk_ext_mesh_shader = false;
@@ -409,69 +283,18 @@ int main()
     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
-
-    glm::mat4 projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
-
-    matrixs_buffer_data.m = model;
-    matrixs_buffer_data.v = view;
-    matrixs_buffer_data.p = projection;
-
-    Turbo::Core::TBuffer *matrixs_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs_buffer_data));
-    void *mvp_ptr = matrixs_buffer->Map();
-    memcpy(mvp_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
-    matrixs_buffer->Unmap();
-
     Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(my_buffer_data));
     void *my_buffer_ptr = my_buffer->Map();
     memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
     my_buffer->Unmap();
 
-    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
-    void *position_buffer_ptr = position_buffer->Map();
-    memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
-    position_buffer->Unmap();
-    POSITION_data.clear();
-
-    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
-    void *normal_buffer_ptr = normal_buffer->Map();
-    memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
-    normal_buffer->Unmap();
-    NORMAL_data.clear();
-
-    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
-    void *texcoord_buffer_ptr = texcoord_buffer->Map();
-    memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
-    texcoord_buffer->Unmap();
-    TEXCOORD_data.clear();
-
-    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
-    void *index_buffer_ptr = index_buffer->Map();
-    memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
-    index_buffer->Unmap();
-    INDICES_data.clear();
-
-    Turbo::Core::TBuffer *tangent_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TANGENT) * TANGENT_data.size());
-    void *tangent_buffer_ptr = tangent_buffer->Map();
-    memcpy(tangent_buffer_ptr, TANGENT_data.data(), sizeof(TANGENT) * TANGENT_data.size());
-    tangent_buffer->Unmap();
-    TANGENT_data.clear();
-
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-    Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
-    Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
-    Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
-
     Turbo::Core::TMeshShader *mesh_shader = new Turbo::Core::TMeshShader(device, Turbo::Core::TShaderLanguage::GLSL, MESH_SHADER_STR);
+    Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
     std::cout << mesh_shader->ToString() << std::endl;
-    
+
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
@@ -489,9 +312,6 @@ int main()
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;
     my_buffers.push_back(my_buffer);
-
-    std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
-    matrixs_buffers.push_back(matrixs_buffer);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
@@ -514,40 +334,17 @@ int main()
 
     Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
-    Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
-    position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
-    Turbo::Core::TVertexBinding normal_binding(1, sizeof(NORMAL), Turbo::Core::TVertexRate::VERTEX);
-    normal_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // normal
-    Turbo::Core::TVertexBinding texcoord_binding(2, sizeof(TEXCOORD), Turbo::Core::TVertexRate::VERTEX);
-    texcoord_binding.AddAttribute(2, Turbo::Core::TFormatType::R32G32_SFLOAT, 0); // texcoord/uv
-    Turbo::Core::TVertexBinding tangent_binding(3, sizeof(TANGENT), Turbo::Core::TVertexRate::VERTEX);
-    tangent_binding.AddAttribute(3, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 0); // tangent
-
-    std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
-    vertex_bindings.push_back(position_binding);
-    vertex_bindings.push_back(normal_binding);
-    vertex_bindings.push_back(texcoord_binding);
-    vertex_bindings.push_back(tangent_binding);
-
     Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
     Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
 
-    uint32_t patch_control_points = 3;
     Turbo::Core::TPolygonMode polygon_mode = Turbo::Core::TPolygonMode::FILL;
-    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, vertex_shader, geometry_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, mesh_shader, fragment_shader, false, false, polygon_mode, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     std::vector<Turbo::Core::TImageView *> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
-
-    std::vector<Turbo::Core::TBuffer *> vertex_buffers;
-    vertex_buffers.push_back(position_buffer);
-    vertex_buffers.push_back(normal_buffer);
-    vertex_buffers.push_back(texcoord_buffer);
-    vertex_buffers.push_back(tangent_buffer);
+    pipeline_descriptor_set->BindData(0, 0, 0, my_buffers);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -721,104 +518,14 @@ int main()
                 }
             }
 
-            // UpdateKeyboard
-            {
-                ImVec2 mouse_pos = io.MousePos;
-                current_mouse_pos = glm::vec2(mouse_pos.x, mouse_pos.y);
-                glm::vec2 mouse_pos_delte = current_mouse_pos - previous_mouse_pos;
-                previous_mouse_pos = current_mouse_pos;
-                mouse_pos_delte.y = mouse_pos_delte.y;
-
-                int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-                if (state == GLFW_PRESS)
-                {
-                    horizontal_angle += mouse_pos_delte.x * 0.2;
-                    vertical_angle += mouse_pos_delte.y * 0.2;
-
-                    if (vertical_angle > 90)
-                    {
-                        vertical_angle = 90;
-                    }
-
-                    if (vertical_angle < -90)
-                    {
-                        vertical_angle = -90;
-                    }
-                }
-
-                float delte_time = io.DeltaTime;
-                float speed = 1;
-
-                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
-                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
-                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
-
-                glm::vec3 look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
-                look_forward = glm::normalize(look_forward);
-
-                glm::vec3 forward_dir = look_forward;                  // 向前向量
-                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
-                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
-                up_dir = glm::cross(right_dir, forward_dir);
-
-                right_dir = glm::normalize(right_dir);
-                up_dir = glm::normalize(up_dir);
-
-                int key_W_state = glfwGetKey(window, GLFW_KEY_W);
-                if (key_W_state == GLFW_PRESS)
-                {
-                    // TODO: 向前
-                    camera_position += forward_dir * speed * delte_time;
-                }
-
-                int key_A_state = glfwGetKey(window, GLFW_KEY_A);
-                if (key_A_state == GLFW_PRESS)
-                {
-                    // TODO: 向左
-                    camera_position += -right_dir * speed * delte_time;
-                }
-
-                int key_S_state = glfwGetKey(window, GLFW_KEY_S);
-                if (key_S_state == GLFW_PRESS)
-                {
-                    // TODO: 向后
-                    camera_position += -forward_dir * speed * delte_time;
-                }
-
-                int key_D_state = glfwGetKey(window, GLFW_KEY_D);
-                if (key_D_state == GLFW_PRESS)
-                {
-                    // TODO: 向右
-                    camera_position += right_dir * speed * delte_time;
-                }
-
-                model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
-
-                glm::vec3 look_point = camera_position + forward_dir;
-                view = glm::lookAt(camera_position, look_point, up_dir);
-                projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
-
-                matrixs_buffer_data.m = model;
-                matrixs_buffer_data.v = view;
-                matrixs_buffer_data.p = projection;
-
-                _ptr = matrixs_buffer->Map();
-                memcpy(_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
-                matrixs_buffer->Unmap();
-            }
-
             ImGui::NewFrame();
 
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("GeometryShaderTest");
-                ImGui::Text("W,A,S,D to move.");
-                ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::Begin("MeshShaderTest");
+                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0, 1);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -836,16 +543,11 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
-            // material_sphere
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdSetLineWidth(1);
-            command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
-
+            command_buffer->CmdDrawMeshTasksEXT(1, 1, 1);
             command_buffer->CmdNextSubpass();
 
             //<IMGUI Rendering>
@@ -1183,8 +885,7 @@ int main()
     delete render_pass;
 
     delete descriptor_pool;
-    delete vertex_shader;
-    delete geometry_shader;
+    delete mesh_shader;
     delete mesh_shader;
     delete fragment_shader;
     delete depth_image_view;
@@ -1193,13 +894,7 @@ int main()
     {
         delete image_view_item;
     }
-    delete index_buffer;
-    delete position_buffer;
-    delete tangent_buffer;
-    delete normal_buffer;
-    delete texcoord_buffer;
     delete my_buffer;
-    delete matrixs_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;
     delete swapchain;
