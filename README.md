@@ -3087,3 +3087,7 @@ Turbo是渲染引擎
   >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangTaskNV`更改为`EShLangTask`
   >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangMeshNV`更改为`EShLangMesh`
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/4/25 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档

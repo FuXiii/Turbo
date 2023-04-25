@@ -64,6 +64,10 @@
   >
   >* 创建`Mesh Shader GraphicsPipeline`章节
 
+* 2023/4/25
+  >
+  >* 更新`Mesh Shader GraphicsPipeline`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -634,7 +638,7 @@ void vkCmdDrawMeshTasksNV(
 当创建`GraphicsPipeline`图形管线时使用`Mesh Shader`有一些限值
 
 * 对于`VkGraphicsPipelineCreateInfo::pVertexInputState`如果使用了`Mesh Shader`的话这个参数将会被忽略
-* 对于`VkGraphicsPipelineCreateInfo::pInputAssemblyState `如果使用了`Mesh Shader`的话这个参数将会被忽略
+* 对于`VkGraphicsPipelineCreateInfo::pInputAssemblyState`如果使用了`Mesh Shader`的话这个参数将会被忽略
 * 对于`VkGraphicsPipelineCreateInfo::pStages`中指定的`Shader`只能是一下两种组合不能混合使用：
   ```mermaid
   graph LR
@@ -653,3 +657,4 @@ void vkCmdDrawMeshTasksNV(
   VertxShader-->id0(TessellationControlShader)-->id1(TessellationEvaluationShader)-->id2(GeometryShader)-->FragmentShader
   ```
 * 如果使用了`Mesh Shader`的话`VkGraphicsPipelineCreateInfo::pDynamicStates`中不能包含`VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY`，`VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE`，`VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`，`VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`，`VK_DYNAMIC_STATE_VERTEX_INPUT_EXT`
+* 对于`VkGraphicsPipelineCreateInfo::pTessellationState`如果使用了`Mesh Shader`的话这个参数将会被忽略(`Vulkan`标准中没有明文指出该限值，只是说如果`VkGraphicsPipelineCreateInfo::pStages`有细分着色器的话此项目需要合法，通过`Shader`组合限制可推出该条目)
