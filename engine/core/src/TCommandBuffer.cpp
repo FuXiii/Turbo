@@ -579,6 +579,32 @@ void Turbo::Core::TCommandBufferBase::CmdEndRendering()
     }
 }
 
+void Turbo::Core::TCommandBufferBase::CmdDrawMeshTasksEXT(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().meshShaderEXT)
+    {
+        PFN_vkCmdDrawMeshTasksEXT pfn_vkCmdDrawMeshTasksEXT = device->GetDeviceDriver()->vkCmdDrawMeshTasksEXT;
+        if (pfn_vkCmdDrawMeshTasksEXT != nullptr)
+        {
+            pfn_vkCmdDrawMeshTasksEXT(this->vkCommandBuffer, groupCountX, groupCountY, groupCountZ);
+        }
+    }
+}
+
+void Turbo::Core::TCommandBufferBase::CmdDrawMeshTasksNV(uint32_t taskCount, uint32_t firstTask)
+{
+    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+    if (device->GetEnableDeviceFeatures().meshShaderNV)
+    {
+        PFN_vkCmdDrawMeshTasksNV pfn_vkCmdDrawMeshTasksNV = device->GetDeviceDriver()->vkCmdDrawMeshTasksNV;
+        if (pfn_vkCmdDrawMeshTasksNV != nullptr)
+        {
+            pfn_vkCmdDrawMeshTasksNV(this->vkCommandBuffer, taskCount, firstTask);
+        }
+    }
+}
+
 bool Turbo::Core::TCommandBufferBase::End()
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();

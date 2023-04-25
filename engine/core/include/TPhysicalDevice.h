@@ -33,6 +33,14 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool timelineSemaphore = false;
     bool dynamicRendering = false;
 
+    bool taskShaderNV = false;
+    bool meshShaderNV = false;
+    bool taskShaderEXT = false;
+    bool meshShaderEXT = false;
+    bool multiviewMeshShaderEXT = false;
+    bool primitiveFragmentShadingRateMeshShaderEXT = false;
+    bool meshShaderQueriesEXT = false;
+
     bool logicOp = false;
 
   public:
@@ -43,6 +51,9 @@ class TInstance;
 class TPhysicalDeviceInfo;
 class TQueueFamilyInfo;
 class TDevice;
+
+struct TPhysicalDeviceFunctionTable;
+using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable;
 
 class TPhysicalDevice : public TVulkanHandle
 {
@@ -77,6 +88,8 @@ class TPhysicalDevice : public TVulkanHandle
     T_VULKAN_HANDLE_REFRESH_DATA uint32_t bestProtectedQueueFamilyIndex = UINT32_MAX;
 
     T_VULKAN_HANDLE_REFRESH_DATA std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap;
+
+    TPhysicalDeviceDriver *physicalDeviceDriver = nullptr;
 
   private:
     void CalculatePerformanceScore();
@@ -123,6 +136,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     size_t GetSupportExtensionCount();
     std::vector<TExtensionInfo> GetSupportExtensions();
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
     bool IsSupportExtension(std::string extensionName);
     bool IsSupportExtension(TExtensionType extensionType);
 
@@ -189,6 +203,8 @@ class TPhysicalDevice : public TVulkanHandle
     TFormatFeatures GetOptimalFeatures(TFormatInfo &format);
     TFormatFeatures GetBufferFeatures(TFormatType formatType);
     TFormatFeatures GetBufferFeatures(TFormatInfo &format);
+
+    const TPhysicalDeviceDriver *GetPhysicalDeviceDriver();
 
     virtual std::string ToString() override;
 };

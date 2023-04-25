@@ -110,7 +110,7 @@ Turbo是渲染引擎
 
 * 如何编译`Turbo`
   * 请安装[Vulkan SDK](https://vulkan.lunarg.com/)
-    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14适配完成))
+    * ( ***注**：2022/7/27 对于`Windows`系统，目前`Turbo`已经完成了动态加载`Vulkan`函数，~~`Vulkan SDK`目前对于`Turbo`不是必需品~~(有些第三方依赖需要`Vulkan SDK`，比如`VulkanMemoryAllocator`)，`Vulkan`的`Runtime`是`Turbo`的必须品，正常`Windows`都会自带该运行时库，如果没有请安装[Vulkan Latest Runtime](https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime.exe)即可，~~`Linux`系统等有空适配一下~~(2022/11/14 `Linux`适配完成))
       >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
@@ -2986,10 +2986,113 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, uint32_t patchControlPoints, ...)`支持细分和几何着色器的构造函数
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr)`支持细分和几何着色器的构造函数
 
+* 2023/4/16 设计架构
+  >
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass *renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的细分着色器的图形管线构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass*renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TGeometryShader*geometryShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的几何着色器的图形管线构造函数
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TPipelineCache *pipelineCache, TRenderPass*renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TTessellationControlShader*tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader*geometryShader, TFragmentShader *fragmentShader, ...)`支持管线缓存的细分和几何着色器的图形管线构造函数
+  >* 更新`./docs/Design/Core.md`文档，研究`Mesh Shader`。
+  >* `./samples`中增加`VulkanFeatureTest`例子，用于研究`Vulkan`特性
 
+* 2023/4/17 设计架构
+  >
+  >* `./samples`中移除`VulkanFeatureTest`例子，改用`VulkanTest`进行`Vulkan`接口测试
+  >* 更新`./engine/core/include`下的`Vulkan`头文件，当前的`VK_HEADER_VERSION`为`204`有点老，更新到`247`，并且增加`Vulkan`的`vk_video`头文件夹
 
+* 2023/4/18 设计架构
+  >
+  >* 更新`./engine/core`下的`TVulkanLoader.h`中`TVulkanLoader`类中的`GetVulkanVersion()`函数，将其更改为静态函数，并更新内部算法
+  >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`IsSupportVulkan()`函数
+  >* 更新`./engine/core`下的`TInstance.h`中`TInstance`类中的`GetVulkanInstanceVersion()`函数
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/4/19 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TCore.h`中增加`#define VULKAN_PHYSICAL_DEVICE_API`声明
+  >* `./engine/core`下`TVulkanLoader.h`中增加`struct TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TVulkanLoader.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中增加`struct TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中增加`using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable`声明
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TPhysicalDeviceDriver *physicalDeviceDriver`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`const TPhysicalDeviceDriver* GetPhysicalDeviceDriver()`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`中`TVulkanLoader`类中增加`TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)`成员函数
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalCreate()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量的构建和初始化
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中`InternalDestroy()`增加`TPhysicalDeviceDriver* physicalDeviceDriver`成员变量回收释放
+  >* 更新`./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中使用`TPhysicalDeviceDriver* physicalDeviceDriver`进行`Vulkan`函数调用
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdBeginRendering vkCmdBeginRendering`声明
+  >* `./engine/core`下`TVulkanLoader.h`中移除全局的`PFN_vkCmdEndRendering vkCmdEndRendering`声明
+
+* 2023/4/20 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV meshShaderFeaturesNV`的成员变量
+  >* `./engine/core`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对`VkPhysicalDeviceMeshShaderFeaturesEXT`和`VkPhysicalDeviceMeshShaderFeaturesNV`的特性获取和赋值
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderNV`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderNV`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool taskShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool multiviewMeshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool primitiveFragmentShadingRateMeshShaderEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool meshShaderQueriesEXT`成员变量
+  >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures()`中增加对`Mesh Shader`特性的赋值
+  >* `./samples`中增加`MeshShaderTest`例子，用于研究`Mesh Shader`
+  >* `./engine/core`下`TDevice`类中`InternalCreate()`中增加对`Mesh Shader`特性的赋值
   
+* 2023/4/21 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TExtensionInfo.h`中`TExtensionType`枚举中增加`VK_EXT_MESH_SHADER`枚举量
+  >* `./engine/core`下`TExtensionInfo.cpp`中`TAllExtensionNames`数组中增加`VK_EXT_mesh_shader`字符串
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectCountNV vkCmdDrawMeshTasksIndirectCountNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加`PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV`成员变量，并在`TDeviceDriver::LoadDeviceDriver(...)`中对应获取
+  >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksEXT(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)`成员函数
+  >* `./engine/core`下`TCommandBuffer.h`中`TCommandBufferBase`类中增加`void CmdDrawMeshTasksNV(uint32_t taskCount, uint32_t firstTask)`成员函数
 
+* 2023/4/22 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中增加`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中`InternalCreate()`成员函数中增加对于设备扩展依赖的检查
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDevice`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数
+
+* 2023/4/23 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`中`TDevice`类中更新`void InspectExtensionAndVersionDependencies()`成员函数用于检查扩展依赖
+  >* `./engine/core`下`TShader.h`中`TShader`类中更新`TShader(...)`构造函数中对于`glslang::EShTargetClientVersion`和`glslang::EShTargetLanguageVersion`的设置，如果想使用`Mesh Shader`特性，`Spir-V`的版本需要大于等于`1.4`
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`TASK`枚举值，用于`Task Shader`
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`MESH`枚举值，用于`Mesh Shader`
+  >* `./engine/core`下`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`增加对于`Turbo::Core::TShaderType::TASK`到`EShLanguage::EShLangTaskNV`的转换
+  >* `./engine/core`下`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`增加对于`Turbo::Core::TShaderType::MESH`到`EShLanguage::EShLangMeshNV`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlags()`成员函数中增加对于`Turbo::Core::TShaderType::TASK`到`VK_SHADER_STAGE_TASK_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlags()`成员函数中增加对于`Turbo::Core::TShaderType::MESH`到`VK_SHADER_STAGE_MESH_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlagBits()`成员函数中增加对于`Turbo::Core::TShaderType::TASK`到`VK_SHADER_STAGE_TASK_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中`TShader`类中`GetVkShaderStageFlagBits()`成员函数中增加对于`Turbo::Core::TShaderType::MESH`到`VK_SHADER_STAGE_MESH_BIT_EXT`的转换
+  >* `./engine/core`下`TShader.h`中增加`TTaskShader`类，用于表示`Task Shader`
+  >* `./engine/core`下`TShader.h`中增加`TMeshShader`类，用于表示`Mesh Shader`
+  >* `./asset/shaders`中增加`MeshShaderTest.mesh`的网格着色器文件
+  >* `./asset/shaders`中增加`MeshShaderTest.frag`的片元着色器文件
+
+* 2023/4/24 设计架构
+  >
+  >* `./engine/core/thirdparty`下的`glslang`库改成`git`的`submodule`进行管理，随着`Vulkan`的版本升级，`glslang`也会跟随更新使得符合`Vulkan`的新标准（这样`Mesh Shader`就支持解析相应`GLSL`扩展了）
+  >* `./engine/core`下的`TShader.cpp`中增加`glslang/Public/ShaderLang.h`头文件，用于使用`glslang`中`GetDefaultResource()`函数
+  >* `./engine/core`下的`CMakeLists.txt`中增加`glslang-default-resource-limits`库包含
+  >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中从`hader_glslang.parse(&resources, ...)`修改为`shader_glslang.parse(GetDefaultResources(), ...)`
+  >* `./engine/core`下的`TShader.h`中`TShader`类的构造函数中移除`TBuiltInResource resources`的声明和相关使用
+  >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangTaskNV`更改为`EShLangTask`
+  >* `./engine/core`下的`TShader.cpp`中`TShaderTypeToGlslangEShLanguage(...)`中返回的`EShLangMeshNV`更改为`EShLangMesh`
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/4/25 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TMeshShader *meshShader, TFragmentShader *fragmentShader, ...)`支持`Mesh Shader`的图形管线构造函数
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`支持`Mesh Shader`的管线基类构造函数
 
 
   

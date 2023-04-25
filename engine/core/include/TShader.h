@@ -17,7 +17,9 @@ typedef enum class TShaderType
     TESSELLATION_EVALUATION = 2,
     GEOMETRY = 3,
     FRAGMENT = 4,
-    COMPUTE = 5
+    COMPUTE = 5,
+    TASK = 6,
+    MESH = 7
 } TShaderType;
 
 typedef enum class TShaderLanguage
@@ -142,6 +144,20 @@ class TGeometryShader : public Turbo::Core::TShader
   public:
     TGeometryShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
     TGeometryShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TTaskShader : public Turbo::Core::TShader
+{
+  public:
+    TTaskShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTaskShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TMeshShader : public Turbo::Core::TShader
+{
+  public:
+    TMeshShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
 } // namespace Core

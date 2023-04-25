@@ -150,13 +150,9 @@ PFN_vkWaitForFences Turbo::Core::vkWaitForFences = nullptr;
 #endif
 
 #if defined(VK_VERSION_1_1)
-PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
-PFN_vkGetPhysicalDeviceFeatures2 Turbo::Core::vkGetPhysicalDeviceFeatures2 = nullptr;
 #endif
 
 #if defined(VK_VERSION_1_3)
-PFN_vkCmdBeginRendering Turbo::Core::vkCmdBeginRendering = nullptr;
-PFN_vkCmdEndRendering Turbo::Core::vkCmdEndRendering = nullptr;
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -200,7 +196,6 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 #endif
 
 #if defined(VK_VERSION_1_1)
-    Turbo::Core::vkEnumerateInstanceVersion = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
 #endif
     //</loade global commands function>
 }
@@ -231,7 +226,6 @@ void Turbo::Core::TVulkanLoader::LoadAllInstanceFunctions(TInstance *instance)
 #endif
 
 #if defined(VK_VERSION_1_1)
-    Turbo::Core::vkGetPhysicalDeviceFeatures2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>(vk_instance, "vkGetPhysicalDeviceFeatures2");
 #endif
 }
 
@@ -364,8 +358,6 @@ void Turbo::Core::TVulkanLoader::LoadAllDeviceFunctions(TInstance *instance)
 #endif
 
 #if defined(VK_VERSION_1_3)
-    Turbo::Core::vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(instance, "vkCmdBeginRendering");
-    Turbo::Core::vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(instance, "vkCmdEndRendering");
 #endif
 }
 
@@ -395,25 +387,167 @@ void Turbo::Core::TVulkanLoader::LoadAll(TInstance *instance)
 
 Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
 {
-    uint32_t version = 0;
-
-#if defined(VK_VERSION_1_1)
-    PFN_vkEnumerateInstanceVersion pfn_vk_enumerate_instance_version = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(nullptr, "vkEnumerateInstanceVersion");
-    if (pfn_vk_enumerate_instance_version != nullptr && pfn_vk_enumerate_instance_version(&version) == VkResult::VK_SUCCESS)
+#ifdef TURBO_PLATFORM_WINDOWS
+    HMODULE library = LoadLibraryA("vulkan-1.dll");
+    if (!library)
     {
-        uint32_t major = VK_VERSION_MAJOR(version);
-        uint32_t minor = VK_VERSION_MINOR(version);
-        uint32_t patch = VK_VERSION_PATCH(version);
-
-        return TVersion(major, minor, patch, 0);
+        return TVersion(0, 0, 0, 0);
     }
+    PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
+#elif defined(TURBO_PLATFORM_LINUX)
+    void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+    if (!library)
+    {
+        library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
+    }
+
+    if (!library)
+    {
+        return TVersion(0, 0, 0, 0);
+    }
+    PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
+#else
+    throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader::GetVulkanVersion()", "Please implement this platform definition");
 #endif
-    if (TInstance::IsSupportVulkan())
+
+    auto uinstall_vulkan_lib = [&]() {
+#ifdef TURBO_PLATFORM_WINDOWS
+        if (library)
+        {
+            FreeLibrary(library);
+        }
+#elif defined(TURBO_PLATFORM_LINUX)
+        if (library)
+        {
+            dlclose(library);
+        }
+#else
+        throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader::GetVulkanVersion()", "Please implement this platform definition");
+#endif
+    }; // end of lambda expression
+
+    if (!vk_get_instance_proc_addr)
     {
-        return TVersion(1, 0, 0, 0);
+        uinstall_vulkan_lib();
+        return TVersion(0, 0, 0, 0);
     }
 
-    return TVersion(0, 0, 0, 0);
+    PFN_vkEnumerateInstanceVersion vk_enumerate_instance_version = (PFN_vkEnumerateInstanceVersion)vk_get_instance_proc_addr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+    if (vk_enumerate_instance_version)
+    {
+        uint32_t vulkan_version = 0;
+        VkResult result = vk_enumerate_instance_version(&vulkan_version);
+        if (result != VkResult::VK_SUCCESS)
+        {
+            uinstall_vulkan_lib();
+            return TVersion(0, 0, 0, 0);
+        }
+
+        uinstall_vulkan_lib();
+        return TVersion(VK_VERSION_MAJOR(vulkan_version), VK_VERSION_MINOR(vulkan_version), VK_VERSION_PATCH(vulkan_version), 0);
+    }
+
+    // TODO:try to create Vulkan1.0
+    PFN_vkCreateInstance vk_create_instance = (PFN_vkCreateInstance)vk_get_instance_proc_addr(VK_NULL_HANDLE, "vkCreateInstance");
+    if (!vk_create_instance)
+    {
+        uinstall_vulkan_lib();
+        return TVersion(0, 0, 0, 0);
+    }
+
+    VkApplicationInfo vk_application_info = {};
+    vk_application_info.sType = VkStructureType::VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    vk_application_info.pNext = nullptr;
+    vk_application_info.pApplicationName = nullptr;
+    vk_application_info.applicationVersion = 0;
+    vk_application_info.pEngineName = nullptr;
+    vk_application_info.engineVersion = 0;
+    vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+
+    VkInstanceCreateInfo vk_instance_create_info = {};
+    vk_instance_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    vk_instance_create_info.pNext = nullptr;
+    vk_instance_create_info.flags = 0;
+    vk_instance_create_info.pApplicationInfo = &vk_application_info;
+    vk_instance_create_info.enabledLayerCount = 0;
+    vk_instance_create_info.ppEnabledLayerNames = nullptr;
+    vk_instance_create_info.enabledExtensionCount = 0;
+    vk_instance_create_info.ppEnabledExtensionNames = nullptr;
+
+    VkInstance vk_instance = VK_NULL_HANDLE;
+    VkResult result = vk_create_instance(&vk_instance_create_info, nullptr, &vk_instance);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        uinstall_vulkan_lib();
+        return TVersion(0, 0, 0, 0);
+    }
+
+    PFN_vkDestroyInstance vk_destroy_instance = (PFN_vkDestroyInstance)vk_get_instance_proc_addr(vk_instance, "vkDestroyInstance");
+    if (!vk_destroy_instance)
+    {
+        uinstall_vulkan_lib();
+        throw Turbo::Core::TException(TResult::FAIL);
+    }
+
+    vk_destroy_instance(vk_instance, nullptr);
+    uinstall_vulkan_lib();
+    return TVersion(1, 0, 0, 0);
+}
+
+Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)
+{
+    Turbo::Core::TPhysicalDeviceDriver physical_device_driver = {};
+    Turbo::Core::TInstance *instance = physicalDevice->GetInstance();
+    Turbo::Core::TVersion instance_version = instance->GetVulkanVersion();
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkPhysicalDevice vk_physical_device = physicalDevice->GetVkPhysicalDevice();
+#if defined(VK_VERSION_1_0)
+    physical_device_driver.vkGetPhysicalDeviceFeatures = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures>(vk_instance, "vkGetPhysicalDeviceFeatures");
+    physical_device_driver.vkGetPhysicalDeviceFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties>(vk_instance, "vkGetPhysicalDeviceFormatProperties");
+    physical_device_driver.vkGetPhysicalDeviceImageFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceImageFormatProperties>(vk_instance, "vkGetPhysicalDeviceImageFormatProperties");
+    physical_device_driver.vkGetPhysicalDeviceProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceProperties>(vk_instance, "vkGetPhysicalDeviceProperties");
+    physical_device_driver.vkGetPhysicalDeviceQueueFamilyProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceQueueFamilyProperties>(vk_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+    physical_device_driver.vkGetPhysicalDeviceMemoryProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceMemoryProperties>(vk_instance, "vkGetPhysicalDeviceMemoryProperties");
+    physical_device_driver.vkCreateDevice = this->LoadInstanceFunction<PFN_vkCreateDevice>(vk_instance, "vkCreateDevice");
+    physical_device_driver.vkEnumerateDeviceExtensionProperties = this->LoadInstanceFunction<PFN_vkEnumerateDeviceExtensionProperties>(vk_instance, "vkEnumerateDeviceExtensionProperties");
+    physical_device_driver.vkEnumerateDeviceLayerProperties = this->LoadInstanceFunction<PFN_vkEnumerateDeviceLayerProperties>(vk_instance, "vkEnumerateDeviceLayerProperties");
+    physical_device_driver.vkGetPhysicalDeviceSparseImageFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSparseImageFormatProperties>(vk_instance, "vkGetPhysicalDeviceSparseImageFormatProperties");
+#endif
+
+    VkPhysicalDeviceProperties vk_physical_device_properties = {};
+    physical_device_driver.vkGetPhysicalDeviceProperties(vk_physical_device, &vk_physical_device_properties);
+
+    uint32_t physical_device_vulkan_api_version = vk_physical_device_properties.apiVersion;
+    Turbo::Core::TVersion physical_device_vulkan_version(VK_VERSION_MAJOR(physical_device_vulkan_api_version), VK_VERSION_MINOR(physical_device_vulkan_api_version), VK_VERSION_PATCH(physical_device_vulkan_api_version), 0);
+
+    Turbo::Core::TVersion vulkan_version_1_1 = Turbo::Core::TVersion(1, 1, 0, 0);
+    if (instance_version >= vulkan_version_1_1 || physical_device_vulkan_version >= vulkan_version_1_1)
+    {
+#if defined(VK_VERSION_1_1)
+        physical_device_driver.vkGetPhysicalDeviceFeatures2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>(vk_instance, "vkGetPhysicalDeviceFeatures2");
+        physical_device_driver.vkGetPhysicalDeviceProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceProperties2>(vk_instance, "vkGetPhysicalDeviceProperties2");
+        physical_device_driver.vkGetPhysicalDeviceFormatProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties2>(vk_instance, "vkGetPhysicalDeviceFormatProperties2");
+        physical_device_driver.vkGetPhysicalDeviceImageFormatProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceImageFormatProperties2>(vk_instance, "vkGetPhysicalDeviceImageFormatProperties2");
+        physical_device_driver.vkGetPhysicalDeviceQueueFamilyProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceQueueFamilyProperties2>(vk_instance, "vkGetPhysicalDeviceQueueFamilyProperties2");
+        physical_device_driver.vkGetPhysicalDeviceMemoryProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceMemoryProperties2>(vk_instance, "vkGetPhysicalDeviceMemoryProperties2");
+        physical_device_driver.vkGetPhysicalDeviceSparseImageFormatProperties2 = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSparseImageFormatProperties2>(vk_instance, "vkGetPhysicalDeviceSparseImageFormatProperties2");
+        physical_device_driver.vkGetPhysicalDeviceExternalBufferProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalBufferProperties>(vk_instance, "vkGetPhysicalDeviceExternalBufferProperties");
+        physical_device_driver.vkGetPhysicalDeviceExternalFenceProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalFenceProperties>(vk_instance, "vkGetPhysicalDeviceExternalFenceProperties");
+        physical_device_driver.vkGetPhysicalDeviceExternalSemaphoreProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalSemaphoreProperties>(vk_instance, "vkGetPhysicalDeviceExternalSemaphoreProperties");
+#endif
+    }
+
+#if defined(VK_VERSION_1_2)
+#endif
+    Turbo::Core::TVersion vulkan_version_1_3 = Turbo::Core::TVersion(1, 3, 0, 0);
+    if (instance_version >= vulkan_version_1_3 || physical_device_vulkan_version >= vulkan_version_1_3)
+    {
+#if defined(VK_VERSION_1_3)
+        physical_device_driver.vkGetPhysicalDeviceToolProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceToolProperties>(vk_instance, "vkGetPhysicalDeviceToolProperties");
+#endif
+    }
+
+    return physical_device_driver;
 }
 
 Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
@@ -549,6 +683,24 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     {
         device_driver.vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
         device_driver.vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");
+    }
+#endif
+
+#if defined(VK_EXT_mesh_shader)
+    if (device->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
+    {
+        device_driver.vkCmdDrawMeshTasksEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksEXT>(device, "vkCmdDrawMeshTasksEXT");
+        device_driver.vkCmdDrawMeshTasksIndirectCountEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(device, "vkCmdDrawMeshTasksIndirectCountEXT");
+        device_driver.vkCmdDrawMeshTasksIndirectEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectEXT>(device, "vkCmdDrawMeshTasksIndirectEXT");
+    }
+#endif
+
+#if defined(VK_NV_mesh_shader)
+    if (device->IsEnabledExtension(TExtensionType::VK_NV_MESH_SHADER))
+    {
+        device_driver.vkCmdDrawMeshTasksIndirectCountNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountNV>(device, "vkCmdDrawMeshTasksIndirectCountNV");
+        device_driver.vkCmdDrawMeshTasksIndirectNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectNV>(device, "vkCmdDrawMeshTasksIndirectNV");
+        device_driver.vkCmdDrawMeshTasksNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksNV>(device, "vkCmdDrawMeshTasksNV");
     }
 #endif
 

@@ -261,3 +261,8 @@ add_executable(TessellationAndGeometry ./TessellationAndGeometry.cpp ${IMGUI_SOU
 target_include_directories(TessellationAndGeometry PUBLIC ${INCLUDE_PARTH})
 target_link_directories(TessellationAndGeometry PUBLIC ${LINK_PARTH})
 target_link_libraries(TessellationAndGeometry PUBLIC ${LIBS})
+
+add_executable(MeshShaderTest ./MeshShaderTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(MeshShaderTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(MeshShaderTest PUBLIC ${LINK_PARTH})
+target_link_libraries(MeshShaderTest PUBLIC ${LIBS})

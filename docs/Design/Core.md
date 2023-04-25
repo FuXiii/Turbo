@@ -30,7 +30,171 @@
   >* 创建`Device Tessellation Feature`章节
   >* 创建`Tessellation Graphics Pipeline`章节
 
+* 2023/4/16
+  >
+  >* 创建`Mesh Shader`章节
+  >* 创建`Mesh Shader 接口函数`章节
+  >* 创建`Mesh Shader Feature`章节
+
+* 2023/4/17
+  >
+  >* 更新`Mesh Shader`章节
+
+* 2023/4/18
+  >
+  >* 创建`获取 Vulkan API`章节
+  >* 创建`实例级别`章节
+  >* 创建`物理设备级别`章节
+  >* 创建`设备级别`章节
+  >* 创建`获取Vulkan版本`章节
+  >* 创建`是否支持Vulkan`章节
+
+* 2023/4/19
+  >
+  >* 更新`获取 Vulkan API`章节
+  >* 更新`物理设备级别`章节
+  >* 更新`设备级别`章节
+
+* 2023/4/21
+  >
+  >* 更新`Mesh Shader`章节
+  >* 创建`Vulkan标准和扩展`章节
+
+* 2023/4/24
+  >
+  >* 创建`Mesh Shader GraphicsPipeline`章节
+
+* 2023/4/25
+  >
+  >* 更新`Mesh Shader GraphicsPipeline`章节
+
 ---
+
+## 获取 Vulkan API
+
+由于`Vulkan`中有三种级别的函数
+
+* 实例级别（instance-level）的函数（使用`vkGetInstanceProcAddr`获取）
+* 物理设备级别（physical-device-level）的函数（使用`vkGetInstanceProcAddr`获取）
+* 设备级别（device-level）的函数（使用`vkGetDeviceProcAddr`获取）
+
+随着`Vulkan`的发展版本的更新，会随着版本的更新增加新的函数，如果创建`VkInstance`时指定的版本和物理设备获取的函数的`Vulkan`发布版本（`VkPhysicalDeviceProperties::apiVersion`）早的话，就算返回了有效函数也不应该使用（但有例外，见下文`物理设备级别`章节），比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkBindBufferMemory2`函数，此时就算返回的函数可用也不应该使用。
+
+### 实例级别
+
+实例级别的函数广义上是指`Vulkan`中的所有可使用`VkInstance`，`VkPhysicalDevice`，`VkDevice`，`VkQueue`或者`VkCommandBuffer`调度的函数，并且在获取这些函数时需要传递一个有效`VkInstance`。
+
+其中有一些函数比较特殊，为全局函数，在获取时不需要传递有效`VkInstance`，直接传递`VK_NULL_HANDLE`既可以有效获取：
+
+* vkEnumerateInstanceVersion
+* vkEnumerateInstanceExtensionProperties
+* vkEnumerateInstanceLayerProperties
+* vkCreateInstance
+
+### 物理设备级别
+
+物理设备级别的函数是指接口函数第一个参数是`VkPhysicalDevice`的函数，比如`vkGetPhysicalDeviceProperties`或者`vkGetPhysicalDeviceFeatures`等函数。
+
+物理设备级别函数的获取有特例，可以获取`Vulkan`高版本的物理设备级别函数进行使用（前提是物理设备支持高版本的`Vulkan`）。比如：创建`VkInstance`时指定的版本为`Vulkan1.0`而之后使用该实例去获取`Vulkan1.1`发布的`vkGetPhysicalDeviceFeatures2`函数，如果设备支持高版本的`Vulkan`并且返回正常则可使用该函数，反之则不行
+
+### 设备级别
+
+设备级别的函数是指接口函数第一个参数是`VkDevice`，`VkQueue`或`VkCommandBuffer`的函数，比如`vkCmdDraw`或`vkCreateBuffer`等。
+
+## 获取Vulkan版本
+
+由于历史原因，在`Vulkan1.0`版本中获取不到系统支持的`Vulkan`版本，只能获取到显卡设备支持的`Vulkan`版本，后来在`Vulkan1.1`后增加了`vkEnumerateInstanceVersion`函数来获取`Vulkan`版本，而`vkEnumerateInstanceVersion`为全局函数，可能会返回`nullptr`（当系统只支持`Vulkan1.0`时）。所以需要有一个判断流程用于获取`Vulkan`版本
+
+```mermaid
+graph TD;
+LoadVulkanLib("加载Vulkan动态库")
+IsLoadVulkanLib{"是否加载"}
+ReturnVersion000("返回版本号0.0.0")
+GetvkEnumerateInstanceVersion("获取vkEnumerateInstanceVersion函数")
+IsGetvkEnumerateInstanceVersion{"是否获取到"}
+GetvkCreateInstance("获取vkCreateInstance函数")
+IsGetvkCreateInstance{"是否获取到"}
+IsCreateVkInstance{"是否成功创建VkInstance"}
+GetvkDestroyInstance("获取vkDestroyInstance函数")
+IsGetvkDestroyInstance{"是否获取到"}
+
+LoadVulkanLib-->IsLoadVulkanLib
+IsLoadVulkanLib--"加载成功（注：返回前卸载）"-->GetvkEnumerateInstanceVersion
+IsLoadVulkanLib--加载失败-->ReturnVersion000
+
+GetvkEnumerateInstanceVersion-->IsGetvkEnumerateInstanceVersion
+IsGetvkEnumerateInstanceVersion--成功获取-->ReturnSupportVersion("返回支持的Vulkan版本")
+IsGetvkEnumerateInstanceVersion--获取失败-->GetvkCreateInstance
+
+GetvkCreateInstance-->IsGetvkCreateInstance
+IsGetvkCreateInstance--成功获取-->TryToCreateVkInstance("尝试创建VkInstance1.0")
+IsGetvkCreateInstance--获取失败-->ReturnVersion000
+
+TryToCreateVkInstance-->IsCreateVkInstance
+IsCreateVkInstance--成功创建-->GetvkDestroyInstance
+IsCreateVkInstance--创建失败-->ReturnVersion000
+
+GetvkDestroyInstance-->IsGetvkDestroyInstance
+IsGetvkDestroyInstance--成功获取-->DestroyInstance("销毁之前创建的VkInstance")
+IsGetvkDestroyInstance--获取失败-->ReturnException("返回一个异常")
+
+DestroyInstance-->ReturnSupportVersion1.0("返回支持的Vulkan1.0")
+```
+
+## 是否支持Vulkan
+
+通过获取`Vulkan`版本判断
+
+```mermaid
+graph TD;
+GetVulkanVersion("获取Vulkan版本")
+IfGetVersion000OrGetException{"返回版本0.0.0或者抛出异常"}
+
+
+GetVulkanVersion-->IfGetVersion000OrGetException
+IfGetVersion000OrGetException--是-->ReturnFalse("返回不支持Vulkan")
+IfGetVersion000OrGetException--否-->ReturnTrue("返回支持Vulkan")
+```
+
+## Vulkan标准和扩展
+
+随着`Vulkan`的发展，每一个`Vulkan`核心版本都会发布新的扩展，并在下一个`Vulkan`核心版中将之前的一部分扩展提升为核心，而`Turbo`也需要随着`Vulkan`的发展进行适配。首要原则是能使用核心标准，尽量使用核心标准，如果设备支持的核心标准过低（导致高版本的`Vulkan`核心功能还处于扩展状态），尝试获取扩展（在用户开启对应扩展功能之后才去获取扩展功能，否则就算用户使用`Turbo`调用了扩展函数，`Turbo`也不会做任何扩展函数调用）。
+
+如果低版本的`Vulkan`实例获取高版本的`Vulkan`核心`API`，所有的高版本的函数皆为`nullptr`，即使调用也不做任何事情。（注：`Vulkan1.0`版本的核心`API`一定不能为`nullptr`）
+
+```mermaid
+graph TD;
+
+ThrowException0("抛出异常")
+ThrowException1("抛出异常")
+Start(("Vulkan\n核心和扩展"))
+IfSupportInVulkanCore{"Vulkan核心是否支持该功能\n(通过当前实例的版本)"}
+UseVulkanCore("使用Vulkan核心")
+GetCoreVulkanAPI("获取Vulkan核心API")
+IsGetLegalVulkanCoreAPI{"是否获得合法Vulkan核心API指针"}
+UseLegalVulkanCoreAPI("使用合法Vulkan核心API指针")
+
+IfEnableExtension{"是否计划激活对应功能扩展"}
+IfSupportExtension{"设备是否支持对应功能扩展"}
+Donothing("什么都不做\n（此时对应的扩展函数指针为nullptr，Turbo在判断对应的函数指针为nullptr后直接调过）")
+GetExtensionVulkanAPI("获取Vulkan扩展API")
+IsExtensionVulkanAPILegal{"是否获得合法Vulkan扩展API指针"}
+UseLegalVulkanExtensionAPI("使用合法Vulkan扩展API指针")
+
+Start-->IfSupportInVulkanCore
+IfSupportInVulkanCore--支持-->UseVulkanCore-->GetCoreVulkanAPI-->IsGetLegalVulkanCoreAPI
+IsGetLegalVulkanCoreAPI--不合法-->ThrowException0
+IsGetLegalVulkanCoreAPI--合法-->UseLegalVulkanCoreAPI
+IfSupportInVulkanCore--不支持-->IfEnableExtension
+
+IfEnableExtension--未计划激活-->Donothing
+IfEnableExtension--计划激活-->IfSupportExtension--支持-->GetExtensionVulkanAPI
+IfSupportExtension--不支持-->Donothing
+
+GetExtensionVulkanAPI-->IsExtensionVulkanAPILegal
+IsExtensionVulkanAPILegal--不合法-->ThrowException1
+IsExtensionVulkanAPILegal--合法-->UseLegalVulkanExtensionAPI
+```
 
 ## Device Feature
 
@@ -210,6 +374,7 @@ void vkCmdBeginRendering(
     VkCommandBuffer                             commandBuffer,
     const VkRenderingInfo*                      pRenderingInfo);
 ```
+
 ```CXX
 // Provided by VK_VERSION_1_3
 void vkCmdEndRendering(
@@ -273,7 +438,7 @@ void CmdBeginRendering(const TRenderingAttachments& renderingAttachment);
 void CmdEndRendering();
 ```
 
-## Tessellation 
+## Tessellation
 
 细分（`Tessellation`）。用于细分网格。
 
@@ -284,6 +449,7 @@ void CmdEndRendering();
 3. 细分评估（计算）着色器（可编程） Tessellation Evaluation Shader
 
 ### Device Tessellation Feature
+
 `Vulkan`中想要使用细分特性，需要查看和激活对应的设备`feature`。有关的细分的`feature`如下：
 
 ```CXX
@@ -347,7 +513,7 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 >如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分评估着色器话，`VkGraphicsPipelineCreateInfo`中的`pStages`必须也包含一个细分控制着色器
 
 >[VUID-VkGraphicsPipelineCreateInfo-pStages-00731](https://registry.khronos.org/vulkan/specs/1.3/html/chap10.html#VUID-VkGraphicsPipelineCreateInfo-pStages-00731)  
->If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage and a tessellation evaluation shader stage, pTessellationState `must` be a valid pointer to a valid `VkPipelineTessellationStateCreateInfo `structure
+>If the pipeline is being created with `pre-rasterization shader state` and `pStages` includes a tessellation control shader stage and a tessellation evaluation shader stage, pTessellationState `must` be a valid pointer to a valid `VkPipelineTessellationStateCreateInfo`structure
 >
 >如果`VkGraphicsPipelineCreateInfo`中的`pStages`中包括细分控制着色器和细分评估着色器的话，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效的`VkPipelineTessellationStateCreateInfo`结构值
 
@@ -372,3 +538,123 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pTessellationState`必须是个有效值
 * 如果想要使用细分特性，`VkGraphicsPipelineCreateInfo`中的`pInputAssemblyState`中的`topology`必须是`VK_PRIMITIVE_TOPOLOGY_PATCH_LIST`
 
+## Mesh Shader
+
+`Mesh Shader`在`Vulkan`中作为`NVIDIA`显卡上的一个设备扩展，被命名为`VK_NV_mesh_shader`。该扩展依赖于`VK_KHR_get_physical_device_properties2`扩展
+
+有两种新的可编程着色器
+
+* Task Shader
+* Mesh Shader
+
+这两个着色器可以用于替代如下过程
+
+* 获取顶点属性
+* 顶点着色器
+* 细分着色器
+* 几何着色器
+
+同时该扩展同时会开启`SPV_NV_mesh_shader`的`SPIR-V`扩展
+
+`Vulkan`中还有一个名为`VK_EXT_mesh_shader`的设备扩展，该扩展为更加通用的扩展。与`VK_NV_mesh_shader`不完全一样，有区别。
+
+其中`VK_NV_mesh_shader`依赖`VK_KHR_get_physical_device_properties2`扩展
+* `VK_KHR_get_physical_device_properties2`在`Vulkan1.1`标准中被提升为核心标准
+
+其中`VK_EXT_mesh_shader`依赖`VK_KHR_spirv_1_4`扩展
+* `VK_KHR_spirv_1_4`在`Vulkan1.2`标准中被提升为核心标准
+* `VK_KHR_spirv_1_4`依赖`VK_KHR_shader_float_controls`扩展
+* `VK_KHR_shader_float_controls`在`Vulkan1.2`标准中被提升为核心标准
+* `VK_KHR_shader_float_controls`依赖`VK_KHR_get_physical_device_properties2`扩展
+
+### Mesh Shader Feature
+
+需要查看设备是否支持`Mesh Shader`特性，之后再去激活相关特性。对于特性获取有两种方式：
+
+1. 通过`Vulkan 1.1`的`vkGetPhysicalDeviceFeatures2`函数：
+
+    ```CXX
+    // Provided by VK_VERSION_1_1
+    void vkGetPhysicalDeviceFeatures2(
+      VkPhysicalDevice physicalDevice,
+      VkPhysicalDeviceFeatures2* pFeatures);
+
+    ```
+
+2. 通过`VK_KHR_get_physical_device_properties2`扩展获得：
+
+    ```CXX
+    // Provided by VK_KHR_get_physical_device_properties2
+    void vkGetPhysicalDeviceFeatures2KHR(
+      VkPhysicalDevice physicalDevice,
+      VkPhysicalDeviceFeatures2* pFeatures);
+
+    ```
+
+### Mesh Shader 接口函数
+
+新增如下接口函数
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksIndirectCountNV(
+  VkCommandBuffer commandBuffer,
+  VkBuffer buffer,
+  VkDeviceSize offset,
+  VkBuffer countBuffer,
+  VkDeviceSize countBufferOffset,
+  uint32_t maxDrawCount,
+  uint32_t stride)
+```
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksIndirectNV(
+  VkCommandBuffer commandBuffer,
+  VkBuffer buffer,
+  VkDeviceSize offset,
+  uint32_t drawCount,
+  uint32_t stride);
+
+```
+
+```CXX
+// Provided by VK_NV_mesh_shader
+void vkCmdDrawMeshTasksNV(
+  VkCommandBuffer commandBuffer,
+  uint32_t taskCount,
+  uint32_t firstTask);
+```
+
+主要看一下`vkCmdDrawMeshTasksNV`函数，其中
+
+* `taskCount`是设置本地工作组（`local workgroup`）在`X`轴处的数量，对于`Y`轴和`Z`轴其数量隐示默认为`1`
+* `firstTask`是`X`轴上的第一个工作组的`ID`
+
+当`vkCmdDrawMeshTasksNV`被调用时会有`taskCount`个本地工作组组成全局工作组
+
+### Mesh Shader GraphicsPipeline
+
+当创建`GraphicsPipeline`图形管线时使用`Mesh Shader`有一些限值
+
+* 对于`VkGraphicsPipelineCreateInfo::pVertexInputState`如果使用了`Mesh Shader`的话这个参数将会被忽略
+* 对于`VkGraphicsPipelineCreateInfo::pInputAssemblyState`如果使用了`Mesh Shader`的话这个参数将会被忽略
+* 对于`VkGraphicsPipelineCreateInfo::pStages`中指定的`Shader`只能是一下两种组合不能混合使用：
+  ```mermaid
+  graph LR
+  style id0 stroke-dasharray: 5 5
+  MeshShader
+  id0(TaskShader)-->MeshShader
+  ```
+  ```mermaid
+  graph LR
+  style id0 stroke-dasharray: 5 5
+  style id1 stroke-dasharray: 5 5
+  style id2 stroke-dasharray: 5 5
+  VertxShader
+
+  FragmentShader
+  VertxShader-->id0(TessellationControlShader)-->id1(TessellationEvaluationShader)-->id2(GeometryShader)-->FragmentShader
+  ```
+* 如果使用了`Mesh Shader`的话`VkGraphicsPipelineCreateInfo::pDynamicStates`中不能包含`VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY`，`VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE`，`VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`，`VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`，`VK_DYNAMIC_STATE_VERTEX_INPUT_EXT`
+* 对于`VkGraphicsPipelineCreateInfo::pTessellationState`如果使用了`Mesh Shader`的话这个参数将会被忽略(`Vulkan`标准中没有明文指出该限值，只是说如果`VkGraphicsPipelineCreateInfo::pStages`有细分着色器的话此项目需要合法，通过`Shader`组合限制可推出该条目)

@@ -45,6 +45,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     virtual TDeviceQueue *RemoveChildHandle(TDeviceQueue *deviceQueue);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
+    virtual void InspectExtensionAndVersionDependencies();
 
     uint32_t GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo queueFamily);
     std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();

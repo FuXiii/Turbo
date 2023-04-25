@@ -301,38 +301,17 @@ void Turbo::Core::TInstance::InternalDestroy()
 
 bool Turbo::Core::TInstance::IsSupportVulkan()
 {
-    TVulkanLoader::Instance();
-
-    VkApplicationInfo application_info = {};
-    application_info.sType = VkStructureType::VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    application_info.pNext = nullptr;
-    application_info.pApplicationName = nullptr;
-    application_info.applicationVersion = 0;
-    application_info.pEngineName = nullptr;
-    application_info.engineVersion = 0;
-    application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
-
-    VkInstanceCreateInfo vkinstance_create_info = {};
-    vkinstance_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    vkinstance_create_info.pNext = nullptr;
-    vkinstance_create_info.flags = 0;
-    vkinstance_create_info.pApplicationInfo = &application_info;
-    vkinstance_create_info.enabledLayerCount = 0;
-    vkinstance_create_info.ppEnabledLayerNames = nullptr;
-    vkinstance_create_info.enabledExtensionCount = 0;
-    vkinstance_create_info.ppEnabledExtensionNames = nullptr;
-
-    VkInstance instance = VK_NULL_HANDLE;
-
-    VkAllocationCallbacks *allocation_call_back = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-
-    VkResult result = Turbo::Core::vkCreateInstance(&vkinstance_create_info, allocation_call_back, &instance);
-
-    if (result == VkResult::VK_SUCCESS)
+    try
     {
-        PFN_vkDestroyInstance pfn_vk_destroy_instance = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroyInstance>(instance, "vkDestroyInstance");
-        pfn_vk_destroy_instance(instance, allocation_call_back);
-        return true;
+        TVersion vulkan_instance_version = TInstance::GetVulkanInstanceVersion();
+        if (vulkan_instance_version != TVersion(0, 0, 0, 0))
+        {
+            return true;
+        }
+    }
+    catch (std::exception &e)
+    {
+        return false;
     }
 
     return false;
@@ -340,7 +319,7 @@ bool Turbo::Core::TInstance::IsSupportVulkan()
 
 Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanInstanceVersion()
 {
-    return TVulkanLoader::Instance()->GetVulkanVersion();
+    return TVulkanLoader::GetVulkanVersion();
 }
 
 std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions()

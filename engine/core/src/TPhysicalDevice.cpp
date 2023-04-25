@@ -63,7 +63,7 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
 {
     VkPhysicalDeviceProperties physicalDeviceProperties;
 
-    Turbo::Core::vkGetPhysicalDeviceProperties(this->vkPhysicalDevice, &physicalDeviceProperties);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceProperties(this->vkPhysicalDevice, &physicalDeviceProperties);
 
     // name
     this->info.name = physicalDeviceProperties.deviceName;
@@ -157,11 +157,27 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     //  vk_physical_device_dynamic_rendering_features_khr.dynamicRendering = VK_FALSE;
 
     // For Vulkan1.0
-    Turbo::Core::vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
-    // For Vulkan1.1
+    this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
+
+    // For VK_EXT_mesh_shader
+    VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
+    vk_physical_device_mesh_shader_features_ext.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    vk_physical_device_mesh_shader_features_ext.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_ext.taskShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.primitiveFragmentShadingRateMeshShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_ext.meshShaderQueries = VK_FALSE;
+    // For VK_NV_mesh_shader
+    VkPhysicalDeviceMeshShaderFeaturesNV vk_physical_device_mesh_shader_features_nv = {};
+    vk_physical_device_mesh_shader_features_nv.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+    vk_physical_device_mesh_shader_features_nv.pNext = &vk_physical_device_mesh_shader_features_ext;
+    vk_physical_device_mesh_shader_features_nv.taskShader = VK_FALSE;
+    vk_physical_device_mesh_shader_features_nv.meshShader = VK_FALSE;
+    //  For Vulkan1.1
     VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan_1_1_features = {};
     vk_physical_device_vulkan_1_1_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
-    vk_physical_device_vulkan_1_1_features.pNext = nullptr;
+    vk_physical_device_vulkan_1_1_features.pNext = &vk_physical_device_mesh_shader_features_nv;
     // For Vulkan1.2
     VkPhysicalDeviceVulkan12Features vk_physical_device_vulkan_1_2_features = {};
     vk_physical_device_vulkan_1_2_features.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -176,27 +192,34 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     vk_physical_device_features2.pNext = &vk_physical_device_vulkan_1_3_features;
     vk_physical_device_features2.features = {};
 
-    Turbo::Core::vkGetPhysicalDeviceFeatures2(this->vkPhysicalDevice, &vk_physical_device_features2);
+    if (this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2 != nullptr)
+    {
+        this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2(this->vkPhysicalDevice, &vk_physical_device_features2);
 
-    this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
-    this->info.vulkan11Feature.pNext = nullptr;
-    this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
-    this->info.vulkan12Feature.pNext = nullptr;
-    this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
-    this->info.vulkan13Feature.pNext = nullptr;
+        this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
+        this->info.vulkan11Feature.pNext = nullptr;
+        this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
+        this->info.vulkan12Feature.pNext = nullptr;
+        this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
+        this->info.vulkan13Feature.pNext = nullptr;
+        this->info.meshShaderFeaturesEXT = vk_physical_device_mesh_shader_features_ext;
+        this->info.meshShaderFeaturesEXT.pNext = nullptr;
+        this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
+        this->info.meshShaderFeaturesNV.pNext = nullptr;
+    }
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()
 {
     uint32_t queue_family_count = 0;
-    Turbo::Core::vkGetPhysicalDeviceQueueFamilyProperties(this->vkPhysicalDevice, &queue_family_count, nullptr);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceQueueFamilyProperties(this->vkPhysicalDevice, &queue_family_count, nullptr);
     if (queue_family_count > 0)
     {
         std::vector<VkQueueFamilyProperties> queue_family_properties;
         queue_family_properties.resize(queue_family_count);
         this->info.queueFamilys.resize(queue_family_count);
 
-        Turbo::Core::vkGetPhysicalDeviceQueueFamilyProperties(this->vkPhysicalDevice, &queue_family_count, queue_family_properties.data());
+        this->physicalDeviceDriver->vkGetPhysicalDeviceQueueFamilyProperties(this->vkPhysicalDevice, &queue_family_count, queue_family_properties.data());
 
         for (uint32_t queue_family_index = 0; queue_family_index < queue_family_count; queue_family_index++)
         {
@@ -223,7 +246,7 @@ void Turbo::Core::TPhysicalDevice::EnumerateSupportLayerAndExtension()
 void Turbo::Core::TPhysicalDevice::EnumerateMemoryType()
 {
     VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
-    Turbo::Core::vkGetPhysicalDeviceMemoryProperties(this->vkPhysicalDevice, &physical_device_memory_properties);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceMemoryProperties(this->vkPhysicalDevice, &physical_device_memory_properties);
 
     if (physical_device_memory_properties.memoryTypeCount > 0)
     {
@@ -375,6 +398,10 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
 
     this->vkPhysicalDevice = vk_physical_devices[this->index];
 
+    // 创建 TPhysicalDeviceDriver
+    this->physicalDeviceDriver = new TPhysicalDeviceDriver();
+    *this->physicalDeviceDriver = TVulkanLoader::Instance()->LoadPhysicalDeviceDriver(this);
+
     // 枚举各种属性：
     this->EnumerateProperties();
     this->EnumerateSupportLayerAndExtension();
@@ -398,6 +425,8 @@ void Turbo::Core::TPhysicalDevice::InternalDestroy()
     {
         device_item->InternalDestroy();
     }
+
+    delete this->physicalDeviceDriver;
 
     // VkPhysicalDevice 没有销毁函数，置空
     this->vkPhysicalDevice = VK_NULL_HANDLE;
@@ -649,6 +678,11 @@ Turbo::Core::TInstance *Turbo::Core::TPhysicalDevice::GetInstance()
     return this->instance;
 }
 
+const Turbo::Core::TPhysicalDeviceDriver *Turbo::Core::TPhysicalDevice::GetPhysicalDeviceDriver()
+{
+    return this->physicalDeviceDriver;
+}
+
 std::string Turbo::Core::TPhysicalDevice::ToString()
 {
     return std::string();
@@ -711,6 +745,14 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
 
     physical_device_features.dynamicRendering = this->info.vulkan13Feature.dynamicRendering == VK_TRUE ? true : false;
 
+    physical_device_features.taskShaderNV = this->info.meshShaderFeaturesNV.taskShader == VK_TRUE ? true : false;
+    physical_device_features.meshShaderNV = this->info.meshShaderFeaturesNV.meshShader == VK_TRUE ? true : false;
+    physical_device_features.taskShaderEXT = this->info.meshShaderFeaturesEXT.taskShader == VK_TRUE ? true : false;
+    physical_device_features.meshShaderEXT = this->info.meshShaderFeaturesEXT.meshShader == VK_TRUE ? true : false;
+    physical_device_features.multiviewMeshShaderEXT = this->info.meshShaderFeaturesEXT.multiviewMeshShader == VK_TRUE ? true : false;
+    physical_device_features.primitiveFragmentShadingRateMeshShaderEXT = this->info.meshShaderFeaturesEXT.primitiveFragmentShadingRateMeshShader == VK_TRUE ? true : false;
+    physical_device_features.meshShaderQueriesEXT = this->info.meshShaderFeaturesEXT.meshShaderQueries == VK_TRUE ? true : false;
+
     return physical_device_features;
 }
 
@@ -727,6 +769,21 @@ size_t Turbo::Core::TPhysicalDevice::GetSupportExtensionCount()
 std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSupportExtensions()
 {
     return this->info.supportExtensions;
+}
+
+Turbo::Core::TExtensionInfo Turbo::Core::TPhysicalDevice::GetExtensionByType(TExtensionType extensionType)
+{
+    TExtensionInfo result;
+    for (TExtensionInfo &type_item : this->info.supportExtensions)
+    {
+        if (type_item.GetExtensionType() == extensionType)
+        {
+            result = type_item;
+            break;
+        }
+    }
+
+    return result;
 }
 
 bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
@@ -832,7 +889,7 @@ void Turbo::Core::TPhysicalDevice::ResetQueueCountMap()
 bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return true;
@@ -849,7 +906,7 @@ bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatInfo &format, TIm
 Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return vk_image_format_properties.maxExtent;
@@ -870,7 +927,7 @@ Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatIn
 uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return vk_image_format_properties.maxMipLevels;
@@ -887,7 +944,7 @@ uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatInfo &format,
 uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return vk_image_format_properties.maxArrayLayers;
@@ -904,7 +961,7 @@ uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatInfo &forma
 Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return vk_image_format_properties.sampleCounts;
@@ -921,7 +978,7 @@ Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCo
 Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
 {
     VkImageFormatProperties vk_image_format_properties = {};
-    VkResult result = Turbo::Core::vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
+    VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
     if (result == VkResult::VK_SUCCESS)
     {
         return vk_image_format_properties.maxResourceSize;
@@ -942,7 +999,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFo
     format_properties.linearTilingFeatures = 0;
     format_properties.optimalTilingFeatures = 0;
 
-    Turbo::Core::vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
 
     return format_properties.linearTilingFeatures;
 }
@@ -959,7 +1016,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TF
     format_properties.linearTilingFeatures = 0;
     format_properties.optimalTilingFeatures = 0;
 
-    Turbo::Core::vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
 
     return format_properties.optimalTilingFeatures;
 }
@@ -976,7 +1033,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFo
     format_properties.linearTilingFeatures = 0;
     format_properties.optimalTilingFeatures = 0;
 
-    Turbo::Core::vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
+    this->physicalDeviceDriver->vkGetPhysicalDeviceFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, &format_properties);
 
     return format_properties.bufferFeatures;
 }

@@ -48,6 +48,8 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
     VkPhysicalDeviceVulkan11Features vulkan11Feature;
     VkPhysicalDeviceVulkan12Features vulkan12Feature;
     VkPhysicalDeviceVulkan13Features vulkan13Feature;
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeaturesEXT;
+    VkPhysicalDeviceMeshShaderFeaturesNV meshShaderFeaturesNV;
 
     std::vector<TLayerInfo> supportLayers;
     std::vector<TExtensionInfo> supportExtensions;

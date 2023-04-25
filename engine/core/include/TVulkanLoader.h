@@ -154,14 +154,44 @@ extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
 #endif
 
 #if defined(VK_VERSION_1_1)
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2;
 #endif
 
 #if defined(VK_VERSION_1_3)
-extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRendering vkCmdBeginRendering;
-extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRendering vkCmdEndRendering;
 #endif
+
+struct TPhysicalDeviceFunctionTable
+{
+#if defined(VK_VERSION_1_0)
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures vkGetPhysicalDeviceFeatures = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceFormatProperties vkGetPhysicalDeviceFormatProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceImageFormatProperties vkGetPhysicalDeviceImageFormatProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkCreateDevice vkCreateDevice = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkEnumerateDeviceLayerProperties vkEnumerateDeviceLayerProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceSparseImageFormatProperties vkGetPhysicalDeviceSparseImageFormatProperties = nullptr;
+#endif
+#if defined(VK_VERSION_1_1)
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceProperties2 vkGetPhysicalDeviceProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceFormatProperties2 vkGetPhysicalDeviceFormatProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceImageFormatProperties2 vkGetPhysicalDeviceImageFormatProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceQueueFamilyProperties2 vkGetPhysicalDeviceQueueFamilyProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceMemoryProperties2 vkGetPhysicalDeviceMemoryProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceSparseImageFormatProperties2 vkGetPhysicalDeviceSparseImageFormatProperties2 = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceExternalBufferProperties vkGetPhysicalDeviceExternalBufferProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceExternalFenceProperties vkGetPhysicalDeviceExternalFenceProperties = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceExternalSemaphoreProperties vkGetPhysicalDeviceExternalSemaphoreProperties = nullptr;
+#endif
+#if defined(VK_VERSION_1_2)
+#endif
+#if defined(VK_VERSION_1_3)
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceToolProperties vkGetPhysicalDeviceToolProperties = nullptr;
+#endif
+};
+using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable;
 
 struct TDeviceFunctionTable
 {
@@ -293,6 +323,18 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr;
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;
 #endif
+
+#if defined(VK_EXT_mesh_shader)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT = nullptr;
+#endif
+
+#if defined(VK_NV_mesh_shader)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectCountNV vkCmdDrawMeshTasksIndirectCountNV = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV = nullptr;
+#endif
 };
 using TDeviceDriver = TDeviceFunctionTable;
 
@@ -323,6 +365,8 @@ class TVulkanLoader : public TObject
     static TVulkanLoader *Instance();
     static void Destroy();
 
+    static TVersion GetVulkanVersion();
+
     void LoadAll(TInstance *instance);
 
     template <typename Function>
@@ -343,8 +387,7 @@ class TVulkanLoader : public TObject
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name);
 
-    TVersion GetVulkanVersion();
-
+    TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice);
     TDeviceDriver LoadDeviceDriver(TDevice *device);
 
     virtual std::string ToString() override;
