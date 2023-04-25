@@ -547,7 +547,14 @@ int main()
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDrawMeshTasksEXT(1, 1, 1);
+            if (is_support_vk_ext_mesh_shader)
+            {
+                command_buffer->CmdDrawMeshTasksEXT(1, 1, 1);
+            }
+            else if (is_support_vk_nv_mesh_shader)
+            {
+                command_buffer->CmdDrawMeshTasksNV(1, 0);
+            }
             command_buffer->CmdNextSubpass();
 
             //<IMGUI Rendering>
