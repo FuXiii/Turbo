@@ -1,11 +1,12 @@
 #pragma once
-#include "TPipelineCache.h"
 #ifndef TURBO_CORE_TPIPELINE_H
 #define TURBO_CORE_TPIPELINE_H
 #include "TFormatInfo.h"
+#include "TPipelineCache.h"
 #include "TScissor.h"
 #include "TViewport.h"
 #include "TVulkanHandle.h"
+
 
 namespace Turbo
 {
@@ -19,6 +20,8 @@ class TComputeShader;
 class TTessellationControlShader;
 class TTessellationEvaluationShader;
 class TGeometryShader;
+class TTaskShader;
+class TMeshShader;
 class TDescriptorSetLayout;
 class TPipelineLayout;
 class TPipelineCache;
@@ -74,6 +77,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
     TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
     TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
 
     // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline

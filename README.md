@@ -3091,3 +3091,8 @@ Turbo是渲染引擎
 * 2023/4/25 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`中增加`TGraphicsPipeline(TRenderPass *renderPass, uint32_t subpass, TMeshShader *meshShader, TFragmentShader *fragmentShader, ...)`支持`Mesh Shader`的图形管线构造函数
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`中增加`TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)`支持`Mesh Shader`的管线基类构造函数
+
+
+  

@@ -198,6 +198,23 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)
+{
+    if (device != nullptr && meshShader != nullptr && fragmentShader != nullptr)
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaders.push_back(meshShader);
+        this->shaders.push_back(fragmentShader);
+        this->pipelineCache = pipelineCache;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
 Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && computeShader != nullptr)
