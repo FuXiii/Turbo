@@ -266,3 +266,8 @@ add_executable(MeshShaderTest ./MeshShaderTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(MeshShaderTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(MeshShaderTest PUBLIC ${LINK_PARTH})
 target_link_libraries(MeshShaderTest PUBLIC ${LIBS})
+
+add_executable(SpecializationConstantsTest ./SpecializationConstantsTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(SpecializationConstantsTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(SpecializationConstantsTest PUBLIC ${LINK_PARTH})
+target_link_libraries(SpecializationConstantsTest PUBLIC ${LIBS})

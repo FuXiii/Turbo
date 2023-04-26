@@ -3097,3 +3097,4 @@ Turbo是渲染引擎
 * 2023/4/26 设计架构
   >
   >* 更新`./docs/FAQ.md`文档
+  >* `./samples`中增加`SpecializationConstantsTest`例子，用于研究着色器中的常量设定
