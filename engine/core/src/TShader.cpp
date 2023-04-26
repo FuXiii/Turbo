@@ -6,6 +6,7 @@
 
 #include <fstream>
 
+// #include <spirv_common.hpp>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 
@@ -691,6 +692,30 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
         this->outputs.push_back(out_interface);
+    }
+
+    spirv_cross::SmallVector<spirv_cross::SpecializationConstant> specialization_constants = glsl.get_specialization_constants();
+    for (spirv_cross::SpecializationConstant &constant_item : specialization_constants)
+    {
+        spirv_cross::ConstantID id = constant_item.id; // The ID of the spec constant, useful for further reflection.
+        auto constant_id = constant_item.constant_id;  // statement in layout(constant_id = n)
+
+        const spirv_cross::SPIRConstant &value = glsl.get_constant(constant_item.id);
+        auto i32 = value.scalar_i32();               // 40
+        auto name = glsl.get_name(constant_item.id); // Const
+
+        auto specialization_constant_macro_name = value.specialization_constant_macro_name;
+        auto constant_type = value.constant_type;
+        auto specialization = value.specialization;
+        auto subconstants = value.subconstants;
+        auto m = value.m;
+        auto is_used_as_array_length = value.is_used_as_array_length;
+        auto is_used_as_lut = value.is_used_as_lut;
+
+        spirv_cross::TypeID type_id = value.constant_type;
+        spirv_cross::SPIRType type = glsl.get_type(type_id);
+        spirv_cross::SPIRType::BaseType base_type = type.basetype;
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
     }
 }
 
