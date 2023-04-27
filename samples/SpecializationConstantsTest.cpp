@@ -47,215 +47,27 @@
 #include <stdio.h>
 #include <string.h>
 
+std::string ReadTextFile(const std::string &filename)
+{
+    std::vector<std::string> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
-{
-    std::string save_file_path = "./";
-    std::string save_file_name = name;
-
-    Turbo::Core::TImage *source_image = image;
-
-    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(image->GetDevice(), 0, Turbo::Core::TImageType::DIMENSION_2D, source_image->GetFormat(), source_image->GetWidth(), source_image->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
-
-    Turbo::Core::TCommandBuffer *temp_command_buffer = commandBufferPool->Allocate();
-
-    temp_command_buffer->Begin();
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->CmdCopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->End();
-
-    Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(image->GetDevice());
-
-    deviceQueue->Submit(nullptr, nullptr, temp_command_buffer, gpu_copy_to_cpu_fence);
-
-    gpu_copy_to_cpu_fence->WaitUntil();
-
-    delete gpu_copy_to_cpu_fence;
-
-    std::string filename;
-    filename.append(save_file_path);
-    filename.append(save_file_name);
-    filename.append(".ppm");
-
-    VkImageSubresource subres = {};
-    subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    subres.mipLevel = 0;
-    subres.arrayLayer = 0;
-    VkSubresourceLayout sr_layout;
-    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
-
-    char *ptr = (char *)temp_image->Map();
-
-    ptr += sr_layout.offset;
-    std::ofstream file(filename.c_str(), std::ios::binary);
-
-    file << "P6\n";
-    file << source_image->GetWidth() << " ";
-    file << source_image->GetHeight() << "\n";
-    file << 255 << "\n";
-
-    int x = 0;
-    int y = 0;
-
-    for (y = 0; y < source_image->GetHeight(); y++)
-    {
-        const int *row = (const int *)ptr;
-        int swapped;
-
-        if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
-        {
-            for (x = 0; x < source_image->GetWidth(); x++)
-            {
-                swapped = (*row & 0xff00ff00) | (*row & 0x000000ff) << 16 | (*row & 0x00ff0000) >> 16;
-                file.write((char *)&swapped, 3);
-                row++;
-            }
-        }
-        else if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
-        {
-            for (x = 0; x < source_image->GetWidth(); x++)
-            {
-                file.write((char *)row, 3);
-                row++;
-            }
-        }
-        else
-        {
-            printf("Unrecognized image format - will not write image files");
-            break;
-        }
-
-        ptr += sr_layout.rowPitch;
-    }
-
-    file.close();
-    temp_image->Unmap();
-    delete temp_image;
-    commandBufferPool->Free(temp_command_buffer);
-}
-
-// bool read_ppm(char const *const filename, int &width, int &height, uint64_t rowPitch, unsigned char *dataPtr)
-// {
-//     // PPM format expected from http://netpbm.sourceforge.net/doc/ppm.html
-//     //  1. magic number
-//     //  2. whitespace
-//     //  3. width
-//     //  4. whitespace
-//     //  5. height
-//     //  6. whitespace
-//     //  7. max color value
-//     //  8. whitespace
-//     //  7. data
-
-//     // Comments are not supported, but are detected and we kick out
-//     // Only 8 bits per channel is supported
-//     // If dataPtr is nullptr, only width and height are returned
-
-//     // Read in values from the PPM file as characters to check for comments
-//     char magicStr[3] = {}, heightStr[6] = {}, widthStr[6] = {}, formatStr[6] = {};
-
-// #ifndef __ANDROID__
-//     FILE *fPtr = fopen(filename, "rb");
-// #else
-//     FILE *fPtr = AndroidFopen(filename, "rb");
-// #endif
-//     if (!fPtr)
-//     {
-//         printf("Bad filename in read_ppm: %s\n", filename);
-//         return false;
-//     }
-
-//     // Read the four values from file, accounting with any and all whitepace
-//     int count = fscanf(fPtr, "%s %s %s %s ", magicStr, widthStr, heightStr, formatStr);
-
-//     // Kick out if comments present
-//     if (magicStr[0] == '#' || widthStr[0] == '#' || heightStr[0] == '#' || formatStr[0] == '#')
-//     {
-//         printf("Unhandled comment in PPM file\n");
-//         return false;
-//     }
-
-//     // Only one magic value is valid
-//     if (strncmp(magicStr, "P6", sizeof(magicStr)))
-//     {
-//         printf("Unhandled PPM magic number: %s\n", magicStr);
-//         return false;
-//     }
-
-//     width = atoi(widthStr);
-//     height = atoi(heightStr);
-
-//     // Ensure we got something sane for width/height
-//     static const int saneDimension = 32768; //??
-//     if (width <= 0 || width > saneDimension)
-//     {
-//         printf("Width seems wrong.  Update read_ppm if not: %u\n", width);
-//         return false;
-//     }
-//     if (height <= 0 || height > saneDimension)
-//     {
-//         printf("Height seems wrong.  Update read_ppm if not: %u\n", height);
-//         return false;
-//     }
-
-//     if (dataPtr == nullptr)
-//     {
-//         // If no destination pointer, caller only wanted dimensions
-//         return true;
-//     }
-
-//     // Now read the data
-//     for (int y = 0; y < height; y++)
-//     {
-//         unsigned char *rowPtr = dataPtr;
-//         for (int x = 0; x < width; x++)
-//         {
-//             count = fread(rowPtr, 3, 1, fPtr);
-//             rowPtr[3] = 255; /* Alpha of 1 */
-//             rowPtr += 4;
-//         }
-//         dataPtr += rowPitch;
-//     }
-//     fclose(fPtr);
-
-//     return true;
-// }
-const std::string IMGUI_VERT_SHADER_STR = "#version 450\n"
-                                          "layout (location = 0) in vec2 inPos;\n"
-                                          "layout (location = 1) in vec2 inUV;\n"
-                                          "layout (location = 2) in vec4 inColor;\n"
-                                          "layout (push_constant) uniform PushConstants {\n"
-                                          "	vec2 scale;\n"
-                                          "	vec2 translate;\n"
-                                          "} pushConstants;\n"
-                                          "layout (location = 0) out vec2 outUV;\n"
-                                          "layout (location = 1) out vec4 outColor;\n"
-                                          "out gl_PerVertex \n"
-                                          "{\n"
-                                          "	vec4 gl_Position;   \n"
-                                          "};\n"
-                                          "void main() \n"
-                                          "{\n"
-                                          "	outUV = inUV;\n"
-                                          "	outColor = inColor;\n"
-                                          "	gl_Position = vec4(inPos * pushConstants.scale + pushConstants.translate, 0.0, 1.0);\n"
-                                          "}\n";
-
-const std::string IMGUI_FRAG_SHADER_STR = "#version 450\n"
-                                          "layout (binding = 0) uniform sampler2D fontSampler;\n"
-                                          "layout (location = 0) in vec2 inUV;\n"
-                                          "layout (location = 1) in vec4 inColor;\n"
-                                          "layout (location = 0) out vec4 outColor;\n"
-                                          "layout (location = 1) out vec4 outCustomColor;\n"
-                                          "void main() \n"
-                                          "{\n"
-                                          "	outColor = inColor * texture(fontSampler, inUV);\n"
-                                          "	outCustomColor = outColor;\n"
-                                          "}";
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
@@ -278,6 +90,8 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "void main() {\n"
                                     "   outColor = vec4(inColor,1);\n"
                                     "}\n";
+
+const std::string COMP_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.comp");
 
 typedef struct POSITION
 {
@@ -435,8 +249,11 @@ int main()
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
+    Turbo::Core::TComputeShader *compute_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, COMP_SHADER_STR);
+
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
+    std::cout << compute_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -1008,8 +825,6 @@ int main()
         //</End Rendering>
     }
 
-    ImageSaveToPPM(swapchain_images[0], command_pool, queue, "HelloTriangle");
-
     if (imgui_vertex_buffer != nullptr)
     {
         delete imgui_vertex_buffer;
@@ -1036,6 +851,7 @@ int main()
     delete render_pass;
 
     delete descriptor_pool;
+    delete compute_shader;
     delete vertex_shader;
     delete fragment_shader;
     delete depth_image_view;

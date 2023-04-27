@@ -665,7 +665,7 @@ void vkCmdDrawMeshTasksNV(
 
 ## Specialization Constants
 
-`Specialization Constants`用于在着色器中定义特化常量，这个`特化`的意思为在使用该着色器的`Pipeline`中可以指定该常量的值。
+`Specialization Constants`用于在着色器中定义特化常量，这个`特化`的意思为在创建该着色器的`Pipeline`中可以指定该常量的值。
 
 在`GLSL`中声明如下：
 ```CXX
