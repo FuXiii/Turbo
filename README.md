@@ -3100,7 +3100,7 @@ Turbo是渲染引擎
   >* `./samples`中增加`SpecializationConstantsTest`例子，用于研究着色器中的常量设定
   >* `./engine/core`下`TShader.h`中`class TShader`中`InternalParseSpirV()`成员函数中增加对于`Specialization Constants`特化常量的解析
 
-* 2023/4/26 设计架构
+* 2023/4/27 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
   >* `./asset/shaders`中增加`SpecializationConstantsTest.comp`的计算着色器文件，用于测试特化常量
