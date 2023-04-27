@@ -68,6 +68,10 @@
   >
   >* 更新`Mesh Shader GraphicsPipeline`章节
 
+* 2023/4/27
+  >
+  >* 创建`Specialization Constants`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -658,3 +662,87 @@ void vkCmdDrawMeshTasksNV(
   ```
 * 如果使用了`Mesh Shader`的话`VkGraphicsPipelineCreateInfo::pDynamicStates`中不能包含`VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY`，`VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE`，`VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`，`VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`，`VK_DYNAMIC_STATE_VERTEX_INPUT_EXT`
 * 对于`VkGraphicsPipelineCreateInfo::pTessellationState`如果使用了`Mesh Shader`的话这个参数将会被忽略(`Vulkan`标准中没有明文指出该限值，只是说如果`VkGraphicsPipelineCreateInfo::pStages`有细分着色器的话此项目需要合法，通过`Shader`组合限制可推出该条目)
+
+## Specialization Constants
+
+`Specialization Constants`用于在着色器中定义特化常量，这个`特化`的意思为在使用该着色器的`Pipeline`中可以指定该常量的值。
+
+在`GLSL`中声明如下：
+```CXX
+layout(constant_id = 17) const int arraySize = 12;
+```
+根据`GLSL`标准：`12`为用户设置`arraySize`的默认值，`17`是用户自定义设置的特化常量`id`号。并且特化常量只能声明成标量数据，包括`bool`，`int`，`uint`，`float`，`double`类型。
+
+`GLSL`内置的常量也可以声明成特化常量，比如：
+```CXX
+layout(constant_id = 31) gl_MaxClipDistances; 
+```
+如果在该内置常量使用后再声明成特化常量的话会在编译时产生编译错误，也就是要求一个常量要么是非特化的普通常量，要么是特化常量，不能两个都是。
+
+对于特化常量最常见的用法是通过使用`local_size_{xyz}_id`特化常量来分别指定计算着色器的`gl_WorkGroupSize`每个分量的`id`。比如：
+```CXX
+layout(local_size_x_id = 18, local_size_z_id = 19) in;
+```
+这里没有设置`local_size_y_id`表明`gl_WorkGroupSize.y`是一个非特化常量值，也就是设定`gl_WorkGroupSize`为部分特化向量值。
+
+对于`x`和`z`的值可以滞后进行特化。在生成`SPIR-V`之后，使用`id`号分别为`18`和`19`进行分别声明工作组纬度大小：
+```CXX
+layout(local_size_x = 32, local_size_y = 32) in; // 大小为 (32,32,1)
+layout(local_size_x_id = 18) in; // x的constant_id 
+layout(local_size_z_id = 19) in; // z的constant_id
+```
+现有标准对于声明`local_size_x`，`local_size_y`和`local_size_z`并不会改变。对于相同的`local-size`的`id`设置了不同的值或者在使用后再设置特化值都会产生编译错误。对于顺序、位置、声明和重复都不会导致错误
+
+### VkSpecializationInfo 
+
+在`Vulkan`中通过创建`Pipeline`时设置`VkSpecializationInfo VkPipelineShaderStageCreateInfo::pSpecializationInfo`进行特化常量的数值设定。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineShaderStageCreateInfo {
+    VkStructureType                     sType;
+    const void*                         pNext;
+    VkPipelineShaderStageCreateFlags    flags;
+    VkShaderStageFlagBits               stage;
+    VkShaderModule                      module;
+    const char*                         pName;
+    const VkSpecializationInfo*         pSpecializationInfo;
+} VkPipelineShaderStageCreateInfo;
+```
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationInfo {
+    uint32_t                           mapEntryCount;
+    const VkSpecializationMapEntry*    pMapEntries;
+    size_t                             dataSize;
+    const void*                        pData;
+} VkSpecializationInfo;
+```
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationMapEntry {
+    uint32_t    constantID;
+    uint32_t    offset;
+    size_t      size;
+} VkSpecializationMapEntry;
+```
+其中`VkSpecializationInfo`用于管线中所有的特化常量设置，而所有的特化常量数据都来源于`VkSpecializationInfo::pData`，所以`Turbo`要做的是收集管线中的所有特化常量声明之后拼成数组用于读写数据，并且需要提供接口供外部设置数据值，大致流程如下：
+```CXX
+//着色器
+layout(constant_id = 0) const bool bool_const_vlaue = true;
+layout(constant_id = 1) const int int_const_vlaue = 1;
+layout(constant_id = 8) const float float_const_vlaue = 2.0;
+layout(constant_id = 11) const double double_const_vlaue = 3.0;
+layout(constant_id = 13) const uint uint_const_vlaue = 40;
+
+//Turbo端
+TSpecializations specializations;
+specializations.SetConst(0, true);
+specializations.SetConst(1, 10);
+specializations.SetConst(8, 20.0);
+//specializations.SetConst(11, 30.0);//如果没有设置该值，不会影响Pipeline的创建和执行
+specializations.SetConst(13, 400);
+
+//创建管线
+new T{Compute，Graphics，...}Pipeline(..., specializations, ...);
+```
