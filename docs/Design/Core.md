@@ -695,7 +695,7 @@ layout(local_size_z_id = 19) in; // z的constant_id
 
 ### VkSpecializationInfo 
 
-在`Vulkan`中通过创建`Pipeline`时设置`VkSpecializationInfo VkPipelineShaderStageCreateInfo::pSpecializationInfo`进行特化常量的数值设定。
+在`Vulkan`中通过创建`Pipeline`时设置`VkPipelineShaderStageCreateInfo::pSpecializationInfo`进行特化常量的数值设定。
 
 ```CXX
 // Provided by VK_VERSION_1_0
