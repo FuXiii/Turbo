@@ -700,22 +700,120 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::ConstantID id = constant_item.id; // The ID of the spec constant, useful for further reflection.
         auto constant_id = constant_item.constant_id;  // statement in layout(constant_id = n)
 
-        const spirv_cross::SPIRConstant &value = glsl.get_constant(constant_item.id);
-        auto i32 = value.scalar_i32();               // 40
-        auto name = glsl.get_name(constant_item.id); // Const
-
+        const spirv_cross::SPIRConstant &value = glsl.get_constant(id);
+        auto vector_size = value.vector_size();
+        std::cout << "vector_size:" << vector_size << std::endl;
+        auto i32 = value.scalar_i32(); // 40
+        auto name = glsl.get_name(id); // Const
+        std::cout << "name:" << name << std::endl;
         auto specialization_constant_macro_name = value.specialization_constant_macro_name;
+        std::cout << "specialization_constant_macro_name:" << specialization_constant_macro_name << std::endl;
         auto constant_type = value.constant_type;
         auto specialization = value.specialization;
         auto subconstants = value.subconstants;
         auto m = value.m;
         auto is_used_as_array_length = value.is_used_as_array_length;
         auto is_used_as_lut = value.is_used_as_lut;
-
         spirv_cross::TypeID type_id = value.constant_type;
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
+        size_t width = type.width;
+        std::cout << "width:" << width << std::endl;
         Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+        switch (descriptor_data_type)
+        {
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN: {
+            std::cout << "UNKNOWN" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_VOID: {
+            std::cout << "VOID" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
+            std::cout << "BOOLEAN" << std::endl;
+            std::cout << "value:" << static_cast<unsigned int>(value.scalar_i8()) << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SBYTE: {
+            std::cout << "SBYTE" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UBYTE: {
+            std::cout << "UBYTE" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SHORT: {
+            std::cout << "SHORT" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_USHORT: {
+            std::cout << "USHORT" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ATOMIC_COUNTER: {
+            std::cout << "ATOMIC_COUNTER" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
+            std::cout << "INT" << std::endl;
+            std::cout << "value:" << value.scalar_i32() << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
+            std::cout << "UINT" << std::endl;
+            std::cout << "value:" << value.scalar() << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT64: {
+            std::cout << "INT64" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT64: {
+            std::cout << "UINT64" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_HALF: {
+            std::cout << "HALF" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
+            std::cout << "FLOAT" << std::endl;
+            std::cout << "value:" << value.scalar_f32() << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
+            std::cout << "DOUBLE" << std::endl;
+            std::cout << "value:" << value.scalar_f64() << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_STRUCT: {
+            std::cout << "STRUCT" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_IMAGE: {
+            std::cout << "IMAGE" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLED_IMAGE: {
+            std::cout << "SAMPLED_IMAGE" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLER: {
+            std::cout << "SAMPLER" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ACCELERATION_STRUCTURE: {
+            std::cout << "ACCELERATION_STRUCTURE" << std::endl;
+        }
+        break;
+        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_RAYQUERY: {
+            std::cout << "RAYQUERY" << std::endl;
+        }
+        break;
+        }
+
+        std::cout << "----------------------------------------" << std::endl;
     }
 }
 
