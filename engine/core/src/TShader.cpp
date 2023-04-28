@@ -38,22 +38,22 @@ Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const
     this->width = width;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetConstantID()
+uint32_t Turbo::Core::TSpecializationConstant::GetConstantID() const
 {
     return this->id;
 }
 
-const std::string &Turbo::Core::TSpecializationConstant::GetName()
+const std::string &Turbo::Core::TSpecializationConstant::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType()
+Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType() const
 {
     return this->descriptorDataType;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetWidth()
+uint32_t Turbo::Core::TSpecializationConstant::GetWidth() const
 {
     return this->width;
 }

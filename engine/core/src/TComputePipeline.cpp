@@ -41,7 +41,7 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     {
         result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
     }
-    
+
     if (result != VkResult::VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TComputePipeline::InternalCreate::vkCreateGraphicsPipelines");
@@ -62,8 +62,19 @@ Turbo::Core::TComputePipeline::TComputePipeline(TComputeShader *computeShader) :
     this->InternalCreate();
 }
 
+Turbo::Core::TComputePipeline::TComputePipeline(TSpecializations *specializations, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, nullptr, specializations)
+{
+    this->InternalCreate();
+}
+
 Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
 {
+    this->InternalCreate();
+}
+
+Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TSpecializations *specializations, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache, specializations)
+{
+    this->InternalCreate();
 }
 
 Turbo::Core::TComputePipeline::~TComputePipeline()

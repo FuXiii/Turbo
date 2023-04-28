@@ -56,10 +56,10 @@ class TSpecializationConstant : public Turbo::Core::TInfo
     TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
     ~TSpecializationConstant() = default;
 
-    uint32_t GetConstantID();
-    const std::string &GetName();
-    Turbo::Core::TDescriptorDataType GetDescriptorDataType();
-    uint32_t GetWidth();
+    uint32_t GetConstantID() const;
+    const std::string &GetName() const;
+    Turbo::Core::TDescriptorDataType GetDescriptorDataType() const;
+    uint32_t GetWidth() const;
 
   public:
     virtual std::string ToString() override;
