@@ -44,6 +44,27 @@ class TInterface : public Turbo::Core::TStructMember
     virtual std::string ToString() override;
 };
 
+class TSpecializationConstant : public Turbo::Core::TInfo
+{
+  private:
+    uint32_t id;
+    std::string name;
+    Turbo::Core::TDescriptorDataType descriptorDataType;
+    uint32_t width;
+
+  public:
+    TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
+    ~TSpecializationConstant() = default;
+
+    uint32_t GetConstantID();
+    const std::string &GetName();
+    Turbo::Core::TDescriptorDataType GetDescriptorDataType();
+    uint32_t GetWidth();
+
+  public:
+    virtual std::string ToString() override;
+};
+
 class TShader : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -57,6 +78,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA TShaderType type;
 
   private:
+    std::vector<TSpecializationConstant> specializationConstants;
     std::vector<TInterface> inputs;
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
@@ -98,6 +120,8 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::vector<TInterface> GetInputs();
     std::vector<TInterface> GetOutputs();
+
+    const std::vector<TSpecializationConstant> &GetSpecializationConstants();
 
     TShaderType GetType();
 

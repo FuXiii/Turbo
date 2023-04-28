@@ -1,12 +1,13 @@
 #pragma once
 #ifndef TURBO_CORE_TPIPELINE_H
 #define TURBO_CORE_TPIPELINE_H
+#include "TDescriptor.h"
 #include "TFormatInfo.h"
 #include "TPipelineCache.h"
 #include "TScissor.h"
 #include "TViewport.h"
 #include "TVulkanHandle.h"
-
+#include <map>
 
 namespace Turbo
 {
@@ -53,6 +54,42 @@ typedef enum TPipelineStageBits
     ALL_COMMANDS_BIT = 0x00010000,
 } TPipelineStageBits;
 typedef VkFlags TPipelineStages;
+
+class TSpecializations : public Turbo::Core::TInfo
+{
+  public:
+    union TConstant {
+        bool boolValue;
+        int32_t intValue;
+        uint32_t uintValue;
+        float floatValue;
+        double doubleValue;
+    };
+
+    struct TConstValue
+    {
+        Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
+        TConstant value;
+    };
+
+  private:
+    std::map<uint32_t, TConstValue> specializationMap;
+
+  public:
+    TSpecializations() = default;
+    ~TSpecializations() = default;
+
+    void SetConstant(uint32_t id, bool value);
+    void SetConstant(uint32_t id, int32_t value);
+    void SetConstant(uint32_t id, uint32_t value);
+    void SetConstant(uint32_t id, float value);
+    void SetConstant(uint32_t id, double value);
+
+    const std::map<uint32_t, TConstValue> &GetSpecializations();
+
+  public:
+    virtual std::string ToString() override;
+};
 
 class TPipeline : public Turbo::Core::TVulkanHandle
 {

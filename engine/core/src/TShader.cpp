@@ -30,6 +30,39 @@ std::string Turbo::Core::TInterface::ToString()
     return Turbo::Core::TStructMember::ToString();
 }
 
+Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+{
+    this->id = id;
+    this->name = name;
+    this->descriptorDataType = descriptorDataType;
+    this->width = width;
+}
+
+uint32_t Turbo::Core::TSpecializationConstant::GetConstantID()
+{
+    return this->id;
+}
+
+const std::string &Turbo::Core::TSpecializationConstant::GetName()
+{
+    return this->name;
+}
+
+Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType()
+{
+    return this->descriptorDataType;
+}
+
+uint32_t Turbo::Core::TSpecializationConstant::GetWidth()
+{
+    return this->width;
+}
+
+std::string Turbo::Core::TSpecializationConstant::ToString()
+{
+    return std::string();
+}
+
 std::vector<char> Turbo::Core::ReadSpirVFile(const std::string &file)
 {
     std::vector<char> result;
@@ -697,123 +730,18 @@ void Turbo::Core::TShader::InternalParseSpirV()
     spirv_cross::SmallVector<spirv_cross::SpecializationConstant> specialization_constants = glsl.get_specialization_constants();
     for (spirv_cross::SpecializationConstant &constant_item : specialization_constants)
     {
-        spirv_cross::ConstantID id = constant_item.id; // The ID of the spec constant, useful for further reflection.
-        auto constant_id = constant_item.constant_id;  // statement in layout(constant_id = n)
-
+        spirv_cross::ConstantID id = constant_item.id;
+        uint32_t constant_id = constant_item.constant_id;
         const spirv_cross::SPIRConstant &value = glsl.get_constant(id);
-        auto vector_size = value.vector_size();
-        std::cout << "vector_size:" << vector_size << std::endl;
-        auto i32 = value.scalar_i32(); // 40
-        auto name = glsl.get_name(id); // Const
-        std::cout << "name:" << name << std::endl;
-        auto specialization_constant_macro_name = value.specialization_constant_macro_name;
-        std::cout << "specialization_constant_macro_name:" << specialization_constant_macro_name << std::endl;
-        auto constant_type = value.constant_type;
-        auto specialization = value.specialization;
-        auto subconstants = value.subconstants;
-        auto m = value.m;
-        auto is_used_as_array_length = value.is_used_as_array_length;
-        auto is_used_as_lut = value.is_used_as_lut;
         spirv_cross::TypeID type_id = value.constant_type;
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
+        std::string name = glsl.get_name(id);
         size_t width = type.width;
-        std::cout << "width:" << width << std::endl;
-        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
-        switch (descriptor_data_type)
-        {
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN: {
-            std::cout << "UNKNOWN" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_VOID: {
-            std::cout << "VOID" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
-            std::cout << "BOOLEAN" << std::endl;
-            std::cout << "value:" << static_cast<unsigned int>(value.scalar_i8()) << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SBYTE: {
-            std::cout << "SBYTE" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UBYTE: {
-            std::cout << "UBYTE" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SHORT: {
-            std::cout << "SHORT" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_USHORT: {
-            std::cout << "USHORT" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ATOMIC_COUNTER: {
-            std::cout << "ATOMIC_COUNTER" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
-            std::cout << "INT" << std::endl;
-            std::cout << "value:" << value.scalar_i32() << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
-            std::cout << "UINT" << std::endl;
-            std::cout << "value:" << value.scalar() << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT64: {
-            std::cout << "INT64" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT64: {
-            std::cout << "UINT64" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_HALF: {
-            std::cout << "HALF" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
-            std::cout << "FLOAT" << std::endl;
-            std::cout << "value:" << value.scalar_f32() << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
-            std::cout << "DOUBLE" << std::endl;
-            std::cout << "value:" << value.scalar_f64() << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_STRUCT: {
-            std::cout << "STRUCT" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_IMAGE: {
-            std::cout << "IMAGE" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLED_IMAGE: {
-            std::cout << "SAMPLED_IMAGE" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_SAMPLER: {
-            std::cout << "SAMPLER" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_ACCELERATION_STRUCTURE: {
-            std::cout << "ACCELERATION_STRUCTURE" << std::endl;
-        }
-        break;
-        case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_RAYQUERY: {
-            std::cout << "RAYQUERY" << std::endl;
-        }
-        break;
-        }
 
-        std::cout << "----------------------------------------" << std::endl;
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+        Turbo::Core::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
+        this->specializationConstants.push_back(specialization_sonstant);
     }
 }
 
@@ -1138,6 +1066,11 @@ std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()
 std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs()
 {
     return this->outputs;
+}
+
+const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants()
+{
+    return this->specializationConstants;
 }
 
 Turbo::Core::TShaderType Turbo::Core::TShader::GetType()

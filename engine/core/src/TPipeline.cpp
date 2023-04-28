@@ -7,6 +7,46 @@
 #include "TVulkanAllocator.h"
 #include <map>
 
+void Turbo::Core::TSpecializations::SetConstant(uint32_t id, bool value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
+    this->specializationMap[id].value.boolValue = value;
+}
+
+void Turbo::Core::TSpecializations::SetConstant(uint32_t id, int32_t value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
+    this->specializationMap[id].value.intValue = value;
+}
+
+void Turbo::Core::TSpecializations::SetConstant(uint32_t id, uint32_t value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
+    this->specializationMap[id].value.uintValue = value;
+}
+
+void Turbo::Core::TSpecializations::SetConstant(uint32_t id, float value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
+    this->specializationMap[id].value.floatValue = value;
+}
+
+void Turbo::Core::TSpecializations::SetConstant(uint32_t id, double value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
+    this->specializationMap[id].value.doubleValue = value;
+}
+
+const std::map<uint32_t, Turbo::Core::TSpecializations::TConstValue> &Turbo::Core::TSpecializations::GetSpecializations()
+{
+    return this->specializationMap;
+}
+
+std::string Turbo::Core::TSpecializations::ToString()
+{
+    return std::string();
+}
+
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 {
     return lhs < rhs;

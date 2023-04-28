@@ -3104,3 +3104,29 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design/Core.md`文档
   >* `./asset/shaders`中增加`SpecializationConstantsTest.comp`的计算着色器文件，用于测试特化常量
+
+* 2023/4/28 设计架构
+  >
+  >* `./engine/core`下`TShader.h`中增加`class TSpecializationConstant`用于描述特化常量
+  >* `./engine/core`下`TShader.h`中`class TShader`中增加`std::vector<TSpecializationConstant> specializationConstants`成员变量
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`uint32_t id`成员变量
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`std::string name`成员变量
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`Turbo::Core::TDescriptorDataType descriptorDataType`成员变量
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`uint32_t width`成员变量
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)`构造函数
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`uint32_t GetConstantID()`成员函数
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`const std::string &GetName()`成员函数
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`Turbo::Core::TDescriptorDataType GetDescriptorDataType()`成员函数
+  >* `./engine/core`下`TShader.h`中`class TSpecializationConstant`类中增加`uint32_t GetWidth()`成员函数
+  >* `./engine/core`下`TShader.h`中`class TShader`中`InternalParseSpirV()`成员函数中完善对于`Specialization Constants`特化常量的解析
+  >* `./engine/core`下`TShader.h`中`class TShader`中增加`const std::vector<TSpecializationConstant> &GetSpecializationConstants()`成员函数
+  >* `./engine/core`下`TPipeline.h`中增加`class TSpecializations`类
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`union TConstant`成员`union`类型
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`struct TConstValue`成员类型
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`std::map<uint32_t, TConstValue> specializationMap`成员变量
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`std::map<uint32_t, TConstValue> specializationMap`成员变量
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`void SetConstant(uint32_t id, bool value)`成员函数
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`void SetConstant(uint32_t id, int32_t value)`成员函数
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`void SetConstant(uint32_t id, uint32_t value)`成员函数
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`void SetConstant(uint32_t id, float value)`成员函数
+  >* `./engine/core`下`TPipeline.h`中`class TSpecializations`类中增加`void SetConstant(uint32_t id, double value)`成员函数
