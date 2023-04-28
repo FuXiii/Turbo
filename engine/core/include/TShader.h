@@ -53,6 +53,7 @@ class TSpecializationConstant : public Turbo::Core::TInfo
     uint32_t width;
 
   public:
+    TSpecializationConstant() = default;
     TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
     ~TSpecializationConstant() = default;
 

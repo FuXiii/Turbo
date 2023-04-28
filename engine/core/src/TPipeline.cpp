@@ -119,7 +119,6 @@ void Turbo::Core::TPipeline::InternalCreate()
             // const std::string &name = specialization_constant_item.GetName();
             // Turbo::Core::TDescriptorDataType data_type = specialization_constant_item.GetDescriptorDataType();
             // uint32_t width = specialization_constant_item.GetWidth();
-
             specialization_constant_map[id] = specialization_constant_item;
         }
     }
