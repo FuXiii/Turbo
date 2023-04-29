@@ -3136,3 +3136,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`类中更新`InternalCreate()`成员函数，统计特化常量
   >* `./engine/core`下`TComputePipeline.h`中`class TComputePipeline`类中增加`TComputePipeline(TSpecializations *specializations, TComputeShader *computeShader)`构造函数
   >* `./engine/core`下`TComputePipeline.h`中`class TComputePipeline`类中增加`TComputePipeline(TPipelineCache *pipelineCache, TSpecializations *specializations, TComputeShader *computeShader)`构造函数
+
+* 2023/4/29 设计架构
+  >
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`类中移除`std::vector<TSpecializationConstant> specializationConstants`成员变量
+  >* `./engine/core`下`TPipeline.h`中`class TPipeline`类中增加`std::vector<TSpecializationConstant> GetSpecializationConstants()`成员函数

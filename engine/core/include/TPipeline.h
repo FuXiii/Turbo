@@ -104,7 +104,6 @@ class TPipeline : public Turbo::Core::TVulkanHandle
   protected:
     T_VULKAN_HANDLE_HANDLE VkPipeline vkPipeline = VK_NULL_HANDLE;
 
-    std::vector<TSpecializationConstant> specializationConstants; // FIXME: dynamic get from shaders
     TSpecializations specializations;
 
   protected:
@@ -133,6 +132,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
+
+    std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() override;
