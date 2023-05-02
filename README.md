@@ -3145,3 +3145,4 @@ Turbo是渲染引擎
 * 2023/5/2 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TPipeline.h`中移除`TSpecializations`类和相关声明

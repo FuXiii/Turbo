@@ -56,42 +56,6 @@ typedef enum TPipelineStageBits
 } TPipelineStageBits;
 typedef VkFlags TPipelineStages;
 
-class TSpecializations : public Turbo::Core::TInfo
-{
-  public:
-    union TConstant {
-        bool boolValue;
-        int32_t intValue;
-        uint32_t uintValue;
-        float floatValue;
-        double doubleValue;
-    };
-
-    struct TConstValue
-    {
-        Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
-        TConstant value;
-    };
-
-  private:
-    std::map<uint32_t, TConstValue> specializationMap;
-
-  public:
-    TSpecializations() = default;
-    ~TSpecializations() = default;
-
-    void SetConstant(uint32_t id, bool value);
-    void SetConstant(uint32_t id, int32_t value);
-    void SetConstant(uint32_t id, uint32_t value);
-    void SetConstant(uint32_t id, float value);
-    void SetConstant(uint32_t id, double value);
-
-    const std::map<uint32_t, TConstValue> &GetSpecializations() const;
-
-  public:
-    virtual std::string ToString() override;
-};
-
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -104,23 +68,21 @@ class TPipeline : public Turbo::Core::TVulkanHandle
   protected:
     T_VULKAN_HANDLE_HANDLE VkPipeline vkPipeline = VK_NULL_HANDLE;
 
-    TSpecializations specializations;
-
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    [[deprecated]] TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr);
-    TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr); // for graphics Pipeline
-    TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr);
-    TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr);
-    TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr);
-    TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr); // for graphics Pipeline
+    [[deprecated]] TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
 
     // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
-    TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr, TSpecializations *specializations = nullptr); // for compute pipeline
+    TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
     ~TPipeline();
 
   public:

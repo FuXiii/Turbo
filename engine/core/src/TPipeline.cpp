@@ -7,46 +7,6 @@
 #include "TVulkanAllocator.h"
 #include <map>
 
-void Turbo::Core::TSpecializations::SetConstant(uint32_t id, bool value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
-    this->specializationMap[id].value.boolValue = value;
-}
-
-void Turbo::Core::TSpecializations::SetConstant(uint32_t id, int32_t value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
-    this->specializationMap[id].value.intValue = value;
-}
-
-void Turbo::Core::TSpecializations::SetConstant(uint32_t id, uint32_t value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
-    this->specializationMap[id].value.uintValue = value;
-}
-
-void Turbo::Core::TSpecializations::SetConstant(uint32_t id, float value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
-    this->specializationMap[id].value.floatValue = value;
-}
-
-void Turbo::Core::TSpecializations::SetConstant(uint32_t id, double value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
-    this->specializationMap[id].value.doubleValue = value;
-}
-
-const std::map<uint32_t, Turbo::Core::TSpecializations::TConstValue> &Turbo::Core::TSpecializations::GetSpecializations() const
-{
-    return this->specializationMap;
-}
-
-std::string Turbo::Core::TSpecializations::ToString()
-{
-    return std::string();
-}
-
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 {
     return lhs < rhs;
@@ -150,7 +110,7 @@ void Turbo::Core::TPipeline::InternalDestroy()
     delete this->pipelineLayout;
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache, TSpecializations *specializations) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vector<TShader *> &shaders, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
     {
@@ -158,7 +118,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vect
         this->type = type;
         this->shaders = shaders;
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -167,7 +126,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TPipelineType type, std::vect
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache, TSpecializations *specializations) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && vertexShader != nullptr && fragmentShader != nullptr)
     {
@@ -176,7 +135,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
         this->shaders.push_back(vertexShader);
         this->shaders.push_back(fragmentShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -185,7 +143,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache, TSpecializations *specializations)
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)
 {
     if (device != nullptr && vertexShader != nullptr && tessellationControlShader != nullptr && tessellationEvaluationShader != nullptr && fragmentShader != nullptr)
     {
@@ -196,7 +154,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
         this->shaders.push_back(tessellationEvaluationShader);
         this->shaders.push_back(fragmentShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -205,7 +162,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache, TSpecializations *specializations) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && vertexShader != nullptr && geometryShader != nullptr && fragmentShader != nullptr)
     {
@@ -215,7 +172,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
         this->shaders.push_back(geometryShader);
         this->shaders.push_back(fragmentShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -224,7 +180,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache, TSpecializations *specializations) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && vertexShader != nullptr && tessellationControlShader != nullptr && tessellationEvaluationShader != nullptr && geometryShader != nullptr && fragmentShader != nullptr)
     {
@@ -236,7 +192,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
         this->shaders.push_back(geometryShader);
         this->shaders.push_back(fragmentShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -245,7 +200,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache, TSpecializations *specializations)
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)
 {
     if (device != nullptr && meshShader != nullptr && fragmentShader != nullptr)
     {
@@ -254,7 +209,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFra
         this->shaders.push_back(meshShader);
         this->shaders.push_back(fragmentShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else
@@ -263,7 +217,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFra
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache, TSpecializations *specializations) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && computeShader != nullptr)
     {
@@ -271,7 +225,6 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader
         this->type = TPipelineType::Compute;
         this->shaders.push_back(computeShader);
         this->pipelineCache = pipelineCache;
-        this->specializations = *specializations;
         this->InternalCreate();
     }
     else

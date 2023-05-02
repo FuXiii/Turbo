@@ -760,3 +760,6 @@ some_shader->SetConstant(13, 400);
 ```
 
 之后在创建`VkPipeline`时根据指定的多个`Shader`中的特化常量进行数据设置。
+
+* 如果用户通过的`TShader::SetConstant`设置的`id`在`Shader`代码中并没有声明的话，不会造成任何问题，`Turbo`将会跳过该`id`
+* 如果用户在`Shader`代码中已经声明了某个`id`的特化常量，而未通过的`TShader::SetConstant`设置特化常量值，则使用`Shader`代码中声明的默认值
