@@ -95,7 +95,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
 
-    std::vector<TSpecializationConstant> GetSpecializationConstants() const;
+    //std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() override;
