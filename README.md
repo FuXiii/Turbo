@@ -3141,3 +3141,7 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`类中移除`std::vector<TSpecializationConstant> specializationConstants`成员变量
   >* `./engine/core`下`TPipeline.h`中`class TPipeline`类中增加`std::vector<TSpecializationConstant> GetSpecializationConstants()`成员函数
+  
+* 2023/5/2 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
