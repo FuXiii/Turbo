@@ -3,6 +3,7 @@
 #define TURBO_CORE_TSHADER_H
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
+#include <map>
 
 namespace Turbo
 {
@@ -78,6 +79,21 @@ class TShader : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA TShaderLanguage language;
     T_VULKAN_HANDLE_DATA TShaderType type;
 
+  public:
+    union TConstant {
+        bool boolValue;
+        int32_t intValue;
+        uint32_t uintValue;
+        float floatValue;
+        double doubleValue;
+    };
+
+    struct TConstValue
+    {
+        Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
+        TConstant value;
+    };
+
   private:
     std::vector<TSpecializationConstant> specializationConstants;
     std::vector<TInterface> inputs;
@@ -91,6 +107,8 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TStorageImageDescriptor *> storageImageDescriptors;
 
     std::string entryPoint;
+
+    std::map<uint32_t, TConstValue> specializationMap;
 
   protected:
     virtual void InternalCreate() override;
@@ -125,6 +143,15 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TSpecializationConstant> &GetSpecializationConstants();
 
     TShaderType GetType();
+
+    //<specialization constants>
+    void SetConstant(uint32_t id, bool value);
+    void SetConstant(uint32_t id, int32_t value);
+    void SetConstant(uint32_t id, uint32_t value);
+    void SetConstant(uint32_t id, float value);
+    void SetConstant(uint32_t id, double value);
+    const std::map<uint32_t, TConstValue> &GetSpecializations() const;
+    //</specialization constants>
 
     virtual std::string ToString() override;
 };

@@ -3146,3 +3146,4 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design/Core.md`文档
   >* `./engine/core`下`TPipeline.h`中移除`TSpecializations`类和相关声明
+  >* `./engine/core`下将`TSpecializations`中的相关声明转移至`TShader.h`中的`TShader`类中
