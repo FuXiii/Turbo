@@ -117,13 +117,13 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
     if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
     {
-        free(specialization_constants_data);
         result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
+        free(specialization_constants_data);
     }
     else
     {
-        free(specialization_constants_data);
         result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
+        free(specialization_constants_data);
     }
 
     if (result != VkResult::VK_SUCCESS)
