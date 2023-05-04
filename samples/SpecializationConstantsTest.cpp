@@ -333,12 +333,12 @@ int main()
         compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, target_image_view);
         compute_command_buffer->End();
 
-        descriptor_pool->Free(compute_pipeline_descriptor_set);
-
         Turbo::Core::TFence *compute_fence = new Turbo::Core::TFence(device);
         queue->Submit(nullptr, nullptr, compute_command_buffer, compute_fence);
         compute_fence->WaitUntil();
         command_pool->Free(compute_command_buffer);
+        descriptor_pool->Free(compute_pipeline_descriptor_set);
+
         delete compute_fence;
         delete compute_pipeline;
         delete compute_shader;
