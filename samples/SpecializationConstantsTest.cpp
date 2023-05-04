@@ -13,6 +13,7 @@
 #include "core/include/TShader.h"
 
 #include "core/include/TAttachment.h"
+#include "core/include/TComputePipeline.h"
 #include "core/include/TGraphicsPipeline.h"
 #include "core/include/TRenderPass.h"
 #include "core/include/TSubpass.h"
@@ -69,27 +70,8 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = "#version 450 core\n"
-                                    "layout (set = 0, binding = 0) uniform bufferVals {\n"
-                                    "    float value;\n"
-                                    "} myBufferVals;\n"
-                                    "layout (location = 0) in vec3 pos;\n"
-                                    "layout (location = 1) in vec3 color;"
-                                    "layout (location = 2) out vec3 outColor;"
-                                    "layout (location = 3) out float outValue;\n"
-                                    "void main() {\n"
-                                    "   gl_Position = vec4(myBufferVals.value*pos,1);\n"
-                                    "   outColor = color;\n"
-                                    "   outValue = myBufferVals.value;\n"
-                                    "}\n";
-
-const std::string FRAG_SHADER_STR = "#version 450 core\n"
-                                    "layout (location = 2) in vec3 inColor;\n"
-                                    "layout (location = 3) in float inValue;\n"
-                                    "layout (location = 0) out vec4 outColor;\n"
-                                    "void main() {\n"
-                                    "   outColor = vec4(inColor,1);\n"
-                                    "}\n";
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/post_show_texture.frag");
 
 const std::string COMP_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.comp");
 
@@ -126,12 +108,19 @@ typedef struct TEXCOORD
     float v;
 } TEXCOORD;
 
+struct MY_PUSH_CONSTANTS_DATA
+{
+    float time;
+    float resolutionX;
+    float resolutionY;
+};
+
 int main()
 {
-    std::vector<POSITION_AND_COLOR> POSITION_AND_COLOR_DATA;
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}});
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}});
-    POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}});
+    MY_PUSH_CONSTANTS_DATA my_push_constants_data;
+    my_push_constants_data.time = 0;
+    my_push_constants_data.resolutionX = 0;
+    my_push_constants_data.resolutionY = 0;
 
     float value = 1.0f;
 
@@ -237,11 +226,11 @@ int main()
     memcpy(value_ptr, &value, sizeof(value));
     value_buffer->Unmap();
 
-    Turbo::Core::TBuffer *vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
-    void *vertx_buffer_ptr = vertex_buffer->Map();
-    memcpy(vertx_buffer_ptr, POSITION_AND_COLOR_DATA.data(), sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
-    vertex_buffer->Unmap();
-    POSITION_AND_COLOR_DATA.clear();
+    uint32_t target_image_width = 512;
+    uint32_t target_image_height = 512;
+
+    Turbo::Core::TImage *target_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, target_image_width, target_image_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TImageView *target_image_view = new Turbo::Core::TImageView(target_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, target_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
@@ -249,11 +238,8 @@ int main()
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
-    Turbo::Core::TComputeShader *compute_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, COMP_SHADER_STR);
-
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
-    std::cout << compute_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -294,7 +280,6 @@ int main()
     vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, color));    // color
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
-    vertex_bindings.push_back(vertex_binding);
 
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
@@ -302,11 +287,17 @@ int main()
     std::vector<Turbo::Core::TShader *> shaders{vertex_shader, fragment_shader};
     Turbo::Core::TGraphicsPipeline *pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
-    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
+    std::vector<Turbo::Core::TImageView *> my_image_views;
+    my_image_views.push_back(target_image_view);
 
-    std::vector<Turbo::Core::TBuffer *> vertex_buffers;
-    vertex_buffers.push_back(vertex_buffer);
+    Turbo::Core::TSampler *my_sampler = new Turbo::Core::TSampler(device);
+
+    std::vector<Turbo::Core::TSampler *> my_samplers;
+    my_samplers.push_back(my_sampler);
+
+    Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
+    pipeline_descriptor_set->BindData(0, 0, 0, my_image_views);
+    pipeline_descriptor_set->BindData(0, 1, 0, my_samplers);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -317,6 +308,40 @@ int main()
 
         Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
         swpachain_framebuffers.push_back(swapchain_framebuffer);
+    }
+
+    {
+        Turbo::Core::TComputeShader *compute_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, COMP_SHADER_STR);
+        compute_shader->SetConstant(0, false);
+        
+        Turbo::Core::TComputePipeline *compute_pipeline = new Turbo::Core::TComputePipeline(compute_shader);
+
+        Turbo::Core::TPipelineDescriptorSet *compute_pipeline_descriptor_set = descriptor_pool->Allocate(compute_pipeline->GetPipelineLayout());
+
+        std::vector<Turbo::Core::TImageView *> pipeline_image_views;
+        pipeline_image_views.push_back(target_image_view);
+        compute_pipeline_descriptor_set->BindData(0, 0, 0, pipeline_image_views);
+
+        Turbo::Core::TCommandBuffer *compute_command_buffer = command_pool->Allocate();
+        compute_command_buffer->Begin();
+        compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, 0, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, target_image_view);
+
+        compute_command_buffer->CmdBindPipeline(compute_pipeline);
+        compute_command_buffer->CmdBindPipelineDescriptorSet(compute_pipeline_descriptor_set);
+        compute_command_buffer->CmdDispatch(target_image_width, target_image_height, 1);
+
+        compute_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::COMPUTE_SHADER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::SHADER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, target_image_view);
+        compute_command_buffer->End();
+
+        descriptor_pool->Free(compute_pipeline_descriptor_set);
+
+        Turbo::Core::TFence *compute_fence = new Turbo::Core::TFence(device);
+        queue->Submit(nullptr, nullptr, compute_command_buffer, compute_fence);
+        compute_fence->WaitUntil();
+        command_pool->Free(compute_command_buffer);
+        delete compute_fence;
+        delete compute_pipeline;
+        delete compute_shader;
     }
 
     //<IMGUI>
@@ -508,12 +533,14 @@ int main()
             command_buffer->Begin();
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
-            // Triangle
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
+            my_push_constants_data.time = _time;
+            my_push_constants_data.resolutionX = swapchain->GetWidth();
+            my_push_constants_data.resolutionY = swapchain->GetHeight();
+            command_buffer->CmdPushConstants(0, sizeof(my_push_constants_data), &my_push_constants_data);
             command_buffer->CmdDraw(3, 1, 0, 0);
 
             //<IMGUI Rendering>
@@ -851,16 +878,16 @@ int main()
     delete render_pass;
 
     delete descriptor_pool;
-    delete compute_shader;
     delete vertex_shader;
     delete fragment_shader;
     delete depth_image_view;
     delete depth_image;
+    delete target_image_view;
+    delete target_image;
     for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
     {
         delete image_view_item;
     }
-    delete vertex_buffer;
     delete value_buffer;
     command_pool->Free(command_buffer);
     delete command_pool;
@@ -869,6 +896,7 @@ int main()
     PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
     pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
+    delete my_sampler;
     delete device;
     delete instance;
 

@@ -3153,3 +3153,4 @@ Turbo是渲染引擎
   >
   >* 更新`./docs/Design/Core.md`文档
   >* `./engine/core`下`TComputePipeline.h`中`class TComputePipeline`类中`InternalCreate()`成员函数中增加对`VkSpecializationInfo`的解析
+  >* `./asset/shaders`中增加`post_show_texture.frag`片元着色器文件，用于在后处理中采样显示纹理

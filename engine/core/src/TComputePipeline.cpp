@@ -27,6 +27,10 @@ void Turbo::Core::TComputePipeline::InternalCreate()
             {
                 TDescriptorDataType constant_type = specialization_constant_item.GetDescriptorDataType();
                 uint32_t constant_width = specialization_constant_item.GetWidth();
+                if (constant_type == TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN)
+                {
+                    constant_width = sizeof(VkBool32);
+                }
 
                 if (constant_type != TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && constant_type == value.dataType && constant_width != 0)
                 {
