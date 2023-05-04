@@ -76,6 +76,10 @@
   >
   >* 更新`VkSpecializationInfo`章节
 
+* 2023/5/4
+  >
+  >* 创建`特化判断流程`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -761,5 +765,17 @@ some_shader->SetConstant(13, 400);
 
 之后在创建`VkPipeline`时根据指定的多个`Shader`中的特化常量进行数据设置。
 
-* 如果用户通过的`TShader::SetConstant`设置的`id`在`Shader`代码中并没有声明的话，不会造成任何问题，`Turbo`将会跳过该`id`
+* 如果用户通过的`TShader::SetConstant`设置的`id`在`Shader`代码中并没有声明的话，不会造成任何问题，`Turbo`将会跳过该`id`（详情请查看后文的`特化判断流程`）
 * 如果用户在`Shader`代码中已经声明了某个`id`的特化常量，而未通过的`TShader::SetConstant`设置特化常量值，则使用`Shader`代码中声明的默认值
+
+#### 特化判断流程
+
+```mermaid
+graph TD;
+Start(("开始"))-->IsConstantEmpty{"用户设置的特化集是否为空"}
+IsConstantEmpty--空-->Donothing("什么也不做")
+IsConstantEmpty--非空-->GetIDAndValue("遍历特化集中每一个用户设置的特化常量对应ID和Value值")
+GetIDAndValue-->IsSpecializationConstantsDeclaredInShader{"Shader中是否声明了相应的特化常量\n按照ID和Value的数值类型判断"}
+IsSpecializationConstantsDeclaredInShader--未声明相应ID或类型对应不上-->Donothing
+IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统计计算VkSpecializationInfo")
+```
