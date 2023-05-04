@@ -3152,3 +3152,4 @@ Turbo是渲染引擎
 * 2023/5/4 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+  >* `./engine/core`下`TComputePipeline.h`中`class TComputePipeline`类中`InternalCreate()`成员函数中增加对`VkSpecializationInfo`的解析
