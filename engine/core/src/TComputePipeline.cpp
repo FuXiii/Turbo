@@ -46,11 +46,13 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     }
 
     void *specialization_constants_data = malloc(data_size); // FIXME:别忘了回收内存
+    size_t specialization_constants_offset = 0;
     for (VkSpecializationMapEntry &vk_specialization_map_entry_item : vk_specialization_map_entrys)
     {
         uint32_t constant_id = vk_specialization_map_entry_item.constantID;
         uint32_t offset = vk_specialization_map_entry_item.offset;
         size_t size = vk_specialization_map_entry_item.size;
+        specialization_constants_offset = specialization_constants_offset + offset;
 
         TDescriptorDataType data_type = specializations.at(constant_id).dataType;
         TShader::TConstant data_value = specializations.at(constant_id).value;
@@ -58,27 +60,27 @@ void Turbo::Core::TComputePipeline::InternalCreate()
         {
         case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
             VkBool32 value = data_value.boolValue ? VK_TRUE : VK_FALSE;
-            memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
+            memcpy(static_cast<uint8_t *>(specialization_constants_data) + specialization_constants_offset, &value, size);
         }
         break;
         case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
             int value = data_value.intValue;
-            memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
+            memcpy(static_cast<uint8_t *>(specialization_constants_data) + specialization_constants_offset, &value, size);
         }
         break;
         case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
             uint32_t value = data_value.uintValue;
-            memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
+            memcpy(static_cast<uint8_t *>(specialization_constants_data) + specialization_constants_offset, &value, size);
         }
         break;
         case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
             float value = data_value.floatValue;
-            memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
+            memcpy(static_cast<uint8_t *>(specialization_constants_data) + specialization_constants_offset, &value, size);
         }
         break;
         case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
             double value = data_value.doubleValue;
-            memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
+            memcpy(static_cast<uint8_t *>(specialization_constants_data) + specialization_constants_offset, &value, size);
         }
         break;
         default: {
@@ -117,10 +119,12 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
     if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
     {
+        free(specialization_constants_data);
         result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
     }
     else
     {
+        free(specialization_constants_data);
         result = device->GetDeviceDriver()->vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &vk_compute_pipeline_create_info, allocator, &this->vkPipeline);
     }
 
