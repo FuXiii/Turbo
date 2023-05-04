@@ -20,28 +20,26 @@ void Turbo::Core::TComputePipeline::InternalCreate()
         uint32_t id = specialization_item.first;
         TShader::TConstValue value = specialization_item.second;
 
-        TDescriptorDataType constant_type = TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
-        uint32_t constant_width = 0;
         for (const TSpecializationConstant &specialization_constant_item : specialization_constants)
         {
             uint32_t constant_id = specialization_constant_item.GetConstantID();
             if (constant_id == id)
             {
-                constant_type = specialization_constant_item.GetDescriptorDataType();
-                constant_width = specialization_constant_item.GetWidth();
+                TDescriptorDataType constant_type = specialization_constant_item.GetDescriptorDataType();
+                uint32_t constant_width = specialization_constant_item.GetWidth();
+
+                if (constant_type != TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && constant_type == value.dataType && constant_width != 0)
+                {
+                    VkSpecializationMapEntry vk_specialization_map_entry = {};
+                    vk_specialization_map_entry.constantID = id;
+                    vk_specialization_map_entry.offset = data_size;
+                    vk_specialization_map_entry.size = constant_width;
+                    vk_specialization_map_entrys.push_back(vk_specialization_map_entry);
+
+                    data_size = data_size + constant_width;
+                }
                 break;
             }
-        }
-
-        if (constant_type != TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && constant_type == value.dataType && constant_width != 0)
-        {
-            VkSpecializationMapEntry vk_specialization_map_entry = {};
-            vk_specialization_map_entry.constantID = id;
-            vk_specialization_map_entry.offset = data_size;
-            vk_specialization_map_entry.size = constant_width;
-            vk_specialization_map_entrys.push_back(vk_specialization_map_entry);
-
-            data_size = data_size + constant_width;
         }
     }
 
