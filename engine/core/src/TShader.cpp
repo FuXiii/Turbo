@@ -6,6 +6,7 @@
 
 #include <fstream>
 
+// #include <spirv_common.hpp>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 
@@ -27,6 +28,39 @@ Turbo::Core::TInterface::~TInterface()
 std::string Turbo::Core::TInterface::ToString()
 {
     return Turbo::Core::TStructMember::ToString();
+}
+
+Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+{
+    this->id = id;
+    this->name = name;
+    this->descriptorDataType = descriptorDataType;
+    this->width = width;
+}
+
+uint32_t Turbo::Core::TSpecializationConstant::GetConstantID() const
+{
+    return this->id;
+}
+
+const std::string &Turbo::Core::TSpecializationConstant::GetName() const
+{
+    return this->name;
+}
+
+Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType() const
+{
+    return this->descriptorDataType;
+}
+
+uint32_t Turbo::Core::TSpecializationConstant::GetWidth() const
+{
+    return this->width;
+}
+
+std::string Turbo::Core::TSpecializationConstant::ToString()
+{
+    return std::string();
 }
 
 std::vector<char> Turbo::Core::ReadSpirVFile(const std::string &file)
@@ -692,6 +726,23 @@ void Turbo::Core::TShader::InternalParseSpirV()
         Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
         this->outputs.push_back(out_interface);
     }
+
+    spirv_cross::SmallVector<spirv_cross::SpecializationConstant> specialization_constants = glsl.get_specialization_constants();
+    for (spirv_cross::SpecializationConstant &constant_item : specialization_constants)
+    {
+        spirv_cross::ConstantID id = constant_item.id;
+        uint32_t constant_id = constant_item.constant_id;
+        const spirv_cross::SPIRConstant &value = glsl.get_constant(id);
+        spirv_cross::TypeID type_id = value.constant_type;
+        spirv_cross::SPIRType type = glsl.get_type(type_id);
+        spirv_cross::SPIRType::BaseType base_type = type.basetype;
+        std::string name = glsl.get_name(id);
+        size_t width = type.width;
+
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+        Turbo::Core::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
+        this->specializationConstants.push_back(specialization_sonstant);
+    }
 }
 
 Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint)
@@ -1017,9 +1068,49 @@ std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs()
     return this->outputs;
 }
 
+const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants()
+{
+    return this->specializationConstants;
+}
+
 Turbo::Core::TShaderType Turbo::Core::TShader::GetType()
 {
     return this->type;
+}
+
+void Turbo::Core::TShader::SetConstant(uint32_t id, bool value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
+    this->specializationMap[id].value.boolValue = value;
+}
+
+void Turbo::Core::TShader::SetConstant(uint32_t id, int32_t value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
+    this->specializationMap[id].value.intValue = value;
+}
+
+void Turbo::Core::TShader::SetConstant(uint32_t id, uint32_t value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
+    this->specializationMap[id].value.uintValue = value;
+}
+
+void Turbo::Core::TShader::SetConstant(uint32_t id, float value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
+    this->specializationMap[id].value.floatValue = value;
+}
+
+void Turbo::Core::TShader::SetConstant(uint32_t id, double value)
+{
+    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
+    this->specializationMap[id].value.doubleValue = value;
+}
+
+const std::map<uint32_t, Turbo::Core::TShader::TConstValue> &Turbo::Core::TShader::GetSpecializations() const
+{
+    return this->specializationMap;
 }
 
 std::string Turbo::Core::TShader::ToString()

@@ -185,6 +185,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
     assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 #else
+    // libvulkan.1.dylib//on macOS
     throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader", "Please implement this platform definition");
 #endif
 

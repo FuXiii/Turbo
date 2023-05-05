@@ -20,6 +20,8 @@ void Turbo::Core::TPipeline::InternalCreate()
 
     std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> descriptor_set_map(DescriptorSetMapCompFunction);
 
+    std::map</*constant_id*/ uint32_t, TSpecializationConstant> specialization_constant_map;
+
     for (TShader *shader_item : this->shaders)
     {
         std::vector<TUniformBufferDescriptor *> uniform_buffer_descriptors = shader_item->GetUniformBufferDescriptors();
@@ -265,6 +267,33 @@ Turbo::Core::TPipelineCache *Turbo::Core::TPipeline::GetPipelineCache()
 {
     return this->pipelineCache;
 }
+
+// std::vector<Turbo::Core::TSpecializationConstant> Turbo::Core::TPipeline::GetSpecializationConstants() const
+// {
+//     std::vector<TSpecializationConstant> specialization_constants;
+
+//     std::map</*constant_id*/ uint32_t, TSpecializationConstant> specialization_constant_map;
+
+//     for (TShader *shader_item : this->shaders)
+//     {
+//         const std::vector<TSpecializationConstant> &specialization_constant = shader_item->GetSpecializationConstants();
+//         for (const TSpecializationConstant &specialization_constant_item : specialization_constant)
+//         {
+//             uint32_t id = specialization_constant_item.GetConstantID();
+//             // const std::string &name = specialization_constant_item.GetName();
+//             // Turbo::Core::TDescriptorDataType data_type = specialization_constant_item.GetDescriptorDataType();
+//             // uint32_t width = specialization_constant_item.GetWidth();
+//             specialization_constant_map[id] = specialization_constant_item;
+//         }
+//     }
+
+//     for (auto &specialization_constant_item : specialization_constant_map)
+//     {
+//         specialization_constants.push_back(specialization_constant_item.second);
+//     }
+
+//     return specialization_constants;
+// }
 
 std::string Turbo::Core::TPipeline::ToString()
 {

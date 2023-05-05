@@ -68,6 +68,18 @@
   >
   >* 更新`Mesh Shader GraphicsPipeline`章节
 
+* 2023/4/27
+  >
+  >* 创建`Specialization Constants`章节
+
+* 2023/5/2
+  >
+  >* 更新`VkSpecializationInfo`章节
+
+* 2023/5/4
+  >
+  >* 创建`特化判断流程`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -559,9 +571,11 @@ const VkPipelineTessellationStateCreateInfo* pTessellationState;
 `Vulkan`中还有一个名为`VK_EXT_mesh_shader`的设备扩展，该扩展为更加通用的扩展。与`VK_NV_mesh_shader`不完全一样，有区别。
 
 其中`VK_NV_mesh_shader`依赖`VK_KHR_get_physical_device_properties2`扩展
+
 * `VK_KHR_get_physical_device_properties2`在`Vulkan1.1`标准中被提升为核心标准
 
 其中`VK_EXT_mesh_shader`依赖`VK_KHR_spirv_1_4`扩展
+
 * `VK_KHR_spirv_1_4`在`Vulkan1.2`标准中被提升为核心标准
 * `VK_KHR_spirv_1_4`依赖`VK_KHR_shader_float_controls`扩展
 * `VK_KHR_shader_float_controls`在`Vulkan1.2`标准中被提升为核心标准
@@ -640,12 +654,14 @@ void vkCmdDrawMeshTasksNV(
 * 对于`VkGraphicsPipelineCreateInfo::pVertexInputState`如果使用了`Mesh Shader`的话这个参数将会被忽略
 * 对于`VkGraphicsPipelineCreateInfo::pInputAssemblyState`如果使用了`Mesh Shader`的话这个参数将会被忽略
 * 对于`VkGraphicsPipelineCreateInfo::pStages`中指定的`Shader`只能是一下两种组合不能混合使用：
+
   ```mermaid
   graph LR
   style id0 stroke-dasharray: 5 5
   MeshShader
   id0(TaskShader)-->MeshShader
   ```
+
   ```mermaid
   graph LR
   style id0 stroke-dasharray: 5 5
@@ -656,5 +672,110 @@ void vkCmdDrawMeshTasksNV(
   FragmentShader
   VertxShader-->id0(TessellationControlShader)-->id1(TessellationEvaluationShader)-->id2(GeometryShader)-->FragmentShader
   ```
+
 * 如果使用了`Mesh Shader`的话`VkGraphicsPipelineCreateInfo::pDynamicStates`中不能包含`VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY`，`VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE`，`VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`，`VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`，`VK_DYNAMIC_STATE_VERTEX_INPUT_EXT`
 * 对于`VkGraphicsPipelineCreateInfo::pTessellationState`如果使用了`Mesh Shader`的话这个参数将会被忽略(`Vulkan`标准中没有明文指出该限值，只是说如果`VkGraphicsPipelineCreateInfo::pStages`有细分着色器的话此项目需要合法，通过`Shader`组合限制可推出该条目)
+
+## Specialization Constants
+
+`Specialization Constants`用于在着色器中定义特化常量，这个`特化`的意思为在创建该着色器的`Pipeline`中可以指定该常量的值。
+
+在`GLSL`中声明如下：
+
+```CXX
+layout(constant_id = 17) const int arraySize = 12;
+```
+
+根据`GLSL`标准：`12`为用户设置`arraySize`的默认值，`17`是用户自定义设置的特化常量`id`号。并且特化常量只能声明成标量数据，包括`bool`，`int`，`uint`，`float`，`double`类型。
+
+`GLSL`内置的常量也可以声明成特化常量，比如：
+
+```CXX
+layout(constant_id = 31) gl_MaxClipDistances; 
+```
+
+如果在该内置常量使用后再声明成特化常量的话会在编译时产生编译错误，也就是要求一个常量要么是非特化的普通常量，要么是特化常量，不能两个都是。
+
+对于特化常量最常见的用法是通过使用`local_size_{xyz}_id`特化常量来分别指定计算着色器的`gl_WorkGroupSize`每个分量的`id`。比如：
+
+```CXX
+layout(local_size_x_id = 18, local_size_z_id = 19) in;
+```
+
+这里没有设置`local_size_y_id`表明`gl_WorkGroupSize.y`是一个非特化常量值，也就是设定`gl_WorkGroupSize`为部分特化向量值。
+
+对于`x`和`z`的值可以滞后进行特化。在生成`SPIR-V`之后，使用`id`号分别为`18`和`19`进行分别声明工作组纬度大小：
+
+```CXX
+layout(local_size_x = 32, local_size_y = 32) in; // 大小为 (32,32,1)
+layout(local_size_x_id = 18) in; // x的constant_id 
+layout(local_size_z_id = 19) in; // z的constant_id
+```
+
+现有标准对于声明`local_size_x`，`local_size_y`和`local_size_z`并不会改变。对于相同的`local-size`的`id`设置了不同的值或者在使用后再设置特化值都会产生编译错误。对于顺序、位置、声明和重复都不会导致错误
+
+### VkSpecializationInfo
+
+在`Vulkan`中通过创建`Pipeline`时设置`VkPipelineShaderStageCreateInfo::pSpecializationInfo`进行特化常量的数值设定。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineShaderStageCreateInfo {
+    VkStructureType                     sType;
+    const void*                         pNext;
+    VkPipelineShaderStageCreateFlags    flags;
+    VkShaderStageFlagBits               stage;
+    VkShaderModule                      module;
+    const char*                         pName;
+    const VkSpecializationInfo*         pSpecializationInfo;
+} VkPipelineShaderStageCreateInfo;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationInfo {
+    uint32_t                           mapEntryCount;
+    const VkSpecializationMapEntry*    pMapEntries;
+    size_t                             dataSize;
+    const void*                        pData;
+} VkSpecializationInfo;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationMapEntry {
+    uint32_t    constantID;
+    uint32_t    offset;
+    size_t      size;
+} VkSpecializationMapEntry;
+```
+
+其中`Vulkan`标准要求：`VkSpecializationInfo`中所有的`VkSpecializationMapEntry`的`constantID`不能重复
+其中`Vulkan`标准要求：如果特化常量的类型为`bool`类型的话`VkSpecializationMapEntry`中的`size`大小必须是`VkBool32`的大小值
+
+每一个`Shader`都会有自己的特化常量，对于特化常量的对外接口应该位于每个`Shader`中，大致流程如下：
+
+```CXX
+TShader* some_shader = new TShader();
+some_shader->SetConstant(0, true);
+some_shader->SetConstant(1, 10);
+some_shader->SetConstant(8, 20.0);
+some_shader->SetConstant(13, 400);
+```
+
+之后在创建`VkPipeline`时根据指定的多个`Shader`中的特化常量进行数据设置。
+
+* 如果用户通过的`TShader::SetConstant`设置的`id`在`Shader`代码中并没有声明的话，不会造成任何问题，`Turbo`将会跳过该`id`（详情请查看后文的`特化判断流程`）
+* 如果用户在`Shader`代码中已经声明了某个`id`的特化常量，而未通过的`TShader::SetConstant`设置特化常量值，则使用`Shader`代码中声明的默认值
+
+#### 特化判断流程
+
+```mermaid
+graph TD;
+Start(("开始"))-->IsConstantEmpty{"用户设置的特化集是否为空"}
+IsConstantEmpty--空-->Donothing("什么也不做")
+IsConstantEmpty--非空-->GetIDAndValue("遍历特化集中每一个用户设置的特化常量对应ID和Value值")
+GetIDAndValue-->IsSpecializationConstantsDeclaredInShader{"Shader中是否声明了相应的特化常量\n按照ID和Value的数值类型判断"}
+IsSpecializationConstantsDeclaredInShader--未声明相应ID或类型对应不上-->Donothing
+IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统计计算VkSpecializationInfo")
+```

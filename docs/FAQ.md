@@ -22,7 +22,14 @@
         ```
 * Expression: vector subscript out of range  
 
-  ![dsa](./images/FQA_VectorSubscriptOutOfRange.png)
+  ![FQA_VectorSubscriptOutOfRange](./images/FQA_VectorSubscriptOutOfRange.png)
 
   * **`原因`**：运行的程序会去读取模型文件（`glTF`文件），如果没找到该模型文件会导致该异常
   * **`解决方法`**：将代码中的模型文件路径指向`./asset/`目录
+
+* Windows Subsystem for Linux has no installed distributions
+  * **`原因`**：新版的`KTX-Software`在`Windows`上编译需要`WSL`（`Windows`上的`Linux`子系统）环境
+  * **`解决方法`**：有提示下载`WSL`链接`https://aka.ms/wslstore`，如果没有，打开`Microsoft Store`，则手动搜索如下`WSL`系统并选择其中一个下载安装（我选择了下载安装`Debian`）
+  ![WSLforKTX](./images/WSLforKTX.png)
+  之后点击`WIN`键在最近安装处打开下载的`WSL`进行安装激活即可
+  ![WSLforKTX_Debian](./images/WSLforKTX_Debian.png)

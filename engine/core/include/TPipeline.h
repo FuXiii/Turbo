@@ -1,12 +1,14 @@
 #pragma once
 #ifndef TURBO_CORE_TPIPELINE_H
 #define TURBO_CORE_TPIPELINE_H
+#include "TDescriptor.h"
 #include "TFormatInfo.h"
 #include "TPipelineCache.h"
 #include "TScissor.h"
+#include "TShader.h"
 #include "TViewport.h"
 #include "TVulkanHandle.h"
-
+#include <map>
 
 namespace Turbo
 {
@@ -61,7 +63,6 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_HANDLE TPipelineLayout *pipelineLayout = nullptr;
     T_VULKAN_HANDLE_CHILDREN std::vector<TShader *> shaders;
     T_VULKAN_HANDLE_CHILDREN TPipelineCache *pipelineCache = nullptr;
-
     TPipelineType type;
 
   protected:
@@ -93,6 +94,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
+
+    //std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() override;
