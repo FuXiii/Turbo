@@ -3160,3 +3160,6 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TComputePipeline.h`中`class TComputePipeline`类中`InternalCreate()`成员函数中更新对`VkSpecializationInfo`的解析，之前`constant_width`计算有误
   >* 更新`./sample`下的`SpecializationConstantsTest`示例
+  >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`类中`InternalCreate()`成员函数中增加对`VkSpecializationInfo`的解析
+  >* `./asset/shaders`中增加`SpecializationConstantsTest.vert`顶点着色器文件，用于测试图形管线特化常量
+  >* `./asset/shaders`中增加`SpecializationConstantsTest.frag`片元着色器文件，用于测试图形管线特化常量

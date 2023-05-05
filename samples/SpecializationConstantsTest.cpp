@@ -70,8 +70,8 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/post_show_texture.frag");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.frag");
 
 const std::string COMP_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.comp");
 
@@ -237,6 +237,18 @@ int main()
 
     Turbo::Core::TShader *vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TShader *fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
+
+    vertex_shader->SetConstant(0, false);
+    vertex_shader->SetConstant(1, 2);
+    vertex_shader->SetConstant(2, 3u);
+    vertex_shader->SetConstant(3, 4.f);
+    vertex_shader->SetConstant(10, 5.);
+
+    fragment_shader->SetConstant(0, true);
+    fragment_shader->SetConstant(1, 20);
+    fragment_shader->SetConstant(2, 30u);
+    fragment_shader->SetConstant(3, 40.f);
+    fragment_shader->SetConstant(11, 50.);
 
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
