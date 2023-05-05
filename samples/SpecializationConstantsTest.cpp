@@ -313,6 +313,10 @@ int main()
     {
         Turbo::Core::TComputeShader *compute_shader = new Turbo::Core::TComputeShader(device, Turbo::Core::TShaderLanguage::GLSL, COMP_SHADER_STR);
         compute_shader->SetConstant(0, false);
+        compute_shader->SetConstant(1, 2);
+        compute_shader->SetConstant(8, 3.f);
+        compute_shader->SetConstant(11, 4.);
+        compute_shader->SetConstant(13, 41u);
 
         Turbo::Core::TComputePipeline *compute_pipeline = new Turbo::Core::TComputePipeline(compute_shader);
 
@@ -502,7 +506,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("SpecializationConstantsTest"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin("SpecializationConstantsTest");     // Create a window called "Hello, world!" and append into it.
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();

@@ -4,10 +4,10 @@ layout(local_size_x_id = 18, local_size_z_id = 19) in;
 layout(rgba32f, set = 0, binding = 0) uniform image2D imgOutput;
 
 layout(constant_id = 0) const bool bool_const_vlaue = true;
-//layout(constant_id = 1) const int int_const_vlaue = 1;
-//layout(constant_id = 8) const float float_const_vlaue = 2.0;
-//layout(constant_id = 11) const double double_const_vlaue = 3.0;
-//layout(constant_id = 13) const uint uint_const_vlaue = 40;
+layout(constant_id = 1) const int int_const_vlaue = 1;
+layout(constant_id = 8) const float float_const_vlaue = 2.0;
+layout(constant_id = 11) const double double_const_vlaue = 3.0;
+layout(constant_id = 13) const uint uint_const_vlaue = 40;
 
 // layout(local_size_x_id = 18) in;
 // layout(local_size_z_id = 19) in;
@@ -17,14 +17,19 @@ void main()
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
     // vec2 uv = vec2(gl_GlobalInvocationID.x / 128., gl_GlobalInvocationID.y / 128.);
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-    if (bool_const_vlaue)
+    if (!bool_const_vlaue && int_const_vlaue == 2 && float_const_vlaue == 3 && double_const_vlaue == 4 && uint_const_vlaue == 41)
     {
         color = vec4(1, 0, 0, 1);
         imageStore(imgOutput, texelCoord, color);
     }
-    else
+    else if (bool_const_vlaue && int_const_vlaue == 1 && float_const_vlaue == 2 && double_const_vlaue == 3 && uint_const_vlaue == 40)
     {
         color = vec4(0, 1, 0, 1);
+        imageStore(imgOutput, texelCoord, color);
+    }
+    else
+    {
+        color = vec4(0, 0, 1, 1);
         imageStore(imgOutput, texelCoord, color);
     }
 }
