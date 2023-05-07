@@ -86,6 +86,11 @@
   >* 创建`历史回顾`章节
   >* 创建`光追标准`章节
 
+* 2023/5/7
+  >
+  >* 更新`光追标准`章节
+  >* 创建`扩展结构`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -793,3 +798,34 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 对于基于硬件的实时光追，最早是`NVIDIA`在2018年10月10日在`DirectX 12`中正式发布的名为`DirectX Raytracing (DXR)`的功能。而`Khronos`组织也在2018年的1月成立了`Vulkan`光追组制定`Vulkan`的光追标准，并在2020年3月发布了一个临时扩展（没记错的话应该是`Vulkan 1.2`，当时的扩展名为`VK_KHR_ray_tracing`，而`VK_NV_ray_tracing`扩展在这之前就已经发布了），经过一些用户和硬件供应商的反馈，最终在2020年的11月份发布了`Vulkan`实时光追标准的最终版（`Vulkan 1.2.162`）。`Vulkan`实时光追标准的发布是里程碑式的存在，标志着第一个工业级开源、跨平台、跨设备的光追加速标准问世（甚至可以在移动设备上使用光追加速）。
 
 ### 光追标准
+
+最终发布版与临时发布版大体上没什么区别，最终发布版如下：
+
+`Vulkan`的扩展标准：
+
+* [VK_KHR_acceleration_structure](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_acceleration_structure.html)
+* [VK_KHR_ray_tracing_pipeline](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_ray_tracing_pipeline.html)
+* [VK_KHR_ray_query](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_ray_query.html)
+* [VK_KHR_pipeline_library](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_pipeline_library.html)
+* [VK_KHR_deferred_host_operations](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_deferred_host_operations.html)
+
+`SPIR-V`的扩展标准：
+
+* [SPV_KHR_ray_tracing](http://htmlpreview.github.io/?https://github.com/KhronosGroup/SPIRV-Registry/blob/master/extensions/KHR/SPV_KHR_ray_tracing.html)
+* [SPV_KHR_ray_query](http://htmlpreview.github.io/?https://github.com/KhronosGroup/SPIRV-Registry/blob/master/extensions/KHR/SPV_KHR_ray_query.html)
+
+`GLSL`的扩展标准：
+
+* [GLSL_EXT_ray_tracing](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_tracing.txt)
+* [GLSL_EXT_ray_query](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_query.txt)
+* [GLSL_EXT_ray_flags_primitive_culling](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_flags_primitive_culling.txt)
+
+### 扩展结构
+
+最终发布版与临时发布版最显著的区别在于临时发布版的`VK_KHR_ray_tracing`扩展在最终发布版中被分成了三个扩展:
+
+* `VK_KHR_acceleration_structure`：用于加速结构的构建和管理
+* `VK_KHR_ray_tracing_pipeline`：用于光追着色器阶段和光追管线
+* `VK_KHR_ray_query`：用于所有着色器阶段的内部光线查询
+
+`Khronos`标准组采纳了一些市场调研和厂家的意见，提供单独的光线查询功能而不需要创建光追管线，所以原先的`VK_KHR_ray_tracing`扩展被细分，用于避免重复和依赖。实现（设备制造商）可以实现`VK_KHR_ray_tracing_pipeline`或者`VK_KHR_ray_query`之一，或是两者都实现，取决于市场需求。两个扩展都依赖于`VK_KHR_acceleration_structure`扩展，该扩展用于提供基本的加速结构的管理。对于桌面级别的设备供应商任致力于都支持`VK_KHR_ray_tracing_pipeline`和`VK_KHR_ray_query`扩展。

@@ -3161,3 +3161,7 @@ Turbo是渲染引擎
 * 2023/5/6 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档。开始研究`Vulkan`硬件实时光追
+
+* 2023/5/7 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
