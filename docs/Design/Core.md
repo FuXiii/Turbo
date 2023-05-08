@@ -91,6 +91,12 @@
   >* 更新`光追标准`章节
   >* 创建`扩展结构`章节
 
+* 2023/5/8
+  >
+  >* 更新`扩展结构`章节
+  >* 创建`加速结构（Acceleration Structures）`章节
+  >* 创建`Host端的延迟操作（Deferred Host Operations）`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -829,3 +835,60 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 * `VK_KHR_ray_query`：用于所有着色器阶段的内部光线查询
 
 `Khronos`标准组采纳了一些市场调研和厂家的意见，提供单独的光线查询功能而不需要创建光追管线，所以原先的`VK_KHR_ray_tracing`扩展被细分，用于避免重复和依赖。实现（设备制造商）可以实现`VK_KHR_ray_tracing_pipeline`或者`VK_KHR_ray_query`之一，或是两者都实现，取决于市场需求。两个扩展都依赖于`VK_KHR_acceleration_structure`扩展，该扩展用于提供基本的加速结构的管理。对于桌面级别的设备供应商任致力于都支持`VK_KHR_ray_tracing_pipeline`和`VK_KHR_ray_query`扩展。
+
+现在`Vulkan`光线追踪扩展标准由原先的临时提升到了核心中，也就是将光追扩展接口从`vulkan_beta.h`中移动到`vulkan_core.h`，所以用户不再需要声明`#define VK_ENABLE_BETA_EXTENSIONS`来激活`Vulkan`光线追踪的功能
+
+这些扩展的依赖有些许变化，现在需要依赖`Vulkan 1.1`和`SPIR-V 1.4`。`VK_KHR_acceleration_structure`需要依赖`Vulkan 1.1`，`VK_EXT_descriptor_indexing`，`VK_KHR_buffer_device_address`和`VK_KHR_deferred_host_operations`。同样我们也意识到这么多依赖链很是繁琐，如果使用`Vulkan 1.2`事情将变得简单，但是并不是所有的平台都支持实现了`Vulkan 1.2`标准，并且我们并不想在光追标准中再增加其他的人为限值。我们也考虑到将`VK_KHR_deferred_host_operations`作为显示依赖是因为在创建管线时需要延迟操作需要该扩展。我们将`VK_KHR_pipeline_library`作为`VK_KHR_ray_tracing_pipeline`的一种相对松弛的扩展依赖而不是严格依赖，所以仅仅在使用相关扩展功能是才去激活扩展，用于减少负载。此外`VK_KHR_acceleration_structure`，`VK_KHR_ray_tracing_pipeline`和`VK_KHR_ray_query`都需要最小支持`SPIR-V 1.4`（该版本中增加了对于着色器的入口函数的改变），`SPIR-V 1.5`也可以在`Vulkan 1.2`上被使用。
+
+
+功能方面，如下的标准需要所有的设备支持：
+
+`VK_KHR_acceleration_structure`要求：
+* `VK_KHR_deferred_host_operations`
+* `accelerationStructure`
+* `descriptorBindingAccelerationStructureUpdateAfterBind`
+* `descriptorIndexing`有关的所有特性（如果支持`Vulkan 1.2`）或者使用`VK_EXT_descriptor_indexing`扩展
+* `Vulkan 1.2`的`bufferDeviceAddress`或者`VK_KHR_buffer_device_address`扩展
+
+设备如果支持`VK_KHR_ray_tracing_pipeline`要求：
+* `VK_KHR_acceleration_structure`
+* `rayTracingPipeline`
+* `rayTracingPipelineTraceRaysIndirect`
+* `rayTraversalPrimitiveCulling`（如果支持`VK_KHR_ray_query`）
+* `VK_KHR_pipeline_library`
+
+设备如果支持`VK_KHR_ray_query`要求：
+* `VK_KHR_acceleration_structure`
+* `rayQuery`
+
+此外这些扩展有一些可选的功能。
+
+对于`VK_KHR_acceleration_structure`要求：
+* `accelerationStructureCaptureReplay`
+* `accelerationStructureIndirectBuild`
+* `accelerationStructureHostCommands`
+
+对于`VK_KHR_ray_tracing_pipeline`要求：
+* `rayTracingPipelineShaderGroupHandleCaptureReplay`
+* `rayTracingPipelineShaderGroupHandleCaptureReplayMixed`
+* `rayTraversalPrimitiveCulling`(如果不支持`VK_KHR_ray_query`)
+
+### 加速结构（Acceleration Structures）
+
+`Vulkan`对于光追扩展标准的最终版中变化最大的就是加速结构的创建和布局。
+
+我们接纳了`API`转换层作者们的意见（比如[vkd3d-proton](https://github.com/HansKristian-Work/vkd3d-proton)），对于将`DXR`层置于`Vulkan`光追加速结构的顶层是不明智的。这使得加速结构的创建大小和存储在`VkBuffer`中发生了改变，而不是使用单独专用的加速结构进行存储。对应的变化位于`VkAccelerationStructureKHR`和`VkAccelerationStructureNV`句柄不再是指代同一实例句柄，并且不能混用。与之相似的结构或者函数在使用这个两个句柄时也不再相同，也不能混用。
+
+我们同时增加了加速结构类型声明`VK_ACCELERATION_STRUCTURE_TYPE_GENERIC_KHR`。可以用在当加速结构在创建时还不知道确切的加速结构类型（在顶部或是在底部），确切的加速结构类型必须是`VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR`或者`VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR`，并且一旦创建就不能改变。开发`Vulkan`应用时不应该使用`VK_ACCELERATION_STRUCTURE_TYPE_GENERIC_KHR`，这会在将来影响设备功能和效率。
+
+我们也接纳了`Vulkan`层实现作者们的意见（比如[MoltenVK](https://github.com/KhronosGroup/MoltenVK)），意见指出一些光追要求（比如设备地址）使得`Vulkan`在层级上难以在其他`API`上实现。不幸的是对于像支持`DXR`的奇偶校验同样是不可能的。我们希望在未来的其他`API`版本中会支持这些特性。
+
+我们听说开发者比较喜欢统一的创建接口和构造参数，比如同一`VK_NV_ray_tracing`和`DXR`。我们将加速结构的创建更改成基于大小的创建，并且这个大小可与构造时的同一个结构体中计算出来（`vkGetAccelerationStructureBuildSizesKHR`），或者来自于压缩查询（`vkCmdWriteAccelerationStructuresPropertiesKHR`）。我们同时得知一些开发商需要在创建时得到更多信息，所以我们将`pMaxPrimitiveCounts`增加到了`vkGetAccelerationStructureBuildSizesKHR`中。
+
+之前在几何描述某些方面是存在冲突的并且在自动代码生成方面不尽如人意（比如验证层（`validation layers`）），并且解决了由于`ppGeometries`的二元对立导致的歧义，并且增加了`pGeometries`，这要求二者在使用时只能指定其中一个使用。
+
+其他的一些增加包括：加速结构的创建时间捕获和回溯标志位。`nullDescriptor`支持加速结构与`VK_EXT_robustness2`和`VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT`相互作用。
+
+最后，我们将所有的扩展更改成一致使用设备地址。这其中有很多命名建议，其中一些已被采纳，并且一些名称和命名风格被修改成统一并且可扩展的方式。有关更多细节请查阅`VK_KHR_acceleration_structure`的问题`3`和`4`的更改日志。
+
+### Host端的延迟操作（Deferred Host Operations）
