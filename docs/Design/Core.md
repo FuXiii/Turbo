@@ -892,3 +892,11 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 最后，我们将所有的扩展更改成一致使用设备地址。这其中有很多命名建议，其中一些已被采纳，并且一些名称和命名风格被修改成统一并且可扩展的方式。有关更多细节请查阅`VK_KHR_acceleration_structure`的问题`3`和`4`的更改日志。
 
 ### Host端的延迟操作（Deferred Host Operations）
+
+*注：`Host`端一般指`CPU`端*
+
+我么改造了`vkBuildAccelerationStructuresKHR`和`vkCreateRayTracingPipelinesKHR`指令的延迟`Host`端操作。取消了使用`pNext`对于各种独立创建和构造的链式操作，现在延迟操作通过指令的上层参数来设置指令是否为延迟操作。当指令为延迟操作的话，应用必须在延迟操作结束之后获取返回的数据。如果之前有一些延迟操作并且没有其他的措施防止不清晰的行为发生，这时难以明确合适能够获取安全数据。我们相信新的语义是清晰的并且对于并行友好，但是付诸的代价就是需要一直开启`VK_KHR_deferred_host_operations`扩展。
+
+![s](../images/2020-Deferred-Host-Operations-enable-Acceleration-Structures-to-be-built-using-multiple-CPU-cores-for-faster-frame-rates-and-elimination-of-frame-stuttering-2.jpg)
+
+*如上图为：`Host`延迟操作使用加速结构在多核`CPU`上部署已达到更高的帧率和限值帧停顿*
