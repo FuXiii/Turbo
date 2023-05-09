@@ -97,6 +97,11 @@
   >* 创建`加速结构（Acceleration Structures）`章节
   >* 创建`Host端的延迟操作（Deferred Host Operations）`章节
 
+* 2023/5/9
+  >
+  >* 创建`光追管线`章节
+  >* 创建`光线查询`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -889,7 +894,7 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 其他的一些增加包括：加速结构的创建时间捕获和回溯标志位。`nullDescriptor`支持加速结构与`VK_EXT_robustness2`和`VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT`相互作用。
 
-最后，我们将所有的扩展更改成一致使用设备地址。这其中有很多命名建议，其中一些已被采纳，并且一些名称和命名风格被修改成统一并且可扩展的方式。有关更多细节请查阅`VK_KHR_acceleration_structure`的问题`3`和`4`的更改日志。
+最后，我们将所有的扩展更改成一致使用设备地址。这其中有很多命名建议，其中一些已被采纳，并且一些名称和命名风格被修改成统一并且可扩展的方式。有关更多细节请查阅`VK_KHR_acceleration_structure`的问题`3`和`4`的更新日志。
 
 ### Host端的延迟操作（Deferred Host Operations）
 
@@ -897,6 +902,34 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 我么改造了`vkBuildAccelerationStructuresKHR`和`vkCreateRayTracingPipelinesKHR`指令的延迟`Host`端操作。取消了使用`pNext`对于各种独立创建和构造的链式操作，现在延迟操作通过指令的上层参数来设置指令是否为延迟操作。当指令为延迟操作的话，应用必须在延迟操作结束之后获取返回的数据。如果之前有一些延迟操作并且没有其他的措施防止不清晰的行为发生，这时难以明确合适能够获取安全数据。我们相信新的语义是清晰的并且对于并行友好，但是付诸的代价就是需要一直开启`VK_KHR_deferred_host_operations`扩展。
 
-![s](../images/2020-Deferred-Host-Operations-enable-Acceleration-Structures-to-be-built-using-multiple-CPU-cores-for-faster-frame-rates-and-elimination-of-frame-stuttering-2.jpg)
+![Acceleration-Structures](../images/2020-Deferred-Host-Operations-enable-Acceleration-Structures-to-be-built-using-multiple-CPU-cores-for-faster-frame-rates-and-elimination-of-frame-stuttering-2.jpg)
 
-*如上图为：`Host`延迟操作使用加速结构在多核`CPU`上部署已达到更高的帧率和限值帧停顿*
+*如上图为：`Host`延迟操作使用加速结构在多核`CPU`上部署已达到更高的帧率和限制帧停顿*
+
+### 光追管线
+
+对于光追管线的改变并不多，基本上都是改变内部的`SPIR-V`和着色器编译链相关。
+
+此外`vkCreateRayTracingPipelinesKHR`中增加了适用延迟操作的修改，并且将`VkPipelineLibraryCreateInfoKHR`和`VkRayTracingPipelineInterfaceCreateInfoKHR`更改成可选项，这样如果`VkPipelineLibraryCreateInfoKHR`和`VkRayTracingPipelineInterfaceCreateInfoKHR`没有使用就不须要激活`VK_KHR_pipeline_library`扩展了。
+
+对于光追管线最大的改变就是明确的增加了栈大小的管理。光追管线在进行光线追踪时需要调用所有的有关执行链，这潜在会有大量的着色器集。当着色器执行时，驱动实现可能会使用栈去存储参数数据，这也间接要求栈要足够大，进而可以处理所有着色器的任何执行链的调用。默认的栈大小可能相当的大，所以我们给应用提供在管线编译之后使用更优栈大小的可能。一般当应用可以计算出紧凑型栈内存理应使用更优的策略。并且增加了一个新的动态状态`VK_DYNAMIC_STATE_RAY_TRACING_PIPELINE_STACK_SIZE_KHR`用于使用光追管线去查询着色器组`vkGetRayTracingShaderGroupStackSizeKHR`的栈大小时使用，与此对应的设置管线栈大小的函数即为`vkCmdSetRayTracingPipelineStackSizeKHR`。
+
+另一个新增特性来自于`DXR`层的积极反馈，即可以通过加速结构地址进行光线追踪。为此，加速结构的设备地址可通过`vkGetAccelerationStructureDeviceAddressKHR`将结果缓存在缓存中或者其他着色器资源中。对于着色器（`SPIR-V`），则可以使用`OpConvertUToAccelerationStructureKHR`显示转换声明`OpTypeAccelerationStructureKHR`描述符类型（在`GLSL`中使用`accelerationStructureEXT`构造）。其结果之后可以用于加速结构中使用`OpTraceRayKHR`指令进行追踪（`traceRayEXT()`）,此种转换是单向的，并且没有其他操作支持加速结构描述符。
+
+![Acceleration-Structures](../images/2020-Ray-tracing-pipelines-provide-implicit-management-of-ray-intersections-3.jpg)
+
+*如上图为：光追管线提供的隐式光线求交管理*
+
+`SPIR-V`标准组也对`SPIR-V`的扩展提供了反馈，将`Payload`参数更改成`OpTraceRayKHR`并且将`Callable Data`参数更改成`OpExecuteCallableKHR`。之前这些参数使用像`GLSL`中的`location`布局来进行匹配，然而这些`location`在`SPIR-V`没有意义，而是直接使用合适的存储类指针直接替换，为了实现这些需要新的指令操作码声明`OpTraceRayKHR`和`OpExecuteCallableKHR`。可以就与`SPV_NV_ray_tracing`进行划分防止混淆了。
+
+另一个`SPIR-V`的改变来自于内部对于`OpIgnoreIntersectionKHR`和`OpTerminateRayKHR`的反馈，将这些转变成终止指令，因为他们会终止调用者的调用。这也必须是块中的最后一条指令。同样，这需要新的指令操作码。这对`GLSL`的冲击较大，这些函数指令将不再是内置函数，而是跳转语句，当在使用着色器时现在是仅仅使用`ignoreIntersectionEXT`而不是`ignoreIntersectionEXT()`。
+
+`SPIR-V`对于光追管线的的变化总结就是：提供了新功能和枚举`RayTracingKHR`,使得驱动实现和工具链在已过时的`SPIR-V`和最终版之间进行区分。并且对于还对`ShaderRecordBufferKHR`所需的显式布局进行了一些澄清，并将其视为`StorageBuffer`的存储类。同时我们也规定了返回值和对于`OpReportIntersectionKHR`的值`T`越界所返回的相关行为，并澄清一部分位域用于各种光追参数。
+
+对于`VK_KHR_acceleration_structure`扩展，我们将设备缓存地址独立出来，这样就可以使用光线追踪指令通过`VkStridedDeviceAddressRegionKHR`去获取着色器绑定表中的缓存设备地址。`vkCmdTraceRaysIndirectKHR`也与之相似的，通过缓存设备地址间接获取参数。
+
+我们也更新了`Vulkan 1.2`与`VK_KHR_vulkan_memory_model`扩展之间的交互，并且要求一些内置变量成为`Volatile`变量，供着色器使用。
+
+其他的改变包括增加创建2023年5月9日15:23:32捕获和着色器组句柄的回溯标志位，增加了一些之前忽略的属性和限值，和一些为了明确用途的重命名。有关更多细节请查阅`VK_KHR_ray_tracing_pipeline`的问题`3`和`4`，`SPV_KHR_ray_tracing`的问题`2`还有扩展的更新日志。
+
+## 光线查询
