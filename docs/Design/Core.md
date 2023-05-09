@@ -101,6 +101,8 @@
   >
   >* 创建`光追管线`章节
   >* 创建`光线查询`章节
+  >* 创建`正路在此`章节
+  >* 创建`加速结构的创建`章节
 
 ---
 
@@ -916,7 +918,7 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 另一个新增特性来自于`DXR`层的积极反馈，即可以通过加速结构地址进行光线追踪。为此，加速结构的设备地址可通过`vkGetAccelerationStructureDeviceAddressKHR`将结果缓存在缓存中或者其他着色器资源中。对于着色器（`SPIR-V`），则可以使用`OpConvertUToAccelerationStructureKHR`显示转换声明`OpTypeAccelerationStructureKHR`描述符类型（在`GLSL`中使用`accelerationStructureEXT`构造）。其结果之后可以用于加速结构中使用`OpTraceRayKHR`指令进行追踪（`traceRayEXT()`）,此种转换是单向的，并且没有其他操作支持加速结构描述符。
 
-![Acceleration-Structures](../images/2020-Ray-tracing-pipelines-provide-implicit-management-of-ray-intersections-3.jpg)
+![Ray-tracing-pipelines](../images/2020-Ray-tracing-pipelines-provide-implicit-management-of-ray-intersections-3.jpg)
 
 *如上图为：光追管线提供的隐式光线求交管理*
 
@@ -932,4 +934,24 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 其他的改变包括增加创建2023年5月9日15:23:32捕获和着色器组句柄的回溯标志位，增加了一些之前忽略的属性和限值，和一些为了明确用途的重命名。有关更多细节请查阅`VK_KHR_ray_tracing_pipeline`的问题`3`和`4`，`SPV_KHR_ray_tracing`的问题`2`还有扩展的更新日志。
 
-## 光线查询
+### 光线查询
+
+考虑到`Vulkan`接口对于表面光线查询欠缺，大部分的光线查询改变都在`SPIR-V`扩展和交互中。
+
+`SPV_KHR_ray_query`也是支持通过加速结构地址进行发射光线查询，并且增加`OpConvertUToAccelerationStructureKHR`用于将加速结构设备地址转变成`OpTypeAccelerationStructureKHR`描述符。这些在之后可以通过加速结构使用`OpRayQueryInitializeKHR`进行追踪。
+
+对于光追管线，也新增了功能和枚举`RayQueryKHR`，这可以是的驱动的实现者将老版的临时版本与最终版明确区分开。我们同时为提出遮罩使用一套位域值，并且不允许查询`AABB`图元的候选`T`值。
+
+最终，我们对于光线参数进行了数量上的限值，要求`HitT`作为光线间隔用于`OpRayQueryGenerateIntersectionKHR`，并且限值追踪顶级的加速结构。
+
+对于更多的细节和其他改变，请查阅`VK_KHR_ray_query`的问题`1`，`SPV_KHR_ray_query`的问题`1`和扩展更新日志。
+
+![Acceleration-Structures](../images/2020-Ray_Queries_provide_explicit_ray_management_from_within_any_shader-4.jpg)
+
+*如上图为：光线查询提供从任意着色器中明确光线管理*
+
+### 正路在此
+
+这一章将会给出创建加速结构新流程的纵览和对于资源创建与光追进行同步的快速入门。
+
+#### 加速结构的创建
