@@ -8,13 +8,7 @@
 
 Turbo是渲染引擎
 
-```
- _____               _            
-/__   \ _   _  _ __ | |__    ___  
-  / /\/| | | || '__|| '_ \  / _ \ 
- / /   | |_| || |   | |_) || (_) |
- \/     \__,_||_|   |_.__/  \___/ 
-```
+![TurboImage](./docs/TurboImage.png)
 
 ## Platform
 
@@ -3163,3 +3157,23 @@ Turbo是渲染引擎
   >* `./engine/core`下`TGraphicsPipeline.h`中`class TGraphicsPipeline`类中`InternalCreate()`成员函数中增加对`VkSpecializationInfo`的解析
   >* `./asset/shaders`中增加`SpecializationConstantsTest.vert`顶点着色器文件，用于测试图形管线特化常量
   >* `./asset/shaders`中增加`SpecializationConstantsTest.frag`片元着色器文件，用于测试图形管线特化常量
+
+* 2023/5/6 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档。开始研究`Vulkan`硬件实时光追
+
+* 2023/5/7 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/5/8 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/5/9 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
+
+* 2023/5/10 设计架构
+  >
+  >* 更新`./docs/Design/Core.md`文档
