@@ -108,6 +108,7 @@
   >
   >* 更新`加速结构的创建`章节
   >* 创建`资源使用和同步`章节
+  >* 创建`结论和资源`章节
 
 ---
 
@@ -986,3 +987,17 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 ![Acceleration-Structures](../images/2020-Comparing-Vulkan-Ray-Tracing-and-DXR.-It-is-straightforward-to-port-code-between-the-two-APIs-including-re-use-of-ray-tracing-shaders-written-in-HLSL-5_.jpg)
 
 *如上图为：`Vulkan`的光追与`DXR`的比较。两者之间进行移植非常简单，包括可共享的`HLSL`光追着色器*
+
+### 结论和资源
+
+现在最终版的`Vulkan`光追扩展已经发布，现在支持临时版本的嵌入式也会在不久支持最终版光追扩展，有关其他工具和组件可通过[GitHub](https://khr.io/vulkanrtfeedback)进行查阅。我们推荐所有的开发者转去使用最终的`Khronos`发布的`Vulkan`光追最终版。
+
+支持`Vulkan`光追扩展的`NVIDIA`显卡驱动以及哪些显卡支持的信息可在[developer.nvidia.com/vulkan-driver](https://developer.nvidia.com/vulkan-driver)中找到。对于`AMD`显卡驱动可在[https://www.amd.com/en/support/kb/release-notes/rn-rad-win-20-11-2-vrt-beta](https://www.amd.com/en/support/kb/release-notes/rn-rad-win-20-11-2-vrt-beta)中找到。光追扩展同样可以通过2021年的`Intel`的`Xe-HPG`显卡支持，通过定期的驱动程序更新提供支持。
+
+有关如何使用`Vulkan`光追用于混合渲染，同时使用光栅化和光追，以此来达到令人信服和画面同时保持交互程度请查看[Vulkan Ray Tracing Best Practices for Hybrid Rendering](https://www.khronos.org/blog/vulkan-ray-tracing-best-practices-for-hybrid-rendering)博客讨论有关在`Wolfenstein:Youngblood`（德军总部：新血脉）中使用最终版光追扩展实现的反射效果。
+
+也可以查阅现今进行更新后支持光追扩展的[NVIDIA Vulkan Ray Tracing Tutorial](https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR)和2020年6月份发布的[NVIDIA Nsight Graphics developer tool](https://news.developer.nvidia.com/nvidia-announces-nsight-graphics-2020-6/)。请关注更多即将发布的有关的生产驱动程序、工具和示例公告。
+
+`Vulkan`工作组同样鼓励开发者和内容创建社区使用`Vulkan`的光追扩展并积极反馈问题。这可通过[Khronos Developer Slack](https://khr.io/slack)和[Vulkan GitHub Issues Tracker](https://github.com/KhronosGroup/Vulkan-Docs/issues)进行讨论和反馈。
+
+欢迎来到便携式、跨厂商、跨平台光线追踪加速的时代！
