@@ -104,6 +104,11 @@
   >* 创建`正路在此`章节
   >* 创建`加速结构的创建`章节
 
+* 2023/5/10
+  >
+  >* 更新`加速结构的创建`章节
+  >* 创建`资源使用和同步`章节
+
 ---
 
 ## 获取 Vulkan API
@@ -955,3 +960,12 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 这一章将会给出创建加速结构新流程的纵览和对于资源创建与光追进行同步的快速入门。
 
 #### 加速结构的创建
+
+为了创建加速结构，应用必须首先确定加速结构需要的大小。对于创建时的加速结构、缓存大小和更新可通过`vkGetAccelerationStructureBuildSizesKHR`指令使用`VkAccelerationStructureBuildSizesInfoKHR`获得。对于创建加速结构时指定的`shape`和`type`位于`VkAccelerationStructureBuildGeometryInfoKHR`结构体中，该结构体之后也被用于真正的加速结构构建，但是此时加速结构的参数和几何数据并不需要全都填充完善（虽然可以填补完善），仅仅完善加速结构的类型、几何类型、数量和最大大小即可。这个大小可以支持任意足够相似的加速结构。对于加速结构目标会进行紧凑拷贝，这需要从`vkCmdWriteAccelerationStructuresPropertiesKHR`指令中获取大小。一旦需求的大小确定了，为加速结构创建`VkBuffer`（`accelerationStructureSize`），并且一个或多个`VkBuffer`用于创建（`buildScratchSize`）和更新（`updateScratchSize`）缓冲。
+
+之后，加速结构`VkAccelerationStructureKHR`对象就可以使用`vkCreateAccelerationStructureKHR`指令根据`type`和`size`创建，并将结果存放在`VkAccelerationStructureCreateInfoKHR`中指定的`buffer`的`offset`位置中。与`Vulkan`中的其他资源不同，指定的这一部分魂村将会完全用于加速结构，并不需要额外的缓存用于加速结构的查询或者内存绑定。如果你愿意，多个加速结构甚至可以放在同一个`VkBuffer`中，只需要多个加速结构之间不互相覆盖即可。
+
+最后，使用`vkCmdBuildAccelerationStructuresKHR`指令可以用于去构建加速结构。此构建使用的是与创建时相同的`VkAccelerationStructureBuildGeometryInfoKHR`结构体，但是此时此时需要指定所有的几何数据（顶点，索引，变换，`aabbs`包围盒，和实例）和缓存数据。一旦构建完成此加速结构将会完全自完善（`self-contained`），并且构建的输入和缓存可以重复利用除非在之后的构建更新中有计划使用他们。
+
+#### 资源使用和同步
+
