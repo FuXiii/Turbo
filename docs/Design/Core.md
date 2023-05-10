@@ -961,6 +961,8 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 #### 加速结构的创建
 
+*注：加速结构的创建和构建是两个不同的东西，创建指的是创建加速结构句柄，构建指的是创建加速结构内部数据和结构*
+
 为了创建加速结构，应用必须首先确定加速结构需要的大小。对于创建时的加速结构、缓存大小和更新可通过`vkGetAccelerationStructureBuildSizesKHR`指令使用`VkAccelerationStructureBuildSizesInfoKHR`获得。对于创建加速结构时指定的`shape`和`type`位于`VkAccelerationStructureBuildGeometryInfoKHR`结构体中，该结构体之后也被用于真正的加速结构构建，但是此时加速结构的参数和几何数据并不需要全都填充完善（虽然可以填补完善），仅仅完善加速结构的类型、几何类型、数量和最大大小即可。这个大小可以支持任意足够相似的加速结构。对于加速结构目标会进行紧凑拷贝，这需要从`vkCmdWriteAccelerationStructuresPropertiesKHR`指令中获取大小。一旦需求的大小确定了，为加速结构创建`VkBuffer`（`accelerationStructureSize`），并且一个或多个`VkBuffer`用于创建（`buildScratchSize`）和更新（`updateScratchSize`）缓冲。
 
 之后，加速结构`VkAccelerationStructureKHR`对象就可以使用`vkCreateAccelerationStructureKHR`指令根据`type`和`size`创建，并将结果存放在`VkAccelerationStructureCreateInfoKHR`中指定的`buffer`的`offset`位置中。与`Vulkan`中的其他资源不同，指定的这一部分魂村将会完全用于加速结构，并不需要额外的缓存用于加速结构的查询或者内存绑定。如果你愿意，多个加速结构甚至可以放在同一个`VkBuffer`中，只需要多个加速结构之间不互相覆盖即可。
@@ -969,3 +971,18 @@ IsSpecializationConstantsDeclaredInShader--合法-->StatisticalCalculation("统�
 
 #### 资源使用和同步
 
+本章将提供各种缓存使用纵观，并且简单讲解光追操作有关的同步使用。
+
+用于备份加速结构的缓存将会使用`VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR`进行创建。缓存将会使用`VK_BUFFER_USAGE_STORAGE_BUFFER_BIT`用于暂存空间，并且使用`VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR`用于加速结构的构建输入（比如顶点，索引，变换，`aabbs`包围盒，和实例）。如果缓存用于着色器绑定表将会使用`VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR`创建，并且如果使用间接构建的话追踪参数将会使用`VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT`创建使用。
+
+为了与加速结构的构建指令（`vkCmdBuildAccelerationStructuresKHR`和`vkCmdBuildAccelerationStructuresIndirectKHR`）进行同步，需要使用`VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR`管线阶段声明。访问加速结构的数据源或目标数据缓存将使用`VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR`或`VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR`。构建时访问输入缓存（顶点，索引，变换，`aabbs`包围盒，和实例）使用`VK_ACCESS_SHADER_READ_BIT`访问类型并且访问间接参数使用`VK_ACCESS_INDIRECT_COMMAND_READ_BIT`访问类型。
+
+为了与加速结构的拷贝指令（`vkCmdWriteAccelerationStructuresPropertiesKHR`、`vkCmdCopyAccelerationStructureKHR`、`vkCmdCopyAccelerationStructureToMemoryKHR`和`vkCmdCopyMemoryToAccelerationStructureKHR`）进行同步，同样需要使用`VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR`管线阶段。访问加速结构的读写使用`VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR`或`VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR`，此外通过设备地址访问的缓存使用`VK_ACCESS_TRANSFER_READ_BIT`或`VK_ACCESS_TRANSFER_WRITE_BIT`访问类型。
+
+与光追指令（`vkCmdTraceRaysKHR`或`vkCmdTraceRaysIndirectKHR`）进行同步，`VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR`管线阶段用于着色器访问绑定的缓存表使用`VK_ACCESS_SHADER_READ_BIT`访问，对于访问间接数据在`VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT`管线阶段使用`VK_ACCESS_INDIRECT_COMMAND_READ_BIT`进行访问。
+
+与加速结构在任何图形，计算或是光追管线阶段进行光线查询同步，对应的管线阶段使用`VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR`进行数据访问。
+
+![Acceleration-Structures](../images/2020-Comparing-Vulkan-Ray-Tracing-and-DXR.-It-is-straightforward-to-port-code-between-the-two-APIs-including-re-use-of-ray-tracing-shaders-written-in-HLSL-5_.jpg)
+
+*如上图为：`Vulkan`的光追与`DXR`的比较。两者之间进行移植非常简单，包括可共享的`HLSL`光追着色器*
