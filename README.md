@@ -38,11 +38,12 @@ Turbo是渲染引擎
 
 ## Document
 
-* 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
-* 使用MarkDown书写文字和文档，使用drawio绘制设计图表
+* 相关文档现在可以在[Vulkan入门精要](https://fuxiii.github.io/Essentials.of.Vulkan/index.html)中查阅。比如[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 * 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
+
+
 
 ## Modular
 
@@ -3177,3 +3178,7 @@ Turbo是渲染引擎
 * 2023/5/10 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/6/5 设计架构
+  >
+  >* `./sample`下增加`VulkanKHRRayTracingTest`示例，用于研究`Vulkan KHR`标准硬件实时光追。相关研究文档请查阅[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
