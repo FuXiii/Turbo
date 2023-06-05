@@ -237,7 +237,7 @@ int main()
         {
             enable_instance_extensions.push_back(extension);
         }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_ACCELERATION_STRUCTURE)
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2)
         {
             enable_instance_extensions.push_back(extension);
         }
@@ -249,6 +249,8 @@ int main()
 
     // check acceleration structure feature
     {
+        PFN_vkGetPhysicalDeviceFeatures2KHR _vkGetPhysicalDeviceFeatures2KHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetPhysicalDeviceFeatures2KHR>(instance, "vkGetPhysicalDeviceFeatures2KHR");
+
         VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
 
         VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
@@ -260,12 +262,17 @@ int main()
         vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = VK_FALSE;
         vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = VK_FALSE;
 
-        VkPhysicalDeviceProperties2 vk_physical_device_properties_2 = {};
-        vk_physical_device_properties_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        vk_physical_device_properties_2.pNext = &vk_physical_device_acceleration_structure_features_khr;
-        vk_physical_device_properties_2.properties = {};
+        VkPhysicalDeviceFeatures2 vk_physical_device_features_2;
+        vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        vk_physical_device_features_2.pNext = &vk_physical_device_acceleration_structure_features_khr;
+        vk_physical_device_features_2.features = {};
 
-        vkGetPhysicalDeviceProperties2(vk_physical_device, &vk_physical_device_properties_2);
+        _vkGetPhysicalDeviceFeatures2KHR(vk_physical_device, &vk_physical_device_features_2);
+
+        if (vk_physical_device_acceleration_structure_features_khr.accelerationStructure == VK_TRUE)
+        {
+            std::cout << "Support acceleration structure feature" << std::endl;
+        }
     }
 
     if (!glfwInit())
@@ -290,6 +297,10 @@ int main()
         if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN)
         {
             enable_device_extensions.push_back(extension);
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_ACCELERATION_STRUCTURE)
+        {
+            enable_instance_extensions.push_back(extension);
         }
     }
 
