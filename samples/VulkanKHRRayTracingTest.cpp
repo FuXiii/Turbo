@@ -237,11 +237,36 @@ int main()
         {
             enable_instance_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_ACCELERATION_STRUCTURE)
+        {
+            enable_instance_extensions.push_back(extension);
+        }
     }
 
     Turbo::Core::TVersion instance_version(1, 0, 0, 0);
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+
+    // check acceleration structure feature
+    {
+        VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
+
+        VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
+        vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+        vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
+        vk_physical_device_acceleration_structure_features_khr.accelerationStructure = VK_FALSE;
+        vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = VK_FALSE;
+        vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = VK_FALSE;
+        vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = VK_FALSE;
+        vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = VK_FALSE;
+
+        VkPhysicalDeviceProperties2 vk_physical_device_properties_2 = {};
+        vk_physical_device_properties_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        vk_physical_device_properties_2.pNext = &vk_physical_device_acceleration_structure_features_khr;
+        vk_physical_device_properties_2.properties = {};
+
+        vkGetPhysicalDeviceProperties2(vk_physical_device, &vk_physical_device_properties_2);
+    }
 
     if (!glfwInit())
         return -1;

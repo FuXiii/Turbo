@@ -3182,3 +3182,4 @@ Turbo是渲染引擎
 * 2023/6/5 设计架构
   >
   >* `./sample`下增加`VulkanKHRRayTracingTest`示例，用于研究`Vulkan KHR`标准硬件实时光追。相关研究文档请查阅[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
+  >* `./engine/core`下`TExtensionInfo.h`下的`TExtensionType`枚举中增加`VK_KHR_ACCELERATION_STRUCTURE`枚举量。并且在对应的`TExtensionInfo.cpp`中的`TAllExtensionNames`中增加`VK_KHR_acceleration_structure`名称。
