@@ -273,6 +273,12 @@ int main()
         {
             std::cout << "Support acceleration structure feature" << std::endl;
         }
+
+        Turbo::Core::TPhysicalDeviceFeatures physical_device_features = physical_device->GetDeviceFeatures();
+        if (physical_device_features.accelerationStructure)
+        {
+            std::cout << "Yes, Support acceleration structure feature" << std::endl;
+        }
     }
 
     if (!glfwInit())

@@ -187,6 +187,15 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
     // for Extensions feature...
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
+    vk_physical_device_acceleration_structure_features_khr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructure = this->enabledFeatures.accelerationStructure ? VK_TRUE : VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = this->enabledFeatures.accelerationStructureCaptureReplay ? VK_TRUE : VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = this->enabledFeatures.accelerationStructureIndirectBuild ? VK_TRUE : VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = this->enabledFeatures.accelerationStructureHostCommands ? VK_TRUE : VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = this->enabledFeatures.descriptorBindingAccelerationStructureUpdateAfterBind ? VK_TRUE : VK_FALSE;
+
     VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
     vk_physical_device_mesh_shader_features_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     vk_physical_device_mesh_shader_features_ext.pNext = nullptr;

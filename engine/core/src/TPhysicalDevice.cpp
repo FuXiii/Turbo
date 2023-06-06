@@ -159,10 +159,20 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // For Vulkan1.0
     this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
 
+    // For VK_KHR_acceleration_structure
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
+    vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructure = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = VK_FALSE;
+
     // For VK_EXT_mesh_shader
     VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
     vk_physical_device_mesh_shader_features_ext.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    vk_physical_device_mesh_shader_features_ext.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_ext.pNext = &vk_physical_device_acceleration_structure_features_khr;
     vk_physical_device_mesh_shader_features_ext.taskShader = VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.meshShader = VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = VK_FALSE;
@@ -206,6 +216,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
         this->info.meshShaderFeaturesEXT.pNext = nullptr;
         this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
         this->info.meshShaderFeaturesNV.pNext = nullptr;
+        this->info.accelerationStructureFeaturesKHR = vk_physical_device_acceleration_structure_features_khr;
+        this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
     }
 }
 
@@ -752,6 +764,12 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.multiviewMeshShaderEXT = this->info.meshShaderFeaturesEXT.multiviewMeshShader == VK_TRUE ? true : false;
     physical_device_features.primitiveFragmentShadingRateMeshShaderEXT = this->info.meshShaderFeaturesEXT.primitiveFragmentShadingRateMeshShader == VK_TRUE ? true : false;
     physical_device_features.meshShaderQueriesEXT = this->info.meshShaderFeaturesEXT.meshShaderQueries == VK_TRUE ? true : false;
+
+    physical_device_features.accelerationStructure = this->info.accelerationStructureFeaturesKHR.accelerationStructure == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureCaptureReplay = this->info.accelerationStructureFeaturesKHR.accelerationStructureCaptureReplay == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureIndirectBuild = this->info.accelerationStructureFeaturesKHR.accelerationStructureIndirectBuild == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureHostCommands = this->info.accelerationStructureFeaturesKHR.accelerationStructureHostCommands == VK_TRUE ? true : false;
+    physical_device_features.descriptorBindingAccelerationStructureUpdateAfterBind = this->info.accelerationStructureFeaturesKHR.descriptorBindingAccelerationStructureUpdateAfterBind == VK_TRUE ? true : false;
 
     return physical_device_features;
 }

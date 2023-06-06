@@ -38,12 +38,10 @@ Turbo是渲染引擎
 
 ## Document
 
-* 相关文档现在可以在[Vulkan入门精要](https://fuxiii.github.io/Essentials.of.Vulkan/index.html)中查阅。比如[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
+* **相关文档现在可以在[Vulkan入门精要](https://fuxiii.github.io/Essentials.of.Vulkan/index.html)中查阅。比如[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。**
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 * 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
-
-
 
 ## Modular
 
@@ -3183,3 +3181,11 @@ Turbo是渲染引擎
   >
   >* `./sample`下增加`VulkanKHRRayTracingTest`示例，用于研究`Vulkan KHR`标准硬件实时光追。相关研究文档请查阅[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
   >* `./engine/core`下`TExtensionInfo.h`下的`TExtensionType`枚举中增加`VK_KHR_ACCELERATION_STRUCTURE`枚举量。并且在对应的`TExtensionInfo.cpp`中的`TAllExtensionNames`中增加`VK_KHR_acceleration_structure`名称。
+
+* 2023/6/6 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`下的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKHR`成员变量，用于存储加速结构特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`EnumerateProperties`函数中增加对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`加速结构特性信息的获取和赋值。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员。用于获取和激活加速结构。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`函数中，增加对于`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员的赋值和获取。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`函数中，增加对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活判断赋值。
