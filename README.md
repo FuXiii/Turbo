@@ -3189,3 +3189,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员。用于获取和激活加速结构。
   >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`函数中，增加对于`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员的赋值和获取。
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`函数中，增加对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活判断赋值。
+
+* 2023/6/7 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`增加扩展指针链对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活。
+  >* 更新`./samples`下的`VulkanKHRRayTracingTest`示例

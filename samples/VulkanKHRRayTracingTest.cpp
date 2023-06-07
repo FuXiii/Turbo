@@ -247,40 +247,6 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    // check acceleration structure feature
-    {
-        PFN_vkGetPhysicalDeviceFeatures2KHR _vkGetPhysicalDeviceFeatures2KHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkGetPhysicalDeviceFeatures2KHR>(instance, "vkGetPhysicalDeviceFeatures2KHR");
-
-        VkPhysicalDevice vk_physical_device = physical_device->GetVkPhysicalDevice();
-
-        VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
-        vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-        vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
-        vk_physical_device_acceleration_structure_features_khr.accelerationStructure = VK_FALSE;
-        vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = VK_FALSE;
-        vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = VK_FALSE;
-        vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = VK_FALSE;
-        vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = VK_FALSE;
-
-        VkPhysicalDeviceFeatures2 vk_physical_device_features_2;
-        vk_physical_device_features_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-        vk_physical_device_features_2.pNext = &vk_physical_device_acceleration_structure_features_khr;
-        vk_physical_device_features_2.features = {};
-
-        _vkGetPhysicalDeviceFeatures2KHR(vk_physical_device, &vk_physical_device_features_2);
-
-        if (vk_physical_device_acceleration_structure_features_khr.accelerationStructure == VK_TRUE)
-        {
-            std::cout << "Support acceleration structure feature" << std::endl;
-        }
-
-        Turbo::Core::TPhysicalDeviceFeatures physical_device_features = physical_device->GetDeviceFeatures();
-        if (physical_device_features.accelerationStructure)
-        {
-            std::cout << "Yes, Support acceleration structure feature" << std::endl;
-        }
-    }
-
     if (!glfwInit())
         return -1;
     GLFWwindow *window;
@@ -292,8 +258,51 @@ int main()
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_support_features = physical_device->GetDeviceFeatures();
+    {
+        if (physical_device_support_features.accelerationStructure)
+        {
+            std::cout << "Support acceleration structure feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support acceleration structure feature" << std::endl;
+        }
+
+        if (physical_device_support_features.accelerationStructureCaptureReplay)
+        {
+            std::cout << "Support acceleration structure capture replay feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support acceleration structure capture replay feature" << std::endl;
+        }
+
+        if (physical_device_support_features.accelerationStructureHostCommands)
+        {
+            std::cout << "Support acceleration structure host commands feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support acceleration structure host commands feature" << std::endl;
+        }
+
+        if (physical_device_support_features.accelerationStructureIndirectBuild)
+        {
+            std::cout << "Support acceleration structure indirect build feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support acceleration structure indirect build feature" << std::endl;
+        }
+    }
+
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
     physical_device_features.sampleRateShading = true;
+    physical_device_features.accelerationStructure = physical_device_support_features.accelerationStructure;
+    physical_device_features.accelerationStructureCaptureReplay = physical_device_support_features.accelerationStructureCaptureReplay;
+    physical_device_features.accelerationStructureHostCommands = physical_device_support_features.accelerationStructureHostCommands;
+    physical_device_features.accelerationStructureIndirectBuild = physical_device_support_features.accelerationStructureIndirectBuild;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     physical_device->GetSupportExtensions();
@@ -312,6 +321,27 @@ int main()
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
+
+    {
+        // create acceleration structure
+        PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateAccelerationStructureKHR>(device, "vkCreateAccelerationStructureKHR");
+
+        VkDevice vk_device = device->GetVkDevice();
+        VkAccelerationStructureCreateInfoKHR vk_acceleration_structure_create_info_khr = {};
+        vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+        vk_acceleration_structure_create_info_khr.pNext = nullptr;
+        vk_acceleration_structure_create_info_khr.createFlags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        vk_acceleration_structure_create_info_khr.buffer;                                                                                 // 将用于存储加速结构的缓存。大小一般可以为VkAccelerationStructureCreateInfoKHR::size，usage为VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR|VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT<由于之后创建顶层加速结构需要底层加速结构的地址，所以需要VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT>
+        vk_acceleration_structure_create_info_khr.offset;                                                                                 // 单位比特，相对于buffer的偏移之后存储加速结构，需要是256的倍数。
+        vk_acceleration_structure_create_info_khr.size;                                                                                   // 该加速结构需要的大小。大小来源于vkGetAccelerationStructureBuildSizesKHR()函数中VkAccelerationStructureBuildSizesInfoKHR::accelerationStructureSize。
+        vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR; // 加速结构的类型：TOP，BOTTOM，GENERIC
+        vk_acceleration_structure_create_info_khr.deviceAddress;                                                                          // 如果激活使用了accelerationStructureCaptureReplay特性，该地址为加速结构要求的那个设备地址。目前为VK_NULL_HANDLE
+
+        VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+
+        VkAccelerationStructureKHR vk_acceleration_structure_khr = VK_NULL_HANDLE;
+        VkResult result = vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &vk_acceleration_structure_khr);
+    }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
@@ -350,8 +380,8 @@ int main()
     Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
-    std::cout << vertex_shader->ToString() << std::endl;
-    std::cout << fragment_shader->ToString() << std::endl;
+    // std::cout << vertex_shader->ToString() << std::endl;
+    // std::cout << fragment_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));

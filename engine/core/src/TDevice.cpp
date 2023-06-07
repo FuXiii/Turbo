@@ -188,7 +188,7 @@ void Turbo::Core::TDevice::InternalCreate()
 
     // for Extensions feature...
     VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
-    vk_physical_device_acceleration_structure_features_khr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
     vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructure = this->enabledFeatures.accelerationStructure ? VK_TRUE : VK_FALSE;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = this->enabledFeatures.accelerationStructureCaptureReplay ? VK_TRUE : VK_FALSE;
@@ -197,8 +197,8 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = this->enabledFeatures.descriptorBindingAccelerationStructureUpdateAfterBind ? VK_TRUE : VK_FALSE;
 
     VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
-    vk_physical_device_mesh_shader_features_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    vk_physical_device_mesh_shader_features_ext.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_ext.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    vk_physical_device_mesh_shader_features_ext.pNext = &vk_physical_device_acceleration_structure_features_khr;
     vk_physical_device_mesh_shader_features_ext.taskShader = this->enabledFeatures.taskShaderEXT ? VK_TRUE : VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.meshShader = this->enabledFeatures.meshShaderEXT ? VK_TRUE : VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = this->enabledFeatures.multiviewMeshShaderEXT ? VK_TRUE : VK_FALSE;
