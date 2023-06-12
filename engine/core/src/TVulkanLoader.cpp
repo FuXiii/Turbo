@@ -705,6 +705,28 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     }
 #endif
 
+#if defined(VK_KHR_acceleration_structure)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE))
+    {
+        device_driver.vkBuildAccelerationStructuresKHR = this->LoadDeviceFunction<PFN_vkBuildAccelerationStructuresKHR>(device, "vkBuildAccelerationStructuresKHR");
+        device_driver.vkCmdBuildAccelerationStructuresIndirectKHR = this->LoadDeviceFunction<PFN_vkCmdBuildAccelerationStructuresIndirectKHR>(device, "vkCmdBuildAccelerationStructuresIndirectKHR");
+        device_driver.vkCmdBuildAccelerationStructuresKHR = this->LoadDeviceFunction<PFN_vkCmdBuildAccelerationStructuresKHR>(device, "vkCmdBuildAccelerationStructuresKHR");
+        device_driver.vkCmdCopyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCmdCopyAccelerationStructureKHR>(device, "vkCmdCopyAccelerationStructureKHR");
+        device_driver.vkCmdCopyAccelerationStructureToMemoryKHR = this->LoadDeviceFunction<PFN_vkCmdCopyAccelerationStructureToMemoryKHR>(device, "vkCmdCopyAccelerationStructureToMemoryKHR");
+        device_driver.vkCmdCopyMemoryToAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCmdCopyMemoryToAccelerationStructureKHR>(device, "vkCmdCopyMemoryToAccelerationStructureKHR");
+        device_driver.vkCmdWriteAccelerationStructuresPropertiesKHR = this->LoadDeviceFunction<PFN_vkCmdWriteAccelerationStructuresPropertiesKHR>(device, "vkCmdWriteAccelerationStructuresPropertiesKHR");
+        device_driver.vkCopyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCopyAccelerationStructureKHR>(device, "vkCopyAccelerationStructureKHR");
+        device_driver.vkCopyAccelerationStructureToMemoryKHR = this->LoadDeviceFunction<PFN_vkCopyAccelerationStructureToMemoryKHR>(device, "vkCopyAccelerationStructureToMemoryKHR");
+        device_driver.vkCopyMemoryToAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCopyMemoryToAccelerationStructureKHR>(device, "vkCopyMemoryToAccelerationStructureKHR");
+        device_driver.vkCreateAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCreateAccelerationStructureKHR>(device, "vkCreateAccelerationStructureKHR");
+        device_driver.vkDestroyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkDestroyAccelerationStructureKHR>(device, "vkDestroyAccelerationStructureKHR");
+        device_driver.vkGetAccelerationStructureBuildSizesKHR = this->LoadDeviceFunction<PFN_vkGetAccelerationStructureBuildSizesKHR>(device, "vkGetAccelerationStructureBuildSizesKHR");
+        device_driver.vkGetAccelerationStructureDeviceAddressKHR = this->LoadDeviceFunction<PFN_vkGetAccelerationStructureDeviceAddressKHR>(device, "vkGetAccelerationStructureDeviceAddressKHR");
+        device_driver.vkGetDeviceAccelerationStructureCompatibilityKHR = this->LoadDeviceFunction<PFN_vkGetDeviceAccelerationStructureCompatibilityKHR>(device, "vkGetDeviceAccelerationStructureCompatibilityKHR");
+        device_driver.vkWriteAccelerationStructuresPropertiesKHR = this->LoadDeviceFunction<PFN_vkWriteAccelerationStructuresPropertiesKHR>(device, "vkWriteAccelerationStructuresPropertiesKHR");
+    }
+#endif
+
     return device_driver;
 }
 

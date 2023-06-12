@@ -3194,3 +3194,8 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`增加扩展指针链对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活。
   >* 更新`./samples`下的`VulkanKHRRayTracingTest`示例
+
+* 2023/6/12 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_acceleration_structure`相关函数声明。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对`VK_KHR_acceleration_structure`相关函数的获取。

@@ -335,6 +335,25 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDrawMeshTasksNV vkCmdDrawMeshTasksNV = nullptr;
 #endif
+
+#if defined(VK_KHR_acceleration_structure)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkBuildAccelerationStructuresKHR vkBuildAccelerationStructuresKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdBuildAccelerationStructuresIndirectKHR vkCmdBuildAccelerationStructuresIndirectKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdCopyAccelerationStructureKHR vkCmdCopyAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdCopyAccelerationStructureToMemoryKHR vkCmdCopyAccelerationStructureToMemoryKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdCopyMemoryToAccelerationStructureKHR vkCmdCopyMemoryToAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdWriteAccelerationStructuresPropertiesKHR vkCmdWriteAccelerationStructuresPropertiesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCopyAccelerationStructureKHR vkCopyAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCopyAccelerationStructureToMemoryKHR vkCopyAccelerationStructureToMemoryKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCopyMemoryToAccelerationStructureKHR vkCopyMemoryToAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceAccelerationStructureCompatibilityKHR vkGetDeviceAccelerationStructureCompatibilityKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkWriteAccelerationStructuresPropertiesKHR vkWriteAccelerationStructuresPropertiesKHR = nullptr;
+#endif
 };
 using TDeviceDriver = TDeviceFunctionTable;
 
