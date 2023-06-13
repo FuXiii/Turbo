@@ -218,7 +218,7 @@ UseLegalVulkanCoreAPI("使用合法Vulkan核心API指针")
 
 IfEnableExtension{"是否计划激活对应功能扩展"}
 IfSupportExtension{"设备是否支持对应功能扩展"}
-Donothing("什么都不做\n（此时对应的扩展函数指针为nullptr，Turbo在判断对应的函数指针为nullptr后直接调过）")
+Donothing("什么都不做\n（此时对应的扩展函数指针为nullptr，Turbo在判断对应的函数指针为nullptr后直接跳过）")
 GetExtensionVulkanAPI("获取Vulkan扩展API")
 IsExtensionVulkanAPILegal{"是否获得合法Vulkan扩展API指针"}
 UseLegalVulkanExtensionAPI("使用合法Vulkan扩展API指针")

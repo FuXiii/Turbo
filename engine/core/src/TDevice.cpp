@@ -325,6 +325,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
         if (enabledExtensions != nullptr)
         {
             this->enabledExtensions = *enabledExtensions;
+            // TODO: we need to check and add extension dependencies(missing extensions required)
         }
 
         if (enabledFeatures != nullptr)

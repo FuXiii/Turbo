@@ -3199,3 +3199,7 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_acceleration_structure`相关函数声明。
   >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对`VK_KHR_acceleration_structure`相关函数的获取。
+
+* 2023/6/13 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对获取扩展函数之前判断是否支持相应扩展的判断。
