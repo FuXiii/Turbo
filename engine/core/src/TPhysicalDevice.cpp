@@ -808,26 +808,13 @@ bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
 {
     if (!extensionName.empty())
     {
-        TExtensionType extension_type = TExtensionInfo::GetExtensionTypeByExtensionName(extensionName);
         size_t support_extension_count = this->info.supportExtensions.size();
-        if (extension_type != TExtensionType::UNDEFINED)
+
+        for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
         {
-            for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
+            if (this->info.supportExtensions[extension_index].GetName() == extensionName)
             {
-                if (this->info.supportExtensions[extension_index].GetExtensionType() == extension_type)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
-            {
-                if (this->info.supportExtensions[extension_index].GetName() == extensionName)
-                {
-                    return true;
-                }
+                return true;
             }
         }
     }

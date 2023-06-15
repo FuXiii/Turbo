@@ -3203,3 +3203,7 @@ Turbo是渲染引擎
 * 2023/6/13 设计架构
   >
   >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对获取扩展函数之前判断是否支持相应扩展的判断。
+
+* 2023/6/15 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`IsSupportExtension`成员函数，将扩展名再次转换成扩展类型枚举进行判断去掉，没必要且重复。
