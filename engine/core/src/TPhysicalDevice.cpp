@@ -809,7 +809,6 @@ bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
     if (!extensionName.empty())
     {
         size_t support_extension_count = this->info.supportExtensions.size();
-
         for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
         {
             if (this->info.supportExtensions[extension_index].GetName() == extensionName)
