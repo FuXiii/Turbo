@@ -740,6 +740,18 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
 
 #endif
 
+#if defined(VK_KHR_buffer_device_address)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
+        {
+            device_driver.vkGetBufferDeviceAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddressKHR>(device, "vkGetBufferDeviceAddressKHR");
+            device_driver.vkGetBufferOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddressKHR>(device, "vkGetBufferOpaqueCaptureAddressKHR");
+            device_driver.vkGetDeviceMemoryOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR>(device, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+        }
+    }
+#endif
+
     return device_driver;
 }
 

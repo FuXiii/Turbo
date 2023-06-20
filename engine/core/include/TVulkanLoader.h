@@ -354,6 +354,13 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceAccelerationStructureCompatibilityKHR vkGetDeviceAccelerationStructureCompatibilityKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkWriteAccelerationStructuresPropertiesKHR vkWriteAccelerationStructuresPropertiesKHR = nullptr;
 #endif
+
+#if defined(VK_KHR_buffer_device_address)
+    // TODO: for core version
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferOpaqueCaptureAddressKHR vkGetBufferOpaqueCaptureAddressKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR vkGetDeviceMemoryOpaqueCaptureAddressKHR = nullptr;
+#endif
 };
 using TDeviceDriver = TDeviceFunctionTable;
 

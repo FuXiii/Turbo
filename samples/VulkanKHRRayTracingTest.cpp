@@ -323,9 +323,62 @@ int main()
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     {
-        // create acceleration structure
-        PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = Turbo::Core::TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkCreateAccelerationStructureKHR>(device, "vkCreateAccelerationStructureKHR");
+        Turbo::Core::TBuffer *device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+        {
+            Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+            memcpy(staging_vertex_buffer->Map(), POSITION_AND_COLOR_DATA.data(), sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+            staging_vertex_buffer->Unmap();
 
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->CmdCopyBuffer(staging_vertex_buffer, device_local_vertex_buffer, 0, 0, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            delete staging_vertex_buffer;
+        }
+
+        VkDeviceOrHostAddressConstKHR vertex_data={};
+
+        VkAccelerationStructureGeometryTrianglesDataKHR vk_acceleration_structure_geometry_triangles_data_khr = {};
+        vk_acceleration_structure_geometry_triangles_data_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+        vk_acceleration_structure_geometry_triangles_data_khr.pNext = nullptr;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexFormat = VkFormat::VK_FORMAT_R32G32B32_SFLOAT;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexData;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexStride;
+        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexType;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexData;
+        vk_acceleration_structure_geometry_triangles_data_khr.transformData;
+
+        VkAccelerationStructureGeometryDataKHR vk_acceleration_structure_geometry_data_khr = {};
+        vk_acceleration_structure_geometry_data_khr.triangles = vk_acceleration_structure_geometry_triangles_data_khr;
+
+        VkAccelerationStructureGeometryKHR vk_acceleration_structure_geometry_khr = {};
+        vk_acceleration_structure_geometry_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+        vk_acceleration_structure_geometry_khr.pNext = nullptr;
+        vk_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR ::VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+        vk_acceleration_structure_geometry_khr.geometry = vk_acceleration_structure_geometry_data_khr;
+        vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_OPAQUE_BIT_KHR;
+
+        VkAccelerationStructureBuildGeometryInfoKHR vk_acceleration_structure_build_geometry_info_khr = {};
+        vk_acceleration_structure_build_geometry_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.pNext = nullptr;
+        vk_acceleration_structure_build_geometry_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.mode = VkBuildAccelerationStructureModeKHR::VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = VK_NULL_HANDLE;
+        vk_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure;
+        vk_acceleration_structure_build_geometry_info_khr.geometryCount;
+        vk_acceleration_structure_build_geometry_info_khr.pGeometries;
+        vk_acceleration_structure_build_geometry_info_khr.ppGeometries;
+        vk_acceleration_structure_build_geometry_info_khr.scratchData;
+
+        // create acceleration structure
         VkDevice vk_device = device->GetVkDevice();
         VkAccelerationStructureCreateInfoKHR vk_acceleration_structure_create_info_khr = {};
         vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -340,7 +393,8 @@ int main()
         VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
         VkAccelerationStructureKHR vk_acceleration_structure_khr = VK_NULL_HANDLE;
-        VkResult result = vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &vk_acceleration_structure_khr);
+        // VkResult result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &vk_acceleration_structure_khr);
+        delete device_local_vertex_buffer;
     }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);

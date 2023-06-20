@@ -3213,3 +3213,6 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数为`InspectExtensionAndVersionDependencies(TExtensionInfo& extensionInfo)`。应该使用递归的方式检查依赖。
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InternalCreate()`成员函数。检查依赖。
+  >* `./engine/core`下`TBuffer.h`下的`TBufferUsageBits`枚举中增加`BUFFER_SHADER_DEVICE_ADDRESS`、`BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY`、`BUFFER_ACCELERATION_STRUCTURE_STORAGE`和`BUFFER_SHADER_BINDING_TABLE`枚举成员枚举。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_buffer_device_address`相关函数声明。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中更新`LoadDeviceDriver`成员函数。增加对`VK_KHR_buffer_device_address`相关函数获取。
