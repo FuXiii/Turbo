@@ -61,53 +61,853 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue 
     return nullptr;
 }
 
-void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies()
+void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
 {
     TVersion vulkan_version = this->physicalDevice->GetInstance()->GetVulkanVersion().GetValidVulkanVersion();
-    if (this->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
+
+    switch (extensionType)
     {
+    case TExtensionType::UNDEFINED: {
+    }
+    break;
+    case TExtensionType::VK_KHR_16BIT_STORAGE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_8BIT_STORAGE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_ANDROID_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_BIND_MEMORY2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP);
+        }
+
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
             {
-                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4);
-                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
-                {
-                    this->enabledExtensions.push_back(extension);
-                }
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS));
             }
         }
     }
+    break;
+    case TExtensionType::VK_KHR_COPY_COMMANDS2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_CREATE_RENDERPASS2: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MULTIVIEW);
+        }
 
-    // FIXME: require at least Vulkan1.1
-    if (this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
-    {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE2);
+        }
+
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_CREATE_RENDERPASS2))
             {
-                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
-                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
-                {
-                    this->enabledExtensions.push_back(extension);
-                }
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_CREATE_RENDERPASS2));
             }
         }
     }
+    break;
+    case TExtensionType::VK_KHR_DEDICATED_ALLOCATION: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS: {
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS));
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE: {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_CREATE_RENDERPASS2);
+        }
 
-    if (this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
-    {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DEVICE_GROUP: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEVICE_GROUP));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_DEVICE_GROUP_CREATION: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_DISPLAY: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DISPLAY_SWAPCHAIN: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DRAW_INDIRECT_COUNT: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DRIVER_PROPERTIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE_FD: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE_WIN32: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY_FD: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY_WIN32: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_FD: {
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_WIN32: {
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_DISPLAY_PROPERTIES2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_MEMORY_REQUIREMENTS2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2: {
         if (vulkan_version < TVersion(1, 1, 0, 0))
         {
             if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
             {
-                TExtensionInfo extension = this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-                if (extension.GetExtensionType() != TExtensionType::UNDEFINED)
-                {
-                    this->enabledExtensions.push_back(extension);
-                }
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
             }
         }
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_SURFACE_CAPABILITIES2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_IMAGE_FORMAT_LIST: {
+    }
+    break;
+    case TExtensionType::VK_KHR_IMAGELESS_FRAMEBUFFER: {
+    }
+    break;
+    case TExtensionType::VK_KHR_INCREMENTAL_PRESENT: {
+    }
+    break;
+    case TExtensionType::VK_KHR_MAINTENANCE1: {
+    }
+    break;
+    case TExtensionType::VK_KHR_MAINTENANCE2: {
+    }
+    break;
+    case TExtensionType::VK_KHR_MAINTENANCE3: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE3))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE3));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_MULTIVIEW: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MULTIVIEW))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MULTIVIEW));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_PERFORMANCE_QUERY: {
+    }
+    break;
+    case TExtensionType::VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_PIPELINE_LIBRARY: {
+    }
+    break;
+    case TExtensionType::VK_KHR_PORTABILITY_SUBSET: {
+    }
+    break;
+    case TExtensionType::VK_KHR_PUSH_DESCRIPTOR: {
+    }
+    break;
+    case TExtensionType::VK_KHR_RAY_TRACING: {
+    }
+    break;
+    case TExtensionType::VK_KHR_RELAXED_BLOCK_LAYOUT: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SAMPLER_YCBCR_CONVERSION: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_ATOMIC_INT64: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_CLOCK: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_DRAW_PARAMETERS: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_FLOAT16_INT8: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_NON_SEMANTIC_INFO: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHADER_SUBGROUP_EXTENDED_TYPES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SHARED_PRESENTABLE_IMAGE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SPIRV_1_4: {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
+        }
+
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_STORAGE_BUFFER_STORAGE_CLASS: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SURFACE_PROTECTED_CAPABILITIES: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SWAPCHAIN: {
+    }
+    break;
+    case TExtensionType::VK_KHR_SWAPCHAIN_MUTABLE_FORMAT: {
+    }
+    break;
+    case TExtensionType::VK_KHR_TIMELINE_SEMAPHORE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_UNIFORM_BUFFER_STANDARD_LAYOUT: {
+    }
+    break;
+    case TExtensionType::VK_KHR_VARIABLE_POINTERS: {
+    }
+    break;
+    case TExtensionType::VK_KHR_VULKAN_MEMORY_MODEL: {
+    }
+    break;
+    case TExtensionType::VK_KHR_WAYLAND_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_WIN32_KEYED_MUTEX: {
+    }
+    break;
+    case TExtensionType::VK_KHR_WIN32_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_XCB_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_KHR_XLIB_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_4444_FORMATS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_ACQUIRE_XLIB_DISPLAY: {
+    }
+    break;
+    case TExtensionType::VK_EXT_ASTC_DECODE_MODE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_BLEND_OPERATION_ADVANCED: {
+    }
+    break;
+    case TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_CALIBRATED_TIMESTAMPS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_CONDITIONAL_RENDERING: {
+    }
+    break;
+    case TExtensionType::VK_EXT_CONSERVATIVE_RASTERIZATION: {
+    }
+    break;
+    case TExtensionType::VK_EXT_CUSTOM_BORDER_COLOR: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DEBUG_MARKER: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DEBUG_REPORT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DEBUG_UTILS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DEPTH_CLIP_ENABLE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DEPTH_RANGE_UNRESTRICTED: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DESCRIPTOR_INDEXING: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE3);
+        }
+
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_EXT_DEVICE_MEMORY_REPORT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DIRECT_MODE_DISPLAY: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DIRECTFB_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DISCARD_RECTANGLES: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DISPLAY_CONTROL: {
+    }
+    break;
+    case TExtensionType::VK_EXT_DISPLAY_SURFACE_COUNTER: {
+    }
+    break;
+    case TExtensionType::VK_EXT_EXTENDED_DYNAMIC_STATE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_EXTERNAL_MEMORY_DMA_BUF: {
+    }
+    break;
+    case TExtensionType::VK_EXT_EXTERNAL_MEMORY_HOST: {
+    }
+    break;
+    case TExtensionType::VK_EXT_FILTER_CUBIC: {
+    }
+    break;
+    case TExtensionType::VK_EXT_FRAGMENT_DENSITY_MAP: {
+    }
+    break;
+    case TExtensionType::VK_EXT_FRAGMENT_DENSITY_MAP2: {
+    }
+    break;
+    case TExtensionType::VK_EXT_FRAGMENT_SHADER_INTERLOCK: {
+    }
+    break;
+    case TExtensionType::VK_EXT_FULL_SCREEN_EXCLUSIVE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_GLOBAL_PRIORITY: {
+    }
+    break;
+    case TExtensionType::VK_EXT_HDR_METADATA: {
+    }
+    break;
+    case TExtensionType::VK_EXT_HEADLESS_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_HOST_QUERY_RESET: {
+    }
+    break;
+    case TExtensionType::VK_EXT_IMAGE_DRM_FORMAT_MODIFIER: {
+    }
+    break;
+    case TExtensionType::VK_EXT_IMAGE_ROBUSTNESS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_INDEX_TYPE_UINT8: {
+    }
+    break;
+    case TExtensionType::VK_EXT_INLINE_UNIFORM_BLOCK: {
+    }
+    break;
+    case TExtensionType::VK_EXT_LINE_RASTERIZATION: {
+    }
+    break;
+    case TExtensionType::VK_EXT_MEMORY_BUDGET: {
+    }
+    break;
+    case TExtensionType::VK_EXT_MEMORY_PRIORITY: {
+    }
+    break;
+    case TExtensionType::VK_EXT_METAL_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_PCI_BUS_INFO: {
+    }
+    break;
+    case TExtensionType::VK_EXT_PIPELINE_CREATION_CACHE_CONTROL: {
+    }
+    break;
+    case TExtensionType::VK_EXT_PIPELINE_CREATION_FEEDBACK: {
+    }
+    break;
+    case TExtensionType::VK_EXT_POST_DEPTH_COVERAGE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_PRIVATE_DATA: {
+    }
+    break;
+    case TExtensionType::VK_EXT_QUEUE_FAMILY_FOREIGN: {
+    }
+    break;
+    case TExtensionType::VK_EXT_ROBUSTNESS2: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SAMPLE_LOCATIONS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SAMPLER_FILTER_MINMAX: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SCALAR_BLOCK_LAYOUT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SEPARATE_STENCIL_USAGE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_ATOMIC_FLOAT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_DEMOTE_TO_HELPER_INVOCATION: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_IMAGE_ATOMIC_INT64: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_STENCIL_EXPORT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_SUBGROUP_BALLOT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_SUBGROUP_VOTE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SHADER_VIEWPORT_INDEX_LAYER: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SUBGROUP_SIZE_CONTROL: {
+    }
+    break;
+    case TExtensionType::VK_EXT_SWAPCHAIN_COLORSPACE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_TEXEL_BUFFER_ALIGNMENT: {
+    }
+    break;
+    case TExtensionType::VK_EXT_TEXTURE_COMPRESSION_ASTC_HDR: {
+    }
+    break;
+    case TExtensionType::VK_EXT_TOOLING_INFO: {
+    }
+    break;
+    case TExtensionType::VK_EXT_TRANSFORM_FEEDBACK: {
+    }
+    break;
+    case TExtensionType::VK_EXT_VALIDATION_CACHE: {
+    }
+    break;
+    case TExtensionType::VK_EXT_VALIDATION_FEATURES: {
+    }
+    break;
+    case TExtensionType::VK_EXT_VALIDATION_FLAGS: {
+    }
+    break;
+    case TExtensionType::VK_EXT_VERTEX_ATTRIBUTE_DIVISOR: {
+    }
+    break;
+    case TExtensionType::VK_EXT_YCBCR_IMAGE_ARRAYS: {
+    }
+    break;
+    case TExtensionType::VK_AMD_BUFFER_MARKER: {
+    }
+    break;
+    case TExtensionType::VK_AMD_DEVICE_COHERENT_MEMORY: {
+    }
+    break;
+    case TExtensionType::VK_AMD_DISPLAY_NATIVE_HDR: {
+    }
+    break;
+    case TExtensionType::VK_AMD_DRAW_INDIRECT_COUNT: {
+    }
+    break;
+    case TExtensionType::VK_AMD_GCN_SHADER: {
+    }
+    break;
+    case TExtensionType::VK_AMD_GPU_SHADER_HALF_FLOAT: {
+    }
+    break;
+    case TExtensionType::VK_AMD_GPU_SHADER_INT16: {
+    }
+    break;
+    case TExtensionType::VK_AMD_MEMORY_OVERALLOCATION_BEHAVIOR: {
+    }
+    break;
+    case TExtensionType::VK_AMD_MIXED_ATTACHMENT_SAMPLES: {
+    }
+    break;
+    case TExtensionType::VK_AMD_NEGATIVE_VIEWPORT_HEIGHT: {
+    }
+    break;
+    case TExtensionType::VK_AMD_PIPELINE_COMPILER_CONTROL: {
+    }
+    break;
+    case TExtensionType::VK_AMD_RASTERIZATION_ORDER: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_BALLOT: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_CORE_PROPERTIES: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_CORE_PROPERTIES2: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_EXPLICIT_VERTEX_PARAMETER: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_FRAGMENT_MASK: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_IMAGE_LOAD_STORE_LOD: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_INFO: {
+    }
+    break;
+    case TExtensionType::VK_AMD_SHADER_TRINARY_MINMAX: {
+    }
+    break;
+    case TExtensionType::VK_AMD_TEXTURE_GATHER_BIAS_LOD: {
+    }
+    break;
+    case TExtensionType::VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER: {
+    }
+    break;
+    case TExtensionType::VK_FUCHSIA_IMAGEPIPE_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_GGP_FRAME_TOKEN: {
+    }
+    break;
+    case TExtensionType::VK_GGP_STREAM_DESCRIPTOR_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_GOOGLE_DECORATE_STRING: {
+    }
+    break;
+    case TExtensionType::VK_GOOGLE_DISPLAY_TIMING: {
+    }
+    break;
+    case TExtensionType::VK_GOOGLE_HLSL_FUNCTIONALITY1: {
+    }
+    break;
+    case TExtensionType::VK_GOOGLE_USER_TYPE: {
+    }
+    break;
+    case TExtensionType::VK_IMG_FILTER_CUBIC: {
+    }
+    break;
+    case TExtensionType::VK_IMG_FORMAT_PVRTC: {
+    }
+    break;
+    case TExtensionType::VK_INTEL_PERFORMANCE_QUERY: {
+    }
+    break;
+    case TExtensionType::VK_INTEL_SHADER_INTEGER_FUNCTIONS2: {
+    }
+    break;
+    case TExtensionType::VK_MVK_IOS_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_MVK_MACOS_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_NN_VI_SURFACE: {
+    }
+    break;
+    case TExtensionType::VK_NV_CLIP_SPACE_W_SCALING: {
+    }
+    break;
+    case TExtensionType::VK_NV_COMPUTE_SHADER_DERIVATIVES: {
+    }
+    break;
+    case TExtensionType::VK_NV_COOPERATIVE_MATRIX: {
+    }
+    break;
+    case TExtensionType::VK_NV_CORNER_SAMPLED_IMAGE: {
+    }
+    break;
+    case TExtensionType::VK_NV_COVERAGE_REDUCTION_MODE: {
+    }
+    break;
+    case TExtensionType::VK_NV_DEDICATED_ALLOCATION: {
+    }
+    break;
+    case TExtensionType::VK_NV_DEDICATED_ALLOCATION_IMAGE_ALIASING: {
+    }
+    break;
+    case TExtensionType::VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS: {
+    }
+    break;
+    case TExtensionType::VK_NV_DEVICE_DIAGNOSTICS_CONFIG: {
+    }
+    break;
+    case TExtensionType::VK_NV_DEVICE_GENERATED_COMMANDS: {
+    }
+    break;
+    case TExtensionType::VK_NV_EXTERNAL_MEMORY: {
+    }
+    break;
+    case TExtensionType::VK_NV_EXTERNAL_MEMORY_CAPABILITIES: {
+    }
+    break;
+    case TExtensionType::VK_NV_EXTERNAL_MEMORY_WIN32: {
+    }
+    break;
+    case TExtensionType::VK_NV_FILL_RECTANGLE: {
+    }
+    break;
+    case TExtensionType::VK_NV_FRAGMENT_COVERAGE_TO_COLOR: {
+    }
+    break;
+    case TExtensionType::VK_NV_FRAGMENT_SHADER_BARYCENTRIC: {
+    }
+    break;
+    case TExtensionType::VK_NV_FRAMEBUFFER_MIXED_SAMPLES: {
+    }
+    break;
+    case TExtensionType::VK_NV_GEOMETRY_SHADER_PASSTHROUGH: {
+    }
+    break;
+    case TExtensionType::VK_NV_GLSL_SHADER: {
+    }
+    break;
+    case TExtensionType::VK_NV_MESH_SHADER: {
+    }
+    break;
+    case TExtensionType::VK_NV_RAY_TRACING: {
+    }
+    break;
+    case TExtensionType::VK_NV_REPRESENTATIVE_FRAGMENT_TEST: {
+    }
+    break;
+    case TExtensionType::VK_NV_SAMPLE_MASK_OVERRIDE_COVERAGE: {
+    }
+    break;
+    case TExtensionType::VK_NV_SCISSOR_EXCLUSIVE: {
+    }
+    break;
+    case TExtensionType::VK_NV_SHADER_IMAGE_FOOTPRINT: {
+    }
+    break;
+    case TExtensionType::VK_NV_SHADER_SM_BUILTINS: {
+    }
+    break;
+    case TExtensionType::VK_NV_SHADER_SUBGROUP_PARTITIONED: {
+    }
+    break;
+    case TExtensionType::VK_NV_SHADING_RATE_IMAGE: {
+    }
+    break;
+    case TExtensionType::VK_NV_VIEWPORT_ARRAY2: {
+    }
+    break;
+    case TExtensionType::VK_NV_VIEWPORT_SWIZZLE: {
+    }
+    break;
+    case TExtensionType::VK_NV_WIN32_KEYED_MUTEX: {
+    }
+    break;
+    case TExtensionType::VK_NVX_IMAGE_VIEW_HANDLE: {
+    }
+    break;
+    case TExtensionType::VK_NVX_MULTIVIEW_PER_VIEW_ATTRIBUTES: {
+    }
+    break;
+    case TExtensionType::VK_QCOM_RENDER_PASS_SHADER_RESOLVE: {
+    }
+    break;
+    case TExtensionType::VK_QCOM_RENDER_PASS_STORE_OPS: {
+    }
+    break;
+    case TExtensionType::VK_QCOM_RENDER_PASS_TRANSFORM: {
+    }
+    break;
+    case TExtensionType::VK_KHR_DYNAMIC_RENDERING: {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE);
+        }
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        }
+
+        if (vulkan_version < TVersion(1, 3, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DYNAMIC_RENDERING))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DYNAMIC_RENDERING));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_EXT_MESH_SHADER: {
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SPIRV_1_4);
+        }
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_EXT_MESH_SHADER));
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_ACCELERATION_STRUCTURE: {
+
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING);
+        }
+
+        if (vulkan_version < TVersion(1, 2, 0, 0))
+        {
+            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS);
+        }
+
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE));
+        }
+    }
+    break;
     }
 }
 
@@ -146,7 +946,10 @@ void Turbo::Core::TDevice::InternalCreate()
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
     }
 
-    this->InspectExtensionAndVersionDependencies();
+    for (Turbo::Core::TExtensionInfo &extension_item : this->enabledExtensions)
+    {
+        this->InspectExtensionAndVersionDependencies(extension_item.GetExtensionType());
+    }
 
     size_t enable_extension_count = this->enabledExtensions.size();
     std::vector<const char *> enable_extension_names(enable_extension_count);

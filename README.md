@@ -3208,3 +3208,8 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`IsSupportExtension`成员函数，将扩展名再次转换成扩展类型枚举进行判断去掉，没必要且重复。
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中`IsEnabledExtension`成员函数，将扩展名再次转换成扩展类型枚举进行判断去掉，没必要且重复。
+
+* 2023/6/20 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数为`InspectExtensionAndVersionDependencies(TExtensionInfo& extensionInfo)`。应该使用递归的方式检查依赖。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InternalCreate()`成员函数。检查依赖。
