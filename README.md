@@ -3216,3 +3216,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TBuffer.h`下的`TBufferUsageBits`枚举中增加`BUFFER_SHADER_DEVICE_ADDRESS`、`BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY`、`BUFFER_ACCELERATION_STRUCTURE_STORAGE`和`BUFFER_SHADER_BINDING_TABLE`枚举成员枚举。
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_buffer_device_address`相关函数声明。
   >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中更新`LoadDeviceDriver`成员函数。增加对`VK_KHR_buffer_device_address`相关函数获取。
+
+* 2023/6/21 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中增加`VK_KHR_MAINTENANCE2`扩展依赖检查。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中移除对`VK_KHR_DEVICE_GROUP_CREATION`和`VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2`扩展依赖检查，这两个依赖属于`instance`依赖，不应该出现在`device`扩展中。

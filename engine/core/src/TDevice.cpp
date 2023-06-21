@@ -83,15 +83,8 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
-
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -106,15 +99,8 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_CREATE_RENDERPASS2: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MULTIVIEW);
-        }
-
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MULTIVIEW);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE2);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -136,10 +122,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE: {
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_CREATE_RENDERPASS2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_CREATE_RENDERPASS2);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -154,10 +137,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_DEVICE_GROUP: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION);
 
         if (vulkan_version < TVersion(1, 1, 0, 0))
         {
@@ -169,13 +149,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_DEVICE_GROUP_CREATION: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION));
-            }
-        }
+        // VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2 is instance extension, so we will do nothing in device extension.
     }
     break;
     case TExtensionType::VK_KHR_DISPLAY: {
@@ -233,13 +207,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
-            }
-        }
+        // VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2 is instance extension, so we will do nothing in device extension.
     }
     break;
     case TExtensionType::VK_KHR_GET_SURFACE_CAPABILITIES2: {
@@ -258,13 +226,17 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_MAINTENANCE2: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE2))
+            {
+                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE2));
+            }
+        }
     }
     break;
     case TExtensionType::VK_KHR_MAINTENANCE3: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
         if (vulkan_version < TVersion(1, 1, 0, 0))
         {
@@ -276,10 +248,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_MULTIVIEW: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
         if (vulkan_version < TVersion(1, 1, 0, 0))
         {
@@ -333,10 +302,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -357,10 +323,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_SPIRV_1_4: {
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -456,15 +419,8 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_EXT_DESCRIPTOR_INDEXING: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
-
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE3);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE3);
 
         if (vulkan_version < TVersion(1, 2, 0, 0))
         {
@@ -857,15 +813,8 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_DYNAMIC_RENDERING: {
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE);
-        }
-
-        if (vulkan_version < TVersion(1, 1, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
         if (vulkan_version < TVersion(1, 3, 0, 0))
         {
@@ -877,10 +826,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_EXT_MESH_SHADER: {
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SPIRV_1_4);
-        }
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SPIRV_1_4);
 
         if (!this->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
         {
@@ -889,17 +835,8 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_ACCELERATION_STRUCTURE: {
-
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING);
-        }
-
-        if (vulkan_version < TVersion(1, 2, 0, 0))
-        {
-            this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS);
-        }
-
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS);
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS);
 
         if (!this->IsEnabledExtension(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE))
