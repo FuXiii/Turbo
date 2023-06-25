@@ -548,6 +548,61 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
 #endif
     }
 
+#if defined(VK_KHR_get_physical_device_properties2)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+        {
+            physical_device_driver.vkGetPhysicalDeviceFeatures2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2KHR>(vk_instance, "vkGetPhysicalDeviceFeatures2KHR");
+            physical_device_driver.vkGetPhysicalDeviceProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceProperties2KHR>(vk_instance, "vkGetPhysicalDeviceProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceFormatProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceImageFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceImageFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceImageFormatProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceQueueFamilyProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR>(vk_instance, "vkGetPhysicalDeviceQueueFamilyProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceMemoryProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceMemoryProperties2KHR>(vk_instance, "vkGetPhysicalDeviceMemoryProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceSparseImageFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceSparseImageFormatProperties2KHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_memory_capabilities)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalBufferPropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalBufferPropertiesKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_fence_capabilities)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalFencePropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalFencePropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalFencePropertiesKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_semaphore_capabilities)
+   if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR");
+        }
+    }
+#endif
+#if defined(VK_EXT_tooling_info)
+    if (instance->IsEnabledExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+        {
+            physical_device_driver.vkGetPhysicalDeviceToolPropertiesEXT = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceToolPropertiesEXT>(vk_instance, "vkGetPhysicalDeviceToolPropertiesEXT");
+        }
+    }
+#endif
+
     return physical_device_driver;
 }
 

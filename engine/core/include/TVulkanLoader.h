@@ -190,6 +190,28 @@ struct TPhysicalDeviceFunctionTable
 #if defined(VK_VERSION_1_3)
     VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceToolProperties vkGetPhysicalDeviceToolProperties = nullptr;
 #endif
+
+#if defined(VK_KHR_get_physical_device_properties2)
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceFeatures2KHR vkGetPhysicalDeviceFeatures2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceProperties2KHR vkGetPhysicalDeviceProperties2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceFormatProperties2KHR vkGetPhysicalDeviceFormatProperties2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceImageFormatProperties2KHR vkGetPhysicalDeviceImageFormatProperties2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR vkGetPhysicalDeviceQueueFamilyProperties2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceMemoryProperties2KHR vkGetPhysicalDeviceMemoryProperties2KHR = nullptr;
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR vkGetPhysicalDeviceSparseImageFormatProperties2KHR = nullptr;
+#endif
+#if defined(VK_KHR_external_memory_capabilities) // FIXME: 依赖 VK_KHR_get_physical_device_properties2
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR vkGetPhysicalDeviceExternalBufferPropertiesKHR = nullptr;
+#endif
+#if defined(VK_KHR_external_fence_capabilities) // FIXME: 依赖 VK_KHR_get_physical_device_properties2
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceExternalFencePropertiesKHR vkGetPhysicalDeviceExternalFencePropertiesKHR = nullptr;
+#endif
+#if defined(VK_KHR_external_semaphore_capabilities) // FIXME: 依赖 VK_KHR_get_physical_device_properties2
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = nullptr;
+#endif
+#if defined(VK_EXT_tooling_info) // FIXME: 这应该是 Device 扩展！！！！！！！！！！！！！
+    VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceToolPropertiesEXT vkGetPhysicalDeviceToolPropertiesEXT = nullptr;
+#endif
 };
 using TPhysicalDeviceDriver = TPhysicalDeviceFunctionTable;
 

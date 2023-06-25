@@ -3221,3 +3221,12 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中增加`VK_KHR_MAINTENANCE2`扩展依赖检查。
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中移除对`VK_KHR_DEVICE_GROUP_CREATION`和`VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2`扩展依赖检查，这两个依赖属于`instance`依赖，不应该出现在`device`扩展中。
+
+* 2023/6/25 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_get_physical_device_properties2`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_memory_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_fence_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_semaphore_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_EXT_tooling_info`扩展的函数。
+
