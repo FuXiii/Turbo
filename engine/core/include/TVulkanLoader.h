@@ -159,6 +159,14 @@ extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
 #if defined(VK_VERSION_1_3)
 #endif
 
+struct TInstanceFunctionTable
+{
+#if defined(VK_KHR_device_group_creation) // FIXME:Core version
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkEnumeratePhysicalDeviceGroupsKHR vkEnumeratePhysicalDeviceGroupsKHR = nullptr;
+#endif
+};
+using TInstanceDriver = TInstanceFunctionTable;
+
 struct TPhysicalDeviceFunctionTable
 {
 #if defined(VK_VERSION_1_0)
@@ -191,7 +199,7 @@ struct TPhysicalDeviceFunctionTable
     VULKAN_PHYSICAL_DEVICE_API VULKAN_CORE PFN_vkGetPhysicalDeviceToolProperties vkGetPhysicalDeviceToolProperties = nullptr;
 #endif
 
-#if defined(VK_KHR_get_physical_device_properties2)
+#if defined(VK_KHR_get_physical_device_properties2) // FIXME:Core version
     VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceFeatures2KHR vkGetPhysicalDeviceFeatures2KHR = nullptr;
     VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceProperties2KHR vkGetPhysicalDeviceProperties2KHR = nullptr;
     VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceFormatProperties2KHR vkGetPhysicalDeviceFormatProperties2KHR = nullptr;
@@ -377,12 +385,42 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkWriteAccelerationStructuresPropertiesKHR vkWriteAccelerationStructuresPropertiesKHR = nullptr;
 #endif
 
+#if defined(VK_EXT_buffer_device_address)
+    // TODO: VkPhysicalDeviceBufferAddressFeaturesEXT
+    // TODO: VkPhysicalDeviceBufferDeviceAddressFeaturesEXT
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferDeviceAddressEXT vkGetBufferDeviceAddressEXT = nullptr;
+#endif
 #if defined(VK_KHR_buffer_device_address)
-    // TODO: for core version
+    //  TODO: VkPhysicalDeviceBufferDeviceAddressFeaturesKHR
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferOpaqueCaptureAddressKHR vkGetBufferOpaqueCaptureAddressKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR vkGetDeviceMemoryOpaqueCaptureAddressKHR = nullptr;
 #endif
+#if defined(VK_VERSION_1_2)
+    //  TODO: VkPhysicalDeviceBufferDeviceAddressFeatures
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferOpaqueCaptureAddress vkGetBufferOpaqueCaptureAddress = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceMemoryOpaqueCaptureAddress vkGetDeviceMemoryOpaqueCaptureAddress = nullptr;
+#endif
+
+#if defined(VK_KHR_device_group)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDispatchBaseKHR vkCmdDispatchBaseKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdSetDeviceMaskKHR vkCmdSetDeviceMaskKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupPeerMemoryFeaturesKHR vkGetDeviceGroupPeerMemoryFeaturesKHR = nullptr;
+#if defined(VK_KHR_surface)
+    // TODO: If VK_KHR_surface is supported:
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupPresentCapabilitiesKHR vkGetDeviceGroupPresentCapabilitiesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupSurfacePresentModesKHR vkGetDeviceGroupSurfacePresentModesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDevicePresentRectanglesKHR vkGetPhysicalDevicePresentRectanglesKHR = nullptr;
+#endif
+#if defined(VK_KHR_swapchain)
+    // TODO: If VK_KHR_swapchain is supported:
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkAcquireNextImage2KHR vkAcquireNextImage2KHR = nullptr;
+#endif
+#endif
+
+    // FIXME:VK_KHR_swapchain
+    // FIXME:VK_KHR_surface
 };
 using TDeviceDriver = TDeviceFunctionTable;
 

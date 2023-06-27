@@ -585,7 +585,7 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
 #endif
 
 #if defined(VK_KHR_external_semaphore_capabilities)
-   if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
     {
         if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
         {
@@ -609,6 +609,8 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
 Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
 {
     TDeviceDriver device_driver = {};
+    Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
+
 #if defined(VK_VERSION_1_0)
     device_driver.vkDestroyDevice = this->LoadDeviceFunction<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
     device_driver.vkAllocateCommandBuffers = this->LoadDeviceFunction<PFN_vkAllocateCommandBuffers>(device, "vkAllocateCommandBuffers");
@@ -737,7 +739,6 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     // TODO: add the Extension version function of VK_KHR_dynamic_rendering
     // TODO: vkCmdBeginRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
     // TODO: vkCmdEndRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
-    Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
     if (vulkan_version >= Turbo::Core::TVersion(1, 3, 0, 0))
     {
         device_driver.vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
@@ -795,6 +796,15 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
 
 #endif
 
+#if defined(VK_EXT_buffer_device_address)
+    if (device->IsEnabledExtension(TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS))
+        {
+            device_driver.vkGetBufferDeviceAddressEXT = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddressEXT>(device, "vkGetBufferDeviceAddressEXT");
+        }
+    }
+#endif
 #if defined(VK_KHR_buffer_device_address)
     if (device->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
     {
@@ -803,6 +813,60 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
             device_driver.vkGetBufferDeviceAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddressKHR>(device, "vkGetBufferDeviceAddressKHR");
             device_driver.vkGetBufferOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddressKHR>(device, "vkGetBufferOpaqueCaptureAddressKHR");
             device_driver.vkGetDeviceMemoryOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR>(device, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+        }
+    }
+#endif
+#if defined(VK_VERSION_1_2)
+    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
+    {
+        device_driver.vkGetBufferDeviceAddress = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddress>(device, "vkGetBufferDeviceAddress");
+        device_driver.vkGetBufferOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddress>(device, "vkGetBufferOpaqueCaptureAddress");
+        device_driver.vkGetDeviceMemoryOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddress>(device, "vkGetDeviceMemoryOpaqueCaptureAddress");
+    }
+#endif
+
+#if defined(VK_KHR_device_group)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
+        {
+            device_driver.vkCmdDispatchBaseKHR = this->LoadDeviceFunction<PFN_vkCmdDispatchBaseKHR>(device, "vkCmdDispatchBaseKHR");
+            device_driver.vkCmdSetDeviceMaskKHR = this->LoadDeviceFunction<PFN_vkCmdSetDeviceMaskKHR>(device, "vkCmdSetDeviceMaskKHR");
+            device_driver.vkGetDeviceGroupPeerMemoryFeaturesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPeerMemoryFeaturesKHR>(device, "vkGetDeviceGroupPeerMemoryFeaturesKHR");
+#if defined(VK_KHR_surface)
+            if (device->IsEnabledExtension(TExtensionType::VK_KHR_SURFACE))
+            {
+                if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SURFACE))
+                {
+                    // TODO: If VK_KHR_surface is supported:
+                    if (device_driver.vkGetDeviceGroupPresentCapabilitiesKHR == nullptr)
+                    {
+                        device_driver.vkGetDeviceGroupPresentCapabilitiesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPresentCapabilitiesKHR>(device, "vkGetDeviceGroupPresentCapabilitiesKHR");
+                    }
+                    if (device_driver.vkGetDeviceGroupSurfacePresentModesKHR == nullptr)
+                    {
+                        device_driver.vkGetDeviceGroupSurfacePresentModesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupSurfacePresentModesKHR>(device, "vkGetDeviceGroupSurfacePresentModesKHR");
+                    }
+                    if (device_driver.vkGetPhysicalDevicePresentRectanglesKHR == nullptr)
+                    {
+                        device_driver.vkGetPhysicalDevicePresentRectanglesKHR = this->LoadDeviceFunction<PFN_vkGetPhysicalDevicePresentRectanglesKHR>(device, "vkGetPhysicalDevicePresentRectanglesKHR");
+                    }
+                }
+            }
+#endif
+#if defined(VK_KHR_swapchain)
+            if (device->IsEnabledExtension(TExtensionType::VK_KHR_SWAPCHAIN))
+            {
+                if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SWAPCHAIN))
+                {
+                    // TODO: If VK_KHR_swapchain is supported:
+                    if (device_driver.vkAcquireNextImage2KHR == nullptr)
+                    {
+                        device_driver.vkAcquireNextImage2KHR = this->LoadDeviceFunction<PFN_vkAcquireNextImage2KHR>(device, "vkAcquireNextImage2KHR");
+                    }
+                }
+            }
+#endif
         }
     }
 #endif

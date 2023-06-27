@@ -389,6 +389,12 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING));
+        }
     }
     break;
     case TExtensionType::VK_EXT_CALIBRATED_TIMESTAMPS: {

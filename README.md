@@ -3230,3 +3230,11 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_semaphore_capabilities`扩展的函数。
   >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_EXT_tooling_info`扩展的函数。
 
+* 2023/6/27 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_EXT_buffer_device_address`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_semaphore_capabilities`提升至核心得函数。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InspectExtensionAndVersionDependencies()`成员函数中增加对`VK_EXT_BUFFER_DEVICE_ADDRESS`扩展依赖检查。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_device_group`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下增加`TInstanceFunctionTable`结构体并声明`TInstanceDriver`为`TInstanceFunctionTable`别名。
+  >* `./engine/core`下`TVulkanLoader.h`下`TInstanceFunctionTable`结构体中增加`VK_KHR_device_group_creation`扩展的函数。
