@@ -159,10 +159,18 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // For Vulkan1.0
     this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
 
+    // For VK_KHR_buffer_device_address
+    VkPhysicalDeviceBufferDeviceAddressFeaturesKHR vk_physical_device_buffer_device_address_features_khr = {};
+    vk_physical_device_buffer_device_address_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
+    vk_physical_device_buffer_device_address_features_khr.pNext = nullptr;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddress = VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressCaptureReplay = VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressMultiDevice = VK_FALSE;
+
     // For VK_KHR_acceleration_structure
     VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
     vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-    vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
+    vk_physical_device_acceleration_structure_features_khr.pNext = &vk_physical_device_buffer_device_address_features_khr;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructure = VK_FALSE;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = VK_FALSE;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = VK_FALSE;
@@ -218,6 +226,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
         this->info.meshShaderFeaturesNV.pNext = nullptr;
         this->info.accelerationStructureFeaturesKHR = vk_physical_device_acceleration_structure_features_khr;
         this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
+        this->info.physicalDeviceBufferDeviceAddressFeaturesKHR = vk_physical_device_buffer_device_address_features_khr;
+        this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
     }
 }
 
@@ -770,6 +780,10 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.accelerationStructureIndirectBuild = this->info.accelerationStructureFeaturesKHR.accelerationStructureIndirectBuild == VK_TRUE ? true : false;
     physical_device_features.accelerationStructureHostCommands = this->info.accelerationStructureFeaturesKHR.accelerationStructureHostCommands == VK_TRUE ? true : false;
     physical_device_features.descriptorBindingAccelerationStructureUpdateAfterBind = this->info.accelerationStructureFeaturesKHR.descriptorBindingAccelerationStructureUpdateAfterBind == VK_TRUE ? true : false;
+
+    physical_device_features.bufferDeviceAddress = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddress == VK_TRUE ? true : false;
+    physical_device_features.bufferDeviceAddressCaptureReplay = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressCaptureReplay == VK_TRUE ? true : false;
+    physical_device_features.bufferDeviceAddressMultiDevice = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressMultiDevice == VK_TRUE ? true : false;
 
     return physical_device_features;
 }

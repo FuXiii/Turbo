@@ -295,6 +295,33 @@ int main()
         {
             std::cout << "Not support acceleration structure indirect build feature" << std::endl;
         }
+
+        if (physical_device_support_features.bufferDeviceAddress)
+        {
+            std::cout << "Support bufferDeviceAddress feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support bufferDeviceAddress feature" << std::endl;
+        }
+
+        if (physical_device_support_features.bufferDeviceAddressCaptureReplay)
+        {
+            std::cout << "Support bufferDeviceAddressCaptureReplay feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support bufferDeviceAddressCaptureReplay feature" << std::endl;
+        }
+
+        if (physical_device_support_features.bufferDeviceAddressMultiDevice)
+        {
+            std::cout << "Support bufferDeviceAddressMultiDevice feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support bufferDeviceAddressMultiDevice feature" << std::endl;
+        }
     }
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};

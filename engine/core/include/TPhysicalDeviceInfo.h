@@ -52,6 +52,7 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
     VkPhysicalDeviceMeshShaderFeaturesNV meshShaderFeaturesNV;
 
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKHR;
+    VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR;
 
     std::vector<TLayerInfo> supportLayers;
     std::vector<TExtensionInfo> supportExtensions;

@@ -3238,3 +3238,12 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_device_group`扩展的函数。
   >* `./engine/core`下`TVulkanLoader.h`下增加`TInstanceFunctionTable`结构体并声明`TInstanceDriver`为`TInstanceFunctionTable`别名。
   >* `./engine/core`下`TVulkanLoader.h`下`TInstanceFunctionTable`结构体中增加`VK_KHR_device_group_creation`扩展的函数。
+
+* 2023/6/29 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddress`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddressCaptureReplay`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddressMultiDevice`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`EnumerateProperties()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`下的`TPhysicalDeviceInfo`类中增加对`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR`成员变量。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。

@@ -49,6 +49,10 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
 
     bool logicOp = false;
 
+    bool bufferDeviceAddress = false;
+    bool bufferDeviceAddressCaptureReplay = false;
+    bool bufferDeviceAddressMultiDevice = false;
+
   public:
     virtual std::string ToString() override;
 };
