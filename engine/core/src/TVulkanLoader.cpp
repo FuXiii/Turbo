@@ -495,6 +495,28 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     return TVersion(1, 0, 0, 0);
 }
 
+Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TInstance *instance)
+{
+    Turbo::Core::TInstanceDriver instance_driver = {};
+
+    VkInstance vk_instance = instance->GetVkInstance();
+#if defined(VK_VERSION_1_0)
+    instance_driver.vkDestroyInstance = this->LoadInstanceFunction<PFN_vkDestroyInstance>(vk_instance, "vkDestroyInstance");
+    instance_driver.vkEnumeratePhysicalDevices = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDevices>(vk_instance, "vkEnumeratePhysicalDevices");
+    instance_driver.vkGetDeviceProcAddr = this->LoadInstanceFunction<PFN_vkGetDeviceProcAddr>(vk_instance, "vkGetDeviceProcAddr");
+#endif
+
+#if defined(VK_KHR_device_group_creation)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
+        {
+            instance_driver.vkEnumeratePhysicalDeviceGroupsKHR = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDeviceGroupsKHR>(vk_instance, "vkEnumeratePhysicalDeviceGroupsKHR");
+        }
+    }
+#endif
+}
+
 Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)
 {
     Turbo::Core::TPhysicalDeviceDriver physical_device_driver = {};
@@ -793,7 +815,6 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
             device_driver.vkWriteAccelerationStructuresPropertiesKHR = this->LoadDeviceFunction<PFN_vkWriteAccelerationStructuresPropertiesKHR>(device, "vkWriteAccelerationStructuresPropertiesKHR");
         }
     }
-
 #endif
 
 #if defined(VK_EXT_buffer_device_address)

@@ -162,6 +162,12 @@ extern VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences;
 
 struct TInstanceFunctionTable
 {
+#if defined(VK_VERSION_1_0)
+    VULKAN_INSTANCE_API VULKAN_CORE PFN_vkDestroyInstance vkDestroyInstance;
+    VULKAN_INSTANCE_API VULKAN_CORE PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+    VULKAN_INSTANCE_API VULKAN_CORE PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
+#endif
+
 #if defined(VK_KHR_device_group_creation) // FIXME:Core version
     VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkEnumeratePhysicalDeviceGroupsKHR vkEnumeratePhysicalDeviceGroupsKHR = nullptr;
 #endif
@@ -474,6 +480,7 @@ class TVulkanLoader : public TObject
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name);
 
+    TInstanceDriver LoadInstanceDriver(TInstance *instance);
     TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice);
     TDeviceDriver LoadDeviceDriver(TDevice *device);
 

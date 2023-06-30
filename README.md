@@ -3247,3 +3247,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPhysicalDevice.h`下的`EnumerateProperties()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。
   >* `./engine/core`下`TPhysicalDeviceInfo.h`下的`TPhysicalDeviceInfo`类中增加对`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR`成员变量。
   >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。
+
+* 2023/6/30 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TInstanceFunctionTable`结构体中，增加`Vulkan 1.0`的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中，增加`LoadInstanceDriver`成员函数。用于获取`instance`函数。
