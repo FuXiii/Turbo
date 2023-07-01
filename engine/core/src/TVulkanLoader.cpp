@@ -196,12 +196,22 @@ Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TIns
 {
     Turbo::Core::TInstanceDriver instance_driver = {};
 
+    Turbo::Core::TVersion instance_version = instance->GetVulkanVersion();
+
     VkInstance vk_instance = instance->GetVkInstance();
 #if defined(VK_VERSION_1_0)
     instance_driver.vkDestroyInstance = this->LoadInstanceFunction<PFN_vkDestroyInstance>(vk_instance, "vkDestroyInstance");
     instance_driver.vkEnumeratePhysicalDevices = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDevices>(vk_instance, "vkEnumeratePhysicalDevices");
     instance_driver.vkGetDeviceProcAddr = this->LoadInstanceFunction<PFN_vkGetDeviceProcAddr>(vk_instance, "vkGetDeviceProcAddr");
 #endif
+
+    Turbo::Core::TVersion vulkan_version_1_1 = Turbo::Core::TVersion(1, 1, 0, 0);
+    if (instance_version >= vulkan_version_1_1)
+    {
+#if defined(VK_VERSION_1_1)
+        instance_driver.vkEnumeratePhysicalDeviceGroups = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDeviceGroups>(vk_instance, "vkEnumeratePhysicalDeviceGroups");
+#endif
+    }
 
 #if defined(VK_KHR_device_group_creation)
     if (instance->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
@@ -311,15 +321,6 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
         if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
         {
             physical_device_driver.vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR");
-        }
-    }
-#endif
-#if defined(VK_EXT_tooling_info)
-    if (instance->IsEnabledExtension(TExtensionType::VK_EXT_TOOLING_INFO))
-    {
-        if (instance->IsSupportExtension(TExtensionType::VK_EXT_TOOLING_INFO))
-        {
-            physical_device_driver.vkGetPhysicalDeviceToolPropertiesEXT = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceToolPropertiesEXT>(vk_instance, "vkGetPhysicalDeviceToolPropertiesEXT");
         }
     }
 #endif
@@ -587,6 +588,16 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
                 }
             }
 #endif
+        }
+    }
+#endif
+
+#if defined(VK_EXT_tooling_info)
+    if (device->IsEnabledExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+        {
+            device_driver.vkGetPhysicalDeviceToolPropertiesEXT = this->LoadDeviceFunction<PFN_vkGetPhysicalDeviceToolPropertiesEXT>(device, "vkGetPhysicalDeviceToolPropertiesEXT");
         }
     }
 #endif

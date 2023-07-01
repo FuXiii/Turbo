@@ -3270,3 +3270,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`InternalCreate`中`vkEnumeratePhysicalDevices`函数使用`Turbo::Core::GetInstanceDriver`中的`vkEnumeratePhysicalDevices`函数
   >* `./engine/core`下`TVmaAllocator.h`下`TVmaAllocator`类中`InternalCreate`中`vkGetDeviceProcAddr`函数使用`Turbo::Core::TInstanceDriver`中的`vkGetDeviceProcAddr`函数
   >* `./docs`下`FAQ.md`下`Could Not find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR)`更新最新确切的解决方法。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TInstanceFunctionTable`结构体中，增加`PFN_vkEnumeratePhysicalDeviceGroups vkEnumeratePhysicalDeviceGroups`的函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中`VK_EXT_tooling_info`先关函数转移至`TDeviceFunctionTable`中并获取。
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`void InspectExtensionAndVersionDependencies(TExtensionType extensionType)`成员函数。使用递归的方式检查依赖。并在`InternalCreate()`进行调用。
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数

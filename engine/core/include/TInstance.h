@@ -41,6 +41,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
     virtual TPhysicalDevice *RemoveChildHandle(TPhysicalDevice *physicalDevice);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
+    virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
 
   public:
     static bool IsSupportVulkan();
@@ -84,6 +85,9 @@ class TInstance : public Turbo::Core::TVulkanHandle
     TPhysicalDevice *GetBestPhysicalDevice();
 
     const TInstanceDriver *GetInstanceDriver();
+
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
+
 
 
     virtual std::string ToString() override;

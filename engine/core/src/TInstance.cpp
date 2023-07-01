@@ -140,6 +140,9 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
 {
     VkResult result = VkResult::VK_NOT_READY;
 
+    this->supportLayers = TLayerInfo::GetInstanceLayers();
+    this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
+
     if (vulkanVersion != nullptr || enabledLayers != nullptr || enabledExtensions != nullptr)
     {
         if (vulkanVersion != nullptr)
@@ -168,9 +171,6 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
         this->vulkanVersion = TVersion(1, 0, 0, 0);
         this->InternalCreate();
     }
-
-    this->supportLayers = TLayerInfo::GetInstanceLayers();
-    this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
 
     uint32_t physical_device_count = 0;
     result = this->GetInstanceDriver()->vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
@@ -225,6 +225,67 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysica
     return nullptr;
 }
 
+void Turbo::Core::TInstance::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
+{
+    TVersion vulkan_version = this->GetVulkanVersion().GetValidVulkanVersion();
+
+    switch (extensionType)
+    {
+    case TExtensionType::UNDEFINED: {
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2: {
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+            {
+                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES))
+            {
+                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+            {
+                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES));
+            }
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (vulkan_version < TVersion(1, 1, 0, 0))
+        {
+            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+            {
+                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES));
+            }
+        }
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+}
+
 void Turbo::Core::TInstance::InternalCreate()
 {
     TVulkanLoader::Instance();
@@ -234,6 +295,11 @@ void Turbo::Core::TInstance::InternalCreate()
     for (uint32_t enable_layer_index = 0; enable_layer_index < enable_layer_count; enable_layer_index++)
     {
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
+    }
+
+    for (Turbo::Core::TExtensionInfo &extension_item : this->enabledExtensions)
+    {
+        this->InspectExtensionAndVersionDependencies(extension_item.GetExtensionType());
     }
 
     size_t enable_extension_count = this->enabledExtensions.size();
@@ -463,4 +529,19 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetBestPhysicalDevice()
 const Turbo::Core::TInstanceDriver *Turbo::Core::TInstance::GetInstanceDriver()
 {
     return this->instanceDriver;
+}
+
+Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType)
+{
+    TExtensionInfo result;
+    for (TExtensionInfo &type_item : this->supportExtensions)
+    {
+        if (type_item.GetExtensionType() == extensionType)
+        {
+            result = type_item;
+            break;
+        }
+    }
+
+    return result;
 }
