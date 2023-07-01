@@ -412,11 +412,13 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
 {
     // this->vkPhysicalDevice=xxx 获取物理设备句柄
     uint32_t physical_device_count = 0;
-    Turbo::Core::vkEnumeratePhysicalDevices(this->instance->GetVkInstance(), &physical_device_count, nullptr);
+
+    PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices = this->GetInstance()->GetInstanceDriver()->vkEnumeratePhysicalDevices;
+    vk_enumerate_physical_devices(this->instance->GetVkInstance(), &physical_device_count, nullptr);
 
     std::vector<VkPhysicalDevice> vk_physical_devices;
     vk_physical_devices.resize(physical_device_count);
-    Turbo::Core::vkEnumeratePhysicalDevices(this->instance->GetVkInstance(), &physical_device_count, vk_physical_devices.data());
+    vk_enumerate_physical_devices(this->instance->GetVkInstance(), &physical_device_count, vk_physical_devices.data());
 
     this->vkPhysicalDevice = vk_physical_devices[this->index];
 

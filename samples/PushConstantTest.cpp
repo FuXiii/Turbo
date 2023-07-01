@@ -87,7 +87,7 @@ void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool 
     subres.mipLevel = 0;
     subres.arrayLayer = 0;
     VkSubresourceLayout sr_layout;
-    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+    image->GetDevice()->GetDeviceDriver()->vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
 
     char *ptr = (char *)temp_image->Map();
 
@@ -711,8 +711,8 @@ int main()
                 // Push Constant
                 VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
                 VkPipelineLayout vk_pipeline_layout = pipeline->GetPipelineLayout()->GetVkPipelineLayout();
-                // 如下Turbo::Core::vkCmdPushConstants(...)代码等价于：command_buffer->CmdPushConstants(...)
-                Turbo::Core::vkCmdPushConstants(vk_command_buffer, vk_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PUSH_CONSTANT_DATA), &PUSH_CONSTANT_DATA);
+                // 如下GetDeviceDriver()->vkCmdPushConstants等价于：command_buffer->CmdPushConstants(...)
+                command_buffer->GetCommandBufferPool()->GetDeviceQueue()->GetDevice()->GetDeviceDriver()->vkCmdPushConstants(vk_command_buffer, vk_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PUSH_CONSTANT_DATA), &PUSH_CONSTANT_DATA);
             }
 
             command_buffer->CmdBindPipeline(pipeline);

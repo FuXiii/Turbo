@@ -19,7 +19,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
 
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::vkGetInstanceProcAddr;
-    vulkanFunctions.vkGetDeviceProcAddr = Turbo::Core::vkGetDeviceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo vma_allocator_create_info = {};
     vma_allocator_create_info.instance = instance->GetVkInstance();

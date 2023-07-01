@@ -173,7 +173,7 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
 
     uint32_t physical_device_count = 0;
-    result = Turbo::Core::vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
+    result = this->GetInstanceDriver()->vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS || physical_device_count == 0)
     {
         return result;
@@ -270,10 +270,11 @@ void Turbo::Core::TInstance::InternalCreate()
         throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::InternalCreate::vkCreateInstance");
     }
 
-    TVulkanLoader::Instance()->LoadAll(this);
-
     this->supportLayers = TLayerInfo::GetInstanceLayers();
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
+
+    this->instanceDriver = new TInstanceDriver();
+    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
 
     for (TPhysicalDevice *physical_device_item : this->physicalDevices)
     {
@@ -294,8 +295,9 @@ void Turbo::Core::TInstance::InternalDestroy()
     if (this->vkInstance != VK_NULL_HANDLE)
     {
         VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        Turbo::Core::vkDestroyInstance(this->vkInstance, allocator);
+        this->instanceDriver->vkDestroyInstance(this->vkInstance, allocator);
         this->vkInstance = VK_NULL_HANDLE;
+        delete this->instanceDriver;
     }
 }
 
@@ -456,4 +458,9 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetBestPhysicalDevice()
     }
 
     return this->physicalDevices[index];
+}
+
+const Turbo::Core::TInstanceDriver *Turbo::Core::TInstance::GetInstanceDriver()
+{
+    return this->instanceDriver;
 }

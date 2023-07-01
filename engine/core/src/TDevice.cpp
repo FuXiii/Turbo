@@ -1004,7 +1004,7 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_device_create_info.pEnabledFeatures = &vk_physical_device_features;
 
     VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = Turbo::Core::vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
+    VkResult result = this->GetPhysicalDevice()->GetPhysicalDeviceDriver()->vkCreateDevice(this->physicalDevice->GetVkPhysicalDevice(), &vk_device_create_info, allocator, &this->vkDevice);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");

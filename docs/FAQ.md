@@ -1,9 +1,8 @@
 # 常见问题
 
 * Could Not find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR)
-  * **`原因`**：可能刚安装`Vulkan SDK`，此时`CMake`没有更新相关环境
-  * **`解决方法`**：尝试重启电脑 或者 配置`CMake`中如图属性：
-    ![dsa](./images/FQA_CMakeCannotFindVulkan.png)
+  * **`原因`**：`cmake`的`find_package(Vulkan REQUIRED)`会去寻找`VULKAN_SDK`环境变量的值，如果没找到则会返回该错误。
+  * **`解决方法`**：在环境变量中设置`VULKAN_SDK`环境变量，其值为安装 `Vulkan SDK` 的 `{安装路径}/VulkanSDK/{安装的版本}`
 
 * Could Not find BASH (missing: BASH_EXECUTABLE)
   * **`原因`**：与`Could Not find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR)`问题类似，`CMake`中设置`BASH_EXECUTABLE`参数
@@ -16,10 +15,12 @@
   * **`解决方法`**：两种方法，随便使用其一即可，推荐方法`2`
     1. 根据`./README.md`中的`Build`章节中的第三方库的链接，将第三方库都下载下来，之后直接替换`./thirdparty`下的文件夹
     2. 在`clone`下来的`Turbo`目录下执行如下指令，将会自动下载对应第三方库
+
         ```Cmd
         git submodule init
         git submodule update
         ```
+
 * Expression: vector subscript out of range  
 
   ![FQA_VectorSubscriptOutOfRange](./images/FQA_VectorSubscriptOutOfRange.png)

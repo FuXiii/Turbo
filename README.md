@@ -3252,3 +3252,21 @@ Turbo是渲染引擎
   >
   >* `./engine/core`下`TVulkanLoader.h`下的`TInstanceFunctionTable`结构体中，增加`Vulkan 1.0`的函数。
   >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中，增加`LoadInstanceDriver`成员函数。用于获取`instance`函数。
+
+* 2023/7/1 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下增加`vkEnumerateInstanceVersion`的`Vulkan`全局函数，并在`TVulkanLoader`构造函数中获取。
+  >* `./engine/core`下`TVulkanLoader.h`下移除所有非`Vulkan`全局函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类的`Load`函数增加`PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr`形参。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`LoadDeviceFunction(TInstance *instance, const char *name)`成员函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`LoadDeviceFunction(VkInstance instance, const char *name)`成员函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中`LoadDeviceFunction(VkDevice device, const char *name)`成员函数增加`PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr`形参
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAllInstanceFunctions(TInstance *instance)`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAllDeviceFunctions(TInstance *instance)`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAll(TInstance *instance)`成员函数
+  >* `./engine/core`下`TInstance.h`下`TInstance`类中增加`TInstanceDriver *instanceDriver = nullptr`成员变量，并在`InternalCreate`成员函数中分配获取，在`InternalDestroy`中回收
+  >* `./engine/core`下`TInstance.h`下`TInstance`类中增加`const TInstanceDriver *GetInstanceDriver()`成员函数
+  >* `./engine/core`下`TDevice.h`下`TDevice`类中`InternalCreate`中`vkCreateDevice`函数使用`Turbo::Core::TPhysicalDeviceDriver`中的`vkCreateDevice`创建
+  >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`InternalCreate`中`vkEnumeratePhysicalDevices`函数使用`Turbo::Core::GetInstanceDriver`中的`vkEnumeratePhysicalDevices`函数
+  >* `./engine/core`下`TVmaAllocator.h`下`TVmaAllocator`类中`InternalCreate`中`vkGetDeviceProcAddr`函数使用`Turbo::Core::TInstanceDriver`中的`vkGetDeviceProcAddr`函数
+  >* `./docs`下`FAQ.md`下`Could Not find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR)`更新最新确切的解决方法。

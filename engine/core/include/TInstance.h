@@ -12,6 +12,9 @@ namespace Core
 class TDevice;
 class TPhysicalDevice;
 
+struct TInstanceFunctionTable;
+using TInstanceDriver = TInstanceFunctionTable;
+
 class TInstance : public Turbo::Core::TVulkanHandle
 {
   public:
@@ -30,6 +33,8 @@ class TInstance : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_REFRESH_DATA std::vector<TLayerInfo> supportLayers;
     T_VULKAN_HANDLE_REFRESH_DATA std::vector<TExtensionInfo> supportExtensions;
 
+    TInstanceDriver *instanceDriver = nullptr;
+
   protected:
     bool IsHaveHandle(TPhysicalDevice *physicalDevice);
     virtual void AddChildHandle(TPhysicalDevice *physicalDevice);
@@ -46,7 +51,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
 
   public:
     explicit TInstance(std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TVersion *vulkanVersion = nullptr);
-    //explicit TInstance(const TInstance &instance) = delete;
+    // explicit TInstance(const TInstance &instance) = delete;
     ~TInstance();
 
   public:
@@ -77,6 +82,9 @@ class TInstance : public Turbo::Core::TVulkanHandle
     TPhysicalDevice *GetPhysicalDevice(uint32_t index);
     const std::vector<TPhysicalDevice *> &GetPhysicalDevices();
     TPhysicalDevice *GetBestPhysicalDevice();
+
+    const TInstanceDriver *GetInstanceDriver();
+
 
     virtual std::string ToString() override;
 };
