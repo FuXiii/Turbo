@@ -456,6 +456,15 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     device_driver.vkWaitForFences = this->LoadDeviceFunction<PFN_vkWaitForFences>(device, "vkWaitForFences");
 #endif
 
+#if defined(VK_VERSION_1_2)
+    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
+    {
+        device_driver.vkGetBufferDeviceAddress = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddress>(device, "vkGetBufferDeviceAddress");
+        device_driver.vkGetBufferOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddress>(device, "vkGetBufferOpaqueCaptureAddress");
+        device_driver.vkGetDeviceMemoryOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddress>(device, "vkGetDeviceMemoryOpaqueCaptureAddress");
+    }
+#endif
+
 #if defined(VK_VERSION_1_3)
     // FIXME: Determine the version of Vulkan version
     // TODO: add the Extension version function of VK_KHR_dynamic_rendering
@@ -535,14 +544,6 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
             device_driver.vkGetBufferOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddressKHR>(device, "vkGetBufferOpaqueCaptureAddressKHR");
             device_driver.vkGetDeviceMemoryOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR>(device, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
         }
-    }
-#endif
-#if defined(VK_VERSION_1_2)
-    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
-    {
-        device_driver.vkGetBufferDeviceAddress = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddress>(device, "vkGetBufferDeviceAddress");
-        device_driver.vkGetBufferOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddress>(device, "vkGetBufferOpaqueCaptureAddress");
-        device_driver.vkGetDeviceMemoryOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddress>(device, "vkGetDeviceMemoryOpaqueCaptureAddress");
     }
 #endif
 

@@ -227,56 +227,42 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysica
 
 void Turbo::Core::TInstance::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
 {
-    TVersion vulkan_version = this->GetVulkanVersion().GetValidVulkanVersion();
-
     switch (extensionType)
     {
     case TExtensionType::UNDEFINED: {
     }
     break;
     case TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
-            {
-                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
-            }
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
         }
     }
     break;
     case TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES))
-            {
-                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES));
-            }
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES));
         }
     }
     break;
     case TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
-            {
-                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES));
-            }
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES));
         }
     }
     break;
     case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
-            {
-                this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES));
-            }
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES));
         }
     }
     break;

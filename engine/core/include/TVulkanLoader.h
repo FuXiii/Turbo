@@ -214,6 +214,13 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences = nullptr;
 #endif
 
+#if defined(VK_VERSION_1_2)
+    //  TODO: VkPhysicalDeviceBufferDeviceAddressFeatures
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferOpaqueCaptureAddress vkGetBufferOpaqueCaptureAddress = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceMemoryOpaqueCaptureAddress vkGetDeviceMemoryOpaqueCaptureAddress = nullptr;
+#endif
+
 #if defined(VK_VERSION_1_3)
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdBeginRendering vkCmdBeginRendering = nullptr;
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdEndRendering vkCmdEndRendering = nullptr;
@@ -260,12 +267,6 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetBufferOpaqueCaptureAddressKHR vkGetBufferOpaqueCaptureAddressKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR vkGetDeviceMemoryOpaqueCaptureAddressKHR = nullptr;
-#endif
-#if defined(VK_VERSION_1_2)
-    //  TODO: VkPhysicalDeviceBufferDeviceAddressFeatures
-    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
-    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferOpaqueCaptureAddress vkGetBufferOpaqueCaptureAddress = nullptr;
-    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceMemoryOpaqueCaptureAddress vkGetDeviceMemoryOpaqueCaptureAddress = nullptr;
 #endif
 
 #if defined(VK_KHR_device_group)

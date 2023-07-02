@@ -63,8 +63,6 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue 
 
 void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
 {
-    TVersion vulkan_version = this->physicalDevice->GetInstance()->GetVulkanVersion().GetValidVulkanVersion();
-
     switch (extensionType)
     {
     case TExtensionType::UNDEFINED: {
@@ -86,12 +84,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS));
         }
     }
     break;
@@ -102,12 +97,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MULTIVIEW);
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE2);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_CREATE_RENDERPASS2))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_CREATE_RENDERPASS2))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_CREATE_RENDERPASS2));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_CREATE_RENDERPASS2));
         }
     }
     break;
@@ -124,12 +116,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     case TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_CREATE_RENDERPASS2);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE));
         }
     }
     break;
@@ -139,12 +128,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     case TExtensionType::VK_KHR_DEVICE_GROUP: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEVICE_GROUP));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DEVICE_GROUP));
         }
     }
     break;
@@ -226,36 +212,27 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_MAINTENANCE2: {
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE2))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE2))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE2));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE2));
         }
     }
     break;
     case TExtensionType::VK_KHR_MAINTENANCE3: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE3))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE3))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE3));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MAINTENANCE3));
         }
     }
     break;
     case TExtensionType::VK_KHR_MULTIVIEW: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 1, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MULTIVIEW))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_MULTIVIEW))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MULTIVIEW));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_MULTIVIEW));
         }
     }
     break;
@@ -304,12 +281,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     case TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS));
         }
     }
     break;
@@ -325,12 +299,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     case TExtensionType::VK_KHR_SPIRV_1_4: {
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SHADER_FLOAT_CONTROLS);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SPIRV_1_4))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SPIRV_1_4));
         }
     }
     break;
@@ -428,12 +399,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_MAINTENANCE3);
 
-        if (vulkan_version < TVersion(1, 2, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_EXT_DESCRIPTOR_INDEXING));
         }
     }
     break;
@@ -822,12 +790,9 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_DEPTH_STENCIL_RESOLVE);
         this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
 
-        if (vulkan_version < TVersion(1, 3, 0, 0))
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DYNAMIC_RENDERING))
         {
-            if (!this->IsEnabledExtension(TExtensionType::VK_KHR_DYNAMIC_RENDERING))
-            {
-                this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DYNAMIC_RENDERING));
-            }
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_DYNAMIC_RENDERING));
         }
     }
     break;
