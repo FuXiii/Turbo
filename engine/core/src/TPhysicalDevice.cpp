@@ -213,22 +213,26 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     if (this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2 != nullptr)
     {
         this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2(this->vkPhysicalDevice, &vk_physical_device_features2);
-
-        this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
-        this->info.vulkan11Feature.pNext = nullptr;
-        this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
-        this->info.vulkan12Feature.pNext = nullptr;
-        this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
-        this->info.vulkan13Feature.pNext = nullptr;
-        this->info.meshShaderFeaturesEXT = vk_physical_device_mesh_shader_features_ext;
-        this->info.meshShaderFeaturesEXT.pNext = nullptr;
-        this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
-        this->info.meshShaderFeaturesNV.pNext = nullptr;
-        this->info.accelerationStructureFeaturesKHR = vk_physical_device_acceleration_structure_features_khr;
-        this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
-        this->info.physicalDeviceBufferDeviceAddressFeaturesKHR = vk_physical_device_buffer_device_address_features_khr;
-        this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
     }
+    else if (this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2KHR != nullptr)
+    {
+        this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2KHR(this->vkPhysicalDevice, &vk_physical_device_features2);
+    }
+
+    this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
+    this->info.vulkan11Feature.pNext = nullptr;
+    this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
+    this->info.vulkan12Feature.pNext = nullptr;
+    this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
+    this->info.vulkan13Feature.pNext = nullptr;
+    this->info.meshShaderFeaturesEXT = vk_physical_device_mesh_shader_features_ext;
+    this->info.meshShaderFeaturesEXT.pNext = nullptr;
+    this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
+    this->info.meshShaderFeaturesNV.pNext = nullptr;
+    this->info.accelerationStructureFeaturesKHR = vk_physical_device_acceleration_structure_features_khr;
+    this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
+    this->info.physicalDeviceBufferDeviceAddressFeaturesKHR = vk_physical_device_buffer_device_address_features_khr;
+    this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()

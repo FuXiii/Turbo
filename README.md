@@ -3274,3 +3274,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中`VK_EXT_tooling_info`先关函数转移至`TDeviceFunctionTable`中并获取。
   >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`void InspectExtensionAndVersionDependencies(TExtensionType extensionType)`成员函数。使用递归的方式检查依赖。并在`InternalCreate()`进行调用。
   >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数
+
+* 2023/7/2 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对`vkGetPhysicalDeviceFeatures2KHR`函数的判断和使用。
