@@ -3293,6 +3293,8 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkDestroyDeferredOperationKHR vkDestroyDeferredOperationKHR`成员函数并获取
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationMaxConcurrencyKHR vkGetDeferredOperationMaxConcurrencyKHR`成员函数并获取
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationResultKHR vkGetDeferredOperationResultKHR`成员函数并获取
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
 
 
 

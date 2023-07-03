@@ -854,9 +854,9 @@ void Turbo::Core::TDevice::InternalCreate()
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
     }
 
-    for (Turbo::Core::TExtensionInfo &extension_item : this->enabledExtensions)
+    for (uint32_t enabled_extensions_index = 0; enabled_extensions_index < this->enabledExtensions.size(); enabled_extensions_index++)
     {
-        this->InspectExtensionAndVersionDependencies(extension_item.GetExtensionType());
+        this->InspectExtensionAndVersionDependencies(this->enabledExtensions[enabled_extensions_index].GetExtensionType());
     }
 
     size_t enable_extension_count = this->enabledExtensions.size();
