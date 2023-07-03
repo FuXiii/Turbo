@@ -898,9 +898,17 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
     // for Extensions feature...
+
+    VkPhysicalDeviceBufferDeviceAddressFeaturesKHR vk_physical_device_buffer_device_address_features_khr = {};
+    vk_physical_device_buffer_device_address_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
+    vk_physical_device_buffer_device_address_features_khr.pNext = nullptr;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddress = this->enabledFeatures.bufferDeviceAddress ? VK_TRUE : VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressCaptureReplay = this->enabledFeatures.bufferDeviceAddressCaptureReplay ? VK_TRUE : VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressMultiDevice = this->enabledFeatures.bufferDeviceAddressMultiDevice ? VK_TRUE : VK_FALSE;
+
     VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
     vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-    vk_physical_device_acceleration_structure_features_khr.pNext = nullptr;
+    vk_physical_device_acceleration_structure_features_khr.pNext = &vk_physical_device_buffer_device_address_features_khr;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructure = this->enabledFeatures.accelerationStructure ? VK_TRUE : VK_FALSE;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = this->enabledFeatures.accelerationStructureCaptureReplay ? VK_TRUE : VK_FALSE;
     vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = this->enabledFeatures.accelerationStructureIndirectBuild ? VK_TRUE : VK_FALSE;

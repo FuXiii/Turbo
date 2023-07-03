@@ -361,7 +361,9 @@ int main()
 
             Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
             Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
             command_buffer->CmdCopyBuffer(staging_vertex_buffer, device_local_vertex_buffer, 0, 0, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
+            command_buffer->End();
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
             queue->Submit(nullptr, nullptr, command_buffer, fence);
             fence->WaitUntil();

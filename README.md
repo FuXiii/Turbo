@@ -3295,6 +3295,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationResultKHR vkGetDeferredOperationResultKHR`成员函数并获取
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
   >* `./engine/core`下`TInstance.h`下的`TInstance`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
-
-
-
+  >* `./engine/core`下`TVmaAllocator.h`下的`TVmaAllocator`类中`InternalCreate`成员函数中，增加对于`VmaAllocatorCreateInfo::flags`的使用（如果要使用`buffer device address`的特性，需要开启`VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT`标志位）
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，增加对于`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR`的使用激活设置
+  >* `./docs/Design`下增加`ForVulkanFeatureNote.md`文档用于记录开发`Vulkan`特性的流程
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的设备内存地址获取
