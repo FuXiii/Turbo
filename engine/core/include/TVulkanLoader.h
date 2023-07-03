@@ -214,6 +214,13 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkWaitForFences vkWaitForFences = nullptr;
 #endif
 
+#if defined(VK_VERSION_1_1)
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdDispatchBase vkCmdDispatchBase = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkCmdSetDeviceMask vkCmdSetDeviceMask = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDeviceGroupPeerMemoryFeatures vkGetDeviceGroupPeerMemoryFeatures = nullptr;
+    VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupport = nullptr;
+#endif
+
 #if defined(VK_VERSION_1_2)
     //  TODO: VkPhysicalDeviceBufferDeviceAddressFeatures
     VULKAN_DEVICE_API VULKAN_CORE PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
@@ -273,20 +280,31 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdDispatchBaseKHR vkCmdDispatchBaseKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdSetDeviceMaskKHR vkCmdSetDeviceMaskKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupPeerMemoryFeaturesKHR vkGetDeviceGroupPeerMemoryFeaturesKHR = nullptr;
+#endif
+
 #if defined(VK_KHR_surface)
-    // TODO: If VK_KHR_surface is supported:
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupPresentCapabilitiesKHR vkGetDeviceGroupPresentCapabilitiesKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceGroupSurfacePresentModesKHR vkGetDeviceGroupSurfacePresentModesKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDevicePresentRectanglesKHR vkGetPhysicalDevicePresentRectanglesKHR = nullptr;
 #endif
 #if defined(VK_KHR_swapchain)
-    // TODO: If VK_KHR_swapchain is supported:
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkAcquireNextImage2KHR vkAcquireNextImage2KHR = nullptr;
-#endif
 #endif
 
 #if defined(VK_EXT_tooling_info)
     VULKAN_PHYSICAL_DEVICE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceToolPropertiesEXT vkGetPhysicalDeviceToolPropertiesEXT = nullptr;
+#endif
+
+#if defined(VK_KHR_maintenance3)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupportKHR = nullptr;
+#endif
+
+#if defined(VK_KHR_deferred_host_operations)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCreateDeferredOperationKHR vkCreateDeferredOperationKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkDeferredOperationJoinKHR vkDeferredOperationJoinKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkDestroyDeferredOperationKHR vkDestroyDeferredOperationKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeferredOperationMaxConcurrencyKHR vkGetDeferredOperationMaxConcurrencyKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeferredOperationResultKHR vkGetDeferredOperationResultKHR = nullptr;
 #endif
 
     // FIXME:VK_KHR_swapchain

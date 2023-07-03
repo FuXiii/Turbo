@@ -3280,3 +3280,19 @@ Turbo是渲染引擎
   >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中，增加对`vkGetPhysicalDeviceFeatures2KHR`函数的判断和使用。
   >* `./engine/core`下`TDevice.h`下`TDevice`类中`InspectExtensionAndVersionDependencies()`成员函数中，移除对于扩展的`Vulkan`版本限制，对于扩展不应该使用版本限制。
   >* `./engine/core`下`TInstance.h`下`TInstance`类中`InspectExtensionAndVersionDependencies()`成员函数中，移除对于扩展的`Vulkan`版本限制，对于扩展不应该使用版本限制。
+
+* 2023/7/3 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCmdDispatchBase vkCmdDispatchBase`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCmdSetDeviceMask vkCmdSetDeviceMask`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeviceGroupPeerMemoryFeatures vkGetDeviceGroupPeerMemoryFeatures`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupportKHR`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupport`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCreateDeferredOperationKHR vkCreateDeferredOperationKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkDeferredOperationJoinKHR vkDeferredOperationJoinKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkDestroyDeferredOperationKHR vkDestroyDeferredOperationKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationMaxConcurrencyKHR vkGetDeferredOperationMaxConcurrencyKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationResultKHR vkGetDeferredOperationResultKHR`成员函数并获取
+
+
+

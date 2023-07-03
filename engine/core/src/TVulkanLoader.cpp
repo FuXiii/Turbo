@@ -456,6 +456,16 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     device_driver.vkWaitForFences = this->LoadDeviceFunction<PFN_vkWaitForFences>(device, "vkWaitForFences");
 #endif
 
+#if defined(VK_VERSION_1_1)
+    if (vulkan_version >= Turbo::Core::TVersion(1, 1, 0, 0))
+    {
+        device_driver.vkCmdDispatchBase = this->LoadDeviceFunction<PFN_vkCmdDispatchBase>(device, "vkCmdDispatchBase");
+        device_driver.vkCmdSetDeviceMask = this->LoadDeviceFunction<PFN_vkCmdSetDeviceMask>(device, "vkCmdSetDeviceMask");
+        device_driver.vkGetDeviceGroupPeerMemoryFeatures = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPeerMemoryFeatures>(device, "vkGetDeviceGroupPeerMemoryFeatures");
+        device_driver.vkGetDescriptorSetLayoutSupport = this->LoadDeviceFunction<PFN_vkGetDescriptorSetLayoutSupport>(device, "vkGetDescriptorSetLayoutSupport");
+    }
+#endif
+
 #if defined(VK_VERSION_1_2)
     if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
     {
@@ -560,7 +570,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
             {
                 if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SURFACE))
                 {
-                    // TODO: If VK_KHR_surface is supported:
+                    // NOTE: If VK_KHR_surface is supported:
                     if (device_driver.vkGetDeviceGroupPresentCapabilitiesKHR == nullptr)
                     {
                         device_driver.vkGetDeviceGroupPresentCapabilitiesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPresentCapabilitiesKHR>(device, "vkGetDeviceGroupPresentCapabilitiesKHR");
@@ -581,7 +591,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
             {
                 if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SWAPCHAIN))
                 {
-                    // TODO: If VK_KHR_swapchain is supported:
+                    // NOTE: If VK_KHR_swapchain is supported:
                     if (device_driver.vkAcquireNextImage2KHR == nullptr)
                     {
                         device_driver.vkAcquireNextImage2KHR = this->LoadDeviceFunction<PFN_vkAcquireNextImage2KHR>(device, "vkAcquireNextImage2KHR");
@@ -599,6 +609,30 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
         if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_TOOLING_INFO))
         {
             device_driver.vkGetPhysicalDeviceToolPropertiesEXT = this->LoadDeviceFunction<PFN_vkGetPhysicalDeviceToolPropertiesEXT>(device, "vkGetPhysicalDeviceToolPropertiesEXT");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_maintenance3)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE3))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_MAINTENANCE3))
+        {
+            device_driver.vkGetDescriptorSetLayoutSupportKHR = this->LoadDeviceFunction<PFN_vkGetDescriptorSetLayoutSupportKHR>(device, "vkGetDescriptorSetLayoutSupportKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_deferred_host_operations)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS))
+        {
+            device_driver.vkCreateDeferredOperationKHR = this->LoadDeviceFunction<PFN_vkCreateDeferredOperationKHR>(device, "vkCreateDeferredOperationKHR");
+            device_driver.vkDeferredOperationJoinKHR = this->LoadDeviceFunction<PFN_vkDeferredOperationJoinKHR>(device, "vkDeferredOperationJoinKHR");
+            device_driver.vkDestroyDeferredOperationKHR = this->LoadDeviceFunction<PFN_vkDestroyDeferredOperationKHR>(device, "vkDestroyDeferredOperationKHR");
+            device_driver.vkGetDeferredOperationMaxConcurrencyKHR = this->LoadDeviceFunction<PFN_vkGetDeferredOperationMaxConcurrencyKHR>(device, "vkGetDeferredOperationMaxConcurrencyKHR");
+            device_driver.vkGetDeferredOperationResultKHR = this->LoadDeviceFunction<PFN_vkGetDeferredOperationResultKHR>(device, "vkGetDeferredOperationResultKHR");
         }
     }
 #endif
