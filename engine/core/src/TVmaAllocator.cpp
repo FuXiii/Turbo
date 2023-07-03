@@ -22,7 +22,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
 
     VmaAllocatorCreateFlags vma_allocator_create_flags = 0;
-    if (this->device->GetEnableDeviceFeatures().bufferDeviceAddress)
+    if (this->device->GetEnableDeviceFeatures().bufferDeviceAddress || vulkan_version >= Turbo::Core::TVersion(1, 3, 0, 0))
     {
         vma_allocator_create_flags |= VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     }
