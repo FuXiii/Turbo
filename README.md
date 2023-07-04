@@ -3299,3 +3299,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，增加对于`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR`的使用激活设置
   >* `./docs/Design`下增加`ForVulkanFeatureNote.md`文档用于记录开发`Vulkan`特性的流程
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的设备内存地址获取
+
+* 2023/7/4 设计架构
+  >
+  >* `./engine/core`下`TVmaAllocator.h`下的`TVmaAllocator`类中`InternalCreate`成员函数中，对于`VmaAllocatorCreateInfo::flags`的使用（在 `Vulkan 1.2` 标准之后被升级为核心标准）
