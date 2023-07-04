@@ -351,8 +351,45 @@ int main()
     Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
 
     const Turbo::Core::TDeviceDriver *device_driver = device->GetDeviceDriver();
+    const Turbo::Core::TPhysicalDeviceDriver *physical_device_driver = physical_device->GetPhysicalDeviceDriver();
 
     {
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR vk_physical_device_acceleration_structure_properties_khr = {};
+        vk_physical_device_acceleration_structure_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+        vk_physical_device_acceleration_structure_properties_khr.pNext = nullptr;
+        vk_physical_device_acceleration_structure_properties_khr.maxGeometryCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxInstanceCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPrimitiveCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorUpdateAfterBindAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment = 0;
+
+        VkPhysicalDeviceProperties2 vk_physical_device_properties_2 = {};
+        vk_physical_device_properties_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        vk_physical_device_properties_2.pNext = &vk_physical_device_acceleration_structure_properties_khr;
+        vk_physical_device_properties_2.properties = {};
+
+        if (physical_device_driver->vkGetPhysicalDeviceProperties2 != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+        else if (physical_device_driver->vkGetPhysicalDeviceProperties2KHR != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2KHR(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxGeometryCount = " << vk_physical_device_acceleration_structure_properties_khr.maxGeometryCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxInstanceCount = " << vk_physical_device_acceleration_structure_properties_khr.maxInstanceCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPrimitiveCount = " << vk_physical_device_acceleration_structure_properties_khr.maxPrimitiveCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPerStageDescriptorAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPerStageDescriptorUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorUpdateAfterBindAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.minAccelerationStructureScratchOffsetAlignment = " << vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment << std::endl;
+
+        // Turbo::Core::TBuffer *device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
         Turbo::Core::TBuffer *device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
         {
             Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
@@ -400,17 +437,20 @@ int main()
         }
 
         VkDeviceOrHostAddressConstKHR vertex_data = {};
+        vertex_data.deviceAddress = device_address;
+
+        VkTransformMatrixKHR vk_transform_matrix_khr = {};
 
         VkAccelerationStructureGeometryTrianglesDataKHR vk_acceleration_structure_geometry_triangles_data_khr = {};
         vk_acceleration_structure_geometry_triangles_data_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
         vk_acceleration_structure_geometry_triangles_data_khr.pNext = nullptr;
         vk_acceleration_structure_geometry_triangles_data_khr.vertexFormat = VkFormat::VK_FORMAT_R32G32B32_SFLOAT;
-        vk_acceleration_structure_geometry_triangles_data_khr.vertexData;
-        vk_acceleration_structure_geometry_triangles_data_khr.vertexStride;
-        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex;
-        vk_acceleration_structure_geometry_triangles_data_khr.indexType;
-        vk_acceleration_structure_geometry_triangles_data_khr.indexData;
-        vk_acceleration_structure_geometry_triangles_data_khr.transformData;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexData = vertex_data;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexStride = sizeof(POSITION_AND_COLOR);
+        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex = POSITION_AND_COLOR_DATA.size();
+        vk_acceleration_structure_geometry_triangles_data_khr.indexType = VkIndexType::VK_INDEX_TYPE_NONE_KHR;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexData.deviceAddress = 0;
+        vk_acceleration_structure_geometry_triangles_data_khr.transformData.deviceAddress = 0;
 
         VkAccelerationStructureGeometryDataKHR vk_acceleration_structure_geometry_data_khr = {};
         vk_acceleration_structure_geometry_data_khr.triangles = vk_acceleration_structure_geometry_triangles_data_khr;
@@ -418,7 +458,7 @@ int main()
         VkAccelerationStructureGeometryKHR vk_acceleration_structure_geometry_khr = {};
         vk_acceleration_structure_geometry_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
         vk_acceleration_structure_geometry_khr.pNext = nullptr;
-        vk_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR ::VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+        vk_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR::VK_GEOMETRY_TYPE_TRIANGLES_KHR;
         vk_acceleration_structure_geometry_khr.geometry = vk_acceleration_structure_geometry_data_khr;
         vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_OPAQUE_BIT_KHR;
 
@@ -429,11 +469,38 @@ int main()
         vk_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
         vk_acceleration_structure_build_geometry_info_khr.mode = VkBuildAccelerationStructureModeKHR::VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
         vk_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = VK_NULL_HANDLE;
-        vk_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure;
-        vk_acceleration_structure_build_geometry_info_khr.geometryCount;
-        vk_acceleration_structure_build_geometry_info_khr.pGeometries;
-        vk_acceleration_structure_build_geometry_info_khr.ppGeometries;
-        vk_acceleration_structure_build_geometry_info_khr.scratchData;
+        vk_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = VK_NULL_HANDLE;
+        vk_acceleration_structure_build_geometry_info_khr.geometryCount = 1;
+        vk_acceleration_structure_build_geometry_info_khr.pGeometries = &vk_acceleration_structure_geometry_khr;
+        vk_acceleration_structure_build_geometry_info_khr.ppGeometries = nullptr;
+        vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = 0;
+
+        VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
+        vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_AND_COLOR_DATA.size() / 3;
+        vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
+        vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
+        vk_acceleration_structure_build_range_info_khr.transformOffset = 0;
+
+        std::vector<uint32_t> max_primitive_counts(vk_acceleration_structure_build_geometry_info_khr.geometryCount);
+        for (uint32_t index = 0; index < vk_acceleration_structure_build_geometry_info_khr.geometryCount; index++)
+        {
+            max_primitive_counts[index] = vk_acceleration_structure_build_range_info_khr.primitiveCount;
+        }
+
+        VkAccelerationStructureBuildSizesInfoKHR vk_acceleration_structure_build_sizes_info_khr = {};
+        vk_acceleration_structure_build_sizes_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+        vk_acceleration_structure_build_sizes_info_khr.pNext = nullptr;
+        vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize = 0;
+        vk_acceleration_structure_build_sizes_info_khr.updateScratchSize = 0;
+        vk_acceleration_structure_build_sizes_info_khr.buildScratchSize = 0;
+        if (device_driver->vkGetAccelerationStructureBuildSizesKHR != nullptr)
+        {
+            device_driver->vkGetAccelerationStructureBuildSizesKHR(device->GetVkDevice(), VkAccelerationStructureBuildTypeKHR::VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &vk_acceleration_structure_build_geometry_info_khr, max_primitive_counts.data(), &vk_acceleration_structure_build_sizes_info_khr);
+        }
+
+        std::cout << "VkAccelerationStructureBuildSizesInfoKHR.accelerationStructureSize = " << vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize << std::endl;
+        std::cout << "VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
+        std::cout << "VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
 
         // create acceleration structure
         VkDevice vk_device = device->GetVkDevice();
