@@ -3305,3 +3305,7 @@ Turbo是渲染引擎
   >* `./engine/core`下`TVmaAllocator.h`下的`TVmaAllocator`类中`InternalCreate`成员函数中，对于`VmaAllocatorCreateInfo::flags`的使用（在 `Vulkan 1.2` 标准之后被升级为核心标准）
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的加速结构
 
+* 2023/7/5 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的加速结构，成功创建一个底层加速结构
+

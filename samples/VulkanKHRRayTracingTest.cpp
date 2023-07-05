@@ -247,17 +247,6 @@ int main()
     Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
-    if (!glfwInit())
-        return -1;
-    GLFWwindow *window;
-    int window_width = 500;
-    int window_height = 500;
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
-    VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
-    VkInstance vk_instance = instance->GetVkInstance();
-    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
-
     Turbo::Core::TPhysicalDeviceFeatures physical_device_support_features = physical_device->GetDeviceFeatures();
     {
         if (physical_device_support_features.accelerationStructure)
@@ -323,6 +312,24 @@ int main()
             std::cout << "Not support bufferDeviceAddressMultiDevice feature" << std::endl;
         }
     }
+
+    if (!physical_device_support_features.accelerationStructure)
+    {
+        delete instance;
+        std::cout << "Please use a GPU which support hardware real-time ray tracing" << std::endl;
+        return 0;
+    }
+
+    if (!glfwInit())
+        return -1;
+    GLFWwindow *window;
+    int window_width = 500;
+    int window_height = 500;
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
+    VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
+    VkInstance vk_instance = instance->GetVkInstance();
+    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
     physical_device_features.sampleRateShading = true;
@@ -475,16 +482,10 @@ int main()
         vk_acceleration_structure_build_geometry_info_khr.ppGeometries = nullptr;
         vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = 0;
 
-        VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
-        vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_AND_COLOR_DATA.size() / 3;
-        vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
-        vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
-        vk_acceleration_structure_build_range_info_khr.transformOffset = 0;
-
         std::vector<uint32_t> max_primitive_counts(vk_acceleration_structure_build_geometry_info_khr.geometryCount);
         for (uint32_t index = 0; index < vk_acceleration_structure_build_geometry_info_khr.geometryCount; index++)
         {
-            max_primitive_counts[index] = vk_acceleration_structure_build_range_info_khr.primitiveCount;
+            max_primitive_counts[index] = POSITION_AND_COLOR_DATA.size() / 3;
         }
 
         VkAccelerationStructureBuildSizesInfoKHR vk_acceleration_structure_build_sizes_info_khr = {};
@@ -502,23 +503,40 @@ int main()
         std::cout << "VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
         std::cout << "VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
 
+        Turbo::Core::TBuffer *acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
+
         // create acceleration structure
         VkDevice vk_device = device->GetVkDevice();
         VkAccelerationStructureCreateInfoKHR vk_acceleration_structure_create_info_khr = {};
         vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
         vk_acceleration_structure_create_info_khr.pNext = nullptr;
         vk_acceleration_structure_create_info_khr.createFlags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-        vk_acceleration_structure_create_info_khr.buffer = VK_NULL_HANDLE;                                                                // 将用于存储加速结构的缓存。大小一般可以为VkAccelerationStructureCreateInfoKHR::size，usage为VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR|VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT<由于之后创建顶层加速结构需要底层加速结构的地址，所以需要VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT>
+        vk_acceleration_structure_create_info_khr.buffer = acceleration_structure_buffer->GetVkBuffer();                                  // 将用于存储加速结构的缓存。大小一般可以为VkAccelerationStructureCreateInfoKHR::size，usage为VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR|VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT<由于之后创建顶层加速结构需要底层加速结构的地址，所以需要VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT>
         vk_acceleration_structure_create_info_khr.offset = 0;                                                                             // 单位比特，相对于buffer的偏移之后存储加速结构，需要是256的倍数。
-        vk_acceleration_structure_create_info_khr.size = 0;                                                                               // 该加速结构需要的大小。大小来源于vkGetAccelerationStructureBuildSizesKHR()函数中VkAccelerationStructureBuildSizesInfoKHR::accelerationStructureSize。
+        vk_acceleration_structure_create_info_khr.size = vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize;        // 该加速结构需要的大小。大小来源于vkGetAccelerationStructureBuildSizesKHR()函数中VkAccelerationStructureBuildSizesInfoKHR::accelerationStructureSize。
         vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR; // 加速结构的类型：TOP，BOTTOM，GENERIC
         vk_acceleration_structure_create_info_khr.deviceAddress = 0;                                                                      // 如果激活使用了accelerationStructureCaptureReplay特性，该地址为加速结构要求的那个设备地址。目前为VK_NULL_HANDLE
 
         VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
         VkAccelerationStructureKHR vk_acceleration_structure_khr = VK_NULL_HANDLE;
-        // VkResult result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &vk_acceleration_structure_khr);
+        VkResult result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &vk_acceleration_structure_khr);
+        if (result != VK_SUCCESS)
+        {
+            std::cout << "Create VkAccelerationStructureKHR Failed" << std::endl;
+        }
+
+        std::cout << "Create VkAccelerationStructureKHR Success" << std::endl;
+
+        device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, vk_acceleration_structure_khr, vk_allocation_callbacks);
+        delete acceleration_structure_buffer;
         delete device_local_vertex_buffer;
+
+        VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
+        vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_AND_COLOR_DATA.size() / 3;
+        vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
+        vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
+        vk_acceleration_structure_build_range_info_khr.transformOffset = 0;
     }
 
     Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
