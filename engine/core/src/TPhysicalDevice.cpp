@@ -159,10 +159,28 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // For Vulkan1.0
     this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
 
+    // For VK_KHR_buffer_device_address
+    VkPhysicalDeviceBufferDeviceAddressFeaturesKHR vk_physical_device_buffer_device_address_features_khr = {};
+    vk_physical_device_buffer_device_address_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
+    vk_physical_device_buffer_device_address_features_khr.pNext = nullptr;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddress = VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressCaptureReplay = VK_FALSE;
+    vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressMultiDevice = VK_FALSE;
+
+    // For VK_KHR_acceleration_structure
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR vk_physical_device_acceleration_structure_features_khr = {};
+    vk_physical_device_acceleration_structure_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    vk_physical_device_acceleration_structure_features_khr.pNext = &vk_physical_device_buffer_device_address_features_khr;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructure = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureCaptureReplay = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureIndirectBuild = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.accelerationStructureHostCommands = VK_FALSE;
+    vk_physical_device_acceleration_structure_features_khr.descriptorBindingAccelerationStructureUpdateAfterBind = VK_FALSE;
+
     // For VK_EXT_mesh_shader
     VkPhysicalDeviceMeshShaderFeaturesEXT vk_physical_device_mesh_shader_features_ext = {};
     vk_physical_device_mesh_shader_features_ext.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    vk_physical_device_mesh_shader_features_ext.pNext = nullptr;
+    vk_physical_device_mesh_shader_features_ext.pNext = &vk_physical_device_acceleration_structure_features_khr;
     vk_physical_device_mesh_shader_features_ext.taskShader = VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.meshShader = VK_FALSE;
     vk_physical_device_mesh_shader_features_ext.multiviewMeshShader = VK_FALSE;
@@ -195,18 +213,26 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     if (this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2 != nullptr)
     {
         this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2(this->vkPhysicalDevice, &vk_physical_device_features2);
-
-        this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
-        this->info.vulkan11Feature.pNext = nullptr;
-        this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
-        this->info.vulkan12Feature.pNext = nullptr;
-        this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
-        this->info.vulkan13Feature.pNext = nullptr;
-        this->info.meshShaderFeaturesEXT = vk_physical_device_mesh_shader_features_ext;
-        this->info.meshShaderFeaturesEXT.pNext = nullptr;
-        this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
-        this->info.meshShaderFeaturesNV.pNext = nullptr;
     }
+    else if (this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2KHR != nullptr)
+    {
+        this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures2KHR(this->vkPhysicalDevice, &vk_physical_device_features2);
+    }
+
+    this->info.vulkan11Feature = vk_physical_device_vulkan_1_1_features;
+    this->info.vulkan11Feature.pNext = nullptr;
+    this->info.vulkan12Feature = vk_physical_device_vulkan_1_2_features;
+    this->info.vulkan12Feature.pNext = nullptr;
+    this->info.vulkan13Feature = vk_physical_device_vulkan_1_3_features;
+    this->info.vulkan13Feature.pNext = nullptr;
+    this->info.meshShaderFeaturesEXT = vk_physical_device_mesh_shader_features_ext;
+    this->info.meshShaderFeaturesEXT.pNext = nullptr;
+    this->info.meshShaderFeaturesNV = vk_physical_device_mesh_shader_features_nv;
+    this->info.meshShaderFeaturesNV.pNext = nullptr;
+    this->info.accelerationStructureFeaturesKHR = vk_physical_device_acceleration_structure_features_khr;
+    this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
+    this->info.physicalDeviceBufferDeviceAddressFeaturesKHR = vk_physical_device_buffer_device_address_features_khr;
+    this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()
@@ -390,11 +416,13 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
 {
     // this->vkPhysicalDevice=xxx 获取物理设备句柄
     uint32_t physical_device_count = 0;
-    Turbo::Core::vkEnumeratePhysicalDevices(this->instance->GetVkInstance(), &physical_device_count, nullptr);
+
+    PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices = this->GetInstance()->GetInstanceDriver()->vkEnumeratePhysicalDevices;
+    vk_enumerate_physical_devices(this->instance->GetVkInstance(), &physical_device_count, nullptr);
 
     std::vector<VkPhysicalDevice> vk_physical_devices;
     vk_physical_devices.resize(physical_device_count);
-    Turbo::Core::vkEnumeratePhysicalDevices(this->instance->GetVkInstance(), &physical_device_count, vk_physical_devices.data());
+    vk_enumerate_physical_devices(this->instance->GetVkInstance(), &physical_device_count, vk_physical_devices.data());
 
     this->vkPhysicalDevice = vk_physical_devices[this->index];
 
@@ -753,6 +781,16 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.primitiveFragmentShadingRateMeshShaderEXT = this->info.meshShaderFeaturesEXT.primitiveFragmentShadingRateMeshShader == VK_TRUE ? true : false;
     physical_device_features.meshShaderQueriesEXT = this->info.meshShaderFeaturesEXT.meshShaderQueries == VK_TRUE ? true : false;
 
+    physical_device_features.accelerationStructure = this->info.accelerationStructureFeaturesKHR.accelerationStructure == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureCaptureReplay = this->info.accelerationStructureFeaturesKHR.accelerationStructureCaptureReplay == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureIndirectBuild = this->info.accelerationStructureFeaturesKHR.accelerationStructureIndirectBuild == VK_TRUE ? true : false;
+    physical_device_features.accelerationStructureHostCommands = this->info.accelerationStructureFeaturesKHR.accelerationStructureHostCommands == VK_TRUE ? true : false;
+    physical_device_features.descriptorBindingAccelerationStructureUpdateAfterBind = this->info.accelerationStructureFeaturesKHR.descriptorBindingAccelerationStructureUpdateAfterBind == VK_TRUE ? true : false;
+
+    physical_device_features.bufferDeviceAddress = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddress == VK_TRUE ? true : false;
+    physical_device_features.bufferDeviceAddressCaptureReplay = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressCaptureReplay == VK_TRUE ? true : false;
+    physical_device_features.bufferDeviceAddressMultiDevice = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressMultiDevice == VK_TRUE ? true : false;
+
     return physical_device_features;
 }
 
@@ -790,26 +828,12 @@ bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
 {
     if (!extensionName.empty())
     {
-        TExtensionType extension_type = TExtensionInfo::GetExtensionTypeByExtensionName(extensionName);
         size_t support_extension_count = this->info.supportExtensions.size();
-        if (extension_type != TExtensionType::UNDEFINED)
+        for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
         {
-            for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
+            if (this->info.supportExtensions[extension_index].GetName() == extensionName)
             {
-                if (this->info.supportExtensions[extension_index].GetExtensionType() == extension_type)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            for (size_t extension_index = 0; extension_index < support_extension_count; extension_index++)
-            {
-                if (this->info.supportExtensions[extension_index].GetName() == extensionName)
-                {
-                    return true;
-                }
+                return true;
             }
         }
     }

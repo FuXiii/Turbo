@@ -41,7 +41,17 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool primitiveFragmentShadingRateMeshShaderEXT = false;
     bool meshShaderQueriesEXT = false;
 
+    bool accelerationStructure = false;
+    bool accelerationStructureCaptureReplay = false;
+    bool accelerationStructureIndirectBuild = false;
+    bool accelerationStructureHostCommands = false;
+    bool descriptorBindingAccelerationStructureUpdateAfterBind = false;
+
     bool logicOp = false;
+
+    bool bufferDeviceAddress = false;
+    bool bufferDeviceAddressCaptureReplay = false;
+    bool bufferDeviceAddressMultiDevice = false;
 
   public:
     virtual std::string ToString() override;

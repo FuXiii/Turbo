@@ -1,8 +1,9 @@
 #pragma once
 #ifndef TURBO_CORE_TBUFFER_H
 #define TURBO_CORE_TBUFFER_H
-#include "TVulkanHandle.h"
 #include "TMemoryTypeInfo.h"
+#include "TVulkanHandle.h"
+
 
 namespace Turbo
 {
@@ -30,6 +31,10 @@ typedef enum TBufferUsageBits
     BUFFER_INDEX_BUFFER = 0x00000040,
     BUFFER_VERTEX_BUFFER = 0x00000080,
     BUFFER_INDIRECT_BUFFER = 0x00000100,
+    BUFFER_SHADER_DEVICE_ADDRESS = 0x00020000,
+    BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY = 0x00080000,
+    BUFFER_ACCELERATION_STRUCTURE_STORAGE = 0x00100000,
+    BUFFER_SHADER_BINDING_TABLE = 0x00000400
 } TBufferUsageBits;
 typedef VkFlags TBufferUsages;
 

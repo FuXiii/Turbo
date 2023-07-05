@@ -6,7 +6,7 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-//#define VMA_IMPLEMENTATION
+// #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 
 void Turbo::Core::TVmaAllocator::InternalCreate()
@@ -19,9 +19,16 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
 
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::vkGetInstanceProcAddr;
-    vulkanFunctions.vkGetDeviceProcAddr = Turbo::Core::vkGetDeviceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
+
+    VmaAllocatorCreateFlags vma_allocator_create_flags = 0;
+    if ((physical_device->GetDeviceFeatures().bufferDeviceAddress && this->device->GetEnableDeviceFeatures().bufferDeviceAddress) || (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0)))
+    {
+        vma_allocator_create_flags |= VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+    }
 
     VmaAllocatorCreateInfo vma_allocator_create_info = {};
+    vma_allocator_create_info.flags = vma_allocator_create_flags;
     vma_allocator_create_info.instance = instance->GetVkInstance();
     vma_allocator_create_info.physicalDevice = physical_device->GetVkPhysicalDevice();
     vma_allocator_create_info.device = this->device->GetVkDevice();

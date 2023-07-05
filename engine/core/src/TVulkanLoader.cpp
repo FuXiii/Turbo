@@ -8,151 +8,10 @@
 
 #if defined(VK_VERSION_1_0)
 PFN_vkGetInstanceProcAddr Turbo::Core::vkGetInstanceProcAddr = nullptr;
+PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
 PFN_vkCreateInstance Turbo::Core::vkCreateInstance = nullptr;
 PFN_vkEnumerateInstanceExtensionProperties Turbo::Core::vkEnumerateInstanceExtensionProperties = nullptr;
 PFN_vkEnumerateInstanceLayerProperties Turbo::Core::vkEnumerateInstanceLayerProperties = nullptr;
-
-PFN_vkDestroyInstance Turbo::Core::vkDestroyInstance = nullptr;
-PFN_vkEnumeratePhysicalDevices Turbo::Core::vkEnumeratePhysicalDevices = nullptr;
-PFN_vkGetPhysicalDeviceProperties Turbo::Core::vkGetPhysicalDeviceProperties = nullptr;
-PFN_vkEnumerateDeviceLayerProperties Turbo::Core::vkEnumerateDeviceLayerProperties = nullptr;
-PFN_vkEnumerateDeviceExtensionProperties Turbo::Core::vkEnumerateDeviceExtensionProperties = nullptr;
-PFN_vkGetPhysicalDeviceQueueFamilyProperties Turbo::Core::vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
-PFN_vkGetPhysicalDeviceMemoryProperties Turbo::Core::vkGetPhysicalDeviceMemoryProperties = nullptr;
-PFN_vkGetPhysicalDeviceFeatures Turbo::Core::vkGetPhysicalDeviceFeatures = nullptr;
-PFN_vkGetPhysicalDeviceFormatProperties Turbo::Core::vkGetPhysicalDeviceFormatProperties = nullptr;
-PFN_vkGetPhysicalDeviceImageFormatProperties Turbo::Core::vkGetPhysicalDeviceImageFormatProperties = nullptr;
-PFN_vkGetPhysicalDeviceSparseImageFormatProperties Turbo::Core::vkGetPhysicalDeviceSparseImageFormatProperties = nullptr;
-PFN_vkCreateDevice Turbo::Core::vkCreateDevice = nullptr;
-
-PFN_vkGetDeviceProcAddr Turbo::Core::vkGetDeviceProcAddr = nullptr;
-PFN_vkDestroyDevice Turbo::Core::vkDestroyDevice = nullptr;
-
-PFN_vkAllocateCommandBuffers Turbo::Core::vkAllocateCommandBuffers = nullptr;
-PFN_vkAllocateDescriptorSets Turbo::Core::vkAllocateDescriptorSets = nullptr;
-PFN_vkAllocateMemory Turbo::Core::vkAllocateMemory = nullptr;
-PFN_vkBeginCommandBuffer Turbo::Core::vkBeginCommandBuffer = nullptr;
-PFN_vkBindBufferMemory Turbo::Core::vkBindBufferMemory = nullptr;
-PFN_vkBindImageMemory Turbo::Core::vkBindImageMemory = nullptr;
-PFN_vkCmdBeginQuery Turbo::Core::vkCmdBeginQuery = nullptr;
-PFN_vkCmdBeginRenderPass Turbo::Core::vkCmdBeginRenderPass = nullptr;
-PFN_vkCmdBindDescriptorSets Turbo::Core::vkCmdBindDescriptorSets = nullptr;
-PFN_vkCmdBindIndexBuffer Turbo::Core::vkCmdBindIndexBuffer = nullptr;
-PFN_vkCmdBindPipeline Turbo::Core::vkCmdBindPipeline = nullptr;
-PFN_vkCmdBindVertexBuffers Turbo::Core::vkCmdBindVertexBuffers = nullptr;
-PFN_vkCmdBlitImage Turbo::Core::vkCmdBlitImage = nullptr;
-PFN_vkCmdClearAttachments Turbo::Core::vkCmdClearAttachments = nullptr;
-PFN_vkCmdClearColorImage Turbo::Core::vkCmdClearColorImage;
-PFN_vkCmdClearDepthStencilImage Turbo::Core::vkCmdClearDepthStencilImage = nullptr;
-PFN_vkCmdCopyBuffer Turbo::Core::vkCmdCopyBuffer = nullptr;
-PFN_vkCmdCopyBufferToImage Turbo::Core::vkCmdCopyBufferToImage = nullptr;
-PFN_vkCmdCopyImage Turbo::Core::vkCmdCopyImage = nullptr;
-PFN_vkCmdCopyImageToBuffer Turbo::Core::vkCmdCopyImageToBuffer = nullptr;
-PFN_vkCmdCopyQueryPoolResults Turbo::Core::vkCmdCopyQueryPoolResults = nullptr;
-PFN_vkCmdDispatch Turbo::Core::vkCmdDispatch = nullptr;
-PFN_vkCmdDispatchIndirect Turbo::Core::vkCmdDispatchIndirect = nullptr;
-PFN_vkCmdDraw Turbo::Core::vkCmdDraw = nullptr;
-PFN_vkCmdDrawIndexed Turbo::Core::vkCmdDrawIndexed = nullptr;
-PFN_vkCmdDrawIndexedIndirect Turbo::Core::vkCmdDrawIndexedIndirect = nullptr;
-PFN_vkCmdDrawIndirect Turbo::Core::vkCmdDrawIndirect = nullptr;
-PFN_vkCmdEndQuery Turbo::Core::vkCmdEndQuery = nullptr;
-PFN_vkCmdEndRenderPass Turbo::Core::vkCmdEndRenderPass = nullptr;
-PFN_vkCmdExecuteCommands Turbo::Core::vkCmdExecuteCommands = nullptr;
-PFN_vkCmdFillBuffer Turbo::Core::vkCmdFillBuffer = nullptr;
-PFN_vkCmdNextSubpass Turbo::Core::vkCmdNextSubpass = nullptr;
-PFN_vkCmdPipelineBarrier Turbo::Core::vkCmdPipelineBarrier = nullptr;
-PFN_vkCmdPushConstants Turbo::Core::vkCmdPushConstants = nullptr;
-PFN_vkCmdResetEvent Turbo::Core::vkCmdResetEvent = nullptr;
-PFN_vkCmdResetQueryPool Turbo::Core::vkCmdResetQueryPool = nullptr;
-PFN_vkCmdResolveImage Turbo::Core::vkCmdResolveImage = nullptr;
-PFN_vkCmdSetBlendConstants Turbo::Core::vkCmdSetBlendConstants = nullptr;
-PFN_vkCmdSetDepthBias Turbo::Core::vkCmdSetDepthBias = nullptr;
-PFN_vkCmdSetDepthBounds Turbo::Core::vkCmdSetDepthBounds = nullptr;
-PFN_vkCmdSetEvent Turbo::Core::vkCmdSetEvent = nullptr;
-PFN_vkCmdSetLineWidth Turbo::Core::vkCmdSetLineWidth = nullptr;
-PFN_vkCmdSetScissor Turbo::Core::vkCmdSetScissor = nullptr;
-PFN_vkCmdSetStencilCompareMask Turbo::Core::vkCmdSetStencilCompareMask = nullptr;
-PFN_vkCmdSetStencilReference Turbo::Core::vkCmdSetStencilReference = nullptr;
-PFN_vkCmdSetStencilWriteMask Turbo::Core::vkCmdSetStencilWriteMask = nullptr;
-PFN_vkCmdSetViewport Turbo::Core::vkCmdSetViewport = nullptr;
-PFN_vkCmdUpdateBuffer Turbo::Core::vkCmdUpdateBuffer = nullptr;
-PFN_vkCmdWaitEvents Turbo::Core::vkCmdWaitEvents = nullptr;
-PFN_vkCmdWriteTimestamp Turbo::Core::vkCmdWriteTimestamp = nullptr;
-PFN_vkCreateBuffer Turbo::Core::vkCreateBuffer = nullptr;
-PFN_vkCreateBufferView Turbo::Core::vkCreateBufferView = nullptr;
-PFN_vkCreateCommandPool Turbo::Core::vkCreateCommandPool = nullptr;
-PFN_vkCreateComputePipelines Turbo::Core::vkCreateComputePipelines = nullptr;
-PFN_vkCreateDescriptorPool Turbo::Core::vkCreateDescriptorPool = nullptr;
-PFN_vkCreateDescriptorSetLayout Turbo::Core::vkCreateDescriptorSetLayout = nullptr;
-PFN_vkCreateEvent Turbo::Core::vkCreateEvent = nullptr;
-PFN_vkCreateFence Turbo::Core::vkCreateFence = nullptr;
-PFN_vkCreateFramebuffer Turbo::Core::vkCreateFramebuffer = nullptr;
-PFN_vkCreateGraphicsPipelines Turbo::Core::vkCreateGraphicsPipelines = nullptr;
-PFN_vkCreateImage Turbo::Core::vkCreateImage = nullptr;
-PFN_vkCreateImageView Turbo::Core::vkCreateImageView = nullptr;
-PFN_vkCreatePipelineCache Turbo::Core::vkCreatePipelineCache = nullptr;
-PFN_vkCreatePipelineLayout Turbo::Core::vkCreatePipelineLayout = nullptr;
-PFN_vkCreateQueryPool Turbo::Core::vkCreateQueryPool = nullptr;
-PFN_vkCreateRenderPass Turbo::Core::vkCreateRenderPass = nullptr;
-PFN_vkCreateSampler Turbo::Core::vkCreateSampler = nullptr;
-PFN_vkCreateSemaphore Turbo::Core::vkCreateSemaphore = nullptr;
-PFN_vkCreateShaderModule Turbo::Core::vkCreateShaderModule = nullptr;
-PFN_vkDestroyBuffer Turbo::Core::vkDestroyBuffer = nullptr;
-PFN_vkDestroyBufferView Turbo::Core::vkDestroyBufferView = nullptr;
-PFN_vkDestroyCommandPool Turbo::Core::vkDestroyCommandPool = nullptr;
-PFN_vkDestroyDescriptorPool Turbo::Core::vkDestroyDescriptorPool = nullptr;
-PFN_vkDestroyDescriptorSetLayout Turbo::Core::vkDestroyDescriptorSetLayout = nullptr;
-PFN_vkDestroyEvent Turbo::Core::vkDestroyEvent = nullptr;
-PFN_vkDestroyFence Turbo::Core::vkDestroyFence = nullptr;
-PFN_vkDestroyFramebuffer Turbo::Core::vkDestroyFramebuffer = nullptr;
-PFN_vkDestroyImage Turbo::Core::vkDestroyImage = nullptr;
-PFN_vkDestroyImageView Turbo::Core::vkDestroyImageView = nullptr;
-PFN_vkDestroyPipeline Turbo::Core::vkDestroyPipeline = nullptr;
-PFN_vkDestroyPipelineCache Turbo::Core::vkDestroyPipelineCache = nullptr;
-PFN_vkDestroyPipelineLayout Turbo::Core::vkDestroyPipelineLayout = nullptr;
-PFN_vkDestroyQueryPool Turbo::Core::vkDestroyQueryPool = nullptr;
-PFN_vkDestroyRenderPass Turbo::Core::vkDestroyRenderPass = nullptr;
-PFN_vkDestroySampler Turbo::Core::vkDestroySampler = nullptr;
-PFN_vkDestroySemaphore Turbo::Core::vkDestroySemaphore = nullptr;
-PFN_vkDestroyShaderModule Turbo::Core::vkDestroyShaderModule = nullptr;
-PFN_vkDeviceWaitIdle Turbo::Core::vkDeviceWaitIdle = nullptr;
-PFN_vkEndCommandBuffer Turbo::Core::vkEndCommandBuffer = nullptr;
-PFN_vkFlushMappedMemoryRanges Turbo::Core::vkFlushMappedMemoryRanges = nullptr;
-PFN_vkFreeCommandBuffers Turbo::Core::vkFreeCommandBuffers = nullptr;
-PFN_vkFreeDescriptorSets Turbo::Core::vkFreeDescriptorSets = nullptr;
-PFN_vkFreeMemory Turbo::Core::vkFreeMemory = nullptr;
-PFN_vkGetBufferMemoryRequirements Turbo::Core::vkGetBufferMemoryRequirements = nullptr;
-PFN_vkGetDeviceMemoryCommitment Turbo::Core::vkGetDeviceMemoryCommitment = nullptr;
-PFN_vkGetDeviceQueue Turbo::Core::vkGetDeviceQueue = nullptr;
-PFN_vkGetEventStatus Turbo::Core::vkGetEventStatus = nullptr;
-PFN_vkGetFenceStatus Turbo::Core::vkGetFenceStatus = nullptr;
-PFN_vkGetImageMemoryRequirements Turbo::Core::vkGetImageMemoryRequirements = nullptr;
-PFN_vkGetImageSparseMemoryRequirements Turbo::Core::vkGetImageSparseMemoryRequirements = nullptr;
-PFN_vkGetImageSubresourceLayout Turbo::Core::vkGetImageSubresourceLayout = nullptr;
-PFN_vkGetPipelineCacheData Turbo::Core::vkGetPipelineCacheData = nullptr;
-PFN_vkGetQueryPoolResults Turbo::Core::vkGetQueryPoolResults = nullptr;
-PFN_vkGetRenderAreaGranularity Turbo::Core::vkGetRenderAreaGranularity = nullptr;
-PFN_vkInvalidateMappedMemoryRanges Turbo::Core::vkInvalidateMappedMemoryRanges = nullptr;
-PFN_vkMapMemory Turbo::Core::vkMapMemory = nullptr;
-PFN_vkMergePipelineCaches Turbo::Core::vkMergePipelineCaches = nullptr;
-PFN_vkQueueBindSparse Turbo::Core::vkQueueBindSparse = nullptr;
-PFN_vkQueueSubmit Turbo::Core::vkQueueSubmit = nullptr;
-PFN_vkQueueWaitIdle Turbo::Core::vkQueueWaitIdle = nullptr;
-PFN_vkResetCommandBuffer Turbo::Core::vkResetCommandBuffer = nullptr;
-PFN_vkResetCommandPool Turbo::Core::vkResetCommandPool = nullptr;
-PFN_vkResetDescriptorPool Turbo::Core::vkResetDescriptorPool = nullptr;
-PFN_vkResetEvent Turbo::Core::vkResetEvent = nullptr;
-PFN_vkResetFences Turbo::Core::vkResetFences = nullptr;
-PFN_vkSetEvent Turbo::Core::vkSetEvent = nullptr;
-PFN_vkUnmapMemory Turbo::Core::vkUnmapMemory = nullptr;
-PFN_vkUpdateDescriptorSets Turbo::Core::vkUpdateDescriptorSets = nullptr;
-PFN_vkWaitForFences Turbo::Core::vkWaitForFences = nullptr;
-#endif
-
-#if defined(VK_VERSION_1_1)
-#endif
-
-#if defined(VK_VERSION_1_3)
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -191,6 +50,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 
 //<loade global commands function>
 #if defined(VK_VERSION_1_0)
+    Turbo::Core::vkEnumerateInstanceVersion = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
     Turbo::Core::vkCreateInstance = this->Load<TLoaderType::INSTANCE, PFN_vkCreateInstance>(VK_NULL_HANDLE, "vkCreateInstance");
     Turbo::Core::vkEnumerateInstanceExtensionProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceExtensionProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties");
     Turbo::Core::vkEnumerateInstanceLayerProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceLayerProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceLayerProperties");
@@ -203,163 +63,6 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 
 Turbo::Core::TVulkanLoader::~TVulkanLoader()
 {
-}
-
-void Turbo::Core::TVulkanLoader::LoadAllInstanceFunctions(TInstance *instance)
-{
-    VkInstance vk_instance = instance->GetVkInstance();
-// load all instance vulkan api function, Vulkan Loader version
-#if defined(VK_VERSION_1_0)
-    Turbo::Core::vkDestroyInstance = this->LoadInstanceFunction<PFN_vkDestroyInstance>(vk_instance, "vkDestroyInstance");
-    Turbo::Core::vkEnumeratePhysicalDevices = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDevices>(vk_instance, "vkEnumeratePhysicalDevices");
-    Turbo::Core::vkGetPhysicalDeviceProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceProperties>(vk_instance, "vkGetPhysicalDeviceProperties");
-    Turbo::Core::vkEnumerateDeviceLayerProperties = this->LoadInstanceFunction<PFN_vkEnumerateDeviceLayerProperties>(vk_instance, "vkEnumerateDeviceLayerProperties");
-    Turbo::Core::vkEnumerateDeviceExtensionProperties = this->LoadInstanceFunction<PFN_vkEnumerateDeviceExtensionProperties>(vk_instance, "vkEnumerateDeviceExtensionProperties");
-    Turbo::Core::vkGetPhysicalDeviceQueueFamilyProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceQueueFamilyProperties>(vk_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
-    Turbo::Core::vkGetPhysicalDeviceMemoryProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceMemoryProperties>(vk_instance, "vkGetPhysicalDeviceMemoryProperties");
-    Turbo::Core::vkGetPhysicalDeviceFeatures = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures>(vk_instance, "vkGetPhysicalDeviceFeatures");
-    Turbo::Core::vkGetPhysicalDeviceFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties>(vk_instance, "vkGetPhysicalDeviceFormatProperties");
-    Turbo::Core::vkGetPhysicalDeviceImageFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceImageFormatProperties>(vk_instance, "vkGetPhysicalDeviceImageFormatProperties");
-    Turbo::Core::vkGetPhysicalDeviceSparseImageFormatProperties = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSparseImageFormatProperties>(vk_instance, "vkGetPhysicalDeviceSparseImageFormatProperties");
-    Turbo::Core::vkCreateDevice = this->LoadInstanceFunction<PFN_vkCreateDevice>(vk_instance, "vkCreateDevice");
-
-    Turbo::Core::vkGetDeviceProcAddr = this->LoadInstanceFunction<PFN_vkGetDeviceProcAddr>(vk_instance, "vkGetDeviceProcAddr");
-#endif
-
-#if defined(VK_VERSION_1_1)
-#endif
-}
-
-void Turbo::Core::TVulkanLoader::LoadAllDeviceFunctions(TInstance *instance)
-{
-    VkInstance vk_instance = instance->GetVkInstance();
-    // load all device vulkan api function, Vulkan Loader version
-#if defined(VK_VERSION_1_0)
-    Turbo::Core::vkDestroyDevice = this->LoadInstanceFunction<PFN_vkDestroyDevice>(vk_instance, "vkDestroyDevice");
-
-    Turbo::Core::vkAllocateCommandBuffers = this->LoadInstanceFunction<PFN_vkAllocateCommandBuffers>(vk_instance, "vkAllocateCommandBuffers");
-    Turbo::Core::vkAllocateDescriptorSets = this->LoadInstanceFunction<PFN_vkAllocateDescriptorSets>(vk_instance, "vkAllocateDescriptorSets");
-    Turbo::Core::vkAllocateMemory = this->LoadInstanceFunction<PFN_vkAllocateMemory>(vk_instance, "vkAllocateMemory");
-    Turbo::Core::vkBeginCommandBuffer = this->LoadInstanceFunction<PFN_vkBeginCommandBuffer>(vk_instance, "vkBeginCommandBuffer");
-    Turbo::Core::vkBindBufferMemory = this->LoadInstanceFunction<PFN_vkBindBufferMemory>(vk_instance, "vkBindBufferMemory");
-    Turbo::Core::vkBindImageMemory = this->LoadInstanceFunction<PFN_vkBindImageMemory>(vk_instance, "vkBindImageMemory");
-    Turbo::Core::vkCmdBeginQuery = this->LoadInstanceFunction<PFN_vkCmdBeginQuery>(vk_instance, "vkCmdBeginQuery");
-    Turbo::Core::vkCmdBeginRenderPass = this->LoadInstanceFunction<PFN_vkCmdBeginRenderPass>(vk_instance, "vkCmdBeginRenderPass");
-    Turbo::Core::vkCmdBindDescriptorSets = this->LoadInstanceFunction<PFN_vkCmdBindDescriptorSets>(vk_instance, "vkCmdBindDescriptorSets");
-    Turbo::Core::vkCmdBindIndexBuffer = this->LoadInstanceFunction<PFN_vkCmdBindIndexBuffer>(vk_instance, "vkCmdBindIndexBuffer");
-    Turbo::Core::vkCmdBindPipeline = this->LoadInstanceFunction<PFN_vkCmdBindPipeline>(vk_instance, "vkCmdBindPipeline");
-    Turbo::Core::vkCmdBindVertexBuffers = this->LoadInstanceFunction<PFN_vkCmdBindVertexBuffers>(vk_instance, "vkCmdBindVertexBuffers");
-    Turbo::Core::vkCmdBlitImage = this->LoadInstanceFunction<PFN_vkCmdBlitImage>(vk_instance, "vkCmdBlitImage");
-    Turbo::Core::vkCmdClearAttachments = this->LoadInstanceFunction<PFN_vkCmdClearAttachments>(vk_instance, "vkCmdClearAttachments");
-    Turbo::Core::vkCmdClearColorImage = this->LoadInstanceFunction<PFN_vkCmdClearColorImage>(vk_instance, "vkCmdClearColorImage");
-    Turbo::Core::vkCmdClearDepthStencilImage = this->LoadInstanceFunction<PFN_vkCmdClearDepthStencilImage>(vk_instance, "vkCmdClearDepthStencilImage");
-    Turbo::Core::vkCmdCopyBuffer = this->LoadInstanceFunction<PFN_vkCmdCopyBuffer>(vk_instance, "vkCmdCopyBuffer");
-    Turbo::Core::vkCmdCopyBufferToImage = this->LoadInstanceFunction<PFN_vkCmdCopyBufferToImage>(vk_instance, "vkCmdCopyBufferToImage");
-    Turbo::Core::vkCmdCopyImage = this->LoadInstanceFunction<PFN_vkCmdCopyImage>(vk_instance, "vkCmdCopyImage");
-    Turbo::Core::vkCmdCopyImageToBuffer = this->LoadInstanceFunction<PFN_vkCmdCopyImageToBuffer>(vk_instance, "vkCmdCopyImageToBuffer");
-    Turbo::Core::vkCmdCopyQueryPoolResults = this->LoadInstanceFunction<PFN_vkCmdCopyQueryPoolResults>(vk_instance, "vkCmdCopyQueryPoolResults");
-    Turbo::Core::vkCmdDispatch = this->LoadInstanceFunction<PFN_vkCmdDispatch>(vk_instance, "vkCmdDispatch");
-    Turbo::Core::vkCmdDispatchIndirect = this->LoadInstanceFunction<PFN_vkCmdDispatchIndirect>(vk_instance, "vkCmdDispatchIndirect");
-    Turbo::Core::vkCmdDraw = this->LoadInstanceFunction<PFN_vkCmdDraw>(vk_instance, "vkCmdDraw");
-    Turbo::Core::vkCmdDrawIndexed = this->LoadInstanceFunction<PFN_vkCmdDrawIndexed>(vk_instance, "vkCmdDrawIndexed");
-    Turbo::Core::vkCmdDrawIndexedIndirect = this->LoadInstanceFunction<PFN_vkCmdDrawIndexedIndirect>(vk_instance, "vkCmdDrawIndexedIndirect");
-    Turbo::Core::vkCmdDrawIndirect = this->LoadInstanceFunction<PFN_vkCmdDrawIndirect>(vk_instance, "vkCmdDrawIndirect");
-    Turbo::Core::vkCmdEndQuery = this->LoadInstanceFunction<PFN_vkCmdEndQuery>(vk_instance, "vkCmdEndQuery");
-    Turbo::Core::vkCmdEndRenderPass = this->LoadInstanceFunction<PFN_vkCmdEndRenderPass>(vk_instance, "vkCmdEndRenderPass");
-    Turbo::Core::vkCmdExecuteCommands = this->LoadInstanceFunction<PFN_vkCmdExecuteCommands>(vk_instance, "vkCmdExecuteCommands");
-    Turbo::Core::vkCmdFillBuffer = this->LoadInstanceFunction<PFN_vkCmdFillBuffer>(vk_instance, "vkCmdFillBuffer");
-    Turbo::Core::vkCmdNextSubpass = this->LoadInstanceFunction<PFN_vkCmdNextSubpass>(vk_instance, "vkCmdNextSubpass");
-    Turbo::Core::vkCmdPipelineBarrier = this->LoadInstanceFunction<PFN_vkCmdPipelineBarrier>(vk_instance, "vkCmdPipelineBarrier");
-    Turbo::Core::vkCmdPushConstants = this->LoadInstanceFunction<PFN_vkCmdPushConstants>(vk_instance, "vkCmdPushConstants");
-    Turbo::Core::vkCmdResetEvent = this->LoadInstanceFunction<PFN_vkCmdResetEvent>(vk_instance, "vkCmdResetEvent");
-    Turbo::Core::vkCmdResetQueryPool = this->LoadInstanceFunction<PFN_vkCmdResetQueryPool>(vk_instance, "vkCmdResetQueryPool");
-    Turbo::Core::vkCmdResolveImage = this->LoadInstanceFunction<PFN_vkCmdResolveImage>(vk_instance, "vkCmdResolveImage");
-    Turbo::Core::vkCmdSetBlendConstants = this->LoadInstanceFunction<PFN_vkCmdSetBlendConstants>(vk_instance, "vkCmdSetBlendConstants");
-    Turbo::Core::vkCmdSetDepthBias = this->LoadInstanceFunction<PFN_vkCmdSetDepthBias>(vk_instance, "vkCmdSetDepthBias");
-    Turbo::Core::vkCmdSetDepthBounds = this->LoadInstanceFunction<PFN_vkCmdSetDepthBounds>(vk_instance, "vkCmdSetDepthBounds");
-    Turbo::Core::vkCmdSetEvent = this->LoadInstanceFunction<PFN_vkCmdSetEvent>(vk_instance, "vkCmdSetEvent");
-    Turbo::Core::vkCmdSetLineWidth = this->LoadInstanceFunction<PFN_vkCmdSetLineWidth>(vk_instance, "vkCmdSetLineWidth");
-    Turbo::Core::vkCmdSetScissor = this->LoadInstanceFunction<PFN_vkCmdSetScissor>(vk_instance, "vkCmdSetScissor");
-    Turbo::Core::vkCmdSetStencilCompareMask = this->LoadInstanceFunction<PFN_vkCmdSetStencilCompareMask>(vk_instance, "vkCmdSetStencilCompareMask");
-    Turbo::Core::vkCmdSetStencilReference = this->LoadInstanceFunction<PFN_vkCmdSetStencilReference>(vk_instance, "vkCmdSetStencilReference");
-    Turbo::Core::vkCmdSetStencilWriteMask = this->LoadInstanceFunction<PFN_vkCmdSetStencilWriteMask>(vk_instance, "vkCmdSetStencilWriteMask");
-    Turbo::Core::vkCmdSetViewport = this->LoadInstanceFunction<PFN_vkCmdSetViewport>(vk_instance, "vkCmdSetViewport");
-    Turbo::Core::vkCmdUpdateBuffer = this->LoadInstanceFunction<PFN_vkCmdUpdateBuffer>(vk_instance, "vkCmdUpdateBuffer");
-    Turbo::Core::vkCmdWaitEvents = this->LoadInstanceFunction<PFN_vkCmdWaitEvents>(vk_instance, "vkCmdWaitEvents");
-    Turbo::Core::vkCmdWriteTimestamp = this->LoadInstanceFunction<PFN_vkCmdWriteTimestamp>(vk_instance, "vkCmdWriteTimestamp");
-    Turbo::Core::vkCreateBuffer = this->LoadInstanceFunction<PFN_vkCreateBuffer>(vk_instance, "vkCreateBuffer");
-    Turbo::Core::vkCreateBufferView = this->LoadInstanceFunction<PFN_vkCreateBufferView>(vk_instance, "vkCreateBufferView");
-    Turbo::Core::vkCreateCommandPool = this->LoadInstanceFunction<PFN_vkCreateCommandPool>(vk_instance, "vkCreateCommandPool");
-    Turbo::Core::vkCreateComputePipelines = this->LoadInstanceFunction<PFN_vkCreateComputePipelines>(vk_instance, "vkCreateComputePipelines");
-    Turbo::Core::vkCreateDescriptorPool = this->LoadInstanceFunction<PFN_vkCreateDescriptorPool>(vk_instance, "vkCreateDescriptorPool");
-    Turbo::Core::vkCreateDescriptorSetLayout = this->LoadInstanceFunction<PFN_vkCreateDescriptorSetLayout>(vk_instance, "vkCreateDescriptorSetLayout");
-    Turbo::Core::vkCreateEvent = this->LoadInstanceFunction<PFN_vkCreateEvent>(vk_instance, "vkCreateEvent");
-    Turbo::Core::vkCreateFence = this->LoadInstanceFunction<PFN_vkCreateFence>(vk_instance, "vkCreateFence");
-    Turbo::Core::vkCreateFramebuffer = this->LoadInstanceFunction<PFN_vkCreateFramebuffer>(vk_instance, "vkCreateFramebuffer");
-    Turbo::Core::vkCreateGraphicsPipelines = this->LoadInstanceFunction<PFN_vkCreateGraphicsPipelines>(vk_instance, "vkCreateGraphicsPipelines");
-    Turbo::Core::vkCreateImage = this->LoadInstanceFunction<PFN_vkCreateImage>(vk_instance, "vkCreateImage");
-    Turbo::Core::vkCreateImageView = this->LoadInstanceFunction<PFN_vkCreateImageView>(vk_instance, "vkCreateImageView");
-    Turbo::Core::vkCreatePipelineCache = this->LoadInstanceFunction<PFN_vkCreatePipelineCache>(vk_instance, "vkCreatePipelineCache");
-    Turbo::Core::vkCreatePipelineLayout = this->LoadInstanceFunction<PFN_vkCreatePipelineLayout>(vk_instance, "vkCreatePipelineLayout");
-    Turbo::Core::vkCreateQueryPool = this->LoadInstanceFunction<PFN_vkCreateQueryPool>(vk_instance, "vkCreateQueryPool");
-    Turbo::Core::vkCreateRenderPass = this->LoadInstanceFunction<PFN_vkCreateRenderPass>(vk_instance, "vkCreateRenderPass");
-    Turbo::Core::vkCreateSampler = this->LoadInstanceFunction<PFN_vkCreateSampler>(vk_instance, "vkCreateSampler");
-    Turbo::Core::vkCreateSemaphore = this->LoadInstanceFunction<PFN_vkCreateSemaphore>(vk_instance, "vkCreateSemaphore");
-    Turbo::Core::vkCreateShaderModule = this->LoadInstanceFunction<PFN_vkCreateShaderModule>(vk_instance, "vkCreateShaderModule");
-    Turbo::Core::vkDestroyBuffer = this->LoadInstanceFunction<PFN_vkDestroyBuffer>(vk_instance, "vkDestroyBuffer");
-    Turbo::Core::vkDestroyBufferView = this->LoadInstanceFunction<PFN_vkDestroyBufferView>(vk_instance, "vkDestroyBufferView");
-    Turbo::Core::vkDestroyCommandPool = this->LoadInstanceFunction<PFN_vkDestroyCommandPool>(vk_instance, "vkDestroyCommandPool");
-    Turbo::Core::vkDestroyDescriptorPool = this->LoadInstanceFunction<PFN_vkDestroyDescriptorPool>(vk_instance, "vkDestroyDescriptorPool");
-    Turbo::Core::vkDestroyDescriptorSetLayout = this->LoadInstanceFunction<PFN_vkDestroyDescriptorSetLayout>(vk_instance, "vkDestroyDescriptorSetLayout");
-    Turbo::Core::vkDestroyEvent = this->LoadInstanceFunction<PFN_vkDestroyEvent>(vk_instance, "vkDestroyEvent");
-    Turbo::Core::vkDestroyFence = this->LoadInstanceFunction<PFN_vkDestroyFence>(vk_instance, "vkDestroyFence");
-    Turbo::Core::vkDestroyFramebuffer = this->LoadInstanceFunction<PFN_vkDestroyFramebuffer>(vk_instance, "vkDestroyFramebuffer");
-    Turbo::Core::vkDestroyImage = this->LoadInstanceFunction<PFN_vkDestroyImage>(vk_instance, "vkDestroyImage");
-    Turbo::Core::vkDestroyImageView = this->LoadInstanceFunction<PFN_vkDestroyImageView>(vk_instance, "vkDestroyImageView");
-    Turbo::Core::vkDestroyPipeline = this->LoadInstanceFunction<PFN_vkDestroyPipeline>(vk_instance, "vkDestroyPipeline");
-    Turbo::Core::vkDestroyPipelineCache = this->LoadInstanceFunction<PFN_vkDestroyPipelineCache>(vk_instance, "vkDestroyPipelineCache");
-    Turbo::Core::vkDestroyPipelineLayout = this->LoadInstanceFunction<PFN_vkDestroyPipelineLayout>(vk_instance, "vkDestroyPipelineLayout");
-    Turbo::Core::vkDestroyQueryPool = this->LoadInstanceFunction<PFN_vkDestroyQueryPool>(vk_instance, "vkDestroyQueryPool");
-    Turbo::Core::vkDestroyRenderPass = this->LoadInstanceFunction<PFN_vkDestroyRenderPass>(vk_instance, "vkDestroyRenderPass");
-    Turbo::Core::vkDestroySampler = this->LoadInstanceFunction<PFN_vkDestroySampler>(vk_instance, "vkDestroySampler");
-    Turbo::Core::vkDestroySemaphore = this->LoadInstanceFunction<PFN_vkDestroySemaphore>(vk_instance, "vkDestroySemaphore");
-    Turbo::Core::vkDestroyShaderModule = this->LoadInstanceFunction<PFN_vkDestroyShaderModule>(vk_instance, "vkDestroyShaderModule");
-    Turbo::Core::vkDeviceWaitIdle = this->LoadInstanceFunction<PFN_vkDeviceWaitIdle>(vk_instance, "vkDeviceWaitIdle");
-    Turbo::Core::vkEndCommandBuffer = this->LoadInstanceFunction<PFN_vkEndCommandBuffer>(vk_instance, "vkEndCommandBuffer");
-    Turbo::Core::vkFlushMappedMemoryRanges = this->LoadInstanceFunction<PFN_vkFlushMappedMemoryRanges>(vk_instance, "vkFlushMappedMemoryRanges");
-    Turbo::Core::vkFreeCommandBuffers = this->LoadInstanceFunction<PFN_vkFreeCommandBuffers>(vk_instance, "vkFreeCommandBuffers");
-    Turbo::Core::vkFreeDescriptorSets = this->LoadInstanceFunction<PFN_vkFreeDescriptorSets>(vk_instance, "vkFreeDescriptorSets");
-    Turbo::Core::vkFreeMemory = this->LoadInstanceFunction<PFN_vkFreeMemory>(vk_instance, "vkFreeMemory");
-    Turbo::Core::vkGetBufferMemoryRequirements = this->LoadInstanceFunction<PFN_vkGetBufferMemoryRequirements>(vk_instance, "vkGetBufferMemoryRequirements");
-    Turbo::Core::vkGetDeviceMemoryCommitment = this->LoadInstanceFunction<PFN_vkGetDeviceMemoryCommitment>(vk_instance, "vkGetDeviceMemoryCommitment");
-    Turbo::Core::vkGetDeviceQueue = this->LoadInstanceFunction<PFN_vkGetDeviceQueue>(vk_instance, "vkGetDeviceQueue");
-    Turbo::Core::vkGetEventStatus = this->LoadInstanceFunction<PFN_vkGetEventStatus>(vk_instance, "vkGetEventStatus");
-    Turbo::Core::vkGetFenceStatus = this->LoadInstanceFunction<PFN_vkGetFenceStatus>(vk_instance, "vkGetFenceStatus");
-    Turbo::Core::vkGetImageMemoryRequirements = this->LoadInstanceFunction<PFN_vkGetImageMemoryRequirements>(vk_instance, "vkGetImageMemoryRequirements");
-    Turbo::Core::vkGetImageSparseMemoryRequirements = this->LoadInstanceFunction<PFN_vkGetImageSparseMemoryRequirements>(vk_instance, "vkGetImageSparseMemoryRequirements");
-    Turbo::Core::vkGetImageSubresourceLayout = this->LoadInstanceFunction<PFN_vkGetImageSubresourceLayout>(vk_instance, "vkGetImageSubresourceLayout");
-    Turbo::Core::vkGetPipelineCacheData = this->LoadInstanceFunction<PFN_vkGetPipelineCacheData>(vk_instance, "vkGetPipelineCacheData");
-    Turbo::Core::vkGetQueryPoolResults = this->LoadInstanceFunction<PFN_vkGetQueryPoolResults>(vk_instance, "vkGetQueryPoolResults");
-    Turbo::Core::vkGetRenderAreaGranularity = this->LoadInstanceFunction<PFN_vkGetRenderAreaGranularity>(vk_instance, "vkGetRenderAreaGranularity");
-    Turbo::Core::vkInvalidateMappedMemoryRanges = this->LoadInstanceFunction<PFN_vkInvalidateMappedMemoryRanges>(vk_instance, "vkInvalidateMappedMemoryRanges");
-    Turbo::Core::vkMapMemory = this->LoadInstanceFunction<PFN_vkMapMemory>(vk_instance, "vkMapMemory");
-    Turbo::Core::vkMergePipelineCaches = this->LoadInstanceFunction<PFN_vkMergePipelineCaches>(vk_instance, "vkMergePipelineCaches");
-    Turbo::Core::vkQueueBindSparse = this->LoadInstanceFunction<PFN_vkQueueBindSparse>(vk_instance, "vkQueueBindSparse");
-    Turbo::Core::vkQueueSubmit = this->LoadInstanceFunction<PFN_vkQueueSubmit>(vk_instance, "vkQueueSubmit");
-    Turbo::Core::vkQueueWaitIdle = this->LoadInstanceFunction<PFN_vkQueueWaitIdle>(vk_instance, "vkQueueWaitIdle");
-    Turbo::Core::vkResetCommandBuffer = this->LoadInstanceFunction<PFN_vkResetCommandBuffer>(vk_instance, "vkResetCommandBuffer");
-    Turbo::Core::vkResetCommandPool = this->LoadInstanceFunction<PFN_vkResetCommandPool>(vk_instance, "vkResetCommandPool");
-    Turbo::Core::vkResetDescriptorPool = this->LoadInstanceFunction<PFN_vkResetDescriptorPool>(vk_instance, "vkResetDescriptorPool");
-    Turbo::Core::vkResetEvent = this->LoadInstanceFunction<PFN_vkResetEvent>(vk_instance, "vkResetEvent");
-    Turbo::Core::vkResetFences = this->LoadInstanceFunction<PFN_vkResetFences>(vk_instance, "vkResetFences");
-    Turbo::Core::vkSetEvent = this->LoadInstanceFunction<PFN_vkSetEvent>(vk_instance, "vkSetEvent");
-    Turbo::Core::vkUnmapMemory = this->LoadInstanceFunction<PFN_vkUnmapMemory>(vk_instance, "vkUnmapMemory");
-    Turbo::Core::vkUpdateDescriptorSets = this->LoadInstanceFunction<PFN_vkUpdateDescriptorSets>(vk_instance, "vkUpdateDescriptorSets");
-    Turbo::Core::vkWaitForFences = this->LoadInstanceFunction<PFN_vkWaitForFences>(vk_instance, "vkWaitForFences");
-#endif
-
-#if defined(VK_VERSION_1_3)
-#endif
 }
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::Instance()
@@ -378,12 +81,6 @@ void Turbo::Core::TVulkanLoader::Destroy()
     {
         delete TVulkanLoader::vulkanLoader;
     }
-}
-
-void Turbo::Core::TVulkanLoader::LoadAll(TInstance *instance)
-{
-    this->LoadAllInstanceFunctions(instance);
-    this->LoadAllDeviceFunctions(instance);
 }
 
 Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
@@ -495,6 +192,40 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     return TVersion(1, 0, 0, 0);
 }
 
+Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TInstance *instance)
+{
+    Turbo::Core::TInstanceDriver instance_driver = {};
+
+    Turbo::Core::TVersion instance_version = instance->GetVulkanVersion();
+
+    VkInstance vk_instance = instance->GetVkInstance();
+#if defined(VK_VERSION_1_0)
+    instance_driver.vkDestroyInstance = this->LoadInstanceFunction<PFN_vkDestroyInstance>(vk_instance, "vkDestroyInstance");
+    instance_driver.vkEnumeratePhysicalDevices = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDevices>(vk_instance, "vkEnumeratePhysicalDevices");
+    instance_driver.vkGetDeviceProcAddr = this->LoadInstanceFunction<PFN_vkGetDeviceProcAddr>(vk_instance, "vkGetDeviceProcAddr");
+#endif
+
+    Turbo::Core::TVersion vulkan_version_1_1 = Turbo::Core::TVersion(1, 1, 0, 0);
+    if (instance_version >= vulkan_version_1_1)
+    {
+#if defined(VK_VERSION_1_1)
+        instance_driver.vkEnumeratePhysicalDeviceGroups = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDeviceGroups>(vk_instance, "vkEnumeratePhysicalDeviceGroups");
+#endif
+    }
+
+#if defined(VK_KHR_device_group_creation)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_DEVICE_GROUP_CREATION))
+        {
+            instance_driver.vkEnumeratePhysicalDeviceGroupsKHR = this->LoadInstanceFunction<PFN_vkEnumeratePhysicalDeviceGroupsKHR>(vk_instance, "vkEnumeratePhysicalDeviceGroupsKHR");
+        }
+    }
+#endif
+
+    return instance_driver;
+}
+
 Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)
 {
     Turbo::Core::TPhysicalDeviceDriver physical_device_driver = {};
@@ -548,12 +279,60 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
 #endif
     }
 
+#if defined(VK_KHR_get_physical_device_properties2)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+        {
+            physical_device_driver.vkGetPhysicalDeviceFeatures2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFeatures2KHR>(vk_instance, "vkGetPhysicalDeviceFeatures2KHR");
+            physical_device_driver.vkGetPhysicalDeviceProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceProperties2KHR>(vk_instance, "vkGetPhysicalDeviceProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceFormatProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceImageFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceImageFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceImageFormatProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceQueueFamilyProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR>(vk_instance, "vkGetPhysicalDeviceQueueFamilyProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceMemoryProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceMemoryProperties2KHR>(vk_instance, "vkGetPhysicalDeviceMemoryProperties2KHR");
+            physical_device_driver.vkGetPhysicalDeviceSparseImageFormatProperties2KHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR>(vk_instance, "vkGetPhysicalDeviceSparseImageFormatProperties2KHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_memory_capabilities)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalBufferPropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalBufferPropertiesKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_fence_capabilities)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalFencePropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalFencePropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalFencePropertiesKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_external_semaphore_capabilities)
+    if (instance->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+    {
+        if (instance->IsSupportExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+        {
+            physical_device_driver.vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = this->LoadInstanceFunction<PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR>(vk_instance, "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR");
+        }
+    }
+#endif
+
     return physical_device_driver;
 }
 
 Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
 {
     TDeviceDriver device_driver = {};
+    Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
+
 #if defined(VK_VERSION_1_0)
     device_driver.vkDestroyDevice = this->LoadDeviceFunction<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
     device_driver.vkAllocateCommandBuffers = this->LoadDeviceFunction<PFN_vkAllocateCommandBuffers>(device, "vkAllocateCommandBuffers");
@@ -677,9 +456,30 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     device_driver.vkWaitForFences = this->LoadDeviceFunction<PFN_vkWaitForFences>(device, "vkWaitForFences");
 #endif
 
+#if defined(VK_VERSION_1_1)
+    if (vulkan_version >= Turbo::Core::TVersion(1, 1, 0, 0))
+    {
+        device_driver.vkCmdDispatchBase = this->LoadDeviceFunction<PFN_vkCmdDispatchBase>(device, "vkCmdDispatchBase");
+        device_driver.vkCmdSetDeviceMask = this->LoadDeviceFunction<PFN_vkCmdSetDeviceMask>(device, "vkCmdSetDeviceMask");
+        device_driver.vkGetDeviceGroupPeerMemoryFeatures = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPeerMemoryFeatures>(device, "vkGetDeviceGroupPeerMemoryFeatures");
+        device_driver.vkGetDescriptorSetLayoutSupport = this->LoadDeviceFunction<PFN_vkGetDescriptorSetLayoutSupport>(device, "vkGetDescriptorSetLayoutSupport");
+    }
+#endif
+
+#if defined(VK_VERSION_1_2)
+    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
+    {
+        device_driver.vkGetBufferDeviceAddress = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddress>(device, "vkGetBufferDeviceAddress");
+        device_driver.vkGetBufferOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddress>(device, "vkGetBufferOpaqueCaptureAddress");
+        device_driver.vkGetDeviceMemoryOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddress>(device, "vkGetDeviceMemoryOpaqueCaptureAddress");
+    }
+#endif
+
 #if defined(VK_VERSION_1_3)
     // FIXME: Determine the version of Vulkan version
-    Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
+    // TODO: add the Extension version function of VK_KHR_dynamic_rendering
+    // TODO: vkCmdBeginRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
+    // TODO: vkCmdEndRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
     if (vulkan_version >= Turbo::Core::TVersion(1, 3, 0, 0))
     {
         device_driver.vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
@@ -690,18 +490,150 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
 #if defined(VK_EXT_mesh_shader)
     if (device->IsEnabledExtension(TExtensionType::VK_EXT_MESH_SHADER))
     {
-        device_driver.vkCmdDrawMeshTasksEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksEXT>(device, "vkCmdDrawMeshTasksEXT");
-        device_driver.vkCmdDrawMeshTasksIndirectCountEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(device, "vkCmdDrawMeshTasksIndirectCountEXT");
-        device_driver.vkCmdDrawMeshTasksIndirectEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectEXT>(device, "vkCmdDrawMeshTasksIndirectEXT");
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_MESH_SHADER))
+        {
+            device_driver.vkCmdDrawMeshTasksEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksEXT>(device, "vkCmdDrawMeshTasksEXT");
+            device_driver.vkCmdDrawMeshTasksIndirectCountEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(device, "vkCmdDrawMeshTasksIndirectCountEXT");
+            device_driver.vkCmdDrawMeshTasksIndirectEXT = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectEXT>(device, "vkCmdDrawMeshTasksIndirectEXT");
+        }
     }
 #endif
 
 #if defined(VK_NV_mesh_shader)
     if (device->IsEnabledExtension(TExtensionType::VK_NV_MESH_SHADER))
     {
-        device_driver.vkCmdDrawMeshTasksIndirectCountNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountNV>(device, "vkCmdDrawMeshTasksIndirectCountNV");
-        device_driver.vkCmdDrawMeshTasksIndirectNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectNV>(device, "vkCmdDrawMeshTasksIndirectNV");
-        device_driver.vkCmdDrawMeshTasksNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksNV>(device, "vkCmdDrawMeshTasksNV");
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_NV_MESH_SHADER))
+        {
+            device_driver.vkCmdDrawMeshTasksIndirectCountNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectCountNV>(device, "vkCmdDrawMeshTasksIndirectCountNV");
+            device_driver.vkCmdDrawMeshTasksIndirectNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksIndirectNV>(device, "vkCmdDrawMeshTasksIndirectNV");
+            device_driver.vkCmdDrawMeshTasksNV = this->LoadDeviceFunction<PFN_vkCmdDrawMeshTasksNV>(device, "vkCmdDrawMeshTasksNV");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_acceleration_structure)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE))
+        {
+            device_driver.vkBuildAccelerationStructuresKHR = this->LoadDeviceFunction<PFN_vkBuildAccelerationStructuresKHR>(device, "vkBuildAccelerationStructuresKHR");
+            device_driver.vkCmdBuildAccelerationStructuresIndirectKHR = this->LoadDeviceFunction<PFN_vkCmdBuildAccelerationStructuresIndirectKHR>(device, "vkCmdBuildAccelerationStructuresIndirectKHR");
+            device_driver.vkCmdBuildAccelerationStructuresKHR = this->LoadDeviceFunction<PFN_vkCmdBuildAccelerationStructuresKHR>(device, "vkCmdBuildAccelerationStructuresKHR");
+            device_driver.vkCmdCopyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCmdCopyAccelerationStructureKHR>(device, "vkCmdCopyAccelerationStructureKHR");
+            device_driver.vkCmdCopyAccelerationStructureToMemoryKHR = this->LoadDeviceFunction<PFN_vkCmdCopyAccelerationStructureToMemoryKHR>(device, "vkCmdCopyAccelerationStructureToMemoryKHR");
+            device_driver.vkCmdCopyMemoryToAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCmdCopyMemoryToAccelerationStructureKHR>(device, "vkCmdCopyMemoryToAccelerationStructureKHR");
+            device_driver.vkCmdWriteAccelerationStructuresPropertiesKHR = this->LoadDeviceFunction<PFN_vkCmdWriteAccelerationStructuresPropertiesKHR>(device, "vkCmdWriteAccelerationStructuresPropertiesKHR");
+            device_driver.vkCopyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCopyAccelerationStructureKHR>(device, "vkCopyAccelerationStructureKHR");
+            device_driver.vkCopyAccelerationStructureToMemoryKHR = this->LoadDeviceFunction<PFN_vkCopyAccelerationStructureToMemoryKHR>(device, "vkCopyAccelerationStructureToMemoryKHR");
+            device_driver.vkCopyMemoryToAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCopyMemoryToAccelerationStructureKHR>(device, "vkCopyMemoryToAccelerationStructureKHR");
+            device_driver.vkCreateAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkCreateAccelerationStructureKHR>(device, "vkCreateAccelerationStructureKHR");
+            device_driver.vkDestroyAccelerationStructureKHR = this->LoadDeviceFunction<PFN_vkDestroyAccelerationStructureKHR>(device, "vkDestroyAccelerationStructureKHR");
+            device_driver.vkGetAccelerationStructureBuildSizesKHR = this->LoadDeviceFunction<PFN_vkGetAccelerationStructureBuildSizesKHR>(device, "vkGetAccelerationStructureBuildSizesKHR");
+            device_driver.vkGetAccelerationStructureDeviceAddressKHR = this->LoadDeviceFunction<PFN_vkGetAccelerationStructureDeviceAddressKHR>(device, "vkGetAccelerationStructureDeviceAddressKHR");
+            device_driver.vkGetDeviceAccelerationStructureCompatibilityKHR = this->LoadDeviceFunction<PFN_vkGetDeviceAccelerationStructureCompatibilityKHR>(device, "vkGetDeviceAccelerationStructureCompatibilityKHR");
+            device_driver.vkWriteAccelerationStructuresPropertiesKHR = this->LoadDeviceFunction<PFN_vkWriteAccelerationStructuresPropertiesKHR>(device, "vkWriteAccelerationStructuresPropertiesKHR");
+        }
+    }
+#endif
+
+#if defined(VK_EXT_buffer_device_address)
+    if (device->IsEnabledExtension(TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS))
+        {
+            device_driver.vkGetBufferDeviceAddressEXT = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddressEXT>(device, "vkGetBufferDeviceAddressEXT");
+        }
+    }
+#endif
+#if defined(VK_KHR_buffer_device_address)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_BUFFER_DEVICE_ADDRESS))
+        {
+            device_driver.vkGetBufferDeviceAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddressKHR>(device, "vkGetBufferDeviceAddressKHR");
+            device_driver.vkGetBufferOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddressKHR>(device, "vkGetBufferOpaqueCaptureAddressKHR");
+            device_driver.vkGetDeviceMemoryOpaqueCaptureAddressKHR = this->LoadDeviceFunction<PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR>(device, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_device_group)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_DEVICE_GROUP))
+        {
+            device_driver.vkCmdDispatchBaseKHR = this->LoadDeviceFunction<PFN_vkCmdDispatchBaseKHR>(device, "vkCmdDispatchBaseKHR");
+            device_driver.vkCmdSetDeviceMaskKHR = this->LoadDeviceFunction<PFN_vkCmdSetDeviceMaskKHR>(device, "vkCmdSetDeviceMaskKHR");
+            device_driver.vkGetDeviceGroupPeerMemoryFeaturesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPeerMemoryFeaturesKHR>(device, "vkGetDeviceGroupPeerMemoryFeaturesKHR");
+#if defined(VK_KHR_surface)
+            if (device->IsEnabledExtension(TExtensionType::VK_KHR_SURFACE))
+            {
+                if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SURFACE))
+                {
+                    // NOTE: If VK_KHR_surface is supported:
+                    if (device_driver.vkGetDeviceGroupPresentCapabilitiesKHR == nullptr)
+                    {
+                        device_driver.vkGetDeviceGroupPresentCapabilitiesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupPresentCapabilitiesKHR>(device, "vkGetDeviceGroupPresentCapabilitiesKHR");
+                    }
+                    if (device_driver.vkGetDeviceGroupSurfacePresentModesKHR == nullptr)
+                    {
+                        device_driver.vkGetDeviceGroupSurfacePresentModesKHR = this->LoadDeviceFunction<PFN_vkGetDeviceGroupSurfacePresentModesKHR>(device, "vkGetDeviceGroupSurfacePresentModesKHR");
+                    }
+                    if (device_driver.vkGetPhysicalDevicePresentRectanglesKHR == nullptr)
+                    {
+                        device_driver.vkGetPhysicalDevicePresentRectanglesKHR = this->LoadDeviceFunction<PFN_vkGetPhysicalDevicePresentRectanglesKHR>(device, "vkGetPhysicalDevicePresentRectanglesKHR");
+                    }
+                }
+            }
+#endif
+#if defined(VK_KHR_swapchain)
+            if (device->IsEnabledExtension(TExtensionType::VK_KHR_SWAPCHAIN))
+            {
+                if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_SWAPCHAIN))
+                {
+                    // NOTE: If VK_KHR_swapchain is supported:
+                    if (device_driver.vkAcquireNextImage2KHR == nullptr)
+                    {
+                        device_driver.vkAcquireNextImage2KHR = this->LoadDeviceFunction<PFN_vkAcquireNextImage2KHR>(device, "vkAcquireNextImage2KHR");
+                    }
+                }
+            }
+#endif
+        }
+    }
+#endif
+
+#if defined(VK_EXT_tooling_info)
+    if (device->IsEnabledExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_EXT_TOOLING_INFO))
+        {
+            device_driver.vkGetPhysicalDeviceToolPropertiesEXT = this->LoadDeviceFunction<PFN_vkGetPhysicalDeviceToolPropertiesEXT>(device, "vkGetPhysicalDeviceToolPropertiesEXT");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_maintenance3)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_MAINTENANCE3))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_MAINTENANCE3))
+        {
+            device_driver.vkGetDescriptorSetLayoutSupportKHR = this->LoadDeviceFunction<PFN_vkGetDescriptorSetLayoutSupportKHR>(device, "vkGetDescriptorSetLayoutSupportKHR");
+        }
+    }
+#endif
+
+#if defined(VK_KHR_deferred_host_operations)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_DEFERRED_HOST_OPERATIONS))
+        {
+            device_driver.vkCreateDeferredOperationKHR = this->LoadDeviceFunction<PFN_vkCreateDeferredOperationKHR>(device, "vkCreateDeferredOperationKHR");
+            device_driver.vkDeferredOperationJoinKHR = this->LoadDeviceFunction<PFN_vkDeferredOperationJoinKHR>(device, "vkDeferredOperationJoinKHR");
+            device_driver.vkDestroyDeferredOperationKHR = this->LoadDeviceFunction<PFN_vkDestroyDeferredOperationKHR>(device, "vkDestroyDeferredOperationKHR");
+            device_driver.vkGetDeferredOperationMaxConcurrencyKHR = this->LoadDeviceFunction<PFN_vkGetDeferredOperationMaxConcurrencyKHR>(device, "vkGetDeferredOperationMaxConcurrencyKHR");
+            device_driver.vkGetDeferredOperationResultKHR = this->LoadDeviceFunction<PFN_vkGetDeferredOperationResultKHR>(device, "vkGetDeferredOperationResultKHR");
+        }
     }
 #endif
 

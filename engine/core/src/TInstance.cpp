@@ -140,6 +140,9 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
 {
     VkResult result = VkResult::VK_NOT_READY;
 
+    this->supportLayers = TLayerInfo::GetInstanceLayers();
+    this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
+
     if (vulkanVersion != nullptr || enabledLayers != nullptr || enabledExtensions != nullptr)
     {
         if (vulkanVersion != nullptr)
@@ -169,11 +172,8 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
         this->InternalCreate();
     }
 
-    this->supportLayers = TLayerInfo::GetInstanceLayers();
-    this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
-
     uint32_t physical_device_count = 0;
-    result = Turbo::Core::vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
+    result = this->GetInstanceDriver()->vkEnumeratePhysicalDevices(this->vkInstance, &physical_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS || physical_device_count == 0)
     {
         return result;
@@ -225,6 +225,53 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysica
     return nullptr;
 }
 
+void Turbo::Core::TInstance::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
+{
+    switch (extensionType)
+    {
+    case TExtensionType::UNDEFINED: {
+    }
+    break;
+    case TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2: {
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2))
+        {
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2));
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES))
+        {
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_MEMORY_CAPABILITIES));
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES))
+        {
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_FENCE_CAPABILITIES));
+        }
+    }
+    break;
+    case TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES))
+        {
+            this->enabledExtensions.push_back(this->GetExtensionByType(TExtensionType::VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES));
+        }
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+}
+
 void Turbo::Core::TInstance::InternalCreate()
 {
     TVulkanLoader::Instance();
@@ -234,6 +281,11 @@ void Turbo::Core::TInstance::InternalCreate()
     for (uint32_t enable_layer_index = 0; enable_layer_index < enable_layer_count; enable_layer_index++)
     {
         enable_layer_names[enable_layer_index] = this->enabledLayers[enable_layer_index].GetName().c_str();
+    }
+
+    for (uint32_t enabled_extensions_index = 0; enabled_extensions_index < this->enabledExtensions.size(); enabled_extensions_index++)
+    {
+        this->InspectExtensionAndVersionDependencies(this->enabledExtensions[enabled_extensions_index].GetExtensionType());
     }
 
     size_t enable_extension_count = this->enabledExtensions.size();
@@ -270,10 +322,11 @@ void Turbo::Core::TInstance::InternalCreate()
         throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::InternalCreate::vkCreateInstance");
     }
 
-    TVulkanLoader::Instance()->LoadAll(this);
-
     this->supportLayers = TLayerInfo::GetInstanceLayers();
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
+
+    this->instanceDriver = new TInstanceDriver();
+    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
 
     for (TPhysicalDevice *physical_device_item : this->physicalDevices)
     {
@@ -294,8 +347,9 @@ void Turbo::Core::TInstance::InternalDestroy()
     if (this->vkInstance != VK_NULL_HANDLE)
     {
         VkAllocationCallbacks *allocator = TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        Turbo::Core::vkDestroyInstance(this->vkInstance, allocator);
+        this->instanceDriver->vkDestroyInstance(this->vkInstance, allocator);
         this->vkInstance = VK_NULL_HANDLE;
+        delete this->instanceDriver;
     }
 }
 
@@ -456,4 +510,24 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetBestPhysicalDevice()
     }
 
     return this->physicalDevices[index];
+}
+
+const Turbo::Core::TInstanceDriver *Turbo::Core::TInstance::GetInstanceDriver()
+{
+    return this->instanceDriver;
+}
+
+Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType)
+{
+    TExtensionInfo result;
+    for (TExtensionInfo &type_item : this->supportExtensions)
+    {
+        if (type_item.GetExtensionType() == extensionType)
+        {
+            result = type_item;
+            break;
+        }
+    }
+
+    return result;
 }

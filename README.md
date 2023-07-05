@@ -38,8 +38,7 @@ Turbo是渲染引擎
 
 ## Document
 
-* 使用MarkDown书写,使用docsify部署(之前是使用MkDocs)
-* 使用MarkDown书写文字和文档，使用drawio绘制设计图表
+* **相关文档现在可以在[Vulkan入门精要](https://fuxiii.github.io/Essentials.of.Vulkan/index.html)中查阅。比如[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。**
 * **详细设计文档请参考`docs/TurboDesign.drawio`(需要安装`drawwio`)**
 * **目前存在的问题待解决，请查看`docs/Issue.md`**
 * 开发记录录像请浏览 [Turbo引擎开发记录](https://space.bilibili.com/34673516)
@@ -3177,3 +3176,136 @@ Turbo是渲染引擎
 * 2023/5/10 设计架构
   >
   >* 更新`./docs/Design/Core.md`文档
+
+* 2023/6/5 设计架构
+  >
+  >* `./sample`下增加`VulkanKHRRayTracingTest`示例，用于研究`Vulkan KHR`标准硬件实时光追。相关研究文档请查阅[Vulkan KHR 光线追踪标准](https://fuxiii.github.io/Essentials.of.Vulkan/InformalEssay/KHRRayTracing.html)。
+  >* `./engine/core`下`TExtensionInfo.h`下的`TExtensionType`枚举中增加`VK_KHR_ACCELERATION_STRUCTURE`枚举量。并且在对应的`TExtensionInfo.cpp`中的`TAllExtensionNames`中增加`VK_KHR_acceleration_structure`名称。
+
+* 2023/6/6 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`下的`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKHR`成员变量，用于存储加速结构特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`EnumerateProperties`函数中增加对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`加速结构特性信息的获取和赋值。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员。用于获取和激活加速结构。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`函数中，增加对于`bool accelerationStructure`、`bool accelerationStructureIndirectBuild`、`bool accelerationStructureHostCommands`和`bool descriptorBindingAccelerationStructureUpdateAfterBind`成员的赋值和获取。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`函数中，增加对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活判断赋值。
+
+* 2023/6/7 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate()`增加扩展指针链对于`VkPhysicalDeviceAccelerationStructureFeaturesKHR`特性的激活。
+  >* 更新`./samples`下的`VulkanKHRRayTracingTest`示例
+
+* 2023/6/12 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_acceleration_structure`相关函数声明。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对`VK_KHR_acceleration_structure`相关函数的获取。
+
+* 2023/6/13 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中`LoadDeviceDriver`成员函数增加对获取扩展函数之前判断是否支持相应扩展的判断。
+
+* 2023/6/15 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`IsSupportExtension`成员函数，将扩展名再次转换成扩展类型枚举进行判断去掉，没必要且重复。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`IsEnabledExtension`成员函数，将扩展名再次转换成扩展类型枚举进行判断去掉，没必要且重复。
+
+* 2023/6/20 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数为`InspectExtensionAndVersionDependencies(TExtensionInfo& extensionInfo)`。应该使用递归的方式检查依赖。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InternalCreate()`成员函数。检查依赖。
+  >* `./engine/core`下`TBuffer.h`下的`TBufferUsageBits`枚举中增加`BUFFER_SHADER_DEVICE_ADDRESS`、`BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY`、`BUFFER_ACCELERATION_STRUCTURE_STORAGE`和`BUFFER_SHADER_BINDING_TABLE`枚举成员枚举。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中增加对`VK_KHR_buffer_device_address`相关函数声明。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中更新`LoadDeviceDriver`成员函数。增加对`VK_KHR_buffer_device_address`相关函数获取。
+
+* 2023/6/21 设计架构
+  >
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中增加`VK_KHR_MAINTENANCE2`扩展依赖检查。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中更新`InspectExtensionAndVersionDependencies()`成员函数中移除对`VK_KHR_DEVICE_GROUP_CREATION`和`VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2`扩展依赖检查，这两个依赖属于`instance`依赖，不应该出现在`device`扩展中。
+
+* 2023/6/25 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_get_physical_device_properties2`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_memory_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_fence_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_semaphore_capabilities`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_EXT_tooling_info`扩展的函数。
+
+* 2023/6/27 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_EXT_buffer_device_address`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_external_semaphore_capabilities`提升至核心得函数。
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InspectExtensionAndVersionDependencies()`成员函数中增加对`VK_EXT_BUFFER_DEVICE_ADDRESS`扩展依赖检查。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中增加`VK_KHR_device_group`扩展的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下增加`TInstanceFunctionTable`结构体并声明`TInstanceDriver`为`TInstanceFunctionTable`别名。
+  >* `./engine/core`下`TVulkanLoader.h`下`TInstanceFunctionTable`结构体中增加`VK_KHR_device_group_creation`扩展的函数。
+
+* 2023/6/29 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddress`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddressCaptureReplay`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDeviceFeatures`类中增加`bool bufferDeviceAddressMultiDevice`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`EnumerateProperties()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`下的`TPhysicalDeviceInfo`类中增加对`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR`成员变量。
+  >* `./engine/core`下`TPhysicalDevice.h`下的`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VK_KHR_buffer_device_address`特性的获取。
+
+* 2023/6/30 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TInstanceFunctionTable`结构体中，增加`Vulkan 1.0`的函数。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TVulkanLoader`类中，增加`LoadInstanceDriver`成员函数。用于获取`instance`函数。
+
+* 2023/7/1 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下增加`vkEnumerateInstanceVersion`的`Vulkan`全局函数，并在`TVulkanLoader`构造函数中获取。
+  >* `./engine/core`下`TVulkanLoader.h`下移除所有非`Vulkan`全局函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类的`Load`函数增加`PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr`形参。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`LoadDeviceFunction(TInstance *instance, const char *name)`成员函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`LoadDeviceFunction(VkInstance instance, const char *name)`成员函数。
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中`LoadDeviceFunction(VkDevice device, const char *name)`成员函数增加`PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr`形参
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAllInstanceFunctions(TInstance *instance)`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAllDeviceFunctions(TInstance *instance)`成员函数
+  >* `./engine/core`下`TVulkanLoader.h`下`TVulkanLoader`类中移除`void LoadAll(TInstance *instance)`成员函数
+  >* `./engine/core`下`TInstance.h`下`TInstance`类中增加`TInstanceDriver *instanceDriver = nullptr`成员变量，并在`InternalCreate`成员函数中分配获取，在`InternalDestroy`中回收
+  >* `./engine/core`下`TInstance.h`下`TInstance`类中增加`const TInstanceDriver *GetInstanceDriver()`成员函数
+  >* `./engine/core`下`TDevice.h`下`TDevice`类中`InternalCreate`中`vkCreateDevice`函数使用`Turbo::Core::TPhysicalDeviceDriver`中的`vkCreateDevice`创建
+  >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`InternalCreate`中`vkEnumeratePhysicalDevices`函数使用`Turbo::Core::GetInstanceDriver`中的`vkEnumeratePhysicalDevices`函数
+  >* `./engine/core`下`TVmaAllocator.h`下`TVmaAllocator`类中`InternalCreate`中`vkGetDeviceProcAddr`函数使用`Turbo::Core::TInstanceDriver`中的`vkGetDeviceProcAddr`函数
+  >* `./docs`下`FAQ.md`下`Could Not find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR)`更新最新确切的解决方法。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TInstanceFunctionTable`结构体中，增加`PFN_vkEnumeratePhysicalDeviceGroups vkEnumeratePhysicalDeviceGroups`的函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TPhysicalDeviceFunctionTable`结构体中`VK_EXT_tooling_info`先关函数转移至`TDeviceFunctionTable`中并获取。
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`void InspectExtensionAndVersionDependencies(TExtensionType extensionType)`成员函数。使用递归的方式检查依赖。并在`InternalCreate()`进行调用。
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中增加`TExtensionInfo GetExtensionByType(TExtensionType extensionType)`成员函数
+
+* 2023/7/2 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDevice.h`下`TPhysicalDevice`类中`EnumerateProperties()`成员函数中，增加对`vkGetPhysicalDeviceFeatures2KHR`函数的判断和使用。
+  >* `./engine/core`下`TDevice.h`下`TDevice`类中`InspectExtensionAndVersionDependencies()`成员函数中，移除对于扩展的`Vulkan`版本限制，对于扩展不应该使用版本限制。
+  >* `./engine/core`下`TInstance.h`下`TInstance`类中`InspectExtensionAndVersionDependencies()`成员函数中，移除对于扩展的`Vulkan`版本限制，对于扩展不应该使用版本限制。
+
+* 2023/7/3 设计架构
+  >
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCmdDispatchBase vkCmdDispatchBase`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCmdSetDeviceMask vkCmdSetDeviceMask`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeviceGroupPeerMemoryFeatures vkGetDeviceGroupPeerMemoryFeatures`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupportKHR`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupport`成员函数并获取。
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkCreateDeferredOperationKHR vkCreateDeferredOperationKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkDeferredOperationJoinKHR vkDeferredOperationJoinKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkDestroyDeferredOperationKHR vkDestroyDeferredOperationKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationMaxConcurrencyKHR vkGetDeferredOperationMaxConcurrencyKHR`成员函数并获取
+  >* `./engine/core`下`TVulkanLoader.h`下的`TDeviceFunctionTable`结构体中，增加`PFN_vkGetDeferredOperationResultKHR vkGetDeferredOperationResultKHR`成员函数并获取
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
+  >* `./engine/core`下`TInstance.h`下的`TInstance`类中`InternalCreate`成员函数中，修正遍历`enabledExtensions`时调用`InspectExtensionAndVersionDependencies`导致的遍历器失效`Bug`
+  >* `./engine/core`下`TVmaAllocator.h`下的`TVmaAllocator`类中`InternalCreate`成员函数中，增加对于`VmaAllocatorCreateInfo::flags`的使用（如果要使用`buffer device address`的特性，需要开启`VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT`标志位）
+  >* `./engine/core`下`TDevice.h`下的`TDevice`类中`InternalCreate`成员函数中，增加对于`VkPhysicalDeviceBufferDeviceAddressFeaturesKHR`的使用激活设置
+  >* `./docs/Design`下增加`ForVulkanFeatureNote.md`文档用于记录开发`Vulkan`特性的流程
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的设备内存地址获取
+
+* 2023/7/4 设计架构
+  >
+  >* `./engine/core`下`TVmaAllocator.h`下的`TVmaAllocator`类中`InternalCreate`成员函数中，对于`VmaAllocatorCreateInfo::flags`的使用（在 `Vulkan 1.2` 标准之后被升级为核心标准）
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的加速结构
+
+* 2023/7/5 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的加速结构，成功创建一个底层加速结构
+

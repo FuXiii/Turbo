@@ -93,7 +93,7 @@ void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool 
     subres.mipLevel = 0;
     subres.arrayLayer = 0;
     VkSubresourceLayout sr_layout;
-    Turbo::Core::vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
+    image->GetDevice()->GetDeviceDriver()->vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
 
     char *ptr = (char *)temp_image->Map();
 

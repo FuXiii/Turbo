@@ -271,3 +271,8 @@ add_executable(SpecializationConstantsTest ./SpecializationConstantsTest.cpp ${I
 target_include_directories(SpecializationConstantsTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(SpecializationConstantsTest PUBLIC ${LINK_PARTH})
 target_link_libraries(SpecializationConstantsTest PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTest ./VulkanKHRRayTracingTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTest PUBLIC ${LIBS})
