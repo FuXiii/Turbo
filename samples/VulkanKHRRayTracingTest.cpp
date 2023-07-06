@@ -607,6 +607,7 @@ int main()
             Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
             Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
             command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
             device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &vk_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
             command_buffer->End();
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
