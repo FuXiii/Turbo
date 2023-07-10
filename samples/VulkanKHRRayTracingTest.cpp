@@ -671,6 +671,9 @@ int main()
             acceleration_structure_buffer = compact_acceleration_structure_buffer;
         }
 
+        // Top Level Acceleration Structure
+        VkAccelerationStructureInstanceKHR vk_acceleration_structure_instance_khr = {};
+
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, vk_acceleration_structure_khr, vk_allocation_callbacks);
         delete scratch_buffer;
         delete acceleration_structure_buffer;

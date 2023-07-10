@@ -3313,3 +3313,7 @@ Turbo是渲染引擎
   >
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索压缩实时光追的加速结构
 
+* 2023/7/10 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的顶层加速结构
+
