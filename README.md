@@ -71,6 +71,12 @@ Turbo是渲染引擎
 * 依赖：`Core`和`FrameGraph`。
 * 说明：由于直接使用`Core`层进行渲染相对来说还是会比较繁琐吃力一些，`Render`模块的出现就是将`Core`和`FrameGraph`结合起来，提供更加方便的工作流，将开发者从繁杂的`Core`层脱离出来，提供更加简单易用的设计架构
 
+## Clone
+
+```CMD
+git clone --recursive git@github.com:FuXiii/Turbo.git
+```
+
 ## Build
 
 * 首先您需要知道的：
@@ -120,8 +126,8 @@ Turbo是渲染引擎
         KTX_FEATURE_STATIC_LIBRARY=ON //目前Turbo按照静态库使用KTX
 
         //2022/7/30 关于解决Turbo核心库的依赖库问题解决，核心库对于VulkanMemoryAllocator使用动态加载Vulkan API方式，这也是Turbo引擎加载Vulkan API的方式
-        VMA_STATIC_VULKAN_FUNCTIONS=0
-        VMA_DYNAMIC_VULKAN_FUNCTIONS=1
+        VMA_STATIC_VULKAN_FUNCTIONS=OFF
+        VMA_DYNAMIC_VULKAN_FUNCTIONS=ON
         ```
 
   *注：如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
@@ -3324,4 +3330,6 @@ Turbo是渲染引擎
 * 2023/7/12 设计架构
   >
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的顶层加速结构
-
+  >* `./engine/core`下`thirdparty`中`SPIRV-Cross`和`VulkanMemoryAllocator`转成`submodules`
+  >* `./engine/core`下更新`CMakeLists.txt`适配新版的`VulkanMemoryAllocator`
+  >* `README`增加`Clone`章节
