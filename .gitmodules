@@ -17,3 +17,11 @@
 [submodule "engine/core/thirdparty/glslang"]
 	path = engine/core/thirdparty/glslang
 	url = git@github.com:KhronosGroup/glslang.git
+[submodule "engine/core/thirdparty/SPIRV-Cross"]
+	path = engine/core/thirdparty/SPIRV-Cross
+	url = git@github.com:KhronosGroup/SPIRV-Cross.git
+	branch = main
+[submodule "engine/core/thirdparty/VulkanMemoryAllocator"]
+	path = engine/core/thirdparty/VulkanMemoryAllocator
+	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+	branch = master
