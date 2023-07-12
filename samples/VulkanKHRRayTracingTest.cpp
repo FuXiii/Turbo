@@ -569,7 +569,7 @@ int main()
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> vk_acceleration_structure_build_range_info_khrs;
         vk_acceleration_structure_build_range_info_khrs.push_back(vk_acceleration_structure_build_range_info_khr);
 
-        std::vector<VkAccelerationStructureBuildRangeInfoKHR * /*指向个数为 VkAccelerationStructureBuildGeometryInfoKHR::geometryCount 的 VkAccelerationStructureBuildRangeInfoKHR 数组*/> build_range_infos;
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR * /*指向个数为 VkAccelerationStructureBuildGeometryInfoKHR::geometryCount 的 VkAccelerationStructureBuildRangeInfoKHR 数组*/> build_range_infos; // 该数组内元素个数应与 vkCmdBuildAccelerationStructuresKHR::infoCount 对应
         build_range_infos.push_back(vk_acceleration_structure_build_range_info_khrs.data());
         // TODO: compaction query pool for compact acceleration structure
         {
@@ -836,92 +836,127 @@ int main()
         {
             std::cout << "Successfully get top_level_scratch_buffer VkBuffer device local address " << std::endl;
         }
+
+        // Build Top Level Acceleration Structure
+        top_level_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = top_level_acceleration_structure_khr;
+        top_level_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = top_level_scratch_buffer_device_address;
+
+        VkAccelerationStructureBuildRangeInfoKHR top_level_acceleration_structure_build_range_info_khr = {};
+        top_level_acceleration_structure_build_range_info_khr.primitiveCount = 1;
+        top_level_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
+        top_level_acceleration_structure_build_range_info_khr.firstVertex = 0;
+        top_level_acceleration_structure_build_range_info_khr.transformOffset = 0;
+
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR> top_level_acceleration_structure_build_range_info_khrs;
+        top_level_acceleration_structure_build_range_info_khrs.push_back(top_level_acceleration_structure_build_range_info_khr);
+
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR *> top_level_acceleration_structure_ppBuildRangeInfos;
+        top_level_acceleration_structure_ppBuildRangeInfos.push_back(top_level_acceleration_structure_build_range_info_khrs.data());
+
+        {
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdBuildAccelerationStructuresKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_build_geometry_info_khr, top_level_acceleration_structure_ppBuildRangeInfos.data());
+            command_buffer->End();
+
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+        }
+
         // Top Level Acceleration Structure Compact
-        // {
-        //     VkQueryPool query_pool = VK_NULL_HANDLE;
+        {
+            VkQueryPool query_pool = VK_NULL_HANDLE;
 
-        //     VkQueryPoolCreateInfo vk_query_pool_create_info = {};
-        //     vk_query_pool_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-        //     vk_query_pool_create_info.pNext = nullptr;
-        //     vk_query_pool_create_info.flags = 0;
-        //     vk_query_pool_create_info.queryType = VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR;
-        //     vk_query_pool_create_info.queryCount = 1;
-        //     vk_query_pool_create_info.pipelineStatistics = 0;
+            VkQueryPoolCreateInfo vk_query_pool_create_info = {};
+            vk_query_pool_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+            vk_query_pool_create_info.pNext = nullptr;
+            vk_query_pool_create_info.flags = 0;
+            vk_query_pool_create_info.queryType = VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR;
+            vk_query_pool_create_info.queryCount = 1;
+            vk_query_pool_create_info.pipelineStatistics = 0;
 
-        //     result = device->GetDeviceDriver()->vkCreateQueryPool(vk_device, &vk_query_pool_create_info, vk_allocation_callbacks, &query_pool);
-        //     if (result != VK_SUCCESS)
-        //     {
-        //         std::cout << "Create VkQueryPool Failed" << std::endl;
-        //     }
+            result = device->GetDeviceDriver()->vkCreateQueryPool(vk_device, &vk_query_pool_create_info, vk_allocation_callbacks, &query_pool);
+            if (result != VK_SUCCESS)
+            {
+                std::cout << "Create VkQueryPool Failed" << std::endl;
+            }
 
-        //     std::cout << "Create VkQueryPool Success" << std::endl;
+            std::cout << "Create VkQueryPool Success" << std::endl;
 
-        //     Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-        //     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
-        //     command_buffer->Begin();
-        //     device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
-        //     device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
-        //     command_buffer->End();
-        //     Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-        //     queue->Submit(nullptr, nullptr, command_buffer, fence);
-        //     fence->WaitUntil();
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
+            device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
 
-        //     VkDeviceSize compact_size = 0;
-        //     device->GetDeviceDriver()->vkGetQueryPoolResults(vk_device, query_pool, 0, 1, sizeof(VkDeviceSize), &compact_size, sizeof(VkDeviceSize), VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
-        //     std::cout << "top level acceleration structure compact size:" << compact_size << std::endl;
+            VkDeviceSize compact_size = 0;
+            device->GetDeviceDriver()->vkGetQueryPoolResults(vk_device, query_pool, 0, 1, sizeof(VkDeviceSize), &compact_size, sizeof(VkDeviceSize), VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
+            std::cout << "top level acceleration structure compact size:" << compact_size << std::endl;
 
-        //     delete fence;
-        //     command_pool->Free(command_buffer);
+            delete fence;
+            command_pool->Free(command_buffer);
 
-        //     VkAccelerationStructureKHR compact_acceleration_structure_khr = VK_NULL_HANDLE;
+            VkAccelerationStructureKHR compact_acceleration_structure_khr = VK_NULL_HANDLE;
 
-        //     Turbo::Core::TBuffer *compact_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
+            Turbo::Core::TBuffer *compact_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
 
-        //     VkAccelerationStructureCreateInfoKHR compact_vk_acceleration_structure_create_info_khr = {};
-        //     compact_vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-        //     compact_vk_acceleration_structure_create_info_khr.pNext = nullptr;
-        //     compact_vk_acceleration_structure_create_info_khr.createFlags = 0;
-        //     compact_vk_acceleration_structure_create_info_khr.buffer = compact_acceleration_structure_buffer->GetVkBuffer();
-        //     compact_vk_acceleration_structure_create_info_khr.offset = 0;
-        //     compact_vk_acceleration_structure_create_info_khr.size = compact_size;
-        //     compact_vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
-        //     compact_vk_acceleration_structure_create_info_khr.deviceAddress = 0;
+            VkAccelerationStructureCreateInfoKHR compact_vk_acceleration_structure_create_info_khr = {};
+            compact_vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+            compact_vk_acceleration_structure_create_info_khr.pNext = nullptr;
+            compact_vk_acceleration_structure_create_info_khr.createFlags = 0;
+            compact_vk_acceleration_structure_create_info_khr.buffer = compact_acceleration_structure_buffer->GetVkBuffer();
+            compact_vk_acceleration_structure_create_info_khr.offset = 0;
+            compact_vk_acceleration_structure_create_info_khr.size = compact_size;
+            compact_vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+            compact_vk_acceleration_structure_create_info_khr.deviceAddress = 0;
 
-        //     result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &compact_vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &compact_acceleration_structure_khr);
-        //     if (result != VkResult::VK_SUCCESS)
-        //     {
-        //         std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Failed" << std::endl;
-        //     }
+            result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &compact_vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &compact_acceleration_structure_khr);
+            if (result != VkResult::VK_SUCCESS)
+            {
+                std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Failed" << std::endl;
+            }
 
-        //     std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Success" << std::endl;
+            std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Success" << std::endl;
 
-        //     VkCopyAccelerationStructureInfoKHR vk_copy_acceleration_structure_info_khr = {};
-        //     vk_copy_acceleration_structure_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR;
-        //     vk_copy_acceleration_structure_info_khr.pNext = nullptr;
-        //     vk_copy_acceleration_structure_info_khr.src = top_level_acceleration_structure_khr;
-        //     vk_copy_acceleration_structure_info_khr.dst = compact_acceleration_structure_khr;
-        //     vk_copy_acceleration_structure_info_khr.mode = VkCopyAccelerationStructureModeKHR::VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR;
+            VkCopyAccelerationStructureInfoKHR vk_copy_acceleration_structure_info_khr = {};
+            vk_copy_acceleration_structure_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR;
+            vk_copy_acceleration_structure_info_khr.pNext = nullptr;
+            vk_copy_acceleration_structure_info_khr.src = top_level_acceleration_structure_khr;
+            vk_copy_acceleration_structure_info_khr.dst = compact_acceleration_structure_khr;
+            vk_copy_acceleration_structure_info_khr.mode = VkCopyAccelerationStructureModeKHR::VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR;
 
-        //     command_buffer = command_pool->Allocate();
-        //     command_buffer->Begin();
-        //     device->GetDeviceDriver()->vkCmdCopyAccelerationStructureKHR(command_buffer->GetVkCommandBuffer(), &vk_copy_acceleration_structure_info_khr);
-        //     command_buffer->End();
-        //     fence = new Turbo::Core::TFence(device);
-        //     queue->Submit(nullptr, nullptr, command_buffer, fence);
-        //     fence->WaitUntil();
-        //     delete fence;
-        //     command_pool->Free(command_buffer);
-        //     delete command_pool;
-        //     device->GetDeviceDriver()->vkDestroyQueryPool(vk_device, query_pool, vk_allocation_callbacks);
+            command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdCopyAccelerationStructureKHR(command_buffer->GetVkCommandBuffer(), &vk_copy_acceleration_structure_info_khr);
+            command_buffer->End();
+            fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            device->GetDeviceDriver()->vkDestroyQueryPool(vk_device, query_pool, vk_allocation_callbacks);
 
-        //     // destroy no compact acceleration structure
-        //     device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
-        //     delete top_level_acceleration_structure_buffer;
+            // destroy no compact acceleration structure
+            device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
+            delete top_level_acceleration_structure_buffer;
 
-        //     // set acceleration structure value to compact version
-        //     top_level_acceleration_structure_khr = compact_acceleration_structure_khr;
-        //     top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
-        // }
+            // set acceleration structure value to compact version
+            top_level_acceleration_structure_khr = compact_acceleration_structure_khr;
+            top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
+        }
+
         delete top_level_scratch_buffer;
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete top_level_acceleration_structure_buffer;
