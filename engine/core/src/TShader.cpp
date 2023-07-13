@@ -85,30 +85,61 @@ EShLanguage TShaderTypeToGlslangEShLanguage(Turbo::Core::TShaderType type)
 {
     switch (type)
     {
-    case Turbo::Core::TShaderType::VERTEX:
+    case Turbo::Core::TShaderType::VERTEX: {
         return EShLanguage::EShLangVertex;
-        break;
-    case Turbo::Core::TShaderType::TESSELLATION_CONTROL:
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_CONTROL: {
         return EShLanguage::EShLangTessControl;
-        break;
-    case Turbo::Core::TShaderType::TESSELLATION_EVALUATION:
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_EVALUATION: {
         return EShLanguage::EShLangTessEvaluation;
-        break;
-    case Turbo::Core::TShaderType::GEOMETRY:
+    }
+    break;
+    case Turbo::Core::TShaderType::GEOMETRY: {
         return EShLanguage::EShLangGeometry;
-        break;
-    case Turbo::Core::TShaderType::FRAGMENT:
+    }
+    break;
+    case Turbo::Core::TShaderType::FRAGMENT: {
         return EShLanguage::EShLangFragment;
-        break;
-    case Turbo::Core::TShaderType::COMPUTE:
+    }
+    break;
+    case Turbo::Core::TShaderType::COMPUTE: {
         return EShLanguage::EShLangCompute;
-        break;
-    case Turbo::Core::TShaderType::TASK:
+    }
+    break;
+    case Turbo::Core::TShaderType::TASK: {
         return EShLanguage::EShLangTask;
-        break;
-    case Turbo::Core::TShaderType::MESH:
+    }
+    break;
+    case Turbo::Core::TShaderType::MESH: {
         return EShLanguage::EShLangMesh;
-        break;
+    }
+    break;
+    case Turbo::Core::TShaderType::RAY_GENERATION: {
+        return EShLanguage::EShLangRayGen;
+    }
+    break;
+    case Turbo::Core::TShaderType::ANY_HIT: {
+        return EShLanguage::EShLangAnyHit;
+    }
+    break;
+    case Turbo::Core::TShaderType::CLOSEST_HIT: {
+        return EShLanguage::EShLangClosestHit;
+    }
+    break;
+    case Turbo::Core::TShaderType::MISS: {
+        return EShLanguage::EShLangMiss;
+    }
+    break;
+    case Turbo::Core::TShaderType::INTERSECTION: {
+        return EShLanguage::EShLangIntersect;
+    }
+    break;
+    case Turbo::Core::TShaderType::CALLABLE: {
+        return EShLanguage::EShLangCallable;
+    }
     }
 
     return EShLanguage::EShLangVertex;
@@ -647,6 +678,36 @@ void Turbo::Core::TShader::InternalParseSpirV()
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
     }
 
+    for (spirv_cross::Resource &acceleration_structures_item : resources.acceleration_structures)
+    {
+        // VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR
+        spirv_cross::ID id = acceleration_structures_item.id;
+        spirv_cross::TypeID type_id = acceleration_structures_item.type_id;
+
+        spirv_cross::SPIRType type = glsl.get_type(type_id);
+        spirv_cross::SPIRType::BaseType base_type = type.basetype;
+
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = acceleration_structures_item.name;
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        TAccelerationStructureDescriptor *acceleration_structure_descriptor = new TAccelerationStructureDescriptor(this, descriptor_data_type, set, binding, count, name);
+        this->accelerationStructureDescriptors.push_back(acceleration_structure_descriptor);
+    }
+
     for (spirv_cross::Resource &stage_input_item : resources.stage_inputs)
     {
         // input
@@ -921,6 +982,12 @@ Turbo::Core::TShader::~TShader()
     }
     this->storageImageDescriptors.clear();
 
+    for (TAccelerationStructureDescriptor *acceleration_structure_descriptor_item : this->accelerationStructureDescriptors)
+    {
+        delete acceleration_structure_descriptor_item;
+    }
+    this->accelerationStructureDescriptors.clear();
+
     free(this->code);
     this->code = nullptr;
     this->size = 0;
@@ -933,43 +1000,8 @@ Turbo::Core::TDevice *Turbo::Core::TShader::GetDevice()
 
 VkShaderStageFlags Turbo::Core::TShader::GetVkShaderStageFlags()
 {
-    switch (this->type)
-    {
-    case Turbo::Core::TShaderType::VERTEX: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::TESSELLATION_CONTROL: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::TESSELLATION_EVALUATION: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::GEOMETRY: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::FRAGMENT: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::COMPUTE: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
-    }
-    break;
-    case Turbo::Core::TShaderType::TASK: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT;
-    }
-    break;
-    case Turbo::Core::TShaderType::MESH: {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
-    }
-    break;
-    }
-
-    return VkShaderStageFlagBits::VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+    VkShaderStageFlags vk_shader_stage_flags = this->GetVkShaderStageFlagBits();
+    return vk_shader_stage_flags;
 }
 
 VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits()
@@ -1006,6 +1038,30 @@ VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits()
     break;
     case Turbo::Core::TShaderType::MESH: {
         return VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
+    }
+    break;
+    case Turbo::Core::TShaderType::RAY_GENERATION: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+    }
+    break;
+    case Turbo::Core::TShaderType::ANY_HIT: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+    }
+    break;
+    case Turbo::Core::TShaderType::CLOSEST_HIT: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+    }
+    break;
+    case Turbo::Core::TShaderType::MISS: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR;
+    }
+    break;
+    case Turbo::Core::TShaderType::INTERSECTION: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+    }
+    break;
+    case Turbo::Core::TShaderType::CALLABLE: {
+        return VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR;
     }
     break;
     }

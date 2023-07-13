@@ -3333,3 +3333,17 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`thirdparty`中`SPIRV-Cross`和`VulkanMemoryAllocator`转成`submodules`
   >* `./engine/core`下更新`CMakeLists.txt`适配新版的`VulkanMemoryAllocator`
   >* `README`增加`Clone`章节
+
+* 2023/7/13 设计架构
+  >
+  >* `./engine/core`下`TDescriptor.h`中`TDescriptorType`枚举增加`ACCELERATION_STRUCTURE`用于加速结构描述符类型
+  >* `./engine/core`下`TDescriptor.h`中增加`TAccelerationStructureDescriptor`类。用于加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptors`成员变量。用于存储加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptor`成员变量。用于存储加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中`InternalParseSpirV()`成员函数中增加对`TAccelerationStructureDescriptor`的加速结构描述符的创建
+  >* `./engine/core`下`TShader.h`中`TShader`类中`~TShader`析构函数中增加对`TAccelerationStructureDescriptor`的加速结构描述符的销毁
+  >* `./asset/shaders`下增加`RayTraceTest.rgen`光线生成着色器，用于测试光线生成着色器。
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`RAY_GENERATION`、`ANY_HIT`、`CLOSEST_HIT`、`MISS`、`INTERSECTION`、`CALLABLE`成员枚举量，用于光线追踪着色器
+  >* `./engine/core`下`TShader.h`中`TShader`类中更新`GetVkShaderStageFlagBits()`成员函数，适配光线追踪着色器
+  >* `./engine/core`下`TShader.cpp`中更新`TShaderTypeToGlslangEShLanguage()`全局函数，适配光线追踪着色器
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的着色器和相关描述符

@@ -20,7 +20,13 @@ typedef enum class TShaderType
     FRAGMENT = 4,
     COMPUTE = 5,
     TASK = 6,
-    MESH = 7
+    MESH = 7,
+    RAY_GENERATION = 8,
+    ANY_HIT = 9,
+    CLOSEST_HIT = 10,
+    MISS = 11,
+    INTERSECTION = 12,
+    CALLABLE = 13,
 } TShaderType;
 
 typedef enum class TShaderLanguage
@@ -105,6 +111,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TPushConstantDescriptor *> pushConstantDescriptors;
     std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;
     std::vector<TStorageImageDescriptor *> storageImageDescriptors;
+    std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptors;
 
     std::string entryPoint;
 

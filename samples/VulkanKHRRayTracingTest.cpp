@@ -47,92 +47,20 @@
 #include "glm/fwd.hpp"
 #include <glm/ext.hpp>
 
-void ImageSaveToPPM(Turbo::Core::TImage *image, Turbo::Core::TCommandBufferPool *commandBufferPool, Turbo::Core::TDeviceQueue *deviceQueue, std::string name)
+std::string ReadTextFile(const std::string &filename)
 {
-    std::string save_file_path = "./";
-    std::string save_file_name = name;
+    std::vector<std::string> data;
 
-    Turbo::Core::TImage *source_image = image;
+    std::ifstream file;
 
-    Turbo::Core::TImage *temp_image = new Turbo::Core::TImage(image->GetDevice(), 0, Turbo::Core::TImageType::DIMENSION_2D, source_image->GetFormat(), source_image->GetWidth(), source_image->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::LINEAR, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE);
+    file.open(filename, std::ios::in);
 
-    Turbo::Core::TCommandBuffer *temp_command_buffer = commandBufferPool->Allocate();
-
-    temp_command_buffer->Begin();
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, 0, 0, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, source_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->CmdCopyImage(source_image, Turbo::Core::TImageLayout::TRANSFER_SRC_OPTIMAL, temp_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, source_image->GetWidth(), source_image->GetHeight(), 1);
-    temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::HOST_BIT, 0, 0, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, temp_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    temp_command_buffer->End();
-
-    Turbo::Core::TFence *gpu_copy_to_cpu_fence = new Turbo::Core::TFence(image->GetDevice());
-
-    deviceQueue->Submit(nullptr, nullptr, temp_command_buffer, gpu_copy_to_cpu_fence);
-
-    gpu_copy_to_cpu_fence->WaitUntil();
-
-    delete gpu_copy_to_cpu_fence;
-
-    std::string filename;
-    filename.append(save_file_path);
-    filename.append(save_file_name);
-    filename.append(".ppm");
-
-    VkImageSubresource subres = {};
-    subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    subres.mipLevel = 0;
-    subres.arrayLayer = 0;
-    VkSubresourceLayout sr_layout;
-    image->GetDevice()->GetDeviceDriver()->vkGetImageSubresourceLayout(image->GetDevice()->GetVkDevice(), temp_image->GetVkImage(), &subres, &sr_layout);
-
-    char *ptr = (char *)temp_image->Map();
-
-    ptr += sr_layout.offset;
-    std::ofstream file(filename.c_str(), std::ios::binary);
-
-    file << "P6\n";
-    file << source_image->GetWidth() << " ";
-    file << source_image->GetHeight() << "\n";
-    file << 255 << "\n";
-
-    int x = 0;
-    int y = 0;
-
-    for (y = 0; y < source_image->GetHeight(); y++)
+    if (!file.is_open())
     {
-        const int *row = (const int *)ptr;
-        int swapped;
-
-        if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_UNORM || source_image->GetFormat().GetVkFormat() == VK_FORMAT_B8G8R8A8_SRGB)
-        {
-            for (x = 0; x < source_image->GetWidth(); x++)
-            {
-                swapped = (*row & 0xff00ff00) | (*row & 0x000000ff) << 16 | (*row & 0x00ff0000) >> 16;
-                file.write((char *)&swapped, 3);
-                row++;
-            }
-        }
-        else if (source_image->GetFormat().GetVkFormat() == VK_FORMAT_R8G8B8A8_UNORM)
-        {
-            for (x = 0; x < source_image->GetWidth(); x++)
-            {
-                file.write((char *)row, 3);
-                row++;
-            }
-        }
-        else
-        {
-            printf("Unrecognized image format - will not write image files");
-            break;
-        }
-
-        ptr += sr_layout.rowPitch;
+        throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    file.close();
-    temp_image->Unmap();
-    delete temp_image;
-    commandBufferPool->Free(temp_command_buffer);
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
@@ -156,6 +84,8 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "void main() {\n"
                                     "   outColor = vec4(inColor,1);\n"
                                     "}\n";
+
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTraceTest.rgen");
 
 typedef struct POSITION
 {
@@ -957,6 +887,9 @@ int main()
             top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
         }
 
+        Turbo::Core::TShader *ray_gen_test = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::RAY_GENERATION, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+
+        delete ray_gen_test;
         delete top_level_scratch_buffer;
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete top_level_acceleration_structure_buffer;
@@ -1275,8 +1208,6 @@ int main()
         delete wait_image_ready;
         //</End Rendering>
     }
-
-    ImageSaveToPPM(swapchain_images[0], command_pool, queue, "PureHelloTriangle");
 
     descriptor_pool->Free(pipeline_descriptor_set);
     delete pipeline;
