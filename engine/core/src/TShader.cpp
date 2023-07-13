@@ -1246,3 +1246,11 @@ Turbo::Core::TMeshShader::TMeshShader(TDevice *device, TShaderLanguage language,
 Turbo::Core::TMeshShader::TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, size, code, entryPoint)
 {
 }
+
+Turbo::Core::TRayGenerationShader::TRayGenerationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TRayGenerationShader::TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, size, code, entryPoint)
+{
+}

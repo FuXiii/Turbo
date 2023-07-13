@@ -3347,3 +3347,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TShader.h`中`TShader`类中更新`GetVkShaderStageFlagBits()`成员函数，适配光线追踪着色器
   >* `./engine/core`下`TShader.cpp`中更新`TShaderTypeToGlslangEShLanguage()`全局函数，适配光线追踪着色器
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的着色器和相关描述符
+  >* `./engine/core`下`TShader.h`中增加`TRayGenerationShader`类。用于描述光线生成着色器。

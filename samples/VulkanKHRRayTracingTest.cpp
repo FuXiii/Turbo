@@ -891,9 +891,9 @@ int main()
             top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
         }
 
-        Turbo::Core::TShader *ray_gen_test = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::RAY_GENERATION, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        Turbo::Core::TRayGenerationShader *ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
 
-        delete ray_gen_test;
+        delete ray_generation_shader_test;
         delete top_level_scratch_buffer;
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete top_level_acceleration_structure_buffer;

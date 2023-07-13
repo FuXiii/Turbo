@@ -219,6 +219,13 @@ class TMeshShader : public Turbo::Core::TShader
     TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
+class TRayGenerationShader : public Turbo::Core::TShader
+{
+  public:
+    TRayGenerationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADER_H
