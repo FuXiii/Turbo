@@ -244,3 +244,11 @@ Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(TShader *shader, T
 Turbo::Core::TStorageImageDescriptor::~TStorageImageDescriptor()
 {
 }
+
+Turbo::Core::TAccelerationStructureDescriptor::TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::ACCELERATION_STRUCTURE, dataType, set, binding, count, name)
+{
+}
+
+Turbo::Core::TAccelerationStructureDescriptor::~TAccelerationStructureDescriptor()
+{
+}
