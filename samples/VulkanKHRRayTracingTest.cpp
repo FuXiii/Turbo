@@ -287,6 +287,10 @@ int main()
         {
             enable_device_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SPIRV_1_4)
+        {
+            enable_device_extensions.push_back(extension);
+        }
     }
 
     Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
