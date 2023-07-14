@@ -122,6 +122,14 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
+        case TDescriptorType::ACCELERATION_STRUCTURE: {
+            VkDescriptorPoolSize vk_descriptor_pool_size = {};
+            vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+            vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
+
+            vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
+        }
+        break;
         }
     }
 
@@ -171,6 +179,7 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
         uint32_t uniform_buffer_dynamic_count = 0;
         uint32_t storage_buffer_dynamic_count = 0;
         uint32_t input_attachment_count = 0;
+        uint32_t acceleration_structure_count = 0;
 
         for (TDescriptorSize &descriptor_size_item : descriptorSizes)
         {
@@ -218,6 +227,10 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
             break;
             case TDescriptorType::INPUT_ATTACHMENT: {
                 input_attachment_count += descriptor_size_item.GetDescriptorCount();
+            }
+            break;
+            case TDescriptorType::ACCELERATION_STRUCTURE: {
+                acceleration_structure_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
             }
@@ -286,6 +299,12 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
         if (input_attachment_count != 0)
         {
             TDescriptorSize descriptor_size(TDescriptorType::INPUT_ATTACHMENT, input_attachment_count);
+            this->descriptorSizes.push_back(descriptor_size);
+        }
+
+        if (acceleration_structure_count != 0)
+        {
+            TDescriptorSize descriptor_size(TDescriptorType::ACCELERATION_STRUCTURE, acceleration_structure_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 

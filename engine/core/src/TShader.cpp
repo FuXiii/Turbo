@@ -1114,6 +1114,11 @@ const std::vector<Turbo::Core::TStorageImageDescriptor *> &Turbo::Core::TShader:
     return this->storageImageDescriptors;
 }
 
+const std::vector<Turbo::Core::TAccelerationStructureDescriptor *> &Turbo::Core::TShader::GetAccelerationStructureDescriptors()
+{
+    return this->accelerationStructureDescriptors;
+}
+
 std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()
 {
     return this->inputs;

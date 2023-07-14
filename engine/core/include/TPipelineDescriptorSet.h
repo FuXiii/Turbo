@@ -36,7 +36,10 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers);
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers);
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews);
-    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler);
+    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &samplers);
+
+    // FIXME: Need a ACCELERATION_STRUCTURE binding function
+    /* FIXME: Just for Test*/ void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures);
 
   public:
     virtual std::string ToString() override;

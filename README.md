@@ -3348,3 +3348,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TShader.cpp`中更新`TShaderTypeToGlslangEShLanguage()`全局函数，适配光线追踪着色器
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的着色器和相关描述符
   >* `./engine/core`下`TShader.h`中增加`TRayGenerationShader`类。用于描述光线生成着色器。
+
+* 2023/7/14 设计架构
+  >
+  >* `./engine/core`下`TDescriptorPool.h`中`TDescriptorPool`类中增加对`TDescriptorType::ACCELERATION_STRUCTURE`的适配
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors()`的成员函数
+  >* `./engine/core`下`TPipeline.h`中`TPipeline`类中增加对`TDescriptorType::ACCELERATION_STRUCTURE`的适配
+  >* `./engine/core`下`TPipelineDescriptorSet.h`中`TPipelineDescriptorSet`类中增加`void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构
+  >* `./engine/core`下`TDescriptorSet.h`中`TDescriptorSet`类中增加`void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构

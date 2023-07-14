@@ -143,6 +143,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
     const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();
     const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors();
+    const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors();
 
     std::vector<TInterface> GetInputs();
     std::vector<TInterface> GetOutputs();

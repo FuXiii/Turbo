@@ -71,6 +71,13 @@ void Turbo::Core::TPipeline::InternalCreate()
             uint32_t set = storage_image_descriptors_item->GetSet();
             descriptor_set_map[set].push_back(storage_image_descriptors_item);
         }
+
+        std::vector<TAccelerationStructureDescriptor *> acceleration_structure_descriptors = shader_item->GetAccelerationStructureDescriptors();
+        for (TAccelerationStructureDescriptor *acceleration_structure_descriptors_item : acceleration_structure_descriptors)
+        {
+            uint32_t set = acceleration_structure_descriptors_item->GetSet();
+            descriptor_set_map[set].push_back(acceleration_structure_descriptors_item);
+        }
     }
 
     {
