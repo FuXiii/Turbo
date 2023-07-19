@@ -26,6 +26,10 @@
   >
   >* `C/C++与WebGPU`中勘误
 
+* 2023/7/19
+  >
+  >* `C/C++与WebGPU`中勘误
+
 ---
 
 [WebGPU标准](https://www.w3.org/TR/webgpu/)
@@ -202,3 +206,12 @@ set https_proxy=127.0.0.1:你VPN或科学工具的端口号
 
 9. 网络端渲染结果：
 ![WebGPU_triangle](../images/WebGPU_triangle.png)
+
+## PureCCppWebGPUTest
+
+该项目是从 [Hello-WebGPU](https://github.com/cwoffenden/hello-webgpu) 中精简摘抄出来的，为独立的项目（目前与 `Turbo` 引擎没有联系）。
+
+### 编译
+
+编译过程和之前 [Hello-WebGPU](##Hello-WebGPU) 章节的流程一致。
+

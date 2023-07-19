@@ -16,15 +16,17 @@ Turbo是渲染引擎
 ![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
 ![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
 ![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
-![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Future-lightgrey?logo=internetexplorer)  
+![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer)  
 
 ## Version
 
 当前版本 0.0.0.12
 
-## State
+## State  
 
-* 开发中
+* 研究开发 `Vulkan` 硬件实时光追。
+* 研究开发`C/C++`开发`WebGPU`项目，并发布到浏览器页面中。  
+    `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档
 
 ## Sponsor
 
@@ -3356,3 +3358,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TPipeline.h`中`TPipeline`类中增加对`TDescriptorType::ACCELERATION_STRUCTURE`的适配
   >* `./engine/core`下`TPipelineDescriptorSet.h`中`TPipelineDescriptorSet`类中增加`void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构
   >* `./engine/core`下`TDescriptorSet.h`中`TDescriptorSet`类中增加`void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构
+
+* 2023/7/19 设计架构
+  >
+  >* `./samples`下增加`PureCCppWebGPUTest`项目文件夹，用于测试`C/C++`的`WebGPU`项目编译至浏览器的网页端渲染。
+  >* 更新`README.md`下的`State`段落，简单记录当前开发状态。
+  >* 更新`./docs/Design/WebGPU_CCPP.md`文档，增加对`PureCCppWebGPUTest`项目的说明。
