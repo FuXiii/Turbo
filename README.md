@@ -3364,3 +3364,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./samples`下增加`PureCCppWebGPUTest`项目文件夹，用于测试`C/C++`的`WebGPU`项目编译至浏览器的网页端渲染。
   >* 更新`README.md`下的`State`段落，简单记录当前开发状态。
   >* 更新`./docs/Design/WebGPU_CCPP.md`文档，增加对`PureCCppWebGPUTest`项目的说明。
+
+* 2023/7/20 设计架构
+  >
+  >* `./samples`下`PureCCppWebGPUTest`项目文件夹增加`compile_flags.txt`，用于设置`clangd`的`Emscripten`的头文件目录。
