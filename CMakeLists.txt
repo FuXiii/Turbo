@@ -4,6 +4,8 @@ project(Turbo)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunused-function")
+
 
 set(CMAKE_BUILD_TYPE "debug")
 
