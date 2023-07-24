@@ -3372,3 +3372,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/7/22 设计架构
   >
   >* `./samples`下新增`PureCCppWebGlslangAndSpirVCrossTest`项目。用于存放将`GLSL`或`HLSL`或`Spir-V`着色器代码通过`Web`网页端，在线将代码进行互相编译和转换项目。
+
+* 2023/7/22 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebGlslangAndSpirVCrossTest`项目。用于存放将`GLSL`或`HLSL`或`Spir-V`着色器代码通过`Web`网页端，在线将代码进行互相编译和转换项目。
+
+* 2023/7/24 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebGlfwTest`项目。用于存放将`glfw`的`Web`网页端测试工程。
