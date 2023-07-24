@@ -1,0 +1,7 @@
+-I
+E:\emsdk\upstream\emscripten\cache\sysroot\include
+
+-I
+E:\TestDelete\WebAssemblyTest\WasmImGuiTest\imgui
+-I
+E:\TestDelete\WebAssemblyTest\WasmImGuiTest\imgui\backends

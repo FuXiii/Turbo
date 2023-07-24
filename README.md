@@ -3377,3 +3377,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下新增`PureCCppWebGlfwTest`项目。用于存放`glfw`的`Web`网页端测试工程。
   >* `./samples`下新增`PureCCppWebImGuiTest`项目。用于存放`imgui`的`Web`网页端测试工程。
+
+* 2023/7/25 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebShaderCompiler`项目。用于存放在线`GLSL`、`HLSL`和`SPIR-V`网页端着色器转化编译器项目。
