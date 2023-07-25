@@ -75,7 +75,6 @@ std::string IMGUI_CLIPBOARD_TEXT;
 
 void SET_CLIPBOARD_TEXT_FUN(void *user_data, const char *text)
 {
-    std::cout << "SET_CLIPBOARD_TEXT_FUN:" << text << std::endl;
     IMGUI_CLIPBOARD_TEXT = std::string(text);
 }
 
@@ -168,7 +167,7 @@ KEEP_IN_MODULE void _get_clipboard_str_(size_t size, char *str)
 // clang-format off
 EM_JS(void, get_clipboard_str, (), {
     navigator.permissions.query({name : 'clipboard-read'}).then(result => {
-        const hasFocus = document.hasFocus(); // 这个是重点，可判断是否为当前dom页面
+        const hasFocus = document.hasFocus();
         if (hasFocus && (result.state === 'granted' || result.state === 'prompt'))
         {
             const clipboard = navigator.clipboard.readText();
@@ -181,6 +180,10 @@ EM_JS(void, get_clipboard_str, (), {
         }
     });
 })
+// clang-format on
+
+// clang-format off
+EM_JS(void, write_clipboard_str, (const char* str), {navigator.clipboard.writeText(UTF8ToString(str))})
 // clang-format on
 
 EM_JS(void, webgpu_preint, (), {
@@ -224,6 +227,426 @@ int main(int, char **)
     return 0;
 }
 
+struct CustomeExampleAppConsole
+{
+    char InputBuf[256];
+    ImVector<char *> Items;
+    ImVector<const char *> Commands;
+    ImVector<char *> History;
+    int HistoryPos; // -1: new line, 0..History.Size-1 browsing history.
+    ImGuiTextFilter Filter;
+    bool AutoScroll;
+    bool ScrollToBottom;
+
+    CustomeExampleAppConsole()
+    {
+        // IMGUI_DEMO_MARKER("Examples/Console");
+        ClearLog();
+        memset(InputBuf, 0, sizeof(InputBuf));
+        HistoryPos = -1;
+
+        // "CLASSIFY" is here to provide the test case where "C"+[tab] completes to "CL" and display multiple matches.
+        Commands.push_back("HELP");
+        Commands.push_back("HISTORY");
+        Commands.push_back("CLEAR");
+        Commands.push_back("CLASSIFY");
+        AutoScroll = true;
+        ScrollToBottom = false;
+    }
+    ~CustomeExampleAppConsole()
+    {
+        ClearLog();
+        for (int i = 0; i < History.Size; i++)
+            free(History[i]);
+    }
+
+    // Portable helpers
+    static int Stricmp(const char *s1, const char *s2)
+    {
+        int d;
+        while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1)
+        {
+            s1++;
+            s2++;
+        }
+        return d;
+    }
+    static int Strnicmp(const char *s1, const char *s2, int n)
+    {
+        int d = 0;
+        while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1)
+        {
+            s1++;
+            s2++;
+            n--;
+        }
+        return d;
+    }
+    static char *Strdup(const char *s)
+    {
+        IM_ASSERT(s);
+        size_t len = strlen(s) + 1;
+        void *buf = malloc(len);
+        IM_ASSERT(buf);
+        return (char *)memcpy(buf, (const void *)s, len);
+    }
+    static void Strtrim(char *s)
+    {
+        char *str_end = s + strlen(s);
+        while (str_end > s && str_end[-1] == ' ')
+            str_end--;
+        *str_end = 0;
+    }
+
+    void ClearLog()
+    {
+        for (int i = 0; i < Items.Size; i++)
+            free(Items[i]);
+        Items.clear();
+    }
+
+    void AddLog(const char *fmt, ...) IM_FMTARGS(2)
+    {
+        // FIXME-OPT
+        char buf[1024];
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
+        buf[IM_ARRAYSIZE(buf) - 1] = 0;
+        va_end(args);
+        Items.push_back(Strdup(buf));
+    }
+
+    void Draw(const char *title, bool *p_open)
+    {
+        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin(title, p_open))
+        {
+            ImGui::End();
+            return;
+        }
+
+        // As a specific feature guaranteed by the library, after calling Begin() the last Item represent the title bar.
+        // So e.g. IsItemHovered() will return true when hovering the title bar.
+        // Here we create a context menu only available from the title bar.
+        if (ImGui::BeginPopupContextItem())
+        {
+            if (ImGui::MenuItem("Close Console"))
+                *p_open = false;
+            ImGui::EndPopup();
+        }
+
+        // ImGui::TextWrapped(
+        //     "This example implements a console with basic coloring, completion (TAB key) and history (Up/Down keys).
+        //     A more elaborate " "implementation may want to store entries along with extra data such as timestamp,
+        //     emitter, etc.");
+        // ImGui::TextWrapped("Enter 'HELP' for help.");
+
+        // TODO: display items starting from the bottom
+
+        // if (ImGui::SmallButton("Add Debug Text"))  { AddLog("%d some text", Items.Size); AddLog("some more text");
+        // AddLog("display very important message here!"); } ImGui::SameLine(); if (ImGui::SmallButton("Add Debug
+        // Error")) { AddLog("[error] something went wrong"); } ImGui::SameLine(); if (ImGui::SmallButton("Clear")) {
+        // ClearLog(); } ImGui::SameLine(); bool copy_to_clipboard = ImGui::SmallButton("Copy");
+        bool copy_to_clipboard = false;
+        // static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
+
+        // ImGui::Separator();
+
+        // Options menu
+        // if (ImGui::BeginPopup("Options"))
+        //{
+        //    ImGui::Checkbox("Auto-scroll", &AutoScroll);
+        //    ImGui::EndPopup();
+        //}
+
+        //// Options, Filter
+        // if (ImGui::Button("Options"))
+        //     ImGui::OpenPopup("Options");
+        // ImGui::SameLine();
+        // Filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
+        // ImGui::Separator();
+
+        // Reserve enough left-over height for 1 separator + 1 input text
+        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+        if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false,
+                              ImGuiWindowFlags_HorizontalScrollbar))
+        {
+            if (ImGui::BeginPopupContextWindow())
+            {
+                if (ImGui::Selectable("Clear"))
+                    ClearLog();
+                ImGui::EndPopup();
+            }
+
+            // Display every line as a separate entry so we can change their color or add custom widgets.
+            // If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
+            // NB- if you have thousands of entries this approach may be too inefficient and may require user-side
+            // clipping to only process visible items. The clipper will automatically measure the height of your first
+            // item and then "seek" to display only items in the visible area. To use the clipper we can replace your
+            // standard loop:
+            //      for (int i = 0; i < Items.Size; i++)
+            //   With:
+            //      ImGuiListClipper clipper;
+            //      clipper.Begin(Items.Size);
+            //      while (clipper.Step())
+            //         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+            // - That your items are evenly spaced (same height)
+            // - That you have cheap random access to your elements (you can access them given their index,
+            //   without processing all the ones before)
+            // You cannot this code as-is if a filter is active because it breaks the 'cheap random-access' property.
+            // We would need random-access on the post-filtered list.
+            // A typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
+            // or offsets of items that passed the filtering test, recomputing this array when user changes the filter,
+            // and appending newly elements as they are inserted. This is left as a task to the user until we can manage
+            // to improve this example code!
+            // If your items are of variable height:
+            // - Split them into same height items would be simpler and facilitate random-seeking into your list.
+            // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+            if (copy_to_clipboard)
+                ImGui::LogToClipboard();
+            for (int i = 0; i < Items.Size; i++)
+            {
+                const char *item = Items[i];
+                if (!Filter.PassFilter(item))
+                    continue;
+
+                // Normally you would store more information in your item than just a string.
+                // (e.g. make Items[] an array of structure, store color/type etc.)
+                ImVec4 color;
+                bool has_color = false;
+                if (strstr(item, "[error]"))
+                {
+                    color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
+                    has_color = true;
+                }
+                else if (strstr(item, "[success]"))
+                {
+                    color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+                    has_color = true;
+                }
+                else if (strncmp(item, "# ", 2) == 0)
+                {
+                    color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f);
+                    has_color = true;
+                }
+                if (has_color)
+                    ImGui::PushStyleColor(ImGuiCol_Text, color);
+                ImGui::TextUnformatted(item);
+                if (has_color)
+                    ImGui::PopStyleColor();
+            }
+            if (copy_to_clipboard)
+                ImGui::LogFinish();
+
+            // Keep up at the bottom of the scroll region if we were already at the bottom at the beginning of the
+            // frame. Using a scrollbar or mouse-wheel will take away from the bottom edge.
+            if (ScrollToBottom || (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
+                ImGui::SetScrollHereY(1.0f);
+            ScrollToBottom = false;
+
+            ImGui::PopStyleVar();
+        }
+        ImGui::EndChild();
+        // ImGui::Separator();
+        //
+        //// Command-line
+        // bool reclaim_focus = false;
+        // ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue |
+        // ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion |
+        // ImGuiInputTextFlags_CallbackHistory; if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf),
+        // input_text_flags, &TextEditCallbackStub, (void*)this))
+        //{
+        //     char* s = InputBuf;
+        //     Strtrim(s);
+        //     if (s[0])
+        //         ExecCommand(s);
+        //     strcpy(s, "");
+        //     reclaim_focus = true;
+        // }
+        //
+        //// Auto-focus on window apparition
+        // ImGui::SetItemDefaultFocus();
+        // if (reclaim_focus)
+        //     ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+
+        ImGui::End();
+    }
+
+    void ExecCommand(const char *command_line)
+    {
+        AddLog("# %s\n", command_line);
+
+        // Insert into history. First find match and delete it so it can be pushed to the back.
+        // This isn't trying to be smart or optimal.
+        HistoryPos = -1;
+        for (int i = History.Size - 1; i >= 0; i--)
+            if (Stricmp(History[i], command_line) == 0)
+            {
+                free(History[i]);
+                History.erase(History.begin() + i);
+                break;
+            }
+        History.push_back(Strdup(command_line));
+
+        // Process command
+        if (Stricmp(command_line, "CLEAR") == 0)
+        {
+            ClearLog();
+        }
+        else if (Stricmp(command_line, "HELP") == 0)
+        {
+            AddLog("Commands:");
+            for (int i = 0; i < Commands.Size; i++)
+                AddLog("- %s", Commands[i]);
+        }
+        else if (Stricmp(command_line, "HISTORY") == 0)
+        {
+            int first = History.Size - 10;
+            for (int i = first > 0 ? first : 0; i < History.Size; i++)
+                AddLog("%3d: %s\n", i, History[i]);
+        }
+        else
+        {
+            AddLog("Unknown command: '%s'\n", command_line);
+        }
+
+        // On command input, we scroll to bottom even if AutoScroll==false
+        ScrollToBottom = true;
+    }
+
+    // In C++11 you'd be better off using lambdas for this sort of forwarding callbacks
+    static int TextEditCallbackStub(ImGuiInputTextCallbackData *data)
+    {
+        CustomeExampleAppConsole *console = (CustomeExampleAppConsole *)data->UserData;
+        return console->TextEditCallback(data);
+    }
+
+    int TextEditCallback(ImGuiInputTextCallbackData *data)
+    {
+        // AddLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
+        switch (data->EventFlag)
+        {
+        case ImGuiInputTextFlags_CallbackCompletion: {
+            // Example of TEXT COMPLETION
+
+            // Locate beginning of current word
+            const char *word_end = data->Buf + data->CursorPos;
+            const char *word_start = word_end;
+            while (word_start > data->Buf)
+            {
+                const char c = word_start[-1];
+                if (c == ' ' || c == '\t' || c == ',' || c == ';')
+                    break;
+                word_start--;
+            }
+
+            // Build a list of candidates
+            ImVector<const char *> candidates;
+            for (int i = 0; i < Commands.Size; i++)
+                if (Strnicmp(Commands[i], word_start, (int)(word_end - word_start)) == 0)
+                    candidates.push_back(Commands[i]);
+
+            if (candidates.Size == 0)
+            {
+                // No match
+                AddLog("No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
+            }
+            else if (candidates.Size == 1)
+            {
+                // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
+                data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
+                data->InsertChars(data->CursorPos, candidates[0]);
+                data->InsertChars(data->CursorPos, " ");
+            }
+            else
+            {
+                // Multiple matches. Complete as much as we can..
+                // So inputing "C"+Tab will complete to "CL" then display "CLEAR" and "CLASSIFY" as matches.
+                int match_len = (int)(word_end - word_start);
+                for (;;)
+                {
+                    int c = 0;
+                    bool all_candidates_matches = true;
+                    for (int i = 0; i < candidates.Size && all_candidates_matches; i++)
+                        if (i == 0)
+                            c = toupper(candidates[i][match_len]);
+                        else if (c == 0 || c != toupper(candidates[i][match_len]))
+                            all_candidates_matches = false;
+                    if (!all_candidates_matches)
+                        break;
+                    match_len++;
+                }
+
+                if (match_len > 0)
+                {
+                    data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
+                    data->InsertChars(data->CursorPos, candidates[0], candidates[0] + match_len);
+                }
+
+                // List matches
+                AddLog("Possible matches:\n");
+                for (int i = 0; i < candidates.Size; i++)
+                    AddLog("- %s\n", candidates[i]);
+            }
+
+            break;
+        }
+        case ImGuiInputTextFlags_CallbackHistory: {
+            // Example of HISTORY
+            const int prev_history_pos = HistoryPos;
+            if (data->EventKey == ImGuiKey_UpArrow)
+            {
+                if (HistoryPos == -1)
+                    HistoryPos = History.Size - 1;
+                else if (HistoryPos > 0)
+                    HistoryPos--;
+            }
+            else if (data->EventKey == ImGuiKey_DownArrow)
+            {
+                if (HistoryPos != -1)
+                    if (++HistoryPos >= History.Size)
+                        HistoryPos = -1;
+            }
+
+            // A better implementation would preserve the data on the current input line along with cursor position.
+            if (prev_history_pos != HistoryPos)
+            {
+                const char *history_str = (HistoryPos >= 0) ? History[HistoryPos] : "";
+                data->DeleteChars(0, data->BufTextLen);
+                data->InsertChars(0, history_str);
+            }
+        }
+        }
+        return 0;
+    }
+};
+
+static CustomeExampleAppConsole console;
+
+static void Log(const std::string &str)
+{
+    console.AddLog(str.c_str());
+}
+
+static void LogSuccess(const std::string &str)
+{
+    std::string error_str = "[success] \n" + str;
+    console.AddLog(error_str.c_str());
+}
+
+static void LogError(const std::string &str)
+{
+    std::string error_str = "[error] \n" + str;
+    console.AddLog(error_str.c_str());
+}
+
+static void ClearLog()
+{
+    console.ClearLog();
+}
+
 const char *CLIENT_ITEMS[] = {"Vulkan", "OpenGL"};
 int CLIENT_ITEMS_CURRENT_INDEX = 0;
 
@@ -233,6 +656,394 @@ int TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
 const char *TARGET_LANGUAGE_ITEMS[] = {"SPIR-V 1.0", "SPIR-V 1.1", "SPIR-V 1.2", "SPIR-V 1.3",
                                        "SPIR-V 1.4", "SPIR-V 1.5", "SPIR-V 1.6"};
 int TARGET_LANGUAGE_ITEMS_CURRENT_INDEX = 0;
+
+const char *SHADER_TYPE_ITEMS[] = {"Vertex",
+                                   "Tessellation Control",
+                                   "Tessellation Evaluation",
+                                   "Geometry",
+                                   "Fragment",
+                                   "Compute",
+                                   "Ray Generation",
+                                   "Intersection",
+                                   "Any-Hit",
+                                   "Closest Hit",
+                                   "Miss",
+                                   "Callable",
+                                   "Task",
+                                   "Mesh"};
+int SHADER_TYPE_ITEMS_CURRENT_INDEX = 0;
+
+const char *LANGUAGE_ITEMS[] = {"GLSL", "HLSL"};
+int LANGUAGE_ITEMS_CURRENT_INDEX = 0;
+
+static TextEditor editor;
+
+enum TextEditorLanguage
+{
+    GLSL,
+    HLSL
+};
+
+void ChangeTextEditorLanguage(TextEditorLanguage textEditorLanguage)
+{
+
+    TextEditor::LanguageDefinition lang;
+    switch (textEditorLanguage)
+    {
+    case GLSL: {
+        lang = TextEditor::LanguageDefinition::GLSL();
+    }
+    break;
+    case HLSL: {
+        lang = TextEditor::LanguageDefinition::HLSL();
+    }
+    break;
+    }
+
+    // set your own known preprocessor symbols...
+    static const char *ppnames[] = {"NULL",
+                                    "PM_REMOVE",
+                                    "ZeroMemory",
+                                    "DXGI_SWAP_EFFECT_DISCARD",
+                                    "D3D_FEATURE_LEVEL",
+                                    "D3D_DRIVER_TYPE_HARDWARE",
+                                    "WINAPI",
+                                    "D3D11_SDK_VERSION",
+                                    "assert"};
+    // ... and their corresponding values
+    static const char *ppvalues[] = {
+        "#define NULL ((void*)0)",
+        "#define PM_REMOVE (0x0001)",
+        "Microsoft's own memory zapper function\n(which is a macro actually)\nvoid ZeroMemory(\n\t[in] PVOID  "
+        "Destination,\n\t[in] SIZE_T Length\n); ",
+        "enum DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD = 0",
+        "enum D3D_FEATURE_LEVEL",
+        "enum D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE  = ( D3D_DRIVER_TYPE_UNKNOWN + 1 )",
+        "#define WINAPI __stdcall",
+        "#define D3D11_SDK_VERSION (7)",
+        " #define assert(expression) (void)(                                                  \n"
+        "    (!!(expression)) ||                                                              \n"
+        "    (_wassert(_CRT_WIDE(#expression), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)), 0) \n"
+        " )"};
+
+    for (int i = 0; i < sizeof(ppnames) / sizeof(ppnames[0]); ++i)
+    {
+        TextEditor::Identifier id;
+        id.mDeclaration = ppvalues[i];
+        lang.mPreprocIdentifiers.insert(std::make_pair(std::string(ppnames[i]), id));
+    }
+
+    // set your own identifiers
+    static const char *identifiers[] = {"HWND",
+                                        "HRESULT",
+                                        "LPRESULT",
+                                        "D3D11_RENDER_TARGET_VIEW_DESC",
+                                        "DXGI_SWAP_CHAIN_DESC",
+                                        "MSG",
+                                        "LRESULT",
+                                        "WPARAM",
+                                        "LPARAM",
+                                        "UINT",
+                                        "LPVOID",
+                                        "ID3D11Device",
+                                        "ID3D11DeviceContext",
+                                        "ID3D11Buffer",
+                                        "ID3D11Buffer",
+                                        "ID3D10Blob",
+                                        "ID3D11VertexShader",
+                                        "ID3D11InputLayout",
+                                        "ID3D11Buffer",
+                                        "ID3D10Blob",
+                                        "ID3D11PixelShader",
+                                        "ID3D11SamplerState",
+                                        "ID3D11ShaderResourceView",
+                                        "ID3D11RasterizerState",
+                                        "ID3D11BlendState",
+                                        "ID3D11DepthStencilState",
+                                        "IDXGISwapChain",
+                                        "ID3D11RenderTargetView",
+                                        "ID3D11Texture2D",
+                                        "TextEditor"};
+    static const char *idecls[] = {"typedef HWND_* HWND",
+                                   "typedef long HRESULT",
+                                   "typedef long* LPRESULT",
+                                   "struct D3D11_RENDER_TARGET_VIEW_DESC",
+                                   "struct DXGI_SWAP_CHAIN_DESC",
+                                   "typedef tagMSG MSG\n * Message structure",
+                                   "typedef LONG_PTR LRESULT",
+                                   "WPARAM",
+                                   "LPARAM",
+                                   "UINT",
+                                   "LPVOID",
+                                   "ID3D11Device",
+                                   "ID3D11DeviceContext",
+                                   "ID3D11Buffer",
+                                   "ID3D11Buffer",
+                                   "ID3D10Blob",
+                                   "ID3D11VertexShader",
+                                   "ID3D11InputLayout",
+                                   "ID3D11Buffer",
+                                   "ID3D10Blob",
+                                   "ID3D11PixelShader",
+                                   "ID3D11SamplerState",
+                                   "ID3D11ShaderResourceView",
+                                   "ID3D11RasterizerState",
+                                   "ID3D11BlendState",
+                                   "ID3D11DepthStencilState",
+                                   "IDXGISwapChain",
+                                   "ID3D11RenderTargetView",
+                                   "ID3D11Texture2D",
+                                   "class TextEditor"};
+    for (int i = 0; i < sizeof(identifiers) / sizeof(identifiers[0]); ++i)
+    {
+        TextEditor::Identifier id;
+        id.mDeclaration = std::string(idecls[i]);
+        lang.mIdentifiers.insert(std::make_pair(std::string(identifiers[i]), id));
+    }
+    editor.SetLanguageDefinition(lang);
+}
+
+#include <SPIRV/GlslangToSpv.h>
+#include <StandAlone/DirStackFileIncluder.h>
+#include <glslang/Include/BaseTypes.h>
+#include <glslang/Public/ResourceLimits.h>
+#include <glslang/Public/ShaderLang.h>
+
+std::vector<uint32_t> ShaderCodeToSpirV(glslang::EShSource language, EShLanguage shaderType, glslang::EShClient client,
+                                        glslang::EShTargetClientVersion targetClientVersion,
+                                        glslang::EShTargetLanguageVersion targetLanguageVersion,
+                                        const std::string &code)
+{
+    std::vector<uint32_t> shader_spir;
+
+    bool is_initialize_process = glslang::InitializeProcess();
+    if (!is_initialize_process)
+    {
+        LogError("glslang::InitializeProcess failed");
+        return shader_spir;
+    }
+
+    EShLanguage esh_language = shaderType;
+
+    glslang::TShader shader_glslang(esh_language);
+
+    glslang::EShSource esh_source = language;
+
+    const char *code_c_str = code.c_str();
+    shader_glslang.setStrings(&code_c_str, 1);
+    shader_glslang.setEnvInput(esh_source, esh_language, client, 100);
+
+    glslang::EShTargetClientVersion esh_target_client_version =
+        targetClientVersion; // glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    glslang::EShTargetLanguageVersion esh_target_language_version =
+        targetLanguageVersion; // glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+
+    shader_glslang.setEnvClient(glslang::EShClient::EShClientVulkan, esh_target_client_version);
+    shader_glslang.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, esh_target_language_version);
+    EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
+
+    if (!shader_glslang.parse(GetDefaultResources(), 100, false, messages))
+    {
+        std::string log_messgae(shader_glslang.getInfoLog());
+        LogError(log_messgae);
+        glslang::FinalizeProcess();
+        return shader_spir;
+    }
+
+    glslang::TProgram program;
+    program.addShader(&shader_glslang);
+    if (!program.link(messages))
+    {
+        std::string log_messgae(program.getInfoLog());
+        LogError(log_messgae);
+        glslang::FinalizeProcess();
+        return shader_spir;
+    }
+
+    glslang::GlslangToSpv(*(program.getIntermediate(esh_language)), shader_spir);
+
+    glslang::FinalizeProcess();
+
+    return shader_spir;
+}
+#include <sstream>
+
+void ToSpirVCallback()
+{
+    std::string code_str = editor.GetText();
+    if (!code_str.empty())
+    {
+        EShLanguage shader_stage = EShLanguage::EShLangVertex;
+
+        if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 0 /*Vertex*/)
+        {
+            shader_stage = EShLanguage::EShLangVertex;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*Tessellation Control*/)
+        {
+            shader_stage = EShLanguage::EShLangTessControl;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 2 /*Tessellation Evaluation*/)
+        {
+            shader_stage = EShLanguage::EShLangTessEvaluation;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 3 /*Geometry*/)
+        {
+            shader_stage = EShLanguage::EShLangGeometry;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 4 /*Fragment*/)
+        {
+            shader_stage = EShLanguage::EShLangFragment;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 5 /*Compute*/)
+        {
+            shader_stage = EShLanguage::EShLangCompute;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 6 /*Ray Generation*/)
+        {
+            shader_stage = EShLanguage::EShLangRayGen;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 7 /*Intersection*/)
+        {
+            shader_stage = EShLanguage::EShLangIntersect;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 8 /*Any-Hit*/)
+        {
+            shader_stage = EShLanguage::EShLangAnyHit;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 9 /*Closest Hit*/)
+        {
+            shader_stage = EShLanguage::EShLangClosestHit;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Miss*/)
+        {
+            shader_stage = EShLanguage::EShLangMiss;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Callable*/)
+        {
+            shader_stage = EShLanguage::EShLangCallable;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Task*/)
+        {
+            shader_stage = EShLanguage::EShLangTask;
+        }
+        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Mesh*/)
+        {
+            shader_stage = EShLanguage::EShLangMesh;
+        }
+
+        glslang::EShClient client = glslang::EShClient::EShClientVulkan;
+        switch (CLIENT_ITEMS_CURRENT_INDEX)
+        {
+        case 0: {
+            client = glslang::EShClient::EShClientVulkan;
+        }
+        break;
+        case 1: {
+            client = glslang::EShClient::EShClientOpenGL;
+        }
+        break;
+        }
+
+        glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+        switch (TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+        {
+        case 0: {
+            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+        }
+        break;
+        case 1: {
+            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+        }
+        break;
+        case 2: {
+            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+        }
+        break;
+        case 3: {
+            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+        }
+        break;
+        case 4: {
+            target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+        }
+        break;
+        }
+
+        glslang::EShTargetLanguageVersion target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+        switch (TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+        {
+        case 0: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+        }
+        break;
+        case 1: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_1;
+        }
+        break;
+        case 2: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_2;
+        }
+        break;
+        case 3: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_3;
+        }
+        break;
+        case 4: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_4;
+        }
+        case 5: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_5;
+        }
+        case 6: {
+            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_6;
+        }
+        break;
+        }
+
+        std::vector<uint32_t> siprv_code;
+        if (LANGUAGE_ITEMS_CURRENT_INDEX == 0 /*GLSL*/)
+        {
+            siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceGlsl, shader_stage, client,
+                                           target_client_version, target_language_version, code_str);
+        }
+        else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1 /*HLSL*/)
+        {
+            siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceHlsl, shader_stage, client,
+                                           target_client_version, target_language_version, code_str);
+        }
+
+        std::string hex_spirv_code_result;
+        {
+            std::stringstream ss;
+
+            ss << "static uint32_t const spirv_code[] = {";
+            for (size_t code_index = 0; code_index < siprv_code.size(); code_index++)
+            {
+                if (code_index != siprv_code.size() - 1)
+                {
+                    ss << "0x" << std::hex << siprv_code[code_index];
+                    ss << ", ";
+                }
+                else
+                {
+                    ss << "0x" << std::hex << siprv_code[code_index];
+                }
+            }
+            ss << "};";
+            hex_spirv_code_result = ss.str();
+        }
+
+        write_clipboard_str(hex_spirv_code_result.c_str());
+
+        LogSuccess(hex_spirv_code_result);
+        LogSuccess("SPIR-V code success copy in clipboard");
+    }
+    else
+    {
+        LogError("Shader code is empty.");
+    }
+}
 
 static void MainLoopStep(void *window)
 {
@@ -266,165 +1077,20 @@ static void MainLoopStep(void *window)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Our state
-    // (we use static, which essentially makes the variable globals, as a convenience to keep the example code easy to
-    // follow)
-    static bool show_demo_window = true;
-    static bool show_another_window = false;
+    static bool show_console_window = true;
+
+    console.Draw("Console", &show_console_window);
+
     static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to
-    // learn more about Dear ImGui!).
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
-
-        if (ImGui::Button(
-                "Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-    }
-
-    // 3. Show another simple window.
-    if (show_another_window)
-    {
-        ImGui::Begin("Another Window",
-                     &show_another_window); // Pass a pointer to our bool variable (the window will have a closing
-                                            // button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me"))
-            show_another_window = false;
-        ImGui::End();
-    }
 
     {
         static bool is_init = false;
-        static TextEditor editor;
         // static const char* fileToEdit = "E:/Echo/SDK/ImGuiColorTextEdit/TextEditor.cpp";
-        static const char *fileToEdit = "E:/Echo/README.txt";
+        static const char *fileToEdit = "";
 
         if (!is_init)
         {
-            auto lang = TextEditor::LanguageDefinition::GLSL();
-
-            // set your own known preprocessor symbols...
-            static const char *ppnames[] = {"NULL",
-                                            "PM_REMOVE",
-                                            "ZeroMemory",
-                                            "DXGI_SWAP_EFFECT_DISCARD",
-                                            "D3D_FEATURE_LEVEL",
-                                            "D3D_DRIVER_TYPE_HARDWARE",
-                                            "WINAPI",
-                                            "D3D11_SDK_VERSION",
-                                            "assert"};
-            // ... and their corresponding values
-            static const char *ppvalues[] = {
-                "#define NULL ((void*)0)",
-                "#define PM_REMOVE (0x0001)",
-                "Microsoft's own memory zapper function\n(which is a macro actually)\nvoid ZeroMemory(\n\t[in] PVOID  "
-                "Destination,\n\t[in] SIZE_T Length\n); ",
-                "enum DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD = 0",
-                "enum D3D_FEATURE_LEVEL",
-                "enum D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE  = ( D3D_DRIVER_TYPE_UNKNOWN + 1 )",
-                "#define WINAPI __stdcall",
-                "#define D3D11_SDK_VERSION (7)",
-                " #define assert(expression) (void)(                                                  \n"
-                "    (!!(expression)) ||                                                              \n"
-                "    (_wassert(_CRT_WIDE(#expression), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)), 0) \n"
-                " )"};
-
-            for (int i = 0; i < sizeof(ppnames) / sizeof(ppnames[0]); ++i)
-            {
-                TextEditor::Identifier id;
-                id.mDeclaration = ppvalues[i];
-                lang.mPreprocIdentifiers.insert(std::make_pair(std::string(ppnames[i]), id));
-            }
-
-            // set your own identifiers
-            static const char *identifiers[] = {"HWND",
-                                                "HRESULT",
-                                                "LPRESULT",
-                                                "D3D11_RENDER_TARGET_VIEW_DESC",
-                                                "DXGI_SWAP_CHAIN_DESC",
-                                                "MSG",
-                                                "LRESULT",
-                                                "WPARAM",
-                                                "LPARAM",
-                                                "UINT",
-                                                "LPVOID",
-                                                "ID3D11Device",
-                                                "ID3D11DeviceContext",
-                                                "ID3D11Buffer",
-                                                "ID3D11Buffer",
-                                                "ID3D10Blob",
-                                                "ID3D11VertexShader",
-                                                "ID3D11InputLayout",
-                                                "ID3D11Buffer",
-                                                "ID3D10Blob",
-                                                "ID3D11PixelShader",
-                                                "ID3D11SamplerState",
-                                                "ID3D11ShaderResourceView",
-                                                "ID3D11RasterizerState",
-                                                "ID3D11BlendState",
-                                                "ID3D11DepthStencilState",
-                                                "IDXGISwapChain",
-                                                "ID3D11RenderTargetView",
-                                                "ID3D11Texture2D",
-                                                "TextEditor"};
-            static const char *idecls[] = {"typedef HWND_* HWND",
-                                           "typedef long HRESULT",
-                                           "typedef long* LPRESULT",
-                                           "struct D3D11_RENDER_TARGET_VIEW_DESC",
-                                           "struct DXGI_SWAP_CHAIN_DESC",
-                                           "typedef tagMSG MSG\n * Message structure",
-                                           "typedef LONG_PTR LRESULT",
-                                           "WPARAM",
-                                           "LPARAM",
-                                           "UINT",
-                                           "LPVOID",
-                                           "ID3D11Device",
-                                           "ID3D11DeviceContext",
-                                           "ID3D11Buffer",
-                                           "ID3D11Buffer",
-                                           "ID3D10Blob",
-                                           "ID3D11VertexShader",
-                                           "ID3D11InputLayout",
-                                           "ID3D11Buffer",
-                                           "ID3D10Blob",
-                                           "ID3D11PixelShader",
-                                           "ID3D11SamplerState",
-                                           "ID3D11ShaderResourceView",
-                                           "ID3D11RasterizerState",
-                                           "ID3D11BlendState",
-                                           "ID3D11DepthStencilState",
-                                           "IDXGISwapChain",
-                                           "ID3D11RenderTargetView",
-                                           "ID3D11Texture2D",
-                                           "class TextEditor"};
-            for (int i = 0; i < sizeof(identifiers) / sizeof(identifiers[0]); ++i)
-            {
-                TextEditor::Identifier id;
-                id.mDeclaration = std::string(idecls[i]);
-                lang.mIdentifiers.insert(std::make_pair(std::string(identifiers[i]), id));
-            }
-            editor.SetLanguageDefinition(lang);
+            ChangeTextEditorLanguage(TextEditorLanguage::GLSL);
 
             TextEditor::ErrorMarkers markers;
             markers.insert(
@@ -445,7 +1111,7 @@ static void MainLoopStep(void *window)
         }
 
         auto cpos = editor.GetCursorPosition();
-        ImGui::Begin("Text Editor Demo", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
+        ImGui::Begin("Shader Code Editor", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
         ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
         if (ImGui::BeginMenuBar())
         {
@@ -512,9 +1178,40 @@ static void MainLoopStep(void *window)
                     editor.SetPalette(TextEditor::GetRetroBluePalette());
                 ImGui::EndMenu();
             }
+
+            if (ImGui::BeginMenu("Convert"))
+            {
+                ImGui::Combo("CLIENT_ITEMS", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
+                ImGui::Separator();
+                ImGui::Combo("TARGET_CLIENT_ITEMS", &TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+                ImGui::Combo("TARGET_LANGUAGE_ITEMS", &TARGET_LANGUAGE_ITEMS_CURRENT_INDEX, TARGET_LANGUAGE_ITEMS,
+                             IM_ARRAYSIZE(TARGET_LANGUAGE_ITEMS));
+
+                if (ImGui::Button("To SPIR-V"))
+                {
+                    ToSpirVCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMenuBar();
         }
-
+        if (ImGui::Combo("Language", &LANGUAGE_ITEMS_CURRENT_INDEX, LANGUAGE_ITEMS, IM_ARRAYSIZE(LANGUAGE_ITEMS)))
+        {
+            if (LANGUAGE_ITEMS_CURRENT_INDEX == 0)
+            {
+                ChangeTextEditorLanguage(TextEditorLanguage::GLSL);
+            }
+            else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1)
+            {
+                ChangeTextEditorLanguage(TextEditorLanguage::HLSL);
+            }
+            // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
+        }
+        ImGui::Combo("SHADER_TYPE_ITEMS", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
+                     IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
         ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
         ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, editor.GetTotalLines(),
                     editor.IsOverwrite() ? "Ovr" : "Ins", editor.CanUndo() ? "*" : " ",

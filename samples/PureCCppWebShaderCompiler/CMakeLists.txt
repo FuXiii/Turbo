@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.9)
 
 project(WasmImGuiTest)
 
+add_subdirectory(./glslang)
+
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-nonportable-include-path -fno-exceptions -fno-rtti")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-reorder-ctor -Wno-sign-compare -Wno-nonportable-include-path -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-function -Wno-format-security -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-reorder-ctor -Wno-sign-compare -Wno-nonportable-include-path -fno-rtti")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -D_DEBUG=1 -Wno-unused -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g0 -DNDEBUG=1 -flto -O3")
 
@@ -61,21 +63,22 @@ ${EMSDK}/upstream/emscripten/cache/sysroot/include
 "${CMAKE_CURRENT_LIST_DIR}/imgui"
 "${CMAKE_CURRENT_LIST_DIR}/imgui/backends"
 "${IMGUI_COLOR_TEXT_EDIT_PATH}"
+./glslang
 )
 
-#target_link_libraries(${PROJECT_NAME} 
-#MachineIndependent 
-#glslang 
-#glslang-default-resource-limits 
-#OGLCompiler 
-#OSDependent 
-#GenericCodeGen 
-#SPIRV
+target_link_libraries(${PROJECT_NAME} 
+MachineIndependent 
+glslang 
+glslang-default-resource-limits 
+OGLCompiler 
+OSDependent 
+GenericCodeGen 
+SPIRV
 #spirv-cross-core
 #spirv-cross-glsl
 #spirv-cross-hlsl
-#)
+)
 
 
 
-# emcmake cmake -G"MinGW Makefiles" ..
+# emcmake cmake -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DENABLE_GLSLANG_JS=ON -DENABLE_HLSL=ON -DBUILD_TESTING=OFF -DENABLE_OPT=OFF -DINSTALL_GTEST=OFF ..
