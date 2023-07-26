@@ -3382,3 +3382,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下新增`PureCCppWebShaderCompiler`项目。用于存放在线`GLSL`、`HLSL`和`SPIR-V`网页端着色器转化编译器项目。
   >* `./samples`下更新`PureCCppWebShaderCompiler`项目。提供在线`GLSL`、`HLSL`转`SPIR-V`功能。
+
+* 2023/7/26 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增大显示大小，之前的可视范围太小了。

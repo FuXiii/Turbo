@@ -92,7 +92,7 @@ extern "C" int __main__(int /*argc*/, char * /*argv*/[])
     // Make sure GLFW does not initialize any graphics context.
     // This needs to be done explicitly later.
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+WebGPU example", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Dear ImGui GLFW+WebGPU example", nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
@@ -320,6 +320,8 @@ struct CustomeExampleAppConsole
     void Draw(const char *title, bool *p_open)
     {
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(1060, 200), ImGuiCond_FirstUseEver);
+
         if (!ImGui::Begin(title, p_open))
         {
             ImGui::End();
@@ -1013,31 +1015,34 @@ void ToSpirVCallback()
                                            target_client_version, target_language_version, code_str);
         }
 
-        std::string hex_spirv_code_result;
+        if (siprv_code.size() > 0)
         {
-            std::stringstream ss;
-
-            ss << "static uint32_t const spirv_code[] = {";
-            for (size_t code_index = 0; code_index < siprv_code.size(); code_index++)
+            std::string hex_spirv_code_result;
             {
-                if (code_index != siprv_code.size() - 1)
+                std::stringstream ss;
+
+                ss << "static uint32_t const spirv_code[] = {";
+                for (size_t code_index = 0; code_index < siprv_code.size(); code_index++)
                 {
-                    ss << "0x" << std::hex << siprv_code[code_index];
-                    ss << ", ";
+                    if (code_index != siprv_code.size() - 1)
+                    {
+                        ss << "0x" << std::hex << siprv_code[code_index];
+                        ss << ", ";
+                    }
+                    else
+                    {
+                        ss << "0x" << std::hex << siprv_code[code_index];
+                    }
                 }
-                else
-                {
-                    ss << "0x" << std::hex << siprv_code[code_index];
-                }
+                ss << "};";
+                hex_spirv_code_result = ss.str();
             }
-            ss << "};";
-            hex_spirv_code_result = ss.str();
+
+            write_clipboard_str(hex_spirv_code_result.c_str());
+
+            LogSuccess(hex_spirv_code_result);
+            LogSuccess("SPIR-V code success copy in clipboard");
         }
-
-        write_clipboard_str(hex_spirv_code_result.c_str());
-
-        LogSuccess(hex_spirv_code_result);
-        LogSuccess("SPIR-V code success copy in clipboard");
     }
     else
     {
@@ -1113,6 +1118,7 @@ static void MainLoopStep(void *window)
         auto cpos = editor.GetCursorPosition();
         ImGui::Begin("Shader Code Editor", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
         ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+        ImGui::SetWindowPos(ImVec2(200, 200), ImGuiCond_FirstUseEver);
         if (ImGui::BeginMenuBar())
         {
             if (ImGui::BeginMenu("File"))
@@ -1181,11 +1187,11 @@ static void MainLoopStep(void *window)
 
             if (ImGui::BeginMenu("Convert"))
             {
-                ImGui::Combo("CLIENT_ITEMS", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
+                ImGui::Combo("Client", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
                 ImGui::Separator();
-                ImGui::Combo("TARGET_CLIENT_ITEMS", &TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                ImGui::Combo("Target Client", &TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
                              IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
-                ImGui::Combo("TARGET_LANGUAGE_ITEMS", &TARGET_LANGUAGE_ITEMS_CURRENT_INDEX, TARGET_LANGUAGE_ITEMS,
+                ImGui::Combo("Target Language", &TARGET_LANGUAGE_ITEMS_CURRENT_INDEX, TARGET_LANGUAGE_ITEMS,
                              IM_ARRAYSIZE(TARGET_LANGUAGE_ITEMS));
 
                 if (ImGui::Button("To SPIR-V"))
@@ -1210,7 +1216,7 @@ static void MainLoopStep(void *window)
             }
             // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
         }
-        ImGui::Combo("SHADER_TYPE_ITEMS", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
+        ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
                      IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
         ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
         ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, editor.GetTotalLines(),
