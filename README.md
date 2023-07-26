@@ -3386,3 +3386,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/7/26 设计架构
   >
   >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增大显示大小，之前的可视范围太小了。
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加`Ctrl+V`粘贴代码快捷键的支持。

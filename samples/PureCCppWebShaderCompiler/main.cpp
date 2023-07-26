@@ -1024,14 +1024,30 @@ void ToSpirVCallback()
                 ss << "static uint32_t const spirv_code[] = {";
                 for (size_t code_index = 0; code_index < siprv_code.size(); code_index++)
                 {
+                    std::stringstream code_num_ss;
+                    code_num_ss << std::hex << siprv_code[code_index];
+
+                    std::string code_num_str = code_num_ss.str();
+                    if (code_num_str.length() < 8)
+                    {
+                        size_t zero_add_count = 8 - code_num_str.length();
+                        std::string zeros;
+                        for (size_t zero_add_index = 0; zero_add_index < zero_add_count; zero_add_index++)
+                        {
+                            zeros += "0";
+                        }
+
+                        code_num_str = zeros + code_num_str;
+                    }
+
                     if (code_index != siprv_code.size() - 1)
                     {
-                        ss << "0x" << std::hex << siprv_code[code_index];
+                        ss << "0x" << code_num_str;
                         ss << ", ";
                     }
                     else
                     {
-                        ss << "0x" << std::hex << siprv_code[code_index];
+                        ss << "0x" << code_num_str;
                     }
                 }
                 ss << "};";
@@ -1081,6 +1097,8 @@ static void MainLoopStep(void *window)
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    //ImGui::ShowDemoWindow();
 
     static bool show_console_window = true;
 
@@ -1204,6 +1222,56 @@ static void MainLoopStep(void *window)
 
             ImGui::EndMenuBar();
         }
+
+        {
+            struct funcs
+            {
+                static bool IsLegacyNativeDupe(ImGuiKey key)
+                {
+                    return key < 512 && ImGui::GetIO().KeyMap[key] != -1;
+                }
+            }; // Hide Native<>ImGuiKey duplicates when both exists in the array
+            ImGuiKey start_key = (ImGuiKey)0;
+            // ImGui::Text("Keys down:");
+            std::vector<ImGuiKey> keys;
+            for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
+            {
+                if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key))
+                    continue;
+                // ImGui::SameLine();
+                // ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key);
+                keys.push_back(key);
+            }
+
+            // static previous_paste_time = io.DeltaTime;
+            ImGuiContext &g = *ImGui::GetCurrentContext();
+
+            static float second = 0;
+            second += io.DeltaTime;
+            // second += g.FramerateSecPerFrameAccum / g.FramerateSecPerFrameCount;
+
+            static float trigger_paste_delta_time = 0.1;
+            static float next_trigger_paste_time = 0;
+
+            // ImGui::Text(std::to_string(second).c_str());
+
+            if (keys.size() == 3)
+            {
+                if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_V &&
+                    keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
+                {
+                    if (second > next_trigger_paste_time)
+                    {
+                        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                        {
+                            editor.Paste(clipboard_str__.c_str());
+                        }
+                    }
+                    next_trigger_paste_time = second + trigger_paste_delta_time;
+                }
+            }
+        }
+
         if (ImGui::Combo("Language", &LANGUAGE_ITEMS_CURRENT_INDEX, LANGUAGE_ITEMS, IM_ARRAYSIZE(LANGUAGE_ITEMS)))
         {
             if (LANGUAGE_ITEMS_CURRENT_INDEX == 0)
@@ -1216,6 +1284,7 @@ static void MainLoopStep(void *window)
             }
             // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
         }
+
         ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
                      IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
         ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
