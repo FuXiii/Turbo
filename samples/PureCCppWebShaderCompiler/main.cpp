@@ -14,6 +14,12 @@
 #include <TextEditor.h>
 
 #include <string>
+
+#include <spirv_cpp.hpp>
+#include <spirv_glsl.hpp>
+#include <spirv_hlsl.hpp>
+#include <spirv_reflect.hpp>
+
 static WGPUDevice wgpu_device = nullptr;
 static WGPUSurface wgpu_surface = nullptr;
 static WGPUSwapChain wgpu_swap_chain = nullptr;
@@ -66,9 +72,9 @@ static bool InitWGPU()
 
 void drop_callback(GLFWwindow *window, int count, const char **paths)
 {
-    int i;
-    for (i = 0; i < count; i++)
-        std::cout << paths[i] << std::endl;
+    // int i;
+    // for (i = 0; i < count; i++)
+    //     std::cout << paths[i] << std::endl;
 }
 
 std::string IMGUI_CLIPBOARD_TEXT;
@@ -320,7 +326,7 @@ struct CustomeExampleAppConsole
     void Draw(const char *title, bool *p_open)
     {
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowPos(ImVec2(1060, 200), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(1060, 100), ImGuiCond_FirstUseEver);
 
         if (!ImGui::Begin(title, p_open))
         {
@@ -678,17 +684,21 @@ int SHADER_TYPE_ITEMS_CURRENT_INDEX = 0;
 const char *LANGUAGE_ITEMS[] = {"GLSL", "HLSL"};
 int LANGUAGE_ITEMS_CURRENT_INDEX = 0;
 
-static TextEditor editor;
+static TextEditor codeEditor;
+
+static TextEditor codeViewEditor;
+static bool isCodeViewEditorShow = false;
 
 enum TextEditorLanguage
 {
     GLSL,
-    HLSL
+    HLSL,
+    SPIRV_DISASSEMBLE,
+    SPIRV_BINARY,
 };
 
-void ChangeTextEditorLanguage(TextEditorLanguage textEditorLanguage)
+void ChangeEditorLanguage(TextEditor &editor, TextEditorLanguage textEditorLanguage)
 {
-
     TextEditor::LanguageDefinition lang;
     switch (textEditorLanguage)
     {
@@ -698,6 +708,14 @@ void ChangeTextEditorLanguage(TextEditorLanguage textEditorLanguage)
     break;
     case HLSL: {
         lang = TextEditor::LanguageDefinition::HLSL();
+    }
+    break;
+    case SPIRV_BINARY: {
+        lang = TextEditor::LanguageDefinition::SpirVBinary();
+    }
+    break;
+    case SPIRV_DISASSEMBLE: {
+        lang = TextEditor::LanguageDefinition::SpirVDisassemble();
     }
     break;
     }
@@ -806,6 +824,7 @@ void ChangeTextEditorLanguage(TextEditorLanguage textEditorLanguage)
 }
 
 #include <SPIRV/GlslangToSpv.h>
+#include <SPIRV/SpvTools.h>
 #include <StandAlone/DirStackFileIncluder.h>
 #include <glslang/Include/BaseTypes.h>
 #include <glslang/Public/ResourceLimits.h>
@@ -870,9 +889,38 @@ std::vector<uint32_t> ShaderCodeToSpirV(glslang::EShSource language, EShLanguage
 }
 #include <sstream>
 
-void ToSpirVCallback()
+#include <spirv-tools/libspirv.h>
+std::string SpirVDisassemble(const std::vector<unsigned int> &spirv, spv_target_env requested_context)
 {
-    std::string code_str = editor.GetText();
+    std::string result;
+    spv_context context = spvContextCreate(requested_context);
+    spv_text text;
+    spv_diagnostic diagnostic = nullptr;
+    spvBinaryToText(context, spirv.data(), spirv.size(),
+                    SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT, &text, &diagnostic);
+
+    if (diagnostic == nullptr)
+    {
+        std::string spirv_text_code = std::string(text->str);
+        result = std::string(text->str);
+    }
+    else
+    {
+        LogError(std::string(diagnostic->error));
+    }
+
+    spvDiagnosticDestroy(diagnostic);
+    spvContextDestroy(context);
+
+    return result;
+}
+
+std::vector<uint32_t> CompilerShaderEditorShaderCodeToSpirVBinary()
+{
+    std::string code_str = codeEditor.GetText();
+
+    std::vector<uint32_t> siprv_code;
+
     if (!code_str.empty())
     {
         EShLanguage shader_stage = EShLanguage::EShLangVertex;
@@ -973,7 +1021,7 @@ void ToSpirVCallback()
         }
 
         glslang::EShTargetLanguageVersion target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
-        switch (TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+        switch (TARGET_LANGUAGE_ITEMS_CURRENT_INDEX)
         {
         case 0: {
             target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
@@ -994,16 +1042,17 @@ void ToSpirVCallback()
         case 4: {
             target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_4;
         }
+        break;
         case 5: {
             target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_5;
         }
+        break;
         case 6: {
             target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_6;
         }
         break;
         }
 
-        std::vector<uint32_t> siprv_code;
         if (LANGUAGE_ITEMS_CURRENT_INDEX == 0 /*GLSL*/)
         {
             siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceGlsl, shader_stage, client,
@@ -1014,56 +1063,574 @@ void ToSpirVCallback()
             siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceHlsl, shader_stage, client,
                                            target_client_version, target_language_version, code_str);
         }
-
-        if (siprv_code.size() > 0)
-        {
-            std::string hex_spirv_code_result;
-            {
-                std::stringstream ss;
-
-                ss << "static uint32_t const spirv_code[] = {";
-                for (size_t code_index = 0; code_index < siprv_code.size(); code_index++)
-                {
-                    std::stringstream code_num_ss;
-                    code_num_ss << std::hex << siprv_code[code_index];
-
-                    std::string code_num_str = code_num_ss.str();
-                    if (code_num_str.length() < 8)
-                    {
-                        size_t zero_add_count = 8 - code_num_str.length();
-                        std::string zeros;
-                        for (size_t zero_add_index = 0; zero_add_index < zero_add_count; zero_add_index++)
-                        {
-                            zeros += "0";
-                        }
-
-                        code_num_str = zeros + code_num_str;
-                    }
-
-                    if (code_index != siprv_code.size() - 1)
-                    {
-                        ss << "0x" << code_num_str;
-                        ss << ", ";
-                    }
-                    else
-                    {
-                        ss << "0x" << code_num_str;
-                    }
-                }
-                ss << "};";
-                hex_spirv_code_result = ss.str();
-            }
-
-            write_clipboard_str(hex_spirv_code_result.c_str());
-
-            LogSuccess(hex_spirv_code_result);
-            LogSuccess("SPIR-V code success copy in clipboard");
-        }
     }
     else
     {
         LogError("Shader code is empty.");
     }
+
+    return siprv_code;
+}
+
+void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
+{
+    std::string hex_spirv_code_result;
+    {
+        std::stringstream ss;
+
+        ss << "static const uint32_t spirv_code[] = {\n    ";
+        for (size_t code_index = 0; code_index < spirvCode.size(); code_index++)
+        {
+            std::stringstream code_num_ss;
+            code_num_ss << std::hex << spirvCode[code_index];
+
+            std::string code_num_str = code_num_ss.str();
+            if (code_num_str.length() < 8)
+            {
+                size_t zero_add_count = 8 - code_num_str.length();
+                std::string zeros;
+                for (size_t zero_add_index = 0; zero_add_index < zero_add_count; zero_add_index++)
+                {
+                    zeros += "0";
+                }
+
+                code_num_str = zeros + code_num_str;
+            }
+
+            if (code_index != spirvCode.size() - 1)
+            {
+                ss << "0x" << code_num_str;
+                ss << ", ";
+            }
+            else
+            {
+                ss << "0x" << code_num_str;
+            }
+
+            // if (code_index != 0 && (code_index % 9 == 0))
+            if (((code_index + 1) % 9) == 0)
+            {
+                ss << "\n    ";
+            }
+        }
+        ss << "};";
+        hex_spirv_code_result = ss.str();
+    }
+
+    // write_clipboard_str(hex_spirv_code_result.c_str());
+
+    isCodeViewEditorShow = true;
+    codeViewEditor.SetText(hex_spirv_code_result);
+
+    // LogSuccess(hex_spirv_code_result);
+    LogSuccess("shader code successfully compile to SPIR-V binary code");
+}
+
+void OuputSpirVDisassembleCallback(const std::vector<uint32_t> &spirvCode)
+{
+    spv_target_env requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
+    switch (TARGET_LANGUAGE_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
+    }
+    break;
+    case 1: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_1;
+    }
+    break;
+    case 2: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_2;
+    }
+    break;
+    case 3: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_3;
+    }
+    break;
+    case 4: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_4;
+    }
+    break;
+    case 5: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_5;
+    }
+    break;
+    case 6: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_6;
+    }
+    break;
+        break;
+    }
+
+    std::string spirv_disassemble_str = SpirVDisassemble(spirvCode, requested_context);
+    // std::cout << spirv_disassemble_str << std::endl;
+
+    isCodeViewEditorShow = true;
+    codeViewEditor.SetText(spirv_disassemble_str);
+
+    LogSuccess("shader code successfully compile to SPIR-V disassemble code");
+}
+
+void ToSpirVDisassembleCallback()
+{
+    std::vector<uint32_t> siprv_code = CompilerShaderEditorShaderCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OuputSpirVDisassembleCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void ToSpirVBinaryCallback()
+{
+    // spirv_cross::CompilerGLSL glsl(siprv_code);
+    // spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
+    // opts.vulkan_semantics = true;
+    // glsl.set_common_options(opts);
+    // Log(glsl.compile());
+
+    // spirv_cross::CompilerCPP cpp(siprv_code);
+    // spirv_cross::CompilerCPP::Options opts = cpp.get_common_options();
+    // opts.vulkan_semantics = true;
+    // cpp.set_common_options(opts);
+    // Log(cpp.compile());
+
+    // spirv_cross::CompilerReflection reflection(siprv_code);
+    // spirv_cross::CompilerCPP::Options opts = reflection.get_common_options();
+    // opts.vulkan_semantics = true;
+    // reflection.set_common_options(opts);
+    // Log(reflection.compile());
+
+    std::vector<uint32_t> siprv_code = CompilerShaderEditorShaderCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OuputSpirVBinaryCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void CodeEditorLoop()
+{
+    ImGuiIO &io = ImGui::GetIO();
+
+    static bool is_init = false;
+    // static const char* fileToEdit = "E:/Echo/SDK/ImGuiColorTextEdit/TextEditor.cpp";
+    static const char *fileToEdit = "";
+
+    if (!is_init)
+    {
+        ChangeEditorLanguage(codeEditor, TextEditorLanguage::GLSL);
+
+        // TextEditor::ErrorMarkers markers;
+        // markers.insert(
+        //     std::make_pair<int, std::string>(6, "Example error here:\nInclude file not found:
+        //     \"TextEditor.h\""));
+        // markers.insert(std::make_pair<int, std::string>(41, "Another example error"));
+        // codeEditor.SetErrorMarkers(markers);
+
+        {
+            // std::ifstream t(fileToEdit);
+            // if (t.good())
+            //{
+            //     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+            //     codeEditor.SetText(str);
+            // }
+        }
+
+        is_init = true;
+    }
+
+    auto cpos = codeEditor.GetCursorPosition();
+    ImGui::Begin("Shader Code Editor", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
+    ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+    ImGui::SetWindowPos(ImVec2(200, 100), ImGuiCond_FirstUseEver);
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Save"))
+            {
+                auto textToSave = codeEditor.GetText();
+                /// save text....
+            }
+            if (ImGui::MenuItem("Quit", "Alt-F4"))
+            {
+                // break;
+            }
+            ImGui::EndMenu();
+        }
+
+        // const char *clip_text = glfwGetClipboardString((GLFWwindow *)window);
+
+        // test_clip();
+        get_clipboard_str();
+        // std::cout << clipboard_str__ << std::endl;
+        ImGui::SetClipboardText(clipboard_str__.c_str());
+        // std::cout << clipboard_str__ << std::endl;
+
+        if (ImGui::BeginMenu("Edit"))
+        {
+            bool ro = codeEditor.IsReadOnly();
+            if (ImGui::MenuItem("Read-only mode", nullptr, &ro))
+                codeEditor.SetReadOnly(ro);
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr, !ro && codeEditor.CanUndo()))
+                codeEditor.Undo();
+            if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr, !ro && codeEditor.CanRedo()))
+                codeEditor.Redo();
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, codeEditor.HasSelection()))
+            {
+                codeEditor.Copy();
+            }
+            if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr, !ro && codeEditor.HasSelection()))
+                codeEditor.Cut();
+            if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && codeEditor.HasSelection()))
+                codeEditor.Delete();
+            if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr, !ro))
+                codeEditor.Paste(clipboard_str__.c_str());
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Select all", nullptr, nullptr))
+                codeEditor.SetSelection(TextEditor::Coordinates(),
+                                        TextEditor::Coordinates(codeEditor.GetTotalLines(), 0));
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Dark palette"))
+                codeEditor.SetPalette(TextEditor::GetDarkPalette());
+            if (ImGui::MenuItem("Light palette"))
+                codeEditor.SetPalette(TextEditor::GetLightPalette());
+            if (ImGui::MenuItem("Retro blue palette"))
+                codeEditor.SetPalette(TextEditor::GetRetroBluePalette());
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Convert"))
+        {
+            if (ImGui::BeginMenu("SPIR-V")) // <-- Append!
+            {
+                ImGui::Combo("Client", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
+                ImGui::Separator();
+                ImGui::Combo("Target Client", &TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+                ImGui::Combo("Target Language", &TARGET_LANGUAGE_ITEMS_CURRENT_INDEX, TARGET_LANGUAGE_ITEMS,
+                             IM_ARRAYSIZE(TARGET_LANGUAGE_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To SPIR-V Binary"))
+                {
+                    ToSpirVBinaryCallback();
+                }
+                ImGui::Separator();
+                if (ImGui::Button("To SPIR-V Disassemble"))
+                {
+                    ToSpirVDisassembleCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
+    {
+        struct funcs
+        {
+            static bool IsLegacyNativeDupe(ImGuiKey key)
+            {
+                return key < 512 && ImGui::GetIO().KeyMap[key] != -1;
+            }
+        }; // Hide Native<>ImGuiKey duplicates when both exists in the array
+        ImGuiKey start_key = (ImGuiKey)0;
+        // ImGui::Text("Keys down:");
+        std::vector<ImGuiKey> keys;
+        for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
+        {
+            if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key))
+                continue;
+            // ImGui::SameLine();
+            // ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key);
+            keys.push_back(key);
+        }
+
+        // static previous_paste_time = io.DeltaTime;
+        ImGuiContext &g = *ImGui::GetCurrentContext();
+
+        static float second = 0;
+        second += io.DeltaTime;
+        // second += g.FramerateSecPerFrameAccum / g.FramerateSecPerFrameCount;
+
+        static float trigger_paste_delta_time = 0.1;
+        static float next_trigger_paste_time = 0;
+
+        static float trigger_copy_delta_time = 0.1;
+        static float next_trigger_copy_time = 0;
+
+        // ImGui::Text(std::to_string(second).c_str());
+
+        if (keys.size() == 3)
+        {
+            if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_V &&
+                keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
+            {
+                if (second > next_trigger_paste_time)
+                {
+                    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                    {
+                        codeEditor.Paste(clipboard_str__.c_str());
+                    }
+                }
+                next_trigger_paste_time = second + trigger_paste_delta_time;
+            }
+
+            if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_C &&
+                keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
+            {
+                if (second > next_trigger_copy_time)
+                {
+                    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                    {
+                        std::string selected_code_str = codeEditor.GetSelectedText();
+                        // std::cout << "selected_code_str:" << selected_code_str << std::endl;
+                        write_clipboard_str(selected_code_str.c_str());
+                    }
+                }
+                next_trigger_copy_time = second + trigger_copy_delta_time;
+            }
+        }
+    }
+
+    if (ImGui::Combo("Language", &LANGUAGE_ITEMS_CURRENT_INDEX, LANGUAGE_ITEMS, IM_ARRAYSIZE(LANGUAGE_ITEMS)))
+    {
+        if (LANGUAGE_ITEMS_CURRENT_INDEX == 0)
+        {
+            ChangeEditorLanguage(codeEditor, TextEditorLanguage::GLSL);
+        }
+        else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1)
+        {
+            ChangeEditorLanguage(codeEditor, TextEditorLanguage::HLSL);
+        }
+        // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
+    }
+
+    ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS, IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
+    ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
+    ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, codeEditor.GetTotalLines(),
+                codeEditor.IsOverwrite() ? "Ovr" : "Ins", codeEditor.CanUndo() ? "*" : " ",
+                codeEditor.GetLanguageDefinition().mName.c_str(), fileToEdit);
+
+    codeEditor.Render("TextEditor");
+    ImGui::End();
+}
+
+void CodeViewerEditorLoop()
+{
+    if (!isCodeViewEditorShow)
+    {
+        return;
+    }
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    static bool is_init = false;
+    // static const char* fileToEdit = "E:/Echo/SDK/ImGuiColorTextEdit/TextEditor.cpp";
+    static const char *fileToEdit = "";
+
+    if (!is_init)
+    {
+        ChangeEditorLanguage(codeViewEditor, TextEditorLanguage::GLSL);
+
+        // TextEditor::ErrorMarkers markers;
+        // markers.insert(
+        //     std::make_pair<int, std::string>(6, "Example error here:\nInclude file not found:
+        //     \"TextEditor.h\""));
+        // markers.insert(std::make_pair<int, std::string>(41, "Another example error"));
+        // codeViewEditor.SetErrorMarkers(markers);
+
+        {
+            // std::ifstream t(fileToEdit);
+            // if (t.good())
+            //{
+            //     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+            //     codeViewEditor.SetText(str);
+            // }
+        }
+
+        codeViewEditor.SetReadOnly(true);
+
+        is_init = true;
+    }
+    // std::cout << isCodeViewEditorShow << std::endl;
+
+    auto cpos = codeViewEditor.GetCursorPosition();
+    ImGui::Begin("Code Viewer", &isCodeViewEditorShow, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
+    ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+    ImGui::SetWindowPos(ImVec2(770, 20), ImGuiCond_FirstUseEver);
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Save"))
+            {
+                auto textToSave = codeViewEditor.GetText();
+                /// save text....
+            }
+            if (ImGui::MenuItem("Quit", "Alt-F4"))
+            {
+                // break;
+            }
+            ImGui::EndMenu();
+        }
+
+        // const char *clip_text = glfwGetClipboardString((GLFWwindow *)window);
+
+        // test_clip();
+        get_clipboard_str();
+        // std::cout << clipboard_str__ << std::endl;
+        ImGui::SetClipboardText(clipboard_str__.c_str());
+        // std::cout << clipboard_str__ << std::endl;
+
+        if (ImGui::BeginMenu("Edit"))
+        {
+            bool ro = codeViewEditor.IsReadOnly();
+            // if (ImGui::MenuItem("Read-only mode", nullptr, &ro))
+            //     codeViewEditor.SetReadOnly(ro);
+            // ImGui::Separator();
+
+            if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr, !ro && codeViewEditor.CanUndo()))
+                codeViewEditor.Undo();
+            if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr, !ro && codeViewEditor.CanRedo()))
+                codeViewEditor.Redo();
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, codeViewEditor.HasSelection()))
+                codeViewEditor.Copy();
+            if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr, !ro && codeViewEditor.HasSelection()))
+                codeViewEditor.Cut();
+            if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && codeViewEditor.HasSelection()))
+                codeViewEditor.Delete();
+            if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr, !ro))
+                codeViewEditor.Paste(clipboard_str__.c_str());
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Select all", nullptr, nullptr))
+                codeViewEditor.SetSelection(TextEditor::Coordinates(),
+                                            TextEditor::Coordinates(codeViewEditor.GetTotalLines(), 0));
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Dark palette"))
+                codeViewEditor.SetPalette(TextEditor::GetDarkPalette());
+            if (ImGui::MenuItem("Light palette"))
+                codeViewEditor.SetPalette(TextEditor::GetLightPalette());
+            if (ImGui::MenuItem("Retro blue palette"))
+                codeViewEditor.SetPalette(TextEditor::GetRetroBluePalette());
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
+    {
+        struct funcs
+        {
+            static bool IsLegacyNativeDupe(ImGuiKey key)
+            {
+                return key < 512 && ImGui::GetIO().KeyMap[key] != -1;
+            }
+        }; // Hide Native<>ImGuiKey duplicates when both exists in the array
+        ImGuiKey start_key = (ImGuiKey)0;
+        // ImGui::Text("Keys down:");
+        std::vector<ImGuiKey> keys;
+        for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
+        {
+            if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key))
+                continue;
+            // ImGui::SameLine();
+            // ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key);
+            keys.push_back(key);
+        }
+
+        // static previous_paste_time = io.DeltaTime;
+        ImGuiContext &g = *ImGui::GetCurrentContext();
+
+        static float second = 0;
+        second += io.DeltaTime;
+        // second += g.FramerateSecPerFrameAccum / g.FramerateSecPerFrameCount;
+
+        static float trigger_paste_delta_time = 0.1;
+        static float next_trigger_paste_time = 0;
+
+        static float trigger_copy_delta_time = 0.1;
+        static float next_trigger_copy_time = 0;
+
+        // ImGui::Text(std::to_string(second).c_str());
+
+        if (keys.size() == 3)
+        {
+            if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_V &&
+                keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
+            {
+                if (second > next_trigger_paste_time)
+                {
+                    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                    {
+                        // codeViewEditor.Paste(clipboard_str__.c_str());
+                    }
+                }
+                next_trigger_paste_time = second + trigger_paste_delta_time;
+            }
+
+            if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_C &&
+                keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
+            {
+                if (second > next_trigger_copy_time)
+                {
+                    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+                    {
+                        std::string selected_code_str = codeViewEditor.GetSelectedText();
+                        // std::cout << "selected_code_str:" << selected_code_str << std::endl;
+                        write_clipboard_str(selected_code_str.c_str());
+                    }
+                }
+                next_trigger_copy_time = second + trigger_copy_delta_time;
+            }
+        }
+    }
+
+    ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
+    ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1,
+                codeViewEditor.GetTotalLines(), codeViewEditor.IsOverwrite() ? "Ovr" : "Ins",
+                codeViewEditor.CanUndo() ? "*" : " ", codeViewEditor.GetLanguageDefinition().mName.c_str(), fileToEdit);
+
+    codeViewEditor.Render("TextEditor");
+    ImGui::End();
 }
 
 static void MainLoopStep(void *window)
@@ -1098,7 +1665,7 @@ static void MainLoopStep(void *window)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    //ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
 
     static bool show_console_window = true;
 
@@ -1106,195 +1673,8 @@ static void MainLoopStep(void *window)
 
     static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    {
-        static bool is_init = false;
-        // static const char* fileToEdit = "E:/Echo/SDK/ImGuiColorTextEdit/TextEditor.cpp";
-        static const char *fileToEdit = "";
-
-        if (!is_init)
-        {
-            ChangeTextEditorLanguage(TextEditorLanguage::GLSL);
-
-            TextEditor::ErrorMarkers markers;
-            markers.insert(
-                std::make_pair<int, std::string>(6, "Example error here:\nInclude file not found: \"TextEditor.h\""));
-            markers.insert(std::make_pair<int, std::string>(41, "Another example error"));
-            editor.SetErrorMarkers(markers);
-
-            {
-                // std::ifstream t(fileToEdit);
-                // if (t.good())
-                //{
-                //     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-                //     editor.SetText(str);
-                // }
-            }
-
-            is_init = true;
-        }
-
-        auto cpos = editor.GetCursorPosition();
-        ImGui::Begin("Shader Code Editor", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
-        ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-        ImGui::SetWindowPos(ImVec2(200, 200), ImGuiCond_FirstUseEver);
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Save"))
-                {
-                    auto textToSave = editor.GetText();
-                    /// save text....
-                }
-                if (ImGui::MenuItem("Quit", "Alt-F4"))
-                {
-                    // break;
-                }
-                ImGui::EndMenu();
-            }
-
-            // const char *clip_text = glfwGetClipboardString((GLFWwindow *)window);
-
-            // test_clip();
-            get_clipboard_str();
-            // std::cout << clipboard_str__ << std::endl;
-            ImGui::SetClipboardText(clipboard_str__.c_str());
-            // std::cout << clipboard_str__ << std::endl;
-
-            if (ImGui::BeginMenu("Edit"))
-            {
-                bool ro = editor.IsReadOnly();
-                if (ImGui::MenuItem("Read-only mode", nullptr, &ro))
-                    editor.SetReadOnly(ro);
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr, !ro && editor.CanUndo()))
-                    editor.Undo();
-                if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr, !ro && editor.CanRedo()))
-                    editor.Redo();
-
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, editor.HasSelection()))
-                    editor.Copy();
-                if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr, !ro && editor.HasSelection()))
-                    editor.Cut();
-                if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && editor.HasSelection()))
-                    editor.Delete();
-                if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr, !ro))
-                    editor.Paste(clipboard_str__.c_str());
-
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Select all", nullptr, nullptr))
-                    editor.SetSelection(TextEditor::Coordinates(), TextEditor::Coordinates(editor.GetTotalLines(), 0));
-
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("View"))
-            {
-                if (ImGui::MenuItem("Dark palette"))
-                    editor.SetPalette(TextEditor::GetDarkPalette());
-                if (ImGui::MenuItem("Light palette"))
-                    editor.SetPalette(TextEditor::GetLightPalette());
-                if (ImGui::MenuItem("Retro blue palette"))
-                    editor.SetPalette(TextEditor::GetRetroBluePalette());
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("Convert"))
-            {
-                ImGui::Combo("Client", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
-                ImGui::Separator();
-                ImGui::Combo("Target Client", &TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
-                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
-                ImGui::Combo("Target Language", &TARGET_LANGUAGE_ITEMS_CURRENT_INDEX, TARGET_LANGUAGE_ITEMS,
-                             IM_ARRAYSIZE(TARGET_LANGUAGE_ITEMS));
-
-                if (ImGui::Button("To SPIR-V"))
-                {
-                    ToSpirVCallback();
-                }
-
-                ImGui::EndMenu();
-            }
-
-            ImGui::EndMenuBar();
-        }
-
-        {
-            struct funcs
-            {
-                static bool IsLegacyNativeDupe(ImGuiKey key)
-                {
-                    return key < 512 && ImGui::GetIO().KeyMap[key] != -1;
-                }
-            }; // Hide Native<>ImGuiKey duplicates when both exists in the array
-            ImGuiKey start_key = (ImGuiKey)0;
-            // ImGui::Text("Keys down:");
-            std::vector<ImGuiKey> keys;
-            for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
-            {
-                if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key))
-                    continue;
-                // ImGui::SameLine();
-                // ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key);
-                keys.push_back(key);
-            }
-
-            // static previous_paste_time = io.DeltaTime;
-            ImGuiContext &g = *ImGui::GetCurrentContext();
-
-            static float second = 0;
-            second += io.DeltaTime;
-            // second += g.FramerateSecPerFrameAccum / g.FramerateSecPerFrameCount;
-
-            static float trigger_paste_delta_time = 0.1;
-            static float next_trigger_paste_time = 0;
-
-            // ImGui::Text(std::to_string(second).c_str());
-
-            if (keys.size() == 3)
-            {
-                if (keys[0] == ImGuiKey::ImGuiKey_LeftCtrl && keys[1] == ImGuiKey::ImGuiKey_V &&
-                    keys[2] == ImGuiKey::ImGuiKey_ReservedForModCtrl)
-                {
-                    if (second > next_trigger_paste_time)
-                    {
-                        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-                        {
-                            editor.Paste(clipboard_str__.c_str());
-                        }
-                    }
-                    next_trigger_paste_time = second + trigger_paste_delta_time;
-                }
-            }
-        }
-
-        if (ImGui::Combo("Language", &LANGUAGE_ITEMS_CURRENT_INDEX, LANGUAGE_ITEMS, IM_ARRAYSIZE(LANGUAGE_ITEMS)))
-        {
-            if (LANGUAGE_ITEMS_CURRENT_INDEX == 0)
-            {
-                ChangeTextEditorLanguage(TextEditorLanguage::GLSL);
-            }
-            else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1)
-            {
-                ChangeTextEditorLanguage(TextEditorLanguage::HLSL);
-            }
-            // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
-        }
-
-        ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
-                     IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
-        ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
-        ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, editor.GetTotalLines(),
-                    editor.IsOverwrite() ? "Ovr" : "Ins", editor.CanUndo() ? "*" : " ",
-                    editor.GetLanguageDefinition().mName.c_str(), fileToEdit);
-
-        editor.Render("TextEditor");
-        ImGui::End();
-    }
+    CodeEditorLoop();
+    CodeViewerEditorLoop();
 
     // Rendering
     ImGui::Render();

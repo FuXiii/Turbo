@@ -1,7 +1,14 @@
 -I
 E:\emsdk\upstream\emscripten\cache\sysroot\include
-
 -I
 E:\TestDelete\WebAssemblyTest\WasmImGuiTest\imgui
 -I
 E:\TestDelete\WebAssemblyTest\WasmImGuiTest\imgui\backends
+-I
+E:\TestDelete\WebAssemblyTest\WasmImGuiTest\ImGuiColorTextEdit
+-I
+glslang
+-I
+SPIRV-Cross
+-I
+SPIRV-Tools/include
