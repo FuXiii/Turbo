@@ -1179,9 +1179,11 @@ CodeEditorLanguage::Language GetCurrentLanguage()
     case 1: {
         result = CodeEditorLanguage::Language::HLSL;
     }
+    break;
     case 2: {
         result = CodeEditorLanguage::Language::SPIRV_BINARY;
     }
+    break;
     case 3: {
         result = CodeEditorLanguage::Language::SPIRV_DISASSEMBLE;
     }
@@ -1409,7 +1411,6 @@ std::vector<uint32_t> CompileEditorCodeToSpirVBinary()
         case CodeEditorLanguage::Language::GLSL: {
         }
         case CodeEditorLanguage::Language::HLSL: {
-
             if (code_editor_language == CodeEditorLanguage::Language::GLSL)
             {
                 siprv_code =
