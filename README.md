@@ -3391,3 +3391,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/7/27 设计架构
   >
   >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加反编译 ``SPIR-V`` 的功能。
+
+* 2023/7/27 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加编译 ``SPIR-V`` 的功能。

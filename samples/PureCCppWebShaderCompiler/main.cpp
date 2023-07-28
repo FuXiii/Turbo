@@ -20,6 +20,26 @@
 #include <spirv_hlsl.hpp>
 #include <spirv_reflect.hpp>
 
+/*
+    // spirv_cross::CompilerGLSL glsl(siprv_code);
+    // spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
+    // opts.vulkan_semantics = true;
+    // glsl.set_common_options(opts);
+    // Log(glsl.compile());
+
+    // spirv_cross::CompilerCPP cpp(siprv_code);
+    // spirv_cross::CompilerCPP::Options opts = cpp.get_common_options();
+    // opts.vulkan_semantics = true;
+    // cpp.set_common_options(opts);
+    // Log(cpp.compile());
+
+    // spirv_cross::CompilerReflection reflection(siprv_code);
+    // spirv_cross::CompilerCPP::Options opts = reflection.get_common_options();
+    // opts.vulkan_semantics = true;
+    // reflection.set_common_options(opts);
+    // Log(reflection.compile());
+*/
+
 static WGPUDevice wgpu_device = nullptr;
 static WGPUSurface wgpu_surface = nullptr;
 static WGPUSwapChain wgpu_swap_chain = nullptr;
@@ -681,7 +701,7 @@ const char *SHADER_TYPE_ITEMS[] = {"Vertex",
                                    "Mesh"};
 int SHADER_TYPE_ITEMS_CURRENT_INDEX = 0;
 
-const char *LANGUAGE_ITEMS[] = {"GLSL", "HLSL"};
+const char *LANGUAGE_ITEMS[] = {"GLSL", "HLSL", "SPIR-V Binary", "SPIR-V Disassemble"};
 int LANGUAGE_ITEMS_CURRENT_INDEX = 0;
 
 static TextEditor codeEditor;
@@ -689,32 +709,35 @@ static TextEditor codeEditor;
 static TextEditor codeViewEditor;
 static bool isCodeViewEditorShow = false;
 
-enum TextEditorLanguage
+namespace CodeEditorLanguage
 {
-    GLSL,
-    HLSL,
-    SPIRV_DISASSEMBLE,
-    SPIRV_BINARY,
+enum Language
+{
+    GLSL = 0,
+    HLSL = 1,
+    SPIRV_BINARY = 2,
+    SPIRV_DISASSEMBLE = 3,
 };
+} // namespace CodeEditorLanguage
 
-void ChangeEditorLanguage(TextEditor &editor, TextEditorLanguage textEditorLanguage)
+void ChangeEditorLanguage(TextEditor &editor, CodeEditorLanguage::Language language)
 {
     TextEditor::LanguageDefinition lang;
-    switch (textEditorLanguage)
+    switch (language)
     {
-    case GLSL: {
+    case CodeEditorLanguage::Language::GLSL: {
         lang = TextEditor::LanguageDefinition::GLSL();
     }
     break;
-    case HLSL: {
+    case CodeEditorLanguage::Language::HLSL: {
         lang = TextEditor::LanguageDefinition::HLSL();
     }
     break;
-    case SPIRV_BINARY: {
+    case CodeEditorLanguage::Language::SPIRV_BINARY: {
         lang = TextEditor::LanguageDefinition::SpirVBinary();
     }
     break;
-    case SPIRV_DISASSEMBLE: {
+    case CodeEditorLanguage::Language::SPIRV_DISASSEMBLE: {
         lang = TextEditor::LanguageDefinition::SpirVDisassemble();
     }
     break;
@@ -890,7 +913,9 @@ std::vector<uint32_t> ShaderCodeToSpirV(glslang::EShSource language, EShLanguage
 #include <sstream>
 
 #include <spirv-tools/libspirv.h>
-std::string SpirVDisassemble(const std::vector<unsigned int> &spirv, spv_target_env requested_context)
+
+// SPIR-V Binary To SPIR-V Disassemble
+std::string SpirVBinaryToSpirVDisassemble(const std::vector<uint32_t> &spirv, spv_target_env requested_context)
 {
     std::string result;
     spv_context context = spvContextCreate(requested_context);
@@ -915,164 +940,157 @@ std::string SpirVDisassemble(const std::vector<unsigned int> &spirv, spv_target_
     return result;
 }
 
-std::vector<uint32_t> CompilerShaderEditorShaderCodeToSpirVBinary()
+// SPIR-V Disassemble To SPIR-V Binary
+std::vector<uint32_t> SpirVDisassembleToSpirVBinary(const std::string &sprivDisassemble,
+                                                    spv_target_env requested_context)
 {
-    std::string code_str = codeEditor.GetText();
+    std::vector<uint32_t> result;
 
-    std::vector<uint32_t> siprv_code;
+    spv_binary binary;
+    spv_context context = spvContextCreate(requested_context);
+    spv_diagnostic diagnostic = nullptr;
+    spv_result_t spv_result =
+        spvTextToBinary(context, sprivDisassemble.c_str(), sprivDisassemble.length(), &binary, &diagnostic);
 
-    if (!code_str.empty())
+    if (diagnostic == nullptr)
     {
-        EShLanguage shader_stage = EShLanguage::EShLangVertex;
-
-        if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 0 /*Vertex*/)
+        for (uint32_t binary_index = 0; binary_index < binary->wordCount; binary_index++)
         {
-            shader_stage = EShLanguage::EShLangVertex;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*Tessellation Control*/)
-        {
-            shader_stage = EShLanguage::EShLangTessControl;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 2 /*Tessellation Evaluation*/)
-        {
-            shader_stage = EShLanguage::EShLangTessEvaluation;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 3 /*Geometry*/)
-        {
-            shader_stage = EShLanguage::EShLangGeometry;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 4 /*Fragment*/)
-        {
-            shader_stage = EShLanguage::EShLangFragment;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 5 /*Compute*/)
-        {
-            shader_stage = EShLanguage::EShLangCompute;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 6 /*Ray Generation*/)
-        {
-            shader_stage = EShLanguage::EShLangRayGen;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 7 /*Intersection*/)
-        {
-            shader_stage = EShLanguage::EShLangIntersect;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 8 /*Any-Hit*/)
-        {
-            shader_stage = EShLanguage::EShLangAnyHit;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 9 /*Closest Hit*/)
-        {
-            shader_stage = EShLanguage::EShLangClosestHit;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Miss*/)
-        {
-            shader_stage = EShLanguage::EShLangMiss;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Callable*/)
-        {
-            shader_stage = EShLanguage::EShLangCallable;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Task*/)
-        {
-            shader_stage = EShLanguage::EShLangTask;
-        }
-        else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Mesh*/)
-        {
-            shader_stage = EShLanguage::EShLangMesh;
-        }
-
-        glslang::EShClient client = glslang::EShClient::EShClientVulkan;
-        switch (CLIENT_ITEMS_CURRENT_INDEX)
-        {
-        case 0: {
-            client = glslang::EShClient::EShClientVulkan;
-        }
-        break;
-        case 1: {
-            client = glslang::EShClient::EShClientOpenGL;
-        }
-        break;
-        }
-
-        glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
-        switch (TARGET_CLIENT_ITEMS_CURRENT_INDEX)
-        {
-        case 0: {
-            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
-        }
-        break;
-        case 1: {
-            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
-        }
-        break;
-        case 2: {
-            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
-        }
-        break;
-        case 3: {
-            target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
-        }
-        break;
-        case 4: {
-            target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
-        }
-        break;
-        }
-
-        glslang::EShTargetLanguageVersion target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
-        switch (TARGET_LANGUAGE_ITEMS_CURRENT_INDEX)
-        {
-        case 0: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
-        }
-        break;
-        case 1: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_1;
-        }
-        break;
-        case 2: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_2;
-        }
-        break;
-        case 3: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_3;
-        }
-        break;
-        case 4: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_4;
-        }
-        break;
-        case 5: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_5;
-        }
-        break;
-        case 6: {
-            target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_6;
-        }
-        break;
-        }
-
-        if (LANGUAGE_ITEMS_CURRENT_INDEX == 0 /*GLSL*/)
-        {
-            siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceGlsl, shader_stage, client,
-                                           target_client_version, target_language_version, code_str);
-        }
-        else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1 /*HLSL*/)
-        {
-            siprv_code = ShaderCodeToSpirV(glslang::EShSource::EShSourceHlsl, shader_stage, client,
-                                           target_client_version, target_language_version, code_str);
+            uint32_t bin = *(binary->code + binary_index);
+            result.push_back(bin);
         }
     }
     else
     {
-        LogError("Shader code is empty.");
+        LogError(std::string(diagnostic->error));
     }
 
-    return siprv_code;
+    spvDiagnosticDestroy(diagnostic);
+    spvContextDestroy(context);
+
+    return result;
 }
 
-void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
+std::vector<uint32_t> SpirVBinaryToSpirVBinary(const std::vector<uint32_t> &spirv, spv_target_env requested_context)
+{
+    std::vector<uint32_t> result;
+
+    std::string disassemble = SpirVBinaryToSpirVDisassemble(spirv, requested_context);
+
+    if (!disassemble.empty())
+    {
+        result = SpirVDisassembleToSpirVBinary(disassemble, requested_context);
+    }
+
+    return result;
+}
+
+// FIXME: SPIR-V Disassemble To SPIR-V Disassemble maybe use SPIR-V Binary for intermediate layer
+std::string SpirVDisassembleToSpirVDisassemble(const std::string &sprivDisassemble, spv_target_env requested_context)
+{
+    std::string result;
+
+    std::vector<uint32_t> assemble = SpirVDisassembleToSpirVBinary(sprivDisassemble, requested_context);
+
+    if (!assemble.empty())
+    {
+        result = SpirVBinaryToSpirVDisassemble(assemble, requested_context);
+    }
+
+    return result;
+}
+
+std::vector<uint32_t> GLSLToSpirVBinary(EShLanguage shaderType, glslang::EShClient client,
+                                        glslang::EShTargetClientVersion targetClientVersion,
+                                        glslang::EShTargetLanguageVersion targetLanguageVersion,
+                                        const std::string &glsl)
+{
+    std::vector<uint32_t> result;
+
+    result = ShaderCodeToSpirV(glslang::EShSource::EShSourceGlsl, shaderType, client, targetClientVersion,
+                               targetLanguageVersion, glsl);
+
+    return result;
+}
+
+std::vector<uint32_t> HLSLToSpirVBinary(EShLanguage shaderType, glslang::EShClient client,
+                                        glslang::EShTargetClientVersion targetClientVersion,
+                                        glslang::EShTargetLanguageVersion targetLanguageVersion,
+                                        const std::string &hlsl)
+{
+    std::vector<uint32_t> result;
+
+    result = ShaderCodeToSpirV(glslang::EShSource::EShSourceHlsl, shaderType, client, targetClientVersion,
+                               targetLanguageVersion, hlsl);
+
+    return result;
+}
+
+std::string SpirVBinaryToGLSL(
+    const std::vector<unsigned int> &spirv,
+    glslang::EShTargetClientVersion targetClientVersion = glslang::EShTargetClientVersion::EShTargetVulkan_1_0)
+{
+    spirv_cross::CompilerGLSL glsl(spirv);
+    spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
+
+    switch (targetClientVersion)
+    {
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_0: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_1: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_2: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_3: {
+        opts.vulkan_semantics = true;
+    }
+    break;
+    case glslang::EShTargetClientVersion::EShTargetOpenGL_450: {
+        opts.vulkan_semantics = false;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    glsl.set_common_options(opts);
+    return glsl.compile();
+}
+
+std::string SpirVBinaryToHLSL(
+    const std::vector<unsigned int> &spirv,
+    glslang::EShTargetClientVersion targetClientVersion = glslang::EShTargetClientVersion::EShTargetVulkan_1_0)
+{
+    spirv_cross::CompilerHLSL hlsl(spirv);
+    spirv_cross::CompilerGLSL::Options opts = hlsl.get_common_options();
+
+    switch (targetClientVersion)
+    {
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_0: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_1: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_2: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_3: {
+        opts.vulkan_semantics = true;
+    }
+    break;
+    case glslang::EShTargetClientVersion::EShTargetOpenGL_450: {
+        opts.vulkan_semantics = false;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    hlsl.set_common_options(opts);
+    return hlsl.compile();
+}
+
+std::string SpirVBinaryToHexArrayString(const std::vector<uint32_t> &spirvCode)
 {
     std::string hex_spirv_code_result;
     {
@@ -1117,7 +1135,315 @@ void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
         hex_spirv_code_result = ss.str();
     }
 
-    // write_clipboard_str(hex_spirv_code_result.c_str());
+    return hex_spirv_code_result;
+}
+
+std::vector<uint32_t> HexArrayStringToSpirVBinary(const std::string &ArrayString)
+{
+    std::vector<uint32_t> result;
+
+    // const std::regex txt_regex("/0x[a-zA-Z0-9]+/g");
+    const std::regex hex_regex("0x[a-zA-Z0-9]+");
+
+    auto words_begin = std::sregex_iterator(ArrayString.begin(), ArrayString.end(), hex_regex);
+    auto words_end = std::sregex_iterator();
+    auto word_count = std::distance(words_begin, words_end);
+
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+    {
+        std::smatch match = *i;
+        std::string match_str = match.str();
+
+        uint32_t bin = 0;
+        std::stringstream ss;
+        ss << match_str;
+        ss >> std::hex >> bin;
+
+        result.push_back(bin);
+    }
+
+    return result;
+}
+
+//================================= UI =======================================
+CodeEditorLanguage::Language GetCurrentLanguage()
+{
+    CodeEditorLanguage::Language result = CodeEditorLanguage::Language::GLSL;
+
+    switch (LANGUAGE_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        result = CodeEditorLanguage::Language::GLSL;
+    }
+    break;
+    case 1: {
+        result = CodeEditorLanguage::Language::HLSL;
+    }
+    case 2: {
+        result = CodeEditorLanguage::Language::SPIRV_BINARY;
+    }
+    case 3: {
+        result = CodeEditorLanguage::Language::SPIRV_DISASSEMBLE;
+    }
+    break;
+    }
+
+    return result;
+}
+
+EShLanguage GetCurrentShaderType()
+{
+    EShLanguage shader_stage = EShLanguage::EShLangVertex;
+
+    if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 0 /*Vertex*/)
+    {
+        shader_stage = EShLanguage::EShLangVertex;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*Tessellation Control*/)
+    {
+        shader_stage = EShLanguage::EShLangTessControl;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 2 /*Tessellation Evaluation*/)
+    {
+        shader_stage = EShLanguage::EShLangTessEvaluation;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 3 /*Geometry*/)
+    {
+        shader_stage = EShLanguage::EShLangGeometry;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 4 /*Fragment*/)
+    {
+        shader_stage = EShLanguage::EShLangFragment;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 5 /*Compute*/)
+    {
+        shader_stage = EShLanguage::EShLangCompute;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 6 /*Ray Generation*/)
+    {
+        shader_stage = EShLanguage::EShLangRayGen;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 7 /*Intersection*/)
+    {
+        shader_stage = EShLanguage::EShLangIntersect;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 8 /*Any-Hit*/)
+    {
+        shader_stage = EShLanguage::EShLangAnyHit;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 9 /*Closest Hit*/)
+    {
+        shader_stage = EShLanguage::EShLangClosestHit;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Miss*/)
+    {
+        shader_stage = EShLanguage::EShLangMiss;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Callable*/)
+    {
+        shader_stage = EShLanguage::EShLangCallable;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Task*/)
+    {
+        shader_stage = EShLanguage::EShLangTask;
+    }
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Mesh*/)
+    {
+        shader_stage = EShLanguage::EShLangMesh;
+    }
+
+    return shader_stage;
+}
+
+glslang::EShClient GetCurrentCLient()
+{
+    glslang::EShClient client = glslang::EShClient::EShClientVulkan;
+    switch (CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        client = glslang::EShClient::EShClientVulkan;
+    }
+    break;
+    case 1: {
+        client = glslang::EShClient::EShClientOpenGL;
+    }
+    break;
+    }
+
+    return client;
+}
+
+glslang::EShTargetClientVersion GetCurrentTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+
+glslang::EShTargetLanguageVersion GetCurrentTargetLanguageVersion()
+{
+    glslang::EShTargetLanguageVersion target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+    switch (TARGET_LANGUAGE_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_0;
+    }
+    break;
+    case 1: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_1;
+    }
+    break;
+    case 2: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_2;
+    }
+    break;
+    case 3: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_3;
+    }
+    break;
+    case 4: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_4;
+    }
+    break;
+    case 5: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_5;
+    }
+    break;
+    case 6: {
+        target_language_version = glslang::EShTargetLanguageVersion::EShTargetSpv_1_6;
+    }
+    break;
+    }
+
+    return target_language_version;
+}
+//================================= UI =======================================
+
+spv_target_env GetCurrentSpirVTargetEnvFromTargetLanguageVersion()
+{
+    spv_target_env requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
+
+    glslang::EShTargetLanguageVersion target_language_version = GetCurrentTargetLanguageVersion();
+    switch (target_language_version)
+    {
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_0: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_1: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_1;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_2: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_2;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_3: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_3;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_4: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_4;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_5: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_5;
+    }
+    break;
+    case glslang::EShTargetLanguageVersion::EShTargetSpv_1_6: {
+        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_6;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    return requested_context;
+}
+
+/*All language to SPIR-V Binary in here*/
+std::vector<uint32_t> CompileEditorCodeToSpirVBinary()
+{
+    std::string code_str = codeEditor.GetText();
+
+    std::vector<uint32_t> siprv_code;
+
+    if (!code_str.empty())
+    {
+        CodeEditorLanguage::Language code_editor_language = GetCurrentLanguage();
+
+        EShLanguage shader_stage = GetCurrentShaderType();
+
+        glslang::EShClient client = GetCurrentCLient();
+
+        glslang::EShTargetClientVersion target_client_version = GetCurrentTargetClientVersion();
+
+        glslang::EShTargetLanguageVersion target_language_version = GetCurrentTargetLanguageVersion();
+
+        switch (code_editor_language)
+        {
+        case CodeEditorLanguage::Language::GLSL: {
+        }
+        case CodeEditorLanguage::Language::HLSL: {
+
+            if (code_editor_language == CodeEditorLanguage::Language::GLSL)
+            {
+                siprv_code =
+                    GLSLToSpirVBinary(shader_stage, client, target_client_version, target_language_version, code_str);
+            }
+            else if (code_editor_language == CodeEditorLanguage::Language::HLSL)
+            {
+                siprv_code =
+                    HLSLToSpirVBinary(shader_stage, client, target_client_version, target_language_version, code_str);
+            }
+        }
+        break;
+        case CodeEditorLanguage::Language::SPIRV_DISASSEMBLE: {
+            siprv_code = SpirVDisassembleToSpirVBinary(code_str, GetCurrentSpirVTargetEnvFromTargetLanguageVersion());
+        }
+        break;
+        case CodeEditorLanguage::Language::SPIRV_BINARY: {
+            std::vector<uint32_t> temp_siprv_code = HexArrayStringToSpirVBinary(code_str);
+            siprv_code = SpirVBinaryToSpirVBinary(temp_siprv_code, GetCurrentSpirVTargetEnvFromTargetLanguageVersion());
+        }
+        break;
+        }
+    }
+    else
+    {
+        LogError("Shader code is empty.");
+    }
+
+    return siprv_code;
+}
+
+void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
+{
+    std::string hex_spirv_code_result = SpirVBinaryToHexArrayString(spirvCode);
 
     isCodeViewEditorShow = true;
     codeViewEditor.SetText(hex_spirv_code_result);
@@ -1128,52 +1454,22 @@ void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
 
 void OuputSpirVDisassembleCallback(const std::vector<uint32_t> &spirvCode)
 {
-    spv_target_env requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
-    switch (TARGET_LANGUAGE_ITEMS_CURRENT_INDEX)
-    {
-    case 0: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_0;
-    }
-    break;
-    case 1: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_1;
-    }
-    break;
-    case 2: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_2;
-    }
-    break;
-    case 3: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_3;
-    }
-    break;
-    case 4: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_4;
-    }
-    break;
-    case 5: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_5;
-    }
-    break;
-    case 6: {
-        requested_context = spv_target_env::SPV_ENV_UNIVERSAL_1_6;
-    }
-    break;
-        break;
-    }
+    spv_target_env requested_context = GetCurrentSpirVTargetEnvFromTargetLanguageVersion();
 
-    std::string spirv_disassemble_str = SpirVDisassemble(spirvCode, requested_context);
+    std::string spirv_disassemble_str = SpirVBinaryToSpirVDisassemble(spirvCode, requested_context);
     // std::cout << spirv_disassemble_str << std::endl;
-
-    isCodeViewEditorShow = true;
-    codeViewEditor.SetText(spirv_disassemble_str);
+    if (!spirv_disassemble_str.empty())
+    {
+        isCodeViewEditorShow = true;
+        codeViewEditor.SetText(spirv_disassemble_str);
+    }
 
     LogSuccess("shader code successfully compile to SPIR-V disassemble code");
 }
 
 void ToSpirVDisassembleCallback()
 {
-    std::vector<uint32_t> siprv_code = CompilerShaderEditorShaderCodeToSpirVBinary();
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
 
     if (siprv_code.size() > 0)
     {
@@ -1188,25 +1484,7 @@ void ToSpirVDisassembleCallback()
 
 void ToSpirVBinaryCallback()
 {
-    // spirv_cross::CompilerGLSL glsl(siprv_code);
-    // spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
-    // opts.vulkan_semantics = true;
-    // glsl.set_common_options(opts);
-    // Log(glsl.compile());
-
-    // spirv_cross::CompilerCPP cpp(siprv_code);
-    // spirv_cross::CompilerCPP::Options opts = cpp.get_common_options();
-    // opts.vulkan_semantics = true;
-    // cpp.set_common_options(opts);
-    // Log(cpp.compile());
-
-    // spirv_cross::CompilerReflection reflection(siprv_code);
-    // spirv_cross::CompilerCPP::Options opts = reflection.get_common_options();
-    // opts.vulkan_semantics = true;
-    // reflection.set_common_options(opts);
-    // Log(reflection.compile());
-
-    std::vector<uint32_t> siprv_code = CompilerShaderEditorShaderCodeToSpirVBinary();
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
 
     if (siprv_code.size() > 0)
     {
@@ -1229,7 +1507,7 @@ void CodeEditorLoop()
 
     if (!is_init)
     {
-        ChangeEditorLanguage(codeEditor, TextEditorLanguage::GLSL);
+        ChangeEditorLanguage(codeEditor, CodeEditorLanguage::Language::GLSL);
 
         // TextEditor::ErrorMarkers markers;
         // markers.insert(
@@ -1425,16 +1703,29 @@ void CodeEditorLoop()
     {
         if (LANGUAGE_ITEMS_CURRENT_INDEX == 0)
         {
-            ChangeEditorLanguage(codeEditor, TextEditorLanguage::GLSL);
+            ChangeEditorLanguage(codeEditor, CodeEditorLanguage::Language::GLSL);
         }
         else if (LANGUAGE_ITEMS_CURRENT_INDEX == 1)
         {
-            ChangeEditorLanguage(codeEditor, TextEditorLanguage::HLSL);
+            ChangeEditorLanguage(codeEditor, CodeEditorLanguage::Language::HLSL);
+        }
+        else if (LANGUAGE_ITEMS_CURRENT_INDEX == 2)
+        {
+            ChangeEditorLanguage(codeEditor, CodeEditorLanguage::Language::SPIRV_BINARY);
+        }
+        else if (LANGUAGE_ITEMS_CURRENT_INDEX == 3)
+        {
+            ChangeEditorLanguage(codeEditor, CodeEditorLanguage::Language::SPIRV_DISASSEMBLE);
         }
         // Log(std::to_string(LANGUAGE_ITEMS_CURRENT_INDEX));
     }
 
-    ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS, IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
+    // FIXME: If Language is [SPIR-V Binary] or [SPIR-V Disassemble] we don't need the [Shader Type] item
+    if (LANGUAGE_ITEMS_CURRENT_INDEX != 2 && LANGUAGE_ITEMS_CURRENT_INDEX != 3)
+    {
+        ImGui::Combo("Shader Type", &SHADER_TYPE_ITEMS_CURRENT_INDEX, SHADER_TYPE_ITEMS,
+                     IM_ARRAYSIZE(SHADER_TYPE_ITEMS));
+    }
     ImGui::Text("ImGui Version: %s", ImGui::GetVersion());
     ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, codeEditor.GetTotalLines(),
                 codeEditor.IsOverwrite() ? "Ovr" : "Ins", codeEditor.CanUndo() ? "*" : " ",
@@ -1459,7 +1750,7 @@ void CodeViewerEditorLoop()
 
     if (!is_init)
     {
-        ChangeEditorLanguage(codeViewEditor, TextEditorLanguage::GLSL);
+        ChangeEditorLanguage(codeViewEditor, CodeEditorLanguage::Language::GLSL);
 
         // TextEditor::ErrorMarkers markers;
         // markers.insert(
