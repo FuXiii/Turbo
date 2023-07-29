@@ -18,15 +18,10 @@
 #include <spirv_cpp.hpp>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
+#include <spirv_msl.hpp>
 #include <spirv_reflect.hpp>
 
 /*
-    // spirv_cross::CompilerGLSL glsl(siprv_code);
-    // spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
-    // opts.vulkan_semantics = true;
-    // glsl.set_common_options(opts);
-    // Log(glsl.compile());
-
     // spirv_cross::CompilerCPP cpp(siprv_code);
     // spirv_cross::CompilerCPP::Options opts = cpp.get_common_options();
     // opts.vulkan_semantics = true;
@@ -680,6 +675,11 @@ int CLIENT_ITEMS_CURRENT_INDEX = 0;
 
 const char *TARGET_CLIENT_ITEMS[] = {"Vulkan 1.0", "Vulkan 1.1", "Vulkan 1.2", "Vulkan 1.3", "OpenGL 4.5"};
 int TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
+int GLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
+int HLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
+int MSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
+int CPP_TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
+int REFLECTION_TARGET_CLIENT_ITEMS_CURRENT_INDEX = 0;
 
 const char *TARGET_LANGUAGE_ITEMS[] = {"SPIR-V 1.0", "SPIR-V 1.1", "SPIR-V 1.2", "SPIR-V 1.3",
                                        "SPIR-V 1.4", "SPIR-V 1.5", "SPIR-V 1.6"};
@@ -1090,6 +1090,102 @@ std::string SpirVBinaryToHLSL(
     return hlsl.compile();
 }
 
+std::string SpirVBinaryToMSL(
+    const std::vector<unsigned int> &spirv,
+    glslang::EShTargetClientVersion targetClientVersion = glslang::EShTargetClientVersion::EShTargetVulkan_1_0)
+{
+    spirv_cross::CompilerMSL msl(spirv);
+    spirv_cross::CompilerGLSL::Options opts = msl.get_common_options();
+
+    switch (targetClientVersion)
+    {
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_0: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_1: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_2: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_3: {
+        opts.vulkan_semantics = true;
+    }
+    break;
+    case glslang::EShTargetClientVersion::EShTargetOpenGL_450: {
+        opts.vulkan_semantics = false;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    msl.set_common_options(opts);
+    return msl.compile();
+}
+
+std::string SpirVBinaryToCpp(
+    const std::vector<unsigned int> &spirv,
+    glslang::EShTargetClientVersion targetClientVersion = glslang::EShTargetClientVersion::EShTargetVulkan_1_0)
+{
+    spirv_cross::CompilerCPP cppp(spirv);
+    spirv_cross::CompilerGLSL::Options opts = cppp.get_common_options();
+
+    switch (targetClientVersion)
+    {
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_0: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_1: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_2: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_3: {
+        opts.vulkan_semantics = true;
+    }
+    break;
+    case glslang::EShTargetClientVersion::EShTargetOpenGL_450: {
+        opts.vulkan_semantics = false;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    cppp.set_common_options(opts);
+    return cppp.compile();
+}
+
+std::string SpirVBinaryToReflection(
+    const std::vector<unsigned int> &spirv,
+    glslang::EShTargetClientVersion targetClientVersion = glslang::EShTargetClientVersion::EShTargetVulkan_1_0)
+{
+    spirv_cross::CompilerReflection reflection(spirv);
+    spirv_cross::CompilerGLSL::Options opts = reflection.get_common_options();
+
+    switch (targetClientVersion)
+    {
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_0: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_1: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_2: {
+    }
+    case glslang::EShTargetClientVersion::EShTargetVulkan_1_3: {
+        opts.vulkan_semantics = true;
+    }
+    break;
+    case glslang::EShTargetClientVersion::EShTargetOpenGL_450: {
+        opts.vulkan_semantics = false;
+    }
+    break;
+    default: {
+    }
+    break;
+    }
+
+    reflection.set_common_options(opts);
+    return reflection.compile();
+}
+
 std::string SpirVBinaryToHexArrayString(const std::vector<uint32_t> &spirvCode)
 {
     std::string hex_spirv_code_result;
@@ -1165,7 +1261,7 @@ std::vector<uint32_t> HexArrayStringToSpirVBinary(const std::string &ArrayString
     return result;
 }
 
-//================================= UI =======================================
+//================================= <UI> =======================================
 CodeEditorLanguage::Language GetCurrentLanguage()
 {
     CodeEditorLanguage::Language result = CodeEditorLanguage::Language::GLSL;
@@ -1342,7 +1438,157 @@ glslang::EShTargetLanguageVersion GetCurrentTargetLanguageVersion()
 
     return target_language_version;
 }
-//================================= UI =======================================
+
+glslang::EShTargetClientVersion GetCurrentGLSLTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (GLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+
+glslang::EShTargetClientVersion GetCurrentHLSLTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (HLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+
+glslang::EShTargetClientVersion GetCurrentMSLTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (MSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+
+glslang::EShTargetClientVersion GetCurrentCppTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (CPP_TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+
+glslang::EShTargetClientVersion GetCurrentReflectionTargetClientVersion()
+{
+    glslang::EShTargetClientVersion target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    switch (REFLECTION_TARGET_CLIENT_ITEMS_CURRENT_INDEX)
+    {
+    case 0: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
+    }
+    break;
+    case 1: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_1;
+    }
+    break;
+    case 2: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_2;
+    }
+    break;
+    case 3: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetVulkan_1_3;
+    }
+    break;
+    case 4: {
+        target_client_version = glslang::EShTargetClientVersion::EShTargetOpenGL_450;
+    }
+    break;
+    }
+
+    return target_client_version;
+}
+//================================= </UI> =======================================
 
 spv_target_env GetCurrentSpirVTargetEnvFromTargetLanguageVersion()
 {
@@ -1498,6 +1744,191 @@ void ToSpirVBinaryCallback()
     }
 }
 
+void OuputGLSLCallback(const std::vector<uint32_t> &spirvCode)
+{
+    try
+    {
+        std::string glsl_str = SpirVBinaryToGLSL(spirvCode, GetCurrentGLSLTargetClientVersion());
+        if (!glsl_str.empty())
+        {
+            isCodeViewEditorShow = true;
+            codeViewEditor.SetText(glsl_str);
+        }
+
+        LogSuccess("shader code successfully compile to GLSL");
+    }
+    catch (std::exception &e)
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+
+        LogError(e.what());
+    }
+}
+
+void ToGLSLCallback()
+{
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OuputGLSLCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void OutputHLSLCallback(const std::vector<uint32_t> &spirvCode)
+{
+    try
+    {
+        std::string hlsl_str = SpirVBinaryToHLSL(spirvCode, GetCurrentHLSLTargetClientVersion());
+        if (!hlsl_str.empty())
+        {
+            isCodeViewEditorShow = true;
+            codeViewEditor.SetText(hlsl_str);
+        }
+
+        LogSuccess("shader code successfully compile to GLSL");
+    }
+    catch (std::exception &e)
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+
+        LogError(e.what());
+    }
+}
+
+void ToHLSLCallback()
+{
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OutputHLSLCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void OutputMSLCallback(const std::vector<uint32_t> &spirvCode)
+{
+    try
+    {
+        std::string msl_str = SpirVBinaryToMSL(spirvCode, GetCurrentMSLTargetClientVersion());
+        if (!msl_str.empty())
+        {
+            isCodeViewEditorShow = true;
+            codeViewEditor.SetText(msl_str);
+        }
+
+        LogSuccess("shader code successfully compile to GLSL");
+    }
+    catch (std::exception &e)
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+
+        LogError(e.what());
+    }
+}
+
+void ToMSLCallback()
+{
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OutputMSLCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void OutputCppCallback(const std::vector<uint32_t> &spirvCode)
+{
+    try
+    {
+        std::string cpp_str = SpirVBinaryToCpp(spirvCode, GetCurrentCppTargetClientVersion());
+        if (!cpp_str.empty())
+        {
+            isCodeViewEditorShow = true;
+            codeViewEditor.SetText(cpp_str);
+        }
+
+        LogSuccess("shader code successfully compile to GLSL");
+    }
+    catch (std::exception &e)
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+
+        LogError(e.what());
+    }
+}
+
+void ToCppCallback()
+{
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OutputCppCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
+void OutputReflectionCallback(const std::vector<uint32_t> &spirvCode)
+{
+    try
+    {
+        std::string reflection_str = SpirVBinaryToReflection(spirvCode, GetCurrentCppTargetClientVersion());
+        if (!reflection_str.empty())
+        {
+            isCodeViewEditorShow = true;
+            codeViewEditor.SetText(reflection_str);
+        }
+
+        LogSuccess("shader code successfully compile to GLSL");
+    }
+    catch (std::exception &e)
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+
+        LogError(e.what());
+    }
+}
+
+void ToReflectionCallback()
+{
+    std::vector<uint32_t> siprv_code = CompileEditorCodeToSpirVBinary();
+
+    if (siprv_code.size() > 0)
+    {
+        OutputReflectionCallback(siprv_code);
+    }
+    else
+    {
+        isCodeViewEditorShow = false;
+        codeViewEditor.SetText("");
+    }
+}
+
 void CodeEditorLoop()
 {
     ImGuiIO &io = ImGui::GetIO();
@@ -1604,7 +2035,7 @@ void CodeEditorLoop()
 
         if (ImGui::BeginMenu("Convert"))
         {
-            if (ImGui::BeginMenu("SPIR-V")) // <-- Append!
+            if (ImGui::BeginMenu("SPIR-V"))
             {
                 ImGui::Combo("Client", &CLIENT_ITEMS_CURRENT_INDEX, CLIENT_ITEMS, IM_ARRAYSIZE(CLIENT_ITEMS));
                 ImGui::Separator();
@@ -1622,6 +2053,76 @@ void CodeEditorLoop()
                 if (ImGui::Button("To SPIR-V Disassemble"))
                 {
                     ToSpirVDisassembleCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("GLSL"))
+            {
+                ImGui::Combo("Target Client", &GLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To GLSL"))
+                {
+                    ToGLSLCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("HLSL"))
+            {
+                ImGui::Combo("Target Client", &HLSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To HLSL"))
+                {
+                    ToHLSLCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("MSL"))
+            {
+                ImGui::Combo("Target Client", &MSL_TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To MSL"))
+                {
+                    ToMSLCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("C++"))
+            {
+                ImGui::Combo("Target Client", &CPP_TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To C++"))
+                {
+                    ToCppCallback();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Reflection"))
+            {
+                ImGui::Combo("Target Client", &CPP_TARGET_CLIENT_ITEMS_CURRENT_INDEX, TARGET_CLIENT_ITEMS,
+                             IM_ARRAYSIZE(TARGET_CLIENT_ITEMS));
+
+                ImGui::Separator();
+                if (ImGui::Button("To Reflection"))
+                {
+                    ToReflectionCallback();
                 }
 
                 ImGui::EndMenu();
