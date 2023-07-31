@@ -1333,19 +1333,19 @@ EShLanguage GetCurrentShaderType()
     {
         shader_stage = EShLanguage::EShLangClosestHit;
     }
-    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Miss*/)
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 10 /*"Miss*/)
     {
         shader_stage = EShLanguage::EShLangMiss;
     }
-    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Callable*/)
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 11 /*"Callable*/)
     {
         shader_stage = EShLanguage::EShLangCallable;
     }
-    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Task*/)
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 12 /*"Task*/)
     {
         shader_stage = EShLanguage::EShLangTask;
     }
-    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 1 /*"Mesh*/)
+    else if (SHADER_TYPE_ITEMS_CURRENT_INDEX == 13 /*"Mesh*/)
     {
         shader_stage = EShLanguage::EShLangMesh;
     }
@@ -1688,7 +1688,7 @@ std::vector<uint32_t> CompileEditorCodeToSpirVBinary()
     return siprv_code;
 }
 
-void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
+void OutputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
 {
     std::string hex_spirv_code_result = SpirVBinaryToHexArrayString(spirvCode);
 
@@ -1699,7 +1699,7 @@ void OuputSpirVBinaryCallback(const std::vector<uint32_t> &spirvCode)
     LogSuccess("shader code successfully compile to SPIR-V binary code");
 }
 
-void OuputSpirVDisassembleCallback(const std::vector<uint32_t> &spirvCode)
+void OutputSpirVDisassembleCallback(const std::vector<uint32_t> &spirvCode)
 {
     spv_target_env requested_context = GetCurrentSpirVTargetEnvFromTargetLanguageVersion();
 
@@ -1720,7 +1720,7 @@ void ToSpirVDisassembleCallback()
 
     if (siprv_code.size() > 0)
     {
-        OuputSpirVDisassembleCallback(siprv_code);
+        OutputSpirVDisassembleCallback(siprv_code);
     }
     else
     {
@@ -1735,7 +1735,7 @@ void ToSpirVBinaryCallback()
 
     if (siprv_code.size() > 0)
     {
-        OuputSpirVBinaryCallback(siprv_code);
+        OutputSpirVBinaryCallback(siprv_code);
     }
     else
     {
@@ -1744,7 +1744,7 @@ void ToSpirVBinaryCallback()
     }
 }
 
-void OuputGLSLCallback(const std::vector<uint32_t> &spirvCode)
+void OutputGLSLCallback(const std::vector<uint32_t> &spirvCode)
 {
     try
     {
@@ -1772,7 +1772,7 @@ void ToGLSLCallback()
 
     if (siprv_code.size() > 0)
     {
-        OuputGLSLCallback(siprv_code);
+        OutputGLSLCallback(siprv_code);
     }
     else
     {
@@ -1780,6 +1780,7 @@ void ToGLSLCallback()
         codeViewEditor.SetText("");
     }
 }
+#include <stdexcept>
 
 void OutputHLSLCallback(const std::vector<uint32_t> &spirvCode)
 {
@@ -1792,14 +1793,15 @@ void OutputHLSLCallback(const std::vector<uint32_t> &spirvCode)
             codeViewEditor.SetText(hlsl_str);
         }
 
-        LogSuccess("shader code successfully compile to GLSL");
+        LogSuccess("shader code successfully compile to HLSL");
     }
-    catch (std::exception &e)
+    catch (const std::exception &e)
     {
         isCodeViewEditorShow = false;
         codeViewEditor.SetText("");
 
         LogError(e.what());
+        return;
     }
 }
 
@@ -1829,7 +1831,7 @@ void OutputMSLCallback(const std::vector<uint32_t> &spirvCode)
             codeViewEditor.SetText(msl_str);
         }
 
-        LogSuccess("shader code successfully compile to GLSL");
+        LogSuccess("shader code successfully compile to MSL");
     }
     catch (std::exception &e)
     {
@@ -1866,7 +1868,7 @@ void OutputCppCallback(const std::vector<uint32_t> &spirvCode)
             codeViewEditor.SetText(cpp_str);
         }
 
-        LogSuccess("shader code successfully compile to GLSL");
+        LogSuccess("shader code successfully compile to C++");
     }
     catch (std::exception &e)
     {
@@ -1903,7 +1905,7 @@ void OutputReflectionCallback(const std::vector<uint32_t> &spirvCode)
             codeViewEditor.SetText(reflection_str);
         }
 
-        LogSuccess("shader code successfully compile to GLSL");
+        LogSuccess("shader code successfully compile to Reflection");
     }
     catch (std::exception &e)
     {

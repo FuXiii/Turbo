@@ -3399,3 +3399,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/7/29 设计架构
   >
   >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加编译 `GLSL`、 `HLSL`、 `MSL`、 `C++`和`Reflection`的功能。
+
+* 2023/7/31 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。修改`Bug`和一些错误。
