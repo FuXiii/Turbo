@@ -3403,3 +3403,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/7/31 设计架构
   >
   >* `./samples`下更新`PureCCppWebShaderCompiler`项目。修改`Bug`和一些错误。
+
+* 2023/8/1 设计架构
+  >
+  >* `./samples`下新增`PureCCppMiniWebGPUTest`项目。一个使用`C/C++`书写的`WebGPU`的小例子。
