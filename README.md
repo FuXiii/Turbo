@@ -26,7 +26,8 @@ Turbo是渲染引擎
 
 * 研究开发 `Vulkan` 硬件实时光追。
 * 研究开发`C/C++`开发`WebGPU`项目，并发布到浏览器页面中。  
-    `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档
+    * `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档。
+    * `./sample` 下新增 `PureCCppMiniWebGPUTest` 项目。
 
 ## Sponsor
 
