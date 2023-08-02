@@ -140,8 +140,19 @@ void Test()
                 switch (status)
                 {
                 case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Success: {
-                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(device);
 
+                    WGPUErrorCallback wgpu_error_callback = [](WGPUErrorType type, char const *message, void *userdata) {
+                        std::cout << "Error:" << type;
+                        if (message)
+                        {
+                            std::cout << ":" << message;
+                        }
+                        std::cout << std::endl;
+                    };
+
+                    wgpuDeviceSetUncapturedErrorCallback(device, wgpu_error_callback, nullptr);
+
+                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(device);
                     // TODO: start emscripten loop callback
                 }
                 break;
