@@ -125,9 +125,6 @@ void Start()
     emscripten_request_animation_frame_loop(EMSCRIPTEN_ANIMATION_FRAME, window);
 }
 
-#include <cassert>
-#include <vector>
-
 void Test()
 {
     WGPUInstanceDescriptor wgpu_instance_descriptor = {};
@@ -139,99 +136,39 @@ void Test()
         {
         case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Success: {
 
-            size_t adapter_feature_size = wgpuAdapterEnumerateFeatures(adapter, nullptr);
-            std::cout << "adapter_feature_size:" << adapter_feature_size << std::endl;
-
-            std::vector<WGPUFeatureName> feature_names(adapter_feature_size);
-            wgpuAdapterEnumerateFeatures(adapter, feature_names.data());
-
-            for (auto item : feature_names)
-            {
-                switch (item)
+            WGPURequestDeviceCallback wgpu_request_device_callback = [](WGPURequestDeviceStatus status, WGPUDevice device, char const *message, void *userdata) {
+                switch (status)
                 {
-                case WGPUFeatureName::WGPUFeatureName_Undefined: {
-                    std::cout << "WGPUFeatureName_Undefined " << std::endl;
+                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Success: {
+                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(device);
+
+                    // TODO: start emscripten loop callback
                 }
                 break;
-                case WGPUFeatureName::WGPUFeatureName_DepthClipControl: {
-                    std::cout << "WGPUFeatureName_DepthClipControl " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_Depth32FloatStencil8: {
-                    std::cout << "WGPUFeatureName_Depth32FloatStencil8 " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_TimestampQuery: {
-                    std::cout << "WGPUFeatureName_TimestampQuery " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_PipelineStatisticsQuery: {
-                    std::cout << "WGPUFeatureName_PipelineStatisticsQuery " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_TextureCompressionBC: {
-                    std::cout << "WGPUFeatureName_TextureCompressionBC " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_TextureCompressionETC2: {
-                    std::cout << "WGPUFeatureName_TextureCompressionETC2 " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_TextureCompressionASTC: {
-                    std::cout << "WGPUFeatureName_TextureCompressionASTC " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_IndirectFirstInstance: {
-                    std::cout << "WGPUFeatureName_IndirectFirstInstance " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_ShaderF16: {
-                    std::cout << "WGPUFeatureName_ShaderF16 " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_RG11B10UfloatRenderable: {
-                    std::cout << "WGPUFeatureName_RG11B10UfloatRenderable " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_BGRA8UnormStorage: {
-                    std::cout << "WGPUFeatureName_BGRA8UnormStorage " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_Float32Filterable: {
-                    std::cout << "WGPUFeatureName_Float32Filterable " << std::endl;
-                }
-                break;
-                case WGPUFeatureName::WGPUFeatureName_Force32: {
-                    std::cout << "WGPUFeatureName_Force32 " << std::endl;
-                }
-                break;
+                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Error:
+                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Unknown:
                 default: {
+                    throw std::runtime_error(std::string("Could not get WebGPU device: ") + std::string(message));
                 }
                 break;
                 }
-            }
+            };
+
+            WGPUDeviceDescriptor wgpu_device_descriptor = {};
+            wgpuAdapterRequestDevice(adapter, &wgpu_device_descriptor, wgpu_request_device_callback, nullptr);
         }
         break;
         case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Unavailable:
         case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Error:
-        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Unknown: {
-            throw std::runtime_error(std::string("Unsupport WebGPU"));
-        }
-        break;
+        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Unknown:
         default: {
+            throw std::runtime_error(std::string("Unsupport WebGPU"));
         }
         break;
         }
     };
 
     WGPURequestAdapterOptions wgpu_request_adapter_options = {};
-    wgpu_request_adapter_options.nextInChain = nullptr;
-    wgpu_request_adapter_options.compatibleSurface = nullptr;
-    wgpu_request_adapter_options.powerPreference = WGPUPowerPreference::WGPUPowerPreference_LowPower;
-    wgpu_request_adapter_options.backendType = WGPUBackendType::WGPUBackendType_WebGPU;
-    wgpu_request_adapter_options.forceFallbackAdapter = false;
-    wgpu_request_adapter_options.compatibilityMode = false;
-
     wgpuInstanceRequestAdapter(wgpu_instance, &wgpu_request_adapter_options, wgpu_request_adapter_callback, nullptr);
 }
 

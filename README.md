@@ -3410,3 +3410,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下新增`PureCCppMiniWebGPUTest`项目。一个使用`C/C++`书写的`WebGPU`的小例子。
   >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口。
+
+* 2023/8/2 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口。
