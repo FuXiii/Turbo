@@ -3414,3 +3414,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/2 设计架构
   >
   >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口。
+
+* 2023/8/3 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口的`WGPUCommandEncoder`和`WGPUCommandBuffer`。

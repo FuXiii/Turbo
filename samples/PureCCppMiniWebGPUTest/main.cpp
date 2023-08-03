@@ -77,6 +77,9 @@ void InitGraphics(wgpu::Surface surface)
 
 void Render()
 {
+    // wgpu::QueueWorkDoneCallback queue_work_done_callback = [](WGPUQueueWorkDoneStatus status, void *userdata) { std::cout << "Queued work finished with status: " << status << std::endl; };
+    // DEVICE.GetQueue().OnSubmittedWorkDone(0, queue_work_done_callback, nullptr);
+
     double time = glfwGetTime();
     double coefficient = (sin(time) + 1) * 0.5;
     wgpu::Color clear_color = {.r = coefficient, .g = coefficient, .b = coefficient, .a = 1};
@@ -140,7 +143,7 @@ void Test()
                 switch (status)
                 {
                 case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Success: {
-
+                    WGPUDevice wgpu_device = device;
                     WGPUErrorCallback wgpu_error_callback = [](WGPUErrorType type, char const *message, void *userdata) {
                         std::cout << "Error:" << type;
                         if (message)
@@ -150,9 +153,27 @@ void Test()
                         std::cout << std::endl;
                     };
 
-                    wgpuDeviceSetUncapturedErrorCallback(device, wgpu_error_callback, nullptr);
+                    wgpuDeviceSetUncapturedErrorCallback(wgpu_device, wgpu_error_callback, nullptr);
 
-                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(device);
+                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(wgpu_device);
+
+                    WGPUQueueWorkDoneCallback wgpu_queue_work_done_callback = [](WGPUQueueWorkDoneStatus status, void *userdata) { std::cout << "Queued work finished with status: " << status << std::endl; };
+                    wgpuQueueOnSubmittedWorkDone(wgpu_queue, 0, wgpu_queue_work_done_callback, nullptr);
+
+                    WGPUCommandEncoderDescriptor wgpu_command_encoder_descriptor = {};
+                    wgpu_command_encoder_descriptor.nextInChain = nullptr;
+                    wgpu_command_encoder_descriptor.label = "Command Encoder";
+                    WGPUCommandEncoder wgpu_command_encoder = wgpuDeviceCreateCommandEncoder(wgpu_device, &wgpu_command_encoder_descriptor);
+
+                    // wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder commandEncoder, const WGPURenderPassDescriptor *descriptor);
+
+                    WGPUCommandBufferDescriptor wgpu_command_buffer_descriptor = {};
+                    wgpu_command_buffer_descriptor.nextInChain = nullptr;
+                    wgpu_command_buffer_descriptor.label = "Command Buffer";
+                    WGPUCommandBuffer wgpu_command_buffer = wgpuCommandEncoderFinish(wgpu_command_encoder, &wgpu_command_buffer_descriptor);
+                    
+                    wgpuQueueSubmit(wgpu_queue, 1, &wgpu_command_buffer);
+
                     // TODO: start emscripten loop callback
                 }
                 break;
@@ -191,6 +212,7 @@ int main()
 
     GetDevice([](wgpu::Device device) {
         DEVICE = device;
+
         Start();
     });
 
