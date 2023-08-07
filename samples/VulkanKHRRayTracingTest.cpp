@@ -85,7 +85,9 @@ const std::string FRAG_SHADER_STR = "#version 450 core\n"
                                     "   outColor = vec4(inColor,1);\n"
                                     "}\n";
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTraceTest.rgen");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rchit");
 
 typedef struct POSITION
 {
@@ -126,6 +128,11 @@ int main()
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}});
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}});
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}});
+
+    std::vector<uint32_t> INDEX_DATA;
+    INDEX_DATA.push_back(0);
+    INDEX_DATA.push_back(1);
+    INDEX_DATA.push_back(2);
 
     float value = -10.0f;
 
@@ -351,7 +358,6 @@ int main()
         std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures << std::endl;
         std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.minAccelerationStructureScratchOffsetAlignment = " << vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment << std::endl;
 
-        // Turbo::Core::TBuffer *device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
         Turbo::Core::TBuffer *device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
         {
             Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION_AND_COLOR) * POSITION_AND_COLOR_DATA.size());
@@ -401,6 +407,55 @@ int main()
         VkDeviceOrHostAddressConstKHR vertex_data = {};
         vertex_data.deviceAddress = device_local_vertex_buffer_device_address;
 
+        Turbo::Core::TBuffer *device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(uint32_t) * INDEX_DATA.size());
+        {
+            Turbo::Core::TBuffer *staging_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDEX_DATA.size());
+            memcpy(staging_index_buffer->Map(), INDEX_DATA.data(), sizeof(uint32_t) * INDEX_DATA.size());
+            staging_index_buffer->Unmap();
+
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            command_buffer->CmdCopyBuffer(staging_index_buffer, device_local_index_buffer, 0, 0, sizeof(uint32_t) * INDEX_DATA.size());
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            delete staging_index_buffer;
+        }
+
+        VkDeviceAddress device_local_index_buffer_device_address = 0;
+
+        VkBufferDeviceAddressInfo device_local_index_buffer_device_address_info = {};
+        device_local_index_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        device_local_index_buffer_device_address_info.pNext = nullptr;
+        device_local_index_buffer_device_address_info.buffer = device_local_index_buffer->GetVkBuffer();
+
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+
+        if (device_local_index_buffer_device_address != 0)
+        {
+            std::cout << "Successfully get device_local_index_buffer VkBuffer device local address " << std::endl;
+        }
+
+        VkDeviceOrHostAddressConstKHR index_data = {};
+        index_data.deviceAddress = device_local_index_buffer_device_address;
+
         VkAccelerationStructureGeometryTrianglesDataKHR vk_acceleration_structure_geometry_triangles_data_khr = {};
         vk_acceleration_structure_geometry_triangles_data_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
         vk_acceleration_structure_geometry_triangles_data_khr.pNext = nullptr;
@@ -408,8 +463,8 @@ int main()
         vk_acceleration_structure_geometry_triangles_data_khr.vertexData = vertex_data;
         vk_acceleration_structure_geometry_triangles_data_khr.vertexStride = sizeof(POSITION_AND_COLOR);
         vk_acceleration_structure_geometry_triangles_data_khr.maxVertex = POSITION_AND_COLOR_DATA.size();
-        vk_acceleration_structure_geometry_triangles_data_khr.indexType = VkIndexType::VK_INDEX_TYPE_NONE_KHR;
-        vk_acceleration_structure_geometry_triangles_data_khr.indexData.deviceAddress = 0;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexType = VkIndexType::VK_INDEX_TYPE_UINT32;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexData = index_data;
         vk_acceleration_structure_geometry_triangles_data_khr.transformData.deviceAddress = 0;
 
         VkAccelerationStructureGeometryDataKHR vk_acceleration_structure_geometry_data_khr = {};
@@ -908,8 +963,27 @@ int main()
         }
 
         Turbo::Core::TRayGenerationShader *ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        Turbo::Core::TMissShader *miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
+        Turbo::Core::TClosestHitShader *closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
+
+        VkDescriptorSetLayoutBinding vk_descriptor_set_layout_binding = {};
+        vk_descriptor_set_layout_binding.binding = 0;
+        vk_descriptor_set_layout_binding.descriptorType;
+        vk_descriptor_set_layout_binding.descriptorCount;
+        vk_descriptor_set_layout_binding.stageFlags;
+        vk_descriptor_set_layout_binding.pImmutableSamplers;
+
+        VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {};
+        descriptor_set_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        descriptor_set_layout_create_info.pNext = nullptr;
+        descriptor_set_layout_create_info.flags = 0;
+        descriptor_set_layout_create_info.bindingCount = 0;
+        descriptor_set_layout_create_info.pBindings = 0;
 
         delete ray_generation_shader_test;
+        delete miss_shader_test;
+        delete closest_hit_shader_test;
+
         delete top_level_scratch_buffer;
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete top_level_acceleration_structure_buffer;
@@ -917,6 +991,7 @@ int main()
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, bottom_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete scratch_buffer;
         delete bottom_level_acceleration_structure_buffer;
+        delete device_local_index_buffer;
         delete device_local_vertex_buffer;
     }
 

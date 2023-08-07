@@ -78,7 +78,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
     TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
     TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr);
-    TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for graphics Pipeline
+    TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache = nullptr); // for mesh Pipeline
 
     // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
@@ -95,7 +95,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
 
-    //std::vector<TSpecializationConstant> GetSpecializationConstants() const;
+    // std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() override;

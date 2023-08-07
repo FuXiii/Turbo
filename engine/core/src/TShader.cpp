@@ -1174,6 +1174,16 @@ const std::map<uint32_t, Turbo::Core::TShader::TConstValue> &Turbo::Core::TShade
     return this->specializationMap;
 }
 
+std::vector<uint32_t> Turbo::Core::TShader::GetSpirV() const
+{
+    std::vector<uint32_t> spirv;
+    spirv.resize(this->size / sizeof(uint32_t));
+    uint32_t *spirv_data = spirv.data();
+    memcpy(spirv_data, this->code, this->size);
+
+    return spirv;
+}
+
 std::string Turbo::Core::TShader::ToString()
 {
     std::vector<uint32_t> spirv;
@@ -1257,5 +1267,45 @@ Turbo::Core::TRayGenerationShader::TRayGenerationShader(TDevice *device, TShader
 }
 
 Turbo::Core::TRayGenerationShader::TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TAnyHitShader::TAnyHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TAnyHitShader::TAnyHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TClosestHitShader::TClosestHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TClosestHitShader::TClosestHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TMissShader::TMissShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TMissShader::TMissShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TIntersectionShader::TIntersectionShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TIntersectionShader::TIntersectionShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, size, code, entryPoint)
+{
+}
+
+Turbo::Core::TCallableShader::TCallableShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, language, code, includePaths, entryPoint)
+{
+}
+
+Turbo::Core::TCallableShader::TCallableShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, size, code, entryPoint)
 {
 }

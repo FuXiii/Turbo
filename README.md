@@ -3418,3 +3418,16 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/3 设计架构
   >
   >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口的`WGPUCommandEncoder`和`WGPUCommandBuffer`。
+
+* 2023/8/7 设计架构
+  >
+  >* `./engine/core`下新增`TRayTracingPipeline.h`和`TRayTracingPipeline.cpp`用于声明定义`TRayTracingPipeline`类
+  >* `./engine/core`下`TShader.h`中增加`TAnyHitShader`类。用于描述任意命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TClosestHitShader`类。用于描述最近命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TMissShader`类。用于描述未命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TIntersectionShader`类。用于描述相交着色器。
+  >* `./engine/core`下`TShader.h`中增加`TCallableShader`类。用于描述可调用着色器。
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<uint32_t> GetSpirV()`成员函数。用于获取着色器的`Spir-V`的数据。
+  >* `./asset/shaders`下新增`RayTracingKHRTest.rmiss`。表示光追测试程序使用的未命中着色器。
+  >* `./asset/shaders`下`RayTraceTest.rgen`更改命名为`RayTracingKHRTest.rgen`。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索光追管线和着色器

@@ -161,6 +161,8 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::map<uint32_t, TConstValue> &GetSpecializations() const;
     //</specialization constants>
 
+    std::vector<uint32_t> GetSpirV() const;
+
     virtual std::string ToString() override;
 };
 
@@ -227,6 +229,40 @@ class TRayGenerationShader : public Turbo::Core::TShader
     TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
+class TAnyHitShader : public Turbo::Core::TShader
+{
+  public:
+    TAnyHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TAnyHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TClosestHitShader : public Turbo::Core::TShader
+{
+  public:
+    TClosestHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TClosestHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TMissShader : public Turbo::Core::TShader
+{
+  public:
+    TMissShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TMissShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TIntersectionShader : public Turbo::Core::TShader
+{
+  public:
+    TIntersectionShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TIntersectionShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TCallableShader : public Turbo::Core::TShader
+{
+  public:
+    TCallableShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TCallableShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADER_H
