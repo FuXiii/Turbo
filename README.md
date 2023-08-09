@@ -3431,3 +3431,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTest.rmiss`。表示光追测试程序使用的未命中着色器。
   >* `./asset/shaders`下`RayTraceTest.rgen`更改命名为`RayTracingKHRTest.rgen`。
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索光追管线和着色器
+
+* 2023/8/9 设计架构
+  >
+  >* `./samples`下更新`SubpassTest.cpp`。修正内部小三角形随时间变化大小。
+
