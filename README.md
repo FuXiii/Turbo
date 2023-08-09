@@ -3435,4 +3435,5 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/9 设计架构
   >
   >* `./samples`下更新`SubpassTest.cpp`。修正内部小三角形随时间变化大小。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。可控制视点方便查看渲染效果。
 
