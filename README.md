@@ -3437,3 +3437,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./samples`下更新`SubpassTest.cpp`。修正内部小三角形随时间变化大小。
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。可控制视点方便查看渲染效果。
 
+* 2023/8/10 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线。
+  >* `./engine/core`下`TExtensionInfo.cpp`中`TAllExtensionNames`增加`VK_KHR_ray_tracing_pipeline`元素值。用于光追管线扩展。
+  >* `./engine/core`下`TExtensionInfo.h`中`TExtensionType`增加`VK_KHR_RAY_TRACING_PIPELINE`枚举值。用于与`VK_KHR_ray_tracing_pipeline`元素光追管线扩展元素对应。
+  >* `./engine/core`下`TDevice.cpp`中`InspectExtensionAndVersionDependencies`中增加对`VK_KHR_RAY_TRACING_PIPELINE`扩展依赖的检查。
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加对`VK_KHR_ray_tracing_pipeline`扩展函数的声明
+  >* `./engine/core`下`TVulkanLoader.cpp`中`LoadDeviceDriver`函数中增加对`VK_KHR_ray_tracing_pipeline`扩展函数的加载获取
+  >* `.docs/Design`下增加`ForVulkanExtensionNote.md`文档文件，用于记录`Vulkan Extension 开发流程`
+
+  

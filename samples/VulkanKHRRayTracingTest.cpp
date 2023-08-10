@@ -1145,28 +1145,6 @@ int main()
             top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
         }
 
-        Turbo::Core::TRayGenerationShader *ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
-        Turbo::Core::TMissShader *miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
-        Turbo::Core::TClosestHitShader *closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
-
-        VkDescriptorSetLayoutBinding vk_descriptor_set_layout_binding = {};
-        vk_descriptor_set_layout_binding.binding = 0;
-        vk_descriptor_set_layout_binding.descriptorType;
-        vk_descriptor_set_layout_binding.descriptorCount;
-        vk_descriptor_set_layout_binding.stageFlags;
-        vk_descriptor_set_layout_binding.pImmutableSamplers;
-
-        VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {};
-        descriptor_set_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptor_set_layout_create_info.pNext = nullptr;
-        descriptor_set_layout_create_info.flags = 0;
-        descriptor_set_layout_create_info.bindingCount = 0;
-        descriptor_set_layout_create_info.pBindings = 0;
-
-        delete ray_generation_shader_test;
-        delete miss_shader_test;
-        delete closest_hit_shader_test;
-
         delete top_level_scratch_buffer;
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete top_level_acceleration_structure_buffer;
@@ -1176,6 +1154,161 @@ int main()
         delete bottom_level_acceleration_structure_buffer;
         delete device_local_index_buffer;
         delete device_local_vertex_buffer;
+    }
+
+    {
+        VkDescriptorSetLayoutBinding vk_ray_tracing_binding_acceleration_structure = {};
+        vk_ray_tracing_binding_acceleration_structure.binding = 0;
+        vk_ray_tracing_binding_acceleration_structure.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        vk_ray_tracing_binding_acceleration_structure.descriptorCount = 1;
+        vk_ray_tracing_binding_acceleration_structure.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        vk_ray_tracing_binding_acceleration_structure.pImmutableSamplers = nullptr;
+
+        VkDescriptorSetLayoutBinding vk_ray_tracing_binding_storage_image = {};
+        vk_ray_tracing_binding_storage_image.binding = 1;
+        vk_ray_tracing_binding_storage_image.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        vk_ray_tracing_binding_storage_image.descriptorCount = 1;
+        vk_ray_tracing_binding_storage_image.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        vk_ray_tracing_binding_storage_image.pImmutableSamplers = nullptr;
+
+        VkDescriptorSetLayoutBinding vk_ray_tracing_binding_matrixs = {};
+        vk_ray_tracing_binding_matrixs.binding = 2;
+        vk_ray_tracing_binding_matrixs.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        vk_ray_tracing_binding_matrixs.descriptorCount = 1;
+        vk_ray_tracing_binding_matrixs.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        vk_ray_tracing_binding_matrixs.pImmutableSamplers = nullptr;
+
+        std::vector<VkDescriptorSetLayoutBinding> ray_tracing_descriptor_set_layout_bindings = {};
+        ray_tracing_descriptor_set_layout_bindings.push_back(vk_ray_tracing_binding_acceleration_structure);
+        ray_tracing_descriptor_set_layout_bindings.push_back(vk_ray_tracing_binding_storage_image);
+        ray_tracing_descriptor_set_layout_bindings.push_back(vk_ray_tracing_binding_matrixs);
+
+        VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {};
+        descriptor_set_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        descriptor_set_layout_create_info.pNext = nullptr;
+        descriptor_set_layout_create_info.flags = 0;
+        descriptor_set_layout_create_info.bindingCount = ray_tracing_descriptor_set_layout_bindings.size();
+        descriptor_set_layout_create_info.pBindings = ray_tracing_descriptor_set_layout_bindings.data();
+
+        VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+        VkDescriptorSetLayout ray_tracing_descriptor_set_layout = VK_NULL_HANDLE;
+        VkResult ray_tracing_descriptor_set_layout_create_result = device_driver->vkCreateDescriptorSetLayout(device->GetVkDevice(), &descriptor_set_layout_create_info, vk_allocation_callbacks, &ray_tracing_descriptor_set_layout);
+        if (ray_tracing_descriptor_set_layout_create_result != VkResult::VK_SUCCESS)
+        {
+            throw std::runtime_error("Create ray tracing descriptor set layout failed");
+        }
+
+        VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
+        ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        ray_tracing_pipeline_layout_create_info.pNext = nullptr;
+        ray_tracing_pipeline_layout_create_info.flags = 0;
+        ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
+        ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+
+        VkPipelineLayout ray_tracing_pipeline_layout = VK_NULL_HANDLE;
+        VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
+        if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
+        {
+            throw std::runtime_error("Create ray tracing pipeline layout failed");
+        }
+
+        Turbo::Core::TRayGenerationShader *ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        Turbo::Core::TMissShader *miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
+        Turbo::Core::TClosestHitShader *closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
+
+        VkPipelineShaderStageCreateInfo ray_generation_shader_stage_create_info = {};
+        ray_generation_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        ray_generation_shader_stage_create_info.pNext = nullptr;
+        ray_generation_shader_stage_create_info.flags = 0;
+        ray_generation_shader_stage_create_info.stage = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        ray_generation_shader_stage_create_info.module = ray_generation_shader_test->GetVkShaderModule();
+        ray_generation_shader_stage_create_info.pName = "main";
+        ray_generation_shader_stage_create_info.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo miss_shader_stage_create_info = {};
+        miss_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        miss_shader_stage_create_info.pNext = nullptr;
+        miss_shader_stage_create_info.flags = 0;
+        miss_shader_stage_create_info.stage = VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR;
+        miss_shader_stage_create_info.module = miss_shader_test->GetVkShaderModule();
+        miss_shader_stage_create_info.pName = "main";
+        miss_shader_stage_create_info.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo closest_hit_shader_stage_create_info = {};
+        closest_hit_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        closest_hit_shader_stage_create_info.pNext = nullptr;
+        closest_hit_shader_stage_create_info.flags = 0;
+        closest_hit_shader_stage_create_info.stage = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        closest_hit_shader_stage_create_info.module = closest_hit_shader_test->GetVkShaderModule();
+        closest_hit_shader_stage_create_info.pName = "main";
+        closest_hit_shader_stage_create_info.pSpecializationInfo = nullptr;
+
+        std::vector<VkPipelineShaderStageCreateInfo> ray_tracing_pipeline_shader_stages = {};
+        ray_tracing_pipeline_shader_stages.push_back(ray_generation_shader_stage_create_info);
+        ray_tracing_pipeline_shader_stages.push_back(miss_shader_stage_create_info);
+        ray_tracing_pipeline_shader_stages.push_back(closest_hit_shader_stage_create_info);
+
+        VkRayTracingShaderGroupCreateInfoKHR ray_generation_shader_group = {};
+        ray_generation_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        ray_generation_shader_group.pNext = nullptr;
+        ray_generation_shader_group.type = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+        ray_generation_shader_group.generalShader = 0;
+        ray_generation_shader_group.closestHitShader = VK_SHADER_UNUSED_KHR;
+        ray_generation_shader_group.anyHitShader = VK_SHADER_UNUSED_KHR;
+        ray_generation_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
+        ray_generation_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
+
+        VkRayTracingShaderGroupCreateInfoKHR miss_shader_group = {};
+        miss_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        miss_shader_group.pNext = nullptr;
+        miss_shader_group.type = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+        miss_shader_group.generalShader = 1;
+        miss_shader_group.closestHitShader = VK_SHADER_UNUSED_KHR;
+        miss_shader_group.anyHitShader = VK_SHADER_UNUSED_KHR;
+        miss_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
+        miss_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
+
+        VkRayTracingShaderGroupCreateInfoKHR close_hit_shader_group = {};
+        close_hit_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        close_hit_shader_group.pNext = nullptr;
+        close_hit_shader_group.type = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+        close_hit_shader_group.generalShader = VK_SHADER_UNUSED_KHR;
+        close_hit_shader_group.closestHitShader = 2;
+        close_hit_shader_group.anyHitShader = VK_SHADER_UNUSED_KHR;
+        close_hit_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
+        close_hit_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
+
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> shader_groups = {};
+        shader_groups.push_back(ray_generation_shader_group);
+        shader_groups.push_back(miss_shader_group);
+        shader_groups.push_back(close_hit_shader_group);
+
+        VkRayTracingPipelineCreateInfoKHR vk_ray_tracing_pipeline_create_info_khr = {};
+        vk_ray_tracing_pipeline_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
+        vk_ray_tracing_pipeline_create_info_khr.pNext = nullptr;
+        vk_ray_tracing_pipeline_create_info_khr.flags = 0;
+        vk_ray_tracing_pipeline_create_info_khr.stageCount = ray_tracing_pipeline_shader_stages.size();
+        vk_ray_tracing_pipeline_create_info_khr.pStages = ray_tracing_pipeline_shader_stages.data();
+        vk_ray_tracing_pipeline_create_info_khr.groupCount = shader_groups.size();
+        vk_ray_tracing_pipeline_create_info_khr.pGroups = shader_groups.data();
+        vk_ray_tracing_pipeline_create_info_khr.maxPipelineRayRecursionDepth = 2;
+        vk_ray_tracing_pipeline_create_info_khr.pLibraryInfo = nullptr;
+        vk_ray_tracing_pipeline_create_info_khr.pLibraryInterface = nullptr;
+        vk_ray_tracing_pipeline_create_info_khr.pDynamicState = nullptr;
+        vk_ray_tracing_pipeline_create_info_khr.layout = ray_tracing_pipeline_layout;
+        vk_ray_tracing_pipeline_create_info_khr.basePipelineHandle = VK_NULL_HANDLE;
+        vk_ray_tracing_pipeline_create_info_khr.basePipelineIndex = 0;
+
+        // device_driver->vkCreateRayTracingPipelinesNV;
+
+        device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
+        device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, vk_allocation_callbacks);
+
+        delete ray_generation_shader_test;
+        delete miss_shader_test;
+        delete closest_hit_shader_test;
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;

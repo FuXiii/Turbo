@@ -2,9 +2,9 @@
 #extension GL_EXT_ray_tracing : require
 #extension GL_EXT_nonuniform_qualifier : enable
 
-layout(location = 0) rayPayloadInEXT vec3 hitValue;
+layout(location = 0) rayPayloadInEXT vec3 HIT_VALUE;
 
 void main()
 {
-  hitValue = vec3(0.2, 0.5, 0.5);
+    HIT_VALUE = vec3(0.2, 0.5, 0.5);
 }

@@ -263,6 +263,15 @@ struct TDeviceFunctionTable
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetDeviceAccelerationStructureCompatibilityKHR vkGetDeviceAccelerationStructureCompatibilityKHR = nullptr;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkWriteAccelerationStructuresPropertiesKHR vkWriteAccelerationStructuresPropertiesKHR = nullptr;
 #endif
+#if defined(VK_KHR_ray_tracing_pipeline)
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdSetRayTracingPipelineStackSizeKHR vkCmdSetRayTracingPipelineStackSizeKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdTraceRaysIndirectKHR vkCmdTraceRaysIndirectKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR vkGetRayTracingCaptureReplayShaderGroupHandlesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR = nullptr;
+    VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetRayTracingShaderGroupStackSizeKHR vkGetRayTracingShaderGroupStackSizeKHR = nullptr;
+#endif
 
 #if defined(VK_EXT_buffer_device_address)
     // TODO: VkPhysicalDeviceBufferAddressFeaturesEXT
