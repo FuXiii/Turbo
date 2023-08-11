@@ -346,9 +346,18 @@ int main()
         {
             std::cout << "Not support bufferDeviceAddressMultiDevice feature" << std::endl;
         }
+
+        if (physical_device_support_features.rayTracingPipeline)
+        {
+            std::cout << "Support ray tracing pipeline feature" << std::endl;
+        }
+        else
+        {
+            std::cout << "Not support ray tracing pipeline feature" << std::endl;
+        }
     }
 
-    if (!physical_device_support_features.accelerationStructure)
+    if (!physical_device_support_features.accelerationStructure || !physical_device_support_features.rayTracingPipeline)
     {
         delete instance;
         std::cout << "Please use a GPU which support hardware real-time ray tracing" << std::endl;
@@ -373,6 +382,7 @@ int main()
     physical_device_features.accelerationStructureHostCommands = physical_device_support_features.accelerationStructureHostCommands;
     physical_device_features.accelerationStructureIndirectBuild = physical_device_support_features.accelerationStructureIndirectBuild;
     physical_device_features.bufferDeviceAddress = physical_device_support_features.bufferDeviceAddress;
+    physical_device_features.rayTracingPipeline = physical_device_support_features.rayTracingPipeline;
 
     if (physical_device_support_features.geometryShader)
     {
@@ -398,6 +408,10 @@ int main()
             enable_device_extensions.push_back(extension);
         }
         else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SPIRV_1_4)
+        {
+            enable_device_extensions.push_back(extension);
+        }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_RAY_TRACING_PIPELINE)
         {
             enable_device_extensions.push_back(extension);
         }
@@ -505,6 +519,7 @@ int main()
     const Turbo::Core::TDeviceDriver *device_driver = device->GetDeviceDriver();
     const Turbo::Core::TPhysicalDeviceDriver *physical_device_driver = physical_device->GetPhysicalDeviceDriver();
 
+    // Acceleration Structure
     {
         VkPhysicalDeviceAccelerationStructurePropertiesKHR vk_physical_device_acceleration_structure_properties_khr = {};
         vk_physical_device_acceleration_structure_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
@@ -1156,6 +1171,7 @@ int main()
         delete device_local_vertex_buffer;
     }
 
+    // Ray Tracing Pipeline
     {
         VkDescriptorSetLayoutBinding vk_ray_tracing_binding_acceleration_structure = {};
         vk_ray_tracing_binding_acceleration_structure.binding = 0;
@@ -1301,14 +1317,67 @@ int main()
         vk_ray_tracing_pipeline_create_info_khr.basePipelineHandle = VK_NULL_HANDLE;
         vk_ray_tracing_pipeline_create_info_khr.basePipelineIndex = 0;
 
-        // device_driver->vkCreateRayTracingPipelinesNV;
+        VkPipeline ray_tracing_pipeline = VK_NULL_HANDLE;
+        VkResult create_ray_tracing_pipeline_result = device_driver->vkCreateRayTracingPipelinesKHR(device->GetVkDevice(), VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &vk_ray_tracing_pipeline_create_info_khr, vk_allocation_callbacks, &ray_tracing_pipeline);
+        if (create_ray_tracing_pipeline_result != VkResult::VK_SUCCESS)
+        {
+            throw std::runtime_error("Create ray tracing pipeline failed");
+        }
 
+        device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, vk_allocation_callbacks);
         device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
         device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, vk_allocation_callbacks);
 
         delete ray_generation_shader_test;
         delete miss_shader_test;
         delete closest_hit_shader_test;
+    }
+
+    // Shader Binding Table
+    {
+        VkPhysicalDeviceRayTracingPipelinePropertiesKHR vk_physical_device_ray_tracing_pipeline_properties_khr = {};
+        vk_physical_device_ray_tracing_pipeline_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.pNext = nullptr;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleSize = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayRecursionDepth = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.maxShaderGroupStride = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupBaseAlignment = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleCaptureReplaySize = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayDispatchInvocationCount = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment = 0;
+        vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayHitAttributeSize = 0;
+
+        VkPhysicalDeviceProperties2 vk_physical_device_properties_2 = {};
+        vk_physical_device_properties_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        vk_physical_device_properties_2.pNext = &vk_physical_device_ray_tracing_pipeline_properties_khr;
+        vk_physical_device_properties_2.properties = {};
+
+        if (physical_device_driver->vkGetPhysicalDeviceProperties2 != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+        else if (physical_device_driver->vkGetPhysicalDeviceProperties2KHR != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2KHR(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleSize << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxRayRecursionDepth:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayRecursionDepth << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxShaderGroupStride:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxShaderGroupStride << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupBaseAlignment:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupBaseAlignment << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleCaptureReplaySize:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleCaptureReplaySize << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxRayDispatchInvocationCount:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayDispatchInvocationCount << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleAlignment:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment << std::endl;
+        std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxRayHitAttributeSize:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayHitAttributeSize << std::endl;
+
+        uint32_t handle_count = 3;
+        uint32_t handle_size = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleSize;
+        uint32_t shader_group_handle_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment;
+        uint32_t shader_group_base_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupBaseAlignment;
+
+        uint32_t handle_size_aligned = Turbo::Core::TVulkanAllocator::AlignUp<uint32_t>(handle_size, shader_group_handle_alignment);
+
+        VkStridedDeviceAddressRegionKHR ray_generation_shader_binding_table;
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;

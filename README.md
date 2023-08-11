@@ -3447,4 +3447,15 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TVulkanLoader.cpp`中`LoadDeviceDriver`函数中增加对`VK_KHR_ray_tracing_pipeline`扩展函数的加载获取
   >* `.docs/Design`下增加`ForVulkanExtensionNote.md`文档文件，用于记录`Vulkan Extension 开发流程`
 
-  
+* 2023/8/11 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`中`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceRayTracingPipelineFeaturesKHR physicalDeviceRayTracingPipelineFeaturesKHR`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipeline`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineShaderGroupHandleCaptureReplay`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineShaderGroupHandleCaptureReplayMixed`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineTraceRaysIndirect`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTraversalPrimitiveCulling`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice`类中`EnumerateProperties`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的获取。
+  >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
+  >* `./engine/core`下`TDevice`类中`InternalCreate`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。

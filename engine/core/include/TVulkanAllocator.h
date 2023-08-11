@@ -31,8 +31,18 @@ class TVulkanAllocator : public TAllocator
 
     VkAllocationCallbacks *GetVkAllocationCallbacks();
 
+    template <typename T>
+    static constexpr T AlignUp(T meta, size_t alignment) noexcept;
+
     virtual std::string ToString() override;
 };
+
+template <typename T /*TODO: T is integral [std::is_integral]*/>
+constexpr T Turbo::Core::TVulkanAllocator::AlignUp(T meta, size_t alignment) noexcept
+{
+    return T((meta + (T(meta) - 1)) & ~T(alignment - 1));
+}
+
 } // namespace Core
 } // namespace Turbo
 

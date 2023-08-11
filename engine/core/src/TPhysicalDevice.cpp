@@ -148,6 +148,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // sparse limits
     this->info.sparseProperties = physicalDeviceProperties.sparseProperties;
 
+    // TODO: we need storage extension properties [in Turbo::Core::TPhysicalDeviceInfo]
+
     // Feature
     // If the pNext chain includes a VkPhysicalDeviceVulkan13Features structure, then it must not include a VkPhysicalDeviceDynamicRenderingFeatures
     //  // For VK_KHR_dynamic_rendering
@@ -159,10 +161,20 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // For Vulkan1.0
     this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
 
+    // For VK_KHR_ray_tracing_pipeline
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR vk_physical_device_ray_tracing_pipeline_features_khr = {};
+    vk_physical_device_ray_tracing_pipeline_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = nullptr;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipeline = VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplay = VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineTraceRaysIndirect = VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTraversalPrimitiveCulling = VK_FALSE;
+
     // For VK_KHR_buffer_device_address
     VkPhysicalDeviceBufferDeviceAddressFeaturesKHR vk_physical_device_buffer_device_address_features_khr = {};
     vk_physical_device_buffer_device_address_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
-    vk_physical_device_buffer_device_address_features_khr.pNext = nullptr;
+    vk_physical_device_buffer_device_address_features_khr.pNext = &vk_physical_device_ray_tracing_pipeline_features_khr;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddress = VK_FALSE;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressCaptureReplay = VK_FALSE;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressMultiDevice = VK_FALSE;
@@ -233,6 +245,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.accelerationStructureFeaturesKHR.pNext = nullptr;
     this->info.physicalDeviceBufferDeviceAddressFeaturesKHR = vk_physical_device_buffer_device_address_features_khr;
     this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
+    this->info.physicalDeviceRayTracingPipelineFeaturesKHR = vk_physical_device_ray_tracing_pipeline_features_khr;
+    this->info.physicalDeviceRayTracingPipelineFeaturesKHR.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()
@@ -790,6 +804,12 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.bufferDeviceAddress = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddress == VK_TRUE ? true : false;
     physical_device_features.bufferDeviceAddressCaptureReplay = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressCaptureReplay == VK_TRUE ? true : false;
     physical_device_features.bufferDeviceAddressMultiDevice = this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.bufferDeviceAddressMultiDevice == VK_TRUE ? true : false;
+
+    physical_device_features.rayTracingPipeline = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipeline == VK_TRUE ? true : false;
+    physical_device_features.rayTracingPipelineShaderGroupHandleCaptureReplay = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipelineShaderGroupHandleCaptureReplay == VK_TRUE ? true : false;
+    physical_device_features.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipelineShaderGroupHandleCaptureReplayMixed == VK_TRUE ? true : false;
+    physical_device_features.rayTracingPipelineTraceRaysIndirect = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipelineTraceRaysIndirect == VK_TRUE ? true : false;
+    physical_device_features.rayTraversalPrimitiveCulling = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTraversalPrimitiveCulling == VK_TRUE ? true : false;
 
     return physical_device_features;
 }
