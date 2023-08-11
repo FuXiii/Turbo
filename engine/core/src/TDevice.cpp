@@ -1224,7 +1224,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
         if (queue_family_info.IsSupportGraphics() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1248,7 +1248,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
         if (queue_family_info.IsSupportCompute() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1272,7 +1272,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
         if (queue_family_info.IsSupportTransfer() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1296,7 +1296,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
         if (queue_family_info.IsSupportSparse() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1320,7 +1320,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
         if (queue_family_info.IsSupportProtected() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 

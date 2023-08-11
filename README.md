@@ -27,8 +27,8 @@ Turbo是渲染引擎
 
 * 研究开发 `Vulkan` 硬件实时光追。
 * 研究开发`C/C++`开发`WebGPU`项目，并发布到浏览器页面中。  
-    * `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档。
-    * `./sample` 下新增 `PureCCppMiniWebGPUTest` 项目。
+  * `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档。
+  * `./sample` 下新增 `PureCCppMiniWebGPUTest` 项目。
 
 ## Sponsor
 
@@ -3459,3 +3459,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
   >* `./engine/core`下`TDevice`类中`InternalCreate`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+
+* 2023/8/12 设计架构
+  >
+  >* `./engine/core`下`TDevice`类中`GetBestGraphicsQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestComputeQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestTransferQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestSparseBindingQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestProtectedQueue`成员函数对`score`的设置有`Bug`，修正。
