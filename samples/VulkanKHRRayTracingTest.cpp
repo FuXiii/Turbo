@@ -1324,17 +1324,7 @@ int main()
             throw std::runtime_error("Create ray tracing pipeline failed");
         }
 
-        device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, vk_allocation_callbacks);
-        device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
-        device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, vk_allocation_callbacks);
-
-        delete ray_generation_shader_test;
-        delete miss_shader_test;
-        delete closest_hit_shader_test;
-    }
-
-    // Shader Binding Table
-    {
+        // Shader Binding Table
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR vk_physical_device_ray_tracing_pipeline_properties_khr = {};
         vk_physical_device_ray_tracing_pipeline_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
         vk_physical_device_ray_tracing_pipeline_properties_khr.pNext = nullptr;
@@ -1399,7 +1389,19 @@ int main()
         uint32_t data_size = handle_count * handle_size_aligned;
         std::vector<uint8_t> handles(data_size);
 
-        // device_driver->vkGetRayTracingShaderGroupHandlesKHR();
+        VkResult vk_get_ray_tracing_shader_group_handles_khr_result = device_driver->vkGetRayTracingShaderGroupHandlesKHR(device->GetVkDevice(), ray_tracing_pipeline, 0, handle_count, data_size, handles.data());
+        if (vk_get_ray_tracing_shader_group_handles_khr_result != VkResult::VK_SUCCESS)
+        {
+            throw std::runtime_error("Get shader group handle failed");
+        }
+
+        device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, vk_allocation_callbacks);
+        device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
+        device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, vk_allocation_callbacks);
+
+        delete ray_generation_shader_test;
+        delete miss_shader_test;
+        delete closest_hit_shader_test;
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;
