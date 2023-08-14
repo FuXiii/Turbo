@@ -1395,6 +1395,11 @@ int main()
         closest_hit_binding_table.deviceAddress = 0;
         closest_hit_binding_table.stride = handle_size_aligned;
         closest_hit_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(closest_hit_count * handle_size_aligned, shader_group_base_alignment);
+
+        uint32_t data_size = handle_count * handle_size_aligned;
+        std::vector<uint8_t> handles(data_size);
+
+        // device_driver->vkGetRayTracingShaderGroupHandlesKHR();
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;
