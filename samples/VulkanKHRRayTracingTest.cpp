@@ -1370,14 +1370,31 @@ int main()
         std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleAlignment:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment << std::endl;
         std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxRayHitAttributeSize:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayHitAttributeSize << std::endl;
 
-        uint32_t handle_count = 3;
+        uint32_t ray_generation_count = 1;
+        uint32_t miss_count = 1;
+        uint32_t closest_hit_count = 1;
+
+        uint32_t handle_count = ray_generation_count + miss_count + closest_hit_count;
         uint32_t handle_size = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleSize;
         uint32_t shader_group_handle_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment;
         uint32_t shader_group_base_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupBaseAlignment;
 
-        uint32_t handle_size_aligned = Turbo::Core::TVulkanAllocator::AlignUp<uint32_t>(handle_size, shader_group_handle_alignment);
+        uint32_t handle_size_aligned = Turbo::Core::TVulkanAllocator::AlignUp(handle_size, shader_group_handle_alignment);
 
-        VkStridedDeviceAddressRegionKHR ray_generation_shader_binding_table;
+        VkStridedDeviceAddressRegionKHR ray_generation_binding_table;
+        ray_generation_binding_table.deviceAddress = 0;
+        ray_generation_binding_table.stride = Turbo::Core::TVulkanAllocator::AlignUp(handle_size_aligned, shader_group_base_alignment);
+        ray_generation_binding_table.size = ray_generation_binding_table.stride; // The size member of pRayGenShaderBindingTable must be equal to its stride member (https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap40.html#VUID-vkCmdTraceRaysKHR-size-04023)
+
+        VkStridedDeviceAddressRegionKHR miss_binding_table;
+        miss_binding_table.deviceAddress = 0;
+        miss_binding_table.stride = handle_size_aligned;
+        miss_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(miss_count * handle_size_aligned, shader_group_base_alignment);
+
+        VkStridedDeviceAddressRegionKHR closest_hit_binding_table;
+        closest_hit_binding_table.deviceAddress = 0;
+        closest_hit_binding_table.stride = handle_size_aligned;
+        closest_hit_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(closest_hit_count * handle_size_aligned, shader_group_base_alignment);
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;

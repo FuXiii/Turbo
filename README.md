@@ -3467,3 +3467,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TDevice`类中`GetBestTransferQueue`成员函数对`score`的设置有`Bug`，修正。
   >* `./engine/core`下`TDevice`类中`GetBestSparseBindingQueue`成员函数对`score`的设置有`Bug`，修正。
   >* `./engine/core`下`TDevice`类中`GetBestProtectedQueue`成员函数对`score`的设置有`Bug`，修正。
+
+* 2023/8/14 设计架构
+  >
+  >* `./engine/core`下`TVulkanAllocator`类中`AlignUp`静态成员函数移至`TAllocator`类中。并增加`std::is_integral`的判断。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
