@@ -29,7 +29,7 @@ template <typename T>
 constexpr T Turbo::Core::TAllocator::AlignUp(T meta, size_t alignment) noexcept
 {
     static_assert(std::is_integral<T>::value, "AlignUp T type: Integral required.");
-    return T((meta + (T(meta) - 1)) & ~T(alignment - 1));
+    return T((meta + (T(alignment) - 1)) & ~T(alignment - 1));
 }
 
 } // namespace Core

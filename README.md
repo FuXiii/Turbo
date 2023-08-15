@@ -3472,3 +3472,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./engine/core`下`TVulkanAllocator`类中`AlignUp`静态成员函数移至`TAllocator`类中。并增加`std::is_integral`的判断。
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+
+* 2023/8/15 设计架构
+  >
+  >* `./engine/core`下`TAllocator`类中`AlignUp`静态成员函数修改计算错误的`Bug`。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建用于光追的图片。

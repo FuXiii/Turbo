@@ -500,6 +500,30 @@ int main()
     Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
+    // for ray tracing image
+    {
+        Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+        Turbo::Core::TImageView *ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+        Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+
+        change_ray_tracing_image_layout_command_buffer->Begin();
+        change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
+        change_ray_tracing_image_layout_command_buffer->End();
+
+        Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+
+        queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+
+        change_image_layout_fence->WaitUntil();
+        delete change_image_layout_fence;
+
+        command_pool->Free(change_ray_tracing_image_layout_command_buffer);
+
+        delete ray_tracing_image_view;
+        delete ray_tracing_image;
+    }
+
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
@@ -1394,6 +1418,48 @@ int main()
         {
             throw std::runtime_error("Get shader group handle failed");
         }
+
+        VkDeviceSize sbt_buffer_size = ray_generation_binding_table.size + miss_binding_table.size + closest_hit_binding_table.size;
+        Turbo::Core::TBuffer *sbt_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_BINDING_TABLE, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sbt_buffer_size);
+
+        VkBufferDeviceAddressInfo sbt_buffer_device_address_info = {};
+        sbt_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        sbt_buffer_device_address_info.pNext = nullptr;
+        sbt_buffer_device_address_info.buffer = sbt_buffer->GetVkBuffer();
+
+        VkDeviceAddress sbt_buffer_device_address = 0;
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            sbt_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &sbt_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            sbt_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &sbt_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            sbt_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &sbt_buffer_device_address_info);
+        }
+
+        if (sbt_buffer_device_address == 0)
+        {
+            throw std::runtime_error("Get shader binding table buffer address failed");
+        }
+
+        ray_generation_binding_table.deviceAddress = sbt_buffer_device_address;
+        miss_binding_table.deviceAddress = sbt_buffer_device_address + ray_generation_binding_table.size;
+        closest_hit_binding_table.deviceAddress = sbt_buffer_device_address + ray_generation_binding_table.size + miss_binding_table.size;
+
+        void *sbt_buffer_point = sbt_buffer->Map();
+        // ray generation
+        memcpy((uint8_t *)sbt_buffer_point, handles.data() + 0 * handle_size, handle_size);
+        // miss
+        memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size, handles.data() + 1 * handle_size, handle_size);
+        // closest_hit
+        memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_binding_table.size, handles.data() + 2 * handle_size, handle_size);
+        sbt_buffer->Unmap();
+
+        delete sbt_buffer;
 
         device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, vk_allocation_callbacks);
         device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
