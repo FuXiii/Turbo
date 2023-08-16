@@ -485,7 +485,7 @@ int main()
     void *index_buffer_ptr = index_buffer->Map();
     memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
     index_buffer->Unmap();
-    // INDICES_data.clear();S
+    // INDICES_data.clear();
 
     Turbo::Core::TBuffer *tangent_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TANGENT) * TANGENT_data.size());
     void *tangent_buffer_ptr = tangent_buffer->Map();
@@ -626,9 +626,9 @@ int main()
             device_local_vertex_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_vertex_buffer_device_address_info);
         }
 
-        if (device_local_vertex_buffer_device_address != 0)
+        if (device_local_vertex_buffer_device_address == 0)
         {
-            std::cout << "Successfully get device_local_vertex_buffer VkBuffer device local address " << std::endl;
+            throw std::runtime_error("Get ray tracing device local vertex buffer address failed");
         }
 
         VkDeviceOrHostAddressConstKHR vertex_data = {};
@@ -675,9 +675,9 @@ int main()
             device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
         }
 
-        if (device_local_index_buffer_device_address != 0)
+        if (device_local_index_buffer_device_address == 0)
         {
-            std::cout << "Successfully get device_local_index_buffer VkBuffer device local address " << std::endl;
+            throw std::runtime_error("Get ray tracing device local index buffer address failed");
         }
 
         VkDeviceOrHostAddressConstKHR index_data = {};
@@ -720,8 +720,12 @@ int main()
         std::vector<uint32_t> max_primitive_counts(vk_acceleration_structure_build_geometry_info_khr.geometryCount);
         for (uint32_t index = 0; index < vk_acceleration_structure_build_geometry_info_khr.geometryCount; index++)
         {
-            max_primitive_counts[index] = POSITION_data.size() / 3;
+            // max_primitive_counts[index] = POSITION_data.size() / 3;
+            max_primitive_counts[index] = INDICES_data.size() / 3;
         }
+
+        std::cout << "POSITION_data.size():" << POSITION_data.size() << std::endl;
+        std::cout << "INDICES_data.size():" << INDICES_data.size() << std::endl;
 
         VkAccelerationStructureBuildSizesInfoKHR vk_acceleration_structure_build_sizes_info_khr = {};
         vk_acceleration_structure_build_sizes_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
@@ -792,7 +796,8 @@ int main()
         vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = scratch_buffer_device_address;
 
         VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
-        vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_data.size() / 3;
+        //vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_data.size() / 3;
+        vk_acceleration_structure_build_range_info_khr.primitiveCount = INDICES_data.size() / 3;
         vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
         vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
         vk_acceleration_structure_build_range_info_khr.transformOffset = 0;
@@ -1924,12 +1929,12 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
 
             // material_sphere
-            //command_buffer->CmdBindPipeline(pipeline);
-            //command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            //command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            //command_buffer->CmdSetLineWidth(1);
-            //command_buffer->CmdBindIndexBuffer(index_buffer);
-            //command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+            // command_buffer->CmdBindPipeline(pipeline);
+            // command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+            // command_buffer->CmdBindVertexBuffers(vertex_buffers);
+            // command_buffer->CmdSetLineWidth(1);
+            // command_buffer->CmdBindIndexBuffer(index_buffer);
+            // command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
 
             command_buffer->CmdNextSubpass();
 
