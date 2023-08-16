@@ -501,7 +501,7 @@ int main()
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
     // for ray tracing image
-    Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+    Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
     Turbo::Core::TImageView *ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     {
 
@@ -1316,7 +1316,7 @@ int main()
         vk_write_descriptor_sets.push_back(ray_tracing_write_image);
         vk_write_descriptor_sets.push_back(ray_tracing_write_matrixs);
 
-        device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), 3, vk_write_descriptor_sets.data(), 0, nullptr);
+        device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1553,7 +1553,7 @@ int main()
     subpasses.push_back(subpass);  // subpass 0
     subpasses.push_back(subpass1); // subpass 1
 
-    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TAttachment> attachemts;
@@ -1889,19 +1889,47 @@ int main()
                 device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
                 device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
                 device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
+
+                // copy ray tracing image into color target image
+                VkImageBlit vk_image_blit = {};
+                vk_image_blit.srcSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+                vk_image_blit.srcSubresource.mipLevel = 0;
+                vk_image_blit.srcSubresource.baseArrayLayer = 0;
+                vk_image_blit.srcSubresource.layerCount = 1;
+                vk_image_blit.srcOffsets[0].x = 0;
+                vk_image_blit.srcOffsets[0].y = 0;
+                vk_image_blit.srcOffsets[0].z = 0;
+                vk_image_blit.srcOffsets[1].x = swapchain->GetWidth();
+                vk_image_blit.srcOffsets[1].y = swapchain->GetHeight();
+                vk_image_blit.srcOffsets[1].z = 1;
+                vk_image_blit.dstSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+                vk_image_blit.dstSubresource.mipLevel = 0;
+                vk_image_blit.dstSubresource.baseArrayLayer = 0;
+                vk_image_blit.dstSubresource.layerCount = 1;
+                vk_image_blit.dstOffsets[0].x = 0;
+                vk_image_blit.dstOffsets[0].y = 0;
+                vk_image_blit.dstOffsets[0].z = 0;
+                vk_image_blit.dstOffsets[1].x = swapchain->GetWidth();
+                vk_image_blit.dstOffsets[1].y = swapchain->GetHeight();
+                vk_image_blit.dstOffsets[1].z = 1;
+
+                command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
+                device_driver->vkCmdBlitImage(vk_command_buffer, ray_tracing_image->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]->GetImage()->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &vk_image_blit, VkFilter::VK_FILTER_LINEAR);
+                command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::COLOR_ATTACHMENT_WRITE_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
             }
 
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
-            // material_sphere
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdSetLineWidth(1);
-            command_buffer->CmdBindIndexBuffer(index_buffer);
-            command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+
+            // material_sphere
+            //command_buffer->CmdBindPipeline(pipeline);
+            //command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+            //command_buffer->CmdBindVertexBuffers(vertex_buffers);
+            //command_buffer->CmdSetLineWidth(1);
+            //command_buffer->CmdBindIndexBuffer(index_buffer);
+            //command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
 
             command_buffer->CmdNextSubpass();
 
@@ -2133,7 +2161,7 @@ int main()
                 }
 
                 // recreate ray tracing image
-                ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+                ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
                 ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                 {
                     Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
@@ -2151,6 +2179,28 @@ int main()
 
                     command_pool->Free(change_ray_tracing_image_layout_command_buffer);
                 }
+
+                VkDescriptorImageInfo vk_descriptor_image_info = {};
+                vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+                vk_descriptor_image_info.imageView = ray_tracing_image_view->GetVkImageView();
+                vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+                VkWriteDescriptorSet ray_tracing_write_image = {};
+                ray_tracing_write_image.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                ray_tracing_write_image.pNext = nullptr;
+                ray_tracing_write_image.dstSet = ray_tracing_descriptor_set;
+                ray_tracing_write_image.dstBinding = 1;
+                ray_tracing_write_image.dstArrayElement = 0;
+                ray_tracing_write_image.descriptorCount = 1;
+                ray_tracing_write_image.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                ray_tracing_write_image.pImageInfo = &vk_descriptor_image_info;
+                ray_tracing_write_image.pBufferInfo = nullptr;
+                ray_tracing_write_image.pTexelBufferView = nullptr;
+
+                std::vector<VkWriteDescriptorSet> vk_write_descriptor_sets;
+                vk_write_descriptor_sets.push_back(ray_tracing_write_image);
+
+                device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
             }
             break;
             default: {
@@ -2232,7 +2282,7 @@ int main()
             }
 
             // recreate ray tracing image
-            ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+            ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
             ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
             {
                 Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
@@ -2250,6 +2300,28 @@ int main()
 
                 command_pool->Free(change_ray_tracing_image_layout_command_buffer);
             }
+
+            VkDescriptorImageInfo vk_descriptor_image_info = {};
+            vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+            vk_descriptor_image_info.imageView = ray_tracing_image_view->GetVkImageView();
+            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+            VkWriteDescriptorSet ray_tracing_write_image = {};
+            ray_tracing_write_image.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            ray_tracing_write_image.pNext = nullptr;
+            ray_tracing_write_image.dstSet = ray_tracing_descriptor_set;
+            ray_tracing_write_image.dstBinding = 1;
+            ray_tracing_write_image.dstArrayElement = 0;
+            ray_tracing_write_image.descriptorCount = 1;
+            ray_tracing_write_image.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            ray_tracing_write_image.pImageInfo = &vk_descriptor_image_info;
+            ray_tracing_write_image.pBufferInfo = nullptr;
+            ray_tracing_write_image.pTexelBufferView = nullptr;
+
+            std::vector<VkWriteDescriptorSet> vk_write_descriptor_sets;
+            vk_write_descriptor_sets.push_back(ray_tracing_write_image);
+
+            device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
         }
         break;
         default: {
