@@ -501,9 +501,9 @@ int main()
     Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
     // for ray tracing image
+    Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+    Turbo::Core::TImageView *ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     {
-        Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
-        Turbo::Core::TImageView *ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
         Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
 
@@ -519,9 +519,6 @@ int main()
         delete change_image_layout_fence;
 
         command_pool->Free(change_ray_tracing_image_layout_command_buffer);
-
-        delete ray_tracing_image_view;
-        delete ray_tracing_image;
     }
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
@@ -544,6 +541,14 @@ int main()
     const Turbo::Core::TPhysicalDeviceDriver *physical_device_driver = physical_device->GetPhysicalDeviceDriver();
 
     // Acceleration Structure
+    Turbo::Core::TBuffer *device_local_vertex_buffer = nullptr;
+    Turbo::Core::TBuffer *device_local_index_buffer = nullptr;
+    Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = nullptr;
+    VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
+    Turbo::Core::TBuffer *top_level_acceleration_structure_buffer = nullptr;
+    VkAccelerationStructureKHR top_level_acceleration_structure_khr = VK_NULL_HANDLE;
+    Turbo::Core::TBuffer *instance_buffer = nullptr;
+
     {
         VkPhysicalDeviceAccelerationStructurePropertiesKHR vk_physical_device_acceleration_structure_properties_khr = {};
         vk_physical_device_acceleration_structure_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
@@ -580,7 +585,7 @@ int main()
         std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures << std::endl;
         std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.minAccelerationStructureScratchOffsetAlignment = " << vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment << std::endl;
 
-        Turbo::Core::TBuffer *device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION) * POSITION_data.size());
+        device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION) * POSITION_data.size());
         {
             Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
             memcpy(staging_vertex_buffer->Map(), POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
@@ -629,7 +634,7 @@ int main()
         VkDeviceOrHostAddressConstKHR vertex_data = {};
         vertex_data.deviceAddress = device_local_vertex_buffer_device_address;
 
-        Turbo::Core::TBuffer *device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(uint32_t) * INDICES_data.size());
+        device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(uint32_t) * INDICES_data.size());
         {
             Turbo::Core::TBuffer *staging_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
             memcpy(staging_index_buffer->Map(), INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
@@ -733,7 +738,7 @@ int main()
         std::cout << "Bottom Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
         std::cout << "Bottom Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
 
-        Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
+        bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
 
         // create acceleration structure
         VkDevice vk_device = device->GetVkDevice();
@@ -749,7 +754,6 @@ int main()
 
         VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-        VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
         VkResult result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &bottom_level_acceleration_structure_khr);
         if (result != VK_SUCCESS)
         {
@@ -921,7 +925,6 @@ int main()
         vk_acceleration_structure_instance_khr.flags = VkGeometryInstanceFlagBitsKHR::VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         vk_acceleration_structure_instance_khr.accelerationStructureReference = bottom_level_acceleration_structure_device_address;
 
-        Turbo::Core::TBuffer *instance_buffer = nullptr;
         {
             Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
             Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
@@ -1016,7 +1019,7 @@ int main()
         std::cout << "Top Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
         std::cout << "Top Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
 
-        Turbo::Core::TBuffer *top_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
+        top_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
 
         VkAccelerationStructureCreateInfoKHR top_level_acceleration_structure_create_info_khr = {};
         top_level_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -1027,8 +1030,6 @@ int main()
         top_level_acceleration_structure_create_info_khr.size = top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize;
         top_level_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
         top_level_acceleration_structure_create_info_khr.deviceAddress = 0;
-
-        VkAccelerationStructureKHR top_level_acceleration_structure_khr = VK_NULL_HANDLE;
 
         result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &top_level_acceleration_structure_create_info_khr, vk_allocation_callbacks, &top_level_acceleration_structure_khr);
         if (result != VkResult::VK_SUCCESS)
@@ -1185,17 +1186,25 @@ int main()
         }
 
         delete top_level_scratch_buffer;
-        device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, top_level_acceleration_structure_khr, vk_allocation_callbacks);
-        delete top_level_acceleration_structure_buffer;
-        delete instance_buffer;
-        device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, bottom_level_acceleration_structure_khr, vk_allocation_callbacks);
         delete scratch_buffer;
-        delete bottom_level_acceleration_structure_buffer;
-        delete device_local_index_buffer;
-        delete device_local_vertex_buffer;
     }
 
     // Ray Tracing Pipeline
+    Turbo::Core::TRayGenerationShader *ray_generation_shader_test = nullptr;
+    Turbo::Core::TMissShader *miss_shader_test = nullptr;
+    Turbo::Core::TClosestHitShader *closest_hit_shader_test = nullptr;
+
+    VkDescriptorSetLayout ray_tracing_descriptor_set_layout = VK_NULL_HANDLE;
+    VkDescriptorSet ray_tracing_descriptor_set = VK_NULL_HANDLE;
+    VkPipelineLayout ray_tracing_pipeline_layout = VK_NULL_HANDLE;
+    VkPipeline ray_tracing_pipeline = VK_NULL_HANDLE;
+
+    VkStridedDeviceAddressRegionKHR ray_generation_binding_table = {};
+    VkStridedDeviceAddressRegionKHR miss_binding_table = {};
+    VkStridedDeviceAddressRegionKHR closest_hit_binding_table = {};
+    VkStridedDeviceAddressRegionKHR callable_binding_table = {}; /*Not used but need statement because vkCmdTraceRaysKHR(..., const VkStridedDeviceAddressRegionKHR* pCallableShaderBindingTable, ...) must be a valid pointer to a valid VkStridedDeviceAddressRegionKHR structure <https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap40.html#VUID-vkCmdTraceRaysKHR-pCallableShaderBindingTable-parameter>*/
+
+    Turbo::Core::TBuffer *sbt_buffer = nullptr;
     {
         VkDescriptorSetLayoutBinding vk_ray_tracing_binding_acceleration_structure = {};
         vk_ray_tracing_binding_acceleration_structure.binding = 0;
@@ -1231,12 +1240,83 @@ int main()
         descriptor_set_layout_create_info.pBindings = ray_tracing_descriptor_set_layout_bindings.data();
 
         VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        VkDescriptorSetLayout ray_tracing_descriptor_set_layout = VK_NULL_HANDLE;
         VkResult ray_tracing_descriptor_set_layout_create_result = device_driver->vkCreateDescriptorSetLayout(device->GetVkDevice(), &descriptor_set_layout_create_info, vk_allocation_callbacks, &ray_tracing_descriptor_set_layout);
         if (ray_tracing_descriptor_set_layout_create_result != VkResult::VK_SUCCESS)
         {
             throw std::runtime_error("Create ray tracing descriptor set layout failed");
         }
+
+        VkDescriptorSetAllocateInfo ray_tracing_descriptor_set_allocate_info = {};
+        ray_tracing_descriptor_set_allocate_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        ray_tracing_descriptor_set_allocate_info.pNext = nullptr;
+        ray_tracing_descriptor_set_allocate_info.descriptorPool = descriptor_pool->GetVkDescriptorPool();
+        ray_tracing_descriptor_set_allocate_info.descriptorSetCount = 1;
+        ray_tracing_descriptor_set_allocate_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
+
+        VkResult ray_tracing_descriptor_sets_allocate_result = device_driver->vkAllocateDescriptorSets(device->GetVkDevice(), &ray_tracing_descriptor_set_allocate_info, &ray_tracing_descriptor_set);
+        if (ray_tracing_descriptor_sets_allocate_result != VkResult::VK_SUCCESS)
+        {
+            throw std::runtime_error("Allocate ray tracing descriptor set failed");
+        }
+
+        VkWriteDescriptorSetAccelerationStructureKHR vk_write_descriptor_set_acceleration_structure_khr = {};
+        vk_write_descriptor_set_acceleration_structure_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+        vk_write_descriptor_set_acceleration_structure_khr.pNext = nullptr;
+        vk_write_descriptor_set_acceleration_structure_khr.accelerationStructureCount = 1;
+        vk_write_descriptor_set_acceleration_structure_khr.pAccelerationStructures = &top_level_acceleration_structure_khr;
+
+        VkWriteDescriptorSet ray_tracing_write_acceleration_structure = {};
+        ray_tracing_write_acceleration_structure.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ray_tracing_write_acceleration_structure.pNext = &vk_write_descriptor_set_acceleration_structure_khr;
+        ray_tracing_write_acceleration_structure.dstSet = ray_tracing_descriptor_set;
+        ray_tracing_write_acceleration_structure.dstBinding = 0;
+        ray_tracing_write_acceleration_structure.dstArrayElement = 0;
+        ray_tracing_write_acceleration_structure.descriptorCount = 1;
+        ray_tracing_write_acceleration_structure.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        ray_tracing_write_acceleration_structure.pImageInfo = nullptr;
+        ray_tracing_write_acceleration_structure.pBufferInfo = nullptr;
+        ray_tracing_write_acceleration_structure.pTexelBufferView = nullptr;
+
+        VkDescriptorImageInfo vk_descriptor_image_info = {};
+        vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+        vk_descriptor_image_info.imageView = ray_tracing_image_view->GetVkImageView();
+        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+        VkWriteDescriptorSet ray_tracing_write_image = {};
+        ray_tracing_write_image.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ray_tracing_write_image.pNext = nullptr;
+        ray_tracing_write_image.dstSet = ray_tracing_descriptor_set;
+        ray_tracing_write_image.dstBinding = 1;
+        ray_tracing_write_image.dstArrayElement = 0;
+        ray_tracing_write_image.descriptorCount = 1;
+        ray_tracing_write_image.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        ray_tracing_write_image.pImageInfo = &vk_descriptor_image_info;
+        ray_tracing_write_image.pBufferInfo = nullptr;
+        ray_tracing_write_image.pTexelBufferView = nullptr;
+
+        VkDescriptorBufferInfo vk_descriptor_buffer_info = {};
+        vk_descriptor_buffer_info.buffer = matrixs_buffer->GetVkBuffer();
+        vk_descriptor_buffer_info.offset = 0;
+        vk_descriptor_buffer_info.range = VK_WHOLE_SIZE;
+
+        VkWriteDescriptorSet ray_tracing_write_matrixs = {};
+        ray_tracing_write_matrixs.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ray_tracing_write_matrixs.pNext = nullptr;
+        ray_tracing_write_matrixs.dstSet = ray_tracing_descriptor_set;
+        ray_tracing_write_matrixs.dstBinding = 2;
+        ray_tracing_write_matrixs.dstArrayElement = 0;
+        ray_tracing_write_matrixs.descriptorCount = 1;
+        ray_tracing_write_matrixs.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ray_tracing_write_matrixs.pImageInfo = nullptr;
+        ray_tracing_write_matrixs.pBufferInfo = &vk_descriptor_buffer_info;
+        ray_tracing_write_matrixs.pTexelBufferView = nullptr;
+
+        std::vector<VkWriteDescriptorSet> vk_write_descriptor_sets;
+        vk_write_descriptor_sets.push_back(ray_tracing_write_acceleration_structure);
+        vk_write_descriptor_sets.push_back(ray_tracing_write_image);
+        vk_write_descriptor_sets.push_back(ray_tracing_write_matrixs);
+
+        device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), 3, vk_write_descriptor_sets.data(), 0, nullptr);
 
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1247,16 +1327,15 @@ int main()
         ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
         ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-        VkPipelineLayout ray_tracing_pipeline_layout = VK_NULL_HANDLE;
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
         {
             throw std::runtime_error("Create ray tracing pipeline layout failed");
         }
 
-        Turbo::Core::TRayGenerationShader *ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
-        Turbo::Core::TMissShader *miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
-        Turbo::Core::TClosestHitShader *closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
+        ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
+        closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
 
         VkPipelineShaderStageCreateInfo ray_generation_shader_stage_create_info = {};
         ray_generation_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -1341,7 +1420,6 @@ int main()
         vk_ray_tracing_pipeline_create_info_khr.basePipelineHandle = VK_NULL_HANDLE;
         vk_ray_tracing_pipeline_create_info_khr.basePipelineIndex = 0;
 
-        VkPipeline ray_tracing_pipeline = VK_NULL_HANDLE;
         VkResult create_ray_tracing_pipeline_result = device_driver->vkCreateRayTracingPipelinesKHR(device->GetVkDevice(), VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &vk_ray_tracing_pipeline_create_info_khr, vk_allocation_callbacks, &ray_tracing_pipeline);
         if (create_ray_tracing_pipeline_result != VkResult::VK_SUCCESS)
         {
@@ -1395,17 +1473,14 @@ int main()
 
         uint32_t handle_size_aligned = Turbo::Core::TVulkanAllocator::AlignUp(handle_size, shader_group_handle_alignment);
 
-        VkStridedDeviceAddressRegionKHR ray_generation_binding_table;
         ray_generation_binding_table.deviceAddress = 0;
         ray_generation_binding_table.stride = Turbo::Core::TVulkanAllocator::AlignUp(handle_size_aligned, shader_group_base_alignment);
         ray_generation_binding_table.size = ray_generation_binding_table.stride; // The size member of pRayGenShaderBindingTable must be equal to its stride member (https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap40.html#VUID-vkCmdTraceRaysKHR-size-04023)
 
-        VkStridedDeviceAddressRegionKHR miss_binding_table;
         miss_binding_table.deviceAddress = 0;
         miss_binding_table.stride = handle_size_aligned;
         miss_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(miss_count * handle_size_aligned, shader_group_base_alignment);
 
-        VkStridedDeviceAddressRegionKHR closest_hit_binding_table;
         closest_hit_binding_table.deviceAddress = 0;
         closest_hit_binding_table.stride = handle_size_aligned;
         closest_hit_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(closest_hit_count * handle_size_aligned, shader_group_base_alignment);
@@ -1420,7 +1495,7 @@ int main()
         }
 
         VkDeviceSize sbt_buffer_size = ray_generation_binding_table.size + miss_binding_table.size + closest_hit_binding_table.size;
-        Turbo::Core::TBuffer *sbt_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_BINDING_TABLE, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sbt_buffer_size);
+        sbt_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_BINDING_TABLE, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sbt_buffer_size);
 
         VkBufferDeviceAddressInfo sbt_buffer_device_address_info = {};
         sbt_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -1458,16 +1533,6 @@ int main()
         // closest_hit
         memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_binding_table.size, handles.data() + 2 * handle_size, handle_size);
         sbt_buffer->Unmap();
-
-        delete sbt_buffer;
-
-        device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, vk_allocation_callbacks);
-        device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, vk_allocation_callbacks);
-        device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, vk_allocation_callbacks);
-
-        delete ray_generation_shader_test;
-        delete miss_shader_test;
-        delete closest_hit_shader_test;
     }
 
     std::vector<Turbo::Core::TBuffer *> my_buffers;
@@ -1817,6 +1882,15 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
+
+            // ray tracing commands
+            {
+                VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
+                device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
+                device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
+                device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
+            }
+
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
 
             // material_sphere
@@ -2024,6 +2098,10 @@ int main()
                 }
                 swpachain_framebuffers.clear();
 
+                // destroy ray tracing image
+                delete ray_tracing_image_view;
+                delete ray_tracing_image;
+
                 // recreate swapchain
                 Turbo::Extension::TSwapchain *old_swapchain = swapchain;
                 Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
@@ -2052,6 +2130,26 @@ int main()
 
                     Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                     swpachain_framebuffers.push_back(swapchain_framebuffer);
+                }
+
+                // recreate ray tracing image
+                ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+                ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                {
+                    Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+
+                    change_ray_tracing_image_layout_command_buffer->Begin();
+                    change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
+                    change_ray_tracing_image_layout_command_buffer->End();
+
+                    Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+
+                    queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+
+                    change_image_layout_fence->WaitUntil();
+                    delete change_image_layout_fence;
+
+                    command_pool->Free(change_ray_tracing_image_layout_command_buffer);
                 }
             }
             break;
@@ -2099,6 +2197,10 @@ int main()
             }
             swpachain_framebuffers.clear();
 
+            // destroy ray tracing image
+            delete ray_tracing_image_view;
+            delete ray_tracing_image;
+
             // recreate swapchain
             Turbo::Extension::TSwapchain *old_swapchain = swapchain;
             Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
@@ -2127,6 +2229,26 @@ int main()
 
                 Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                 swpachain_framebuffers.push_back(swapchain_framebuffer);
+            }
+
+            // recreate ray tracing image
+            ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+            ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            {
+                Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+
+                change_ray_tracing_image_layout_command_buffer->Begin();
+                change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
+                change_ray_tracing_image_layout_command_buffer->End();
+
+                Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+
+                queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+
+                change_image_layout_fence->WaitUntil();
+                delete change_image_layout_fence;
+
+                command_pool->Free(change_ray_tracing_image_layout_command_buffer);
             }
         }
         break;
@@ -2165,6 +2287,17 @@ int main()
 
     delete render_pass;
 
+    delete sbt_buffer;
+
+    device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
+    device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
+    device_driver->vkFreeDescriptorSets(device->GetVkDevice(), descriptor_pool->GetVkDescriptorPool(), 1, &ray_tracing_descriptor_set);
+    device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
+
+    delete ray_generation_shader_test;
+    delete miss_shader_test;
+    delete closest_hit_shader_test;
+
     delete descriptor_pool;
     delete vertex_shader;
     delete geometry_shader;
@@ -2182,6 +2315,17 @@ int main()
     delete texcoord_buffer;
     delete my_buffer;
     delete matrixs_buffer;
+
+    device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), top_level_acceleration_structure_khr, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
+    delete top_level_acceleration_structure_buffer;
+    delete instance_buffer;
+    device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), bottom_level_acceleration_structure_khr, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
+    delete bottom_level_acceleration_structure_buffer;
+    delete device_local_index_buffer;
+    delete device_local_vertex_buffer;
+
+    delete ray_tracing_image_view;
+    delete ray_tracing_image;
     command_pool->Free(command_buffer);
     delete command_pool;
     delete swapchain;

@@ -8,9 +8,9 @@ struct HitPayload
 
 layout(location = 0) rayPayloadEXT HitPayload HIT_PAY_LOAD;
 
-layout(binding = 0, set = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
-layout(binding = 0, set = 1, rgba32f) uniform image2D IMAGE;
-layout(binding = 0, set = 2) uniform RAY_TRACING_MATRIXS
+layout(set = 0, binding = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D IMAGE;
+layout(set = 0, binding = 2) uniform RAY_TRACING_MATRIXS
 {
     mat4 view;
     mat4 project;
