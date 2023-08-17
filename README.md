@@ -3483,3 +3483,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./asset/shaders`下`RayTracingKHRTest.rgen`着色器中`set`和`binding`写反了，修正。
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建用于光追的描述符集并进行`vkCmdTraceRaysKHR`光追指令。
+
+* 2023/8/17 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。修正一些小`Bug`和着色器矩阵不匹配的问题。现在可以输出正确光追渲染结果了。

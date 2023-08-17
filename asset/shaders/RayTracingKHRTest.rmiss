@@ -1,9 +1,14 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
 
-layout(location = 0) rayPayloadInEXT vec3 HIT_VALUE;
+struct HitPayload
+{
+    vec3 color;
+};
+
+layout(location = 0) rayPayloadInEXT HitPayload HIT_PAY_LOAD;
 
 void main()
 {
-    HIT_VALUE = vec3(0.0, 0.1, 0.3);
+    HIT_PAY_LOAD.color = vec3(0.0, 0.1, 0.3);
 }

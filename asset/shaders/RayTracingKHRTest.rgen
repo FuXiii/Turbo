@@ -3,7 +3,7 @@
 
 struct HitPayload
 {
-    vec3 hitColor;
+    vec3 color;
 };
 
 layout(location = 0) rayPayloadEXT HitPayload HIT_PAY_LOAD;
@@ -12,6 +12,7 @@ layout(set = 0, binding = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
 layout(set = 0, binding = 1, rgba32f) uniform image2D IMAGE;
 layout(set = 0, binding = 2) uniform RAY_TRACING_MATRIXS
 {
+    mat4 model;
     mat4 view;
     mat4 project;
 }
@@ -47,5 +48,5 @@ void main()
                 0              // payload (location = 0)
     );
 
-    imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.hitColor, 1.0));
+    imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.color, 1.0));
 }
