@@ -48,6 +48,7 @@ typedef enum class TDescriptorType
     UNIFORM_BUFFER_DYNAMIC = 8,
     STORAGE_BUFFER_DYNAMIC = 9,
     INPUT_ATTACHMENT = 10,
+    ACCELERATION_STRUCTURE = 1000150000 // FIXME: How to maintain VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV
 } TDescriptorType;
 
 // Equivalent to VkDescriptorSetLayoutBinding
@@ -182,6 +183,14 @@ class TStorageImageDescriptor : public TDescriptor
   public:
     TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TStorageImageDescriptor();
+};
+
+class TAccelerationStructureDescriptor : public TDescriptor
+{
+  private:
+  public:
+    TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TAccelerationStructureDescriptor();
 };
 } // namespace Core
 } // namespace Turbo

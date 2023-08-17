@@ -1,0 +1,8 @@
+-I
+E:\emsdk\upstream\emscripten\cache\sysroot\include
+
+-I
+glslang
+
+-I
+SPIRV-Cross

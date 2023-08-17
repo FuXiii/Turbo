@@ -278,7 +278,7 @@ int main()
         memcpy(_ptr, &scale_data, sizeof(scale_data));
         dynamic_buffer->Unmap();
 
-        _time = _time + 0.1f;
+        _time = glfwGetTime();
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;

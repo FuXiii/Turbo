@@ -53,6 +53,12 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool bufferDeviceAddressCaptureReplay = false;
     bool bufferDeviceAddressMultiDevice = false;
 
+    bool rayTracingPipeline = false;
+    bool rayTracingPipelineShaderGroupHandleCaptureReplay = false;
+    bool rayTracingPipelineShaderGroupHandleCaptureReplayMixed = false;
+    bool rayTracingPipelineTraceRaysIndirect = false;
+    bool rayTraversalPrimitiveCulling = false;
+
   public:
     virtual std::string ToString() override;
 };

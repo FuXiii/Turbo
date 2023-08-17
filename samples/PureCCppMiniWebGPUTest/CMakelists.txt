@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(PureCCppMiniWebGPUTest)
+
+add_executable(${PROJECT_NAME} "main.cpp")
+
+if(EMSCRIPTEN)
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
+    target_link_options(${PROJECT_NAME} PRIVATE "-sUSE_WEBGPU=1" "-sUSE_GLFW=3" "-sALLOW_MEMORY_GROWTH" "-sNO_DISABLE_EXCEPTION_CATCHING")
+endif()
+
+# emcmake cmake -G"MinGW Makefiles" ..

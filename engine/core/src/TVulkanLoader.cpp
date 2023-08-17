@@ -535,6 +535,21 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
         }
     }
 #endif
+#if defined(VK_KHR_ray_tracing_pipeline)
+    if (device->IsEnabledExtension(TExtensionType::VK_KHR_RAY_TRACING_PIPELINE))
+    {
+        if (device->GetPhysicalDevice()->IsSupportExtension(TExtensionType::VK_KHR_RAY_TRACING_PIPELINE))
+        {
+            device_driver.vkCmdSetRayTracingPipelineStackSizeKHR = this->LoadDeviceFunction<PFN_vkCmdSetRayTracingPipelineStackSizeKHR>(device, "vkCmdSetRayTracingPipelineStackSizeKHR");
+            device_driver.vkCmdTraceRaysIndirectKHR = this->LoadDeviceFunction<PFN_vkCmdTraceRaysIndirectKHR>(device, "vkCmdTraceRaysIndirectKHR");
+            device_driver.vkCmdTraceRaysKHR = this->LoadDeviceFunction<PFN_vkCmdTraceRaysKHR>(device, "vkCmdTraceRaysKHR");
+            device_driver.vkCreateRayTracingPipelinesKHR = this->LoadDeviceFunction<PFN_vkCreateRayTracingPipelinesKHR>(device, "vkCreateRayTracingPipelinesKHR");
+            device_driver.vkGetRayTracingCaptureReplayShaderGroupHandlesKHR = this->LoadDeviceFunction<PFN_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR>(device, "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR");
+            device_driver.vkGetRayTracingShaderGroupHandlesKHR = this->LoadDeviceFunction<PFN_vkGetRayTracingShaderGroupHandlesKHR>(device, "vkGetRayTracingShaderGroupHandlesKHR");
+            device_driver.vkGetRayTracingShaderGroupStackSizeKHR = this->LoadDeviceFunction<PFN_vkGetRayTracingShaderGroupStackSizeKHR>(device, "vkGetRayTracingShaderGroupStackSizeKHR");
+        }
+    }
+#endif
 
 #if defined(VK_EXT_buffer_device_address)
     if (device->IsEnabledExtension(TExtensionType::VK_EXT_BUFFER_DEVICE_ADDRESS))

@@ -147,7 +147,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
             vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
             vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
             vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            
+
             vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
         }
     }
@@ -208,6 +208,31 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.descriptorCount = sampler.size();
     vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
     vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+    vk_write_descriptor_set.pBufferInfo = nullptr;
+    vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+    TDevice *device = this->descriptorPool->GetDevice();
+    VkDevice vk_device = device->GetVkDevice();
+    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)
+{
+    VkWriteDescriptorSetAccelerationStructureKHR vk_write_descriptor_set_acceleration_structure_khr;
+    vk_write_descriptor_set_acceleration_structure_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+    vk_write_descriptor_set_acceleration_structure_khr.pNext = nullptr;
+    vk_write_descriptor_set_acceleration_structure_khr.accelerationStructureCount = accelerationStructures.size();
+    vk_write_descriptor_set_acceleration_structure_khr.pAccelerationStructures = accelerationStructures.data();
+
+    VkWriteDescriptorSet vk_write_descriptor_set;
+    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    vk_write_descriptor_set.pNext = &vk_write_descriptor_set_acceleration_structure_khr;
+    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+    vk_write_descriptor_set.dstBinding = binding;
+    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+    vk_write_descriptor_set.descriptorCount = accelerationStructures.size();
+    vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+    vk_write_descriptor_set.pImageInfo = nullptr;
     vk_write_descriptor_set.pBufferInfo = nullptr;
     vk_write_descriptor_set.pTexelBufferView = nullptr;
 

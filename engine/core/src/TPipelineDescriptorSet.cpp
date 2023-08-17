@@ -96,14 +96,31 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &samplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
         if (descriptor_set_item->GetSet() == set)
         {
             // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, sampler);
+            descriptor_set_item->BindData(binding, dstArrayElement, samplers);
+            return;
+        }
+    }
+
+    std::stringstream ss;
+    ss << "There not have TDescriptorSet set=" << set << " ,please check the number of set";
+    throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)
+{
+    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    {
+        if (descriptor_set_item->GetSet() == set)
+        {
+            // TODO: to find is have the binding descriptor? throw TException
+            descriptor_set_item->BindData(binding, dstArrayElement, accelerationStructures);
             return;
         }
     }

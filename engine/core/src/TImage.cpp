@@ -138,7 +138,7 @@ void Turbo::Core::TImage::InternalCreate()
     // vk_image_create_info.sharingMode;//By Vma?
     // vk_image_create_info.queueFamilyIndexCount;//By Vma?
     // vk_image_create_info.pQueueFamilyIndices;//By Vma?
-    vk_image_create_info.initialLayout = vk_image_layout;
+    vk_image_create_info.initialLayout = vk_image_layout; // NOTE: initialLayout must be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED <https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap12.html#VUID-VkImageCreateInfo-initialLayout-00993>
 
     VmaAllocationCreateInfo alloc_info = {};
     alloc_info.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;

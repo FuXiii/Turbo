@@ -20,7 +20,13 @@ typedef enum class TShaderType
     FRAGMENT = 4,
     COMPUTE = 5,
     TASK = 6,
-    MESH = 7
+    MESH = 7,
+    RAY_GENERATION = 8,
+    ANY_HIT = 9,
+    CLOSEST_HIT = 10,
+    MISS = 11,
+    INTERSECTION = 12,
+    CALLABLE = 13,
 } TShaderType;
 
 typedef enum class TShaderLanguage
@@ -105,6 +111,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TPushConstantDescriptor *> pushConstantDescriptors;
     std::vector<TInputAttachmentDescriptor *> inputAttachmentDescriptors;
     std::vector<TStorageImageDescriptor *> storageImageDescriptors;
+    std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptors;
 
     std::string entryPoint;
 
@@ -136,6 +143,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
     const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();
     const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors();
+    const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors();
 
     std::vector<TInterface> GetInputs();
     std::vector<TInterface> GetOutputs();
@@ -152,6 +160,8 @@ class TShader : public Turbo::Core::TVulkanHandle
     void SetConstant(uint32_t id, double value);
     const std::map<uint32_t, TConstValue> &GetSpecializations() const;
     //</specialization constants>
+
+    std::vector<uint32_t> GetSpirV() const;
 
     virtual std::string ToString() override;
 };
@@ -212,6 +222,47 @@ class TMeshShader : public Turbo::Core::TShader
     TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 };
 
+class TRayGenerationShader : public Turbo::Core::TShader
+{
+  public:
+    TRayGenerationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TAnyHitShader : public Turbo::Core::TShader
+{
+  public:
+    TAnyHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TAnyHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TClosestHitShader : public Turbo::Core::TShader
+{
+  public:
+    TClosestHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TClosestHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TMissShader : public Turbo::Core::TShader
+{
+  public:
+    TMissShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TMissShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TIntersectionShader : public Turbo::Core::TShader
+{
+  public:
+    TIntersectionShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TIntersectionShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
+
+class TCallableShader : public Turbo::Core::TShader
+{
+  public:
+    TCallableShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TCallableShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+};
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADER_H

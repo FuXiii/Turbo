@@ -44,6 +44,8 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
     VkPhysicalDeviceLimits limits;
     VkPhysicalDeviceSparseProperties sparseProperties;
 
+    // TODO: we need storage extension properties [in Turbo::Core::TPhysicalDevice::EnumerateProperties()]
+
     VkPhysicalDeviceFeatures features;
     VkPhysicalDeviceVulkan11Features vulkan11Feature;
     VkPhysicalDeviceVulkan12Features vulkan12Feature;
@@ -53,6 +55,8 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
 
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKHR;
     VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR;
+
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR physicalDeviceRayTracingPipelineFeaturesKHR;
 
     std::vector<TLayerInfo> supportLayers;
     std::vector<TExtensionInfo> supportExtensions;

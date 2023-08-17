@@ -15,16 +15,20 @@ Turbo是渲染引擎
 ![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux)  
 ![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
 ![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
+![Platform Android](https://img.shields.io/badge/Android-Future-lightgrey?logo=Android)  
 ![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
-![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Future-lightgrey?logo=internetexplorer)  
+![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer)  
 
 ## Version
 
 当前版本 0.0.0.12
 
-## State
+## State  
 
-* 开发中
+* 研究开发 `Vulkan` 硬件实时光追。
+* 研究开发`C/C++`开发`WebGPU`项目，并发布到浏览器页面中。  
+  * `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档。
+  * `./sample` 下新增 `PureCCppMiniWebGPUTest` 项目。
 
 ## Sponsor
 
@@ -3333,3 +3337,153 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`thirdparty`中`SPIRV-Cross`和`VulkanMemoryAllocator`转成`submodules`
   >* `./engine/core`下更新`CMakeLists.txt`适配新版的`VulkanMemoryAllocator`
   >* `README`增加`Clone`章节
+
+* 2023/7/13 设计架构
+  >
+  >* `./engine/core`下`TDescriptor.h`中`TDescriptorType`枚举增加`ACCELERATION_STRUCTURE`用于加速结构描述符类型
+  >* `./engine/core`下`TDescriptor.h`中增加`TAccelerationStructureDescriptor`类。用于加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptors`成员变量。用于存储加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<TAccelerationStructureDescriptor *> accelerationStructureDescriptor`成员变量。用于存储加速结构描述符
+  >* `./engine/core`下`TShader.h`中`TShader`类中`InternalParseSpirV()`成员函数中增加对`TAccelerationStructureDescriptor`的加速结构描述符的创建
+  >* `./engine/core`下`TShader.h`中`TShader`类中`~TShader`析构函数中增加对`TAccelerationStructureDescriptor`的加速结构描述符的销毁
+  >* `./asset/shaders`下增加`RayTraceTest.rgen`光线生成着色器，用于测试光线生成着色器。
+  >* `./engine/core`下`TShader.h`中`TShaderType`枚举中增加`RAY_GENERATION`、`ANY_HIT`、`CLOSEST_HIT`、`MISS`、`INTERSECTION`、`CALLABLE`成员枚举量，用于光线追踪着色器
+  >* `./engine/core`下`TShader.h`中`TShader`类中更新`GetVkShaderStageFlagBits()`成员函数，适配光线追踪着色器
+  >* `./engine/core`下`TShader.cpp`中更新`TShaderTypeToGlslangEShLanguage()`全局函数，适配光线追踪着色器
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索实时光追的着色器和相关描述符
+  >* `./engine/core`下`TShader.h`中增加`TRayGenerationShader`类。用于描述光线生成着色器。
+
+* 2023/7/14 设计架构
+  >
+  >* `./engine/core`下`TDescriptorPool.h`中`TDescriptorPool`类中增加对`TDescriptorType::ACCELERATION_STRUCTURE`的适配
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors()`的成员函数
+  >* `./engine/core`下`TPipeline.h`中`TPipeline`类中增加对`TDescriptorType::ACCELERATION_STRUCTURE`的适配
+  >* `./engine/core`下`TPipelineDescriptorSet.h`中`TPipelineDescriptorSet`类中增加`void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构
+  >* `./engine/core`下`TDescriptorSet.h`中`TDescriptorSet`类中增加`void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)`的临时测试函数，用于绑定加速结构
+
+* 2023/7/19 设计架构
+  >
+  >* `./samples`下增加`PureCCppWebGPUTest`项目文件夹，用于测试`C/C++`的`WebGPU`项目编译至浏览器的网页端渲染。
+  >* 更新`README.md`下的`State`段落，简单记录当前开发状态。
+  >* 更新`./docs/Design/WebGPU_CCPP.md`文档，增加对`PureCCppWebGPUTest`项目的说明。
+
+* 2023/7/20 设计架构
+  >
+  >* `./samples`下`PureCCppWebGPUTest`项目文件夹增加`compile_flags.txt`，用于设置`clangd`的`Emscripten`的头文件目录。
+
+* 2023/7/22 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebGlslangAndSpirVCrossTest`项目。用于存放将`GLSL`或`HLSL`或`Spir-V`着色器代码通过`Web`网页端，在线将代码进行互相编译和转换项目。
+
+* 2023/7/24 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebGlfwTest`项目。用于存放`glfw`的`Web`网页端测试工程。
+  >* `./samples`下新增`PureCCppWebImGuiTest`项目。用于存放`imgui`的`Web`网页端测试工程。
+
+* 2023/7/25 设计架构
+  >
+  >* `./samples`下新增`PureCCppWebShaderCompiler`项目。用于存放在线`GLSL`、`HLSL`和`SPIR-V`网页端着色器转化编译器项目。
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。提供在线`GLSL`、`HLSL`转`SPIR-V`功能。
+
+* 2023/7/26 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增大显示大小，之前的可视范围太小了。
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加`Ctrl+V`粘贴代码快捷键的支持。
+
+* 2023/7/27 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加反编译 ``SPIR-V`` 的功能。
+
+* 2023/7/28 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加编译 ``SPIR-V`` 的功能。
+
+* 2023/7/29 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。增加编译 `GLSL`、 `HLSL`、 `MSL`、 `C++`和`Reflection`的功能。
+
+* 2023/7/31 设计架构
+  >
+  >* `./samples`下更新`PureCCppWebShaderCompiler`项目。修改`Bug`和一些错误。
+
+* 2023/8/1 设计架构
+  >
+  >* `./samples`下新增`PureCCppMiniWebGPUTest`项目。一个使用`C/C++`书写的`WebGPU`的小例子。
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口。
+
+* 2023/8/2 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口。
+
+* 2023/8/3 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`项目。测试`WebGPU`的`C`接口的`WGPUCommandEncoder`和`WGPUCommandBuffer`。
+
+* 2023/8/7 设计架构
+  >
+  >* `./engine/core`下新增`TRayTracingPipeline.h`和`TRayTracingPipeline.cpp`用于声明定义`TRayTracingPipeline`类
+  >* `./engine/core`下`TShader.h`中增加`TAnyHitShader`类。用于描述任意命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TClosestHitShader`类。用于描述最近命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TMissShader`类。用于描述未命中着色器。
+  >* `./engine/core`下`TShader.h`中增加`TIntersectionShader`类。用于描述相交着色器。
+  >* `./engine/core`下`TShader.h`中增加`TCallableShader`类。用于描述可调用着色器。
+  >* `./engine/core`下`TShader.h`中`TShader`类中增加`std::vector<uint32_t> GetSpirV()`成员函数。用于获取着色器的`Spir-V`的数据。
+  >* `./asset/shaders`下新增`RayTracingKHRTest.rmiss`。表示光追测试程序使用的未命中着色器。
+  >* `./asset/shaders`下`RayTraceTest.rgen`更改命名为`RayTracingKHRTest.rgen`。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`探索光追管线和着色器
+
+* 2023/8/9 设计架构
+  >
+  >* `./samples`下更新`SubpassTest.cpp`。修正内部小三角形随时间变化大小。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。可控制视点方便查看渲染效果。
+
+* 2023/8/10 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线。
+  >* `./engine/core`下`TExtensionInfo.cpp`中`TAllExtensionNames`增加`VK_KHR_ray_tracing_pipeline`元素值。用于光追管线扩展。
+  >* `./engine/core`下`TExtensionInfo.h`中`TExtensionType`增加`VK_KHR_RAY_TRACING_PIPELINE`枚举值。用于与`VK_KHR_ray_tracing_pipeline`元素光追管线扩展元素对应。
+  >* `./engine/core`下`TDevice.cpp`中`InspectExtensionAndVersionDependencies`中增加对`VK_KHR_RAY_TRACING_PIPELINE`扩展依赖的检查。
+  >* `./engine/core`下`TVulkanLoader.h`中`TDeviceFunctionTable`结构体中增加对`VK_KHR_ray_tracing_pipeline`扩展函数的声明
+  >* `./engine/core`下`TVulkanLoader.cpp`中`LoadDeviceDriver`函数中增加对`VK_KHR_ray_tracing_pipeline`扩展函数的加载获取
+  >* `.docs/Design`下增加`ForVulkanExtensionNote.md`文档文件，用于记录`Vulkan Extension 开发流程`
+
+* 2023/8/11 设计架构
+  >
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`中`TPhysicalDeviceInfo`类中增加`VkPhysicalDeviceRayTracingPipelineFeaturesKHR physicalDeviceRayTracingPipelineFeaturesKHR`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipeline`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineShaderGroupHandleCaptureReplay`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineShaderGroupHandleCaptureReplayMixed`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTracingPipelineTraceRaysIndirect`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice.h`中`TPhysicalDeviceFeatures`类中增加`bool rayTraversalPrimitiveCulling`成员变量。用于存储光追管线特性信息。
+  >* `./engine/core`下`TPhysicalDevice`类中`EnumerateProperties`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的获取。
+  >* `./engine/core`下`TPhysicalDevice`类中`GetDeviceFeatures`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
+  >* `./engine/core`下`TDevice`类中`InternalCreate`成员函数中增加对`VkPhysicalDeviceRayTracingPipelineFeaturesKHR`特性的设置。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+
+* 2023/8/12 设计架构
+  >
+  >* `./engine/core`下`TDevice`类中`GetBestGraphicsQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestComputeQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestTransferQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestSparseBindingQueue`成员函数对`score`的设置有`Bug`，修正。
+  >* `./engine/core`下`TDevice`类中`GetBestProtectedQueue`成员函数对`score`的设置有`Bug`，修正。
+
+* 2023/8/14 设计架构
+  >
+  >* `./engine/core`下`TVulkanAllocator`类中`AlignUp`静态成员函数移至`TAllocator`类中。并增加`std::is_integral`的判断。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+
+* 2023/8/15 设计架构
+  >
+  >* `./engine/core`下`TAllocator`类中`AlignUp`静态成员函数修改计算错误的`Bug`。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建光追管线和着色器绑定表。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建用于光追的图片。
+
+* 2023/8/16 设计架构
+  >
+  >* `./asset/shaders`下`RayTracingKHRTest.rgen`着色器中`set`和`binding`写反了，修正。
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。尝试创建用于光追的描述符集并进行`vkCmdTraceRaysKHR`光追指令。
+
+* 2023/8/17 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。修正一些小`Bug`和着色器矩阵不匹配的问题。现在可以输出正确光追渲染结果了。

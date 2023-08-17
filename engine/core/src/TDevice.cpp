@@ -816,6 +816,16 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         }
     }
     break;
+    case TExtensionType::VK_KHR_RAY_TRACING_PIPELINE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SPIRV_1_4);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_RAY_TRACING_PIPELINE))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_RAY_TRACING_PIPELINE));
+        }
+    }
+    break;
     }
 }
 
@@ -898,10 +908,18 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
     // for Extensions feature...
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR vk_physical_device_ray_tracing_pipeline_features_khr = {};
+    vk_physical_device_ray_tracing_pipeline_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = nullptr;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipeline = this->enabledFeatures.rayTracingPipeline ? VK_TRUE : VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplay = this->enabledFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay ? VK_TRUE : VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = this->enabledFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed ? VK_TRUE : VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineTraceRaysIndirect = this->enabledFeatures.rayTracingPipelineTraceRaysIndirect ? VK_TRUE : VK_FALSE;
+    vk_physical_device_ray_tracing_pipeline_features_khr.rayTraversalPrimitiveCulling = this->enabledFeatures.rayTraversalPrimitiveCulling ? VK_TRUE : VK_FALSE;
 
     VkPhysicalDeviceBufferDeviceAddressFeaturesKHR vk_physical_device_buffer_device_address_features_khr = {};
     vk_physical_device_buffer_device_address_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
-    vk_physical_device_buffer_device_address_features_khr.pNext = nullptr;
+    vk_physical_device_buffer_device_address_features_khr.pNext = &vk_physical_device_ray_tracing_pipeline_features_khr;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddress = this->enabledFeatures.bufferDeviceAddress ? VK_TRUE : VK_FALSE;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressCaptureReplay = this->enabledFeatures.bufferDeviceAddressCaptureReplay ? VK_TRUE : VK_FALSE;
     vk_physical_device_buffer_device_address_features_khr.bufferDeviceAddressMultiDevice = this->enabledFeatures.bufferDeviceAddressMultiDevice ? VK_TRUE : VK_FALSE;
@@ -1206,7 +1224,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
         if (queue_family_info.IsSupportGraphics() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1230,7 +1248,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
         if (queue_family_info.IsSupportCompute() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1254,7 +1272,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
         if (queue_family_info.IsSupportTransfer() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1278,7 +1296,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
         if (queue_family_info.IsSupportSparse() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
@@ -1302,7 +1320,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
         if (queue_family_info.IsSupportProtected() && queue_family_info.score > score)
         {
             index = device_queue_index;
-            score = score;
+            score = queue_family_info.score;
         }
     }
 
