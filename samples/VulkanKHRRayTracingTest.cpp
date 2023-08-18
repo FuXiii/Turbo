@@ -796,7 +796,7 @@ int main()
         vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = scratch_buffer_device_address;
 
         VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
-        //vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_data.size() / 3;
+        // vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_data.size() / 3;
         vk_acceleration_structure_build_range_info_khr.primitiveCount = INDICES_data.size() / 3;
         vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
         vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
@@ -911,9 +911,10 @@ int main()
         }
 
         // Top Level Acceleration Structure
-        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 acceleration_structure_model = glm::mat4(1.0f);
+        acceleration_structure_model = glm::rotate(acceleration_structure_model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         VkTransformMatrixKHR vk_transform_matrix_khr = {};
-        memcpy(&vk_transform_matrix_khr, &model, sizeof(VkTransformMatrixKHR));
+        memcpy(&vk_transform_matrix_khr, &acceleration_structure_model, sizeof(VkTransformMatrixKHR));
 
         VkAccelerationStructureDeviceAddressInfoKHR bottom_level_acceleration_structure_device_address_info_khr = {};
         bottom_level_acceleration_structure_device_address_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
@@ -1323,14 +1324,19 @@ int main()
 
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
+        VkPushConstantRange ray_tracing_pipeline_push_constant_range = {};
+        ray_tracing_pipeline_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        ray_tracing_pipeline_push_constant_range.offset = 0;
+        ray_tracing_pipeline_push_constant_range.size = sizeof(VkBool32);
+
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         ray_tracing_pipeline_layout_create_info.pNext = nullptr;
         ray_tracing_pipeline_layout_create_info.flags = 0;
         ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
         ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
-        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
-        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 1;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = &ray_tracing_pipeline_push_constant_range;
 
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
@@ -1863,6 +1869,9 @@ int main()
 
             ImGui::NewFrame();
 
+            static bool is_ray_tracing = false;
+            static bool is_show_barycentrics = false;
+
             {
                 static float f = 0.0f;
                 static int counter = 0;
@@ -1872,6 +1881,11 @@ int main()
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::Checkbox("ray tracing", &is_ray_tracing);
+                if (is_ray_tracing)
+                {
+                    ImGui::Checkbox("show barycentrics", &is_show_barycentrics);
+                }
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1888,38 +1902,53 @@ int main()
 
             command_buffer->Begin();
 
-            // ray tracing commands
+            if (is_ray_tracing)
             {
-                VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
-                device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
-                device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
-                device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
+                // ray tracing commands
+                {
+                    VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
+                    device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
+                    VkBool32 vk_is_show_barycentrics = VK_FALSE;
+                    if (is_show_barycentrics)
+                    {
+                        vk_is_show_barycentrics = VK_TRUE;
+                    }
+                    device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0, sizeof(VkBool32), &vk_is_show_barycentrics);
+                    device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
+                    device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 
-                // copy ray tracing image into color target image
-                VkImageBlit vk_image_blit = {};
-                vk_image_blit.srcSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-                vk_image_blit.srcSubresource.mipLevel = 0;
-                vk_image_blit.srcSubresource.baseArrayLayer = 0;
-                vk_image_blit.srcSubresource.layerCount = 1;
-                vk_image_blit.srcOffsets[0].x = 0;
-                vk_image_blit.srcOffsets[0].y = 0;
-                vk_image_blit.srcOffsets[0].z = 0;
-                vk_image_blit.srcOffsets[1].x = swapchain->GetWidth();
-                vk_image_blit.srcOffsets[1].y = swapchain->GetHeight();
-                vk_image_blit.srcOffsets[1].z = 1;
-                vk_image_blit.dstSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-                vk_image_blit.dstSubresource.mipLevel = 0;
-                vk_image_blit.dstSubresource.baseArrayLayer = 0;
-                vk_image_blit.dstSubresource.layerCount = 1;
-                vk_image_blit.dstOffsets[0].x = 0;
-                vk_image_blit.dstOffsets[0].y = 0;
-                vk_image_blit.dstOffsets[0].z = 0;
-                vk_image_blit.dstOffsets[1].x = swapchain->GetWidth();
-                vk_image_blit.dstOffsets[1].y = swapchain->GetHeight();
-                vk_image_blit.dstOffsets[1].z = 1;
+                    // copy ray tracing image into color target image
+                    VkImageBlit vk_image_blit = {};
+                    vk_image_blit.srcSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+                    vk_image_blit.srcSubresource.mipLevel = 0;
+                    vk_image_blit.srcSubresource.baseArrayLayer = 0;
+                    vk_image_blit.srcSubresource.layerCount = 1;
+                    vk_image_blit.srcOffsets[0].x = 0;
+                    vk_image_blit.srcOffsets[0].y = 0;
+                    vk_image_blit.srcOffsets[0].z = 0;
+                    vk_image_blit.srcOffsets[1].x = swapchain->GetWidth();
+                    vk_image_blit.srcOffsets[1].y = swapchain->GetHeight();
+                    vk_image_blit.srcOffsets[1].z = 1;
+                    vk_image_blit.dstSubresource.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+                    vk_image_blit.dstSubresource.mipLevel = 0;
+                    vk_image_blit.dstSubresource.baseArrayLayer = 0;
+                    vk_image_blit.dstSubresource.layerCount = 1;
+                    vk_image_blit.dstOffsets[0].x = 0;
+                    vk_image_blit.dstOffsets[0].y = 0;
+                    vk_image_blit.dstOffsets[0].z = 0;
+                    vk_image_blit.dstOffsets[1].x = swapchain->GetWidth();
+                    vk_image_blit.dstOffsets[1].y = swapchain->GetHeight();
+                    vk_image_blit.dstOffsets[1].z = 1;
 
+                    command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
+                    device_driver->vkCmdBlitImage(vk_command_buffer, ray_tracing_image->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]->GetImage()->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &vk_image_blit, VkFilter::VK_FILTER_LINEAR);
+                    command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::COLOR_ATTACHMENT_WRITE_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
+                }
+            }
+            else
+            {
                 command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
-                device_driver->vkCmdBlitImage(vk_command_buffer, ray_tracing_image->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]->GetImage()->GetVkImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &vk_image_blit, VkFilter::VK_FILTER_LINEAR);
+                command_buffer->CmdClearColorImage(swpachain_framebuffers[current_image_index]->GetAttachments()[0]->GetImage(), Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, 0);
                 command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::COLOR_ATTACHMENT_WRITE_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
             }
 
@@ -1929,12 +1958,15 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
 
             // material_sphere
-            // command_buffer->CmdBindPipeline(pipeline);
-            // command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            // command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            // command_buffer->CmdSetLineWidth(1);
-            // command_buffer->CmdBindIndexBuffer(index_buffer);
-            // command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+            if (!is_ray_tracing)
+            {
+                command_buffer->CmdBindPipeline(pipeline);
+                command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+                command_buffer->CmdBindVertexBuffers(vertex_buffers);
+                command_buffer->CmdSetLineWidth(1);
+                command_buffer->CmdBindIndexBuffer(index_buffer);
+                command_buffer->CmdDrawIndexed(indices_count, 1, 0, 0, 0);
+            }
 
             command_buffer->CmdNextSubpass();
 

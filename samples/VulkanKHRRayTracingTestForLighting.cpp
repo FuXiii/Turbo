@@ -964,9 +964,10 @@ int main()
         }
 
         // Top Level Acceleration Structure
-        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 acceleration_structure_model = glm::mat4(1.0f);
+        acceleration_structure_model = glm::rotate(acceleration_structure_model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         VkTransformMatrixKHR vk_transform_matrix_khr = {};
-        memcpy(&vk_transform_matrix_khr, &model, sizeof(VkTransformMatrixKHR));
+        memcpy(&vk_transform_matrix_khr, &acceleration_structure_model, sizeof(VkTransformMatrixKHR));
 
         VkAccelerationStructureDeviceAddressInfoKHR bottom_level_acceleration_structure_device_address_info_khr = {};
         bottom_level_acceleration_structure_device_address_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
