@@ -3487,3 +3487,10 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/17 设计架构
   >
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。修正一些小`Bug`和着色器矩阵不匹配的问题。现在可以输出正确光追渲染结果了。
+
+* 2023/8/18 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForLighting.cpp`示例。用于尝试使用硬件实时光追渲染光照。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.rchit`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.rgen`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.miss`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
