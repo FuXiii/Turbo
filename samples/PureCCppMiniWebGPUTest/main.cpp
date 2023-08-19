@@ -107,6 +107,8 @@ EM_BOOL EMSCRIPTEN_ANIMATION_FRAME(double time, void *userData)
     return EM_TRUE;
 }
 
+#include <vector>
+
 void Start()
 {
     if (!glfwInit())
@@ -138,6 +140,30 @@ void Test()
         switch (status)
         {
         case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Success: {
+
+            {
+                if (userdata != nullptr)
+                {
+                    if (adapter != nullptr)
+                    {
+                        std::cout << "Begin::Set wgpu_adapter" << std::endl;
+                        WGPUAdapter *wgpu_adapter = static_cast<WGPUAdapter *>(userdata);
+                        *wgpu_adapter = adapter;
+                        std::cout << "End::Set wgpu_adapter" << std::endl;
+                    }
+                }
+            }
+
+            {
+                size_t feature_count = wgpuAdapterEnumerateFeatures(adapter, nullptr);
+                std::vector<WGPUFeatureName> features(feature_count);
+                wgpuAdapterEnumerateFeatures(adapter, features.data());
+
+                for (WGPUFeatureName &featre_name_item : features)
+                {
+                    std::cout << "WGPUFeatureName:" << featre_name_item << std::endl;
+                }
+            }
 
             WGPURequestDeviceCallback wgpu_request_device_callback = [](WGPURequestDeviceStatus status, WGPUDevice device, char const *message, void *userdata) {
                 switch (status)
@@ -171,7 +197,7 @@ void Test()
                     wgpu_command_buffer_descriptor.nextInChain = nullptr;
                     wgpu_command_buffer_descriptor.label = "Command Buffer";
                     WGPUCommandBuffer wgpu_command_buffer = wgpuCommandEncoderFinish(wgpu_command_encoder, &wgpu_command_buffer_descriptor);
-                    
+
                     wgpuQueueSubmit(wgpu_queue, 1, &wgpu_command_buffer);
 
                     // TODO: start emscripten loop callback
@@ -200,8 +226,19 @@ void Test()
         }
     };
 
+    WGPUAdapter wgpu_adapter = nullptr;
+
     WGPURequestAdapterOptions wgpu_request_adapter_options = {};
-    wgpuInstanceRequestAdapter(wgpu_instance, &wgpu_request_adapter_options, wgpu_request_adapter_callback, nullptr);
+    wgpuInstanceRequestAdapter(wgpu_instance, &wgpu_request_adapter_options, wgpu_request_adapter_callback, &wgpu_adapter);
+
+    if (wgpu_adapter != nullptr)
+    {
+        std::cout << "wgpu_adapter not nullptr" << std::endl;
+    }
+    else
+    {
+        std::cout << "wgpu_adapter is nullptr" << std::endl;
+    }
 }
 
 int main()

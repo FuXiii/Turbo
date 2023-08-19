@@ -3496,3 +3496,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.miss`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
   >* `./samples`下更新`VulkanKHRRayTracingTest`示例。将模型摆正。
   >* `./samples`下优化`VulkanKHRRayTracingTest`示例。丰富渲染。
+
+* 2023/8/19 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`示例。研究 `WebGPU`。
