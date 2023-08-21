@@ -64,7 +64,12 @@ void main()
     const vec3 normal = v0.normal * barycentrics.x + v1.normal * barycentrics.y + v2.normal * barycentrics.z;
     const vec3 world_normal = normalize(vec3(gl_WorldToObjectEXT * vec4(normal, 1.0)));
 
-    // HIT_PAY_LOAD.color = vec3(0.2, 0.5, 0.5);
-    // HIT_PAY_LOAD.color = barycentrics;
-    HIT_PAY_LOAD.color = (world_normal + 1) * 0.5;
+    const vec3 light_dir = normalize(vec3(1, 1, 1));
+    const vec3 diffuse_color = vec3(0.4, 0.4, 0.4);
+
+    float normalDotLight = max(dot(world_normal, light_dir), 0);
+
+    vec3 diffuse = diffuse_color * normalDotLight;
+
+    HIT_PAY_LOAD.color = diffuse;
 }

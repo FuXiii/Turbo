@@ -3504,3 +3504,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/20 设计架构
   >
   >* `./samples`下新增`PureMiniWebGPUTest`示例。研究纯`C`语言版`WebGPU`。
+
+* 2023/8/21 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForLighting`示例。研究光照计算。
