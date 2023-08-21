@@ -160,7 +160,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -965,7 +965,7 @@ int main()
 
         // Top Level Acceleration Structure
         glm::mat4 acceleration_structure_model = glm::mat4(1.0f);
-        acceleration_structure_model = glm::rotate(acceleration_structure_model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        acceleration_structure_model = glm::rotate(acceleration_structure_model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         VkTransformMatrixKHR vk_transform_matrix_khr = {};
         memcpy(&vk_transform_matrix_khr, &acceleration_structure_model, sizeof(VkTransformMatrixKHR));
 
