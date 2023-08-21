@@ -65,11 +65,21 @@ void main()
     const vec3 world_normal = normalize(vec3(gl_WorldToObjectEXT * vec4(normal, 1.0)));
 
     const vec3 light_dir = normalize(vec3(1, 1, 1));
+
+    // Diffuse
     const vec3 diffuse_color = vec3(0.4, 0.4, 0.4);
-
     float normalDotLight = max(dot(world_normal, light_dir), 0);
-
     vec3 diffuse = diffuse_color * normalDotLight;
 
-    HIT_PAY_LOAD.color = diffuse;
+    // Specular
+    const float PI = 3.1415925;
+    float shininess = 28.0;
+    float energy_conservation = (2 + shininess) / (2 * PI);
+    vec3 view_dir = normalize(-gl_WorldRayDirectionEXT);
+    // vec3 reflect_dir = normalize(reflect(-light_dir, world_normal));
+    vec3 reflect_dir = normalize(reflect(light_dir, world_normal));
+    float specular_value = energy_conservation * pow(max(dot(view_dir, reflect_dir), 0), shininess);
+    vec3 specular = vec3(specular_value);
+
+    HIT_PAY_LOAD.color = diffuse + specular;
 }
