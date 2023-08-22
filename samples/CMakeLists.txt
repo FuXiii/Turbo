@@ -281,3 +281,8 @@ add_executable(VulkanKHRRayTracingTestForLighting ./VulkanKHRRayTracingTestForLi
 target_include_directories(VulkanKHRRayTracingTestForLighting PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanKHRRayTracingTestForLighting PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForLighting PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForLightingShadow ./VulkanKHRRayTracingTestForLightingShadow.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForLightingShadow PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForLightingShadow PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForLightingShadow PUBLIC ${LIBS})
