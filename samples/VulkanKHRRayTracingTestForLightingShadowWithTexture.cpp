@@ -458,8 +458,8 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        // std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        // std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
