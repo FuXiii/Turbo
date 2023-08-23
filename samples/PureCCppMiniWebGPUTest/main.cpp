@@ -128,86 +128,8 @@ void Start()
     emscripten_request_animation_frame_loop(EMSCRIPTEN_ANIMATION_FRAME, window);
 }
 
-void Test()
-{
-    WGPUInstanceDescriptor wgpu_instance_descriptor = {};
-    wgpu_instance_descriptor.nextInChain = nullptr;
-    WGPUInstance wgpu_instance = wgpuCreateInstance(&wgpu_instance_descriptor);
-
-    WGPURequestAdapterCallback wgpu_request_adapter_callback = [](WGPURequestAdapterStatus status, WGPUAdapter adapter, char const *message, void *userdata) {
-        switch (status)
-        {
-        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Success: {
-
-            WGPURequestDeviceCallback wgpu_request_device_callback = [](WGPURequestDeviceStatus status, WGPUDevice device, char const *message, void *userdata) {
-                switch (status)
-                {
-                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Success: {
-                    WGPUDevice wgpu_device = device;
-                    WGPUErrorCallback wgpu_error_callback = [](WGPUErrorType type, char const *message, void *userdata) {
-                        std::cout << "Error:" << type;
-                        if (message)
-                        {
-                            std::cout << ":" << message;
-                        }
-                        std::cout << std::endl;
-                    };
-
-                    wgpuDeviceSetUncapturedErrorCallback(wgpu_device, wgpu_error_callback, nullptr);
-
-                    WGPUQueue wgpu_queue = wgpuDeviceGetQueue(wgpu_device);
-
-                    WGPUQueueWorkDoneCallback wgpu_queue_work_done_callback = [](WGPUQueueWorkDoneStatus status, void *userdata) { std::cout << "Queued work finished with status: " << status << std::endl; };
-                    wgpuQueueOnSubmittedWorkDone(wgpu_queue, 0, wgpu_queue_work_done_callback, nullptr);
-
-                    WGPUCommandEncoderDescriptor wgpu_command_encoder_descriptor = {};
-                    wgpu_command_encoder_descriptor.nextInChain = nullptr;
-                    wgpu_command_encoder_descriptor.label = "Command Encoder";
-                    WGPUCommandEncoder wgpu_command_encoder = wgpuDeviceCreateCommandEncoder(wgpu_device, &wgpu_command_encoder_descriptor);
-
-                    // wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder commandEncoder, const WGPURenderPassDescriptor *descriptor);
-
-                    WGPUCommandBufferDescriptor wgpu_command_buffer_descriptor = {};
-                    wgpu_command_buffer_descriptor.nextInChain = nullptr;
-                    wgpu_command_buffer_descriptor.label = "Command Buffer";
-                    WGPUCommandBuffer wgpu_command_buffer = wgpuCommandEncoderFinish(wgpu_command_encoder, &wgpu_command_buffer_descriptor);
-                    
-                    wgpuQueueSubmit(wgpu_queue, 1, &wgpu_command_buffer);
-
-                    // TODO: start emscripten loop callback
-                }
-                break;
-                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Error:
-                case WGPURequestDeviceStatus::WGPURequestDeviceStatus_Unknown:
-                default: {
-                    throw std::runtime_error(std::string("Could not get WebGPU device: ") + std::string(message));
-                }
-                break;
-                }
-            };
-
-            WGPUDeviceDescriptor wgpu_device_descriptor = {};
-            wgpuAdapterRequestDevice(adapter, &wgpu_device_descriptor, wgpu_request_device_callback, nullptr);
-        }
-        break;
-        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Unavailable:
-        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Error:
-        case WGPURequestAdapterStatus::WGPURequestAdapterStatus_Unknown:
-        default: {
-            throw std::runtime_error(std::string("Unsupport WebGPU"));
-        }
-        break;
-        }
-    };
-
-    WGPURequestAdapterOptions wgpu_request_adapter_options = {};
-    wgpuInstanceRequestAdapter(wgpu_instance, &wgpu_request_adapter_options, wgpu_request_adapter_callback, nullptr);
-}
-
 int main()
 {
-    Test();
-
     INSTANCE = wgpu::CreateInstance();
 
     GetDevice([](wgpu::Device device) {

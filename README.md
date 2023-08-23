@@ -3487,3 +3487,40 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/8/17 设计架构
   >
   >* `./samples`下更新`VulkanKHRRayTracingTest.cpp`。修正一些小`Bug`和着色器矩阵不匹配的问题。现在可以输出正确光追渲染结果了。
+
+* 2023/8/18 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForLighting`示例。用于尝试使用硬件实时光追渲染光照。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.rchit`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.rgen`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForLighting.miss`着色器。用于`VulkanKHRRayTracingTestForLighting`示例。
+  >* `./samples`下更新`VulkanKHRRayTracingTest`示例。将模型摆正。
+  >* `./samples`下优化`VulkanKHRRayTracingTest`示例。丰富渲染。
+
+* 2023/8/19 设计架构
+  >
+  >* `./samples`下更新`PureCCppMiniWebGPUTest`示例。研究 `WebGPU`。
+
+* 2023/8/20 设计架构
+  >
+  >* `./samples`下新增`PureMiniWebGPUTest`示例。研究纯`C`语言版`WebGPU`。
+
+* 2023/8/21 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForLighting`示例。研究光照计算。
+
+* 2023/8/22 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingTestForLightingShadow`示例。研究光照计算中的阴影。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadow.rgen`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadow.rchit`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadow.rmiss`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadow.rmiss`着色器。
+
+* 2023/8/23 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingTestForLightingShadowWithTexture`示例。研究光追光照计算中对纹理采样。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rgen`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rchit`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rmiss`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadowWithTexture.rmiss`着色器。
