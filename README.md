@@ -3516,3 +3516,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadow.rchit`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadow.rmiss`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadow.rmiss`着色器。
+
+* 2023/8/23 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingTestForLightingShadowWithTexture`示例。研究光追光照计算中对纹理采样。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rgen`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rchit`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rmiss`着色器。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadowWithTexture.rmiss`着色器。
