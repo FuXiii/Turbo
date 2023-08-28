@@ -3524,3 +3524,12 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rchit`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rmiss`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadowWithTexture.rmiss`着色器。
+
+* 2023/8/28 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingJitterCamera`示例。通过抖动采样点并多帧累积采样结果进行抗锯齿。
+  >* `./asset/shaders`下新增`random.glsl`文件，用于生成随机数。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rgen`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCameraShadow.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rchit`文件，用于`VulkanKHRRayTracingJitterCamera`示例。

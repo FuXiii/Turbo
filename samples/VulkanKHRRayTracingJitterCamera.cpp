@@ -77,10 +77,10 @@ const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTe
 const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
 const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rmiss");
-const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTextureShadow.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rchit");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCamera.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCamera.rmiss");
+const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCameraShadow.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCamera.rchit");
 
 typedef struct POSITION
 {
