@@ -82,6 +82,8 @@ const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracing
 const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCameraShadow.rmiss");
 const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRJitterCamera.rchit");
 
+const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
+
 typedef struct POSITION
 {
     float x;
@@ -141,9 +143,19 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct RAY_TRACING_PUSH_CONSTANT
+{
+    float accumulateWeight;
+    int32_t frame;
+};
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+
+    RAY_TRACING_PUSH_CONSTANT ray_tracing_push_constant = {};
+    ray_tracing_push_constant.frame = 0;
+    ray_tracing_push_constant.accumulateWeight = 1;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.scale = 0.03;
@@ -162,7 +174,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -458,8 +470,7 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
-        // std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = "../../asset/images/checkerboard_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -518,8 +529,10 @@ int main()
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
+    glm::mat4 previous_view = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+    previous_view = view;
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
@@ -1493,14 +1506,19 @@ int main()
 
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
+        VkPushConstantRange ray_tracing_pipeline_push_constant_range = {};
+        ray_tracing_pipeline_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        ray_tracing_pipeline_push_constant_range.offset = 0;
+        ray_tracing_pipeline_push_constant_range.size = sizeof(RAY_TRACING_PUSH_CONSTANT);
+
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         ray_tracing_pipeline_layout_create_info.pNext = nullptr;
         ray_tracing_pipeline_layout_create_info.flags = 0;
         ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
         ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
-        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
-        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 1;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = &ray_tracing_pipeline_push_constant_range;
 
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
@@ -1508,7 +1526,7 @@ int main()
             throw std::runtime_error("Create ray tracing pipeline layout failed");
         }
 
-        ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR, {SHADER_INCLUDE_PATH});
         miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
         shadow_miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, SHADOW_MISS_SHADER_STR);
         closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
@@ -1887,6 +1905,9 @@ int main()
 
     float angle = 0;
     float _time = glfwGetTime();
+
+    bool is_need_refresh_frame = false;
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -2048,7 +2069,15 @@ int main()
                 model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
                 glm::vec3 look_point = camera_position + forward_dir;
+
+                previous_view = view;
                 view = glm::lookAt(camera_position, look_point, up_dir);
+
+                if (previous_view != view)
+                {
+                    is_need_refresh_frame = true;
+                }
+
                 projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
 
                 matrixs_buffer_data.m = model;
@@ -2062,15 +2091,39 @@ int main()
 
             ImGui::NewFrame();
 
+            static bool is_force_accumulate_frame = false;
+            static bool is_force_refresh_frame = false;
+
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForLightingShadowWithTexture");
+                ImGui::Begin("VulkanKHRRayTracingJitterCamera");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                if (ImGui::Checkbox("Is force accumulate frame", &is_force_accumulate_frame))
+                {
+                    if (!is_force_accumulate_frame)
+                    {
+                        is_need_refresh_frame = true;
+                    }
+                }
+
+                if (ImGui::Checkbox("Is force refresh frame", &is_force_refresh_frame))
+                {
+                    if (!is_force_refresh_frame)
+                    {
+                        is_need_refresh_frame = true;
+                    }
+                }
+
+                if (is_force_accumulate_frame)
+                {
+                    ImGui::SliderFloat("Accumulate weight", &ray_tracing_push_constant.accumulateWeight, 0.0f, 300);
+                }
+
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -2092,6 +2145,23 @@ int main()
                 VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
                 device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
                 device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
+
+                if (is_force_accumulate_frame)
+                {
+                    is_need_refresh_frame = false;
+                }
+
+                if (is_need_refresh_frame || is_force_refresh_frame)
+                {
+                    ray_tracing_push_constant.frame = 0;
+                    is_need_refresh_frame = false;
+                }
+                else
+                {
+                    ray_tracing_push_constant.frame++;
+                }
+
+                device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(RAY_TRACING_PUSH_CONSTANT), &ray_tracing_push_constant);
                 device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 
                 // copy ray tracing image into color target image
@@ -2405,6 +2475,8 @@ int main()
                 vk_write_descriptor_sets.push_back(ray_tracing_write_image);
 
                 device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
+
+                is_need_refresh_frame = true;
             }
             break;
             default: {
@@ -2526,6 +2598,8 @@ int main()
             vk_write_descriptor_sets.push_back(ray_tracing_write_image);
 
             device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
+
+            is_need_refresh_frame = true;
         }
         break;
         default: {

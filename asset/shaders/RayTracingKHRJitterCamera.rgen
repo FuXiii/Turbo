@@ -23,6 +23,7 @@ rayTracingMatrixs;
 
 layout(push_constant) uniform PUSH_CONSTANT
 {
+    float accumulateWeight;
     int frame;
 }
 pushConstant;
@@ -74,5 +75,14 @@ void main()
 
     HIT_PAY_LOAD.color = hit_value / NBSAMPLES;
 
-    imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.color, 1.0));
+    if (pushConstant.frame > 0)
+    {
+        float weight = pushConstant.accumulateWeight * 1.0f / float(pushConstant.frame + 1);
+        vec3 old_color = imageLoad(IMAGE, ivec2(gl_LaunchIDEXT.xy)).xyz;
+        imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(mix(old_color, HIT_PAY_LOAD.color, weight), 1.0));
+    }
+    else
+    {
+        imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.color, 1.0));
+    }
 }
