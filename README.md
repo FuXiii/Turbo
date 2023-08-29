@@ -3533,3 +3533,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
   >* `./asset/shaders`下新增`RayTracingKHRJitterCameraShadow.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
   >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rchit`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+
+* 2023/8/29 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingAnyHitShader`示例。用于研究实时光追中的任意命中着色器。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rgen`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rmiss`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShaderShadow.rmiss`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rchit`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。

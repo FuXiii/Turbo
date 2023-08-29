@@ -1,0 +1,88 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_GOOGLE_include_directive : enable
+
+#include "random.glsl"
+
+struct HitPayload
+{
+    vec3 color;
+};
+
+layout(location = 0) rayPayloadEXT HitPayload HIT_PAY_LOAD;
+
+layout(set = 0, binding = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D IMAGE;
+layout(set = 0, binding = 2) uniform RAY_TRACING_MATRIXS
+{
+    mat4 model;
+    mat4 view;
+    mat4 project;
+}
+rayTracingMatrixs;
+
+layout(push_constant) uniform PUSH_CONSTANT
+{
+    float accumulateWeight;
+    int frame;
+}
+pushConstant;
+
+const int NBSAMPLES = 10;
+
+void main()
+{
+    uint seed = Tea(gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, pushConstant.frame);
+
+    vec3 hit_value = vec3(0);
+    for (int sample_index = 0; sample_index < NBSAMPLES; sample_index++)
+    {
+        float random_x = Random(seed);
+        float random_y = Random(seed);
+
+        vec2 subpixel_jitter = pushConstant.frame == 0 ? vec2(0.5f, 0.5f) : vec2(random_x, random_y);
+
+        const vec2 pixel_center = vec2(gl_LaunchIDEXT.xy) + subpixel_jitter; // 像素中心点
+        const vec2 uv = pixel_center / vec2(gl_LaunchSizeEXT.xy);            // 归一化 [0,1]
+        vec2 ndc = uv * 2.0 - 1.0;                                           //[-1,1]，为归一化设备坐标（NDC）
+
+        mat4 view_inverse = inverse(rayTracingMatrixs.view);
+        mat4 project_inverse = inverse(rayTracingMatrixs.project);
+
+        vec4 origin = view_inverse * vec4(0, 0, 0, 1);                  // 相机的世界坐标
+        vec4 target = project_inverse * vec4(ndc.x, ndc.y, 1, 1);       // 像素中点(d.x, d.y)向前的向量乘以投影矩阵的逆得到，在View空间下该像素点的正前方向量
+        vec4 direction = view_inverse * vec4(normalize(target.xyz), 0); // 归一化View空间下正前方向量，之后转到世界坐标系下
+
+        uint ray_flags = gl_RayFlagsOpaqueEXT;
+        float t_min = 0.001;
+        float t_max = 10000.0;
+
+        traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
+                    ray_flags,     // rayFlags
+                    0xFF,          // cullMask
+                    0,             // sbtRecordOffset
+                    0,             // sbtRecordStride
+                    0,             // missIndex
+                    origin.xyz,    // ray origin
+                    t_min,         // ray min range
+                    direction.xyz, // ray direction
+                    t_max,         // ray max range
+                    0              // payload (location = 0)
+        );
+
+        hit_value += HIT_PAY_LOAD.color;
+    }
+
+    HIT_PAY_LOAD.color = hit_value / NBSAMPLES;
+
+    if (pushConstant.frame > 0)
+    {
+        float weight = pushConstant.accumulateWeight * 1.0f / float(pushConstant.frame + 1);
+        vec3 old_color = imageLoad(IMAGE, ivec2(gl_LaunchIDEXT.xy)).xyz;
+        imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(mix(old_color, HIT_PAY_LOAD.color, weight), 1.0));
+    }
+    else
+    {
+        imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.color, 1.0));
+    }
+}
