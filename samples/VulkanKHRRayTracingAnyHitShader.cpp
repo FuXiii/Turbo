@@ -158,6 +158,7 @@ int main()
     RAY_TRACING_PUSH_CONSTANT ray_tracing_push_constant = {};
     ray_tracing_push_constant.frame = 0;
     ray_tracing_push_constant.accumulateWeight = 1;
+    ray_tracing_push_constant.alpha = 0.5;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.scale = 0.03;
@@ -2123,7 +2124,7 @@ int main()
                 {
                     is_need_refresh_frame = true;
                 }
-                
+
                 if (ImGui::Checkbox("Is force accumulate frame", &is_force_accumulate_frame))
                 {
                     if (!is_force_accumulate_frame)
