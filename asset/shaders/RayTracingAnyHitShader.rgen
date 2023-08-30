@@ -7,6 +7,7 @@
 struct HitPayload
 {
     vec3 color;
+    uint seed;
 };
 
 layout(location = 0) rayPayloadEXT HitPayload HIT_PAY_LOAD;
@@ -23,6 +24,7 @@ rayTracingMatrixs;
 
 layout(push_constant) uniform PUSH_CONSTANT
 {
+    float alpha;
     float accumulateWeight;
     int frame;
 }
@@ -53,9 +55,12 @@ void main()
         vec4 target = project_inverse * vec4(ndc.x, ndc.y, 1, 1);       // 像素中点(d.x, d.y)向前的向量乘以投影矩阵的逆得到，在View空间下该像素点的正前方向量
         vec4 direction = view_inverse * vec4(normalize(target.xyz), 0); // 归一化View空间下正前方向量，之后转到世界坐标系下
 
-        uint ray_flags = gl_RayFlagsOpaqueEXT;
+        //uint ray_flags = gl_RayFlagsOpaqueEXT;
+        uint ray_flags = gl_RayFlagsNoneEXT;
         float t_min = 0.001;
         float t_max = 10000.0;
+
+        HIT_PAY_LOAD.seed = Tea(gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, pushConstant.frame);
 
         traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
                     ray_flags,     // rayFlags

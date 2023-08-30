@@ -4,6 +4,7 @@
 struct HitPayload
 {
     vec3 color;
+    uint seed;
 };
 
 layout(location = 0) rayPayloadInEXT HitPayload HIT_PAY_LOAD;

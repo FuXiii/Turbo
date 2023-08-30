@@ -8,6 +8,7 @@
 struct HitPayload
 {
     vec3 color;
+    uint seed;
 };
 
 struct Vertex
@@ -96,7 +97,8 @@ void main()
         float t_max = 10000.0;
         vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; // gl_HitTEXT is an alias of gl_RayTmaxEXT
         vec3 direction = light_dir;
-        uint ray_flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
+        // uint ray_flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
+        uint ray_flags = gl_RayFlagsSkipClosestHitShaderEXT;
         isShadowed = true;
         traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
                     ray_flags,     // rayFlags
