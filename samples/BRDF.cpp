@@ -957,6 +957,7 @@ int main()
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::COLOR_ATTACHMENT_WRITE_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, swpachain_framebuffers[current_image_index]->GetAttachments()[0]);
 
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
+            
             // material_sphere
             command_buffer->CmdBindPipeline(pipeline);
             command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
