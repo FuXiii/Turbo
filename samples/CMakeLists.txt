@@ -291,3 +291,14 @@ add_executable(VulkanKHRRayTracingTestForLightingShadowWithTexture ./VulkanKHRRa
 target_include_directories(VulkanKHRRayTracingTestForLightingShadowWithTexture PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanKHRRayTracingTestForLightingShadowWithTexture PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForLightingShadowWithTexture PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingJitterCamera ./VulkanKHRRayTracingJitterCamera.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingJitterCamera PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingJitterCamera PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingJitterCamera PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingAnyHitShader ./VulkanKHRRayTracingAnyHitShader.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingAnyHitShader PUBLIC ${LIBS})
+

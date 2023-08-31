@@ -1,0 +1,33 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require // we need use [uint64_t] key word
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_GOOGLE_include_directive : enable
+
+#include "random.glsl"
+
+struct ShadowHitPayload
+{
+    bool isShadowed;
+    uint seed;
+};
+
+layout(location = 1) rayPayloadInEXT ShadowHitPayload SHADOW_HIT_PAY_LOAD;
+
+layout(push_constant) uniform PUSH_CONSTANT
+{
+    float alpha;
+    float accumulateWeight;
+    int frame;
+}
+pushConstant;
+
+void main()
+{
+    if (Random(SHADOW_HIT_PAY_LOAD.seed) > pushConstant.alpha)
+    {
+        ignoreIntersectionEXT;
+    }
+}

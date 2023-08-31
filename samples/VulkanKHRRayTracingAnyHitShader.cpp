@@ -77,10 +77,14 @@ const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTe
 const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
 const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rmiss");
-const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTextureShadow.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rchit");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rmiss");
+const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShaderShadow.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rchit");
+const std::string ANY_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rahit");
+const std::string SHADOW_ANY_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShaderShadow.rahit");
+
+const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
 
 typedef struct POSITION
 {
@@ -141,9 +145,21 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct RAY_TRACING_PUSH_CONSTANT
+{
+    float alpha;
+    float accumulateWeight;
+    int32_t frame;
+};
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+
+    RAY_TRACING_PUSH_CONSTANT ray_tracing_push_constant = {};
+    ray_tracing_push_constant.frame = 0;
+    ray_tracing_push_constant.accumulateWeight = 1;
+    ray_tracing_push_constant.alpha = 0.5;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.scale = 0.03;
@@ -162,7 +178,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -458,8 +474,7 @@ int main()
     Turbo::Core::TImage *ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
-        // std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = "../../asset/images/checkerboard_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -518,8 +533,10 @@ int main()
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
+    glm::mat4 previous_view = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+    previous_view = view;
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
@@ -618,6 +635,7 @@ int main()
     // Acceleration Structure
     Turbo::Core::TBuffer *device_local_vertex_buffer = nullptr;
     Turbo::Core::TBuffer *device_local_index_buffer = nullptr;
+    Turbo::Core::TBuffer *device_local_material_buffer = nullptr;
     Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = nullptr;
     VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
     Turbo::Core::TBuffer *top_level_acceleration_structure_buffer = nullptr;
@@ -818,7 +836,8 @@ int main()
         vk_acceleration_structure_geometry_khr.pNext = nullptr;
         vk_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR::VK_GEOMETRY_TYPE_TRIANGLES_KHR;
         vk_acceleration_structure_geometry_khr.geometry = vk_acceleration_structure_geometry_data_khr;
-        vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_OPAQUE_BIT_KHR;
+        // vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_OPAQUE_BIT_KHR;
+        vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR; // 避免多次击中同一个三角形
 
         VkAccelerationStructureBuildGeometryInfoKHR vk_acceleration_structure_build_geometry_info_khr = {};
         vk_acceleration_structure_build_geometry_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
@@ -1313,8 +1332,10 @@ int main()
     // Ray Tracing Pipeline
     Turbo::Core::TRayGenerationShader *ray_generation_shader_test = nullptr;
     Turbo::Core::TMissShader *miss_shader_test = nullptr;
+    Turbo::Core::TAnyHitShader *any_hit_shader_test = nullptr;
     Turbo::Core::TClosestHitShader *closest_hit_shader_test = nullptr;
 
+    Turbo::Core::TAnyHitShader *shadow_any_hit_shader_test = nullptr;
     Turbo::Core::TMissShader *shadow_miss_shader_test = nullptr;
 
     VkDescriptorSetLayout ray_tracing_descriptor_set_layout = VK_NULL_HANDLE;
@@ -1493,14 +1514,19 @@ int main()
 
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
+        VkPushConstantRange ray_tracing_pipeline_push_constant_range = {};
+        ray_tracing_pipeline_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        ray_tracing_pipeline_push_constant_range.offset = 0;
+        ray_tracing_pipeline_push_constant_range.size = sizeof(RAY_TRACING_PUSH_CONSTANT);
+
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         ray_tracing_pipeline_layout_create_info.pNext = nullptr;
         ray_tracing_pipeline_layout_create_info.flags = 0;
         ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
         ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
-        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
-        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 1;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = &ray_tracing_pipeline_push_constant_range;
 
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
@@ -1508,10 +1534,13 @@ int main()
             throw std::runtime_error("Create ray tracing pipeline layout failed");
         }
 
-        ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
+        ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR, {SHADER_INCLUDE_PATH});
         miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
         shadow_miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, SHADOW_MISS_SHADER_STR);
         closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
+        any_hit_shader_test = new Turbo::Core::TAnyHitShader(device, Turbo::Core::TShaderLanguage::GLSL, ANY_HIT_SHADER_STR, {SHADER_INCLUDE_PATH});
+
+        shadow_any_hit_shader_test = new Turbo::Core::TAnyHitShader(device, Turbo::Core::TShaderLanguage::GLSL, SHADOW_ANY_HIT_SHADER_STR, {SHADER_INCLUDE_PATH});
 
         VkPipelineShaderStageCreateInfo ray_generation_shader_stage_create_info = {};
         ray_generation_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -1549,11 +1578,31 @@ int main()
         closest_hit_shader_stage_create_info.pName = "main";
         closest_hit_shader_stage_create_info.pSpecializationInfo = nullptr;
 
+        VkPipelineShaderStageCreateInfo any_hit_shader_stage_create_info = {};
+        any_hit_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        any_hit_shader_stage_create_info.pNext = nullptr;
+        any_hit_shader_stage_create_info.flags = 0;
+        any_hit_shader_stage_create_info.stage = VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        any_hit_shader_stage_create_info.module = any_hit_shader_test->GetVkShaderModule();
+        any_hit_shader_stage_create_info.pName = "main";
+        any_hit_shader_stage_create_info.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo shadow_any_hit_shader_stage_create_info = {};
+        shadow_any_hit_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shadow_any_hit_shader_stage_create_info.pNext = nullptr;
+        shadow_any_hit_shader_stage_create_info.flags = 0;
+        shadow_any_hit_shader_stage_create_info.stage = VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        shadow_any_hit_shader_stage_create_info.module = shadow_any_hit_shader_test->GetVkShaderModule();
+        shadow_any_hit_shader_stage_create_info.pName = "main";
+        shadow_any_hit_shader_stage_create_info.pSpecializationInfo = nullptr;
+
         std::vector<VkPipelineShaderStageCreateInfo> ray_tracing_pipeline_shader_stages = {};
         ray_tracing_pipeline_shader_stages.push_back(ray_generation_shader_stage_create_info);
         ray_tracing_pipeline_shader_stages.push_back(miss_shader_stage_create_info);
         ray_tracing_pipeline_shader_stages.push_back(shadow_miss_shader_stage_create_info);
         ray_tracing_pipeline_shader_stages.push_back(closest_hit_shader_stage_create_info);
+        ray_tracing_pipeline_shader_stages.push_back(any_hit_shader_stage_create_info);
+        ray_tracing_pipeline_shader_stages.push_back(shadow_any_hit_shader_stage_create_info);
 
         VkRayTracingShaderGroupCreateInfoKHR ray_generation_shader_group = {};
         ray_generation_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
@@ -1585,21 +1634,34 @@ int main()
         shadow_miss_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
         shadow_miss_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
 
+        // Payload 0
         VkRayTracingShaderGroupCreateInfoKHR close_hit_shader_group = {};
         close_hit_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
         close_hit_shader_group.pNext = nullptr;
         close_hit_shader_group.type = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
         close_hit_shader_group.generalShader = VK_SHADER_UNUSED_KHR;
         close_hit_shader_group.closestHitShader = 3;
-        close_hit_shader_group.anyHitShader = VK_SHADER_UNUSED_KHR;
+        close_hit_shader_group.anyHitShader = 4;
         close_hit_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
         close_hit_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
+
+        // Payload 1
+        VkRayTracingShaderGroupCreateInfoKHR shadow_any_hit_shader_group = {};
+        shadow_any_hit_shader_group.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        shadow_any_hit_shader_group.pNext = nullptr;
+        shadow_any_hit_shader_group.type = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+        shadow_any_hit_shader_group.generalShader = VK_SHADER_UNUSED_KHR;
+        shadow_any_hit_shader_group.closestHitShader = VK_SHADER_UNUSED_KHR;
+        shadow_any_hit_shader_group.anyHitShader = 5;
+        shadow_any_hit_shader_group.intersectionShader = VK_SHADER_UNUSED_KHR;
+        shadow_any_hit_shader_group.pShaderGroupCaptureReplayHandle = nullptr;
 
         std::vector<VkRayTracingShaderGroupCreateInfoKHR> shader_groups = {};
         shader_groups.push_back(ray_generation_shader_group);
         shader_groups.push_back(miss_shader_group);
         shader_groups.push_back(shadow_miss_shader_group);
         shader_groups.push_back(close_hit_shader_group);
+        shader_groups.push_back(shadow_any_hit_shader_group);
 
         VkRayTracingPipelineCreateInfoKHR vk_ray_tracing_pipeline_create_info_khr = {};
         vk_ray_tracing_pipeline_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
@@ -1659,11 +1721,11 @@ int main()
         std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleAlignment:" << vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment << std::endl;
         std::cout << "VkPhysicalDeviceRayTracingPipelinePropertiesKHR::maxRayHitAttributeSize:" << vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayHitAttributeSize << std::endl;
 
-        uint32_t ray_generation_count = 1;
-        uint32_t miss_count = 2;
-        uint32_t closest_hit_count = 1;
+        uint32_t ray_generation_group_count = 1;
+        uint32_t miss_group_count = 2;
+        uint32_t hit_group_count = 2;
 
-        uint32_t handle_count = ray_generation_count + miss_count + closest_hit_count;
+        uint32_t handle_count = ray_generation_group_count + miss_group_count + hit_group_count;
         uint32_t handle_size = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleSize;
         uint32_t shader_group_handle_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupHandleAlignment;
         uint32_t shader_group_base_alignment = vk_physical_device_ray_tracing_pipeline_properties_khr.shaderGroupBaseAlignment;
@@ -1676,11 +1738,11 @@ int main()
 
         miss_binding_table.deviceAddress = 0;
         miss_binding_table.stride = handle_size_aligned;
-        miss_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(miss_count * handle_size_aligned, shader_group_base_alignment);
+        miss_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(miss_group_count * handle_size_aligned, shader_group_base_alignment);
 
         closest_hit_binding_table.deviceAddress = 0;
         closest_hit_binding_table.stride = handle_size_aligned;
-        closest_hit_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(closest_hit_count * handle_size_aligned, shader_group_base_alignment);
+        closest_hit_binding_table.size = Turbo::Core::TVulkanAllocator::AlignUp(hit_group_count * handle_size_aligned, shader_group_base_alignment);
 
         uint32_t data_size = handle_count * handle_size_aligned;
         std::vector<uint8_t> handles(data_size);
@@ -1726,14 +1788,14 @@ int main()
         // ray generation
         memcpy((uint8_t *)sbt_buffer_point, handles.data() + 0 * handle_size, handle_size);
         // miss
-        for (uint32_t miss_index = 0; miss_index < miss_count; miss_index++)
+        for (uint32_t miss_index = 0; miss_index < miss_group_count; miss_index++)
         {
-            memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_index * miss_binding_table.stride, handles.data() + ray_generation_count * handle_size + miss_index * handle_size, handle_size);
+            memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_index * miss_binding_table.stride, handles.data() + ray_generation_group_count * handle_size + miss_index * handle_size, handle_size);
         }
-        // closest_hit
-        for (uint32_t closest_hit_index = 0; closest_hit_index < closest_hit_count; closest_hit_index++)
+        // hit
+        for (uint32_t hit_index = 0; hit_index < hit_group_count; hit_index++)
         {
-            memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_binding_table.size + closest_hit_index * closest_hit_binding_table.stride, handles.data() + ray_generation_count * handle_size + miss_count * handle_size + closest_hit_index * handle_size, handle_size);
+            memcpy((uint8_t *)sbt_buffer_point + ray_generation_binding_table.size + miss_binding_table.size + hit_index * closest_hit_binding_table.stride, handles.data() + ray_generation_group_count * handle_size + miss_group_count * handle_size + hit_index * handle_size, handle_size);
         }
 
         sbt_buffer->Unmap();
@@ -1887,6 +1949,9 @@ int main()
 
     float angle = 0;
     float _time = glfwGetTime();
+
+    bool is_need_refresh_frame = false;
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -2048,7 +2113,15 @@ int main()
                 model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
                 glm::vec3 look_point = camera_position + forward_dir;
+
+                previous_view = view;
                 view = glm::lookAt(camera_position, look_point, up_dir);
+
+                if (previous_view != view)
+                {
+                    is_need_refresh_frame = true;
+                }
+
                 projection = glm::perspective(glm::radians(45.0f), (float)(swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth()) / (float)(swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight()), 0.1f, 300.0f);
 
                 matrixs_buffer_data.m = model;
@@ -2062,15 +2135,44 @@ int main()
 
             ImGui::NewFrame();
 
+            static bool is_force_accumulate_frame = false;
+            static bool is_force_refresh_frame = false;
+
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForLightingShadowWithTexture");
+                ImGui::Begin("VulkanKHRRayTracingAnyHitShader");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                if (ImGui::SliderFloat("alpha", &ray_tracing_push_constant.alpha, 0.0, 1))
+                {
+                    is_need_refresh_frame = true;
+                }
+
+                if (ImGui::Checkbox("Is force accumulate frame", &is_force_accumulate_frame))
+                {
+                    if (!is_force_accumulate_frame)
+                    {
+                        is_need_refresh_frame = true;
+                    }
+                }
+
+                if (ImGui::Checkbox("Is force refresh frame", &is_force_refresh_frame))
+                {
+                    if (!is_force_refresh_frame)
+                    {
+                        is_need_refresh_frame = true;
+                    }
+                }
+
+                if (is_force_accumulate_frame)
+                {
+                    ImGui::SliderFloat("Accumulate weight", &ray_tracing_push_constant.accumulateWeight, 0.0f, 300);
+                }
+
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -2092,6 +2194,23 @@ int main()
                 VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
                 device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
                 device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
+
+                if (is_force_accumulate_frame)
+                {
+                    is_need_refresh_frame = false;
+                }
+
+                if (is_need_refresh_frame || is_force_refresh_frame)
+                {
+                    ray_tracing_push_constant.frame = 0;
+                    is_need_refresh_frame = false;
+                }
+                else
+                {
+                    ray_tracing_push_constant.frame++;
+                }
+
+                device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(RAY_TRACING_PUSH_CONSTANT), &ray_tracing_push_constant);
                 device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 
                 // copy ray tracing image into color target image
@@ -2405,6 +2524,8 @@ int main()
                 vk_write_descriptor_sets.push_back(ray_tracing_write_image);
 
                 device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
+
+                is_need_refresh_frame = true;
             }
             break;
             default: {
@@ -2526,6 +2647,8 @@ int main()
             vk_write_descriptor_sets.push_back(ray_tracing_write_image);
 
             device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
+
+            is_need_refresh_frame = true;
         }
         break;
         default: {
@@ -2573,8 +2696,10 @@ int main()
     delete ray_generation_shader_test;
     delete miss_shader_test;
     delete closest_hit_shader_test;
+    delete any_hit_shader_test;
 
     delete shadow_miss_shader_test;
+    delete shadow_any_hit_shader_test;
 
     delete descriptor_pool;
     delete vertex_shader;

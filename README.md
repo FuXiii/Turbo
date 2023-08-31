@@ -3524,3 +3524,36 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rchit`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowWithTexture.rmiss`着色器。
   >* `./asset/shaders`下新增`RayTracingKHRTestForLightingShadowShadowWithTexture.rmiss`着色器。
+
+* 2023/8/28 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingJitterCamera`示例。通过抖动采样点并多帧累积采样结果进行抗锯齿。
+  >* `./asset/shaders`下新增`random.glsl`文件，用于生成随机数。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rgen`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCameraShadow.rmiss`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRJitterCamera.rchit`文件，用于`VulkanKHRRayTracingJitterCamera`示例。
+
+* 2023/8/29 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingAnyHitShader`示例。用于研究实时光追中的任意命中着色器。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rgen`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rmiss`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShaderShadow.rmiss`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rchit`文件，用于`VulkanKHRRayTracingAnyHitShader`示例。
+
+* 2023/8/30 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingAnyHitShader`示例。用于研究实时光追中的任意命中着色器。
+  >* `./asset/shaders`下新增`RayTracingAnyHitShader.rahit`文件（任意命中着色器），用于`VulkanKHRRayTracingAnyHitShader`示例。
+
+* 2023/8/31 设计架构
+  >
+  >* `./asset/shaders`下新增`RayTracingAnyHitShaderShadow.rahit`文件（任意命中着色器），用于`VulkanKHRRayTracingAnyHitShader`示例中阴影负载 `1` 的任意命中。
+  >* `./asset/shaders`下更新`RayTracingAnyHitShaderShadow.rmiss`。将阴影负载增加随机种子`seed`成员。
+  >* `./asset/shaders`下更新`RayTracingAnyHitShader.rchit`。将阴影负载增加随机种子`seed`成员。
+  >* `./samples`下更新`VulkanKHRRayTracingAnyHitShader`示例。增加对阴影负载的任意命中着色器的适配。
+  >* `./samples`下更新`BRDF`示例。使用非`Y`轴向上的材质球，并将背景清空成浅色。
+  >* `./samples`下更新`NormalTexture`示例。使用非`Y`轴向上的材质球，并将背景清空成浅色。
+  >* `./samples`下更新`PBRTest`示例。`roughness`参数默认设置为`0.5`。
+
