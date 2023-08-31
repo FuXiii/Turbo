@@ -3546,3 +3546,10 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下更新`VulkanKHRRayTracingAnyHitShader`示例。用于研究实时光追中的任意命中着色器。
   >* `./asset/shaders`下新增`RayTracingAnyHitShader.rahit`文件（任意命中着色器），用于`VulkanKHRRayTracingAnyHitShader`示例。
+
+* 2023/8/31 设计架构
+  >
+  >* `./asset/shaders`下新增`RayTracingAnyHitShaderShadow.rahit`文件（任意命中着色器），用于`VulkanKHRRayTracingAnyHitShader`示例中阴影负载 `1` 的任意命中。
+  >* `./asset/shaders`下更新`RayTracingAnyHitShaderShadow.rmiss`。将阴影负载增加随机种子`seed`成员。
+  >* `./asset/shaders`下更新`RayTracingAnyHitShader.rchit`。将阴影负载增加随机种子`seed`成员。
+  >* `./samples`下更新`VulkanKHRRayTracingAnyHitShader`示例。增加对阴影负载的任意命中着色器的适配。

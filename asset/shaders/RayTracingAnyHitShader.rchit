@@ -11,6 +11,12 @@ struct HitPayload
     uint seed;
 };
 
+struct ShadowHitPayload
+{
+    bool isShadowed;
+    uint seed;
+};
+
 struct Vertex
 {
     vec3 position;
@@ -25,7 +31,7 @@ struct BottomLevelAccelerationStructureDeviceAddress
 };
 
 layout(location = 0) rayPayloadInEXT HitPayload HIT_PAY_LOAD;
-layout(location = 1) rayPayloadEXT bool isShadowed;
+layout(location = 1) rayPayloadEXT ShadowHitPayload SHADOW_HIT_PAY_LOAD;
 
 layout(set = 0, binding = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
 
@@ -99,11 +105,12 @@ void main()
         vec3 direction = light_dir;
         // uint ray_flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
         uint ray_flags = gl_RayFlagsSkipClosestHitShaderEXT;
-        isShadowed = true;
+        SHADOW_HIT_PAY_LOAD.isShadowed = true;
+        SHADOW_HIT_PAY_LOAD.seed = HIT_PAY_LOAD.seed;
         traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
                     ray_flags,     // rayFlags
                     0xFF,          // cullMask
-                    0,             // sbtRecordOffset
+                    /*0*/ 1,       // sbtRecordOffset
                     0,             // sbtRecordStride
                     1,             // missIndex
                     origin.xyz,    // ray origin
@@ -113,7 +120,9 @@ void main()
                     1              // payload (location = 1)
         );
 
-        if (isShadowed)
+        // SHADOW_HIT_PAY_LOAD.seed = HIT_PAY_LOAD.seed;
+
+        if (SHADOW_HIT_PAY_LOAD.isShadowed)
         {
             attenuation = 0.3;
         }
