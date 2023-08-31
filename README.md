@@ -3553,3 +3553,5 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下更新`RayTracingAnyHitShaderShadow.rmiss`。将阴影负载增加随机种子`seed`成员。
   >* `./asset/shaders`下更新`RayTracingAnyHitShader.rchit`。将阴影负载增加随机种子`seed`成员。
   >* `./samples`下更新`VulkanKHRRayTracingAnyHitShader`示例。增加对阴影负载的任意命中着色器的适配。
+  >* `./samples`下更新`BRDF`示例。使用非`Y`轴向上的材质球，并将背景清空成浅色。
+
