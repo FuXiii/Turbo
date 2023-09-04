@@ -302,3 +302,7 @@ target_include_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${INCLUDE_PART
 target_link_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingAnyHitShader PUBLIC ${LIBS})
 
+add_executable(VulkanKHRRayTracingTestForInstances ./VulkanKHRRayTracingTestForInstances.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForInstances PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForInstances PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForInstances PUBLIC ${LIBS})

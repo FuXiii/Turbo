@@ -3557,3 +3557,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./samples`下更新`NormalTexture`示例。使用非`Y`轴向上的材质球，并将背景清空成浅色。
   >* `./samples`下更新`PBRTest`示例。`roughness`参数默认设置为`0.5`。
 
+* 2023/9/4 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingTestForInstances`示例。用于光追示例化（多实体）。
+
