@@ -163,7 +163,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -967,11 +967,6 @@ int main()
         }
 
         // Top Level Acceleration Structure
-        glm::mat4 acceleration_structure_model = glm::mat4(1.0f);
-        acceleration_structure_model = glm::rotate(acceleration_structure_model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        VkTransformMatrixKHR vk_transform_matrix_khr = {};
-        memcpy(&vk_transform_matrix_khr, &acceleration_structure_model, sizeof(VkTransformMatrixKHR));
-
         VkAccelerationStructureDeviceAddressInfoKHR bottom_level_acceleration_structure_device_address_info_khr = {};
         bottom_level_acceleration_structure_device_address_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         bottom_level_acceleration_structure_device_address_info_khr.pNext = nullptr;
@@ -979,44 +974,56 @@ int main()
 
         VkDeviceAddress bottom_level_acceleration_structure_device_address = device->GetDeviceDriver()->vkGetAccelerationStructureDeviceAddressKHR(vk_device, &bottom_level_acceleration_structure_device_address_info_khr);
 
+        std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
         {
-            // random instance
+            // random instance transform matrix
             std::random_device seed;
             std::mt19937 gen(seed());
             std::normal_distribution<float> dis(1.0f, 1.0f);
-            std::normal_distribution<float> disn(1.0f, 1.0f);
+            std::normal_distribution<float> disn(0.05f, 0.05f);
 
             for (uint32_t instance_index = 0; instance_index < 2000; instance_index++)
             {
-                float random_value = dis(gen);
-                std::cout << "random_value:" << random_value << std::endl;
+                glm::mat4 instance_model = glm::mat4x3(1.0f);
+                instance_model = glm::scale(instance_model, glm::vec3(std::abs(disn(gen))));
+                instance_model = glm::rotate(instance_model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                instance_model = glm::rotate(instance_model, glm::radians(dis(gen) * 180 / 3.1415926f), glm::vec3(dis(gen), dis(gen), dis(gen)));
+
+                VkTransformMatrixKHR vk_transform_matrix = {};
+                memcpy(&vk_transform_matrix, &instance_model, sizeof(VkTransformMatrixKHR));
+
+                vk_transform_matrix.matrix[0][3] = dis(gen);
+                vk_transform_matrix.matrix[1][3] = 2 + dis(gen);
+                vk_transform_matrix.matrix[2][3] = dis(gen);
+
+                VkAccelerationStructureInstanceKHR vk_acceleration_structure_instance_khr = {};
+                vk_acceleration_structure_instance_khr.transform = vk_transform_matrix;
+                vk_acceleration_structure_instance_khr.instanceCustomIndex = 0;
+                vk_acceleration_structure_instance_khr.mask = 0xFF;
+                vk_acceleration_structure_instance_khr.instanceShaderBindingTableRecordOffset = 0;
+                vk_acceleration_structure_instance_khr.flags = VkGeometryInstanceFlagBitsKHR::VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+                vk_acceleration_structure_instance_khr.accelerationStructureReference = bottom_level_acceleration_structure_device_address;
+
+                vk_acceleration_structure_instances.push_back(vk_acceleration_structure_instance_khr);
             }
         }
-
-        VkAccelerationStructureInstanceKHR vk_acceleration_structure_instance_khr = {};
-        vk_acceleration_structure_instance_khr.transform = vk_transform_matrix_khr;
-        vk_acceleration_structure_instance_khr.instanceCustomIndex = 0;
-        vk_acceleration_structure_instance_khr.mask = 0xFF;
-        vk_acceleration_structure_instance_khr.instanceShaderBindingTableRecordOffset = 0;
-        vk_acceleration_structure_instance_khr.flags = VkGeometryInstanceFlagBitsKHR::VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-        vk_acceleration_structure_instance_khr.accelerationStructureReference = bottom_level_acceleration_structure_device_address;
 
         {
             Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
             Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
-            Turbo::Core::TBuffer *staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VkAccelerationStructureInstanceKHR));
+            Turbo::Core::TBuffer *staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
             void *staging_ptr = staging_buffer->Map();
             if (staging_ptr)
             {
-                memcpy(staging_ptr, &vk_acceleration_structure_instance_khr, sizeof(VkAccelerationStructureInstanceKHR));
+                memcpy(staging_ptr, vk_acceleration_structure_instances.data(), sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
             }
             staging_buffer->Unmap();
 
-            instance_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(VkAccelerationStructureInstanceKHR));
+            instance_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
 
             command_buffer->Begin();
-            command_buffer->CmdCopyBuffer(staging_buffer, instance_buffer, 0, 0, sizeof(VkAccelerationStructureInstanceKHR));
+            command_buffer->CmdCopyBuffer(staging_buffer, instance_buffer, 0, 0, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
             command_buffer->End();
 
             Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
@@ -1081,7 +1088,7 @@ int main()
         top_level_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = 0;
         top_level_acceleration_structure_build_geometry_info_khr.scratchData.hostAddress = 0;
 
-        uint32_t instance_count = 1;
+        uint32_t instance_count = vk_acceleration_structure_instances.size();
         VkAccelerationStructureBuildSizesInfoKHR top_level_acceleration_structure_build_sizes_info_khr = {};
         top_level_acceleration_structure_build_sizes_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
         top_level_acceleration_structure_build_sizes_info_khr.pNext = nullptr;
@@ -1146,7 +1153,7 @@ int main()
         top_level_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = top_level_scratch_buffer_device_address;
 
         VkAccelerationStructureBuildRangeInfoKHR top_level_acceleration_structure_build_range_info_khr = {};
-        top_level_acceleration_structure_build_range_info_khr.primitiveCount = 1;
+        top_level_acceleration_structure_build_range_info_khr.primitiveCount = instance_count;
         top_level_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
         top_level_acceleration_structure_build_range_info_khr.firstVertex = 0;
         top_level_acceleration_structure_build_range_info_khr.transformOffset = 0;

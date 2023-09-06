@@ -3561,3 +3561,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下新增`VulkanKHRRayTracingTestForInstances`示例。用于光追示例化（多实体）。
 
+* 2023/9/6 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForInstances`示例。用于光追示例化（多实体）。
+
