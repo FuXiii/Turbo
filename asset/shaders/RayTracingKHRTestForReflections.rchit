@@ -7,6 +7,8 @@
 
 struct HitPayload
 {
+    int depth;
+    vec3 attenuation;
     vec3 color;
 };
 
@@ -44,6 +46,16 @@ layout(set = 0, binding = 3, scalar) buffer BottomLevelAccelerationStructureDevi
 }
 BLAS_DEVICE_ADDRESS;
 
+struct PushConstant
+{
+    int depth;
+};
+
+layout(push_constant) uniform PushConstant_
+{
+    PushConstant pc;
+};
+
 hitAttributeEXT vec2 attribs;
 
 void main()
@@ -70,7 +82,7 @@ void main()
     const vec3 light_dir = -normalize(vec3(1, 1, 1));
 
     // Diffuse
-    const vec3 diffuse_color = vec3(0.4, 0.4, 0.4);
+    const vec3 diffuse_color = vec3(1, 1, 1);
     float normalDotLight = max(dot(world_normal, light_dir), 0);
     vec3 diffuse = diffuse_color * normalDotLight;
 
@@ -113,5 +125,29 @@ void main()
         }
     }
 
-    HIT_PAY_LOAD.color = attenuation * (diffuse + specular);
+    bool is_reflection = true;
+    const float attenuation_coefficient = 0.95;
+    if (is_reflection && HIT_PAY_LOAD.depth < pc.depth)
+    {
+        vec3 origin = world_position;
+        vec3 rayDir = reflect(gl_WorldRayDirectionEXT, world_normal);
+        HIT_PAY_LOAD.attenuation *= attenuation_coefficient;
+
+        HIT_PAY_LOAD.depth++;
+        traceRayEXT(TOP_LEVEL_AS,       // acceleration structure
+                    gl_RayFlagsNoneEXT, // rayFlags
+                    0xFF,               // cullMask
+                    0,                  // sbtRecordOffset
+                    0,                  // sbtRecordStride
+                    0,                  // missIndex
+                    origin,             // ray origin
+                    0.1,                // ray min range
+                    rayDir,             // ray direction
+                    100000.0,           // ray max range
+                    0                   // payload (location = 0)
+        );
+        HIT_PAY_LOAD.depth--;
+    }
+
+    HIT_PAY_LOAD.color += (attenuation * (diffuse + specular)) * HIT_PAY_LOAD.attenuation;
 }

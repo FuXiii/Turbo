@@ -146,6 +146,9 @@ int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
+    int max_ray_tracing_depth = 0;
+    int ray_tracing_depth = 0;
+
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.scale = 0.03;
 
@@ -163,7 +166,8 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
+        // bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -982,19 +986,19 @@ int main()
             std::normal_distribution<float> dis(1.0f, 1.0f);
             std::normal_distribution<float> disn(0.05f, 0.05f);
 
-            for (uint32_t instance_index = 0; instance_index < 2000; instance_index++)
+            for (uint32_t instance_index = 0; instance_index < 2; instance_index++)
             {
                 glm::mat4 instance_model = glm::mat4x3(1.0f);
-                instance_model = glm::scale(instance_model, glm::vec3(std::abs(disn(gen))));
+                // instance_model = glm::scale(instance_model, glm::vec3(std::abs(disn(gen))));
                 instance_model = glm::rotate(instance_model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                 instance_model = glm::rotate(instance_model, glm::radians(dis(gen) * 180 / 3.1415926f), glm::vec3(dis(gen), dis(gen), dis(gen)));
 
                 VkTransformMatrixKHR vk_transform_matrix = {};
                 memcpy(&vk_transform_matrix, &instance_model, sizeof(VkTransformMatrixKHR));
 
-                vk_transform_matrix.matrix[0][3] = dis(gen);
-                vk_transform_matrix.matrix[1][3] = 2 + dis(gen);
-                vk_transform_matrix.matrix[2][3] = dis(gen);
+                vk_transform_matrix.matrix[0][3] = 2 * float(instance_index) - 1;
+                vk_transform_matrix.matrix[1][3] = 0;
+                vk_transform_matrix.matrix[2][3] = 0;
 
                 VkAccelerationStructureInstanceKHR vk_acceleration_structure_instance_khr = {};
                 vk_acceleration_structure_instance_khr.transform = vk_transform_matrix;
@@ -1464,14 +1468,19 @@ int main()
 
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
+        VkPushConstantRange ray_tracing_depth_push_constant_range = {};
+        ray_tracing_depth_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        ray_tracing_depth_push_constant_range.offset = 0;
+        ray_tracing_depth_push_constant_range.size = sizeof(ray_tracing_depth);
+
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         ray_tracing_pipeline_layout_create_info.pNext = nullptr;
         ray_tracing_pipeline_layout_create_info.flags = 0;
         ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
         ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
-        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
-        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 1;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = &ray_tracing_depth_push_constant_range;
 
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
@@ -1580,13 +1589,16 @@ int main()
         vk_ray_tracing_pipeline_create_info_khr.pStages = ray_tracing_pipeline_shader_stages.data();
         vk_ray_tracing_pipeline_create_info_khr.groupCount = shader_groups.size();
         vk_ray_tracing_pipeline_create_info_khr.pGroups = shader_groups.data();
-        vk_ray_tracing_pipeline_create_info_khr.maxPipelineRayRecursionDepth = 2;
+        // vk_ray_tracing_pipeline_create_info_khr.maxPipelineRayRecursionDepth = 2;
+        vk_ray_tracing_pipeline_create_info_khr.maxPipelineRayRecursionDepth = std::max(10u, vk_physical_device_ray_tracing_pipeline_properties_khr.maxRayRecursionDepth);
         vk_ray_tracing_pipeline_create_info_khr.pLibraryInfo = nullptr;
         vk_ray_tracing_pipeline_create_info_khr.pLibraryInterface = nullptr;
         vk_ray_tracing_pipeline_create_info_khr.pDynamicState = nullptr;
         vk_ray_tracing_pipeline_create_info_khr.layout = ray_tracing_pipeline_layout;
         vk_ray_tracing_pipeline_create_info_khr.basePipelineHandle = VK_NULL_HANDLE;
         vk_ray_tracing_pipeline_create_info_khr.basePipelineIndex = 0;
+
+        max_ray_tracing_depth = vk_ray_tracing_pipeline_create_info_khr.maxPipelineRayRecursionDepth - 1;
 
         VkResult create_ray_tracing_pipeline_result = device_driver->vkCreateRayTracingPipelinesKHR(device->GetVkDevice(), VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &vk_ray_tracing_pipeline_create_info_khr, vk_allocation_callbacks, &ray_tracing_pipeline);
         if (create_ray_tracing_pipeline_result != VkResult::VK_SUCCESS)
@@ -2007,6 +2019,7 @@ int main()
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::SliderInt("Ray Tracing Depth", &ray_tracing_depth, 0, max_ray_tracing_depth);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -2027,6 +2040,7 @@ int main()
             {
                 VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
                 device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
+                device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0, sizeof(ray_tracing_depth), &ray_tracing_depth);
                 device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
                 device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 

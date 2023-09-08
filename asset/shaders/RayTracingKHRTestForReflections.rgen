@@ -3,6 +3,8 @@
 
 struct HitPayload
 {
+    int depth;
+    vec3 attenuation;
     vec3 color;
 };
 
@@ -34,6 +36,10 @@ void main()
     uint ray_flags = gl_RayFlagsOpaqueEXT;
     float t_min = 0.001;
     float t_max = 10000.0;
+
+    HIT_PAY_LOAD.depth = 0;
+    HIT_PAY_LOAD.attenuation = vec3(1.f, 1.f, 1.f);
+    HIT_PAY_LOAD.color = vec3(0);
 
     traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
                 ray_flags,     // rayFlags
