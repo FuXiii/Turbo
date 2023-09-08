@@ -3559,9 +3559,17 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 
 * 2023/9/4 设计架构
   >
-  >* `./samples`下新增`VulkanKHRRayTracingTestForInstances`示例。用于光追示例化（多实体）。
+  >* `./samples`下新增`VulkanKHRRayTracingTestForInstances`示例。用于光追实例化（多实体）。
 
 * 2023/9/6 设计架构
   >
-  >* `./samples`下更新`VulkanKHRRayTracingTestForInstances`示例。用于光追示例化（多实体）。
+  >* `./samples`下更新`VulkanKHRRayTracingTestForInstances`示例。用于光追实例化（多实体）。
+
+* 2023/9/8 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForReflections`示例。用于光追反射。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForReflections.rgen`文件，用于`VulkanKHRRayTracingTestForReflections`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForReflections.rmiss`文件，用于`VulkanKHRRayTracingTestForReflections`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForReflectionsShadow.rmiss`文件，用于`VulkanKHRRayTracingTestForReflections`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForReflections.rchit`文件，用于`VulkanKHRRayTracingTestForReflections`示例。
 

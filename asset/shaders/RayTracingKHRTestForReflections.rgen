@@ -1,0 +1,52 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+
+struct HitPayload
+{
+    vec3 color;
+};
+
+layout(location = 0) rayPayloadEXT HitPayload HIT_PAY_LOAD;
+
+layout(set = 0, binding = 0) uniform accelerationStructureEXT TOP_LEVEL_AS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D IMAGE;
+layout(set = 0, binding = 2) uniform RAY_TRACING_MATRIXS
+{
+    mat4 model;
+    mat4 view;
+    mat4 project;
+}
+rayTracingMatrixs;
+
+void main()
+{
+    const vec2 pixel_center = vec2(gl_LaunchIDEXT.xy) + vec2(0.5); // 像素中心点
+    const vec2 uv = pixel_center / vec2(gl_LaunchSizeEXT.xy);      // 归一化 [0,1]
+    vec2 ndc = uv * 2.0 - 1.0;                                     //[-1,1]，为归一化设备坐标（NDC）
+
+    mat4 view_inverse = inverse(rayTracingMatrixs.view);
+    mat4 project_inverse = inverse(rayTracingMatrixs.project);
+
+    vec4 origin = view_inverse * vec4(0, 0, 0, 1);                  // 相机的世界坐标
+    vec4 target = project_inverse * vec4(ndc.x, ndc.y, 1, 1);       // 像素中点(d.x, d.y)向前的向量乘以投影矩阵的逆得到，在View空间下该像素点的正前方向量
+    vec4 direction = view_inverse * vec4(normalize(target.xyz), 0); // 归一化View空间下正前方向量，之后转到世界坐标系下
+
+    uint ray_flags = gl_RayFlagsOpaqueEXT;
+    float t_min = 0.001;
+    float t_max = 10000.0;
+
+    traceRayEXT(TOP_LEVEL_AS,  // acceleration structure
+                ray_flags,     // rayFlags
+                0xFF,          // cullMask
+                0,             // sbtRecordOffset
+                0,             // sbtRecordStride
+                0,             // missIndex
+                origin.xyz,    // ray origin
+                t_min,         // ray min range
+                direction.xyz, // ray direction
+                t_max,         // ray max range
+                0              // payload (location = 0)
+    );
+
+    imageStore(IMAGE, ivec2(gl_LaunchIDEXT.xy), vec4(HIT_PAY_LOAD.color, 1.0));
+}
