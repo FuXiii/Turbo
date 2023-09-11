@@ -7,7 +7,13 @@
 
 struct HitPayload
 {
+    int depth;
+    vec3 attenuation;
     vec3 color;
+
+    bool isDone;
+    vec3 rayOrigin;
+    vec3 rayDir;
 };
 
 struct Vertex
@@ -70,7 +76,7 @@ void main()
     const vec3 light_dir = -normalize(vec3(1, 1, 1));
 
     // Diffuse
-    const vec3 diffuse_color = vec3(0.4, 0.4, 0.4);
+    const vec3 diffuse_color = vec3(1, 1, 1);
     float normalDotLight = max(dot(world_normal, light_dir), 0);
     vec3 diffuse = diffuse_color * normalDotLight;
 
@@ -113,5 +119,26 @@ void main()
         }
     }
 
-    HIT_PAY_LOAD.color = attenuation * (diffuse + specular);
+    bool is_reflection = true;
+    const float attenuation_coefficient = 0.5;
+    if (is_reflection)
+    {
+        vec3 origin = world_position;
+        vec3 rayDir = reflect(gl_WorldRayDirectionEXT, world_normal);
+        HIT_PAY_LOAD.attenuation *= attenuation_coefficient;
+
+        if (HIT_PAY_LOAD.attenuation.x < 0.01)
+        {
+            HIT_PAY_LOAD.isDone = true;
+        }
+        else
+        {
+            HIT_PAY_LOAD.isDone = false;
+        }
+
+        HIT_PAY_LOAD.rayOrigin = origin;
+        HIT_PAY_LOAD.rayDir = rayDir;
+    }
+
+    HIT_PAY_LOAD.color += (attenuation * (diffuse + specular));
 }

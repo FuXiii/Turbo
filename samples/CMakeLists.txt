@@ -1,7 +1,7 @@
 project(TSample)
 
 function(Add_Sample Sample Srcs Incs Links Libs)
-add_executable(${Sample} ${Srcs})
+add_executable(${Sample} ./${Sample}.cpp ${Srcs})
 target_include_directories(${Sample} PUBLIC ${Incs})
 target_link_directories(${Sample} PUBLIC ${Links})
 target_link_libraries(${Sample} PUBLIC ${Libs})
@@ -302,3 +302,17 @@ target_include_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${INCLUDE_PART
 target_link_directories(VulkanKHRRayTracingAnyHitShader PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingAnyHitShader PUBLIC ${LIBS})
 
+add_executable(VulkanKHRRayTracingTestForInstances ./VulkanKHRRayTracingTestForInstances.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForInstances PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForInstances PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForInstances PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForReflections ./VulkanKHRRayTracingTestForReflections.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForReflections PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForReflections PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForReflections PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForReflections_WithoutLimited ./VulkanKHRRayTracingTestForReflections_WithoutLimited.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForReflections_WithoutLimited PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForReflections_WithoutLimited PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForReflections_WithoutLimited PUBLIC ${LIBS})
