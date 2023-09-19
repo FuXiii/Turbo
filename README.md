@@ -3580,3 +3580,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForReflections_WithoutLimited.rmiss`文件，用于`VulkanKHRRayTracingTestForReflections_WithoutLimited`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForReflectionShadows_WithoutLimited.rmiss`文件，用于`VulkanKHRRayTracingTestForReflections_WithoutLimited`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForReflections_WithoutLimited.rchit`文件，用于`VulkanKHRRayTracingTestForReflections_WithoutLimited`示例。
+
+* 2023/9/19 设计架构
+  >
+  >* `./samples`下新增`VulkanKHRRayTracingTestForMultiClosestHits`示例。用于研究实时光追中的多个最近命中着色器。
