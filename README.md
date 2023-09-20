@@ -3584,3 +3584,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/9/19 设计架构
   >
   >* `./samples`下新增`VulkanKHRRayTracingTestForMultiClosestHits`示例。用于研究实时光追中的多个最近命中着色器。
+
+* 2023/9/20 设计架构
+  >
+  >* `engine\core\include`下`TCore.h`新增对于`VK_USE_PLATFORM_OHOS`或`OHOS_PLATFORM`的开源鸿蒙系统的`TURBO_PLATFORM_OPEN_HARMONY`宏定义的。
+  >* `engine\core\include`下`TCore.h`新增对于`vulkan_ohos.h`的开源鸿蒙系统的头文件加入。
+  >* `engine\core\src`下`TVulkanLoader.cpp`新增对于的开源鸿蒙系统`TURBO_PLATFORM_OPEN_HARMONY`宏适配。

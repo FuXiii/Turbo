@@ -1,6 +1,6 @@
 #include "TVulkanLoader.h"
 
-#if defined(TURBO_PLATFORM_LINUX)
+#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
 #include <dlfcn.h>
 #elif defined(TURBO_PLATFORM_WINDOWS)
 #include <Windows.h>
@@ -28,7 +28,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     // loader
     Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
     assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -92,7 +92,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         return TVersion(0, 0, 0, 0);
     }
     PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -114,7 +114,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         {
             FreeLibrary(library);
         }
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
         if (library)
         {
             dlclose(library);
