@@ -14,7 +14,7 @@ size_t Turbo::Core::TLayerInfo::GetInstanceLayerCount()
 
     do
     {
-        result = Turbo::Core::vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+        result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
         if (result == VkResult::VK_SUCCESS)
         {
@@ -39,7 +39,7 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers(
         {
             std::vector<VkLayerProperties> layer_propertiess;
             layer_propertiess.resize(layer_count);
-            result = Turbo::Core::vkEnumerateInstanceLayerProperties(&layer_count, layer_propertiess.data());
+            result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceLayerProperties(&layer_count, layer_propertiess.data());
 
             if (result == VkResult::VK_SUCCESS)
             {

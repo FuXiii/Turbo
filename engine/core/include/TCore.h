@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "vulkan/vulkan.h"
 //<Test Delete>
 #include <iostream>
 //</Test Delete>
@@ -20,8 +19,16 @@
 #define TURBO_PLATFORM_LINUX
 #elif defined(__unix) || defined(__unix__)
 #define TURBO_PLATFORM_UNIX
+#elif defined(VK_USE_PLATFORM_OHOS) || defined(OHOS_PLATFORM)
+#define TURBO_PLATFORM_OPEN_HARMONY
 #else
 #define TURBO_PLATFORM_UNDEFINED
+#endif
+
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+#include <vulkan_ohos.h> //FIXME: If use OpenHarmony we need use vulkan_ohos.h for some extension reference
+#else
+#include "vulkan/vulkan.h"
 #endif
 
 namespace Turbo

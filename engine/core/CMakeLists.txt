@@ -18,21 +18,43 @@ endif()
 
 message(STATUS "${VMA_SRCS}")
 
-add_library(${PROJECT_NAME} STATIC
-${VMA_SRCS}
-#$<TARGET_OBJECTS:VulkanMemoryAllocator>
-$<TARGET_OBJECTS:MachineIndependent>
-$<TARGET_OBJECTS:glslang>
-$<TARGET_OBJECTS:glslang-default-resource-limits>
-$<TARGET_OBJECTS:OGLCompiler>
-$<TARGET_OBJECTS:OSDependent>
-$<TARGET_OBJECTS:GenericCodeGen>
-$<TARGET_OBJECTS:SPIRV>
-$<TARGET_OBJECTS:spirv-cross-core>
-$<TARGET_OBJECTS:spirv-cross-glsl>
-$<TARGET_OBJECTS:spirv-cross-hlsl>
-${SRCS}
-)
+option(TCORE_SHARED_LIBS "flag to create TCore shared libraries if on" OFF)
+
+if(TCORE_SHARED_LIBS)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    add_library(${PROJECT_NAME} SHARED
+        ${VMA_SRCS}
+        #$<TARGET_OBJECTS:VulkanMemoryAllocator>
+        $<TARGET_OBJECTS:MachineIndependent>
+        $<TARGET_OBJECTS:glslang>
+        $<TARGET_OBJECTS:glslang-default-resource-limits>
+        $<TARGET_OBJECTS:OGLCompiler>
+        $<TARGET_OBJECTS:OSDependent>
+        $<TARGET_OBJECTS:GenericCodeGen>
+        $<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:spirv-cross-core>
+        $<TARGET_OBJECTS:spirv-cross-glsl>
+        $<TARGET_OBJECTS:spirv-cross-hlsl>
+        ${SRCS}
+    )
+    target_compile_definitions(${PROJECT_NAME} PUBLIC TCORE_SHARED_LIBS)
+else() 
+    add_library(${PROJECT_NAME} STATIC
+        ${VMA_SRCS}
+        #$<TARGET_OBJECTS:VulkanMemoryAllocator>
+        $<TARGET_OBJECTS:MachineIndependent>
+        $<TARGET_OBJECTS:glslang>
+        $<TARGET_OBJECTS:glslang-default-resource-limits>
+        $<TARGET_OBJECTS:OGLCompiler>
+        $<TARGET_OBJECTS:OSDependent>
+        $<TARGET_OBJECTS:GenericCodeGen>
+        $<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:spirv-cross-core>
+        $<TARGET_OBJECTS:spirv-cross-glsl>
+        $<TARGET_OBJECTS:spirv-cross-hlsl>
+        ${SRCS}
+    )
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
     VMA_STATIC_VULKAN_FUNCTIONS=$<BOOL:${VMA_STATIC_VULKAN_FUNCTIONS}>

@@ -34,3 +34,10 @@
   ![WSLforKTX](./images/WSLforKTX.png)  
   之后点击`WIN`键在最近安装处打开下载的`WSL`进行安装激活即可  
   ![WSLforKTX_Debian](./images/WSLforKTX_Debian.png)
+
+* Can not find TCore.dll 找不到TCore.dll
+
+  * **`原因`**：如果在`CMake`阶段设置`TCORE_SHARED_LIBS`为`ON`，`Turbo`的核心`TCore`库将会输出为动态库，在可执行程序运行时需要加载该动态库
+  * **`解决方法`**：将输出的`TCore`动态库文件拷贝至和可执行程序同级目录中
+
+  ![FQA_VectorSubscriptOutOfRange](./images/can_not_found_tcore_dll.png)

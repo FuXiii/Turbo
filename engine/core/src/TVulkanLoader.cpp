@@ -1,17 +1,19 @@
 #include "TVulkanLoader.h"
 
-#if defined(TURBO_PLATFORM_LINUX)
+#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
 #include <dlfcn.h>
 #elif defined(TURBO_PLATFORM_WINDOWS)
 #include <Windows.h>
 #endif
 
+// template<> PFN_vkDestroySurfaceKHR Turbo::Core::TVulkanLoader::Load<Turbo::Core::TVulkanLoader::TLoaderType::INSTANCE, PFN_vkDestroySurfaceKHR>(void *context, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr);
+
 #if defined(VK_VERSION_1_0)
-PFN_vkGetInstanceProcAddr Turbo::Core::vkGetInstanceProcAddr = nullptr;
-PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
-PFN_vkCreateInstance Turbo::Core::vkCreateInstance = nullptr;
-PFN_vkEnumerateInstanceExtensionProperties Turbo::Core::vkEnumerateInstanceExtensionProperties = nullptr;
-PFN_vkEnumerateInstanceLayerProperties Turbo::Core::vkEnumerateInstanceLayerProperties = nullptr;
+// PFN_vkGetInstanceProcAddr Turbo::Core::vkGetInstanceProcAddr = nullptr;
+// PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
+// PFN_vkCreateInstance Turbo::Core::vkCreateInstance = nullptr;
+// PFN_vkEnumerateInstanceExtensionProperties Turbo::Core::vkEnumerateInstanceExtensionProperties = nullptr;
+// PFN_vkEnumerateInstanceLayerProperties Turbo::Core::vkEnumerateInstanceLayerProperties = nullptr;
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -26,9 +28,10 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     }
 
     // loader
-    Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
-    assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
-#elif defined(TURBO_PLATFORM_LINUX)
+    this->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
+    assert(this->vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
+
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -41,8 +44,8 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     }
 
     // loader
-    Turbo::Core::vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
-    assert(Turbo::Core::vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
+    this->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
+    assert(this->vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 #else
     // libvulkan.1.dylib//on macOS
     throw Turbo::Core::TException(Turbo::Core::TResult::UNIMPLEMENTED, "Turbo::Core::TVulkanLoader::TVulkanLoader", "Please implement this platform definition");
@@ -50,10 +53,10 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 
 //<loade global commands function>
 #if defined(VK_VERSION_1_0)
-    Turbo::Core::vkEnumerateInstanceVersion = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
-    Turbo::Core::vkCreateInstance = this->Load<TLoaderType::INSTANCE, PFN_vkCreateInstance>(VK_NULL_HANDLE, "vkCreateInstance");
-    Turbo::Core::vkEnumerateInstanceExtensionProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceExtensionProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties");
-    Turbo::Core::vkEnumerateInstanceLayerProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceLayerProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceLayerProperties");
+    this->vkEnumerateInstanceVersion = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceVersion>(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+    this->vkCreateInstance = this->Load<TLoaderType::INSTANCE, PFN_vkCreateInstance>(VK_NULL_HANDLE, "vkCreateInstance");
+    this->vkEnumerateInstanceExtensionProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceExtensionProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties");
+    this->vkEnumerateInstanceLayerProperties = this->Load<TLoaderType::INSTANCE, PFN_vkEnumerateInstanceLayerProperties>(VK_NULL_HANDLE, "vkEnumerateInstanceLayerProperties");
 #endif
 
 #if defined(VK_VERSION_1_1)
@@ -92,7 +95,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         return TVersion(0, 0, 0, 0);
     }
     PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -114,7 +117,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         {
             FreeLibrary(library);
         }
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
         if (library)
         {
             dlclose(library);
@@ -190,6 +193,18 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
     vk_destroy_instance(vk_instance, nullptr);
     uinstall_vulkan_lib();
     return TVersion(1, 0, 0, 0);
+}
+
+Turbo::Core::TGlobalDriver Turbo::Core::TVulkanLoader::LoadGlobalDriver()
+{
+    Turbo::Core::TGlobalDriver global_driver = {};
+    global_driver.vkGetInstanceProcAddr = this->vkGetInstanceProcAddr;
+    global_driver.vkEnumerateInstanceVersion = this->vkEnumerateInstanceVersion;
+    global_driver.vkCreateInstance = this->vkCreateInstance;
+    global_driver.vkEnumerateInstanceExtensionProperties = this->vkEnumerateInstanceExtensionProperties;
+    global_driver.vkEnumerateInstanceLayerProperties = this->vkEnumerateInstanceLayerProperties;
+
+    return global_driver;
 }
 
 Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TInstance *instance)
