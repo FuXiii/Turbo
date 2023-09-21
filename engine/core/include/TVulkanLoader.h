@@ -11,12 +11,22 @@ namespace Turbo
 namespace Core
 {
 #if defined(VK_VERSION_1_0)
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
-extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
+/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
+/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
+/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance;
+/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
+/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
 #endif
+
+struct TGlobalFunctionTable
+{
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion = nullptr;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance = nullptr;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties = nullptr;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = nullptr;
+};
+using TGlobalDriver = TGlobalFunctionTable;
 
 struct TInstanceFunctionTable
 {
@@ -334,6 +344,12 @@ class TVulkanLoader : public TObject
         DEVICE
     };
 
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
+    VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
+
   private:
     TVulkanLoader();
     ~TVulkanLoader();
@@ -359,6 +375,7 @@ class TVulkanLoader : public TObject
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr);
 
+    TGlobalDriver LoadGlobalDriver();
     TInstanceDriver LoadInstanceDriver(TInstance *instance);
     TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice);
     TDeviceDriver LoadDeviceDriver(TDevice *device);
@@ -376,7 +393,8 @@ Function Turbo::Core::TVulkanLoader::Load(void *context, const char *name, PFN_v
     switch (type)
     {
     case TLoaderType::INSTANCE: {
-        result = (Function)Turbo::Core::vkGetInstanceProcAddr((VkInstance)context, name);
+        // result = (Function)Turbo::Core::vkGetInstanceProcAddr((VkInstance)context, name);
+        result = (Function)this->vkGetInstanceProcAddr((VkInstance)context, name);
     }
     break;
     case TLoaderType::DEVICE: {

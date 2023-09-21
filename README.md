@@ -117,6 +117,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
       >[Vulkan Loader 文档有这么一句：](https://github.com/KhronosGroup/Vulkan-Loader/blob/master/docs/LoaderApplicationInterface.md)
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
+
+    - 2023/9/21 添加了`TCORE_SHARED_LIBS`的`CMake`选项。用于配置是否输出`TCore`的动态库。默认情况下为`OFF`，也就是输出静态库，如果想输出动态库请设置为`ON`。
+
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
     2. 请安装`python`。第三方库很多`CMake`使用`Python`脚本运行，安装完后请确保`Python`的`{Python的安装目录}/Python{版本号}/`目录和`{Python的安装目录}/Python{版本号}/Scripts`目录加入到了环境变量中
@@ -132,6 +135,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
         //2022/7/30 关于解决Turbo核心库的依赖库问题解决，核心库对于VulkanMemoryAllocator使用动态加载Vulkan API方式，这也是Turbo引擎加载Vulkan API的方式
         VMA_STATIC_VULKAN_FUNCTIONS=OFF
         VMA_DYNAMIC_VULKAN_FUNCTIONS=ON
+        
+        TCORE_SHARED_LIBS=ON //2023/9/21 Turbo的核心库输出为动态库，如果想输出为静态库请设置为OFF
         ```
 
   *注：如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
@@ -3590,3 +3595,22 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `engine\core\include`下`TCore.h`新增对于`VK_USE_PLATFORM_OHOS`或`OHOS_PLATFORM`的开源鸿蒙系统的`TURBO_PLATFORM_OPEN_HARMONY`宏定义的。
   >* `engine\core\include`下`TCore.h`新增对于`vulkan_ohos.h`的开源鸿蒙系统的头文件加入。
   >* `engine\core\src`下`TVulkanLoader.cpp`新增对于的开源鸿蒙系统`TURBO_PLATFORM_OPEN_HARMONY`宏适配。
+
+* 2023/9/21 设计架构
+  >
+  >* `engine\core\include`下`TVulkanLoader.h`将外部全局变量`PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr`移动到`TVulkanLoader`类中作为成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`将外部全局变量`PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion`移动到`TVulkanLoader`类中作为成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`将外部全局变量`PFN_vkCreateInstance vkCreateInstance`移动到`TVulkanLoader`类中作为成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`将外部全局变量`PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties`移动到`TVulkanLoader`类中作为成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`将外部全局变量`PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties`移动到`TVulkanLoader`类中作为成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`中的`TVulkanLoader`类`Turbo::Core::TVulkanLoader::Load`使用相应的成员变量获取函数。
+  >* `engine\core\src`下`TVulkanLoader.cpp`中的`TVulkanLoader`类构造函数获取初始化相应的成员变量。
+  >* `engine\core\include`下`TVulkanLoader.h`增加`struct TGlobalFunctionTable`结构体，用于将`Vulkan`全局函数打包。
+  >* `engine\core\include`下`TVulkanLoader.h`增加`TGlobalDriver`重命名`TGlobalFunctionTable`。
+  >* `engine\core`下`TVulkanLoader`类增加`TGlobalDriver LoadGlobalDriver()`成员函数，并实现。
+  >* `engine\core`下`TVmaAllocator`类的构造函数中使用`TVulkanLoader`获取`vkGetInstanceProcAddr`接口。
+  >* `engine\core`下`TExtensionInfo`类的`GetInstanceExtensionCount`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkEnumerateInstanceExtensionProperties`接口。
+  >* `engine\core`下`TExtensionInfo`类的`GetInstanceExtensions`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkEnumerateInstanceExtensionProperties`接口。
+  >* `engine\core`下`TInstance`类的`InternalCreate`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkCreateInstance`接口。
+  >* `engine\core`下`TLayerInfo`类的`GetInstanceLayerCount`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkEnumerateInstanceLayerProperties`接口。
+  >* `engine\core`下`CMakeLists.txt`中增加`TCORE_SHARED_LIBS`选项，用于编译输出`TCore`的动态库。

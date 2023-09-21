@@ -17,11 +17,11 @@ size_t Turbo::Core::TExtensionInfo::GetInstanceExtensionCount(TLayerInfo *layer)
     {
         if (layer == nullptr || (layer != nullptr && layer->GetName().empty()))
         {
-            result = Turbo::Core::vkEnumerateInstanceExtensionProperties(nullptr, &layer_extension_count, nullptr);
+            result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceExtensionProperties(nullptr, &layer_extension_count, nullptr);
         }
         else
         {
-            result = Turbo::Core::vkEnumerateInstanceExtensionProperties(layer->GetName().c_str(), &layer_extension_count, nullptr);
+            result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceExtensionProperties(layer->GetName().c_str(), &layer_extension_count, nullptr);
         }
 
         if (result == VkResult::VK_SUCCESS)
@@ -51,11 +51,11 @@ std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TExtensionInfo::GetInstanc
 
             if (layer == nullptr || (layer != nullptr && layer->GetName().empty()))
             {
-                result = Turbo::Core::vkEnumerateInstanceExtensionProperties(nullptr, &layer_extension_count, extension_propertiess.data());
+                result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceExtensionProperties(nullptr, &layer_extension_count, extension_propertiess.data());
             }
             else
             {
-                result = Turbo::Core::vkEnumerateInstanceExtensionProperties(layer->GetName().c_str(), &layer_extension_count, extension_propertiess.data());
+                result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkEnumerateInstanceExtensionProperties(layer->GetName().c_str(), &layer_extension_count, extension_propertiess.data());
             }
 
             if (result == VkResult::VK_SUCCESS)

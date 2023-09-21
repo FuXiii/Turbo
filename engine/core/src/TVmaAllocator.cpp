@@ -18,7 +18,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     const TDeviceDriver *driver = this->device->GetDeviceDriver();
 
     VmaVulkanFunctions vulkanFunctions = {};
-    vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::vkGetInstanceProcAddr;
+    vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
 
     VmaAllocatorCreateFlags vma_allocator_create_flags = 0;

@@ -316,7 +316,7 @@ void Turbo::Core::TInstance::InternalCreate()
     instance_create_info.ppEnabledExtensionNames = enable_extension_names.data();
 
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    VkResult result = Turbo::Core::vkCreateInstance(&instance_create_info, allocator, &this->vkInstance);
+    VkResult result = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkCreateInstance(&instance_create_info, allocator, &this->vkInstance);
     if (result != VK_SUCCESS)
     {
         throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::InternalCreate::vkCreateInstance");
