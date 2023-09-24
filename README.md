@@ -3625,3 +3625,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core/src`下实现`TSurface`类中`TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)`构造函数。适配`Android`平台。
   >* `./engine/core/src`下更新`TSurface`类中`InternalCreate`函数。适配`Android`平台。
   >* `./engine/core/src`下更新`TSurface`类中`GetSurfaceSupportQueueFamilys()`函数。适配`Android`平台。
+  >* `./engine/core/include`下更新`TPlatform.h`中的`TPlatformType`平台枚举值声明。会与安卓平台特定的``ADNROID``宏冲突。
+  >* `./engine/core/src`下更新`TVulkanLoader.cpp`中的`TVulkanLoader::GetVulkanVersion()`函数。适配`Android`平台。
+  >* `./engine/core/src`下更新`TPlatform.cpp`中修正`return32;`为`return 32;`的`Bug`。

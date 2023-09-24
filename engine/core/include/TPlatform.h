@@ -26,11 +26,11 @@ namespace Turbo
 		typedef enum class TPlatformType
 		{
 			UNDEFINED = 0,
-			WINDOWS,
-			APPLE,
-			UNIX,
-			LINUX,
-			ANDROID
+			TWINDOWS,
+			TAPPLE,
+			TUNIX,
+			TLINUX,
+			TANDROID
 		}TPlatformTypeEnum;
 
 		class TPlatform :public TObject
