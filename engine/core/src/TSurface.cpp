@@ -112,7 +112,26 @@ void Turbo::Extension::TSurface::InternalCreate()
                 throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
             }
 #elif defined(__APPLE__)
-#elif defined(ANDROID) || defined(__ANDROID__)
+#elif defined(TURBO_PLATFORM_ANDROID)
+            if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_ANDROID_SURFACE))
+            {
+                VkAndroidSurfaceCreateInfoKHR vk_android_surface_create_info_khr = {};
+                vk_android_surface_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+                vk_android_surface_create_info_khr.pNext = nullptr;
+                vk_android_surface_create_info_khr.flags = 0;
+                vk_android_surface_create_info_khr.window = this->nativeWindow;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = this->vkCreateAndroidSurfaceKHR(instance->GetVkInstance(), &vk_android_surface_create_info_khr, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateAndroidSurfaceKHR");
+                }
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
+            }
 #elif defined(TURBO_PLATFORM_LINUX)
             if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
             {
@@ -244,8 +263,45 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
 Turbo::Extension::TSurface::TSurface(...)
 {
 }
-#elif defined(ANDROID) || defined(__ANDROID__)
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window){...}
+#elif defined(TURBO_PLATFORM_ANDROID)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)
+{
+    if (device != nullptr)
+    {
+        this->isExternalHandle = false;
+        this->device = device;
+        this->nativeWindow = window;
+
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_ANDROID_SURFACE))
+        {
+            this->vkCreateAndroidSurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateAndroidSurfaceKHR>(instance, "vkCreateAndroidSurfaceKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_android_surface extension");
+        }
+
+        if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
+        {
+            this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+            this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+            this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+            this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+            this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_surface extension");
+        }
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
+    }
+}
 #elif defined(TURBO_PLATFORM_LINUX)
 Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)
 {
@@ -442,7 +498,8 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                         throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
                     }
 #elif defined(__APPLE__)
-#elif defined(ANDROID) || defined(__ANDROID__)
+#elif defined(TURBO_PLATFORM_ANDROID)
+                    this->supportQueueFamilys.push_back(queue_family);
 #elif defined(TURBO_PLATFORM_LINUX)
                     if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
                     {

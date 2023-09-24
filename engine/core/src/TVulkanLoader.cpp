@@ -1,6 +1,6 @@
 #include "TVulkanLoader.h"
 
-#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
 #include <dlfcn.h>
 #elif defined(TURBO_PLATFORM_WINDOWS)
 #include <Windows.h>
@@ -21,7 +21,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     this->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
     assert(this->vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 
-#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
