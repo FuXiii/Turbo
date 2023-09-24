@@ -6,16 +6,6 @@
 #include <Windows.h>
 #endif
 
-// template<> PFN_vkDestroySurfaceKHR Turbo::Core::TVulkanLoader::Load<Turbo::Core::TVulkanLoader::TLoaderType::INSTANCE, PFN_vkDestroySurfaceKHR>(void *context, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr);
-
-#if defined(VK_VERSION_1_0)
-// PFN_vkGetInstanceProcAddr Turbo::Core::vkGetInstanceProcAddr = nullptr;
-// PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
-// PFN_vkCreateInstance Turbo::Core::vkCreateInstance = nullptr;
-// PFN_vkEnumerateInstanceExtensionProperties Turbo::Core::vkEnumerateInstanceExtensionProperties = nullptr;
-// PFN_vkEnumerateInstanceLayerProperties Turbo::Core::vkEnumerateInstanceLayerProperties = nullptr;
-#endif
-
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
 
 Turbo::Core::TVulkanLoader::TVulkanLoader()
