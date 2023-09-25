@@ -16,8 +16,8 @@ Turbo::Core::TException::TException(TResult result, const std::string &message, 
         std::cout << "[Error]:" << this->message << "{" << this->tip << "}" << std::endl;
     }
 
-    std::string what = std::string("[Error]:") + std::string("[") + Turbo::Core::TResultToString(this->result) + std::string("]") + this->message + std::string("{") + this->tip + std::string("}");
-    exception(what.c_str());
+    // exception(what.c_str());
+    this->whatStr = std::string("[Error]:") + std::string("[") + Turbo::Core::TResultToString(this->result) + std::string("]") + this->message + std::string("{") + this->tip + std::string("}");
 }
 
 Turbo::Core::TException::~TException()
@@ -40,8 +40,7 @@ std::string Turbo::Core::TException::ToString()
     return result;
 }
 
-// char const *Turbo::Core::TException::what() const throw()
-// {
-
-//     return "Undefined";
-// }
+char const *Turbo::Core::TException::what() const throw()
+{
+    return this->whatStr.c_str();
+}

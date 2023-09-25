@@ -3636,3 +3636,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `engine/core`下更新`TException`。统一错误消息格式，使用标准异常消息输出。
   >* `engine/core`下更新`TCore`下增加`std::string TResultToString(TResult result)`函数。用于帮助将结果枚举转成字符串。
   >* `engine/core`下更新`TSurface`下`InternalCreate()`。将`VkAndroidSurfaceCreateInfoKHR`下的`sType`设置为`VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR`，之前为`VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR`是个`Bug`
+  >* `engine/core`下更新`TException`，增加一个`std::string whatStr`成员变量。移除使用`exception(char const* const _Message)`构造函数（该函数非标准函数）。
