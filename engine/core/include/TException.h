@@ -26,7 +26,7 @@ class TException : public std::exception, public Turbo::Core::TObject
     std::string GetMessage();
 
     virtual std::string ToString() override;
-    virtual const char *what() const throw() override;
+    //virtual const char *what() const throw() override;
 };
 } // namespace Core
 } // namespace Turbo

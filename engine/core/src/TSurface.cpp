@@ -116,7 +116,7 @@ void Turbo::Extension::TSurface::InternalCreate()
             if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_ANDROID_SURFACE))
             {
                 VkAndroidSurfaceCreateInfoKHR vk_android_surface_create_info_khr = {};
-                vk_android_surface_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+                vk_android_surface_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
                 vk_android_surface_create_info_khr.pNext = nullptr;
                 vk_android_surface_create_info_khr.flags = 0;
                 vk_android_surface_create_info_khr.window = this->nativeWindow;

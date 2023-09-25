@@ -3628,3 +3628,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core/include`下更新`TPlatform.h`中的`TPlatformType`平台枚举值声明。会与安卓平台特定的``ADNROID``宏冲突。
   >* `./engine/core/src`下更新`TVulkanLoader.cpp`中的`TVulkanLoader::GetVulkanVersion()`函数。适配`Android`平台。
   >* `./engine/core/src`下更新`TPlatform.cpp`中修正`return32;`为`return 32;`的`Bug`。
+
+* 2023/9/25 设计架构
+  >
+  >* `engine/core`下更新`TSwapchain`的构造函数。修改之前强制判断并使用`TCompositeAlphaBits::ALPHA_OPAQUE_BIT`透明配置，该配置在`Android`平台上不适用。在`Android`平台上会返回`TCompositeAlphaBits::ALPHA_INHERIT_BIT`，也就是透明度不由`Vulkan`控制，而是`Android`平台自己控制。
+  >* `engine/core`下更新`TSwapchain`的`InternalCreate()`函数。增加对于`TCompositeAlphaBits::ALPHA_OPAQUE_BIT`的判断，防止在`Android`平台上导致不应该的异常抛出。
+  >* `engine/core`下更新`TException`。统一错误消息格式，使用标准异常消息输出。
+  >* `engine/core`下更新`TCore`下增加`std::string TResultToString(TResult result)`函数。用于帮助将结果枚举转成字符串。
+  >* `engine/core`下更新`TSurface`下`InternalCreate()`。将`VkAndroidSurfaceCreateInfoKHR`下的`sType`设置为`VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR`，之前为`VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR`是个`Bug`
