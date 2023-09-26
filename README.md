@@ -12,12 +12,12 @@ Turbo是渲染引擎
 
 ## Platform
 
-![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux)  
-![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
-![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
-![Platform Android](https://img.shields.io/badge/Android-Future-lightgrey?logo=Android)  
-![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
-![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer)  
+![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux&logoColor=f5f5f5)  
+![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows&logoColor=f5f5f5)  
+![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple&logoColor=f5f5f5)  
+![Platform Android](https://img.shields.io/badge/Android-Support-brightgreen?logo=Android&logoColor=f5f5f5)  
+![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos&logoColor=f5f5f5)  
+![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer&logoColor=f5f5f5)  
 
 ## Version
 
@@ -118,7 +118,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
       In previous versions of the loader, it was possible to statically link the loader. **This was removed and is no longer possible**. The decision to remove static linking was because of changes to the driver which made older applications that statically linked unable to find newer drivers.
   * `Turbo`的核心可以单独编译，编译相关的`CMakeLists.txt`位于`./engine/core/CMakeLists.txt`。将会输出名为`TCore`的库文件。
 
-    - 2023/9/21 添加了`TCORE_SHARED_LIBS`的`CMake`选项。用于配置是否输出`TCore`的动态库。默认情况下为`OFF`，也就是输出静态库，如果想输出动态库请设置为`ON`。
+    * 2023/9/21 添加了`TCORE_SHARED_LIBS`的`CMake`选项。用于配置是否输出`TCore`的动态库。默认情况下为`OFF`，也就是输出静态库，如果想输出动态库请设置为`ON`。
 
   * 如果您想直接编译`Turbo`
     1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录，`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下
@@ -3614,3 +3614,32 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `engine\core`下`TInstance`类的`InternalCreate`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkCreateInstance`接口。
   >* `engine\core`下`TLayerInfo`类的`GetInstanceLayerCount`函数中使用`TVulkanLoader`中的`LoadGlobalDriver`接口获取`vkEnumerateInstanceLayerProperties`接口。
   >* `engine\core`下`CMakeLists.txt`中增加`TCORE_SHARED_LIBS`选项，用于编译输出`TCore`的动态库。
+
+* 2023/9/24 设计架构
+  >
+  >* `./samples`下增加`AndroidVulkanTest`，用于研究`Adnroid`的`Vulkan`，并尝试将`Turbo`适配到`Android`平台。
+  >* `./engine/core/src`下`TVulkanLoader.cpp`增加对于`TURBO_PLATFORM_ANDROID`宏适配，用于适配到`Android`平台。
+  >* `./engine/core`下`TSurface`增加对于`TURBO_PLATFORM_ANDROID`宏适配，用于适配到`Android`平台。
+  >* `./engine/core`下`TSurface`类中，适配`Android`平台，增加`ANativeWindow *nativeWindow`成员变量。
+  >* `./engine/core`下`TSurface`类中，适配`Android`平台，增加`PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR`成员变量。
+  >* `./engine/core/src`下实现`TSurface`类中`TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)`构造函数。适配`Android`平台。
+  >* `./engine/core/src`下更新`TSurface`类中`InternalCreate`函数。适配`Android`平台。
+  >* `./engine/core/src`下更新`TSurface`类中`GetSurfaceSupportQueueFamilys()`函数。适配`Android`平台。
+  >* `./engine/core/include`下更新`TPlatform.h`中的`TPlatformType`平台枚举值声明。会与安卓平台特定的``ADNROID``宏冲突。
+  >* `./engine/core/src`下更新`TVulkanLoader.cpp`中的`TVulkanLoader::GetVulkanVersion()`函数。适配`Android`平台。
+  >* `./engine/core/src`下更新`TPlatform.cpp`中修正`return32;`为`return 32;`的`Bug`。
+
+* 2023/9/25 设计架构
+  >
+  >* `engine/core`下更新`TSwapchain`的构造函数。修改之前强制判断并使用`TCompositeAlphaBits::ALPHA_OPAQUE_BIT`透明配置，该配置在`Android`平台上不适用。在`Android`平台上会返回`TCompositeAlphaBits::ALPHA_INHERIT_BIT`，也就是透明度不由`Vulkan`控制，而是`Android`平台自己控制。
+  >* `engine/core`下更新`TSwapchain`的`InternalCreate()`函数。增加对于`TCompositeAlphaBits::ALPHA_OPAQUE_BIT`的判断，防止在`Android`平台上导致不应该的异常抛出。
+  >* `engine/core`下更新`TException`。统一错误消息格式，使用标准异常消息输出。
+  >* `engine/core`下更新`TCore`下增加`std::string TResultToString(TResult result)`函数。用于帮助将结果枚举转成字符串。
+  >* `engine/core`下更新`TSurface`下`InternalCreate()`。将`VkAndroidSurfaceCreateInfoKHR`下的`sType`设置为`VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR`，之前为`VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR`是个`Bug`
+  >* `engine/core`下更新`TException`，增加一个`std::string whatStr`成员变量。移除使用`exception(char const* const _Message)`构造函数（该函数非标准函数）。
+
+* 2023/9/26 设计架构
+  >
+  >* `engine/core`下更新`TException`，增加`std::string GetTip()`成员函数。移用于获取提示信息。
+  >* `engine/core`下更新`TVersion`的版本大小比较算法，之前的比较有逻辑`Bug`。
+  >* `engine/core`下增加`AndroidPureHelloTriangle`文件夹，用于存放`Turbo`在`Android`上绘制三角形的示例程序。

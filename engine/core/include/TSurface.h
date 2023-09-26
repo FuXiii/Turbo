@@ -144,13 +144,16 @@ class TSurface : public Turbo::Core::TVulkanHandle
     std::vector<Turbo::Extension::TPresentMode> presentModes;
 
 #if defined(TURBO_PLATFORM_WINDOWS)
-    HINSTANCE hinstance;
-    HWND hwnd;
+    HINSTANCE hinstance = nullptr;
+    HWND hwnd = nullptr;
 
     VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = nullptr;
     VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR vkGetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
 #elif defined(__APPLE__)
-#elif defined(ANDROID) || defined(__ANDROID__)
+#elif defined(TURBO_PLATFORM_ANDROID)
+    ANativeWindow *nativeWindow;
+
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR = nullptr;
 #elif defined(TURBO_PLATFORM_LINUX)
     // wayland
     struct wl_display *waylandDisplay = nullptr;
@@ -197,8 +200,8 @@ class TSurface : public Turbo::Core::TVulkanHandle
     explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
     explicit TSurface(...);
-#elif defined(ANDROID) || defined(__ANDROID__)
-    explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window);
+#elif defined(TURBO_PLATFORM_ANDROID)
+    explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
 #elif defined(TURBO_PLATFORM_LINUX)
     explicit TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface);
     explicit TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window);

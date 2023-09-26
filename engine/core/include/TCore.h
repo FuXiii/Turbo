@@ -89,6 +89,8 @@ typedef enum class TResult : int32_t
     MISMATCH = 4
 } TResultEnum;
 
+std::string TResultToString(TResult result);
+
 typedef enum TMemoryFlagsBits
 {
     DEDICATED_MEMORY = 0x00000001,

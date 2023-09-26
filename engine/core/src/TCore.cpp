@@ -129,3 +129,103 @@ Turbo::Core::TResult Turbo::Core::VkResultToTResult(VkResult vkResult)
 
     return result;
 }
+
+std::string Turbo::Core::TResultToString(Turbo::Core::TResult result)
+{
+    switch (result)
+    {
+    case Turbo::Core::TResult::UNIMPLEMENTED: {
+        return "UNIMPLEMENTED";
+    }
+    break;
+    case Turbo::Core::TResult::SHADER_LINK_FAILED: {
+        return "SHADER_LINK_FAILED";
+    }
+    break;
+    case Turbo::Core::TResult::SHADER_PARSE_FAILED: {
+        return "SHADER_PARSE_FAILED";
+    }
+    break;
+    case Turbo::Core::TResult::RESOURCE_STARVATION: {
+        return "RESOURCE_STARVATION";
+    }
+    break;
+    case Turbo::Core::TResult::MEMORY_MAP_FAILED: {
+        return "MEMORY_MAP_FAILED";
+    }
+    break;
+    case Turbo::Core::TResult::OUT_OF_RANGE: {
+        return "OUT_OF_RANGE";
+    }
+    break;
+    case Turbo::Core::TResult::INVALID_PARAMETER: {
+        return "INVALID_PARAMETER";
+    }
+    break;
+    case Turbo::Core::TResult::INVALID_EXTERNAL_HANDLE: {
+        return "INVALID_EXTERNAL_HANDLE";
+    }
+    break;
+    case Turbo::Core::TResult::DEVICE_LOST: {
+        return "DEVICE_LOST";
+    }
+    break;
+    case Turbo::Core::TResult::TOO_MANY_OBJECTS: {
+        return "TOO_MANY_OBJECTS";
+    }
+    break;
+    case Turbo::Core::TResult::EXTENSION_NOT_PRESENT: {
+        return "EXTENSION_NOT_PRESENT";
+    }
+    break;
+    case Turbo::Core::TResult::LAYER_NOT_PRESENT: {
+        return "LAYER_NOT_PRESENT";
+    }
+    break;
+    case Turbo::Core::TResult::INITIALIZATION_FAILED: {
+        return "INITIALIZATION_FAILED";
+    }
+    break;
+    case Turbo::Core::TResult::OUT_OF_DEVICE_MEMORY: {
+        return "OUT_OF_DEVICE_MEMORY";
+    }
+    break;
+    case Turbo::Core::TResult::OUT_OF_HOST_MEMORY: {
+        return "OUT_OF_HOST_MEMORY";
+    }
+    break;
+    case Turbo::Core::TResult::UNSUPPORTED: {
+        return "UNSUPPORTED";
+    }
+    break;
+    case Turbo::Core::TResult::FAIL: {
+        return "FAIL";
+    }
+    break;
+    case Turbo::Core::TResult::UNDEFINED: {
+        return "UNDEFINED ";
+    }
+    break;
+    case Turbo::Core::TResult::SUCCESS: {
+        return "SUCCESS ";
+    }
+    break;
+    case Turbo::Core::TResult::TIMEOUT: {
+        return "TIMEOUT ";
+    }
+    break;
+    case Turbo::Core::TResult::NOT_READY: {
+        return "NOT_READY ";
+    }
+    break;
+    case Turbo::Core::TResult::MISMATCH: {
+        return "MISMATCH ";
+    }
+    break;
+    default:
+        return "Undefined";
+        break;
+    }
+
+    return "Undefined";
+}

@@ -73,7 +73,10 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         TCompositeAlphas surface_support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
         if ((surface_support_composite_alphas & this->compositeAlpha) != this->compositeAlpha)
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the composite alpha of swapchain can not compatible with surface");
+            if ((this->compositeAlpha & TCompositeAlphaBits::ALPHA_OPAQUE_BIT) != TCompositeAlphaBits::ALPHA_OPAQUE_BIT)
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::InternalCreate", "the composite alpha of swapchain can not compatible with surface");
+            }
         }
 
         // presentMode
@@ -228,13 +231,21 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         this->usages = usages;
         this->transform = surface->GetCurrentTransform();
 
-        TCompositeAlphas support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
-        if (!this->surface->IsSupportCompositeAlphaOpaque())
+        if (this->surface->IsSupportCompositeAlphaInherit())
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_INHERIT_BIT;
         }
 
-        this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        if (this->surface->IsSupportCompositeAlphaOpaque())
+        {
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        }
+
+        if (this->compositeAlpha == 0)
+        {
+            // throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        }
 
         if (this->surface->IsSupportPresentModeFifo())
         {
@@ -358,13 +369,21 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
         this->usages = usages;
         this->transform = surface->GetCurrentTransform();
 
-        TCompositeAlphas support_composite_alphas = this->surface->GetSupportedCompositeAlpha();
-        if (!this->surface->IsSupportCompositeAlphaOpaque())
+        if (this->surface->IsSupportCompositeAlphaInherit())
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_INHERIT_BIT;
         }
 
-        this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        if (this->surface->IsSupportCompositeAlphaOpaque())
+        {
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        }
+
+        if (this->compositeAlpha == 0)
+        {
+            // throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSwapchain::TSwapchain", "this surface unsupport CompositeAlphaOpaque");
+            this->compositeAlpha = TCompositeAlphaBits::ALPHA_OPAQUE_BIT;
+        }
 
         if (this->surface->IsSupportPresentModeFifo())
         {
@@ -410,7 +429,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
         {
             throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSwapchain::TSwapchain", "Please enable the VK_KHR_swapchain extension");
         }
-        
+
         this->surface = oldSwapchain->GetSurface();
         this->minImageCount = oldSwapchain->GetMinImageCount();
         this->format = oldSwapchain->GetFormat();

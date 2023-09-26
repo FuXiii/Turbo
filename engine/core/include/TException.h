@@ -4,7 +4,6 @@
 #include "TObject.h"
 #include <exception>
 
-
 namespace Turbo
 {
 namespace Core
@@ -16,6 +15,8 @@ class TException : public std::exception, public Turbo::Core::TObject
     std::string message;
     std::string tip;
 
+    std::string whatStr;
+
   public:
     TException();
     TException(TResult result, const std::string &message = "", const std::string &tip = "");
@@ -24,6 +25,7 @@ class TException : public std::exception, public Turbo::Core::TObject
   public:
     TResult GetResult();
     std::string GetMessage();
+    std::string GetTip();
 
     virtual std::string ToString() override;
     virtual const char *what() const throw() override;

@@ -10,14 +10,6 @@ namespace Turbo
 {
 namespace Core
 {
-#if defined(VK_VERSION_1_0)
-/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
-/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
-/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkCreateInstance vkCreateInstance;
-/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
-/*TURBO_EXPORT*/ // extern VULKAN_GLOBAL_API VULKAN_CORE PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
-#endif
-
 struct TGlobalFunctionTable
 {
     VULKAN_GLOBAL_API VULKAN_CORE PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;

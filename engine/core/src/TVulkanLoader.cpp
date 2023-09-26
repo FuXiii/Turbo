@@ -1,19 +1,9 @@
 #include "TVulkanLoader.h"
 
-#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#if defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
 #include <dlfcn.h>
 #elif defined(TURBO_PLATFORM_WINDOWS)
 #include <Windows.h>
-#endif
-
-// template<> PFN_vkDestroySurfaceKHR Turbo::Core::TVulkanLoader::Load<Turbo::Core::TVulkanLoader::TLoaderType::INSTANCE, PFN_vkDestroySurfaceKHR>(void *context, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr);
-
-#if defined(VK_VERSION_1_0)
-// PFN_vkGetInstanceProcAddr Turbo::Core::vkGetInstanceProcAddr = nullptr;
-// PFN_vkEnumerateInstanceVersion Turbo::Core::vkEnumerateInstanceVersion = nullptr;
-// PFN_vkCreateInstance Turbo::Core::vkCreateInstance = nullptr;
-// PFN_vkEnumerateInstanceExtensionProperties Turbo::Core::vkEnumerateInstanceExtensionProperties = nullptr;
-// PFN_vkEnumerateInstanceLayerProperties Turbo::Core::vkEnumerateInstanceLayerProperties = nullptr;
 #endif
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
@@ -31,7 +21,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
     this->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
     assert(this->vkGetInstanceProcAddr && "Turbo::Core::vkGetInstanceProcAddr");
 
-#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -95,7 +85,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         return TVersion(0, 0, 0, 0);
     }
     PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
-#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
     void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
     if (!library)
     {
@@ -117,7 +107,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         {
             FreeLibrary(library);
         }
-#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY) || defined(TURBO_PLATFORM_ANDROID)
         if (library)
         {
             dlclose(library);
