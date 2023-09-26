@@ -15,7 +15,7 @@ Turbo是渲染引擎
 ![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux)  
 ![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
 ![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
-![Platform Android](https://img.shields.io/badge/Android-Future-lightgrey?logo=Android)  
+![Platform Android](https://img.shields.io/badge/Android-Support-brightgreen?logo=Android)  
 ![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
 ![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer)  
 
