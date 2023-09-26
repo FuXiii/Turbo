@@ -16,7 +16,6 @@ Turbo::Core::TException::TException(TResult result, const std::string &message, 
         std::cout << "[Error]:" << this->message << "{" << this->tip << "}" << std::endl;
     }
 
-    // exception(what.c_str());
     this->whatStr = std::string("[Error]:") + std::string("[") + Turbo::Core::TResultToString(this->result) + std::string("]") + this->message + std::string("{") + this->tip + std::string("}");
 }
 
@@ -32,6 +31,11 @@ Turbo::Core::TResult Turbo::Core::TException::GetResult()
 std::string Turbo::Core::TException::GetMessage()
 {
     return this->message;
+}
+
+std::string Turbo::Core::TException::GetTip()
+{
+    return this->tip;
 }
 
 std::string Turbo::Core::TException::ToString()

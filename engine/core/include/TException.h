@@ -15,7 +15,6 @@ class TException : public std::exception, public Turbo::Core::TObject
     std::string message;
     std::string tip;
 
-    // FIXME:: we need std:string to storage what() return const char*
     std::string whatStr;
 
   public:
@@ -26,6 +25,7 @@ class TException : public std::exception, public Turbo::Core::TObject
   public:
     TResult GetResult();
     std::string GetMessage();
+    std::string GetTip();
 
     virtual std::string ToString() override;
     virtual const char *what() const throw() override;
