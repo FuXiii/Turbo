@@ -12,12 +12,12 @@ Turbo是渲染引擎
 
 ## Platform
 
-![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux)  
-![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows)  
-![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple)  
-![Platform Android](https://img.shields.io/badge/Android-Support-brightgreen?logo=Android)  
-![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos)  
-![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer)  
+![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux&logoColor=f5f5f5)  
+![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows&logoColor=f5f5f5)  
+![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple&logoColor=f5f5f5)  
+![Platform Android](https://img.shields.io/badge/Android-Support-brightgreen?logo=Android&logoColor=f5f5f5)  
+![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos&logoColor=f5f5f5)  
+![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer&logoColor=f5f5f5)  
 
 ## Version
 
