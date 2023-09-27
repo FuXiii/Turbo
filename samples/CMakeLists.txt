@@ -321,3 +321,8 @@ add_executable(VulkanKHRRayTracingTestForMultiClosestHits ./VulkanKHRRayTracingT
 target_include_directories(VulkanKHRRayTracingTestForMultiClosestHits PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanKHRRayTracingTestForMultiClosestHits PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForMultiClosestHits PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForAnimationTLAS ./VulkanKHRRayTracingTestForAnimationTLAS.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForAnimationTLAS PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForAnimationTLAS PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForAnimationTLAS PUBLIC ${LIBS})

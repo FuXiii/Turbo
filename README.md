@@ -3643,3 +3643,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `engine/core`下更新`TException`，增加`std::string GetTip()`成员函数。移用于获取提示信息。
   >* `engine/core`下更新`TVersion`的版本大小比较算法，之前的比较有逻辑`Bug`。
   >* `engine/core`下增加`AndroidPureHelloTriangle`文件夹，用于存放`Turbo`在`Android`上绘制三角形的示例程序。
+
+* 2023/9/27 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForAnimationTLAS`示例。用于研究光追中顶层加速结构的更新。

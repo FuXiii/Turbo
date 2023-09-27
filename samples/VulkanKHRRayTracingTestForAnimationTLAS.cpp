@@ -604,6 +604,8 @@ int main()
     VkAccelerationStructureKHR top_level_acceleration_structure_khr = VK_NULL_HANDLE;
     Turbo::Core::TBuffer *instance_buffer = nullptr;
 
+    std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
+
     Turbo::Core::TBuffer *bottom_level_acceleration_structure_device_address_buffer = nullptr;
 
     {
@@ -1013,7 +1015,6 @@ int main()
 
         VkDeviceAddress bottom_level_acceleration_structure_device_address = device->GetDeviceDriver()->vkGetAccelerationStructureDeviceAddressKHR(vk_device, &bottom_level_acceleration_structure_device_address_info_khr);
 
-        std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
         {
             // random instance transform matrix
             std::random_device seed;
@@ -2065,7 +2066,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForMultiClosestHits");
+                ImGui::Begin("VulkanKHRRayTracingTestForAnimationTLAS");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
@@ -2085,6 +2086,31 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
+
+            // Update Instance
+            {
+
+                // random instance transform matrix
+                std::random_device seed;
+                std::mt19937 gen(seed());
+                std::normal_distribution<float> dis(1.0f, 1.0f);
+                std::normal_distribution<float> disn(0.05f, 0.05f);
+
+                for (VkAccelerationStructureInstanceKHR &acceleration_structure_instance_item : vk_acceleration_structure_instances)
+                {
+                    glm::mat4 instance_model = glm::mat4x3(1.0f);
+                    instance_model = glm::scale(instance_model, glm::vec3(std::abs(disn(gen))));
+                    instance_model = glm::rotate(instance_model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                    instance_model = glm::rotate(instance_model, glm::radians(dis(gen) * 180 / 3.1415926f), glm::vec3(dis(gen), dis(gen), dis(gen)));
+
+                    VkTransformMatrixKHR vk_transform_matrix = {};
+                    memcpy(&vk_transform_matrix, &instance_model, sizeof(VkTransformMatrixKHR));
+
+                    vk_transform_matrix.matrix[0][3] = dis(gen);
+                    vk_transform_matrix.matrix[1][3] = 2 + dis(gen);
+                    vk_transform_matrix.matrix[2][3] = dis(gen);
+                }
+            }
 
             // ray tracing commands
             {
