@@ -2171,7 +2171,7 @@ int main()
 
                 if (instance_buffer_device_address != 0)
                 {
-                    std::cout << "Successfully get instance_buffer VkBuffer device local address " << std::endl;
+                    //std::cout << "Successfully get instance_buffer VkBuffer device local address " << std::endl;
                 }
 
                 // Update Top Level Acceleration Structure
@@ -2212,9 +2212,9 @@ int main()
 
                 device->GetDeviceDriver()->vkGetAccelerationStructureBuildSizesKHR(device->GetVkDevice(), VkAccelerationStructureBuildTypeKHR::VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &top_level_acceleration_structure_build_geometry_info_khr, &instance_count, &top_level_acceleration_structure_build_sizes_info_khr);
 
-                std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.accelerationStructureSize = " << top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize << std::endl;
-                std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
-                std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.accelerationStructureSize = " << top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize << std::endl;
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
 
                 Turbo::Core::TBuffer *top_level_scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize);
 
@@ -2239,7 +2239,7 @@ int main()
 
                 if (top_level_scratch_buffer_device_address != 0)
                 {
-                    std::cout << "Successfully get top_level_scratch_buffer VkBuffer device local address " << std::endl;
+                    //std::cout << "Successfully get top_level_scratch_buffer VkBuffer device local address " << std::endl;
                 }
 
                 // Update Top Level Acceleration Structure
