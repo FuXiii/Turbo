@@ -105,6 +105,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TInterface> inputs;
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
+    std::vector<TStorageBufferDescriptor *> storageBufferDescriptors;
     std::vector<TCombinedImageSamplerDescriptor *> combinedImageSamplerDescriptors;
     std::vector<TSampledImageDescriptor *> sampledImageDescriptors;
     std::vector<TSamplerDescriptor *> samplerDescriptors;
@@ -137,6 +138,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::string &GetEntryPoint();
 
     const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors();
+    const std::vector<TStorageBufferDescriptor *> &GetStorageBufferDescriptors();
     const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors();
     const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors();
     const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();

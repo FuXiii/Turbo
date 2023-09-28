@@ -130,6 +130,14 @@ class TUniformBufferDescriptor : public TDescriptor
     uint32_t GetSize();
 };
 
+// Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+class TStorageBufferDescriptor : public TDescriptor
+{
+  public:
+    TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    ~TStorageBufferDescriptor();
+};
+
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
 class TCombinedImageSamplerDescriptor : public TDescriptor
 {

@@ -3647,3 +3647,17 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/9/27 设计架构
   >
   >* `./samples`下增加`VulkanKHRRayTracingTestForAnimationTLAS`示例。用于研究光追中顶层加速结构的更新。
+
+* 2023/9/28 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForAnimationBLAS`示例。用于研究光追中底层加速结构的更新。
+  >* `./asset/shaders`下增加`RayTracingKHRTestForAnimationBLAS.comp`计算着色器。用于研究光追中底层加速结构更新中使用计算管线更新顶点数据。
+  >* `./engine/core`下`TDescriptorSet`类中增加`void BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)`成员函数。用于简单绑定单个缓存。
+  >* `./engine/core`下`TPipelineDescriptorSet`类中增加`void BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)`成员函数。用于简单绑定单个缓存。
+  >* `./engine/core`下`TDescriptorSet`类中`BindData(..., std::vector<TBuffer *> &buffers)`中增加对`STORAGE_BUFFER`描述符类型判断。
+  >* 不支持`VK_DESCRIPTOR_TYPE_STORAGE_BUFFER`描述符类型（相关代码未实现）。需要填补这一部分空缺。
+  >* `./engine/core`下`TDescriptor.h`中增加`TStorageBufferDescriptor`类声明。用于表述`VK_DESCRIPTOR_TYPE_STORAGE_BUFFER`类型的描述符
+  >* `./engine/core`下`TShader`类中增加`std::vector<TStorageBufferDescriptor *> storageBufferDescriptors`成员变量。用于存储`VK_DESCRIPTOR_TYPE_STORAGE_BUFFER`类型的描述符。
+  >* `./engine/core`下`TShader`类析构中增加对`std::vector<TStorageBufferDescriptor *> storageBufferDescriptors`成员的内存释放。
+  >* `./engine/core`下`TShader`类中增加`const std::vector<TStorageBufferDescriptor *> &GetStorageBufferDescriptors()`成员函数。用于获取着色器中的对应描述符信息。
+  >* `./engine/core`下`TPipeline`类中`InternalCreate()`成员函数中增加对于`std::vector<TStorageBufferDescriptor *>`描述符的处理。

@@ -676,6 +676,30 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         spirv_cross::SPIRType type = glsl.get_type(type_id);
         spirv_cross::SPIRType::BaseType base_type = type.basetype;
+
+        Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
+
+        // set and binding
+        uint32_t set = glsl.get_decoration(id, spv::DecorationDescriptorSet);
+        uint32_t binding = glsl.get_decoration(id, spv::DecorationBinding);
+
+        // name
+        std::string name = storage_buffer_item.name;
+
+        // vector and matrices
+        uint32_t vec_size = type.vecsize; // size of vec
+        uint32_t colums = type.columns;   // 1 column means it's a vector.
+
+        // Arrary
+        size_t array_dimension = type.array.size(); // array dimension
+        uint32_t count = 1;
+        if (array_dimension > 0)
+        {
+            count = type.array[0]; // just for one dimension.
+        }
+
+        TStorageBufferDescriptor *storage_buffer_descriptor = new TStorageBufferDescriptor(this, descriptor_data_type, set, binding, count, name);
+        this->storageBufferDescriptors.push_back(storage_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &acceleration_structures_item : resources.acceleration_structures)
@@ -946,6 +970,12 @@ Turbo::Core::TShader::~TShader()
     }
     this->uniformBufferDescriptors.clear();
 
+    for (TStorageBufferDescriptor *storage_buffer_descriptor_item : this->storageBufferDescriptors)
+    {
+        delete storage_buffer_descriptor_item;
+    }
+    this->storageBufferDescriptors.clear();
+
     for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : this->combinedImageSamplerDescriptors)
     {
         delete combined_image_sampler_descriptor_item;
@@ -1082,6 +1112,11 @@ const std::string &Turbo::Core::TShader::GetEntryPoint()
 const std::vector<Turbo::Core::TUniformBufferDescriptor *> &Turbo::Core::TShader::GetUniformBufferDescriptors()
 {
     return this->uniformBufferDescriptors;
+}
+
+const std::vector<Turbo::Core::TStorageBufferDescriptor *> &Turbo::Core::TShader::GetStorageBufferDescriptors()
+{
+    return this->storageBufferDescriptors;
 }
 
 const std::vector<Turbo::Core::TCombinedImageSamplerDescriptor *> &Turbo::Core::TShader::GetCombinedImageSamplerDescriptors()

@@ -62,6 +62,14 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+{
+    std::vector<TBuffer *> buffers;
+    buffers.push_back(buffer);
+
+    this->BindData(set, binding, dstArrayElement, buffers);
+}
+
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)

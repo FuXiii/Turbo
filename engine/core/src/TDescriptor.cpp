@@ -191,6 +191,14 @@ Turbo::Core::TUniformBufferDescriptor::~TUniformBufferDescriptor()
 {
 }
 
+Turbo::Core::TStorageBufferDescriptor::TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_BUFFER, dataType, set, binding, count, name)
+{
+}
+
+Turbo::Core::TStorageBufferDescriptor::~TStorageBufferDescriptor()
+{
+}
+
 Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
 {
 }

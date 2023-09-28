@@ -31,6 +31,13 @@ void Turbo::Core::TPipeline::InternalCreate()
             descriptor_set_map[set].push_back(uniform_buffer_descriptor_item);
         }
 
+        std::vector<TStorageBufferDescriptor *> storage_buffer_descriptors = shader_item->GetStorageBufferDescriptors();
+        for (TStorageBufferDescriptor *storage_buffer_descriptor_item : storage_buffer_descriptors)
+        {
+            uint32_t set = storage_buffer_descriptor_item->GetSet();
+            descriptor_set_map[set].push_back(storage_buffer_descriptor_item);
+        }
+
         std::vector<TCombinedImageSamplerDescriptor *> combined_image_sampler_descriptors = shader_item->GetCombinedImageSamplerDescriptors();
         for (TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor_item : combined_image_sampler_descriptors)
         {
