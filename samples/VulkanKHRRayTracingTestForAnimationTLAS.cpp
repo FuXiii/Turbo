@@ -604,6 +604,10 @@ int main()
     VkAccelerationStructureKHR top_level_acceleration_structure_khr = VK_NULL_HANDLE;
     Turbo::Core::TBuffer *instance_buffer = nullptr;
 
+    std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
+    std::vector<glm::vec3> instance_normals;
+    std::vector<float> instance_speeds;
+
     Turbo::Core::TBuffer *bottom_level_acceleration_structure_device_address_buffer = nullptr;
 
     {
@@ -1013,7 +1017,6 @@ int main()
 
         VkDeviceAddress bottom_level_acceleration_structure_device_address = device->GetDeviceDriver()->vkGetAccelerationStructureDeviceAddressKHR(vk_device, &bottom_level_acceleration_structure_device_address_info_khr);
 
-        std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
         {
             // random instance transform matrix
             std::random_device seed;
@@ -1044,6 +1047,8 @@ int main()
                 vk_acceleration_structure_instance_khr.accelerationStructureReference = bottom_level_acceleration_structure_device_address;
 
                 vk_acceleration_structure_instances.push_back(vk_acceleration_structure_instance_khr);
+                instance_normals.push_back(glm::normalize(glm::vec3(dis(gen), dis(gen), dis(gen))));
+                instance_speeds.push_back(TRandom(-1.0f, 1.0f));
             }
         }
 
@@ -1117,7 +1122,7 @@ int main()
         top_level_acceleration_structure_build_geometry_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         top_level_acceleration_structure_build_geometry_info_khr.pNext = nullptr;
         top_level_acceleration_structure_build_geometry_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
-        top_level_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR;
+        top_level_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
         top_level_acceleration_structure_build_geometry_info_khr.mode = VkBuildAccelerationStructureModeKHR::VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
         top_level_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = VK_NULL_HANDLE;
         top_level_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = VK_NULL_HANDLE;
@@ -2065,7 +2070,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForMultiClosestHits");
+                ImGui::Begin("VulkanKHRRayTracingTestForAnimationTLAS");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
@@ -2085,6 +2090,193 @@ int main()
             frame_scissors.push_back(frame_scissor);
 
             command_buffer->Begin();
+
+            // Update Instance
+            {
+                // random instance transform matrix
+                std::random_device seed;
+                std::mt19937 gen(seed());
+                std::normal_distribution<float> dis(1.0f, 1.0f);
+                std::normal_distribution<float> disn(0.05f, 0.05f);
+
+                for (uint32_t instance_index = 0; instance_index < vk_acceleration_structure_instances.size(); instance_index++)
+                {
+                    auto &acceleration_structure_instance_item = vk_acceleration_structure_instances[instance_index];
+                    auto &instance_normal = instance_normals[instance_index];
+                    auto &speed = instance_speeds[instance_index];
+                    glm::vec3 current_instance_position{acceleration_structure_instance_item.transform.matrix[0][3], acceleration_structure_instance_item.transform.matrix[1][3], acceleration_structure_instance_item.transform.matrix[2][3]};
+
+                    auto forward_dir = glm::normalize(glm::cross(instance_normal, current_instance_position));
+
+                    glm::vec3 instance_next_position = current_instance_position + glm::vec3(forward_dir.x * 0.01 * speed, forward_dir.y * 0.01 * speed, forward_dir.z * 0.01 * speed);
+
+                    acceleration_structure_instance_item.transform.matrix[0][3] = instance_next_position.x;
+                    acceleration_structure_instance_item.transform.matrix[1][3] = instance_next_position.y;
+                    acceleration_structure_instance_item.transform.matrix[2][3] = instance_next_position.z;
+                }
+
+                VkMemoryBarrier top_level_accelerate_update_barrier = {};
+                top_level_accelerate_update_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+                top_level_accelerate_update_barrier.pNext = nullptr;
+                top_level_accelerate_update_barrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+                top_level_accelerate_update_barrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+
+                device_driver->vkCmdPipelineBarrier(command_buffer->GetVkCommandBuffer(), VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &top_level_accelerate_update_barrier, 0, nullptr, 0, nullptr);
+
+                Turbo::Core::TBuffer *update_instance_buffer;
+                {
+                    Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+
+                    Turbo::Core::TBuffer *staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
+                    void *staging_ptr = staging_buffer->Map();
+                    if (staging_ptr)
+                    {
+                        memcpy(staging_ptr, vk_acceleration_structure_instances.data(), sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
+                    }
+                    staging_buffer->Unmap();
+
+                    update_instance_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
+
+                    command_buffer->Begin();
+                    command_buffer->CmdCopyBuffer(staging_buffer, update_instance_buffer, 0, 0, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
+                    command_buffer->End();
+
+                    Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+                    queue->Submit(nullptr, nullptr, command_buffer, fence);
+                    fence->WaitUntil();
+
+                    delete fence;
+                    delete staging_buffer;
+                    command_pool->Free(command_buffer);
+                }
+
+                VkBufferDeviceAddressInfo instance_buffer_device_address_info = {};
+                instance_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+                instance_buffer_device_address_info.pNext = nullptr;
+                instance_buffer_device_address_info.buffer = update_instance_buffer->GetVkBuffer();
+
+                VkDeviceAddress instance_buffer_device_address = 0;
+                if (device_driver->vkGetBufferDeviceAddress != nullptr)
+                {
+                    instance_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &instance_buffer_device_address_info);
+                }
+                else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+                {
+                    instance_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &instance_buffer_device_address_info);
+                }
+                else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+                {
+                    instance_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &instance_buffer_device_address_info);
+                }
+
+                if (instance_buffer_device_address != 0)
+                {
+                    //std::cout << "Successfully get instance_buffer VkBuffer device local address " << std::endl;
+                }
+
+                // Update Top Level Acceleration Structure
+                VkAccelerationStructureGeometryInstancesDataKHR vk_acceleration_structure_geometry_instances_data_khr = {};
+                vk_acceleration_structure_geometry_instances_data_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+                vk_acceleration_structure_geometry_instances_data_khr.pNext = nullptr;
+                vk_acceleration_structure_geometry_instances_data_khr.arrayOfPointers = VK_FALSE;
+                vk_acceleration_structure_geometry_instances_data_khr.data.deviceAddress = instance_buffer_device_address;
+
+                VkAccelerationStructureGeometryKHR top_level_acceleration_structure_geometry_khr = {};
+                top_level_acceleration_structure_geometry_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+                top_level_acceleration_structure_geometry_khr.pNext = nullptr;
+                top_level_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR::VK_GEOMETRY_TYPE_INSTANCES_KHR;
+                top_level_acceleration_structure_geometry_khr.geometry.instances = vk_acceleration_structure_geometry_instances_data_khr;
+                top_level_acceleration_structure_geometry_khr.flags = 0;
+
+                VkAccelerationStructureBuildGeometryInfoKHR top_level_acceleration_structure_build_geometry_info_khr = {};
+                top_level_acceleration_structure_build_geometry_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+                top_level_acceleration_structure_build_geometry_info_khr.pNext = nullptr;
+                top_level_acceleration_structure_build_geometry_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+                top_level_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
+                top_level_acceleration_structure_build_geometry_info_khr.mode = VkBuildAccelerationStructureModeKHR::VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR;
+                top_level_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = VK_NULL_HANDLE;
+                top_level_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = VK_NULL_HANDLE;
+                top_level_acceleration_structure_build_geometry_info_khr.geometryCount = 1;
+                top_level_acceleration_structure_build_geometry_info_khr.pGeometries = &top_level_acceleration_structure_geometry_khr;
+                top_level_acceleration_structure_build_geometry_info_khr.ppGeometries = nullptr;
+                top_level_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = 0;
+                top_level_acceleration_structure_build_geometry_info_khr.scratchData.hostAddress = 0;
+
+                uint32_t instance_count = vk_acceleration_structure_instances.size();
+                VkAccelerationStructureBuildSizesInfoKHR top_level_acceleration_structure_build_sizes_info_khr = {};
+                top_level_acceleration_structure_build_sizes_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+                top_level_acceleration_structure_build_sizes_info_khr.pNext = nullptr;
+                top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize = 0;
+                top_level_acceleration_structure_build_sizes_info_khr.updateScratchSize = 0;
+                top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize = 0;
+
+                device->GetDeviceDriver()->vkGetAccelerationStructureBuildSizesKHR(device->GetVkDevice(), VkAccelerationStructureBuildTypeKHR::VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &top_level_acceleration_structure_build_geometry_info_khr, &instance_count, &top_level_acceleration_structure_build_sizes_info_khr);
+
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.accelerationStructureSize = " << top_level_acceleration_structure_build_sizes_info_khr.accelerationStructureSize << std::endl;
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
+                //std::cout << "Update Top Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
+
+                Turbo::Core::TBuffer *top_level_scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize);
+
+                VkBufferDeviceAddressInfo top_level_scratch_buffer_device_address_info = {};
+                top_level_scratch_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+                top_level_scratch_buffer_device_address_info.pNext = nullptr;
+                top_level_scratch_buffer_device_address_info.buffer = top_level_scratch_buffer->GetVkBuffer();
+
+                VkDeviceAddress top_level_scratch_buffer_device_address = 0;
+                if (device_driver->vkGetBufferDeviceAddress != nullptr)
+                {
+                    top_level_scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &top_level_scratch_buffer_device_address_info);
+                }
+                else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+                {
+                    top_level_scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &top_level_scratch_buffer_device_address_info);
+                }
+                else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+                {
+                    top_level_scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &top_level_scratch_buffer_device_address_info);
+                }
+
+                if (top_level_scratch_buffer_device_address != 0)
+                {
+                    //std::cout << "Successfully get top_level_scratch_buffer VkBuffer device local address " << std::endl;
+                }
+
+                // Update Top Level Acceleration Structure
+                top_level_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = top_level_acceleration_structure_khr;
+                top_level_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = top_level_acceleration_structure_khr;
+                top_level_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = top_level_scratch_buffer_device_address;
+
+                VkAccelerationStructureBuildRangeInfoKHR top_level_acceleration_structure_build_range_info_khr = {};
+                top_level_acceleration_structure_build_range_info_khr.primitiveCount = instance_count;
+                top_level_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
+                top_level_acceleration_structure_build_range_info_khr.firstVertex = 0;
+                top_level_acceleration_structure_build_range_info_khr.transformOffset = 0;
+
+                std::vector<VkAccelerationStructureBuildRangeInfoKHR> top_level_acceleration_structure_build_range_info_khrs;
+                top_level_acceleration_structure_build_range_info_khrs.push_back(top_level_acceleration_structure_build_range_info_khr);
+
+                std::vector<VkAccelerationStructureBuildRangeInfoKHR *> top_level_acceleration_structure_ppBuildRangeInfos;
+                top_level_acceleration_structure_ppBuildRangeInfos.push_back(top_level_acceleration_structure_build_range_info_khrs.data());
+
+                {
+                    Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+
+                    command_buffer->Begin();
+                    device->GetDeviceDriver()->vkCmdBuildAccelerationStructuresKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_build_geometry_info_khr, top_level_acceleration_structure_ppBuildRangeInfos.data());
+                    command_buffer->End();
+
+                    Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+                    queue->Submit(nullptr, nullptr, command_buffer, fence);
+                    fence->WaitUntil();
+
+                    delete fence;
+                    command_pool->Free(command_buffer);
+                }
+
+                delete update_instance_buffer;
+                delete top_level_scratch_buffer;
+            }
 
             // ray tracing commands
             {

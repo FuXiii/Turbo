@@ -71,6 +71,8 @@ uint32_t Turbo::Core::TDescriptorSet::GetSet()
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers)
 {
+    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
+
     std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
     for (TBuffer *buffer_item : buffers)
     {
@@ -89,7 +91,11 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.dstBinding = binding;
     vk_write_descriptor_set.dstArrayElement = dstArrayElement;
     vk_write_descriptor_set.descriptorCount = buffers.size();
-    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    if (descriptor_type == Turbo::Core::TDescriptorType::STORAGE_BUFFER)
+    {
+        vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    }
     vk_write_descriptor_set.pImageInfo = nullptr;
     vk_write_descriptor_set.pBufferInfo = vk_descriptor_buffer_infos.data();
     vk_write_descriptor_set.pTexelBufferView = nullptr;
@@ -97,6 +103,14 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     TDevice *device = this->descriptorPool->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+{
+    std::vector<TBuffer *> buffers;
+    buffers.push_back(buffer);
+
+    this->BindData(binding, dstArrayElement, buffers);
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
