@@ -3661,3 +3661,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TShader`类析构中增加对`std::vector<TStorageBufferDescriptor *> storageBufferDescriptors`成员的内存释放。
   >* `./engine/core`下`TShader`类中增加`const std::vector<TStorageBufferDescriptor *> &GetStorageBufferDescriptors()`成员函数。用于获取着色器中的对应描述符信息。
   >* `./engine/core`下`TPipeline`类中`InternalCreate()`成员函数中增加对于`std::vector<TStorageBufferDescriptor *>`描述符的处理。
+  
+* 2023/10/11 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForIntersectionShader`示例。用于研究光追中相交着色器的使用。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForIntersection.rgen`文件，用于`VulkanKHRRayTracingTestForIntersectionShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForIntersection.rchit`文件，用于`VulkanKHRRayTracingTestForIntersectionShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForIntersection.rmiss`文件，用于`VulkanKHRRayTracingTestForIntersectionShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForIntersection.rint`文件，用于`VulkanKHRRayTracingTestForIntersectionShader`示例。

@@ -1,0 +1,111 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require // we need use [uint64_t] key word
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_buffer_reference2 : require
+
+#define KIND_SPHERE 0
+#define KIND_CUBE 1
+
+struct SPHERE
+{
+    vec3 center;
+    float radius;
+};
+
+struct AABB
+{
+    vec3 minimum;
+    vec3 maximum;
+};
+
+struct BottomLevelAccelerationStructureDeviceAddress
+{
+    uint64_t vertexDeviceAddress;
+    uint64_t indexDeviceAddress;
+    uint64_t aabbsDeviceAddress;
+};
+
+layout(buffer_reference, scalar) buffer AABBs
+{
+    AABB boxs[];
+};
+
+struct Ray
+{
+    vec3 origin;
+    vec3 direction;
+};
+
+layout(set = 0, binding = 3, scalar) buffer BottomLevelAccelerationStructureDeviceAddress_
+{
+    BottomLevelAccelerationStructureDeviceAddress blas_device_address[];
+}
+BLAS_DEVICE_ADDRESS;
+
+// Ray-Sphere intersection
+// http://viclw17.github.io/2018/07/16/raytracing-ray-sphere-intersection/
+float hitSphere(const SPHERE s, const Ray r)
+{
+    vec3 oc = r.origin - s.center;
+    float a = dot(r.direction, r.direction);
+    float b = 2.0 * dot(oc, r.direction);
+    float c = dot(oc, oc) - s.radius * s.radius;
+    float discriminant = b * b - 4 * a * c;
+    if (discriminant < 0)
+    {
+        return -1.0;
+    }
+    else
+    {
+        return (-b - sqrt(discriminant)) / (2.0 * a);
+    }
+}
+
+// Ray-AABB intersection
+float hitAabb(const AABB aabb, const Ray r)
+{
+    vec3 invDir = 1.0 / r.direction;
+    vec3 tbot = invDir * (aabb.minimum - r.origin);
+    vec3 ttop = invDir * (aabb.maximum - r.origin);
+    vec3 tmin = min(ttop, tbot);
+    vec3 tmax = max(ttop, tbot);
+    float t0 = max(tmin.x, max(tmin.y, tmin.z));
+    float t1 = min(tmax.x, min(tmax.y, tmax.z));
+    return t1 > max(t0, 0.0) ? t0 : -1.0;
+}
+
+void main()
+{
+    Ray ray;
+    ray.origin = gl_WorldRayOriginEXT;
+    ray.direction = gl_WorldRayDirectionEXT;
+
+    BottomLevelAccelerationStructureDeviceAddress blas_device_address = BLAS_DEVICE_ADDRESS.blas_device_address[gl_InstanceCustomIndexEXT];
+    AABBs aabbs = AABBs(blas_device_address.aabbsDeviceAddress);
+
+    AABB aabb = aabbs.boxs[gl_PrimitiveID];
+
+    // Sphere data
+    SPHERE sphere;
+    sphere.center = (aabb.maximum + aabb.minimum) * 0.5;
+    sphere.radius = ((aabb.maximum - aabb.minimum) * 0.5).x;
+
+    float tHit = -1;
+    int hitKind = gl_PrimitiveID % 2 == 0 ? KIND_SPHERE : KIND_CUBE;
+    if (hitKind == KIND_SPHERE)
+    {
+        // Sphere intersection
+        tHit = hitSphere(sphere, ray);
+    }
+    else
+    {
+        // AABB intersection
+        tHit = hitAabb(aabb, ray);
+    }
+
+    // Report hit point
+    if (tHit > 0)
+        reportIntersectionEXT(tHit, hitKind);
+}
