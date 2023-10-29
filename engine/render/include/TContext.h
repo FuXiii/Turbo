@@ -242,6 +242,10 @@ class TContext
     template <typename T>
     void BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TUniformBuffer<T>> &uniformBuffers)
     {
+        TDescriptorID descriptor_id = {};
+        descriptor_id.set = set;
+        descriptor_id.binding = binding;
+
         auto set_map = this->descriptorMap.find(set);
         if (set_map != this->descriptorMap.end())
         {
@@ -251,31 +255,32 @@ class TContext
                 // TODO:更新Set和Binding对应的缓存
                 // 说明之前已有描述符资源绑定到此，需要在之前的【描述符资源数组】中移除并更新到目标【描述符资源数组】中
                 TDescriptorMapType descriptor_map_type = binding_map->second;
+
                 switch (descriptor_map_type)
                 {
                 case TDescriptorMapType::UNDEFINED: {
                 }
                 break;
                 case TDescriptorMapType::UNIFROM_BUFFER_MAP: {
-                    this->uniformBufferMap.at({set, binding}).clear();
+                    this->uniformBufferMap.at(descriptor_id).clear();
                 }
                 break;
                 case TDescriptorMapType::COMBINED_IMAGE_SAMPLER_MAP: {
-                    this->combinedImageSamplerMap.at({set, binding}).clear();
+                    this->combinedImageSamplerMap.at(descriptor_id).clear();
                 }
                 break;
                 case TDescriptorMapType::SAMPLED_IMAGE_MAP: {
-                    this->sampledImageMap.at({set, binding}).clear();
+                    this->sampledImageMap.at(descriptor_id).clear();
                 }
                 break;
                 case TDescriptorMapType::SAMPLER_MAP: {
-                    this->samplerMap.at({set, binding}).clear();
+                    this->samplerMap.at(descriptor_id).clear();
                 }
                 break;
                 }
 
                 // TODO:更新到目标【描述符资源数组】中
-                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap.at({set, binding});
+                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap.at(descriptor_id);
                 for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
                 {
                     uniform_buffers.push_back(uniform_buffer_item.buffer);
@@ -288,7 +293,7 @@ class TContext
             {
                 // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
                 // 说明找到了Set，但没有Binding
-                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[{set, binding}];
+                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[descriptor_id];
                 for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
                 {
                     uniform_buffers.push_back(uniform_buffer_item.buffer);
@@ -300,7 +305,7 @@ class TContext
         else
         {
             // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-            std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[{set, binding}];
+            std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[descriptor_id];
             for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
             {
                 uniform_buffers.push_back(uniform_buffer_item.buffer);

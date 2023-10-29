@@ -7,6 +7,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <type_traits>
 
 namespace Turbo
 {
@@ -153,7 +154,7 @@ class TIndexBuffer : public Turbo::Render::TBuffer
     TIndexType GetIndexType() const;
 };
 
-template <typename T, std::enable_if_t<std::is_class<T>::value, bool> = true>
+template <typename T/*, std::enable_if_t<std::is_class<T>::value, bool> = true*/>
 class TUniformBuffer : public Turbo::Render::TBuffer
 {
   public:
