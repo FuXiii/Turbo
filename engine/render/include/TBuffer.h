@@ -154,7 +154,6 @@ class TIndexBuffer : public Turbo::Render::TBuffer
     TIndexType GetIndexType() const;
 };
 
-// template <typename T, std::enable_if_t<std::is_class<T>::value, bool> = true>
 template <typename T, typename std::enable_if<std::is_class<T>::value, bool>::type = true>
 class TUniformBuffer : public Turbo::Render::TBuffer
 {
