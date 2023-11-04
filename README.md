@@ -3676,10 +3676,15 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`移除`std::enable_if_t`（`llvm-mingw`编译器不支持，估计是`C++`标准配置不对）。
   >* `./thirdparty`下更新`KTX-Software`到最新`main`分支。
   >* `./engine/render`下`TContext`中移除对于`TDescriptorID`的初始化列表写法使用最原始的结构体赋值法。（`llvm-mingw`好像不支持初始化列表写法，目前不知道如何设置编译器支持初始化列表写法，估计是`C++`标准配置不对）。
-  >* `./samples`下`TContext`中将`std::is_class_v<A_Test>`改为`std::is_class<A_Test>::value`。
+  >* `./engine/render`下`TContext`中将`std::is_class_v<A_Test>`改为`std::is_class<A_Test>::value`。
   >* `./samples`下`VulkanTest`中将所有`std::exception(const std::string&)`改为`Turbo::Core::TException`。
   >* `./samples`下`VulkanAllocatorTest`中将所有`std::exception(const std::string&)`改为`Turbo::Core::TException`。
 
 * 2023/10/31 设计架构
   >
   >* `./engine/render`下`TBuffer.h`中`TUniformBuffer`移除`std::enable_if_t`（`C++14`特性），使用`std::enable_if`替换（`C++11`特性）。
+
+* 2023/11/4 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForCallableShader`示例。用于研究可调用着色器的使用。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
