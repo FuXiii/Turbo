@@ -907,10 +907,15 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.pNext = nullptr;
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
-    // for Extensions feature...
+    // NOTE: for Extensions feature...
+    VkPhysicalDeviceRayQueryFeaturesKHR vk_physical_device_ray_query_features_khr = {};
+    vk_physical_device_ray_query_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+    vk_physical_device_ray_query_features_khr.pNext = nullptr;
+    vk_physical_device_ray_query_features_khr.rayQuery = this->enabledFeatures.rayQuery ? VK_TRUE : VK_FALSE;
+
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR vk_physical_device_ray_tracing_pipeline_features_khr = {};
     vk_physical_device_ray_tracing_pipeline_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = nullptr;
+    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = &vk_physical_device_ray_query_features_khr;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipeline = this->enabledFeatures.rayTracingPipeline ? VK_TRUE : VK_FALSE;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplay = this->enabledFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay ? VK_TRUE : VK_FALSE;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = this->enabledFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed ? VK_TRUE : VK_FALSE;

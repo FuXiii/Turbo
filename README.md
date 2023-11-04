@@ -3691,3 +3691,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_R.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_G.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_B.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`中类`TPhysicalDeviceInfo`中新增`VkPhysicalDeviceRayQueryFeaturesKHR physicalDeviceRayQueryFeaturesKHR`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDeviceFeatures`中新增`bool rayQuery = false`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDevice`中更新`EnumerateProperties()`成员函数，获取并保存`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDevice`中更新`GetDeviceFeatures()`成员函数，获取`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据。
+  >* `./engine/core`下`TDevice.h`中类`TDevice`中更新`InternalCreate()`成员函数，更新对`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据的激活设置。
