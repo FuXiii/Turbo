@@ -44,7 +44,7 @@ int main()
 {
     std::cout << "Hello World" << std::endl;
 
-    bool is_class = std::is_class_v<A_Test>;
+    bool is_class = std::is_class<A_Test>::value;
     std::cout << is_class << ":A_Test" << std::endl;
 
     struct B_Test

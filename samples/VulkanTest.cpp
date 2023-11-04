@@ -1,5 +1,7 @@
+#include "core/include/TException.h"
 #include "core/include/TInstance.h"
 #include <vulkan/vulkan.h>
+
 // #include <vulkan/vulkan_core.h>
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -138,7 +140,7 @@ int main()
     HMODULE library = LoadLibraryA("vulkan-1.dll");
     if (!library)
     {
-        throw std::exception("Can not found vulkan-1.dll");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Can not found vulkan-1.dll");
     }
 
     vk_GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
@@ -195,7 +197,7 @@ int main()
     VkResult result = vk_CreateInstance(&vk_instance_create_info, &vk_allocation_callbacks, &vk_instance);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkCreateInstance failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateInstance failed");
     }
     else
     {
@@ -234,14 +236,14 @@ int main()
     result = vk_EnumeratePhysicalDevices(vk_instance, &physcial_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkEnumeratePhysicalDevices get count failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkEnumeratePhysicalDevices get count failed");
     }
 
     std::vector<VkPhysicalDevice> physcail_devices(physcial_device_count);
     result = vk_EnumeratePhysicalDevices(vk_instance, &physcial_device_count, physcail_devices.data());
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkEnumeratePhysicalDevices failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkEnumeratePhysicalDevices failed");
     }
 
     VkPhysicalDevice target_physical_device = VK_NULL_HANDLE;
@@ -266,7 +268,7 @@ int main()
 
     if (target_physical_device == VK_NULL_HANDLE)
     {
-        throw std::exception("Not found suitable GPU");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Not found suitable GPU");
     }
     else
     {
@@ -317,7 +319,7 @@ int main()
     result = vk_CreateDevice(target_physical_device, &vk_device_create_info, nullptr, &vk_device);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkCreateDevice failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateDevice failed");
     }
     std::cout << "vkCreateDevice success" << std::endl;
 

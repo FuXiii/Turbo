@@ -881,7 +881,7 @@ Turbo::Render::TContext::TContext()
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
     physical_device_features.sampleRateShading = true;
-    
+
     this->device = new Turbo::Core::TDevice(this->physicalDevice, nullptr, &enable_device_extensions, &physical_device_features);
     this->graphicsQueue = this->device->GetBestGraphicsQueue();
 
@@ -1153,6 +1153,10 @@ void Turbo::Render::TContext::BindPipeline(const Turbo::Render::TGraphicsPipelin
 
 void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture2D> &texture2Ds)
 {
+    TDescriptorID descriptor_id = {};
+    descriptor_id.set = set;
+    descriptor_id.binding = binding;
+
     auto set_map = this->descriptorMap.find(set);
     if (set_map != this->descriptorMap.end())
     {
@@ -1168,25 +1172,25 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
             }
             break;
             case TDescriptorMapType::UNIFROM_BUFFER_MAP: {
-                this->uniformBufferMap.at({set, binding}).clear();
+                this->uniformBufferMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::COMBINED_IMAGE_SAMPLER_MAP: {
-                this->combinedImageSamplerMap.at({set, binding}).clear();
+                this->combinedImageSamplerMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::SAMPLED_IMAGE_MAP: {
-                this->sampledImageMap.at({set, binding}).clear();
+                this->sampledImageMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::SAMPLER_MAP: {
-                this->samplerMap.at({set, binding}).clear();
+                this->samplerMap.at(descriptor_id).clear();
             }
             break;
             }
 
             // TODO:更新到目标【描述符资源数组】中
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at({set, binding});
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at(descriptor_id);
             for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
             {
                 sampled_images.push_back(texture_2d_item.imageView);
@@ -1199,7 +1203,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
         {
             // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
             // 说明找到了Set，但没有Binding
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
             for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
             {
                 sampled_images.push_back(texture_2d_item.imageView);
@@ -1211,7 +1215,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
     else
     {
         // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
         for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
         {
             sampled_images.push_back(texture_2d_item.imageView);
@@ -1229,6 +1233,10 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
 
 void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, const std::vector<Turbo::Render::TTexture3D> &texture3Ds)
 {
+    TDescriptorID descriptor_id = {};
+    descriptor_id.set = set;
+    descriptor_id.binding = binding;
+
     auto set_map = this->descriptorMap.find(set);
     if (set_map != this->descriptorMap.end())
     {
@@ -1244,25 +1252,25 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
             }
             break;
             case TDescriptorMapType::UNIFROM_BUFFER_MAP: {
-                this->uniformBufferMap.at({set, binding}).clear();
+                this->uniformBufferMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::COMBINED_IMAGE_SAMPLER_MAP: {
-                this->combinedImageSamplerMap.at({set, binding}).clear();
+                this->combinedImageSamplerMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::SAMPLED_IMAGE_MAP: {
-                this->sampledImageMap.at({set, binding}).clear();
+                this->sampledImageMap.at(descriptor_id).clear();
             }
             break;
             case TDescriptorMapType::SAMPLER_MAP: {
-                this->samplerMap.at({set, binding}).clear();
+                this->samplerMap.at(descriptor_id).clear();
             }
             break;
             }
 
             // TODO:更新到目标【描述符资源数组】中
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at({set, binding});
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at(descriptor_id);
             for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
             {
                 sampled_images.push_back(texture_3d_item.imageView);
@@ -1275,7 +1283,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
         {
             // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
             // 说明找到了Set，但没有Binding
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
             for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
             {
                 sampled_images.push_back(texture_3d_item.imageView);
@@ -1287,7 +1295,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
     else
     {
         // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[{set, binding}];
+        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
         for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
         {
             sampled_images.push_back(texture_3d_item.imageView);

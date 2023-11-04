@@ -1,3 +1,4 @@
+#include "core/include/TException.h"
 #include <vulkan/vulkan_core.h>
 
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
@@ -45,7 +46,7 @@ int main()
     HMODULE library = LoadLibraryA("vulkan-1.dll");
     if (!library)
     {
-        throw std::exception("Can not found vulkan-1.dll");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Can not found vulkan-1.dll");
     }
 
     vk_GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
@@ -97,7 +98,7 @@ int main()
     VkResult result = vk_CreateInstance(&vk_instance_create_info, &vk_allocation_callbacks, &instance);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkCreateInstance failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateInstance failed");
     }
 
     std::cout << "vkCreateInstance success" << std::endl;
@@ -126,14 +127,14 @@ int main()
     result = vk_EnumeratePhysicalDevices(instance, &physcial_device_count, nullptr);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkEnumeratePhysicalDevices get count failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkEnumeratePhysicalDevices get count failed");
     }
 
     std::vector<VkPhysicalDevice> physcail_devices(physcial_device_count);
     result = vk_EnumeratePhysicalDevices(instance, &physcial_device_count, physcail_devices.data());
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkEnumeratePhysicalDevices failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkEnumeratePhysicalDevices failed");
     }
 
     VkPhysicalDevice target_physical_device = VK_NULL_HANDLE;
@@ -158,7 +159,7 @@ int main()
 
     if (target_physical_device == VK_NULL_HANDLE)
     {
-        throw std::exception("Not found suitable GPU");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Not found suitable GPU");
     }
     std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
 
@@ -206,7 +207,7 @@ int main()
     result = vk_CreateDevice(target_physical_device, &vk_device_create_info, nullptr, &vk_device);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw std::exception("vkCreateDevice failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateDevice failed");
     }
     std::cout << "vkCreateDevice success" << std::endl;
 
@@ -248,7 +249,7 @@ int main()
         result = vk_CreatePipelineLayout(vk_device, &vk_pipeline_layout_create_info, nullptr, &vk_pipeline_layout);
         if (result != VkResult::VK_SUCCESS)
         {
-            throw std::exception("vkCreatePipelineLayout failed");
+            throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreatePipelineLayout failed");
         }
         vk_DestroyPipelineLayout(vk_device, vk_pipeline_layout, nullptr);
 

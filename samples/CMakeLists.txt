@@ -331,3 +331,13 @@ add_executable(VulkanKHRRayTracingTestForAnimationBLAS ./VulkanKHRRayTracingTest
 target_include_directories(VulkanKHRRayTracingTestForAnimationBLAS PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanKHRRayTracingTestForAnimationBLAS PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForAnimationBLAS PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForIntersectionShader ./VulkanKHRRayTracingTestForIntersectionShader.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForIntersectionShader PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForIntersectionShader PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForIntersectionShader PUBLIC ${LIBS})
+
+add_executable(VulkanKHRRayTracingTestForCallableShader ./VulkanKHRRayTracingTestForCallableShader.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanKHRRayTracingTestForCallableShader PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanKHRRayTracingTestForCallableShader PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanKHRRayTracingTestForCallableShader PUBLIC ${LIBS})
