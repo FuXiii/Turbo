@@ -31,11 +31,11 @@ struct BottomLevelAccelerationStructureDeviceAddress
 layout(location = 0) rayPayloadInEXT HitPayload HIT_PAY_LOAD;
 layout(location = 0) callableDataEXT CallablePayload callablePayload;
 
-//layout(push_constant) uniform my_push_constants
-//{
-//    int callableSBTIndex;
-//}
-//my_push_constants_data;
+layout(push_constant) uniform my_push_constants
+{
+    int callableSBTIndex;
+}
+my_push_constants_data;
 
 layout(buffer_reference, scalar) buffer Vertices
 {
@@ -79,8 +79,7 @@ void main()
     const vec3 light_dir = -normalize(vec3(1, 1, 1));
 
     // Diffuse
-    // executeCallableEXT(my_push_constants_data.callableSBTIndex, 0);
-    executeCallableEXT(0, 0);
+    executeCallableEXT(my_push_constants_data.callableSBTIndex, 0);
 
     const vec3 diffuse_color = callablePayload.color;
     float normalDotLight = max(dot(world_normal, light_dir), 0);

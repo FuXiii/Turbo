@@ -142,6 +142,11 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct MY_PUSH_CONSTANTS
+{
+    int callableSBTIndex;
+};
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -150,6 +155,9 @@ int main()
     my_buffer_data.scale = 0.03;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
+
+    MY_PUSH_CONSTANTS my_push_constants = {};
+    my_push_constants.callableSBTIndex = 0;
 
     //<gltf for material_sphere>
     std::vector<POSITION> POSITION_data;
@@ -1409,14 +1417,19 @@ int main()
 
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
+        VkPushConstantRange vk_push_constant_range = {};
+        vk_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        vk_push_constant_range.offset = 0;
+        vk_push_constant_range.size = sizeof(my_push_constants);
+
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         ray_tracing_pipeline_layout_create_info.pNext = nullptr;
         ray_tracing_pipeline_layout_create_info.flags = 0;
         ray_tracing_pipeline_layout_create_info.setLayoutCount = 1;
         ray_tracing_pipeline_layout_create_info.pSetLayouts = &ray_tracing_descriptor_set_layout;
-        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 0;
-        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = nullptr;
+        ray_tracing_pipeline_layout_create_info.pushConstantRangeCount = 1;
+        ray_tracing_pipeline_layout_create_info.pPushConstantRanges = &vk_push_constant_range;
 
         VkResult ray_tracing_pipeline_layout_create_result = device_driver->vkCreatePipelineLayout(device->GetVkDevice(), &ray_tracing_pipeline_layout_create_info, vk_allocation_callbacks, &ray_tracing_pipeline_layout);
         if (ray_tracing_pipeline_layout_create_result != VkResult::VK_SUCCESS)
@@ -2030,11 +2043,12 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForLighting");
+                ImGui::Begin("VulkanKHRRayTracingTestForCallableShader");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                // ImGui::SliderFloat("angle", &angle, 0.0f, 360);
+                // ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::SliderInt("Callable Index", &my_push_constants.callableSBTIndex, 0, 2);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -2055,6 +2069,7 @@ int main()
             {
                 VkCommandBuffer vk_command_buffer = command_buffer->GetVkCommandBuffer();
                 device_driver->vkCmdBindPipeline(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline);
+                device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0, sizeof(my_push_constants), &my_push_constants);
                 device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
                 device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 

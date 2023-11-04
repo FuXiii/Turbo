@@ -3688,3 +3688,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下增加`VulkanKHRRayTracingTestForCallableShader`示例。用于研究可调用着色器的使用。
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_R.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_G.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
+  >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_B.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
