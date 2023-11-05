@@ -229,7 +229,8 @@ typedef enum class TExtensionType
     VK_KHR_DYNAMIC_RENDERING,
     VK_EXT_MESH_SHADER,
     VK_KHR_ACCELERATION_STRUCTURE,
-    VK_KHR_RAY_TRACING_PIPELINE
+    VK_KHR_RAY_TRACING_PIPELINE,
+    VK_KHR_RAY_QUERY
 } TExtensionTypeEnum;
 
 class TLayerInfo;

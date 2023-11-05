@@ -825,6 +825,15 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
             this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_RAY_TRACING_PIPELINE));
         }
     }
+    case TExtensionType::VK_KHR_RAY_QUERY: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SPIRV_1_4);
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_ACCELERATION_STRUCTURE);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_RAY_QUERY))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_RAY_QUERY));
+        }
+    }
     break;
     }
 }
