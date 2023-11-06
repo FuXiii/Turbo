@@ -3703,3 +3703,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TExtensionInfo.cpp`中数组`TAllExtensionNames`中增加`VK_KHR_ray_query`项。
   >* `./engine/core`下`TExtensionInfo.h`中枚举`TExtensionType`中增加`VK_KHR_RAY_QUERY`项。
   >* `./engine/core`下`TDevice.cpp`中，类`TDevice`的成员函数`InspectExtensionAndVersionDependencies()`中增加对`VK_KHR_RAY_QUERY`扩展依赖项的检查。
+
+* 2023/11/6 设计架构
+  >
+  >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。

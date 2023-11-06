@@ -341,3 +341,8 @@ add_executable(VulkanKHRRayTracingTestForCallableShader ./VulkanKHRRayTracingTes
 target_include_directories(VulkanKHRRayTracingTestForCallableShader PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VulkanKHRRayTracingTestForCallableShader PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForCallableShader PUBLIC ${LIBS})
+
+add_executable(VulkanRayQueryTest ./VulkanRayQueryTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VulkanRayQueryTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VulkanRayQueryTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VulkanRayQueryTest PUBLIC ${LIBS})
