@@ -72,13 +72,8 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
-
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rchit");
+const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanRayQueryTest.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanRayQueryTest.frag");
 
 typedef struct POSITION
 {
@@ -1194,7 +1189,7 @@ int main()
     subpasses.push_back(subpass);  // subpass 0
     subpasses.push_back(subpass1); // subpass 1
 
-    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::LOAD, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TAttachment> attachemts;
@@ -1230,7 +1225,7 @@ int main()
 
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
+    //pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -1244,7 +1239,7 @@ int main()
         std::vector<Turbo::Core::TImageView *> image_views;
         image_views.push_back(swapchain_image_view_item);
         image_views.push_back(depth_image_view);
-
+        
         Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
         swpachain_framebuffers.push_back(swapchain_framebuffer);
     }
@@ -1499,9 +1494,6 @@ int main()
 
             ImGui::NewFrame();
 
-            static bool is_ray_tracing = false;
-            static bool is_show_barycentrics = false;
-
             {
                 static float f = 0.0f;
                 static int counter = 0;
@@ -1511,11 +1503,6 @@ int main()
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
-                ImGui::Checkbox("ray tracing", &is_ray_tracing);
-                if (is_ray_tracing)
-                {
-                    ImGui::Checkbox("show barycentrics", &is_show_barycentrics);
-                }
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1538,7 +1525,7 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
 
             // material_sphere
-            if (!is_ray_tracing)
+            //if (!is_ray_tracing)
             {
                 command_buffer->CmdBindPipeline(pipeline);
                 command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);

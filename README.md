@@ -3707,3 +3707,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/11/6 设计架构
   >
   >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
+
+* 2023/11/7 设计架构
+  >
+  >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
+  >* `./asset/shaders`下增加`VulkanRayQueryTest.vert`示例。用于研究`VK_KHR_ray_query`扩展的顶点着色器。
+  >* `./asset/shaders`下增加`VulkanRayQueryTest.frag`示例。用于研究`VK_KHR_ray_query`扩展的片元着色器。
