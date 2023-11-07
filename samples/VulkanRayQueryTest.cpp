@@ -121,6 +121,12 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct MY_PUSH_CONSTANT_DATA
+{
+    float angle;
+    float length;
+};
+
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
@@ -129,6 +135,10 @@ int main()
     my_buffer_data.scale = 0.03;
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
+
+    MY_PUSH_CONSTANT_DATA my_push_constant_data = {};
+    my_push_constant_data.angle = 70;
+    my_push_constant_data.length = 3;
 
     //<gltf for material_sphere>
     std::vector<POSITION> POSITION_data;
@@ -439,7 +449,7 @@ int main()
     Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
@@ -1223,9 +1233,12 @@ int main()
     std::vector<Turbo::Core::TImageView *> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
 
+    std::vector<VkAccelerationStructureKHR> vk_acceleration_structure_khrs;
+    vk_acceleration_structure_khrs.push_back(top_level_acceleration_structure_khr);
+
     Turbo::Core::TPipelineDescriptorSet *pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    //pipeline_descriptor_set->BindData(0, 1, 0, my_buffers);
+    pipeline_descriptor_set->BindData(0, 1, 0, vk_acceleration_structure_khrs);
 
     std::vector<Turbo::Core::TBuffer *> vertex_buffers;
     vertex_buffers.push_back(position_buffer);
@@ -1239,7 +1252,7 @@ int main()
         std::vector<Turbo::Core::TImageView *> image_views;
         image_views.push_back(swapchain_image_view_item);
         image_views.push_back(depth_image_view);
-        
+
         Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
         swpachain_framebuffers.push_back(swapchain_framebuffer);
     }
@@ -1476,8 +1489,8 @@ int main()
                     camera_position += right_dir * speed * delte_time;
                 }
 
-                model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+                //model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                // model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
                 glm::vec3 look_point = camera_position + forward_dir;
                 view = glm::lookAt(camera_position, look_point, up_dir);
@@ -1498,11 +1511,11 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTest");
+                ImGui::Begin("VulkanRayQueryTest");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                ImGui::SliderFloat("light angle", &my_push_constant_data.angle, 0.0f, 360);
+                ImGui::SliderFloat("length", &my_push_constant_data.length, 0.01, 3);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
             }
@@ -1525,10 +1538,11 @@ int main()
             command_buffer->CmdSetScissor(frame_scissors);
 
             // material_sphere
-            //if (!is_ray_tracing)
+            // if (!is_ray_tracing)
             {
                 command_buffer->CmdBindPipeline(pipeline);
                 command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+                command_buffer->CmdPushConstants(0, sizeof(my_push_constant_data), &my_push_constant_data);
                 command_buffer->CmdBindVertexBuffers(vertex_buffers);
                 command_buffer->CmdSetLineWidth(1);
                 command_buffer->CmdBindIndexBuffer(index_buffer);

@@ -69,6 +69,10 @@ VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
         return VkDescriptorType::VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     }
     break;
+    case Turbo::Core::TDescriptorType::ACCELERATION_STRUCTURE: {
+        return VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+    }
+    break;
     }
 
     return VkDescriptorType::VK_DESCRIPTOR_TYPE_MAX_ENUM;

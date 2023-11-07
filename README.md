@@ -3713,3 +3713,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
   >* `./asset/shaders`下增加`VulkanRayQueryTest.vert`示例。用于研究`VK_KHR_ray_query`扩展的顶点着色器。
   >* `./asset/shaders`下增加`VulkanRayQueryTest.frag`示例。用于研究`VK_KHR_ray_query`扩展的片元着色器。
+  >* `./engine/core`下`TDescriptor.cpp`中，类`TDescriptor`的成员函数`GetVkDescriptorType()`中增加对`ACCELERATION_STRUCTURE`加速结构描述符类型（`VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR`）的适配。
