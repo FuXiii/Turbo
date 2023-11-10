@@ -3722,3 +3722,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/11/9 设计架构
   >
   >* `./samples`下增加`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。
+
+* 2023/11/10 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。
