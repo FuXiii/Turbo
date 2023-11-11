@@ -72,10 +72,6 @@ static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
-
 const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rgen");
 const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rmiss");
 const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rchit");
@@ -110,6 +106,13 @@ typedef struct TEXCOORD
     float v;
 } TEXCOORD;
 
+typedef struct COLOR
+{
+    float r;
+    float g;
+    float b;
+} COLOR;
+
 struct MY_BUFFER_DATA
 {
     float scale;
@@ -128,14 +131,16 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct MATERIAL
+{
+    COLOR pbrBaseColorFactor;
+    COLOR emissiveFactor;
+};
+
 struct NODE
 {
     glm::mat4 matrix;
     uint32_t meshIndex;
-};
-
-struct MATERIAL
-{
 };
 
 struct MESH
@@ -144,7 +149,403 @@ struct MESH
     std::vector<NORMAL> NORMAL_data;
     std::vector<TEXCOORD> TEXCOORD_data;
     std::vector<INDEX> INDICES_data;
+
+    MATERIAL material;
 };
+
+struct VERTEX
+{
+    POSITION position;
+    POSITION normal;
+    POSITION texcoord;
+};
+
+struct BOTTOM_LEVEL_ACCELERATION_STRUCTUR
+{
+    Turbo::Core::TBuffer *vertexBuffer = nullptr;
+    Turbo::Core::TBuffer *indexBuffer = nullptr;
+    Turbo::Core::TBuffer *bottomLevelAccelerationStructureBuffer = nullptr;
+    VkAccelerationStructureKHR bottomLevelAccelerationStructure = VK_NULL_HANDLE;
+};
+
+BOTTOM_LEVEL_ACCELERATION_STRUCTUR CreateBottomLevelAccelerationStructure(Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue, MESH &mesh)
+{
+    assert(device != nullptr);
+
+    auto physical_device = device->GetPhysicalDevice();
+    auto physical_device_driver = physical_device->GetPhysicalDeviceDriver();
+    auto device_driver = device->GetDeviceDriver();
+
+    Turbo::Core::TBuffer *device_local_vertex_buffer = nullptr;
+    Turbo::Core::TBuffer *device_local_index_buffer = nullptr;
+    Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = nullptr;
+    VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
+
+    {
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR vk_physical_device_acceleration_structure_properties_khr = {};
+        vk_physical_device_acceleration_structure_properties_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+        vk_physical_device_acceleration_structure_properties_khr.pNext = nullptr;
+        vk_physical_device_acceleration_structure_properties_khr.maxGeometryCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxInstanceCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPrimitiveCount = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorUpdateAfterBindAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures = 0;
+        vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment = 0;
+
+        VkPhysicalDeviceProperties2 vk_physical_device_properties_2 = {};
+        vk_physical_device_properties_2.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        vk_physical_device_properties_2.pNext = &vk_physical_device_acceleration_structure_properties_khr;
+        vk_physical_device_properties_2.properties = {};
+
+        // if (physical_device_driver->vkGetPhysicalDeviceProperties2 != nullptr)
+        if (physical_device_driver->vkGetPhysicalDeviceProperties2 != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+        else if (physical_device_driver->vkGetPhysicalDeviceProperties2KHR != nullptr)
+        {
+            physical_device_driver->vkGetPhysicalDeviceProperties2KHR(physical_device->GetVkPhysicalDevice(), &vk_physical_device_properties_2);
+        }
+
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxGeometryCount = " << vk_physical_device_acceleration_structure_properties_khr.maxGeometryCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxInstanceCount = " << vk_physical_device_acceleration_structure_properties_khr.maxInstanceCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPrimitiveCount = " << vk_physical_device_acceleration_structure_properties_khr.maxPrimitiveCount << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPerStageDescriptorAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxPerStageDescriptorUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxPerStageDescriptorUpdateAfterBindAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.maxDescriptorSetUpdateAfterBindAccelerationStructures = " << vk_physical_device_acceleration_structure_properties_khr.maxDescriptorSetUpdateAfterBindAccelerationStructures << std::endl;
+        std::cout << "VkPhysicalDeviceAccelerationStructurePropertiesKHR.minAccelerationStructureScratchOffsetAlignment = " << vk_physical_device_acceleration_structure_properties_khr.minAccelerationStructureScratchOffsetAlignment << std::endl;
+
+        device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(POSITION) * POSITION_data.size());
+        {
+            Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
+            memcpy(staging_vertex_buffer->Map(), POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
+            staging_vertex_buffer->Unmap();
+
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            command_buffer->CmdCopyBuffer(staging_vertex_buffer, device_local_vertex_buffer, 0, 0, sizeof(POSITION) * POSITION_data.size());
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            delete staging_vertex_buffer;
+        }
+
+        VkDeviceAddress device_local_vertex_buffer_device_address = 0;
+
+        VkBufferDeviceAddressInfo device_local_vertex_buffer_device_address_info = {};
+        device_local_vertex_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        device_local_vertex_buffer_device_address_info.pNext = nullptr;
+        device_local_vertex_buffer_device_address_info.buffer = device_local_vertex_buffer->GetVkBuffer();
+
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            device_local_vertex_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &device_local_vertex_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            device_local_vertex_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &device_local_vertex_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            device_local_vertex_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_vertex_buffer_device_address_info);
+        }
+
+        if (device_local_vertex_buffer_device_address == 0)
+        {
+            throw std::runtime_error("Get ray tracing device local vertex buffer address failed");
+        }
+
+        VkDeviceOrHostAddressConstKHR vertex_data = {};
+        vertex_data.deviceAddress = device_local_vertex_buffer_device_address;
+
+        device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(uint32_t) * INDICES_data.size());
+        {
+            Turbo::Core::TBuffer *staging_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
+            memcpy(staging_index_buffer->Map(), INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
+            staging_index_buffer->Unmap();
+
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            command_buffer->CmdCopyBuffer(staging_index_buffer, device_local_index_buffer, 0, 0, sizeof(uint32_t) * INDICES_data.size());
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            delete staging_index_buffer;
+        }
+
+        VkDeviceAddress device_local_index_buffer_device_address = 0;
+
+        VkBufferDeviceAddressInfo device_local_index_buffer_device_address_info = {};
+        device_local_index_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        device_local_index_buffer_device_address_info.pNext = nullptr;
+        device_local_index_buffer_device_address_info.buffer = device_local_index_buffer->GetVkBuffer();
+
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
+        }
+
+        if (device_local_index_buffer_device_address == 0)
+        {
+            throw std::runtime_error("Get ray tracing device local index buffer address failed");
+        }
+
+        VkDeviceOrHostAddressConstKHR index_data = {};
+        index_data.deviceAddress = device_local_index_buffer_device_address;
+
+        VkAccelerationStructureGeometryTrianglesDataKHR vk_acceleration_structure_geometry_triangles_data_khr = {};
+        vk_acceleration_structure_geometry_triangles_data_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+        vk_acceleration_structure_geometry_triangles_data_khr.pNext = nullptr;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexFormat = VkFormat::VK_FORMAT_R32G32B32_SFLOAT;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexData = vertex_data;
+        vk_acceleration_structure_geometry_triangles_data_khr.vertexStride = sizeof(POSITION);
+        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex = POSITION_data.size();
+        vk_acceleration_structure_geometry_triangles_data_khr.indexType = VkIndexType::VK_INDEX_TYPE_UINT32;
+        vk_acceleration_structure_geometry_triangles_data_khr.indexData = index_data;
+        vk_acceleration_structure_geometry_triangles_data_khr.transformData.deviceAddress = 0;
+
+        VkAccelerationStructureGeometryDataKHR vk_acceleration_structure_geometry_data_khr = {};
+        vk_acceleration_structure_geometry_data_khr.triangles = vk_acceleration_structure_geometry_triangles_data_khr;
+
+        VkAccelerationStructureGeometryKHR vk_acceleration_structure_geometry_khr = {};
+        vk_acceleration_structure_geometry_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+        vk_acceleration_structure_geometry_khr.pNext = nullptr;
+        vk_acceleration_structure_geometry_khr.geometryType = VkGeometryTypeKHR::VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+        vk_acceleration_structure_geometry_khr.geometry = vk_acceleration_structure_geometry_data_khr;
+        vk_acceleration_structure_geometry_khr.flags = VkGeometryFlagBitsKHR::VK_GEOMETRY_OPAQUE_BIT_KHR;
+
+        VkAccelerationStructureBuildGeometryInfoKHR vk_acceleration_structure_build_geometry_info_khr = {};
+        vk_acceleration_structure_build_geometry_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.pNext = nullptr;
+        vk_acceleration_structure_build_geometry_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.flags = VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR | VkBuildAccelerationStructureFlagBitsKHR::VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.mode = VkBuildAccelerationStructureModeKHR::VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        vk_acceleration_structure_build_geometry_info_khr.srcAccelerationStructure = VK_NULL_HANDLE;
+        vk_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = VK_NULL_HANDLE;
+        vk_acceleration_structure_build_geometry_info_khr.geometryCount = 1;
+        vk_acceleration_structure_build_geometry_info_khr.pGeometries = &vk_acceleration_structure_geometry_khr;
+        vk_acceleration_structure_build_geometry_info_khr.ppGeometries = nullptr;
+        vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = 0;
+
+        std::vector<uint32_t> max_primitive_counts(vk_acceleration_structure_build_geometry_info_khr.geometryCount);
+        for (uint32_t index = 0; index < vk_acceleration_structure_build_geometry_info_khr.geometryCount; index++)
+        {
+            // max_primitive_counts[index] = POSITION_data.size() / 3;
+            max_primitive_counts[index] = INDICES_data.size() / 3;
+        }
+
+        std::cout << "POSITION_data.size():" << POSITION_data.size() << std::endl;
+        std::cout << "INDICES_data.size():" << INDICES_data.size() << std::endl;
+
+        VkAccelerationStructureBuildSizesInfoKHR vk_acceleration_structure_build_sizes_info_khr = {};
+        vk_acceleration_structure_build_sizes_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+        vk_acceleration_structure_build_sizes_info_khr.pNext = nullptr;
+        vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize = 0;
+        vk_acceleration_structure_build_sizes_info_khr.updateScratchSize = 0;
+        vk_acceleration_structure_build_sizes_info_khr.buildScratchSize = 0;
+        if (device_driver->vkGetAccelerationStructureBuildSizesKHR != nullptr)
+        {
+            device_driver->vkGetAccelerationStructureBuildSizesKHR(device->GetVkDevice(), VkAccelerationStructureBuildTypeKHR::VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &vk_acceleration_structure_build_geometry_info_khr, max_primitive_counts.data(), &vk_acceleration_structure_build_sizes_info_khr);
+        }
+
+        std::cout << "Bottom Level VkAccelerationStructureBuildSizesInfoKHR.accelerationStructureSize = " << vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize << std::endl;
+        std::cout << "Bottom Level VkAccelerationStructureBuildSizesInfoKHR.updateScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.updateScratchSize << std::endl;
+        std::cout << "Bottom Level VkAccelerationStructureBuildSizesInfoKHR.buildScratchSize = " << vk_acceleration_structure_build_sizes_info_khr.buildScratchSize << std::endl;
+
+        bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize);
+
+        // create acceleration structure
+        VkDevice vk_device = device->GetVkDevice();
+        VkAccelerationStructureCreateInfoKHR vk_acceleration_structure_create_info_khr = {};
+        vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+        vk_acceleration_structure_create_info_khr.pNext = nullptr;
+        vk_acceleration_structure_create_info_khr.createFlags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        vk_acceleration_structure_create_info_khr.buffer = bottom_level_acceleration_structure_buffer->GetVkBuffer();                     // 将用于存储加速结构的缓存。大小一般可以为VkAccelerationStructureCreateInfoKHR::size，usage为VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR|VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT<由于之后创建顶层加速结构需要底层加速结构的地址，所以需要VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT>
+        vk_acceleration_structure_create_info_khr.offset = 0;                                                                             // 单位比特，相对于buffer的偏移之后存储加速结构，需要是256的倍数。
+        vk_acceleration_structure_create_info_khr.size = vk_acceleration_structure_build_sizes_info_khr.accelerationStructureSize;        // 该加速结构需要的大小。大小来源于vkGetAccelerationStructureBuildSizesKHR()函数中VkAccelerationStructureBuildSizesInfoKHR::accelerationStructureSize。
+        vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR; // 加速结构的类型：TOP，BOTTOM，GENERIC
+        vk_acceleration_structure_create_info_khr.deviceAddress = 0;                                                                      // 如果激活使用了accelerationStructureCaptureReplay特性，该地址为加速结构要求的那个设备地址。目前为VK_NULL_HANDLE
+
+        VkAllocationCallbacks *vk_allocation_callbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+
+        VkResult result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &bottom_level_acceleration_structure_khr);
+        if (result != VK_SUCCESS)
+        {
+            std::cout << "Create VkAccelerationStructureKHR Failed" << std::endl;
+        }
+
+        std::cout << "Create VkAccelerationStructureKHR Success" << std::endl;
+
+        Turbo::Core::TBuffer *scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.buildScratchSize);
+
+        VkBufferDeviceAddressInfo scratch_buffer_device_address_info = {};
+        scratch_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        scratch_buffer_device_address_info.pNext = nullptr;
+        scratch_buffer_device_address_info.buffer = scratch_buffer->GetVkBuffer();
+
+        VkDeviceAddress scratch_buffer_device_address = 0;
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddress(vk_device, &scratch_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(vk_device, &scratch_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            scratch_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(vk_device, &scratch_buffer_device_address_info);
+        }
+
+        if (scratch_buffer_device_address != 0)
+        {
+            std::cout << "Successfully get scratch_buffer VkBuffer device local address " << std::endl;
+        }
+
+        vk_acceleration_structure_build_geometry_info_khr.dstAccelerationStructure = bottom_level_acceleration_structure_khr;
+        vk_acceleration_structure_build_geometry_info_khr.scratchData.deviceAddress = scratch_buffer_device_address;
+
+        VkAccelerationStructureBuildRangeInfoKHR vk_acceleration_structure_build_range_info_khr = {};
+        // vk_acceleration_structure_build_range_info_khr.primitiveCount = POSITION_data.size() / 3;
+        vk_acceleration_structure_build_range_info_khr.primitiveCount = INDICES_data.size() / 3;
+        vk_acceleration_structure_build_range_info_khr.primitiveOffset = 0;
+        vk_acceleration_structure_build_range_info_khr.firstVertex = 0;
+        vk_acceleration_structure_build_range_info_khr.transformOffset = 0;
+
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR> vk_acceleration_structure_build_range_info_khrs;
+        vk_acceleration_structure_build_range_info_khrs.push_back(vk_acceleration_structure_build_range_info_khr);
+
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR * /*指向个数为 VkAccelerationStructureBuildGeometryInfoKHR::geometryCount 的 VkAccelerationStructureBuildRangeInfoKHR 数组*/> build_range_infos; // 该数组内元素个数应与 vkCmdBuildAccelerationStructuresKHR::infoCount 对应
+        build_range_infos.push_back(vk_acceleration_structure_build_range_info_khrs.data());
+        // TODO: compaction query pool for compact acceleration structure
+        {
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdBuildAccelerationStructuresKHR(command_buffer->GetVkCommandBuffer(), 1, &vk_acceleration_structure_build_geometry_info_khr, build_range_infos.data());
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+        }
+
+        // TODO: compact acceleration structure
+        {
+            VkQueryPool query_pool = VK_NULL_HANDLE;
+
+            VkQueryPoolCreateInfo vk_query_pool_create_info = {};
+            vk_query_pool_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+            vk_query_pool_create_info.pNext = nullptr;
+            vk_query_pool_create_info.flags = 0;
+            vk_query_pool_create_info.queryType = VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR;
+            vk_query_pool_create_info.queryCount = 1;
+            vk_query_pool_create_info.pipelineStatistics = 0;
+
+            result = device->GetDeviceDriver()->vkCreateQueryPool(vk_device, &vk_query_pool_create_info, vk_allocation_callbacks, &query_pool);
+            if (result != VK_SUCCESS)
+            {
+                std::cout << "Create VkQueryPool Failed" << std::endl;
+            }
+
+            std::cout << "Create VkQueryPool Success" << std::endl;
+
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
+            device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &bottom_level_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            VkDeviceSize compact_size = 0;
+            device->GetDeviceDriver()->vkGetQueryPoolResults(vk_device, query_pool, 0, 1, sizeof(VkDeviceSize), &compact_size, sizeof(VkDeviceSize), VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
+            std::cout << "compact size:" << compact_size << std::endl;
+
+            delete fence;
+            command_pool->Free(command_buffer);
+
+            VkAccelerationStructureKHR compact_bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
+
+            Turbo::Core::TBuffer *compact_bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
+
+            VkAccelerationStructureCreateInfoKHR compact_vk_acceleration_structure_create_info_khr = {};
+            compact_vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+            compact_vk_acceleration_structure_create_info_khr.pNext = nullptr;
+            compact_vk_acceleration_structure_create_info_khr.createFlags = 0;
+            compact_vk_acceleration_structure_create_info_khr.buffer = compact_bottom_level_acceleration_structure_buffer->GetVkBuffer();
+            compact_vk_acceleration_structure_create_info_khr.offset = 0;
+            compact_vk_acceleration_structure_create_info_khr.size = compact_size;
+            compact_vk_acceleration_structure_create_info_khr.type = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+            compact_vk_acceleration_structure_create_info_khr.deviceAddress = 0;
+
+            result = device->GetDeviceDriver()->vkCreateAccelerationStructureKHR(vk_device, &compact_vk_acceleration_structure_create_info_khr, vk_allocation_callbacks, &compact_bottom_level_acceleration_structure_khr);
+            if (result != VkResult::VK_SUCCESS)
+            {
+                std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Failed" << std::endl;
+            }
+
+            std::cout << "vkCreateAccelerationStructureKHR create compact VkAccelerationStructureKHR Success" << std::endl;
+
+            VkCopyAccelerationStructureInfoKHR vk_copy_acceleration_structure_info_khr = {};
+            vk_copy_acceleration_structure_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR;
+            vk_copy_acceleration_structure_info_khr.pNext = nullptr;
+            vk_copy_acceleration_structure_info_khr.src = bottom_level_acceleration_structure_khr;
+            vk_copy_acceleration_structure_info_khr.dst = compact_bottom_level_acceleration_structure_khr;
+            vk_copy_acceleration_structure_info_khr.mode = VkCopyAccelerationStructureModeKHR::VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR;
+
+            command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            device->GetDeviceDriver()->vkCmdCopyAccelerationStructureKHR(command_buffer->GetVkCommandBuffer(), &vk_copy_acceleration_structure_info_khr);
+            command_buffer->End();
+            fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            device->GetDeviceDriver()->vkDestroyQueryPool(vk_device, query_pool, vk_allocation_callbacks);
+
+            // destroy no compact acceleration structure
+            device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, bottom_level_acceleration_structure_khr, vk_allocation_callbacks);
+            delete bottom_level_acceleration_structure_buffer;
+
+            // set acceleration structure value to compact version
+            bottom_level_acceleration_structure_khr = compact_bottom_level_acceleration_structure_khr;
+            bottom_level_acceleration_structure_buffer = compact_bottom_level_acceleration_structure_buffer;
+        }
+
+        delete scratch_buffer;
+    }
+}
 
 int main()
 {
@@ -156,15 +557,8 @@ int main()
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
     //<gltf>
-
     std::vector<MESH> meshes;
     std::vector<NODE> nodes;
-
-    std::vector<POSITION> POSITION_data;
-    std::vector<NORMAL> NORMAL_data;
-    std::vector<TEXCOORD> TEXCOORD_data;
-    std::vector<uint32_t> INDICES_data;
-
     {
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
@@ -204,6 +598,18 @@ int main()
             tinygltf::Primitive &primitive = mesh.primitives[0];
             int mode = primitive.mode;
             int material_index = primitive.material; // NOTE: Material
+
+            tinygltf::Material &material = model.materials[material_index];
+            auto &bace_color_factor = material.pbrMetallicRoughness.baseColorFactor;
+            auto &emissive_factor = material.emissiveFactor;
+
+            MATERIAL temp_material = {};
+            temp_material.pbrBaseColorFactor.r = bace_color_factor[0];
+            temp_material.pbrBaseColorFactor.g = bace_color_factor[1];
+            temp_material.pbrBaseColorFactor.b = bace_color_factor[2];
+            temp_material.emissiveFactor.r = emissive_factor[0];
+            temp_material.emissiveFactor.g = emissive_factor[1];
+            temp_material.emissiveFactor.b = emissive_factor[2];
 
             int position_accesser_index = primitive.attributes["POSITION"];
             int normal_accesser_index = primitive.attributes["NORMAL"];
@@ -274,23 +680,13 @@ int main()
             temp_mesh.NORMAL_data = std::move(temp_normal_data);
             temp_mesh.TEXCOORD_data = std::move(temp_texcoord_data);
             temp_mesh.INDICES_data = std::move(temp_indices_data);
+            temp_mesh.material = std::move(temp_material);
 
             meshes.push_back(std::move(temp_mesh));
         }
     }
     //</gltf>
 
-    //<Test>
-    {
-        uint32_t target_index = 8; //[0,8]
-        POSITION_data = meshes[target_index].POSITION_data;
-        NORMAL_data = meshes[target_index].NORMAL_data;
-        TEXCOORD_data = meshes[target_index].TEXCOORD_data;
-        INDICES_data = meshes[target_index].INDICES_data;
-    }
-    //</Test>
-
-    uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
 
     Turbo::Core::TLayerInfo khronos_validation;
@@ -345,79 +741,6 @@ int main()
     Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_support_features = physical_device->GetDeviceFeatures();
-    {
-        if (physical_device_support_features.accelerationStructure)
-        {
-            std::cout << "Support acceleration structure feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support acceleration structure feature" << std::endl;
-        }
-
-        if (physical_device_support_features.accelerationStructureCaptureReplay)
-        {
-            std::cout << "Support acceleration structure capture replay feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support acceleration structure capture replay feature" << std::endl;
-        }
-
-        if (physical_device_support_features.accelerationStructureHostCommands)
-        {
-            std::cout << "Support acceleration structure host commands feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support acceleration structure host commands feature" << std::endl;
-        }
-
-        if (physical_device_support_features.accelerationStructureIndirectBuild)
-        {
-            std::cout << "Support acceleration structure indirect build feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support acceleration structure indirect build feature" << std::endl;
-        }
-
-        if (physical_device_support_features.bufferDeviceAddress)
-        {
-            std::cout << "Support bufferDeviceAddress feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support bufferDeviceAddress feature" << std::endl;
-        }
-
-        if (physical_device_support_features.bufferDeviceAddressCaptureReplay)
-        {
-            std::cout << "Support bufferDeviceAddressCaptureReplay feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support bufferDeviceAddressCaptureReplay feature" << std::endl;
-        }
-
-        if (physical_device_support_features.bufferDeviceAddressMultiDevice)
-        {
-            std::cout << "Support bufferDeviceAddressMultiDevice feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support bufferDeviceAddressMultiDevice feature" << std::endl;
-        }
-
-        if (physical_device_support_features.rayTracingPipeline)
-        {
-            std::cout << "Support ray tracing pipeline feature" << std::endl;
-        }
-        else
-        {
-            std::cout << "Not support ray tracing pipeline feature" << std::endl;
-        }
-    }
 
     if (!physical_device_support_features.accelerationStructure || !physical_device_support_features.rayTracingPipeline)
     {
@@ -446,16 +769,16 @@ int main()
     physical_device_features.bufferDeviceAddress = physical_device_support_features.bufferDeviceAddress;
     physical_device_features.rayTracingPipeline = physical_device_support_features.rayTracingPipeline;
 
-    if (physical_device_support_features.geometryShader)
-    {
-        physical_device_features.geometryShader = true;
-    }
-    else
-    {
-        glfwTerminate();
-        delete instance;
-        throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry shader feature");
-    }
+    // if (physical_device_support_features.geometryShader)
+    //{
+    //     physical_device_features.geometryShader = true;
+    // }
+    // else
+    //{
+    //     glfwTerminate();
+    //     delete instance;
+    //     throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Not support geometry shader feature");
+    // }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
@@ -525,36 +848,8 @@ int main()
     memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
     my_buffer->Unmap();
 
-    Turbo::Core::TBuffer *position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(POSITION) * POSITION_data.size());
-    void *position_buffer_ptr = position_buffer->Map();
-    memcpy(position_buffer_ptr, POSITION_data.data(), sizeof(POSITION) * POSITION_data.size());
-    position_buffer->Unmap();
-    // POSITION_data.clear();
-
-    Turbo::Core::TBuffer *normal_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(NORMAL) * NORMAL_data.size());
-    void *normal_buffer_ptr = normal_buffer->Map();
-    memcpy(normal_buffer_ptr, NORMAL_data.data(), sizeof(NORMAL) * NORMAL_data.size());
-    normal_buffer->Unmap();
-    // NORMAL_data.clear();
-
-    Turbo::Core::TBuffer *texcoord_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TEXCOORD) * TEXCOORD_data.size());
-    void *texcoord_buffer_ptr = texcoord_buffer->Map();
-    memcpy(texcoord_buffer_ptr, TEXCOORD_data.data(), sizeof(TEXCOORD) * TEXCOORD_data.size());
-    texcoord_buffer->Unmap();
-    // TEXCOORD_data.clear();
-
-    Turbo::Core::TBuffer *index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(uint32_t) * INDICES_data.size());
-    void *index_buffer_ptr = index_buffer->Map();
-    memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
-    index_buffer->Unmap();
-    // INDICES_data.clear();
-
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
-
-    Turbo::Core::TVertexShader *vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, VERT_SHADER_STR);
-    Turbo::Core::TGeometryShader *geometry_shader = new Turbo::Core::TGeometryShader(device, Turbo::Core::TShaderLanguage::GLSL, GEOM_SHADER_STR);
-    Turbo::Core::TFragmentShader *fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, FRAG_SHADER_STR);
 
     // for ray tracing image
     Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
