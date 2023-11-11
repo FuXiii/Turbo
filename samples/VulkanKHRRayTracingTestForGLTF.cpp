@@ -80,6 +80,8 @@ const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/
 const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rmiss");
 const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTest.rchit");
 
+typedef uint32_t INDEX;
+
 typedef struct POSITION
 {
     float x;
@@ -129,9 +131,20 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
 struct NODE
 {
     glm::mat4 matrix;
+    uint32_t meshIndex;
 };
 
-typedef uint32_t INDEX;
+struct MATERIAL
+{
+};
+
+struct MESH
+{
+    std::vector<POSITION> POSITION_data;
+    std::vector<NORMAL> NORMAL_data;
+    std::vector<TEXCOORD> TEXCOORD_data;
+    std::vector<INDEX> INDICES_data;
+};
 
 int main()
 {
@@ -142,12 +155,16 @@ int main()
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
-    //<gltf for material_sphere>
+    //<gltf>
+
+    std::vector<MESH> meshes;
+    std::vector<NODE> nodes;
+
     std::vector<POSITION> POSITION_data;
     std::vector<NORMAL> NORMAL_data;
     std::vector<TEXCOORD> TEXCOORD_data;
-    std::vector<TANGENT> TANGENT_data;
     std::vector<uint32_t> INDICES_data;
+
     {
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
@@ -156,10 +173,13 @@ int main()
 
         bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/CornellBox/cornellBox.gltf");
         const tinygltf::Scene &default_scene = model.scenes[model.defaultScene];
+
+        // NOTE: 多个 node 允许公用同一个 mesh
+        // NOTE: 使用一个数组存储所有 mesh，避免重复数据
+        // NOTE: 遍历 model.meshes 数组获取网格数据
+        // NOTE: 遍历 model.nodes 数组获取节点数据（变换矩阵和对应的 mesh 索引）
         for (auto node_index : default_scene.nodes)
         {
-            NODE temp_node;
-
             tinygltf::Node &node = model.nodes[node_index];
             auto node_matrix = node.matrix;
 
@@ -168,89 +188,107 @@ int main()
             glm::mat4::col_type v2(node_matrix[8], node_matrix[9], node_matrix[10], node_matrix[11]);
             glm::mat4::col_type v3(node_matrix[12], node_matrix[13], node_matrix[14], node_matrix[15]);
 
-            temp_node.matrix = glm::mat4(v0, v1, v2, v3); // Node Matrix
-
-            // NOTE: 多个 node 允许公用同一个 mesh
-            // NOTE: 使用一个数组存储所有 mesh，避免重复数据
-            // NOTE: 遍历 model.meshes 数组获取网格数据
-            // NOTE: 遍历 model.nodes 数组获取节点数据（变换矩阵和对应的 mesh 索引）
             int mesh_index = node.mesh;
             if (mesh_index >= 0)
             {
-                tinygltf::Mesh &mesh = model.meshes[mesh_index];
-                tinygltf::Primitive &primitive = mesh.primitives[0];
-                int mode = primitive.mode;
-                int material_index = primitive.material;
+                NODE temp_node = {};
+                temp_node.matrix = glm::mat4(v0, v1, v2, v3); // Node Matrix
+                temp_node.meshIndex = mesh_index;
 
-                int position_accesser_index = primitive.attributes["POSITION"];
-                int normal_accesser_index = primitive.attributes["NORMAL"];
-                int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
-                int indices_accesser_index = primitive.indices;
-
-                tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
-                tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
-                tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
-                tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
-
-                tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
-                tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
-                tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
-                tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
-
-                int position_buffer_index = position_buffer_view.buffer;
-                size_t position_buffer_byteLength = position_buffer_view.byteLength;
-                size_t position_buffer_byteOffset = position_buffer_view.byteOffset;
-                size_t position_buffer_byteStride = position_buffer_view.byteStride;
-                int position_type = position_accessor.type;
-                size_t position_count = position_accessor.count;
-
-                int normal_buffer_index = normal_buffer_view.buffer;
-                size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
-                size_t normal_buffer_byteOffset = normal_buffer_view.byteOffset;
-                size_t normal_buffer_byteStride = normal_buffer_view.byteStride;
-                int normal_type = normal_accessor.type;
-                size_t normal_count = normal_accessor.count;
-
-                int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
-                size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
-                size_t texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
-                size_t texcoord_0_buffer_byteStride = texcoord_0_buffer_view.byteStride;
-                int texcoord_0_type = texcoord_0_accessor.type;
-                size_t texcoord_0_count = texcoord_0_accessor.count;
-
-                int indices_buffer_index = indices_buffer_view.buffer;
-                size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
-                size_t indices_buffer_byteOffset = indices_buffer_view.byteOffset;
-                size_t indices_buffer_byteStride = indices_buffer_view.byteStride;
-
-                int indices_type = indices_accessor.type;
-                size_t indices_count = indices_accessor.count;
-
-                tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
-                tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
-                tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
-                tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
-
-                std::vector<unsigned char> &position_data = position_buffer.data;
-                std::vector<unsigned char> &normal_data = normal_buffer.data;
-                std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
-                std::vector<unsigned char> &indices_data = indices_buffer.data;
-
-                std::vector<POSITION> POSITION_data(position_buffer_byteLength / sizeof(POSITION));
-                std::vector<NORMAL> NORMAL_data(normal_buffer_byteLength / sizeof(NORMAL));
-                std::vector<TEXCOORD> TEXCOORD_data(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
-                std::vector<INDEX> INDICES_data(indices_buffer_byteLength / sizeof(INDEX));
-
-                memcpy(POSITION_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
-                memcpy(NORMAL_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
-                memcpy(TEXCOORD_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
-                memcpy(INDICES_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
+                nodes.push_back(std::move(temp_node));
             }
         }
-    }
 
-    return 0;
-    //</gltf for material_sphere>
+        for (auto &mesh : model.meshes)
+        {
+            tinygltf::Primitive &primitive = mesh.primitives[0];
+            int mode = primitive.mode;
+            int material_index = primitive.material; // NOTE: Material
+
+            int position_accesser_index = primitive.attributes["POSITION"];
+            int normal_accesser_index = primitive.attributes["NORMAL"];
+            int texcoord_0_accesser_index = primitive.attributes["TEXCOORD_0"];
+            int indices_accesser_index = primitive.indices;
+
+            tinygltf::Accessor &position_accessor = model.accessors[position_accesser_index];
+            tinygltf::Accessor &normal_accessor = model.accessors[normal_accesser_index];
+            tinygltf::Accessor &texcoord_0_accessor = model.accessors[texcoord_0_accesser_index];
+            tinygltf::Accessor &indices_accessor = model.accessors[indices_accesser_index];
+
+            tinygltf::BufferView &position_buffer_view = model.bufferViews[position_accessor.bufferView];
+            tinygltf::BufferView &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
+            tinygltf::BufferView &texcoord_0_buffer_view = model.bufferViews[texcoord_0_accessor.bufferView];
+            tinygltf::BufferView &indices_buffer_view = model.bufferViews[indices_accessor.bufferView];
+
+            int position_buffer_index = position_buffer_view.buffer;
+            size_t position_buffer_byteLength = position_buffer_view.byteLength;
+            size_t position_buffer_byteOffset = position_buffer_view.byteOffset;
+            size_t position_buffer_byteStride = position_buffer_view.byteStride;
+            int position_type = position_accessor.type;
+            size_t position_count = position_accessor.count;
+
+            int normal_buffer_index = normal_buffer_view.buffer;
+            size_t normal_buffer_byteLength = normal_buffer_view.byteLength;
+            size_t normal_buffer_byteOffset = normal_buffer_view.byteOffset;
+            size_t normal_buffer_byteStride = normal_buffer_view.byteStride;
+            int normal_type = normal_accessor.type;
+            size_t normal_count = normal_accessor.count;
+
+            int texcoord_0_buffer_index = texcoord_0_buffer_view.buffer;
+            size_t texcoord_0_buffer_byteLength = texcoord_0_buffer_view.byteLength;
+            size_t texcoord_0_buffer_byteOffset = texcoord_0_buffer_view.byteOffset;
+            size_t texcoord_0_buffer_byteStride = texcoord_0_buffer_view.byteStride;
+            int texcoord_0_type = texcoord_0_accessor.type;
+            size_t texcoord_0_count = texcoord_0_accessor.count;
+
+            int indices_buffer_index = indices_buffer_view.buffer;
+            size_t indices_buffer_byteLength = indices_buffer_view.byteLength;
+            size_t indices_buffer_byteOffset = indices_buffer_view.byteOffset;
+            size_t indices_buffer_byteStride = indices_buffer_view.byteStride;
+
+            int indices_type = indices_accessor.type;
+            size_t indices_count = indices_accessor.count;
+
+            tinygltf::Buffer &position_buffer = model.buffers[position_buffer_index];
+            tinygltf::Buffer &normal_buffer = model.buffers[normal_buffer_index];
+            tinygltf::Buffer &texcoord_0_buffer = model.buffers[texcoord_0_buffer_index];
+            tinygltf::Buffer &indices_buffer = model.buffers[indices_buffer_index];
+
+            std::vector<unsigned char> &position_data = position_buffer.data;
+            std::vector<unsigned char> &normal_data = normal_buffer.data;
+            std::vector<unsigned char> &texcoord_0_data = texcoord_0_buffer.data;
+            std::vector<unsigned char> &indices_data = indices_buffer.data;
+
+            std::vector<POSITION> temp_position_data(position_buffer_byteLength / sizeof(POSITION));
+            std::vector<NORMAL> temp_normal_data(normal_buffer_byteLength / sizeof(NORMAL));
+            std::vector<TEXCOORD> temp_texcoord_data(texcoord_0_buffer_byteLength / sizeof(TEXCOORD));
+            std::vector<INDEX> temp_indices_data(indices_buffer_byteLength / sizeof(INDEX));
+
+            memcpy(temp_position_data.data(), position_data.data() + position_buffer_byteOffset, position_buffer_byteLength);
+            memcpy(temp_normal_data.data(), normal_data.data() + normal_buffer_byteOffset, normal_buffer_byteLength);
+            memcpy(temp_texcoord_data.data(), texcoord_0_data.data() + texcoord_0_buffer_byteOffset, texcoord_0_buffer_byteLength);
+            memcpy(temp_indices_data.data(), indices_data.data() + indices_buffer_byteOffset, indices_buffer_byteLength);
+
+            MESH temp_mesh = {};
+            temp_mesh.POSITION_data = std::move(temp_position_data);
+            temp_mesh.NORMAL_data = std::move(temp_normal_data);
+            temp_mesh.TEXCOORD_data = std::move(temp_texcoord_data);
+            temp_mesh.INDICES_data = std::move(temp_indices_data);
+
+            meshes.push_back(std::move(temp_mesh));
+        }
+    }
+    //</gltf>
+
+    //<Test>
+    {
+        uint32_t target_index = 8; //[0,8]
+        POSITION_data = meshes[target_index].POSITION_data;
+        NORMAL_data = meshes[target_index].NORMAL_data;
+        TEXCOORD_data = meshes[target_index].TEXCOORD_data;
+        INDICES_data = meshes[target_index].INDICES_data;
+    }
+    //</Test>
 
     uint32_t indices_count = INDICES_data.size();
     Turbo::Core::TEngine engine;
@@ -510,12 +548,6 @@ int main()
     memcpy(index_buffer_ptr, INDICES_data.data(), sizeof(uint32_t) * INDICES_data.size());
     index_buffer->Unmap();
     // INDICES_data.clear();
-
-    Turbo::Core::TBuffer *tangent_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(TANGENT) * TANGENT_data.size());
-    void *tangent_buffer_ptr = tangent_buffer->Map();
-    memcpy(tangent_buffer_ptr, TANGENT_data.data(), sizeof(TANGENT) * TANGENT_data.size());
-    tangent_buffer->Unmap();
-    // TANGENT_data.clear();
 
     Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
     Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
@@ -1630,7 +1662,6 @@ int main()
     vertex_buffers.push_back(position_buffer);
     vertex_buffers.push_back(normal_buffer);
     vertex_buffers.push_back(texcoord_buffer);
-    vertex_buffers.push_back(tangent_buffer);
 
     std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
     for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
@@ -2443,7 +2474,6 @@ int main()
     }
     delete index_buffer;
     delete position_buffer;
-    delete tangent_buffer;
     delete normal_buffer;
     delete texcoord_buffer;
     delete my_buffer;
