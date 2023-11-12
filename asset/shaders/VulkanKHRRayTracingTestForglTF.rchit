@@ -1,16 +1,48 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
 #extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require // we need use [uint64_t] key word
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_buffer_reference2 : require
 
 struct HitPayload
 {
     vec3 color;
 };
 
+struct Vertex
+{
+    vec3 position;
+    vec3 normal;
+    vec2 texcoord;
+};
+
+struct BottomLevelAccelerationStructureDeviceAddress
+{
+    uint64_t vertexDeviceAddress;
+    uint64_t indexDeviceAddress;
+};
+
+layout(buffer_reference, scalar) buffer Vertices
+{
+    Vertex v[];
+};
+
+layout(buffer_reference, scalar) buffer Indices
+{
+    ivec3 i[];
+};
+
 struct PushConstant
 {
     bool isBarycentrics;
 };
+
+layout(set = 0, binding = 3, scalar) buffer BottomLevelAccelerationStructureDeviceAddress_
+{
+    BottomLevelAccelerationStructureDeviceAddress blas_device_address[];
+}
+BLAS_DEVICE_ADDRESS;
 
 layout(location = 0) rayPayloadInEXT HitPayload HIT_PAY_LOAD;
 layout(push_constant) uniform PushConstant_
@@ -22,11 +54,30 @@ hitAttributeEXT vec2 attribs;
 
 void main()
 {
+    BottomLevelAccelerationStructureDeviceAddress blas_device_address = BLAS_DEVICE_ADDRESS.blas_device_address[gl_InstanceCustomIndexEXT];
+
+    Vertices vertices = Vertices(blas_device_address.vertexDeviceAddress);
+    Indices indices = Indices(blas_device_address.indexDeviceAddress);
+
+    ivec3 index = indices.i[gl_PrimitiveID];
+
+    Vertex v0 = vertices.v[index.x];
+    Vertex v1 = vertices.v[index.y];
+    Vertex v2 = vertices.v[index.z];
+
     const vec3 barycentrics = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y); // 最近命中点重心坐标
+
+    const vec3 position = v0.position * barycentrics.x + v1.position * barycentrics.y + v2.position * barycentrics.z;
+    const vec3 world_position = vec3(gl_ObjectToWorldEXT * vec4(position, 1.0));
+
+    const vec3 normal = v0.normal * barycentrics.x + v1.normal * barycentrics.y + v2.normal * barycentrics.z;
+    // const vec3 world_normal = normalize(vec3(gl_WorldToObjectEXT * vec4(normal, 1.0)));
+    const vec3 world_normal = normalize(vec3(normal * gl_WorldToObjectEXT));
 
     if (pc.isBarycentrics)
     {
-        HIT_PAY_LOAD.color = barycentrics;
+        // HIT_PAY_LOAD.color = barycentrics;
+        HIT_PAY_LOAD.color = (world_normal + 1) * 0.5;
     }
     else
     {
