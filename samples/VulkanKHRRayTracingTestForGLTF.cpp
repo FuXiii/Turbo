@@ -1782,7 +1782,7 @@ int main()
                 }
 
                 float delte_time = io.DeltaTime;
-                float speed = 1;
+                float speed = 3;
 
                 glm::vec3 forward_axis = glm::vec3(0, 0, 1);
                 glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
@@ -1845,14 +1845,14 @@ int main()
 
             ImGui::NewFrame();
 
-            static bool is_ray_tracing = true;
-            static bool is_show_barycentrics = true;
+            static bool is_ray_tracing = false;
+            static bool is_show_barycentrics = false;
 
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTest");
+                ImGui::Begin("VulkanKHRRayTracingTestForglTF");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
