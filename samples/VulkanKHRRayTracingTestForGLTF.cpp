@@ -75,6 +75,7 @@ const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgu
 const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rgen");
 const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rmiss");
 const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rchit");
+const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
 
 typedef uint32_t INDEX;
 
@@ -131,6 +132,13 @@ struct RAY_TRACING_MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
+struct PUSH_CONSTANT_DATA
+{
+    int accumulateFrame;
+    float intensity;
+    float roughness;
+};
+
 struct MATERIAL
 {
     COLOR pbrBaseColorFactor;
@@ -164,6 +172,7 @@ struct BOTTOM_LEVEL_ACCELERATION_STRUCTURE
 {
     Turbo::Core::TBuffer *vertexBuffer = nullptr;
     Turbo::Core::TBuffer *indexBuffer = nullptr;
+    Turbo::Core::TBuffer *materialBuffer = nullptr;
     Turbo::Core::TBuffer *bottomLevelAccelerationStructureBuffer = nullptr;
     VkAccelerationStructureKHR bottomLevelAccelerationStructure = VK_NULL_HANDLE;
 };
@@ -179,6 +188,7 @@ struct BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS
 {
     VkDeviceAddress vertexDeviceAddress;
     VkDeviceAddress indexDeviceAddress;
+    VkDeviceAddress materialDeviceAddress;
 };
 
 BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue, MESH &mesh)
@@ -205,6 +215,7 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
 
     Turbo::Core::TBuffer *device_local_vertex_buffer = nullptr;
     Turbo::Core::TBuffer *device_local_index_buffer = nullptr;
+    Turbo::Core::TBuffer *device_local_material_buffer = nullptr;
     Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = nullptr;
     VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
 
@@ -553,11 +564,33 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
         }
 
         delete scratch_buffer;
+
+        device_local_material_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(MATERIAL));
+        {
+            Turbo::Core::TBuffer *staging_material_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(MATERIAL));
+            memcpy(staging_material_buffer->Map(), &(mesh.material), sizeof(MATERIAL));
+            staging_material_buffer->Unmap();
+
+            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            command_buffer->CmdCopyBuffer(staging_material_buffer, device_local_material_buffer, 0, 0, sizeof(MATERIAL));
+            command_buffer->End();
+            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
+            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            fence->WaitUntil();
+
+            delete fence;
+            command_pool->Free(command_buffer);
+            delete command_pool;
+            delete staging_material_buffer;
+        }
     }
 
     BOTTOM_LEVEL_ACCELERATION_STRUCTURE bottom_level_acceleration_structur = {};
     bottom_level_acceleration_structur.vertexBuffer = device_local_vertex_buffer;
     bottom_level_acceleration_structur.indexBuffer = device_local_index_buffer;
+    bottom_level_acceleration_structur.materialBuffer = device_local_material_buffer;
     bottom_level_acceleration_structur.bottomLevelAccelerationStructureBuffer = bottom_level_acceleration_structure_buffer;
     bottom_level_acceleration_structur.bottomLevelAccelerationStructure = bottom_level_acceleration_structure_khr;
 
@@ -869,6 +902,11 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
 int main()
 {
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+
+    PUSH_CONSTANT_DATA push_constant_data = {};
+    push_constant_data.accumulateFrame = 0;
+    push_constant_data.intensity = 0;
+    push_constant_data.roughness = 1;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.scale = 0.03;
@@ -1215,6 +1253,7 @@ int main()
 
         VkDeviceAddress device_local_vertex_buffer_device_address = 0;
         VkDeviceAddress device_local_index_buffer_device_address = 0;
+        VkDeviceAddress device_local_material_buffer_device_address = 0;
 
         VkBufferDeviceAddressInfo device_local_vertex_buffer_device_address_info = {};
         device_local_vertex_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -1252,9 +1291,28 @@ int main()
             device_local_index_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_index_buffer_device_address_info);
         }
 
+        VkBufferDeviceAddressInfo device_local_material_buffer_device_address_info = {};
+        device_local_material_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        device_local_material_buffer_device_address_info.pNext = nullptr;
+        device_local_material_buffer_device_address_info.buffer = bottom_level_acceleration_structure_item.materialBuffer->GetVkBuffer();
+
+        if (device_driver->vkGetBufferDeviceAddress != nullptr)
+        {
+            device_local_material_buffer_device_address = device_driver->vkGetBufferDeviceAddress(device->GetVkDevice(), &device_local_material_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressKHR != nullptr)
+        {
+            device_local_material_buffer_device_address = device_driver->vkGetBufferDeviceAddressKHR(device->GetVkDevice(), &device_local_material_buffer_device_address_info);
+        }
+        else if (device_driver->vkGetBufferDeviceAddressEXT != nullptr)
+        {
+            device_local_material_buffer_device_address = device_driver->vkGetBufferDeviceAddressEXT(device->GetVkDevice(), &device_local_material_buffer_device_address_info);
+        }
+
         BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS ray_tracing_bottom_level_acceleration_structure;
         ray_tracing_bottom_level_acceleration_structure.vertexDeviceAddress = device_local_vertex_buffer_device_address;
         ray_tracing_bottom_level_acceleration_structure.indexDeviceAddress = device_local_index_buffer_device_address;
+        ray_tracing_bottom_level_acceleration_structure.materialDeviceAddress = device_local_material_buffer_device_address;
 
         bottom_level_acceleration_structure_device_addresses.push_back(ray_tracing_bottom_level_acceleration_structure);
     }
@@ -1438,9 +1496,9 @@ int main()
         device_driver->vkUpdateDescriptorSets(device->GetVkDevice(), vk_write_descriptor_sets.size(), vk_write_descriptor_sets.data(), 0, nullptr);
 
         VkPushConstantRange ray_tracing_pipeline_push_constant_range = {};
-        ray_tracing_pipeline_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        ray_tracing_pipeline_push_constant_range.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
         ray_tracing_pipeline_push_constant_range.offset = 0;
-        ray_tracing_pipeline_push_constant_range.size = sizeof(VkBool32);
+        ray_tracing_pipeline_push_constant_range.size = sizeof(PUSH_CONSTANT_DATA);
 
         VkPipelineLayoutCreateInfo ray_tracing_pipeline_layout_create_info = {};
         ray_tracing_pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1459,7 +1517,7 @@ int main()
 
         ray_generation_shader_test = new Turbo::Core::TRayGenerationShader(device, Turbo::Core::TShaderLanguage::GLSL, RAY_GENERATION_SHADER_STR);
         miss_shader_test = new Turbo::Core::TMissShader(device, Turbo::Core::TShaderLanguage::GLSL, MISS_SHADER_STR);
-        closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR);
+        closest_hit_shader_test = new Turbo::Core::TClosestHitShader(device, Turbo::Core::TShaderLanguage::GLSL, CLOSEST_HIT_SHADER_STR, {SHADER_INCLUDE_PATH});
 
         VkPipelineShaderStageCreateInfo ray_generation_shader_stage_create_info = {};
         ray_generation_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -1945,6 +2003,21 @@ int main()
                 _ptr = matrixs_buffer->Map();
                 memcpy(_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
                 matrixs_buffer->Unmap();
+
+                //
+                static glm::vec3 previous_camera_position;
+                static glm::vec3 previous_camera_forward;
+                if (previous_camera_position != camera_position || previous_camera_forward != forward_dir)
+                {
+                    push_constant_data.accumulateFrame = 0;
+
+                    previous_camera_position = camera_position;
+                    previous_camera_forward = forward_dir;
+                }
+                else
+                {
+                    push_constant_data.accumulateFrame += 1;
+                }
             }
 
             ImGui::NewFrame();
@@ -1959,12 +2032,22 @@ int main()
                 ImGui::Begin("VulkanKHRRayTracingTestForglTF");
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
-                ImGui::SliderFloat("angle", &angle, 0.0f, 360);
-                ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+                // ImGui::SliderFloat("angle", &angle, 0.0f, 360);
+                // ImGui::SliderFloat("scale", &my_buffer_data.scale, 0.03, 0.1);
+
                 ImGui::Checkbox("ray tracing", &is_ray_tracing);
                 if (is_ray_tracing)
                 {
-                    ImGui::Checkbox("show barycentrics", &is_show_barycentrics);
+                    // ImGui::Checkbox("show barycentrics", &is_show_barycentrics);
+
+                    if (ImGui::SliderFloat("Intensity", &push_constant_data.intensity, 0, 1))
+                    {
+                        push_constant_data.accumulateFrame = 0;
+                    }
+                    if (ImGui::SliderFloat("Roughness", &push_constant_data.roughness, 0, 1))
+                    {
+                        push_constant_data.accumulateFrame = 0;
+                    }
                 }
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -1993,7 +2076,7 @@ int main()
                     {
                         vk_is_show_barycentrics = VK_TRUE;
                     }
-                    device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0, sizeof(VkBool32), &vk_is_show_barycentrics);
+                    device_driver->vkCmdPushConstants(vk_command_buffer, ray_tracing_pipeline_layout, VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(PUSH_CONSTANT_DATA), &push_constant_data);
                     device_driver->vkCmdBindDescriptorSets(vk_command_buffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, ray_tracing_pipeline_layout, 0, 1, &ray_tracing_descriptor_set, 0, nullptr);
                     device_driver->vkCmdTraceRaysKHR(vk_command_buffer, &ray_generation_binding_table, &miss_binding_table, &closest_hit_binding_table, &callable_binding_table, swapchain->GetWidth(), swapchain->GetHeight(), 1);
 
@@ -2505,6 +2588,7 @@ int main()
         delete bottom_level_acceleration_structure_item.bottomLevelAccelerationStructureBuffer;
         delete bottom_level_acceleration_structure_item.indexBuffer;
         delete bottom_level_acceleration_structure_item.vertexBuffer;
+        delete bottom_level_acceleration_structure_item.materialBuffer;
     }
 
     delete bottom_level_acceleration_structure_device_address_buffer;
