@@ -161,10 +161,18 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     // For Vulkan1.0
     this->physicalDeviceDriver->vkGetPhysicalDeviceFeatures(this->vkPhysicalDevice, &(this->info.features));
 
+    // NOTE: add new feature in here(don't forgot refresh pNext in feature chain)
+
+    // For VK_KHR_ray_query
+    VkPhysicalDeviceRayQueryFeaturesKHR vk_physical_device_ray_query_features_khr = {};
+    vk_physical_device_ray_query_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+    vk_physical_device_ray_query_features_khr.pNext = nullptr;
+    vk_physical_device_ray_query_features_khr.rayQuery = VK_FALSE;
+
     // For VK_KHR_ray_tracing_pipeline
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR vk_physical_device_ray_tracing_pipeline_features_khr = {};
     vk_physical_device_ray_tracing_pipeline_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = nullptr;
+    vk_physical_device_ray_tracing_pipeline_features_khr.pNext = &vk_physical_device_ray_query_features_khr;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipeline = VK_FALSE;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplay = VK_FALSE;
     vk_physical_device_ray_tracing_pipeline_features_khr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = VK_FALSE;
@@ -247,6 +255,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.physicalDeviceBufferDeviceAddressFeaturesKHR.pNext = nullptr;
     this->info.physicalDeviceRayTracingPipelineFeaturesKHR = vk_physical_device_ray_tracing_pipeline_features_khr;
     this->info.physicalDeviceRayTracingPipelineFeaturesKHR.pNext = nullptr;
+    this->info.physicalDeviceRayQueryFeaturesKHR = vk_physical_device_ray_query_features_khr;
+    this->info.physicalDeviceRayQueryFeaturesKHR.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()
@@ -810,6 +820,8 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipelineShaderGroupHandleCaptureReplayMixed == VK_TRUE ? true : false;
     physical_device_features.rayTracingPipelineTraceRaysIndirect = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTracingPipelineTraceRaysIndirect == VK_TRUE ? true : false;
     physical_device_features.rayTraversalPrimitiveCulling = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTraversalPrimitiveCulling == VK_TRUE ? true : false;
+
+    physical_device_features.rayQuery = this->info.physicalDeviceRayQueryFeaturesKHR.rayQuery == VK_TRUE ? true : false;
 
     return physical_device_features;
 }

@@ -59,6 +59,8 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool rayTracingPipelineTraceRaysIndirect = false;
     bool rayTraversalPrimitiveCulling = false;
 
+    bool rayQuery = false;
+
   public:
     virtual std::string ToString() override;
 };

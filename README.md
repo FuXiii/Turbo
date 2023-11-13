@@ -3691,3 +3691,51 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_R.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_G.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
   >* `./asset/shaders`下新增`RayTracingKHRTestForCallableShader_B.rchit`文件，用于`VulkanKHRRayTracingTestForCallableShader`示例。
+  >* `./engine/core`下`TPhysicalDeviceInfo.h`中类`TPhysicalDeviceInfo`中新增`VkPhysicalDeviceRayQueryFeaturesKHR physicalDeviceRayQueryFeaturesKHR`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDeviceFeatures`中新增`bool rayQuery = false`成员。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDevice`中更新`EnumerateProperties()`成员函数，获取并保存`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据。
+  >* `./engine/core`下`TPhysicalDevice.h`中类`TPhysicalDevice`中更新`GetDeviceFeatures()`成员函数，获取`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据。
+  >* `./engine/core`下`TDevice.h`中类`TDevice`中更新`InternalCreate()`成员函数，更新对`VkPhysicalDeviceRayQueryFeaturesKHR`相关数据的激活设置。
+
+* 2023/11/5 设计架构
+  >
+  >* `./samples`下增加`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
+  >* `./engine/core`下`TExtensionInfo.cpp`中数组`TAllExtensionNames`中增加`VK_KHR_ray_query`项。
+  >* `./engine/core`下`TExtensionInfo.h`中枚举`TExtensionType`中增加`VK_KHR_RAY_QUERY`项。
+  >* `./engine/core`下`TDevice.cpp`中，类`TDevice`的成员函数`InspectExtensionAndVersionDependencies()`中增加对`VK_KHR_RAY_QUERY`扩展依赖项的检查。
+
+* 2023/11/6 设计架构
+  >
+  >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
+
+* 2023/11/7 设计架构
+  >
+  >* `./samples`下更新`VulkanRayQueryTest`示例。用于研究`VK_KHR_ray_query`扩展的使用。
+  >* `./asset/shaders`下增加`VulkanRayQueryTest.vert`示例。用于研究`VK_KHR_ray_query`扩展的顶点着色器。
+  >* `./asset/shaders`下增加`VulkanRayQueryTest.frag`示例。用于研究`VK_KHR_ray_query`扩展的片元着色器。
+  >* `./engine/core`下`TDescriptor.cpp`中，类`TDescriptor`的成员函数`GetVkDescriptorType()`中增加对`ACCELERATION_STRUCTURE`加速结构描述符类型（`VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR`）的适配。
+
+* 2023/11/8 设计架构
+  >
+  >* `./asset`下增加`CornellBox`的`glTF`模型。
+
+* 2023/11/9 设计架构
+  >
+  >* `./samples`下增加`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。
+
+* 2023/11/10 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。
+
+* 2023/11/11 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。
+
+* 2023/11/12 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。`glTF`场景解析和基本渲染完成。
+
+* 2023/11/13 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。完成对于光追结果的采样积累。
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。完成对于材质信息的采样渲染。
