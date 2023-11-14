@@ -163,10 +163,17 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
 
     // NOTE: add new feature in here(don't forgot refresh pNext in feature chain)
 
+    // For VK_KHR_shader_clock
+    VkPhysicalDeviceShaderClockFeaturesKHR vk_physical_device_shader_clock_features_khr = {};
+    vk_physical_device_shader_clock_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR;
+    vk_physical_device_shader_clock_features_khr.pNext = nullptr;
+    vk_physical_device_shader_clock_features_khr.shaderSubgroupClock = VK_FALSE;
+    vk_physical_device_shader_clock_features_khr.shaderDeviceClock = VK_FALSE;
+
     // For VK_KHR_ray_query
     VkPhysicalDeviceRayQueryFeaturesKHR vk_physical_device_ray_query_features_khr = {};
     vk_physical_device_ray_query_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
-    vk_physical_device_ray_query_features_khr.pNext = nullptr;
+    vk_physical_device_ray_query_features_khr.pNext = &vk_physical_device_shader_clock_features_khr;
     vk_physical_device_ray_query_features_khr.rayQuery = VK_FALSE;
 
     // For VK_KHR_ray_tracing_pipeline
@@ -257,6 +264,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.physicalDeviceRayTracingPipelineFeaturesKHR.pNext = nullptr;
     this->info.physicalDeviceRayQueryFeaturesKHR = vk_physical_device_ray_query_features_khr;
     this->info.physicalDeviceRayQueryFeaturesKHR.pNext = nullptr;
+    this->info.physicalDeviceShaderClockFeaturesKHR = vk_physical_device_shader_clock_features_khr;
+    this->info.physicalDeviceShaderClockFeaturesKHR.pNext = nullptr;
 }
 
 void Turbo::Core::TPhysicalDevice::EnumerateQueueFamily()
@@ -822,6 +831,9 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     physical_device_features.rayTraversalPrimitiveCulling = this->info.physicalDeviceRayTracingPipelineFeaturesKHR.rayTraversalPrimitiveCulling == VK_TRUE ? true : false;
 
     physical_device_features.rayQuery = this->info.physicalDeviceRayQueryFeaturesKHR.rayQuery == VK_TRUE ? true : false;
+
+    physical_device_features.shaderSubgroupClock = this->info.physicalDeviceShaderClockFeaturesKHR.shaderSubgroupClock == VK_TRUE ? true : false;
+    physical_device_features.shaderDeviceClock = this->info.physicalDeviceShaderClockFeaturesKHR.shaderDeviceClock == VK_TRUE ? true : false;
 
     return physical_device_features;
 }

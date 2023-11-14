@@ -3739,3 +3739,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。完成对于光追结果的采样积累。
   >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。完成对于材质信息的采样渲染。
+
+* 2023/11/14 设计架构
+  >
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。修正法线错误 `Bug`。
+  >* `./engine/core`下更新`TDevice`类中`InspectExtensionAndVersionDependencies()`成员函数中增加对`VK_KHR_shader_clock`扩展的依赖检查。
+  >* `./engine/core`下更新`TPhysicalDeviceInfo.h`中`class TPhysicalDeviceInfo`中增加`VkPhysicalDeviceShaderClockFeaturesKHR physicalDeviceShaderClockFeaturesKHR`成员。
+  >* `./engine/core`下更新`TPhysicalDevice.h`中`class TPhysicalDeviceFeatures`中增加`bool shaderSubgroupClock`和`bool shaderDeviceClock`成员。
+  >* `./engine/core`下更新`TPhysicalDevice`类中`EnumerateProperties()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的获取。
+  >* `./engine/core`下更新`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的赋值。
+  >* `./engine/core`下更新`TDevice`类中`InternalCreate()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的激活。
+  >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。增加对于`VK_KHR_shader_clock`扩展和相关特性的支持。

@@ -351,7 +351,7 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
         vk_acceleration_structure_geometry_triangles_data_khr.vertexFormat = VkFormat::VK_FORMAT_R32G32B32_SFLOAT;
         vk_acceleration_structure_geometry_triangles_data_khr.vertexData = vertex_data;
         vk_acceleration_structure_geometry_triangles_data_khr.vertexStride = sizeof(VERTEX);
-        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex = mesh.POSITION_data.size();
+        vk_acceleration_structure_geometry_triangles_data_khr.maxVertex = vertexs.size();
         vk_acceleration_structure_geometry_triangles_data_khr.indexType = VkIndexType::VK_INDEX_TYPE_UINT32;
         vk_acceleration_structure_geometry_triangles_data_khr.indexData = index_data;
         vk_acceleration_structure_geometry_triangles_data_khr.transformData.deviceAddress = 0;
@@ -1091,6 +1091,10 @@ int main()
         {
             enable_instance_extensions.push_back(extension);
         }
+        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SHADER_CLOCK)
+        {
+            enable_instance_extensions.push_back(extension);
+        }
     }
 
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
@@ -1099,7 +1103,7 @@ int main()
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_support_features = physical_device->GetDeviceFeatures();
 
-    if (!physical_device_support_features.accelerationStructure || !physical_device_support_features.rayTracingPipeline)
+    if (!physical_device_support_features.accelerationStructure || !physical_device_support_features.rayTracingPipeline || !physical_device_support_features.shaderDeviceClock)
     {
         delete instance;
         std::cout << "Please use a GPU which support hardware real-time ray tracing" << std::endl;
@@ -1125,6 +1129,8 @@ int main()
     physical_device_features.accelerationStructureIndirectBuild = physical_device_support_features.accelerationStructureIndirectBuild;
     physical_device_features.bufferDeviceAddress = physical_device_support_features.bufferDeviceAddress;
     physical_device_features.rayTracingPipeline = physical_device_support_features.rayTracingPipeline;
+    physical_device_features.shaderDeviceClock = physical_device_support_features.shaderDeviceClock;
+    physical_device_features.shaderSubgroupClock = physical_device_support_features.shaderSubgroupClock;
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
@@ -1239,7 +1245,6 @@ int main()
 
     // Acceleration Structure
     std::vector<BOTTOM_LEVEL_ACCELERATION_STRUCTURE> bottom_level_acceleration_structures;
-
     for (MESH &mesh_item : meshes)
     {
         BOTTOM_LEVEL_ACCELERATION_STRUCTURE bottom_level_acceleration_structure = CreateBottomLevelAccelerationStructure(device, queue, mesh_item);

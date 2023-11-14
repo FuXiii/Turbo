@@ -57,8 +57,10 @@ class TPhysicalDeviceInfo : public Turbo::Core::TInfo
     VkPhysicalDeviceBufferDeviceAddressFeaturesKHR physicalDeviceBufferDeviceAddressFeaturesKHR;
 
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR physicalDeviceRayTracingPipelineFeaturesKHR;
-    
+
     VkPhysicalDeviceRayQueryFeaturesKHR physicalDeviceRayQueryFeaturesKHR;
+
+    VkPhysicalDeviceShaderClockFeaturesKHR physicalDeviceShaderClockFeaturesKHR;
 
     std::vector<TLayerInfo> supportLayers;
     std::vector<TExtensionInfo> supportExtensions;

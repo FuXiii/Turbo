@@ -270,6 +270,12 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_SHADER_CLOCK: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES2);
+
+        if (!this->IsEnabledExtension(TExtensionType::VK_KHR_SHADER_CLOCK))
+        {
+            this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_SHADER_CLOCK));
+        }
     }
     break;
     case TExtensionType::VK_KHR_SHADER_DRAW_PARAMETERS: {
@@ -917,9 +923,15 @@ void Turbo::Core::TDevice::InternalCreate()
     vk_physical_device_vulkan13_features.dynamicRendering = this->enabledFeatures.dynamicRendering ? VK_TRUE : VK_FALSE;
 
     // NOTE: for Extensions feature...
+    VkPhysicalDeviceShaderClockFeaturesKHR vk_physical_device_shader_clock_features_khr = {};
+    vk_physical_device_shader_clock_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR;
+    vk_physical_device_shader_clock_features_khr.pNext = nullptr;
+    vk_physical_device_shader_clock_features_khr.shaderSubgroupClock = this->enabledFeatures.shaderSubgroupClock ? VK_TRUE : VK_FALSE;
+    vk_physical_device_shader_clock_features_khr.shaderDeviceClock = this->enabledFeatures.shaderDeviceClock ? VK_TRUE : VK_FALSE;
+
     VkPhysicalDeviceRayQueryFeaturesKHR vk_physical_device_ray_query_features_khr = {};
     vk_physical_device_ray_query_features_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
-    vk_physical_device_ray_query_features_khr.pNext = nullptr;
+    vk_physical_device_ray_query_features_khr.pNext = &vk_physical_device_shader_clock_features_khr;
     vk_physical_device_ray_query_features_khr.rayQuery = this->enabledFeatures.rayQuery ? VK_TRUE : VK_FALSE;
 
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR vk_physical_device_ray_tracing_pipeline_features_khr = {};
