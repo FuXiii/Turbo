@@ -61,6 +61,9 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
 
     bool rayQuery = false;
 
+    bool shaderSubgroupClock = false;
+    bool shaderDeviceClock = false;
+
   public:
     virtual std::string ToString() override;
 };

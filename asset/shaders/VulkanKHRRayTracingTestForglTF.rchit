@@ -18,11 +18,23 @@ struct HitPayload
     vec3 color;
 };
 
+// struct VERTEX
+//{
+//     vec3 position;
+//     vec3 normal;
+//     vec2 texcoord;
+// };
+
 struct VERTEX
 {
-    vec3 position;
-    vec3 normal;
-    vec2 texcoord;
+    float positionX;
+    float positionY;
+    float positionZ;
+    float normalX;
+    float normalY;
+    float normalZ;
+    float texcoordU;
+    float texcoordV;
 };
 
 struct MATERIAL
@@ -126,12 +138,19 @@ void main()
 
     const vec3 barycentrics = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y); // 最近命中点重心坐标
 
-    const vec3 position = v0.position * barycentrics.x + v1.position * barycentrics.y + v2.position * barycentrics.z;
+    const vec3 position = vec3(v0.positionX, v0.positionY, v0.positionZ) * barycentrics.x + vec3(v1.positionX, v1.positionY, v1.positionZ) * barycentrics.y + vec3(v2.positionX, v2.positionY, v2.positionZ) * barycentrics.z;
     const vec3 world_position = vec3(gl_ObjectToWorldEXT * vec4(position, 1.0));
 
-    const vec3 normal = v0.normal * barycentrics.x + v1.normal * barycentrics.y + v2.normal * barycentrics.z;
+    // const vec3 normal = v0.normal * barycentrics.x + v1.normal * barycentrics.y + v2.normal * barycentrics.z;
+    const vec3 normal = vec3(v0.normalX, v0.normalY, v0.normalZ) * barycentrics.x + vec3(v1.normalX, v1.normalY, v1.normalZ) * barycentrics.y + vec3(v2.normalX, v2.normalY, v2.normalZ) * barycentrics.z;
     // const vec3 world_normal = normalize(vec3(normal * gl_WorldToObjectEXT));
-    const vec3 world_normal = normalize(vec3(gl_WorldToObjectEXT * vec4(normal, 1.0)));
+    // const vec3 world_normal = normalize(vec3(gl_WorldToObjectEXT * vec4(normal, 1.0)));
+    const vec3 world_normal = normalize(vec3(gl_ObjectToWorldEXT * vec4(normal, 0.0)));
+    // const vec3 world_normal = normal;
+
+    //HIT_PAY_LOAD.color = (world_normal + 1) * 0.5;
+    //HIT_PAY_LOAD.depth = 100;
+    //return;
 
     vec3 tangent, bitangent;
     createCoordinateSystem(world_normal, tangent, bitangent);
