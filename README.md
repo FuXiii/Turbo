@@ -3750,3 +3750,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的赋值。
   >* `./engine/core`下更新`TDevice`类中`InternalCreate()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的激活。
   >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。增加对于`VK_KHR_shader_clock`扩展和相关特性的支持。
+
+* 2023/11/15 设计架构
+  >
+  >* `./engine/core`下新增`TReferenced`类。用于计数引用内存回收机制。
