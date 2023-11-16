@@ -1,4 +1,5 @@
 #include "TReferenced.h"
+#include <limits>
 
 Turbo::Core::TReferenced::TReferenced()
 {
@@ -16,15 +17,18 @@ uint32_t Turbo::Core::TReferenced::Reference() const
 
 uint32_t Turbo::Core::TReferenced::UnReference() const
 {
+    int temp_reference_count = std::numeric_limits<uint32_t>().max();
+
     bool need_delete = false;
 
     if (this->referenceCount == 0)
     {
         need_delete = true;
+        temp_reference_count = 0;
     }
     else
     {
-        --this->referenceCount;
+        temp_reference_count = --this->referenceCount;
 
         if (this->referenceCount == 0)
         {
@@ -37,5 +41,5 @@ uint32_t Turbo::Core::TReferenced::UnReference() const
         delete this;
     }
 
-    return this->referenceCount;
+    return temp_reference_count;
 }
