@@ -17,23 +17,13 @@ uint32_t Turbo::Core::TReferenced::Reference() const
 
 uint32_t Turbo::Core::TReferenced::UnReference() const
 {
-    int temp_reference_count = std::numeric_limits<uint32_t>().max();
-
     bool need_delete = false;
+
+    uint32_t temp_reference_count = --this->referenceCount;
 
     if (this->referenceCount == 0)
     {
         need_delete = true;
-        temp_reference_count = 0;
-    }
-    else
-    {
-        temp_reference_count = --this->referenceCount;
-
-        if (this->referenceCount == 0)
-        {
-            need_delete = true;
-        }
     }
 
     if (need_delete)

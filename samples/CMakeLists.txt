@@ -352,3 +352,8 @@ target_include_directories(VulkanKHRRayTracingTestForGLTF PUBLIC ${INCLUDE_PARTH
 target_link_directories(VulkanKHRRayTracingTestForGLTF PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForGLTF PUBLIC ${LIBS})
 
+add_executable(ReferencedTest ./ReferencedTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(ReferencedTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(ReferencedTest PUBLIC ${LINK_PARTH})
+target_link_libraries(ReferencedTest PUBLIC ${LIBS})
+

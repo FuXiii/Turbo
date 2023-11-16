@@ -3758,3 +3758,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/11/16 设计架构
   >
   >* `./engine/core`下更新`TReferenced`类中的`UnReference()`成员函数。修正`delete`返回对象内部变量的`Bug`。
+  >* `./samples`下增加`ReferencedTest`示例。用于计数引用内存回收机制测试。
