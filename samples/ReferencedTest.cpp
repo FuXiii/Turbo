@@ -1,5 +1,5 @@
-#include "TReferenced.h"
 #include "TRefPtr.h"
+#include "TReferenced.h"
 #include <iostream>
 
 class ReferencedTest : public Turbo::Core::TReferenced
@@ -39,7 +39,25 @@ int main()
     Turbo::Core::TRefPtr<ReferencedTest> rt0 = new ReferencedTest();
     rt0->HelloWorld();
 
+    if (rt == rt0)
+    {
+        std::cout << "rt == rt0" << std::endl;
+    }
+    else
+    {
+        std::cout << "rt!= rt0" << std::endl;
+    }
+
     rt0 = rt;
+
+    if (rt == rt0)
+    {
+        std::cout << "rt == rt0" << std::endl;
+    }
+    else
+    {
+        std::cout << "rt!= rt0" << std::endl;
+    }
 
     return 0;
 }

@@ -28,16 +28,6 @@ class TRefPtr
         this->ptr = nullptr;
     }
 
-    TRefPtr(T *ptr)
-    {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
-        this->ptr = ptr;
-        if (this->ptr != nullptr)
-        {
-            this->ptr->Reference();
-        }
-    }
-
     TRefPtr(const TRefPtr &other)
     {
         static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
@@ -55,11 +45,40 @@ class TRefPtr
         other.ptr = nullptr;
     }
 
+    TRefPtr(T *ptr)
+    {
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
+        this->ptr = ptr;
+        if (this->ptr != nullptr)
+        {
+            this->ptr->Reference();
+        }
+    }
+
     template <typename Inherit>
     TRefPtr(const TRefPtr<Inherit> &other)
     {
         static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
         this->ptr = other.ptr;
+        if (this->ptr != nullptr)
+        {
+            this->ptr->Reference();
+        }
+    }
+
+    template <typename Inherit>
+    TRefPtr(const TRefPtr<Inherit> &&other)
+    {
+        static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
+        this->ptr = other.ptr;
+        other.ptr = nullptr;
+    }
+
+    template <typename Inherit>
+    TRefPtr(Inherit *ptr)
+    {
+        static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
+        this->ptr = ptr;
         if (this->ptr != nullptr)
         {
             this->ptr->Reference();
@@ -82,16 +101,14 @@ class TRefPtr
 
         if (this->ptr != rp.ptr)
         {
-            T *tmp_ptr = this->ptr;
+            if (this->ptr != nullptr)
+            {
+                this->ptr->UnReference();
+            }
             this->ptr = rp.ptr;
             if (this->ptr != nullptr)
             {
                 this->ptr->Reference();
-            }
-
-            if (tmp_ptr != nullptr)
-            {
-                tmp_ptr->UnReference();
             }
         }
 
@@ -105,17 +122,17 @@ class TRefPtr
 
         if (this->ptr != rp.ptr)
         {
-            T *tmp_ptr = this->ptr;
+            if (this->ptr != nullptr)
+            {
+                this->ptr->UnReference();
+            }
             this->ptr = rp.ptr;
             if (this->ptr != nullptr)
             {
                 this->ptr->Reference();
             }
 
-            if (tmp_ptr != nullptr)
-            {
-                tmp_ptr->UnReference();
-            }
+            
         }
 
         return *this;
@@ -145,30 +162,55 @@ class TRefPtr
 
         if (this->ptr != ptr)
         {
-            T *tmp_ptr = this->ptr;
+            if (this->ptr != nullptr)
+            {
+                this->ptr->UnReference();
+            }
             this->ptr = ptr;
             if (this->ptr != nullptr)
             {
                 this->ptr->Reference();
-            }
-
-            if (tmp_ptr != nullptr)
-            {
-                tmp_ptr->UnReference();
             }
         }
 
         return *this;
     }
 
-    // bool operator==(const TRefPtr &rp) const;
-    // bool operator==(const T *ptr) const;
-    // friend bool operator==(const T *ptr, const TRefPtr &rp);
+    template <class Inherit>
+    bool operator<(const TRefPtr<Inherit> &rp) const
+    {
+        return (this->ptr < rp.ptr);
+    }
 
-    // bool operator!=(const TRefPtr &rp) const;
-    // bool operator!=(const T *ptr) const;
-    // friend bool operator!=(const T *ptr, const TRefPtr &rp);
-    // bool operator<(const TRefPtr &rp) const;
+    template <class Inherit>
+    bool operator==(const TRefPtr<Inherit> &rp) const
+    {
+        return (this->ptr == rp.ptr);
+    }
+
+    template <class Inherit>
+    bool operator!=(const TRefPtr<Inherit> &rp) const
+    {
+        return (this->ptr != rp.ptr);
+    }
+
+    template <class Inherit>
+    bool operator<(const Inherit *ptr) const
+    {
+        return (this->ptr < ptr);
+    }
+
+    template <class Inherit>
+    bool operator==(const Inherit *ptr) const
+    {
+        return (this->ptr == ptr);
+    }
+
+    template <class Inherit>
+    bool operator!=(const Inherit *ptr) const
+    {
+        return (this->ptr != ptr);
+    }
 
     operator T *() const
     {
@@ -206,6 +248,11 @@ class TRefPtr
         T *temp = this->ptr;
         this->ptr = rp.ptr;
         rp.ptr = temp;
+    }
+
+    explicit operator bool() const
+    {
+        return this->Valid();
     }
 };
 } // namespace Core
