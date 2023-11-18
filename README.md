@@ -3761,6 +3761,10 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./samples`下增加`ReferencedTest`示例。用于计数引用内存回收机制测试。
   >* `./engine/core`下新增`ref_ptr`类。用于计数引用内存回收机制。
 
-* 2023/11/16 设计架构
+* 2023/11/17 设计架构
   >
   >* `./engine/core`下更新`ref_ptr`类。用于计数引用内存回收机制。
+
+* 2023/11/18 设计架构
+  >
+  >* `./engine/core`下将`ref_ptr`重命名为`TRefPtr`(统一命名规则)。用于计数引用内存回收机制。

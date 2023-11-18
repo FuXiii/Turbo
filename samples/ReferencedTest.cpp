@@ -1,5 +1,5 @@
 #include "TReferenced.h"
-#include "ref_ptr.h"
+#include "TRefPtr.h"
 #include <iostream>
 
 class ReferencedTest : public Turbo::Core::TReferenced
@@ -34,9 +34,9 @@ int main()
     std::cout << "UnReference:" << referenced_test->UnReference() << std::endl;
     std::cout << "UnReference:" << referenced_test->UnReference() << std::endl;
 
-    Turbo::Core::ref_ptr<ReferencedTest> rt = new ReferencedTest();
+    Turbo::Core::TRefPtr<ReferencedTest> rt = new ReferencedTest();
     rt->HelloWorld();
-    Turbo::Core::ref_ptr<ReferencedTest> rt0 = new ReferencedTest();
+    Turbo::Core::TRefPtr<ReferencedTest> rt0 = new ReferencedTest();
     rt0->HelloWorld();
 
     rt0 = rt;

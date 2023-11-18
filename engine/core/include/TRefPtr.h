@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TURBO_CORE_REF_PTR_H
-#define TURBO_CORE_REF_PTR_H
+#ifndef TURBO_CORE_TREFPTR_H
+#define TURBO_CORE_TREFPTR_H
 #include <assert.h>
 #include <type_traits>
 
@@ -12,25 +12,25 @@ class TReferenced;
 
 // template <typename T, typename std::enable_if<std::is_base_of<Turbo::Core::TReferenced, T>::value, bool>::type = true>
 template <typename T>
-class ref_ptr
+class TRefPtr
 {
   private:
     template <class Inherit>
-    friend class ref_ptr;
+    friend class TRefPtr;
 
   private:
     T *ptr = nullptr;
 
   public:
-    ref_ptr()
+    TRefPtr()
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
         this->ptr = nullptr;
     }
 
-    ref_ptr(T *ptr)
+    TRefPtr(T *ptr)
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
         this->ptr = ptr;
         if (this->ptr != nullptr)
         {
@@ -38,9 +38,9 @@ class ref_ptr
         }
     }
 
-    ref_ptr(const ref_ptr &other)
+    TRefPtr(const TRefPtr &other)
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
         this->ptr = other.ptr;
         if (this->ptr != nullptr)
         {
@@ -48,17 +48,17 @@ class ref_ptr
         }
     }
 
-    ref_ptr(ref_ptr &&other) noexcept
+    TRefPtr(TRefPtr &&other) noexcept
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
         this->ptr = other.ptr;
         other.ptr = nullptr;
     }
 
     template <typename Inherit>
-    ref_ptr(const ref_ptr<Inherit> &other)
+    TRefPtr(const TRefPtr<Inherit> &other)
     {
-        static_assert(std::is_base_of<T, Inherit>::value, "ref_ptr<Inherit> must inherited from T");
+        static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
         this->ptr = other.ptr;
         if (this->ptr != nullptr)
         {
@@ -66,7 +66,7 @@ class ref_ptr
         }
     }
 
-    ~ref_ptr()
+    ~TRefPtr()
     {
         if (this->ptr != nullptr)
         {
@@ -76,9 +76,9 @@ class ref_ptr
     }
 
   public:
-    ref_ptr &operator=(const ref_ptr &rp)
+    TRefPtr &operator=(const TRefPtr &rp)
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
 
         if (this->ptr != rp.ptr)
         {
@@ -99,9 +99,9 @@ class ref_ptr
     }
 
     template <typename Inherit>
-    ref_ptr &operator=(const ref_ptr<Inherit> &rp)
+    TRefPtr &operator=(const TRefPtr<Inherit> &rp)
     {
-        static_assert(std::is_base_of<T, Inherit>::value, "ref_ptr<Inherit> must inherited from T");
+        static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
 
         if (this->ptr != rp.ptr)
         {
@@ -122,9 +122,9 @@ class ref_ptr
     }
 
     template <typename Inherit>
-    ref_ptr &operator=(ref_ptr<Inherit> &&rp)
+    TRefPtr &operator=(TRefPtr<Inherit> &&rp)
     {
-        static_assert(std::is_base_of<T, Inherit>::value, "ref_ptr<Inherit> must inherited from T");
+        static_assert(std::is_base_of<T, Inherit>::value, "TRefPtr<Inherit> must inherited from T");
 
         if (this->ptr != rp.ptr)
         {
@@ -139,9 +139,9 @@ class ref_ptr
         return *this;
     }
 
-    ref_ptr &operator=(T *ptr)
+    TRefPtr &operator=(T *ptr)
     {
-        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "ref_ptr<T> must inherited from Turbo::Core::TReferenced");
+        static_assert(std::is_base_of<Turbo::Core::TReferenced, T>::value, "TRefPtr<T> must inherited from Turbo::Core::TReferenced");
 
         if (this->ptr != ptr)
         {
@@ -161,14 +161,14 @@ class ref_ptr
         return *this;
     }
 
-    // bool operator==(const ref_ptr &rp) const;
+    // bool operator==(const TRefPtr &rp) const;
     // bool operator==(const T *ptr) const;
-    // friend bool operator==(const T *ptr, const ref_ptr &rp);
+    // friend bool operator==(const T *ptr, const TRefPtr &rp);
 
-    // bool operator!=(const ref_ptr &rp) const;
+    // bool operator!=(const TRefPtr &rp) const;
     // bool operator!=(const T *ptr) const;
-    // friend bool operator!=(const T *ptr, const ref_ptr &rp);
-    // bool operator<(const ref_ptr &rp) const;
+    // friend bool operator!=(const T *ptr, const TRefPtr &rp);
+    // bool operator<(const TRefPtr &rp) const;
 
     operator T *() const
     {
@@ -201,7 +201,7 @@ class ref_ptr
     }
 
     // T *Release();
-    void Swap(ref_ptr &rp)
+    void Swap(TRefPtr &rp)
     {
         T *temp = this->ptr;
         this->ptr = rp.ptr;
