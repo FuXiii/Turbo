@@ -38,16 +38,16 @@ class TMemoryBarrier : public Turbo::Core::TBarrier
 class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
 {
   private:
-    TBuffer *buffer;
+    TRefPtr<TBuffer> buffer; // TBuffer *buffer;
     TDeviceSize offset;
     TDeviceSize size;
 
   public:
-    TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
+    TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     ~TBufferMemoryBarrier();
 
   public:
-    TBuffer *GetBuffer();
+    TRefPtr<TBuffer> GetBuffer();
     TDeviceSize GetOffset();
     TDeviceSize GetSize();
 
@@ -59,7 +59,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
   private:
     TImageLayout oldLayout;
     TImageLayout newLayout;
-    TImage *image;
+    TRefPtr<TImage> image; // TImage *image;
     TImageAspects aspects;
     uint32_t baseMipLevel;
     uint32_t levelCount;
@@ -67,14 +67,14 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
     uint32_t layerCount;
 
   public:
-    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
-    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *view, TImageLayout oldLayout, TImageLayout newLayout);
+    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
+    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout);
     ~TImageMemoryBarrier();
 
   public:
     TImageLayout GetOldLayout();
     TImageLayout GetNewLayout();
-    TImage *GetImage();
+    TRefPtr<TImage> GetImage();
     TImageAspects GetAspects();
     uint32_t GetBaseMipLevel();
     uint32_t GetLevelCount();

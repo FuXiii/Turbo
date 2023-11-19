@@ -34,7 +34,7 @@ std::string Turbo::Core::TMemoryBarrier::ToString()
     return std::string();
 }
 
-Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
+Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
     if (buffer != nullptr)
     {
@@ -52,7 +52,7 @@ Turbo::Core::TBufferMemoryBarrier::~TBufferMemoryBarrier()
 {
 }
 
-Turbo::Core::TBuffer *Turbo::Core::TBufferMemoryBarrier::GetBuffer()
+Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer()
 {
     return this->buffer;
 }
@@ -72,7 +72,7 @@ std::string Turbo::Core::TBufferMemoryBarrier::ToString()
     return std::string();
 }
 
-Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
+Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
     if (image != nullptr)
     {
@@ -91,18 +91,18 @@ Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess
     }
 }
 
-Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *view, TImageLayout oldLayout, TImageLayout newLayout) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
+Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (view != nullptr)
+    if (imageView != nullptr)
     {
         this->oldLayout = oldLayout;
         this->newLayout = newLayout;
-        this->image = view->GetImage();
-        this->aspects = view->GetAspects();
-        this->baseMipLevel = view->GetBaseMipLevel();
-        this->levelCount = view->GetLevelCount();
-        this->baseArrayLayer = view->GetBaseArrayLayer();
-        this->layerCount = view->GetLayerCount();
+        this->image = imageView->GetImage();
+        this->aspects = imageView->GetAspects();
+        this->baseMipLevel = imageView->GetBaseMipLevel();
+        this->levelCount = imageView->GetLevelCount();
+        this->baseArrayLayer = imageView->GetBaseArrayLayer();
+        this->layerCount = imageView->GetLayerCount();
     }
     else
     {
@@ -120,9 +120,8 @@ Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetNewLayout()
     return this->newLayout;
 }
 
-Turbo::Core::TImage *Turbo::Core::TImageMemoryBarrier::GetImage()
+Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageMemoryBarrier::GetImage()
 {
-
     return this->image;
 }
 

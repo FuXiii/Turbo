@@ -22,6 +22,38 @@ class ReferencedTest : public Turbo::Core::TReferenced
     }
 };
 
+class ReferencedTestContainer : public Turbo::Core::TReferenced
+{
+  private:
+    Turbo::Core::TRefPtr<ReferencedTest> referencedTest;
+
+  public:
+    ReferencedTestContainer(const Turbo::Core::TRefPtr<ReferencedTest> &referencedTest)
+    {
+        std::cout << "ReferencedTestContainer()" << std::endl;
+        if (referencedTest != nullptr)
+        {
+            this->referencedTest = referencedTest;
+        }
+    }
+
+    void HelloWorld()
+    {
+        this->referencedTest->HelloWorld();
+    }
+
+    Turbo::Core::TRefPtr<ReferencedTest> Get()
+    {
+        return this->referencedTest;
+    }
+
+  protected:
+    ~ReferencedTestContainer()
+    {
+        std::cout << "~ReferencedTestContainer()" << std::endl;
+    }
+};
+
 int main()
 {
     std::cout << "Hello World" << std::endl;
@@ -58,6 +90,12 @@ int main()
     {
         std::cout << "rt!= rt0" << std::endl;
     }
+
+    Turbo::Core::TRefPtr<ReferencedTestContainer> referenced_test_container = new ReferencedTestContainer(rt);
+    referenced_test_container->HelloWorld();
+
+    Turbo::Core::TRefPtr<ReferencedTestContainer> referenced_test_container0 = new ReferencedTestContainer(new ReferencedTest());
+    referenced_test_container0->HelloWorld();
 
     return 0;
 }
