@@ -59,7 +59,7 @@ void Turbo::Core::TCommandBufferBase::InternalDestroy()
     device->GetDeviceDriver()->vkFreeCommandBuffers(vk_device, command_pool, command_buffer_count, &this->vkCommandBuffer);
 }
 
-Turbo::Core::TCommandBufferBase::TCommandBufferBase(TCommandBufferPool *commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TCommandBufferBase::TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
 {
     if (commandBufferPool != nullptr)
     {
@@ -94,7 +94,7 @@ Turbo::Core::TCommandBufferLevel Turbo::Core::TCommandBufferBase::GetLevel()
     return this->level;
 }
 
-Turbo::Core::TCommandBufferPool *Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
 {
     return this->commandBufferPool;
 }
@@ -141,7 +141,7 @@ bool Turbo::Core::TCommandBufferBase::Begin()
     return false;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, TSubpassContents subpassContents, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
+void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
 {
     TDevice *device = renderPass->GetDevice();
     TPhysicalDevice *physical_device = device->GetPhysicalDevice();
@@ -240,7 +240,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
     this->currentFramebuffer = framebuffer;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindPipeline(TPipeline *pipeline)
+void Turbo::Core::TCommandBufferBase::CmdBindPipeline(const TRefPtr<TPipeline> &pipeline)
 {
     TDevice *device = pipeline->GetDevice();
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
@@ -262,7 +262,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipeline(TPipeline *pipeline)
     this->currentPipeline = pipeline;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, std::vector<TDescriptorSet *> &descriptorSets)
+void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
@@ -295,7 +295,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, s
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet)
+void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
 {
     std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
 
@@ -307,7 +307,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(TPipelineDesc
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(std::vector<TBuffer *> &vertexBuffers)
+void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(std::vector<TRefPtr<TBuffer>> &vertexBuffers)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -748,31 +748,31 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineImageBarrier(TPipelineStages sr
     device->GetDeviceDriver()->vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 0, nullptr, vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImage> &image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, image, oldLayout, newLayout, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
     this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView)
+void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImageView> &imageView)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, imageView, oldLayout, newLayout);
     this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdFillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, uint32_t data)
+void Turbo::Core::TCommandBufferBase::CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size, uint32_t data)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
     device->GetDeviceDriver()->vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, data);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdFillBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, float data)
+void Turbo::Core::TCommandBufferBase::CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size, float data)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
     device->GetDeviceDriver()->vkCmdFillBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, size, *(const uint32_t *)&data);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdUpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data)
+void Turbo::Core::TCommandBufferBase::CmdUpdateBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size, const void *data)
 {
     if (buffer != nullptr && data != nullptr)
     {
@@ -781,7 +781,7 @@ void Turbo::Core::TCommandBufferBase::CmdUpdateBuffer(TBuffer *buffer, TDeviceSi
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdCopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size)
+void Turbo::Core::TCommandBufferBase::CmdCopyBuffer(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -793,7 +793,7 @@ void Turbo::Core::TCommandBufferBase::CmdCopyBuffer(TBuffer *srcBuffer, TBuffer 
     device->GetDeviceDriver()->vkCmdCopyBuffer(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstBuffer->GetVkBuffer(), 1, &vk_buffer_copy);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBufferBase::CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -833,22 +833,22 @@ void Turbo::Core::TCommandBufferBase::CmdClearColorImage(TImage *image, TImageLa
     device->GetDeviceDriver()->vkCmdClearColorImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_color_value, 1, &vk_image_subresource_range);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects)
+void Turbo::Core::TCommandBufferBase::CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects)
 {
     this->CmdClearColorImage(image, layout, r, g, b, a, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a)
+void Turbo::Core::TCommandBufferBase::CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a)
 {
     this->CmdClearColorImage(image, layout, r, g, b, a, TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearColorImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a)
+void Turbo::Core::TCommandBufferBase::CmdClearColorImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r, float g, float b, float a)
 {
     this->CmdClearColorImage(imageView->GetImage(), layout, r, g, b, a, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -866,17 +866,17 @@ void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(TImage *image, T
     device->GetDeviceDriver()->vkCmdClearDepthStencilImage(this->vkCommandBuffer, image->GetVkImage(), (VkImageLayout)layout, &vk_clear_depth_stencil_value, 1, &vk_image_subresource_range);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects)
+void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects)
 {
     this->CmdClearDepthStencilImage(image, layout, depth, stencil, aspects, 0, image->GetMipLevels(), 0, image->GetArrayLayers());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth, uint32_t stencil)
+void Turbo::Core::TCommandBufferBase::CmdClearDepthStencilImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float depth, uint32_t stencil)
 {
     this->CmdClearDepthStencilImage(imageView->GetImage(), layout, depth, stencil, imageView->GetAspects(), imageView->GetBaseMipLevel(), imageView->GetLevelCount(), imageView->GetBaseArrayLayer(), imageView->GetLayerCount());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBufferBase::CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TImageUsages image_usages = image->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -889,7 +889,7 @@ void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout 
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects)
+void Turbo::Core::TCommandBufferBase::CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects)
 {
     TImageUsages image_usages = image->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -902,7 +902,7 @@ void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout 
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
+void Turbo::Core::TCommandBufferBase::CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
 {
     TImageUsages image_usages = image->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -915,7 +915,7 @@ void Turbo::Core::TCommandBufferBase::CmdClearImage(TImage *image, TImageLayout 
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdClearImage(TImageView *imageView, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
+void Turbo::Core::TCommandBufferBase::CmdClearImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil)
 {
     TImageUsages image_usages = imageView->GetImage()->GetUsages();
     if ((image_usages & TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT) == TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -928,7 +928,7 @@ void Turbo::Core::TCommandBufferBase::CmdClearImage(TImageView *imageView, TImag
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdCopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+void Turbo::Core::TCommandBufferBase::CmdCopyBufferToImage(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TImage> &dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -953,7 +953,7 @@ void Turbo::Core::TCommandBufferBase::CmdCopyBufferToImage(TBuffer *srcBuffer, T
     device->GetDeviceDriver()->vkCmdCopyBufferToImage(this->vkCommandBuffer, srcBuffer->GetVkBuffer(), dstImage->GetVkImage(), (VkImageLayout)layout, 1, &vk_buffer_image_copy);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdCopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
+void Turbo::Core::TCommandBufferBase::CmdCopyImageToBuffer(const TRefPtr<TImage> &srcImage, TImageLayout layout, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -978,7 +978,7 @@ void Turbo::Core::TCommandBufferBase::CmdCopyImageToBuffer(TImage *srcImage, TIm
     device->GetDeviceDriver()->vkCmdCopyImageToBuffer(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)layout, dstBuffer->GetVkBuffer(), 1, &vk_buffer_image_copy);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdCopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
+void Turbo::Core::TCommandBufferBase::CmdCopyImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -1019,7 +1019,7 @@ void Turbo::Core::TCommandBufferBase::CmdCopyImage(TImage *srcImage, TImageLayou
     device->GetDeviceDriver()->vkCmdCopyImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_copy);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindIndexBuffer(TBuffer *buffer, TDeviceSize offset, TIndexType indexType)
+void Turbo::Core::TCommandBufferBase::CmdBindIndexBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TIndexType indexType)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
     device->GetDeviceDriver()->vkCmdBindIndexBuffer(this->vkCommandBuffer, buffer->GetVkBuffer(), offset, (VkIndexType)indexType);
@@ -1031,7 +1031,7 @@ void Turbo::Core::TCommandBufferBase::CmdDrawIndexed(uint32_t indexCount, uint32
     device->GetDeviceDriver()->vkCmdDrawIndexed(this->vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBlitImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter)
+void Turbo::Core::TCommandBufferBase::CmdBlitImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -1070,7 +1070,7 @@ void Turbo::Core::TCommandBufferBase::CmdBlitImage(TImage *srcImage, TImageLayou
     device->GetDeviceDriver()->vkCmdBlitImage(this->vkCommandBuffer, srcImage->GetVkImage(), src_image_layout, dstImage->GetVkImage(), dst_image_layout, 1, &vk_image_blit, vk_filter);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdResolveImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
+void Turbo::Core::TCommandBufferBase::CmdResolveImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -1102,7 +1102,7 @@ void Turbo::Core::TCommandBufferBase::CmdResolveImage(TImage *srcImage, TImageLa
     device->GetDeviceDriver()->vkCmdResolveImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_resolve);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
+void Turbo::Core::TCommandBufferBase::CmdPushConstants(const TRefPtr<TPipelineLayout> &pipelineLayout, uint32_t offset, uint32_t size, const void *values)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
@@ -1143,7 +1143,7 @@ void Turbo::Core::TCommandBufferBase::CmdSetLineWidth(float lineWidth)
     device->GetDeviceDriver()->vkCmdSetLineWidth(this->vkCommandBuffer, lineWidth);
 }
 
-Turbo::Core::TSecondaryCommandBuffer::TSecondaryCommandBuffer(TCommandBufferPool *commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::SECONDARY)
+Turbo::Core::TSecondaryCommandBuffer::TSecondaryCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::SECONDARY)
 {
 }
 
@@ -1151,7 +1151,7 @@ Turbo::Core::TSecondaryCommandBuffer::~TSecondaryCommandBuffer()
 {
 }
 
-void Turbo::Core::TSecondaryCommandBuffer::Begin(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t subpass)
+void Turbo::Core::TSecondaryCommandBuffer::Begin(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, uint32_t subpass)
 {
     this->currentRenderPass = renderPass;
     this->currentFramebuffer = framebuffer;
@@ -1165,7 +1165,7 @@ std::string Turbo::Core::TSecondaryCommandBuffer::ToString()
     return std::string();
 }
 
-Turbo::Core::TCommandBuffer::TCommandBuffer(TCommandBufferPool *commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::PRIMARY)
+Turbo::Core::TCommandBuffer::TCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::PRIMARY)
 {
 }
 
@@ -1173,7 +1173,7 @@ Turbo::Core::TCommandBuffer::~TCommandBuffer()
 {
 }
 
-void Turbo::Core::TCommandBuffer::CmdExecuteCommand(TSecondaryCommandBuffer *secondaryCommandBuffer)
+void Turbo::Core::TCommandBuffer::CmdExecuteCommand(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
 {
     TCommandBufferPool *command_buffer_pool = this->GetCommandBufferPool();
     TDevice *device = command_buffer_pool->GetDeviceQueue()->GetDevice();

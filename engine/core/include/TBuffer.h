@@ -40,7 +40,7 @@ typedef VkFlags TBufferUsages;
 class TBuffer : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr; // TDevice* device = nullptr
     T_VULKAN_HANDLE_HANDLE VkBuffer vkBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
@@ -58,7 +58,7 @@ class TBuffer : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
+    explicit TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
 
   protected:
     virtual ~TBuffer();

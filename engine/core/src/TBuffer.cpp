@@ -42,7 +42,7 @@ void Turbo::Core::TBuffer::InternalDestroy()
     vmaDestroyBuffer(*vma_allocator, this->vkBuffer, *vma_allocation);
 }
 
-Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
+Turbo::Core::TBuffer::TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
 {
     if (device != nullptr)
     {
