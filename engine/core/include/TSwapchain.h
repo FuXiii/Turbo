@@ -57,8 +57,11 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
 
     explicit TSwapchain(TSwapchain *oldSwapchain);
-    ~TSwapchain();
 
+  protected:
+    virtual ~TSwapchain();
+
+  public:
     TSurface *GetSurface();
     const std::vector<Turbo::Core::TImage *> &GetImages();
 

@@ -3769,3 +3769,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./engine/core`下将`ref_ptr`重命名为`TRefPtr`(统一命名规则)。用于计数引用内存回收机制。
   >* `./engine/core`下更新`TRefPtr`。用于计数引用内存回收机制。
+
+* 2023/11/19 设计架构
+  >
+  >* `Turbo`使用`Turbo::Core::TRefPtr`和`Turbo::Core::TReferenced`进行重构。

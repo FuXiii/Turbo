@@ -64,8 +64,11 @@ class TImageView : public TVulkanHandle
   public:
     [[deprecated]] explicit TImageView(TImage *image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
     explicit TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    ~TImageView();
 
+  protected:
+    virtual ~TImageView();
+
+  public:
     TImage *GetImage();
 
     VkImageView GetVkImageView();

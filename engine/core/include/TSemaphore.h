@@ -23,10 +23,12 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
 
   public:
     TSemaphore(TDevice *device, TPipelineStages waitDstStageMask);
-    ~TSemaphore();
 
+  protected:
+    virtual ~TSemaphore();
+
+  public:
     VkSemaphore GetVkSemaphore();
-
     TPipelineStages GetWaitDstStageMask();
 
   public:

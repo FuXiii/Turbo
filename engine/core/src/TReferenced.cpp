@@ -17,6 +17,12 @@ uint32_t Turbo::Core::TReferenced::Reference() const
 
 uint32_t Turbo::Core::TReferenced::UnReference() const
 {
+    if (this->referenceCount == 0)
+    {
+        delete this;
+        return 0;
+    }
+
     bool need_delete = false;
 
     uint32_t temp_reference_count = --this->referenceCount;

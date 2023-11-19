@@ -26,8 +26,11 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
 
   public:
     TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments);
-    ~TFramebuffer();
 
+  protected:
+    virtual ~TFramebuffer();
+
+  public:
     VkFramebuffer GetVkFramebuffer();
 
     uint32_t GetWidth();

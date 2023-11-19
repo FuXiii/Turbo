@@ -23,8 +23,11 @@ class TFence : public Turbo::Core::TVulkanHandle
 
   public:
     TFence(TDevice *device);
-    ~TFence();
 
+  protected:
+    virtual ~TFence();
+
+  public:
     TDevice *GetDevice();
 
     VkFence GetVkFence();
@@ -44,8 +47,11 @@ class TFences : public Turbo::Core::TObject
 
   public:
     TFences() = default;
-    ~TFences() = default;
 
+  protected:
+    virtual ~TFences() = default;
+
+  public:
     void Add(TFence *fence);
 
     TResult Wait(uint64_t timeout);

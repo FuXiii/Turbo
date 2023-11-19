@@ -21,7 +21,9 @@ class TVulkanHandle : public Turbo::Core::TObject
 {
   public:
     TVulkanHandle();
-    ~TVulkanHandle();
+
+  protected:
+    virtual ~TVulkanHandle();
 
   protected:
     // virtual void AddChildHandle(TVulkanHandle* handle);

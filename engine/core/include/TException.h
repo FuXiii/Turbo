@@ -8,7 +8,9 @@ namespace Turbo
 {
 namespace Core
 {
-class TException : public std::exception, public Turbo::Core::TObject
+
+// TODO:inherit std::runtime_error
+class TException : public std::exception //, public Turbo::Core::TObject
 {
   private:
     TResult result;
@@ -27,7 +29,7 @@ class TException : public std::exception, public Turbo::Core::TObject
     std::string GetMessage();
     std::string GetTip();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString();
     virtual const char *what() const throw() override;
 };
 } // namespace Core

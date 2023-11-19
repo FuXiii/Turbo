@@ -59,8 +59,11 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 
   public:
     TCommandBufferBase(TCommandBufferPool *commandBufferPool, TCommandBufferLevel level);
-    ~TCommandBufferBase();
 
+  protected:
+    virtual ~TCommandBufferBase();
+
+  public:
     VkCommandBuffer GetVkCommandBuffer();
 
     TCommandBufferLevel GetLevel();
@@ -166,7 +169,9 @@ class TSecondaryCommandBuffer : public Turbo::Core::TCommandBufferBase
 
   public:
     TSecondaryCommandBuffer(TCommandBufferPool *commandBufferPool);
-    ~TSecondaryCommandBuffer();
+
+  protected:
+    virtual ~TSecondaryCommandBuffer();
 
   public:
     void Begin() = delete;
@@ -183,7 +188,9 @@ class TCommandBuffer : public Turbo::Core::TCommandBufferBase
 
   public:
     TCommandBuffer(TCommandBufferPool *commandBufferPool);
-    ~TCommandBuffer();
+
+  protected:
+    virtual ~TCommandBuffer();
 
   public:
     void CmdExecuteCommand(TSecondaryCommandBuffer *secondaryCommandBuffer);

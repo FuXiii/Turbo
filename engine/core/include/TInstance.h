@@ -53,7 +53,8 @@ class TInstance : public Turbo::Core::TVulkanHandle
   public:
     explicit TInstance(std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TVersion *vulkanVersion = nullptr);
     // explicit TInstance(const TInstance &instance) = delete;
-    ~TInstance();
+  protected:
+    virtual ~TInstance();
 
   public:
     VkInstance GetVkInstance();
@@ -87,8 +88,6 @@ class TInstance : public Turbo::Core::TVulkanHandle
     const TInstanceDriver *GetInstanceDriver();
 
     TExtensionInfo GetExtensionByType(TExtensionType extensionType);
-
-
 
     virtual std::string ToString() override;
 };

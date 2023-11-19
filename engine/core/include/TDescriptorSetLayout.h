@@ -4,7 +4,6 @@
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
 
-
 namespace Turbo
 {
 namespace Core
@@ -25,8 +24,11 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
   public:
     TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors);
-    ~TDescriptorSetLayout();
 
+  protected:
+    virtual ~TDescriptorSetLayout();
+
+  public:
     uint32_t GetSet();
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
 

@@ -267,10 +267,10 @@ int main()
 
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
 
-    Turbo::Core::TEngine engine;
+    Turbo::Core::TRefPtr<Turbo::Core::TEngine> engine = new Turbo::Core::TEngine();
 
     Turbo::Core::TLayerInfo khronos_validation;
-    std::vector<Turbo::Core::TLayerInfo> support_layers = engine.GetInstance().GetSupportLayers();
+    std::vector<Turbo::Core::TLayerInfo> support_layers = engine->GetInstance().GetSupportLayers();
     for (Turbo::Core::TLayerInfo &layer : support_layers)
     {
         if (layer.GetLayerType() == Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION)

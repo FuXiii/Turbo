@@ -83,7 +83,9 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(TDevice *device, TVertexShader* vertexShader,...其他着色器, TFragmentShader* fragmentShader);//for future graphics Pipeline
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
     TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
-    ~TPipeline();
+
+  protected:
+    virtual ~TPipeline();
 
   public:
     TPipelineLayout *GetPipelineLayout();

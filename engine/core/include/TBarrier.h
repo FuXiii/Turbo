@@ -15,7 +15,7 @@ class TBarrier : public Turbo::Core::TInfo
 {
   public:
     TBarrier();
-    virtual ~TBarrier();
+    ~TBarrier();
 };
 
 class TMemoryBarrier : public Turbo::Core::TBarrier
@@ -28,6 +28,7 @@ class TMemoryBarrier : public Turbo::Core::TBarrier
     TMemoryBarrier(TAccess srcAccess, TAccess dstAccess);
     ~TMemoryBarrier();
 
+  public:
     TAccess GetSrcAccess();
     TAccess GetDstAccess();
 
@@ -45,6 +46,7 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     ~TBufferMemoryBarrier();
 
+  public:
     TBuffer *GetBuffer();
     TDeviceSize GetOffset();
     TDeviceSize GetSize();
@@ -67,7 +69,9 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
   public:
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *view, TImageLayout oldLayout, TImageLayout newLayout);
+    ~TImageMemoryBarrier();
 
+  public:
     TImageLayout GetOldLayout();
     TImageLayout GetNewLayout();
     TImage *GetImage();

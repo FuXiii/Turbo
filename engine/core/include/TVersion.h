@@ -1,14 +1,14 @@
 #pragma once
 #ifndef TURBO_CORE_TVERSION_H
 #define TURBO_CORE_TVERSION_H
-#include "TObject.h"
+#include "TInfo.h"
 #include <stdint.h>
 
 namespace Turbo
 {
 	namespace Core
 	{
-		class TVersion :public TObject
+		class TVersion :public TInfo
 		{
 		private:
 			uint32_t major;

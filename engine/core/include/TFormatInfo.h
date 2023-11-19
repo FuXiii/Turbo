@@ -1,7 +1,7 @@
 #pragma once
 #ifndef TURBO_CORE_TFORMAT_H
 #define TURBO_CORE_TFORMAT_H
-#include "TObject.h"
+#include "TInfo.h"
 
 namespace Turbo
 {
@@ -330,7 +330,7 @@ typedef VkFlags TFormatFeatures;
 
 class TPhysicalDevice;
 
-class TFormatInfo : public TObject
+class TFormatInfo : public TInfo
 {
   private:
     TFormatType formatType = TFormatType::UNDEFINED;

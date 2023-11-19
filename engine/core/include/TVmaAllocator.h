@@ -25,7 +25,9 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
 
   public:
     TVmaAllocator(TDevice *device);
-    ~TVmaAllocator();
+
+  protected:
+    virtual ~TVmaAllocator();
 
   public:
     void *GetVmaAllocator();

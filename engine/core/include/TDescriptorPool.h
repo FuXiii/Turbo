@@ -21,7 +21,9 @@ class TDescriptorSize : public Turbo::Core::TInfo
 
   public:
     TDescriptorSize(TDescriptorType type, uint32_t count);
+    ~TDescriptorSize();
 
+  public:
     TDescriptorType GetDescriptorType();
     uint32_t GetDescriptorCount();
 
@@ -45,8 +47,11 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
 
   public:
     explicit TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
-    ~TDescriptorPool();
 
+  protected:
+    virtual ~TDescriptorPool();
+
+  public:
     TPipelineDescriptorSet *Allocate(TPipelineLayout *pipelineLayout);
     void Free(TPipelineDescriptorSet *pipelineDescriptorSet);
 

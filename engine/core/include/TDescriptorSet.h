@@ -27,8 +27,11 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
 
   public:
     explicit TDescriptorSet(TDescriptorPool *descriptorPool, TDescriptorSetLayout *descriptorSetLayout);
-    ~TDescriptorSet();
 
+  protected:
+    virtual ~TDescriptorSet();
+
+  public:
     VkDescriptorSet GetVkDescriptorSet();
 
     uint32_t GetSet();

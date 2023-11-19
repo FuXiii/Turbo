@@ -7,11 +7,13 @@ namespace Turbo
 {
 namespace Core
 {
-class TInfo : public TObject
+class TInfo //: public TObject
 {
   public:
     explicit TInfo();
-    virtual ~TInfo();
+    ~TInfo();
+
+    virtual std::string ToString() = 0;
 };
 } // namespace Core
 } // namespace Turbo

@@ -52,7 +52,9 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
   public:
     explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
-    ~TDevice();
+
+  protected:
+    virtual ~TDevice();
 
   public:
     VkDevice GetVkDevice();

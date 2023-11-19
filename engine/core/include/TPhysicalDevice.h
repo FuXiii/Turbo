@@ -65,6 +65,10 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     bool shaderDeviceClock = false;
 
   public:
+    TPhysicalDeviceFeatures() = default;
+    ~TPhysicalDeviceFeatures() = default;
+
+  public:
     virtual std::string ToString() override;
 };
 
@@ -130,7 +134,9 @@ class TPhysicalDevice : public TVulkanHandle
 
   public:
     explicit TPhysicalDevice(TInstance *instance, uint32_t index);
-    ~TPhysicalDevice();
+
+  protected:
+    virtual ~TPhysicalDevice();
 
   private:
     void AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex);

@@ -2,8 +2,8 @@
 #ifndef TURBO_CORE_TRENDERPASS_H
 #define TURBO_CORE_TRENDERPASS_H
 #include "TAttachment.h"
-#include "TVulkanHandle.h"
 #include "TSubpass.h"
+#include "TVulkanHandle.h"
 
 namespace Turbo
 {
@@ -27,8 +27,11 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
 
   public:
     TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
-    ~TRenderPass();
 
+  protected:
+    virtual ~TRenderPass();
+
+  public:
     VkRenderPass GetVkRenderPass();
 
     TDevice *GetDevice();

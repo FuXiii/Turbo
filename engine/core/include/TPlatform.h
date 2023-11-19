@@ -21,24 +21,30 @@
 
 namespace Turbo
 {
-	namespace Core
-	{
-		typedef enum class TPlatformType
-		{
-			UNDEFINED = 0,
-			TWINDOWS,
-			TAPPLE,
-			TUNIX,
-			TLINUX,
-			TANDROID
-		}TPlatformTypeEnum;
+namespace Core
+{
+typedef enum class TPlatformType
+{
+    UNDEFINED = 0,
+    TWINDOWS,
+    TAPPLE,
+    TUNIX,
+    TLINUX,
+    TANDROID
+} TPlatformTypeEnum;
 
-		class TPlatform :public TObject
-		{
-		public:
-			static TPlatformType GetCurrentPlatform();
-			static uint32_t GetCurrentPlatformBits();
-		};
-	}
-}
+class TPlatform : public TObject
+{
+  public:
+    static TPlatformType GetCurrentPlatform();
+    static uint32_t GetCurrentPlatformBits();
+
+  public:
+    TPlatform() = default;
+
+  protected:
+    virtual ~TPlatform() = default;
+};
+} // namespace Core
+} // namespace Turbo
 #endif // !TURBO_CORE_TPLATFORM_H

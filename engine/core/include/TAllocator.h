@@ -12,7 +12,9 @@ class TAllocator : public TObject
 {
   public:
     explicit TAllocator();
-    ~TAllocator();
+
+  protected:
+    virtual ~TAllocator();
 
   public:
     static void *VKAPI_PTR Allocate(size_t size, size_t alignment);

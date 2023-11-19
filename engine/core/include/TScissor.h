@@ -22,6 +22,7 @@ class TScissor : public Turbo::Core::TInfo
     TScissor(int32_t offsetX, int32_t offsetY, uint32_t width, uint32_t height);
     ~TScissor();
 
+  public:
     int32_t GetOffsetX();
     int32_t GetOffsetY();
     uint32_t GetWidth();

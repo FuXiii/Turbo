@@ -4,7 +4,6 @@
 #include "TMemoryTypeInfo.h"
 #include "TVulkanHandle.h"
 
-
 namespace Turbo
 {
 namespace Core
@@ -60,8 +59,11 @@ class TBuffer : public TVulkanHandle
 
   public:
     explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
-    ~TBuffer();
 
+  protected:
+    virtual ~TBuffer();
+
+  public:
     bool IsMappable();
     void *Map();
     void Unmap();

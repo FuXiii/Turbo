@@ -25,9 +25,12 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipelineLayout(TDevice *device, std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *>& pushConstantDescriptors);
-    ~TPipelineLayout();
+    TPipelineLayout(TDevice *device, std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors);
 
+  protected:
+    virtual ~TPipelineLayout();
+
+  public:
     const std::vector<TDescriptorSetLayout *> &GetDescriptorSetLayouts();
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
 

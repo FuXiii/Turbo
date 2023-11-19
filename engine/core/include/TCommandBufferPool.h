@@ -1,7 +1,7 @@
 #pragma once
 #ifndef TURBO_CORE_TCOMMANDBUFFERPOOL_H
 #define TURBO_CORE_TCOMMANDBUFFERPOOL_H
-//#include "TPool.h"
+// #include "TPool.h"
 #include "TVulkanHandle.h"
 
 namespace Turbo
@@ -35,8 +35,11 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
 
   public:
     TCommandBufferPool(TDeviceQueue *deviceQueue);
-    ~TCommandBufferPool();
 
+  protected:
+    virtual ~TCommandBufferPool();
+
+  public:
     TCommandBuffer *Allocate();
     void Free(TCommandBuffer *commandBuffer);
 

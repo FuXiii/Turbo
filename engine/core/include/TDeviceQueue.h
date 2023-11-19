@@ -48,7 +48,9 @@ class TDeviceQueue : public TVulkanHandle
 
   public:
     explicit TDeviceQueue(TDevice *device, TQueueFamilyInfo &queueFamily, uint32_t index);
-    ~TDeviceQueue();
+
+  protected:
+    virtual ~TDeviceQueue();
 
   public:
     TQueueFamilyInfo GetQueueFamily();

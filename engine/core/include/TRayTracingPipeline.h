@@ -12,7 +12,10 @@ namespace Core
 //{
 //   public:
 //     TRayTracingPipeline();
-//     ~TRayTracingPipeline();
+//
+//   protected:
+//   virtual ~TRayTracingPipeline();
+//
 // };
 } // namespace Core
 } // namespace Turbo

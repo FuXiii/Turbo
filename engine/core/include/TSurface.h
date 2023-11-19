@@ -14,15 +14,10 @@
 #include "vulkan/vulkan_android.h"
 #elif defined(TURBO_PLATFORM_LINUX)
 #include <wayland-client.h>
-
 #include "vulkan/vulkan_wayland.h"
-
 #include <xcb/xcb.h>
-
 #include "vulkan/vulkan_xcb.h"
-
 #include <X11/Xlib.h>
-
 #include "vulkan/vulkan_xlib.h"
 #elif defined(TURBO_PLATFORM_UNIX)
 #endif
@@ -213,7 +208,8 @@ class TSurface : public Turbo::Core::TVulkanHandle
     // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
     explicit TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR);
 
-    ~TSurface();
+  protected:
+    virtual ~TSurface();
 
   public:
     VkSurfaceKHR GetVkSurfaceKHR();

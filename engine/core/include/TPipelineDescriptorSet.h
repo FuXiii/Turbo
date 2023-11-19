@@ -28,8 +28,11 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
 
   public:
     explicit TPipelineDescriptorSet(TDescriptorPool *descriptorPool, TPipelineLayout *pipelineLayout);
-    ~TPipelineDescriptorSet();
 
+  protected:
+    virtual ~TPipelineDescriptorSet();
+
+  public:
     const std::vector<TDescriptorSet *> &GetDescriptorSet();
 
     // TODO: this BindData function just for Test

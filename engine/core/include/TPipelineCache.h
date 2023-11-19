@@ -31,8 +31,11 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
   public:
     TPipelineCache(TDevice *device);
     TPipelineCache(TDevice *device, size_t size, void *data);
-    ~TPipelineCache();
 
+  protected:
+    virtual ~TPipelineCache();
+
+  public:
     VkPipelineCache GetVkPipelineCache();
 
     size_t GetSize();
