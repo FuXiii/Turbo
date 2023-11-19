@@ -21,32 +21,32 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     friend class TCommandBuffer;
 
   private:
-    T_VULKAN_HANDLE_PARENT TDeviceQueue *deviceQueue = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDeviceQueue> deviceQueue = nullptr;
     T_VULKAN_HANDLE_HANDLE VkCommandPool vkCommandPool = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TCommandBufferBase *> commandBuffers; // std::vector<T *>  Turbo::Core::TPool::pool
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBufferBase>> commandBuffers;
 
   protected:
-    virtual void AddChildHandle(TCommandBuffer *commandBuffer);
-    virtual TCommandBuffer *RemoveChildHandle(TCommandBuffer *commandBuffer);
+    virtual void AddChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer);
+    virtual TRefPtr<TCommandBuffer> RemoveChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
-    void Free(TCommandBufferBase *commandBufferBase);
+    void Free(const TRefPtr<TCommandBufferBase> &commandBufferBase);
 
   public:
-    TCommandBufferPool(TDeviceQueue *deviceQueue);
+    TCommandBufferPool(const TRefPtr<TDeviceQueue> &deviceQueue);
 
   protected:
     virtual ~TCommandBufferPool();
 
   public:
-    TCommandBuffer *Allocate();
-    void Free(TCommandBuffer *commandBuffer);
+    TRefPtr<TCommandBuffer> Allocate();
+    void Free(const TRefPtr<TCommandBuffer> &commandBuffer);
 
-    TSecondaryCommandBuffer *AllocateSecondary();
-    void Free(TSecondaryCommandBuffer *secondaryCommandBuffer);
+    TRefPtr<TSecondaryCommandBuffer> AllocateSecondary();
+    void Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
 
-    TDeviceQueue *GetDeviceQueue();
+    TRefPtr<TDeviceQueue> GetDeviceQueue();
     VkCommandPool GetVkCommandPool();
 
   public:

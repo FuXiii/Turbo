@@ -3778,4 +3778,5 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `Turbo`中将所有继承自`Turbo::Core::TObject`的子类的析构函数全部转成`protected`权限。
   >* `./engine/core`下将`TBarrier.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
-  >* `./engine/core`下将`TCommandBuffer`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TCommandBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TCommandBufferPool.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
