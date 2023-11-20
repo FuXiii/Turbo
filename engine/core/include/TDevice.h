@@ -27,10 +27,10 @@ class TDevice : public Turbo::Core::TVulkanHandle
     friend class TPhysicalDevice;
 
   private:
-    T_VULKAN_HANDLE_PARENT TPhysicalDevice *physicalDevice = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TPhysicalDevice> physicalDevice = nullptr;
     T_VULKAN_HANDLE_HANDLE VkDevice vkDevice = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TDeviceQueue *> deviceQueues;
-    T_VULKAN_HANDLE_CHILDREN TVmaAllocator *vmaAllocator = nullptr;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TDeviceQueue>> deviceQueues;
+    T_VULKAN_HANDLE_CHILDREN TRefPtr<TVmaAllocator> vmaAllocator = nullptr;
 
     T_VULKAN_HANDLE_DATA std::vector<std::vector<float>> deviceQueuePriorities;
 
@@ -41,8 +41,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     TDeviceDriver *deviceDriver = nullptr;
 
   protected:
-    virtual void AddChildHandle(TDeviceQueue *deviceQueue);
-    virtual TDeviceQueue *RemoveChildHandle(TDeviceQueue *deviceQueue);
+    virtual void AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue);
+    virtual TRefPtr<TDeviceQueue> RemoveChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
     virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
@@ -51,7 +51,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
 
   public:
-    explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
+    explicit TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
 
   protected:
     virtual ~TDevice();
@@ -59,7 +59,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
   public:
     VkDevice GetVkDevice();
 
-    TPhysicalDevice *GetPhysicalDevice();
+    TRefPtr<TPhysicalDevice> GetPhysicalDevice();
 
     size_t GetEnabledLayersCount();
     std::vector<TLayerInfo> GetEnabledLayers();
@@ -71,13 +71,13 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     TPhysicalDeviceFeatures GetEnableDeviceFeatures();
 
-    TVmaAllocator *GetVmaAllocator();
+    TRefPtr<TVmaAllocator> GetVmaAllocator();
 
-    TDeviceQueue *GetBestGraphicsQueue();
-    TDeviceQueue *GetBestComputeQueue();
-    TDeviceQueue *GetBestTransferQueue();
-    TDeviceQueue *GetBestSparseBindingQueue();
-    TDeviceQueue *GetBestProtectedQueue();
+    TRefPtr<TDeviceQueue> GetBestGraphicsQueue();
+    TRefPtr<TDeviceQueue> GetBestComputeQueue();
+    TRefPtr<TDeviceQueue> GetBestTransferQueue();
+    TRefPtr<TDeviceQueue> GetBestSparseBindingQueue();
+    TRefPtr<TDeviceQueue> GetBestProtectedQueue();
 
     void WaitIdle();
 

@@ -75,7 +75,7 @@ void Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, this->vkDescriptorSetLayout, allocator);
 }
 
-Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
     {

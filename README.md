@@ -3780,3 +3780,13 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下将`TBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TCommandBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TCommandBufferPool.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/20 设计架构
+  >
+  >* `./engine/core`下将`TComputePipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptor.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorPool.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorSet.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorSetLayout.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDevice.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDeviceQueue.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。

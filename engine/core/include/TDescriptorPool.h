@@ -34,7 +34,7 @@ class TDescriptorSize : public Turbo::Core::TInfo
 class TDescriptorPool : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkDescriptorPool vkDescriptorPool = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 
@@ -46,16 +46,16 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
+    explicit TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
 
   protected:
     virtual ~TDescriptorPool();
 
   public:
-    TPipelineDescriptorSet *Allocate(TPipelineLayout *pipelineLayout);
-    void Free(TPipelineDescriptorSet *pipelineDescriptorSet);
+    TRefPtr<TPipelineDescriptorSet> Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout);
+    void Free(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
 
-    TDevice *GetDevice();
+    TRefPtr<TDevice> GetDevice();
     VkDescriptorPool GetVkDescriptorPool();
 
   public:

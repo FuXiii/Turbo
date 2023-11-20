@@ -8,7 +8,7 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
+void Turbo::Core::TDevice::AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
 {
     if (deviceQueue != nullptr)
     {
@@ -16,7 +16,7 @@ void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
     }
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue *deviceQueue)
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::RemoveChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
 {
     // Turbo::Core::TDeviceQueue *result = nullptr;
     // uint32_t index = 0;
@@ -1068,7 +1068,7 @@ void Turbo::Core::TDevice::InternalDestroy()
     }
 }
 
-Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
 {
     /*
     Vulkan Spec::1.2.156
@@ -1142,7 +1142,7 @@ VkDevice Turbo::Core::TDevice::GetVkDevice()
     return this->vkDevice;
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TDevice::GetPhysicalDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TDevice::GetPhysicalDevice()
 {
     return this->physicalDevice;
 }
@@ -1233,12 +1233,12 @@ std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TDevice::GetDeviceQueueF
     return result;
 }
 
-Turbo::Core::TVmaAllocator *Turbo::Core::TDevice::GetVmaAllocator()
+Turbo::Core::TRefPtr<Turbo::Core::TVmaAllocator> Turbo::Core::TDevice::GetVmaAllocator()
 {
     return this->vmaAllocator;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestGraphicsQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1262,7 +1262,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestComputeQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1286,7 +1286,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestTransferQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1310,7 +1310,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestSparseBindingQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1334,7 +1334,7 @@ Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestProtectedQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();

@@ -13,7 +13,7 @@ class TDevice;
 class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
 
     T_VULKAN_HANDLE_DATA std::vector<TDescriptor *> descriptors;
@@ -23,7 +23,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors);
+    TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors);
 
   protected:
     virtual ~TDescriptorSetLayout();

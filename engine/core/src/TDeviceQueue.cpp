@@ -12,7 +12,7 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-void Turbo::Core::TDeviceQueue::AddChildHandle(TCommandBufferPool *commandBufferPool)
+void Turbo::Core::TDeviceQueue::AddChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool)
 {
     if (commandBufferPool != nullptr)
     {
@@ -20,7 +20,7 @@ void Turbo::Core::TDeviceQueue::AddChildHandle(TCommandBufferPool *commandBuffer
     }
 }
 
-Turbo::Core::TCommandBufferPool *Turbo::Core::TDeviceQueue::RemoveChildHandle(TCommandBufferPool *commandBufferPool)
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> Turbo::Core::TDeviceQueue::RemoveChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool)
 {
     Turbo::Core::TCommandBufferPool *result = nullptr;
     uint32_t index = 0;
@@ -82,7 +82,7 @@ void Turbo::Core::TDeviceQueue::InternalDestroy()
     this->vkQueue = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TDeviceQueue::TDeviceQueue(TDevice *device, TQueueFamilyInfo &queueFamily, uint32_t index) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDeviceQueue::TDeviceQueue(const TRefPtr<TDevice> &device, TQueueFamilyInfo &queueFamily, uint32_t index) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && queueFamily.GetIndex() != UINT32_MAX)
     {
@@ -139,12 +139,12 @@ VkQueue Turbo::Core::TDeviceQueue::GetVkQueue()
     return this->vkQueue;
 }
 
-Turbo::Core::TDevice *Turbo::Core::TDeviceQueue::GetDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDeviceQueue::GetDevice()
 {
     return this->device;
 }
 
-bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores, std::vector<TSemaphore *> *signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)
+bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> *waitSemaphores, std::vector<TRefPtr<TSemaphore>> *signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
 {
     std::vector<VkSemaphore> wait_semaphores;
     std::vector<VkPipelineStageFlags> wait_dst_stage_masks;
@@ -203,7 +203,7 @@ void Turbo::Core::TDeviceQueue::WaitIdle()
     }
 }
 
-bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *surface)
+bool Turbo::Core::TDeviceQueue::IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface)
 {
     uint32_t queue_family_index = this->queueFamily.GetIndex();
     std::vector<Turbo::Core::TQueueFamilyInfo> support_queue_familys = surface->GetSupportQueueFamilys();
@@ -218,7 +218,7 @@ bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *sur
     return false;
 }
 
-Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)
+Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex)
 {
     if (swapchain != nullptr)
     {
