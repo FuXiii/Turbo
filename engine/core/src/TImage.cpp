@@ -163,7 +163,7 @@ void Turbo::Core::TImage::InternalDestroy()
     vmaDestroyImage(*vma_allocator, this->vkImage, *vma_allocation);
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     this->device = device;
     this->vkImage = vkImage;
@@ -181,7 +181,7 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags
     this->layout = layout;
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
     {
@@ -209,7 +209,7 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TIma
     }
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
 {
     if (device != nullptr)
     {
@@ -265,7 +265,7 @@ Turbo::Core::TFormatInfo Turbo::Core::TImage::GetFormat()
     return this->format;
 }
 
-Turbo::Core::TDevice *Turbo::Core::TImage::GetDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TImage::GetDevice()
 {
     return this->device;
 }

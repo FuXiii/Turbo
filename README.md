@@ -3797,3 +3797,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下将`TFence.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TFramebuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TGraphicsPipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TImage.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
