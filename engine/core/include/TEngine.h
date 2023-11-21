@@ -4,7 +4,6 @@
 #include "TInstance.h"
 #include "TObject.h"
 
-
 namespace Turbo
 {
 namespace Core
@@ -15,7 +14,7 @@ class TDevice;
 class TEngine : public TObject
 {
   private:
-    TInstance *instance = nullptr;
+    TRefPtr<TInstance> instance = nullptr;
 
   private:
     void VerificationInitVulkan();
@@ -28,7 +27,7 @@ class TEngine : public TObject
     virtual ~TEngine();
 
   public:
-    TInstance &GetInstance();
+    TRefPtr<TInstance> GetInstance();
 
     virtual std::string ToString() override;
 };

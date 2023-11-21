@@ -13,9 +13,9 @@ class TImageView;
 class TFramebuffer : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRenderPass *renderPass = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass = nullptr;
     T_VULKAN_HANDLE_HANDLE VkFramebuffer vkFramebuffer = VK_NULL_HANDLE;
-    std::vector<TImageView *> attachments;
+    std::vector<TRefPtr<TImageView>> attachments;
 
     uint32_t width;
     uint32_t height;
@@ -25,7 +25,7 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments);
+    TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments);
 
   protected:
     virtual ~TFramebuffer();
@@ -36,9 +36,9 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
     uint32_t GetWidth();
     uint32_t GetHeight();
 
-    TRenderPass *GetRenderPass();
+    TRefPtr<TRenderPass> GetRenderPass();
 
-    std::vector<TImageView *> GetAttachments();
+    std::vector<TRefPtr<TImageView>> GetAttachments();
 
   public:
     virtual std::string ToString() override;

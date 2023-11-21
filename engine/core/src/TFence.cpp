@@ -29,7 +29,7 @@ void Turbo::Core::TFence::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyFence(vk_device, this->vkFence, allocator);
 }
 
-Turbo::Core::TFence::TFence(TDevice *device)
+Turbo::Core::TFence::TFence(const TRefPtr<TDevice> &device)
 {
     if (device != nullptr)
     {
@@ -47,7 +47,7 @@ Turbo::Core::TFence::~TFence()
     this->InternalDestroy();
 }
 
-Turbo::Core::TDevice *Turbo::Core::TFence::GetDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TFence::GetDevice()
 {
     return this->device;
 }
@@ -84,7 +84,7 @@ std::string Turbo::Core::TFence::ToString()
     return std::string();
 }
 
-void Turbo::Core::TFences::Add(TFence *fence)
+void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
 {
     if (fence != nullptr && fence->GetVkFence() != VK_NULL_HANDLE)
     {

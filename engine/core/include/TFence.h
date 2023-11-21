@@ -14,7 +14,7 @@ class TDevice;
 class TFence : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkFence vkFence = VK_NULL_HANDLE;
 
   protected:
@@ -22,13 +22,13 @@ class TFence : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TFence(TDevice *device);
+    TFence(const TRefPtr<TDevice> &device);
 
   protected:
     virtual ~TFence();
 
   public:
-    TDevice *GetDevice();
+    TRefPtr<TDevice> GetDevice();
 
     VkFence GetVkFence();
 
@@ -43,7 +43,7 @@ class TFence : public Turbo::Core::TVulkanHandle
 class TFences : public Turbo::Core::TObject
 {
   private:
-    std::map<TDevice *, std::vector<TFence *>> fenceMap;
+    std::map<TRefPtr<TDevice>, std::vector<TRefPtr<TFence>>> fenceMap;
 
   public:
     TFences() = default;
@@ -52,7 +52,7 @@ class TFences : public Turbo::Core::TObject
     virtual ~TFences() = default;
 
   public:
-    void Add(TFence *fence);
+    void Add(const TRefPtr<TFence> &fence);
 
     TResult Wait(uint64_t timeout);
 

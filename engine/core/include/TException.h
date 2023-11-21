@@ -9,7 +9,7 @@ namespace Turbo
 namespace Core
 {
 
-// TODO:inherit std::runtime_error
+// TODO: inherit std::runtime_error
 class TException : public std::exception //, public Turbo::Core::TObject
 {
   private:
