@@ -16,7 +16,7 @@ class TCommandBuffer;
 class TRenderPass : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkRenderPass vkRenderPass = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN std::vector<TSubpass> subpasses;
     T_VULKAN_HANDLE_DATA std::vector<TAttachment> attachments;
@@ -26,7 +26,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
+    TRenderPass(const TRefPtr<TDevice> &device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
 
   protected:
     virtual ~TRenderPass();
@@ -34,7 +34,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
   public:
     VkRenderPass GetVkRenderPass();
 
-    TDevice *GetDevice();
+    TRefPtr<TDevice> GetDevice();
 
     const std::vector<TAttachment> &GetAttachments();
 

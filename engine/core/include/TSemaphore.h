@@ -13,7 +13,7 @@ class TDevice;
 class TSemaphore : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkSemaphore vkSemaphore = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN VkPipelineStageFlags waitDstStageMask;
 
@@ -22,7 +22,7 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TSemaphore(TDevice *device, TPipelineStages waitDstStageMask);
+    TSemaphore(const TRefPtr<TDevice> &device, TPipelineStages waitDstStageMask);
 
   protected:
     virtual ~TSemaphore();

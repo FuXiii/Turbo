@@ -3809,3 +3809,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下将`TPipelineDescriptorSet.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TPipelineLayout.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TRenderingPipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TRenderPass.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSampler.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSemaphore.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TShader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。

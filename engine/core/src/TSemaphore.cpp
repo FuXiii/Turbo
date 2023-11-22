@@ -27,7 +27,7 @@ void Turbo::Core::TSemaphore::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroySemaphore(vk_device, this->vkSemaphore, allocator);
 }
 
-Turbo::Core::TSemaphore::TSemaphore(TDevice *device, VkPipelineStageFlags waitDstStageMask)
+Turbo::Core::TSemaphore::TSemaphore(const TRefPtr<TDevice> &device, VkPipelineStageFlags waitDstStageMask)
 {
     if (device != nullptr)
     {
