@@ -24,7 +24,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT
     T_VULKAN_HANDLE_HANDLE VkInstance vkInstance = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TPhysicalDevice *> physicalDevices;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TPhysicalDevice>> physicalDevices;
 
     T_VULKAN_HANDLE_DATA std::vector<TLayerInfo> enabledLayers;
     T_VULKAN_HANDLE_DATA std::vector<TExtensionInfo> enabledExtensions;
@@ -36,9 +36,9 @@ class TInstance : public Turbo::Core::TVulkanHandle
     TInstanceDriver *instanceDriver = nullptr;
 
   protected:
-    bool IsHaveHandle(TPhysicalDevice *physicalDevice);
-    virtual void AddChildHandle(TPhysicalDevice *physicalDevice);
-    virtual TPhysicalDevice *RemoveChildHandle(TPhysicalDevice *physicalDevice);
+    bool IsHaveHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    virtual void AddChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    virtual TRefPtr<TPhysicalDevice> RemoveChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
     virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
@@ -81,9 +81,9 @@ class TInstance : public Turbo::Core::TVulkanHandle
     bool IsEnabledExtension(TExtensionType extensionType);
 
     uint32_t GetPhysicalDeviceCount();
-    TPhysicalDevice *GetPhysicalDevice(uint32_t index);
-    const std::vector<TPhysicalDevice *> &GetPhysicalDevices();
-    TPhysicalDevice *GetBestPhysicalDevice();
+    TRefPtr<TPhysicalDevice> GetPhysicalDevice(uint32_t index);
+    const std::vector<TRefPtr<TPhysicalDevice>> &GetPhysicalDevices();
+    TRefPtr<TPhysicalDevice> GetBestPhysicalDevice();
 
     const TInstanceDriver *GetInstanceDriver();
 

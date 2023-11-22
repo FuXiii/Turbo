@@ -187,7 +187,7 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
     return VkResult::VK_SUCCESS;
 }
 
-bool Turbo::Core::TInstance::IsHaveHandle(TPhysicalDevice *physicalDevice)
+bool Turbo::Core::TInstance::IsHaveHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     if (physicalDevice != nullptr)
     {
@@ -208,7 +208,7 @@ bool Turbo::Core::TInstance::IsHaveHandle(TPhysicalDevice *physicalDevice)
     return true;
 }
 
-void Turbo::Core::TInstance::AddChildHandle(TPhysicalDevice *physicalDevice)
+void Turbo::Core::TInstance::AddChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     if (physicalDevice != nullptr)
     {
@@ -219,7 +219,7 @@ void Turbo::Core::TInstance::AddChildHandle(TPhysicalDevice *physicalDevice)
     }
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysicalDevice *physicalDevice)
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::RemoveChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     // We don't need to remove it,because physical device created by instance.we just delete is at ~TInstance()
     return nullptr;
@@ -473,7 +473,7 @@ uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount()
     return this->physicalDevices.size();
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
 {
     if (index > this->physicalDevices.size() - 1)
     {
@@ -483,12 +483,12 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t
     return this->physicalDevices[index];
 }
 
-const std::vector<Turbo::Core::TPhysicalDevice *> &Turbo::Core::TInstance::GetPhysicalDevices()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice>> &Turbo::Core::TInstance::GetPhysicalDevices()
 {
     return this->physicalDevices;
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetBestPhysicalDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::GetBestPhysicalDevice()
 {
     uint32_t physical_device_count = this->GetPhysicalDeviceCount();
 

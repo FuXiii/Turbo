@@ -90,9 +90,9 @@ class TPhysicalDevice : public TVulkanHandle
     friend class TDeviceQueue;
 
   private:
-    T_VULKAN_HANDLE_PARENT TInstance *instance = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TInstance> instance = nullptr;
     T_VULKAN_HANDLE_HANDLE VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TDevice *> devices;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TDevice>> devices;
 
     T_VULKAN_HANDLE_DATA uint32_t index = 0;
 
@@ -127,13 +127,13 @@ class TPhysicalDevice : public TVulkanHandle
     void EnumerateFromat();
 
   protected:
-    virtual void AddChildHandle(TDevice *device);
-    virtual TDevice *RemoveChildHandle(TDevice *device);
+    virtual void AddChildHandle(const TRefPtr<TDevice> &device);
+    virtual TRefPtr<TDevice> RemoveChildHandle(const TRefPtr<TDevice> &device);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    explicit TPhysicalDevice(TInstance *instance, uint32_t index);
+    explicit TPhysicalDevice(const TRefPtr<TInstance> &instance, uint32_t index);
 
   protected:
     virtual ~TPhysicalDevice();
@@ -204,7 +204,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     uint32_t GetPerformanceScore();
 
-    TInstance *GetInstance();
+    TRefPtr<TInstance> GetInstance();
 
     uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily);
 

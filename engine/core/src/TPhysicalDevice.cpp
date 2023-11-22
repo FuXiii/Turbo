@@ -411,7 +411,7 @@ void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
     }
 }
 
-void Turbo::Core::TPhysicalDevice::AddChildHandle(TDevice *device)
+void Turbo::Core::TPhysicalDevice::AddChildHandle(const TRefPtr<TDevice> &device)
 {
     if (device != nullptr)
     {
@@ -419,7 +419,7 @@ void Turbo::Core::TPhysicalDevice::AddChildHandle(TDevice *device)
     }
 }
 
-Turbo::Core::TDevice *Turbo::Core::TPhysicalDevice::RemoveChildHandle(TDevice *device)
+Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TPhysicalDevice::RemoveChildHandle(const TRefPtr<TDevice> &device)
 {
     Turbo::Core::TDevice *result = nullptr;
     uint32_t index = 0;
@@ -493,7 +493,7 @@ void Turbo::Core::TPhysicalDevice::InternalDestroy()
     this->vkPhysicalDevice = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TPhysicalDevice::TPhysicalDevice(TInstance *instance, uint32_t index) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPhysicalDevice::TPhysicalDevice(const TRefPtr<TInstance> &instance, uint32_t index) : Turbo::Core::TVulkanHandle()
 {
     if (instance != nullptr)
     {
@@ -734,7 +734,7 @@ uint32_t Turbo::Core::TPhysicalDevice::GetPerformanceScore()
     return this->performanceScore;
 }
 
-Turbo::Core::TInstance *Turbo::Core::TPhysicalDevice::GetInstance()
+Turbo::Core::TRefPtr<Turbo::Core::TInstance> Turbo::Core::TPhysicalDevice::GetInstance()
 {
     return this->instance;
 }

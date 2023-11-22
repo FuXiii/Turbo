@@ -50,7 +50,7 @@ void Turbo::Core::TImageView::InternalDestroy()
     this->vkImageView = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
     {
@@ -71,7 +71,7 @@ Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFor
     }
 }
 
-Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
     {
@@ -106,7 +106,7 @@ Turbo::Core::TImageView::~TImageView()
     this->InternalDestroy();
 }
 
-Turbo::Core::TImage *Turbo::Core::TImageView::GetImage()
+Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageView::GetImage()
 {
     return this->image;
 }
