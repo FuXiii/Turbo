@@ -22,7 +22,7 @@ void Turbo::Core::TPipelineDescriptorSet::InternalDestroy()
     this->descriptorSets.clear();
 }
 
-Turbo::Core::TPipelineDescriptorSet::TPipelineDescriptorSet(TDescriptorPool *descriptorPool, TPipelineLayout *pipelineLayout)
+Turbo::Core::TPipelineDescriptorSet::TPipelineDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
     if (descriptorPool != nullptr && pipelineLayout != nullptr)
     {
@@ -40,12 +40,12 @@ Turbo::Core::TPipelineDescriptorSet::~TPipelineDescriptorSet()
     this->InternalDestroy();
 }
 
-const std::vector<Turbo::Core::TDescriptorSet *> &Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSet>> &Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
 {
     return this->descriptorSets;
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -62,7 +62,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
 {
     std::vector<TBuffer *> buffers;
     buffers.push_back(buffer);
@@ -70,7 +70,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     this->BindData(set, binding, dstArrayElement, buffers);
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -87,7 +87,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -104,7 +104,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &samplers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &samplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {

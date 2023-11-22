@@ -9,6 +9,9 @@ namespace Turbo
 {
 namespace Core
 {
+
+// NOTE: 目前该 TPool<T> 没有用上
+
 template <typename T>
 class TPool : public Turbo::Core::TObject
 {

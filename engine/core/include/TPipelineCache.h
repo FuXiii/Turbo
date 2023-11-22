@@ -18,7 +18,7 @@ enum class TPipelineCacheHeaderVersion
 class TPipelineCache : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
 
     size_t size;
@@ -29,8 +29,8 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipelineCache(TDevice *device);
-    TPipelineCache(TDevice *device, size_t size, void *data);
+    TPipelineCache(const TRefPtr<TDevice> &device);
+    TPipelineCache(const TRefPtr<TDevice> &device, size_t size, void *data);
 
   protected:
     virtual ~TPipelineCache();

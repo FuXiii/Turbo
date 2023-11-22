@@ -53,7 +53,7 @@ void Turbo::Core::TPipelineLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
 }
 
-Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
+Turbo::Core::TPipelineLayout::TPipelineLayout(const TRefPtr<TDevice> &device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
 {
     if (device != nullptr)
     {
@@ -78,7 +78,7 @@ Turbo::Core::TPipelineLayout::~TPipelineLayout()
     }
 }
 
-const std::vector<Turbo::Core::TDescriptorSetLayout *> &Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout>> &Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
 {
     return this->descriptorSetLayouts;
 }
