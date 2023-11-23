@@ -57,7 +57,7 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyCommandPool(vk_device, this->vkCommandPool, allocator);
 }
 
-void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TCommandBufferBase> &commandBufferBase)
+void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandBufferBase)
 {
     uint32_t index = 0;
     bool is_found = false;
@@ -75,6 +75,7 @@ void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TCommandBufferBase> &co
     {
         // delete this->commandBuffers[index];
         this->commandBuffers.erase(this->commandBuffers.begin() + index);
+        commandBufferBase = nullptr;
     }
 }
 
@@ -116,7 +117,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Core::TCommandBufferPoo
     return command_buffer;
 }
 
-void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TCommandBuffer> &commandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBuffer> &commandBuffer)
 {
     // this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
     this->Free(commandBuffer);
@@ -129,7 +130,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> Turbo::Core::TCommand
     return secondary_command_buffer;
 }
 
-void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
 {
     // this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
     this->Free(secondaryCommandBuffer);

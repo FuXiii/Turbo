@@ -163,7 +163,7 @@ void Turbo::Core::TDescriptorPool::InternalDestroy()
 
 Turbo::Core::TDescriptorPool::TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->maxSetsCount = maxSetsCount;
@@ -325,11 +325,13 @@ Turbo::Core::TDescriptorPool::~TDescriptorPool()
 Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
     return new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout);
+    // FIXME: 存储到容器中
 }
 
-void Turbo::Core::TDescriptorPool::Free(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
+void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
 {
-    delete pipelineDescriptorSet;
+    // delete pipelineDescriptorSet;
+    pipelineDescriptorSet = nullptr; // FIXME: 需要确保该 pipelineDescriptorSet 是从该池中分配的
 }
 
 Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDescriptorPool::GetDevice()
