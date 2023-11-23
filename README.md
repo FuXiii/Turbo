@@ -3824,3 +3824,13 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TRefPtr`中使用`class`声明的模板关键字，使用`typename`替代。
   >* `./engine/core`下更新`TReferenced`中增加`virtual bool Valid() const`成员虚函数。用于判定该引用是否有效（用于自定义判定有效性）。
   >* `./engine/core`下更新`TRefPtr`中更新`bool Valid() const`成员函数。增加对该指针自身对象的有效性判断（用于自定义判定有效性）。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TBufferMemoryBarrier`构造函数的`buffer`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TImageMemoryBarrier`构造函数的`image`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TImageMemoryBarrier`构造函数的`imageView`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`构造函数的`commandBufferPool`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdBindPipelineDescriptorSet`成员函数使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`的`Free(const TRefPtr<TCommandBufferBase> &commandBufferBase)`成员函数移除对`delete`的使用。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`~TCommandBufferPool`析构函数,使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TCommandBuffer> &commandBuffer)`成员函数,使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)`成员函数,使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`构造函数,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。。

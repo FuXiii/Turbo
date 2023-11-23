@@ -61,7 +61,7 @@ void Turbo::Core::TCommandBufferBase::InternalDestroy()
 
 Turbo::Core::TCommandBufferBase::TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
 {
-    if (commandBufferPool != nullptr)
+    if (commandBufferPool->Valid())
     {
         this->commandBufferPool = commandBufferPool;
         this->level = level;
@@ -297,12 +297,12 @@ void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, s
 
 void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
 {
-    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
+    std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
 
-    for (Turbo::Core::TDescriptorSet *descriptor_set_item : descriptor_sets)
+    for (TRefPtr<Turbo::Core::TDescriptorSet> &descriptor_set_item : descriptor_sets)
     {
         uint32_t first_set = descriptor_set_item->GetSet();
-        std::vector<Turbo::Core::TDescriptorSet *> descriptor_set{descriptor_set_item};
+        std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_set{descriptor_set_item};
         this->CmdBindDescriptorSets(first_set, descriptor_set);
     }
 }

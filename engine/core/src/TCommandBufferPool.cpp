@@ -73,14 +73,15 @@ void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TCommandBufferBase> &co
 
     if (is_found)
     {
-        delete this->commandBuffers[index];
+        // delete this->commandBuffers[index];
         this->commandBuffers.erase(this->commandBuffers.begin() + index);
     }
 }
 
 Turbo::Core::TCommandBufferPool::TCommandBufferPool(const TRefPtr<TDeviceQueue> &deviceQueue) : Turbo::Core::TVulkanHandle()
 {
-    if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
+    // if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
+    if (deviceQueue.Valid())
     {
         this->deviceQueue = deviceQueue;
 
@@ -100,8 +101,9 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
 
     for (; this->commandBuffers.size() > 0;)
     {
-        TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
-        this->Free(command_buffer_base);
+        // TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
+        // this->Free(command_buffer_base);
+        this->Free(this->commandBuffers[0]);
     }
 
     this->InternalDestroy();
@@ -116,7 +118,8 @@ Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Core::TCommandBufferPoo
 
 void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TCommandBuffer> &commandBuffer)
 {
-    this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
+    // this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
+    this->Free(commandBuffer);
 }
 
 Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> Turbo::Core::TCommandBufferPool::AllocateSecondary()
@@ -128,7 +131,8 @@ Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> Turbo::Core::TCommand
 
 void Turbo::Core::TCommandBufferPool::Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
 {
-    this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
+    // this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
+    this->Free(secondaryCommandBuffer);
 }
 
 Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TCommandBufferPool::GetDeviceQueue()

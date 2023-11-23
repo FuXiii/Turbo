@@ -36,7 +36,7 @@ std::string Turbo::Core::TMemoryBarrier::ToString()
 
 Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (buffer != nullptr)
+    if (buffer.Valid())
     {
         this->buffer = buffer;
         this->offset = offset;
@@ -74,7 +74,7 @@ std::string Turbo::Core::TBufferMemoryBarrier::ToString()
 
 Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (image != nullptr)
+    if (image->Valid())
     {
         this->oldLayout = oldLayout;
         this->newLayout = newLayout;
@@ -93,7 +93,7 @@ Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess
 
 Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (imageView != nullptr)
+    if (imageView.Valid())
     {
         this->oldLayout = oldLayout;
         this->newLayout = newLayout;
