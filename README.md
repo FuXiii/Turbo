@@ -3833,4 +3833,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`~TCommandBufferPool`析构函数,使用`Turbo::Core::TRefPtr`。
   >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TCommandBuffer> &commandBuffer)`成员函数,使用`Turbo::Core::TRefPtr`。
   >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)`成员函数,使用`Turbo::Core::TRefPtr`。
-  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`构造函数,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`构造函数,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`CmdBindDescriptorSets`成员函数中,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdBeginRendering`成员函数中,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdUpdateBuffer`成员函数中,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdPushConstants`成员函数中,使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
