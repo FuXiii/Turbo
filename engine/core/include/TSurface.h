@@ -13,11 +13,11 @@
 #elif defined(TURBO_PLATFORM_ANDROID)
 #include "vulkan/vulkan_android.h"
 #elif defined(TURBO_PLATFORM_LINUX)
-#include <wayland-client.h>
-#include "vulkan/vulkan_wayland.h"
-#include <xcb/xcb.h>
-#include "vulkan/vulkan_xcb.h"
 #include <X11/Xlib.h>
+#include <wayland-client.h>
+#include <xcb/xcb.h>
+#include "vulkan/vulkan_wayland.h"
+#include "vulkan/vulkan_xcb.h"
 #include "vulkan/vulkan_xlib.h"
 #elif defined(TURBO_PLATFORM_UNIX)
 #endif
@@ -116,7 +116,7 @@ typedef enum class TPresentMode
 class TSurface : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
 
     bool isExternalHandle = false;
@@ -192,21 +192,21 @@ class TSurface : public Turbo::Core::TVulkanHandle
 
   public:
 #if defined(TURBO_PLATFORM_WINDOWS)
-    explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
     explicit TSurface(...);
 #elif defined(TURBO_PLATFORM_ANDROID)
-    explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
 #elif defined(TURBO_PLATFORM_LINUX)
-    explicit TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface);
-    explicit TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window);
-    explicit TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, wl_display *display, wl_surface *surface);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, xcb_connection_t *connection, xcb_window_t window);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, Display *dpy, Window window);
 #elif defined(__unix) || defined(__unix__)
     explicit TSurface(...);
 #else
 #endif
     // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
-    explicit TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, VkSurfaceKHR vkSurfaceKHR);
 
   protected:
     virtual ~TSurface();
@@ -256,7 +256,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha();
     Turbo::Core::TImageUsages GetSupportedUsages();
 
-    Turbo::Core::TDevice *GetDevice();
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> GetDevice();
 
     // Inherited via TObject
     virtual std::string ToString() override;

@@ -10,7 +10,7 @@ namespace Core
 class TVulkanAllocator : public TAllocator
 {
   private:
-    static TVulkanAllocator *instance;
+    static TRefPtr<TVulkanAllocator> instance;
     static VkAllocationCallbacks vkAllocationCallbacks;
 
   private:
@@ -18,7 +18,7 @@ class TVulkanAllocator : public TAllocator
     ~TVulkanAllocator();
 
   public:
-    static TVulkanAllocator *Instance();
+    static TRefPtr<TVulkanAllocator> Instance();
     static void Destory();
 
   public:
@@ -33,7 +33,6 @@ class TVulkanAllocator : public TAllocator
 
     virtual std::string ToString() override;
 };
-
 
 } // namespace Core
 } // namespace Turbo

@@ -3813,3 +3813,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下将`TSampler.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TSemaphore.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TShader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/23 设计架构
+  >
+  >* `./engine/core`下将`TSurface.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSwapchain.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVmaAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVulkanAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVulkanLoader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。

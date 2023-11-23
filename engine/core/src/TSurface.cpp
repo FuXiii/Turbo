@@ -219,7 +219,7 @@ void Turbo::Extension::TSurface::InternalDestroy()
 }
 
 #if defined(TURBO_PLATFORM_WINDOWS)
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd)
 {
     if (device != nullptr)
     {
@@ -436,7 +436,7 @@ Turbo::Extension::TSurface::TSurface(...)
 #else
 #endif
 
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, VkSurfaceKHR vkSurfaceKHR)
 {
     if (device != nullptr && vkSurfaceKHR != VK_NULL_HANDLE)
     {
@@ -997,7 +997,7 @@ Turbo::Core::TImageUsages Turbo::Extension::TSurface::GetSupportedUsages()
     return this->supportedUsageFlags;
 }
 
-Turbo::Core::TDevice *Turbo::Extension::TSurface::GetDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Extension::TSurface::GetDevice()
 {
     return this->device;
 }

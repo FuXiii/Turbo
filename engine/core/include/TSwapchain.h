@@ -22,7 +22,7 @@ namespace Extension
 class TSwapchain : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TSurface *surface = nullptr;
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<TSurface> surface = nullptr;
     T_VULKAN_HANDLE_HANDLE VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
 
     uint32_t minImageCount;
@@ -36,9 +36,9 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     TPresentMode presentMode;
     bool isClipped;
 
-    TSwapchain *oldSwapchain = nullptr;
+    Turbo::Core::TRefPtr<TSwapchain> oldSwapchain = nullptr;
 
-    std::vector<Turbo::Core::TImage *> images;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> images;
 
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
@@ -50,23 +50,23 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    [[deprecated]] explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
-    [[deprecated]] explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
+    [[deprecated]] explicit TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
+    [[deprecated]] explicit TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
 
-    explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
-    explicit TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
+    explicit TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped);
+    explicit TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped);
 
-    explicit TSwapchain(TSwapchain *oldSwapchain);
+    explicit TSwapchain(const Turbo::Core::TRefPtr<TSwapchain> &oldSwapchain);
 
   protected:
     virtual ~TSwapchain();
 
   public:
-    TSurface *GetSurface();
-    const std::vector<Turbo::Core::TImage *> &GetImages();
+    Turbo::Core::TRefPtr<TSurface> GetSurface();
+    const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> &GetImages();
 
-    Turbo::Core::TResult AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
-    Turbo::Core::TResult AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index);
+    Turbo::Core::TResult AcquireNextImage(uint64_t timeout, const Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> &signalSemphore, const Turbo::Core::TRefPtr<Turbo::Core::TFence> &signalFence, uint32_t *index);
+    Turbo::Core::TResult AcquireNextImageUntil(const Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> &signalSemphore, const Turbo::Core::TRefPtr<Turbo::Core::TFence> &signalFence, uint32_t *index);
 
     VkSwapchainKHR GetVkSwapchainKHR();
 

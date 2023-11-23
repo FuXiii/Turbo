@@ -1,7 +1,7 @@
 #include "TVulkanAllocator.h"
 
 VkAllocationCallbacks Turbo::Core::TVulkanAllocator::vkAllocationCallbacks;
-Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::instance = nullptr;
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::instance = nullptr;
 
 Turbo::Core::TVulkanAllocator::TVulkanAllocator()
 {
@@ -17,7 +17,7 @@ Turbo::Core::TVulkanAllocator::~TVulkanAllocator()
 {
 }
 
-Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::Instance()
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::Instance()
 {
     if (TVulkanAllocator::instance == nullptr)
     {

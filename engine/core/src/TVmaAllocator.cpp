@@ -49,7 +49,7 @@ void Turbo::Core::TVmaAllocator::InternalDestroy()
     vmaDestroyAllocator(*vma_allocator);
 }
 
-Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TVmaAllocator::TVmaAllocator(const TRefPtr<TDevice> &device) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr)
     {

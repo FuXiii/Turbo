@@ -167,7 +167,7 @@ void Turbo::Extension::TSwapchain::InternalDestroy()
     this->vkDestroySwapchainKHR(this->surface->GetDevice()->GetVkDevice(), this->vkSwapchainKHR, allocator);
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
+Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
 {
     if (surface != nullptr)
     {
@@ -205,7 +205,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
+Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
 {
     if (surface != nullptr)
     {
@@ -275,7 +275,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
+Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
 {
     if (surface != nullptr)
     {
@@ -328,7 +328,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
+Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
 {
     if (surface != nullptr)
     {
@@ -413,7 +413,7 @@ Turbo::Extension::TSwapchain::TSwapchain(TSurface *surface, uint32_t minImageCou
     }
 }
 
-Turbo::Extension::TSwapchain::TSwapchain(TSwapchain *oldSwapchain)
+Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSwapchain> &oldSwapchain)
 {
     if (oldSwapchain != nullptr)
     {
@@ -455,17 +455,17 @@ Turbo::Extension::TSwapchain::~TSwapchain()
     this->InternalDestroy();
 }
 
-Turbo::Extension::TSurface *Turbo::Extension::TSwapchain::GetSurface()
+Turbo::Core::TRefPtr<Turbo::Extension::TSurface> Turbo::Extension::TSwapchain::GetSurface()
 {
     return this->surface;
 }
 
-const std::vector<Turbo::Core::TImage *> &Turbo::Extension::TSwapchain::GetImages()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> &Turbo::Extension::TSwapchain::GetImages()
 {
     return this->images;
 }
 
-Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t timeout, Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index)
+Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t timeout, const Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> &signalSemphore, const Turbo::Core::TRefPtr<Turbo::Core::TFence> &signalFence, uint32_t *index)
 {
     if (index != nullptr)
     {
@@ -514,7 +514,7 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t tim
     return Turbo::Core::TResult::INVALID_PARAMETER;
 }
 
-Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImageUntil(Turbo::Core::TSemaphore *signalSemphore, Turbo::Core::TFence *signalFence, uint32_t *index)
+Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImageUntil(const Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> &signalSemphore, const Turbo::Core::TRefPtr<Turbo::Core::TFence> &signalFence, uint32_t *index)
 {
     return this->AcquireNextImage(UINT64_MAX, signalSemphore, signalFence, index);
 }
