@@ -15,7 +15,7 @@ template <typename T>
 class TRefPtr
 {
   private:
-    template <class Inherit>
+    template <typename Inherit>
     friend class TRefPtr;
 
   private:
@@ -131,8 +131,6 @@ class TRefPtr
             {
                 this->ptr->Reference();
             }
-
-            
         }
 
         return *this;
@@ -176,37 +174,37 @@ class TRefPtr
         return *this;
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator<(const TRefPtr<Inherit> &rp) const
     {
         return (this->ptr < rp.ptr);
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator==(const TRefPtr<Inherit> &rp) const
     {
         return (this->ptr == rp.ptr);
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator!=(const TRefPtr<Inherit> &rp) const
     {
         return (this->ptr != rp.ptr);
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator<(const Inherit *ptr) const
     {
         return (this->ptr < ptr);
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator==(const Inherit *ptr) const
     {
         return (this->ptr == ptr);
     }
 
-    template <class Inherit>
+    template <typename Inherit>
     bool operator!=(const Inherit *ptr) const
     {
         return (this->ptr != ptr);
@@ -239,7 +237,7 @@ class TRefPtr
 
     bool Valid() const
     {
-        return this->ptr != nullptr;
+        return (this->ptr != nullptr && this->ptr->Valid());
     }
 
     // T *Release();

@@ -18,6 +18,8 @@ class TReferenced
     uint32_t Reference() const;
     uint32_t UnReference() const;
 
+    virtual bool Valid() const;
+
   protected:
     virtual ~TReferenced();
 };

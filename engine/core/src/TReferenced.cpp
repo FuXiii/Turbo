@@ -39,3 +39,8 @@ uint32_t Turbo::Core::TReferenced::UnReference() const
 
     return temp_reference_count;
 }
+
+bool Turbo::Core::TReferenced::Valid() const
+{
+    return true;
+}

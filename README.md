@@ -3821,3 +3821,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下将`TVmaAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TVulkanAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
   >* `./engine/core`下将`TVulkanLoader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下更新`TRefPtr`中使用`class`声明的模板关键字，使用`typename`替代。
+  >* `./engine/core`下更新`TReferenced`中增加`virtual bool Valid() const`成员虚函数。用于判定该引用是否有效（用于自定义判定有效性）。
+  >* `./engine/core`下更新`TRefPtr`中更新`bool Valid() const`成员函数。增加对该指针自身对象的有效性判断（用于自定义判定有效性）。
