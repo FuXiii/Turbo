@@ -3847,3 +3847,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TDescriptorPool`类内增加`std::vector<TRefPtr<TPipelineDescriptorSet>> pipelineDescriptorSets`成员。
   >* `./engine/core`下的`TDescriptorPool`类内更新`Allocate(...)`成员函数。内部使用容器存储。
   >* `./engine/core`下的`TDescriptorPool`类内更新`Free(...)`成员函数。内部判断是否为该池分配。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`~TDescriptorPool()`析构函数。回收所有分配的描述符。

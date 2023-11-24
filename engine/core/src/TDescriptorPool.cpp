@@ -318,6 +318,11 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(const TRefPtr<TDevice> &device, ui
 
 Turbo::Core::TDescriptorPool::~TDescriptorPool()
 {
+    for (; this->pipelineDescriptorSets.size() > 0;)
+    {
+        this->Free(this->pipelineDescriptorSets[0]);
+    }
+
     this->InternalDestroy();
     this->descriptorSizes.clear();
 }
