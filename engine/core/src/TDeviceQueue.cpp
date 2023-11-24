@@ -14,7 +14,7 @@
 
 void Turbo::Core::TDeviceQueue::AddChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool)
 {
-    if (commandBufferPool != nullptr)
+    if (commandBufferPool.Valid())
     {
         this->commandBufferPools.push_back(commandBufferPool);
     }
@@ -144,13 +144,13 @@ Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDeviceQueue::GetDevice(
     return this->device;
 }
 
-bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> *waitSemaphores, std::vector<TRefPtr<TSemaphore>> *signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
+bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> &waitSemaphores, std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
 {
     std::vector<VkSemaphore> wait_semaphores;
     std::vector<VkPipelineStageFlags> wait_dst_stage_masks;
-    if (waitSemaphores != nullptr)
+    if (!waitSemaphores.empty())
     {
-        for (TSemaphore *semaphore_item : *waitSemaphores)
+        for (TRefPtr<TSemaphore> &semaphore_item : waitSemaphores)
         {
             wait_semaphores.push_back(semaphore_item->GetVkSemaphore());
             wait_dst_stage_masks.push_back(semaphore_item->GetWaitDstStageMask());
@@ -158,9 +158,9 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> *waitSem
     }
 
     std::vector<VkSemaphore> signal_semaphores;
-    if (signalSemaphores != nullptr)
+    if (!signalSemaphores.empty())
     {
-        for (TSemaphore *semaphore_item : *signalSemaphores)
+        for (TRefPtr<TSemaphore> &semaphore_item : signalSemaphores)
         {
             signal_semaphores.push_back(semaphore_item->GetVkSemaphore());
         }
@@ -180,7 +180,7 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> *waitSem
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
     VkFence vk_fence = VK_NULL_HANDLE;
-    if (fence != nullptr)
+    if (fence.Valid())
     {
         vk_fence = fence->GetVkFence();
     }
@@ -192,6 +192,14 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> *waitSem
     }
 
     return true;
+}
+
+bool Turbo::Core::TDeviceQueue::Submit(const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
+{
+    std::vector<TRefPtr<TSemaphore>> wait_semaphores;
+    std::vector<TRefPtr<TSemaphore>> signal_semaphores;
+
+    return this->Submit(wait_semaphores, signal_semaphores, commandBuffer, fence);
 }
 
 void Turbo::Core::TDeviceQueue::WaitIdle()
@@ -220,7 +228,7 @@ bool Turbo::Core::TDeviceQueue::IsSupportSurface(const TRefPtr<Turbo::Extension:
 
 Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex)
 {
-    if (swapchain != nullptr)
+    if (swapchain.Valid())
     {
         VkSwapchainKHR vk_swapchain_khr = swapchain->GetVkSwapchainKHR();
         uint32_t image_index = imageIndex;

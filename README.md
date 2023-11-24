@@ -3848,3 +3848,21 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TDescriptorPool`类内更新`Allocate(...)`成员函数。内部使用容器存储。
   >* `./engine/core`下的`TDescriptorPool`类内更新`Free(...)`成员函数。内部判断是否为该池分配。
   >* `./engine/core`下的`TDescriptorPool`类内更新`~TDescriptorPool()`析构函数。回收所有分配的描述符。
+  >* `./engine/core`下更新`TDescriptorSet.cpp`中更新`TDescriptorSet`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorSet.cpp`中更新`TDescriptorSet`的`BindData`成员函数，使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDescriptorSetLayout.cpp`中`TDescriptorSetLayout`的`InternalCreate`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorSetLayout.cpp`中`TDescriptorSetLayout`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`AddChildHandle`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`InternalCreate`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`InternalDestroy`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的析构函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`GetDeviceQueueCountByQueueFamily`成员函数，使用`Turbo::Core::TRefPtr<T>`。
+  >* `./engine/core`下更新`TDeviceQueue`中的`Submit`成员函数。将指针变成引用。并在内部适配`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDeviceQueue`。增加只使用`Fence`的`Submit`成员函数。并在内部适配`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDeviceQueue.cpp`中`TDeviceQueue`的`Present`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDeviceQueue.cpp`中`TDeviceQueue`的`AddChildHandle`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`VerificationInitVulkan`成员函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的析构函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`GetInstance`函数，使用`Turbo::Core::TRefPtr`适配。
+  >* `./engine/core`下更新`TException`。继承自`std::runtime_error`。

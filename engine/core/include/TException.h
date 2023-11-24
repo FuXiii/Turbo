@@ -2,7 +2,7 @@
 #ifndef TURBO_CORE_TException_H
 #define TURBO_CORE_TException_H
 #include "TObject.h"
-#include <exception>
+#include <stdexcept> 
 
 namespace Turbo
 {
@@ -10,14 +10,12 @@ namespace Core
 {
 
 // TODO: inherit std::runtime_error
-class TException : public std::exception //, public Turbo::Core::TObject
+class TException : public std::runtime_error //, public Turbo::Core::TObject
 {
   private:
     TResult result;
     std::string message;
     std::string tip;
-
-    std::string whatStr;
 
   public:
     TException();
@@ -30,7 +28,6 @@ class TException : public std::exception //, public Turbo::Core::TObject
     std::string GetTip();
 
     virtual std::string ToString();
-    virtual const char *what() const throw() override;
 };
 } // namespace Core
 } // namespace Turbo

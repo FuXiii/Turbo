@@ -25,20 +25,20 @@ void Turbo::Core::TEngine::VerificationInitVulkan()
         {
             if (best_physical_device->GetDeviceApiVersion().GetValidVulkanVersion() >= vulkan_instance_version.GetValidVulkanVersion())
             {
-                delete this->instance;
+                // delete this->instance;
                 this->instance = nullptr;
                 this->InitVulkan(vulkan_instance_version.GetValidVulkanVersion());
             }
             else
             {
-                delete this->instance;
+                // delete this->instance;
                 this->instance = nullptr;
                 this->InitVulkan(best_physical_device->GetDeviceApiVersion().GetValidVulkanVersion());
             }
         }
         else
         {
-            delete this->instance;
+            // delete this->instance;
             this->instance = nullptr;
             this->InitVulkan(TVersion(1, 0, 0, 0));
         }
@@ -63,16 +63,16 @@ Turbo::Core::TEngine::TEngine()
 
 Turbo::Core::TEngine::~TEngine()
 {
-    if (this->instance != nullptr)
+    if (this->instance.Valid())
     {
-        delete this->instance;
+        // delete this->instance;
         this->instance = nullptr;
     }
 }
 
 Turbo::Core::TRefPtr<Turbo::Core::TInstance> Turbo::Core::TEngine::GetInstance()
 {
-    return *this->instance;
+    return this->instance;
 }
 
 std::string Turbo::Core::TEngine::ToString()

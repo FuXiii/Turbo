@@ -1,12 +1,12 @@
 #include "TException.h"
 #include <iostream>
 
-Turbo::Core::TException::TException() : std::exception(), Turbo::Core::TObject()
+Turbo::Core::TException::TException() : std::runtime_error("UNDEFINED") //, Turbo::Core::TObject()
 {
     this->result = TResult::UNDEFINED;
 }
 
-Turbo::Core::TException::TException(TResult result, const std::string &message, const std::string &tip)
+Turbo::Core::TException::TException(TResult result, const std::string &message, const std::string &tip) : std::runtime_error(std::string("[Error]:") + std::string("[") + Turbo::Core::TResultToString(result) + std::string("]") + message + std::string("{") + tip + std::string("}"))
 {
     this->result = result;
     this->message = message;
@@ -15,8 +15,6 @@ Turbo::Core::TException::TException(TResult result, const std::string &message, 
     {
         std::cout << "[Error]:" << this->message << "{" << this->tip << "}" << std::endl;
     }
-
-    this->whatStr = std::string("[Error]:") + std::string("[") + Turbo::Core::TResultToString(this->result) + std::string("]") + this->message + std::string("{") + this->tip + std::string("}");
 }
 
 Turbo::Core::TException::~TException()
@@ -42,9 +40,4 @@ std::string Turbo::Core::TException::ToString()
 {
     std::string result(this->what());
     return result;
-}
-
-char const *Turbo::Core::TException::what() const throw()
-{
-    return this->whatStr.c_str();
 }

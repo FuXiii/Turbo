@@ -10,7 +10,7 @@
 
 void Turbo::Core::TDevice::AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
 {
-    if (deviceQueue != nullptr)
+    if (deviceQueue.Valid())
     {
         this->deviceQueues.push_back(deviceQueue);
     }
@@ -1031,7 +1031,7 @@ void Turbo::Core::TDevice::InternalCreate()
     this->deviceDriver = new TDeviceDriver();
     *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this); // TODO:load dynamic rendering function
 
-    if (this->vmaAllocator != nullptr)
+    if (this->vmaAllocator.Valid())
     {
         this->vmaAllocator->InternalCreate();
     }
@@ -1049,7 +1049,7 @@ void Turbo::Core::TDevice::InternalDestroy()
         device_queue_item->InternalDestroy();
     }
 
-    if (this->vmaAllocator != nullptr)
+    if (this->vmaAllocator.Valid())
     {
         this->vmaAllocator->InternalDestroy();
     }
@@ -1076,7 +1076,7 @@ Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, st
     bit of flags must not be set
     */
 
-    if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
+    if (physicalDevice.Valid())
     {
         this->physicalDevice = physicalDevice;
 
@@ -1121,14 +1121,15 @@ Turbo::Core::TDevice::~TDevice()
     {
         this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
 
-        delete this->vmaAllocator;
+        // delete this->vmaAllocator;
         this->vmaAllocator = nullptr;
 
         this->physicalDevice->RemoveChildHandle(this);
 
-        for (TDeviceQueue *device_queue_item : this->deviceQueues)
+        for (TRefPtr<TDeviceQueue> &device_queue_item : this->deviceQueues)
         {
-            delete device_queue_item;
+            // delete device_queue_item;
+            device_queue_item = nullptr;
         }
 
         this->deviceQueues.clear();
@@ -1198,7 +1199,7 @@ uint32_t Turbo::Core::TDevice::GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo
 {
     uint32_t count = 0;
 
-    for (auto *item : this->deviceQueues)
+    for (TRefPtr<TDeviceQueue> &item : this->deviceQueues)
     {
         if (item->GetQueueFamily().GetIndex() == queueFamily.GetIndex())
         {

@@ -42,7 +42,7 @@ void Turbo::Core::TDescriptorSet::InternalDestroy()
 
 Turbo::Core::TDescriptorSet::TDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TDescriptorSetLayout> &descriptorSetLayout) : Turbo::Core::TVulkanHandle()
 {
-    if (descriptorPool != nullptr && descriptorSetLayout != nullptr)
+    if (descriptorPool.Valid() && descriptorSetLayout.Valid())
     {
         this->descriptorPool = descriptorPool;
         this->descriptorSetLayout = descriptorSetLayout;
@@ -107,7 +107,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
 {
-    std::vector<TBuffer *> buffers;
+    std::vector<TRefPtr<TBuffer>> buffers;
     buffers.push_back(buffer);
 
     this->BindData(binding, dstArrayElement, buffers);
@@ -116,7 +116,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const TRefPtr<TBuff
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (std::pair<TImageView *, TSampler *> &combined_image_sampler_item : combinedImageSamplers)
+    for (std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>> &combined_image_sampler_item : combinedImageSamplers)
     {
         TImageView *image_view = combined_image_sampler_item.first;
         TSampler *sampler = combined_image_sampler_item.second;

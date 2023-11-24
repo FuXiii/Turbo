@@ -208,3 +208,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - <font color=green>**[ ✓ ]2022/12/17**</font> ~~修改`./engine/core`下`TBuffer`和`TImage`对于`TFormatInfo`参数的构造函数，更改成使用`TFormatType formatType`参数构造~~
 
 - <font color=green>**[ ✓ ]2023/4/11**</font> ~~`./engine/core`下`TGraphicsPipeline`中`VkPipelineTessellationStateCreateInfo`目前没有提供支持，需要实现相关接口，提供功能~~
+
+- 记得重载`TReferenced`的`virtual bool Valid()`虚函数。
