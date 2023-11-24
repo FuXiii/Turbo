@@ -74,11 +74,11 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     bool Begin();
     void CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     void CmdBindPipeline(const TRefPtr<TPipeline> &pipeline);
-    void CmdBindDescriptorSets(uint32_t firstSet, std::vector<TRefPtr<TDescriptorSet>> &descriptorSets);
+    void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
     void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
-    void CmdBindVertexBuffers(std::vector<TRefPtr<TBuffer>> &vertexBuffers);
-    void CmdSetViewport(std::vector<TViewport> &viewports);
-    void CmdSetScissor(std::vector<TScissor> &scissors);
+    void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
+    void CmdSetViewport(const std::vector<TViewport> &viewports = {});
+    void CmdSetScissor(const std::vector<TScissor> &scissors = {});
     void CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
     void CmdNextSubpass();
     void CmdEndRenderPass();
@@ -99,7 +99,7 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     bool End();
     bool Reset();
 
-    void CmdPipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers);
+    void CmdPipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, const std::vector<TMemoryBarrier> &memoryBarriers = {}, const std::vector<TBufferMemoryBarrier> &bufferBarriers = {}, const std::vector<TImageMemoryBarrier> &imageBarriers = {});
     void CmdPipelineMemoryBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TMemoryBarrier &memoryBarrier);
     void CmdPipelineBufferBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TBufferMemoryBarrier &bufferBarrier);
     void CmdPipelineImageBarrier(TPipelineStages srcStages, TPipelineStages dstStages, TImageMemoryBarrier &imageBarrier);

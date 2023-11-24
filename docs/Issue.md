@@ -210,3 +210,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 - <font color=green>**[ ✓ ]2023/4/11**</font> ~~`./engine/core`下`TGraphicsPipeline`中`VkPipelineTessellationStateCreateInfo`目前没有提供支持，需要实现相关接口，提供功能~~
 
 - 记得重载`TReferenced`的`virtual bool Valid()`虚函数。
+
+- 所有的 `std::vector<...>` 的形参都尝试使用 `const std::vector<...>& xxx = {}` 来声明使用。
+
+- 需要适配常量成员函数供常量对象获取内部数据（成员函数后声明`const`）。目前`Turbo`中的大部分函数并没有适配 `const` 函数。

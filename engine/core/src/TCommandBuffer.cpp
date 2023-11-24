@@ -262,11 +262,11 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipeline(const TRefPtr<TPipeline> &
     this->currentPipeline = pipeline;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
+void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
-    if (this->currentPipeline.Valid())
+    if (this->currentPipeline.Valid() && !descriptorSets.empty())
     {
         switch (this->currentPipeline->GetType())
         {
@@ -307,60 +307,69 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(const TRefPtr
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(std::vector<TRefPtr<TBuffer>> &vertexBuffers)
+void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers)
 {
-    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-
-    std::vector<VkBuffer> vertex_buffers;
-    std::vector<VkDeviceSize> offsets;
-
-    for (TBuffer *buffer_item : vertexBuffers)
+    if (!vertexBuffers.empty())
     {
-        vertex_buffers.push_back(buffer_item->GetVkBuffer());
-        offsets.push_back(0);
-    }
+        TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
-    device->GetDeviceDriver()->vkCmdBindVertexBuffers(this->vkCommandBuffer, 0, vertexBuffers.size(), vertex_buffers.data(), offsets.data());
+        std::vector<VkBuffer> vertex_buffers;
+        std::vector<VkDeviceSize> offsets;
+
+        for (TBuffer *buffer_item : vertexBuffers)
+        {
+            vertex_buffers.push_back(buffer_item->GetVkBuffer());
+            offsets.push_back(0);
+        }
+
+        device->GetDeviceDriver()->vkCmdBindVertexBuffers(this->vkCommandBuffer, 0, vertexBuffers.size(), vertex_buffers.data(), offsets.data());
+    }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdSetViewport(std::vector<TViewport> &viewports)
+void Turbo::Core::TCommandBufferBase::CmdSetViewport(const std::vector<TViewport> &viewports)
 {
-    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-
-    std::vector<VkViewport> vk_viewports;
-    for (TViewport &viewport_item : viewports)
+    if (!viewports.empty())
     {
-        VkViewport vk_viewport;
-        vk_viewport.x = viewport_item.GetX();
-        vk_viewport.y = viewport_item.GetY();
-        vk_viewport.width = viewport_item.GetWidth();
-        vk_viewport.height = viewport_item.GetHeight();
-        vk_viewport.minDepth = viewport_item.GetMinDepth();
-        vk_viewport.maxDepth = viewport_item.GetMaxDepth();
+        TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
-        vk_viewports.push_back(vk_viewport);
+        std::vector<VkViewport> vk_viewports;
+        for (const TViewport &viewport_item : viewports)
+        {
+            VkViewport vk_viewport;
+            vk_viewport.x = viewport_item.GetX();
+            vk_viewport.y = viewport_item.GetY();
+            vk_viewport.width = viewport_item.GetWidth();
+            vk_viewport.height = viewport_item.GetHeight();
+            vk_viewport.minDepth = viewport_item.GetMinDepth();
+            vk_viewport.maxDepth = viewport_item.GetMaxDepth();
+
+            vk_viewports.push_back(vk_viewport);
+        }
+
+        device->GetDeviceDriver()->vkCmdSetViewport(this->vkCommandBuffer, 0, vk_viewports.size(), vk_viewports.data());
     }
-
-    device->GetDeviceDriver()->vkCmdSetViewport(this->vkCommandBuffer, 0, vk_viewports.size(), vk_viewports.data());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdSetScissor(std::vector<TScissor> &scissors)
+void Turbo::Core::TCommandBufferBase::CmdSetScissor(const std::vector<TScissor> &scissors)
 {
-    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-
-    std::vector<VkRect2D> vk_scissors;
-    for (TScissor &scissor_item : scissors)
+    if (!scissors.empty())
     {
-        VkRect2D vk_scissor;
-        vk_scissor.offset.x = scissor_item.GetOffsetX();
-        vk_scissor.offset.y = scissor_item.GetOffsetY();
-        vk_scissor.extent.width = scissor_item.GetWidth();
-        vk_scissor.extent.height = scissor_item.GetHeight();
+        TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
-        vk_scissors.push_back(vk_scissor);
+        std::vector<VkRect2D> vk_scissors;
+        for (const TScissor &scissor_item : scissors)
+        {
+            VkRect2D vk_scissor;
+            vk_scissor.offset.x = scissor_item.GetOffsetX();
+            vk_scissor.offset.y = scissor_item.GetOffsetY();
+            vk_scissor.extent.width = scissor_item.GetWidth();
+            vk_scissor.extent.height = scissor_item.GetHeight();
+
+            vk_scissors.push_back(vk_scissor);
+        }
+
+        device->GetDeviceDriver()->vkCmdSetScissor(this->vkCommandBuffer, 0, vk_scissors.size(), vk_scissors.data());
     }
-
-    device->GetDeviceDriver()->vkCmdSetScissor(this->vkCommandBuffer, 0, vk_scissors.size(), vk_scissors.data());
 }
 
 void Turbo::Core::TCommandBufferBase::CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
@@ -627,12 +636,12 @@ bool Turbo::Core::TCommandBufferBase::Reset()
     return false;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, std::vector<TMemoryBarrier> &memoryBarriers, std::vector<TBufferMemoryBarrier> &bufferBarriers, std::vector<TImageMemoryBarrier> &imageBarriers)
+void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStages, TPipelineStages dstStages, const std::vector<TMemoryBarrier> &memoryBarriers, const std::vector<TBufferMemoryBarrier> &bufferBarriers, const std::vector<TImageMemoryBarrier> &imageBarriers)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
     std::vector<VkMemoryBarrier> vk_memory_barriers;
-    for (TMemoryBarrier &memory_barrier_item : memoryBarriers)
+    for (const TMemoryBarrier &memory_barrier_item : memoryBarriers)
     {
         VkMemoryBarrier vk_memory_barrier = {};
         vk_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -644,7 +653,7 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStag
     }
 
     std::vector<VkBufferMemoryBarrier> vk_buffer_memory_barriers;
-    for (TBufferMemoryBarrier &memory_barrier_item : bufferBarriers)
+    for (const TBufferMemoryBarrier &memory_barrier_item : bufferBarriers)
     {
         VkBufferMemoryBarrier vk_buffer_memory_barrier = {};
         vk_buffer_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -661,7 +670,7 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStag
     }
 
     std::vector<VkImageMemoryBarrier> vk_image_memory_barriers;
-    for (TImageMemoryBarrier &image_barrier_item : imageBarriers)
+    for (const TImageMemoryBarrier &image_barrier_item : imageBarriers)
     {
         VkImageMemoryBarrier vk_image_memory_barrier = {};
         vk_image_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

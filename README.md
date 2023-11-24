@@ -3868,3 +3868,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TException`。继承自`std::runtime_error`。并移除不必要的成员变量和函数。
   >* `./engine/core`下更新`TFence.cpp`中`TFence`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下更新`TFence.cpp`中`TFence`的`Wait`成员函数，使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdBindDescriptorSets`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdBindVertexBuffers`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetViewport`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetScissor`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数，`std::vector`形参使用`const`进行适配。
