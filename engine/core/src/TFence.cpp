@@ -31,7 +31,7 @@ void Turbo::Core::TFence::InternalDestroy()
 
 Turbo::Core::TFence::TFence(const TRefPtr<TDevice> &device)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->InternalCreate();
@@ -95,7 +95,7 @@ void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
 
 Turbo::Core::TResult Turbo::Core::TFences::Wait(uint64_t timeout)
 {
-    for (std::pair<Turbo::Core::TDevice *const, std::vector<Turbo::Core::TFence *>> &fence_item : this->fenceMap)
+    for (std::pair<const TRefPtr<TDevice>, std::vector<TRefPtr<TFence>>> &fence_item : this->fenceMap)
     {
         std::vector<VkFence> vk_fences;
         for (Turbo::Core::TFence *fence_item : fence_item.second)

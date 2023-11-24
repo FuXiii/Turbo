@@ -3865,4 +3865,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`VerificationInitVulkan`成员函数，移除对于`delete`的显式调用。
   >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的析构函数，移除对于`delete`的显式调用。
   >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`GetInstance`函数，使用`Turbo::Core::TRefPtr`适配。
-  >* `./engine/core`下更新`TException`。继承自`std::runtime_error`。
+  >* `./engine/core`下更新`TException`。继承自`std::runtime_error`。并移除不必要的成员变量和函数。
+  >* `./engine/core`下更新`TFence.cpp`中`TFence`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TFence.cpp`中`TFence`的`Wait`成员函数，使用`Turbo::Core::TRefPtr`进行适配。
