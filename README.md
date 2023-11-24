@@ -3841,3 +3841,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TDescriptorPool.cpp`中更新`TDescriptorPool`的构造函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下更新`TDescriptorPool.cpp`中更新`TDescriptorPool`的`Free`成员函数，回收资源。
   >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`的`Free`成员函数，回收资源。
+
+* 2023/11/24 设计架构
+  >
+  >* `./engine/core`下的`TDescriptorPool`类内增加`std::vector<TRefPtr<TPipelineDescriptorSet>> pipelineDescriptorSets`成员。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Allocate(...)`成员函数。内部使用容器存储。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Free(...)`成员函数。内部判断是否为该池分配。

@@ -324,14 +324,31 @@ Turbo::Core::TDescriptorPool::~TDescriptorPool()
 
 Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
-    return new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout);
-    // FIXME: 存储到容器中
+    this->pipelineDescriptorSets.push_back(new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout));
+    return this->pipelineDescriptorSets.back();
 }
 
 void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
 {
     // delete pipelineDescriptorSet;
-    pipelineDescriptorSet = nullptr; // FIXME: 需要确保该 pipelineDescriptorSet 是从该池中分配的
+    uint32_t index = 0;
+    bool is_found = false;
+    for (Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> &pipeline_descriptor_set_item : this->pipelineDescriptorSets)
+    {
+        if (pipeline_descriptor_set_item == pipelineDescriptorSet)
+        {
+            is_found = true;
+            break;
+        }
+        index = index + 1;
+    }
+
+    if (is_found)
+    {
+        // delete this->commandBuffers[index];
+        this->pipelineDescriptorSets.erase(this->pipelineDescriptorSets.begin() + index);
+        pipelineDescriptorSet = nullptr;
+    }
 }
 
 Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDescriptorPool::GetDevice()

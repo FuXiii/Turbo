@@ -36,7 +36,7 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
     T_VULKAN_HANDLE_HANDLE VkDescriptorPool vkDescriptorPool = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TPipelineDescriptorSet>> pipelineDescriptorSets;
 
     uint32_t maxSetsCount;
     std::vector<TDescriptorSize> descriptorSizes;
