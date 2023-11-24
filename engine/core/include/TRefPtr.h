@@ -240,12 +240,21 @@ class TRefPtr
         return (this->ptr != nullptr && this->ptr->Valid());
     }
 
-    // T *Release();
     void Swap(TRefPtr &rp)
     {
         T *temp = this->ptr;
         this->ptr = rp.ptr;
         rp.ptr = temp;
+    }
+
+    // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
+    void Release()
+    {
+        if (this->ptr != nullptr)
+        {
+            this->ptr->Release();
+            this->ptr = nullptr;
+        }
     }
 
     explicit operator bool() const

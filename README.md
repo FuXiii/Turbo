@@ -3873,3 +3873,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetViewport`成员函数，`std::vector`形参使用`const`进行适配。
   >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetScissor`成员函数，`std::vector`形参使用`const`进行适配。
   >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TAttachment`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TBufferMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TImageMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TReferenced`中增加`void Release() const`成员函数。用于内存强制回收。
+  >* `./engine/core`下更新`TRefPtr<T>`中增加`void Release()`成员函数。用于内存强制回收。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Allocate`成员函数。优化调用。
+  >* `./engine/core`下更新`TCommandBufferPool`中`AllocateSecondary`成员函数。优化调用。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TSecondaryCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBufferBase> &)`成员函数。优化调用，并强制回收内存。

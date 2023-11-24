@@ -34,10 +34,15 @@ uint32_t Turbo::Core::TReferenced::UnReference() const
 
     if (need_delete)
     {
-        delete this;
+        this->Release();
     }
 
     return temp_reference_count;
+}
+
+void Turbo::Core::TReferenced::Release() const
+{
+    delete this;
 }
 
 bool Turbo::Core::TReferenced::Valid() const

@@ -42,14 +42,14 @@ class TAttachment : public Turbo::Core::TInfo
     ~TAttachment();
 
   public:
-    TFormatInfo GetFormat();
-    TSampleCountBits GetVkSampleCountFlagBits();
-    TLoadOp GetLoadOp();
-    TStoreOp GetStoreOp();
-    TLoadOp GetStencilLoadOp();
-    TStoreOp GetStencilStoreOp();
-    TImageLayout GetInitialLayout();
-    TImageLayout GetFinalLayout();
+    TFormatInfo GetFormat() const;
+    TSampleCountBits GetVkSampleCountFlagBits() const;
+    TLoadOp GetLoadOp() const;
+    TStoreOp GetStoreOp() const;
+    TLoadOp GetStencilLoadOp() const;
+    TStoreOp GetStencilStoreOp() const;
+    TImageLayout GetInitialLayout() const;
+    TImageLayout GetFinalLayout() const;
 
   public:
     virtual std::string ToString() override;

@@ -31,7 +31,7 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
-    void Free(TRefPtr<TCommandBufferBase> &commandBufferBase);
+    bool Free(TRefPtr<TCommandBufferBase> &commandBufferBase);
 
   public:
     TCommandBufferPool(const TRefPtr<TDeviceQueue> &deviceQueue);

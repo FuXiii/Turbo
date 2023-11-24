@@ -19,12 +19,12 @@ Turbo::Core::TMemoryBarrier::~TMemoryBarrier()
 {
 }
 
-Turbo::Core::TAccess Turbo::Core::TMemoryBarrier::GetSrcAccess()
+Turbo::Core::TAccess Turbo::Core::TMemoryBarrier::GetSrcAccess() const
 {
     return this->srcAccess;
 }
 
-Turbo::Core::TAccess Turbo::Core::TMemoryBarrier::GetDstAccess()
+Turbo::Core::TAccess Turbo::Core::TMemoryBarrier::GetDstAccess() const
 {
     return this->dstAccess;
 }
@@ -52,17 +52,17 @@ Turbo::Core::TBufferMemoryBarrier::~TBufferMemoryBarrier()
 {
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer()
+Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer() const
 {
     return this->buffer;
 }
 
-Turbo::Core::TDeviceSize Turbo::Core::TBufferMemoryBarrier::GetOffset()
+Turbo::Core::TDeviceSize Turbo::Core::TBufferMemoryBarrier::GetOffset() const
 {
     return this->offset;
 }
 
-Turbo::Core::TDeviceSize Turbo::Core::TBufferMemoryBarrier::GetSize()
+Turbo::Core::TDeviceSize Turbo::Core::TBufferMemoryBarrier::GetSize() const
 {
     return this->size;
 }
@@ -110,42 +110,42 @@ Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess
     }
 }
 
-Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetOldLayout()
+Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetOldLayout() const
 {
     return this->oldLayout;
 }
 
-Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetNewLayout()
+Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetNewLayout() const
 {
     return this->newLayout;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageMemoryBarrier::GetImage()
+Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageMemoryBarrier::GetImage() const
 {
     return this->image;
 }
 
-Turbo::Core::TImageAspects Turbo::Core::TImageMemoryBarrier::GetAspects()
+Turbo::Core::TImageAspects Turbo::Core::TImageMemoryBarrier::GetAspects() const
 {
     return this->aspects;
 }
 
-uint32_t Turbo::Core::TImageMemoryBarrier::GetBaseMipLevel()
+uint32_t Turbo::Core::TImageMemoryBarrier::GetBaseMipLevel() const
 {
     return this->baseMipLevel;
 }
 
-uint32_t Turbo::Core::TImageMemoryBarrier::GetLevelCount()
+uint32_t Turbo::Core::TImageMemoryBarrier::GetLevelCount() const
 {
     return this->levelCount;
 }
 
-uint32_t Turbo::Core::TImageMemoryBarrier::GetBaseArrayLayer()
+uint32_t Turbo::Core::TImageMemoryBarrier::GetBaseArrayLayer() const
 {
     return this->baseArrayLayer;
 }
 
-uint32_t Turbo::Core::TImageMemoryBarrier::GetLayerCount()
+uint32_t Turbo::Core::TImageMemoryBarrier::GetLayerCount() const
 {
     return this->layerCount;
 }

@@ -18,6 +18,9 @@ class TReferenced
     uint32_t Reference() const;
     uint32_t UnReference() const;
 
+    // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
+    void Release() const;
+
     virtual bool Valid() const;
 
   protected:

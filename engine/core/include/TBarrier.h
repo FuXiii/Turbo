@@ -29,8 +29,8 @@ class TMemoryBarrier : public Turbo::Core::TBarrier
     ~TMemoryBarrier();
 
   public:
-    TAccess GetSrcAccess();
-    TAccess GetDstAccess();
+    TAccess GetSrcAccess() const;
+    TAccess GetDstAccess() const;
 
     virtual std::string ToString() override;
 };
@@ -47,9 +47,9 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     ~TBufferMemoryBarrier();
 
   public:
-    TRefPtr<TBuffer> GetBuffer();
-    TDeviceSize GetOffset();
-    TDeviceSize GetSize();
+    TRefPtr<TBuffer> GetBuffer() const;
+    TDeviceSize GetOffset() const;
+    TDeviceSize GetSize() const;
 
     virtual std::string ToString() override;
 };
@@ -72,14 +72,14 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
     ~TImageMemoryBarrier();
 
   public:
-    TImageLayout GetOldLayout();
-    TImageLayout GetNewLayout();
-    TRefPtr<TImage> GetImage();
-    TImageAspects GetAspects();
-    uint32_t GetBaseMipLevel();
-    uint32_t GetLevelCount();
-    uint32_t GetBaseArrayLayer();
-    uint32_t GetLayerCount();
+    TImageLayout GetOldLayout() const;
+    TImageLayout GetNewLayout() const;
+    TRefPtr<TImage> GetImage() const;
+    TImageAspects GetAspects() const;
+    uint32_t GetBaseMipLevel() const;
+    uint32_t GetLevelCount() const;
+    uint32_t GetBaseArrayLayer() const;
+    uint32_t GetLayerCount() const;
 
     virtual std::string ToString() override;
 };
