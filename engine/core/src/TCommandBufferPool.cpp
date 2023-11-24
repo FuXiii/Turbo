@@ -94,12 +94,14 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
 {
     this->deviceQueue->RemoveChildHandle(this);
 
-    for (; this->commandBuffers.size() > 0;)
-    {
-        // TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
-        // this->Free(command_buffer_base);
-        this->Free(this->commandBuffers[0]);
-    }
+    // OLD:for (; this->commandBuffers.size() > 0;)
+    // OLD:{
+    // OLD:    // TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
+    // OLD:    // this->Free(command_buffer_base);
+    // OLD:    this->Free(this->commandBuffers[0]);
+    // OLD:}
+
+    this->commandBuffers.clear(); // Just clear it
 
     this->InternalDestroy();
 }
