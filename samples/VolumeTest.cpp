@@ -262,7 +262,7 @@ bool LoadVolume()
 {
     GenerateVolume(Data, Dim);  // 生成原始体数据
     Classify(CData, Data, Dim); // 对体数据分类赋予对应颜色值和不透明度
-    // free(Data);
+    free(Data);
 
     return true;
 }
@@ -757,7 +757,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin("VolumeTest"); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 
@@ -767,11 +767,11 @@ int main()
                 ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -20, 20);
                 ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
                 ImGui::SliderFloat3("BoundingBox half diagonal vector", bounding_box_half_diagonal_vector, 0, 20);
-                ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
-                ImGui::SliderFloat("Power", &my_push_constants_data.power, 0, 750);
-                ImGui::SliderFloat("Absorption", &my_push_constants_data.absorption, 0, 1);
-                ImGui::SliderFloat("Out scattering", &my_push_constants_data.outScattering, 0, 1);
-                ImGui::Checkbox("Is high frequence", &my_push_constants_data.isHighFreq);
+                // ImGui::SliderFloat("Coverage", &my_push_constants_data.coverage, 0, 1);
+                // ImGui::SliderFloat("Power", &my_push_constants_data.power, 0, 750);
+                // ImGui::SliderFloat("Absorption", &my_push_constants_data.absorption, 0, 1);
+                // ImGui::SliderFloat("Out scattering", &my_push_constants_data.outScattering, 0, 1);
+                // ImGui::Checkbox("Is high frequence", &my_push_constants_data.isHighFreq);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();

@@ -523,8 +523,6 @@ vec4 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             if (color.a > 0.99)
                 break;
         }
-
-        // color=vec4(GetSamplePointPosition(point, boundingBox),1);
     }
 
     return color;
