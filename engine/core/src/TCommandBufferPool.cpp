@@ -65,7 +65,6 @@ bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandB
         {
             this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
             commandBufferBase.Release(); // NOTE: It will force release memory
-            commandBufferBase = nullptr;
             return true;
         }
     }
