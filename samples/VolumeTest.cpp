@@ -169,7 +169,7 @@ struct MY_PUSH_CONSTANTS_DATA
 int Dim[3] = {200, 200, 200}; // 体数据维度大小
 int *Data = (int *)malloc(sizeof(int) * Dim[0] * Dim[1] * Dim[2]);
 // GLubyte CData[200][200][200][4];                         // 存储颜色和不透明度
-unsigned char CData[200][200][200][4];                   // 存储颜色和不透明度
+float CData[200][200][200][4];                           // 存储颜色和不透明度
 glm::vec4 smallCubeC = glm::vec4(1.0, 1.0, 0.0, 1.0);    // 小立方体颜色
 glm::vec4 middleSphereC = glm::vec4(1.0, 0.0, 0.0, 1.0); // 中间球体颜色
 glm::vec4 largeCubeC = glm::vec4(1.0, 1.0, 1.0, 1.0);    // 大立方体颜色
@@ -212,7 +212,7 @@ void GenSphere(int x, int y, int z, int radius, int density, int *Data, int *Dim
     }
 }
 
-void Classify(GLubyte CData[200][200][200][4], int *Data, int *Dim) // 按照所在位置为每个体数据点赋值，颜色和不透明度
+void Classify(float CData[200][200][200][4], int *Data, int *Dim) // 按照所在位置为每个体数据点赋值，颜色和不透明度
 {
     int *LinePS = Data;
     for (int k = 0; k < Dim[2]; k++)
@@ -263,6 +263,8 @@ bool LoadVolume()
     GenerateVolume(Data, Dim);  // 生成原始体数据
     Classify(CData, Data, Dim); // 对体数据分类赋予对应颜色值和不透明度
     // free(Data);
+
+    return true;
 }
 
 int main()
@@ -374,7 +376,7 @@ int main()
         memcpy(volumn_ptr, CData, sizeof(CData));
         volume_staging_buffer->Unmap();
 
-        volume_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, 200, 200, 200, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+        volume_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_3D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, 200, 200, 200, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
 
         Turbo::Core::TCommandBuffer *volumn_command_buffer = command_pool->Allocate();
         volumn_command_buffer->Begin();
@@ -383,9 +385,9 @@ int main()
             uint32_t copy_width = 200;
             uint32_t copy_height = 200;
             uint32_t copy_depth = 200;
-            uint32_t copy_mip_level = 1;
+            uint32_t copy_mip_level = 0;
             uint32_t copy_buffer_offset = 0;
-            volumn_command_buffer->CmdCopyBufferToImage(volume_staging_buffer, volume_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, copy_depth);
+            volumn_command_buffer->CmdCopyBufferToImage(volume_staging_buffer, volume_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, 0, 0, 0, copy_width, copy_height, copy_height);
         }
         volumn_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, volume_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         volumn_command_buffer->End();
@@ -408,8 +410,8 @@ int main()
     Turbo::Core::TVertexShader *my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
     Turbo::Core::TFragmentShader *my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
 
-    std::cout << my_vertex_shader->ToString() << std::endl;
-    std::cout << my_fragment_shader->ToString() << std::endl;
+    // std::cout << my_vertex_shader->ToString() << std::endl;
+    // std::cout << my_fragment_shader->ToString() << std::endl;
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
@@ -554,13 +556,13 @@ int main()
 
     float bounding_box_pos[3];
     bounding_box_pos[0] = 0;
-    bounding_box_pos[1] = 20;
+    bounding_box_pos[1] = 0;
     bounding_box_pos[2] = 0;
 
     float bounding_box_half_diagonal_vector[3];
-    bounding_box_half_diagonal_vector[0] = 20;
-    bounding_box_half_diagonal_vector[1] = 20;
-    bounding_box_half_diagonal_vector[2] = 20;
+    bounding_box_half_diagonal_vector[0] = 1;
+    bounding_box_half_diagonal_vector[1] = 1;
+    bounding_box_half_diagonal_vector[2] = 1;
 
     bool show_demo_window = true;
     MY_PUSH_CONSTANTS_DATA my_push_constants_data;
@@ -574,14 +576,14 @@ int main()
     my_push_constants_data.lookForwardDirY = 0;
     my_push_constants_data.lookForwardDirZ = 0;
     my_push_constants_data.boxPosX = 0;
-    my_push_constants_data.boxPosY = 20;
+    my_push_constants_data.boxPosY = 0;
     my_push_constants_data.boxPosZ = 0;
     my_push_constants_data.boxForwardDirX = 0;
     my_push_constants_data.boxForwardDirY = 0;
     my_push_constants_data.boxForwardDirZ = 1;
-    my_push_constants_data.boxHalfDiagonalVectorX = 20;
-    my_push_constants_data.boxHalfDiagonalVectorY = 20;
-    my_push_constants_data.boxHalfDiagonalVectorZ = 20;
+    my_push_constants_data.boxHalfDiagonalVectorX = 1;
+    my_push_constants_data.boxHalfDiagonalVectorY = 1;
+    my_push_constants_data.boxHalfDiagonalVectorZ = 1;
     my_push_constants_data.coverage = 0.048f;
     my_push_constants_data.power = 30;
     my_push_constants_data.absorption = 0;
@@ -758,6 +760,9 @@ int main()
                 ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
+
+                // std::string camera_position_str = std::string("(") + std::to_string(camera_position.x) + std::string(",") + std::to_string(camera_position.y) + std::string(",") + std::to_string(camera_position.z) + std::string(")");
+                // ImGui::Text(camera_position_str.c_str());
 
                 ImGui::SliderFloat3("BoundingBox position", bounding_box_pos, -20, 20);
                 ImGui::SliderFloat3("BoundingBox forward direction", bounding_box_forward_dir, -1, 1);
