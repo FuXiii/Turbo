@@ -515,7 +515,7 @@ vec4 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             point = start_pos + dir * step * i * hash(dot(point, vec3(12.256, 2.646, 6.356)));
 
             vec3 sample_point = GetSamplePointPosition(point, boundingBox);
-            vec4 samplec = texture(sampler3D(volumeNoise, mySampler), sample_point + move, 0);
+            vec4 samplec = texture(sampler3D(volumeNoise, mySampler), sample_point, 0);
             color.r += samplec.r * samplec.a * (1 - color.a);
             color.g += samplec.g * samplec.a * (1 - color.a);
             color.b += samplec.b * samplec.a * (1 - color.a);
