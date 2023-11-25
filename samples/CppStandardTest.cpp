@@ -42,21 +42,21 @@ class TestContext
 
 int main()
 {
-    std::cout << "Hello World" << std::endl;
-
-    bool is_class = std::is_class<A_Test>::value;
-    std::cout << is_class << ":A_Test" << std::endl;
-
-    struct B_Test
-    {
-        float test;
-        uint16_t uint16_t_test;
-        double double_test;
-    };
-
-    TestUniformBuffer<B_Test> test_buffer;
-    test_buffer.Create("test uniform bffer", {123}, nullptr);
-
-    TestContext tc;
-    tc.BindingTestUniformBuffer(test_buffer);
+    //std::cout << "Hello World" << std::endl;
+//
+    //bool is_class = std::is_class_v<A_Test>;
+    //std::cout << is_class << ":A_Test" << std::endl;
+//
+    //struct B_Test
+    //{
+    //    float test;
+    //    uint16_t uint16_t_test;
+    //    double double_test;
+    //};
+//
+    //TestUniformBuffer<B_Test> test_buffer;
+    //test_buffer.Create("test uniform bffer", {123}, nullptr);
+//
+    //TestContext tc;
+    //tc.BindingTestUniformBuffer(test_buffer);
 }

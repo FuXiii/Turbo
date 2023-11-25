@@ -506,6 +506,8 @@ vec4 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
         vec3 start_pos = intersections.firstInterectionPos;
         vec3 end_pos = intersections.secondInterectionPos;
 
+        float l = length((end_pos - start_pos)) / 1.732050807569;
+
         int max_step = 32;
         float step = abs(length(end_pos - start_pos)) / max_step;
 
@@ -520,9 +522,12 @@ vec4 RayMarchingBoundingBox(vec3 origin, vec3 dir, BoundingBox boundingBox, floa
             color.g += samplec.g * samplec.a * (1 - color.a);
             color.b += samplec.b * samplec.a * (1 - color.a);
             color.a += samplec.a * (1 - color.a);
+
             if (color.a > 0.99)
                 break;
         }
+
+        color.rgb *= l;
     }
 
     return color;
