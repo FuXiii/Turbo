@@ -352,3 +352,7 @@ target_include_directories(VulkanKHRRayTracingTestForGLTF PUBLIC ${INCLUDE_PARTH
 target_link_directories(VulkanKHRRayTracingTestForGLTF PUBLIC ${LINK_PARTH})
 target_link_libraries(VulkanKHRRayTracingTestForGLTF PUBLIC ${LIBS})
 
+add_executable(VolumeTest ./VolumeTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VolumeTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VolumeTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VolumeTest PUBLIC ${LIBS})
