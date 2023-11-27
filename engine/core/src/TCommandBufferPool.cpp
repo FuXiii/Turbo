@@ -64,7 +64,8 @@ bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandB
         if (this->commandBuffers[command_buffer_index] == commandBufferBase)
         {
             this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
-            commandBufferBase.Release(); // NOTE: It will force release memory
+            // commandBufferBase.Release(); // NOTE: It will force release memory
+            commandBufferBase = nullptr;
             return true;
         }
     }
@@ -117,6 +118,11 @@ void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBuffer> &commandBuffe
     TRefPtr<TCommandBufferBase> command_buffer_base = commandBuffer;
     if (this->Free(command_buffer_base))
     {
+        // NOTE: Now reference count should be 1
+        if (commandBuffer.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
         commandBuffer = nullptr;
     }
 }
@@ -133,6 +139,11 @@ void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &sec
     TRefPtr<TCommandBufferBase> command_buffer_base = secondaryCommandBuffer;
     if (this->Free(command_buffer_base))
     {
+        // NOTE: Now reference count should be 1
+        if (secondaryCommandBuffer.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
         secondaryCommandBuffer = nullptr;
     }
 }

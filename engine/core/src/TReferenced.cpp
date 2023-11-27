@@ -40,6 +40,11 @@ uint32_t Turbo::Core::TReferenced::UnReference() const
     return temp_reference_count;
 }
 
+uint32_t Turbo::Core::TReferenced::GetReferenceCount() const
+{
+    return this->referenceCount;
+}
+
 void Turbo::Core::TReferenced::Release() const
 {
     delete this;

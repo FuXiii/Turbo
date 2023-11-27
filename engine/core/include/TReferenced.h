@@ -9,7 +9,7 @@ namespace Core
 {
 class TReferenced
 {
-  protected:
+  private:
     mutable uint32_t referenceCount = 0;
 
   public:
@@ -18,7 +18,9 @@ class TReferenced
     uint32_t Reference() const;
     uint32_t UnReference() const;
 
-    // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
+    uint32_t GetReferenceCount() const;
+
+    // NOTE: It will force delete the memory it occupied. If you really know what are you doing now, otherwise never call it yourself!
     void Release() const;
 
     virtual bool Valid() const;

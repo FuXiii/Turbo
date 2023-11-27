@@ -240,6 +240,16 @@ class TRefPtr
         return (this->ptr != nullptr && this->ptr->Valid());
     }
 
+    uint32_t ReferenceCount() const
+    {
+        if (this->Valid())
+        {
+            return this->ptr->GetReferenceCount();
+        }
+
+        return 0;
+    }
+
     void Swap(TRefPtr &rp)
     {
         T *temp = this->ptr;

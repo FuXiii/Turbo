@@ -3884,3 +3884,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
   >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TSecondaryCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
   >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBufferBase> &)`成员函数。优化调用，并强制回收内存。
+
+* 2023/11/27 设计架构
+  >
+  >* `./engine/core`下的`TCommandBufferPool`类内更新`Free(TRefPtr<TCommandBufferBase> &)`成员函数。移除对于`TRefPtr::Release()`的调用。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Free(TRefPtr<TPipelineDescriptorSet> &)`成员函数。
+  >* `./engine/core`下的`TReferenced`类内增加`uint32_t GetReferenceCount() const`成员函数。
+  >* `./engine/core`下的`TReferenced`类内更新`uint32_t referenceCount`成员从`protected`转成`private`。
+  >* `./engine/core`下的`TRefPtr`类内增加`uint32_t ReferenceCount() const`成员函数。

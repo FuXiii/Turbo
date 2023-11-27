@@ -352,6 +352,13 @@ void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelin
     {
         // delete this->commandBuffers[index];
         this->pipelineDescriptorSets.erase(this->pipelineDescriptorSets.begin() + index);
+        // pipelineDescriptorSet.Release(); // NOTE: It will force release memory
+
+        // NOTE: Now reference count should be 1
+        if (pipelineDescriptorSet.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
         pipelineDescriptorSet = nullptr;
     }
 }
