@@ -127,10 +127,10 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
 
-    std::vector<TShader *> shaders = this->GetShaders();
-    std::map<TShader *, std::vector<VkSpecializationMapEntry>> shader_specialization_map_entry_map;
-    std::map<TShader *, VkSpecializationInfo> shader_specialization_info_map;
-    for (auto *shader_item : shaders)
+    std::vector<TRefPtr<TShader>> shaders = this->GetShaders();
+    std::map<TRefPtr<TShader>, std::vector<VkSpecializationMapEntry>> shader_specialization_map_entry_map;
+    std::map<TRefPtr<TShader>, VkSpecializationInfo> shader_specialization_info_map;
+    for (TRefPtr<TShader> &shader_item : shaders)
     {
         const std::vector<TSpecializationConstant> &specialization_constants = shader_item->GetSpecializationConstants();
         const std::map<uint32_t, TShader::TConstValue> &specializations = shader_item->GetSpecializations();
@@ -476,10 +476,10 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
 
     TDevice *device = this->renderPass->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
-    TPipelineCache *pipeline_cache = this->GetPipelineCache();
+    TRefPtr<TPipelineCache> pipeline_cache = this->GetPipelineCache();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
-    if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
+    if (pipeline_cache.Valid())
     {
         result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     }
@@ -509,7 +509,7 @@ void Turbo::Core::TGraphicsPipeline::InternalDestroy()
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, std::vector<TRefPtr<TShader>> &shaders, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), TPipelineType::Graphics, shaders)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -600,7 +600,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TFragmentShader> &fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, fragmentShader)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -691,7 +691,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TFragmentShader> &fragmentShader, uint32_t patchControlPoints, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, tessellationControlShader, tessellationEvaluationShader, fragmentShader)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -782,7 +782,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, geometryShader, fragmentShader)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -873,7 +873,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, uint32_t patchControlPoints, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, tessellationControlShader, tessellationEvaluationShader, geometryShader, fragmentShader)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -964,7 +964,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, const TRefPtr<TMeshShader> &meshShader, const TRefPtr<TFragmentShader> &fragmentShader, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), meshShader, fragmentShader)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -1056,7 +1056,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TRenderPass> &re
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TPipelineCache> &pipelineCache, const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TFragmentShader> &fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, fragmentShader, pipelineCache)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -1147,7 +1147,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TPipelineCache> 
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TPipelineCache> &pipelineCache, const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TFragmentShader> &fragmentShader, uint32_t patchControlPoints, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, tessellationControlShader, tessellationEvaluationShader, fragmentShader, pipelineCache)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;
@@ -1238,7 +1238,7 @@ Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TPipelineCache> 
 
 Turbo::Core::TGraphicsPipeline::TGraphicsPipeline(const TRefPtr<TPipelineCache> &pipelineCache, const TRefPtr<TRenderPass> &renderPass, uint32_t subpass, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(renderPass->GetDevice(), vertexShader, geometryShader, fragmentShader, pipelineCache)
 {
-    if (renderPass != nullptr)
+    if (renderPass.Valid())
     {
         // VkRenderPass VkGraphicsPipelineCreateInfo::renderPass
         this->renderPass = renderPass;

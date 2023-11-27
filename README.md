@@ -3897,3 +3897,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(TPhysicalDevice *, TFormatType)`成员函数为`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`。
   >* `./engine/core`下的`TFormatInfo`类内更新`GetSupportFormats(const TRefPtr<TPhysicalDevice> &)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFramebuffer`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。

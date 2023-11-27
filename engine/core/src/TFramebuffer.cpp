@@ -50,7 +50,8 @@ void Turbo::Core::TFramebuffer::InternalDestroy()
 
 Turbo::Core::TFramebuffer::TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments) : Turbo::Core::TVulkanHandle()
 {
-    if (renderPass != nullptr && attachments.size() > 0)
+    // OLD: if (renderPass != nullptr && attachments.size() > 0)
+    if (renderPass.Valid())
     {
         this->renderPass = renderPass;
         this->attachments = attachments;
