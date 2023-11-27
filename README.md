@@ -3892,3 +3892,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TReferenced`类内增加`uint32_t GetReferenceCount() const`成员函数。
   >* `./engine/core`下的`TReferenced`类内更新`uint32_t referenceCount`成员从`protected`转成`private`。
   >* `./engine/core`下的`TRefPtr`类内增加`uint32_t ReferenceCount() const`成员函数。
+  >* `./engine/core`下的`TFences`类内更新`Add(const TRefPtr<TFence> &)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFormatInfo`类内更新`GetSupportFormats(TPhysicalDevice *)`成员函数为`GetSupportFormats(const TRefPtr<TPhysicalDevice> &)`。
+  >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(TPhysicalDevice *, TFormatType)`成员函数为`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`。
+  >* `./engine/core`下的`TFormatInfo`类内更新`GetSupportFormats(const TRefPtr<TPhysicalDevice> &)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。

@@ -86,7 +86,7 @@ std::string Turbo::Core::TFence::ToString()
 
 void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
 {
-    if (fence != nullptr && fence->GetVkFence() != VK_NULL_HANDLE)
+    if (fence.Valid())
     {
         TDevice *device = fence->GetDevice();
         this->fenceMap[device].push_back(fence);
