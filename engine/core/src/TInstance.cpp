@@ -189,7 +189,7 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
 
 bool Turbo::Core::TInstance::IsHaveHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
-    if (physicalDevice != nullptr)
+    if (physicalDevice.Valid())
     {
         if (physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
         {
@@ -210,7 +210,7 @@ bool Turbo::Core::TInstance::IsHaveHandle(const TRefPtr<TPhysicalDevice> &physic
 
 void Turbo::Core::TInstance::AddChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
-    if (physicalDevice != nullptr)
+    if (physicalDevice.Valid())
     {
         if (!this->IsHaveHandle(physicalDevice))
         {

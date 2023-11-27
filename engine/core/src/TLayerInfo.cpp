@@ -83,11 +83,11 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers(
     return layers;
 }
 
-size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(TPhysicalDevice *physicalDevice)
+size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     uint32_t layer_count = 0;
 
-    if (physicalDevice != nullptr && (physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE))
+    if (physicalDevice.Valid())
     {
         VkResult result = VkResult::VK_ERROR_UNKNOWN;
         PFN_vkEnumerateDeviceLayerProperties pfn_vk_enumerate_device_layer_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkEnumerateDeviceLayerProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceLayerProperties");
@@ -106,7 +106,7 @@ size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(TPhysicalDevice *phy
     return layer_count;
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice)
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     std::vector<Turbo::Core::TLayerInfo> layers;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;

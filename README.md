@@ -3901,3 +3901,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr`。
   >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TGraphicsPipeline`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TImage`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TImageView`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TInstance`类内更新`IsHaveHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TInstance`类内更新`AddChildHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TLayerInfo`类内更新`GetPhysicalDeviceLayerCount(TPhysicalDevice *)`成员函数。修改为`GetPhysicalDeviceLayerCount(const TRefPtr<TPhysicalDevice> &)`。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TLayerInfo`类内更新`GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice)`成员函数。修改为`GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &)`
+  >* `./engine/core`下的`TPhysicalDevice`类内更新`AddChildHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPhysicalDevice`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。

@@ -183,7 +183,7 @@ Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkI
 
 Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->imageFlags = imageFlags;
@@ -211,7 +211,7 @@ Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags i
 
 Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         TPhysicalDevice *physical_device = device->GetPhysicalDevice();
         if (physical_device->IsSupportFormat(formatType))

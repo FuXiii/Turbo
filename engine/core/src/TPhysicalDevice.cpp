@@ -413,7 +413,7 @@ void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
 
 void Turbo::Core::TPhysicalDevice::AddChildHandle(const TRefPtr<TDevice> &device)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->devices.push_back(device);
     }
@@ -495,7 +495,7 @@ void Turbo::Core::TPhysicalDevice::InternalDestroy()
 
 Turbo::Core::TPhysicalDevice::TPhysicalDevice(const TRefPtr<TInstance> &instance, uint32_t index) : Turbo::Core::TVulkanHandle()
 {
-    if (instance != nullptr)
+    if (instance.Valid())
     {
         this->instance = instance;
         this->index = index;

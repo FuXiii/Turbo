@@ -52,7 +52,7 @@ void Turbo::Core::TImageView::InternalDestroy()
 
 Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    if (image.Valid())
     {
         this->image = image;
         this->viewType = viewType;
@@ -73,7 +73,7 @@ Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType
 
 Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    if (image.Valid())
     {
         TPhysicalDevice *physical_device = image->GetDevice()->GetPhysicalDevice();
         if (physical_device->IsSupportFormat(formatType))
