@@ -49,7 +49,7 @@ void Turbo::Core::TSampler::InternalDestroy()
 
 Turbo::Core::TSampler::TSampler(const TRefPtr<TDevice> &device, TFilter minFilter, TFilter magFilter, TMipmapMode mipmapMode, TAddressMode addressModeU, TAddressMode addressModeV, TAddressMode addressModeW, TBorderColor borderColor, float mipLodBias, float minLod, float maxLod)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
 

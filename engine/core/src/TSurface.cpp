@@ -85,8 +85,8 @@ std::string Turbo::Extension::TSurfaceFormat::ToString()
 
 void Turbo::Extension::TSurface::InternalCreate()
 {
-    Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
-    if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE)
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = device->GetPhysicalDevice()->GetInstance();
+    if (instance.Valid())
     {
         if (!this->isExternalHandle)
         {
@@ -205,12 +205,12 @@ void Turbo::Extension::TSurface::InternalDestroy()
 {
     if (!this->isExternalHandle)
     {
-        if (this->device != nullptr)
+        if (this->device.Valid())
         {
-            Turbo::Core::TInstance *instance = device->GetPhysicalDevice()->GetInstance();
+            Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = device->GetPhysicalDevice()->GetInstance();
             VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
 
-            if (instance != nullptr && instance->GetVkInstance() != VK_NULL_HANDLE && this->vkSurfaceKHR != VK_NULL_HANDLE)
+            if (instance.Valid() && this->vkSurfaceKHR != VK_NULL_HANDLE)
             {
                 this->vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, allocator);
             }
@@ -221,7 +221,7 @@ void Turbo::Extension::TSurface::InternalDestroy()
 #if defined(TURBO_PLATFORM_WINDOWS)
 Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -264,9 +264,9 @@ Turbo::Extension::TSurface::TSurface(...)
 {
 }
 #elif defined(TURBO_PLATFORM_ANDROID)
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, ANativeWindow *window)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -303,9 +303,9 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow
     }
 }
 #elif defined(TURBO_PLATFORM_LINUX)
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, wl_display *display, wl_surface *surface)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -345,9 +345,9 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *d
     }
 }
 
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, xcb_connection_t *connection, xcb_window_t window)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -387,9 +387,9 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connectio
     }
 }
 
-Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, Display *dpy, Window window)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -438,7 +438,7 @@ Turbo::Extension::TSurface::TSurface(...)
 
 Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, VkSurfaceKHR vkSurfaceKHR)
 {
-    if (device != nullptr && vkSurfaceKHR != VK_NULL_HANDLE)
+    if (device.Valid() && vkSurfaceKHR != VK_NULL_HANDLE)
     {
         this->isExternalHandle = true;
         this->device = device;

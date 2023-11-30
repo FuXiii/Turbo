@@ -134,7 +134,7 @@ void Turbo::Core::TRenderPass::InternalDestroy()
 
 Turbo::Core::TRenderPass::TRenderPass(const TRefPtr<TDevice> &device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr || subpasses.size() == 0)
+    if (device.Valid() || subpasses.size() == 0)
     {
         this->device = device;
         this->subpasses = subpasses;

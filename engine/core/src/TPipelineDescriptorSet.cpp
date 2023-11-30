@@ -6,7 +6,7 @@
 
 void Turbo::Core::TPipelineDescriptorSet::InternalCreate()
 {
-    std::vector<TDescriptorSetLayout *> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
+    std::vector<TRefPtr<TDescriptorSetLayout>> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
     for (TDescriptorSetLayout *descriptor_set_layout_item : descriptor_set_layouts)
     {
         descriptorSets.push_back(new TDescriptorSet(this->descriptorPool, descriptor_set_layout_item));
@@ -15,16 +15,16 @@ void Turbo::Core::TPipelineDescriptorSet::InternalCreate()
 
 void Turbo::Core::TPipelineDescriptorSet::InternalDestroy()
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    for (TRefPtr<TDescriptorSet> &descriptor_set_item : this->descriptorSets)
     {
-        delete descriptor_set_item;
+        descriptor_set_item = nullptr;
     }
     this->descriptorSets.clear();
 }
 
 Turbo::Core::TPipelineDescriptorSet::TPipelineDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
-    if (descriptorPool != nullptr && pipelineLayout != nullptr)
+    if (descriptorPool.Valid() && pipelineLayout.Valid())
     {
         this->descriptorPool = descriptorPool;
         this->pipelineLayout = pipelineLayout;
@@ -64,7 +64,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
 {
-    std::vector<TBuffer *> buffers;
+    std::vector<TRefPtr<TBuffer>> buffers;
     buffers.push_back(buffer);
 
     this->BindData(set, binding, dstArrayElement, buffers);

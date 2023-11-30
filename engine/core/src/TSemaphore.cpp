@@ -29,7 +29,7 @@ void Turbo::Core::TSemaphore::InternalDestroy()
 
 Turbo::Core::TSemaphore::TSemaphore(const TRefPtr<TDevice> &device, VkPipelineStageFlags waitDstStageMask)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->waitDstStageMask = waitDstStageMask;

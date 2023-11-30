@@ -33,7 +33,7 @@ void Turbo::Core::TPipelineCache::InternalDestroy()
 
 Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->size = 0;
@@ -48,7 +48,7 @@ Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device)
 
 Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device, size_t size, void *data)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->size = 0;

@@ -3909,3 +3909,26 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TLayerInfo`类内更新`GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice)`成员函数。修改为`GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &)`
   >* `./engine/core`下的`TPhysicalDevice`类内更新`AddChildHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TPhysicalDevice`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+
+* 2023/11/30 设计架构
+  >
+  >* `./engine/core`下的`TPipeline`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipeline`类内更新`InternalCreate()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipeline`类内更新`InternalDestroy()`成员函数。移除对于`pipelineLayout`内存回收。
+  >* `./engine/core`下的`TPipelineCache`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`InternalCreate()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`InternalDestroy()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`BindData()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineLayout`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新析构函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TRenderingPipeline`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TRenderingPipeline`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TRenderPass`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSampler`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSemaphore`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TShader`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TShader`类内更新构造函数，修正之前有效性判断的代码错误。
+  >* `./engine/core`下的`TSurface`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSurface`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSurface`类内更新`InternalDestroy`函数。使用`Turbo::Core::TRefPtr`进行适配。

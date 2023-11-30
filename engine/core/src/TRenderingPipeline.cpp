@@ -93,8 +93,8 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
 
-    std::vector<TShader *> shaders = this->GetShaders();
-    for (auto *shader_item : shaders)
+    std::vector<TRefPtr<TShader>> shaders = this->GetShaders();
+    for (const TRefPtr<TShader> &shader_item : shaders)
     {
         VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
         vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -354,10 +354,10 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
 
     TDevice *device = this->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
-    TPipelineCache *pipeline_cache = this->GetPipelineCache();
+    TRefPtr<TPipelineCache> pipeline_cache = this->GetPipelineCache();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
-    if (pipeline_cache != nullptr && pipeline_cache->GetVkPipelineCache() != VK_NULL_HANDLE)
+    if (pipeline_cache.Valid())
     {
         result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, pipeline_cache->GetVkPipelineCache(), 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     }

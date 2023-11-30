@@ -55,7 +55,7 @@ void Turbo::Core::TPipelineLayout::InternalDestroy()
 
 Turbo::Core::TPipelineLayout::TPipelineLayout(const TRefPtr<TDevice> &device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->descriptorSetLayouts = descriptorSetLayouts;
@@ -72,9 +72,9 @@ Turbo::Core::TPipelineLayout::~TPipelineLayout()
 {
     this->InternalDestroy();
 
-    for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
+    for (TRefPtr<TDescriptorSetLayout> &descriptor_set_layout_item : this->descriptorSetLayouts)
     {
-        delete descriptor_set_layout_item;
+        descriptor_set_layout_item = nullptr;
     }
 }
 

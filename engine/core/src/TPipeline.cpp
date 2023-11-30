@@ -16,7 +16,7 @@ void Turbo::Core::TPipeline::InternalCreate()
 {
     std::vector<TPushConstantDescriptor *> pipeline_push_constant_descriptors;
 
-    std::vector<TDescriptorSetLayout *> descriptor_set_layouts;
+    std::vector<TRefPtr<TDescriptorSetLayout>> descriptor_set_layouts;
 
     std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> descriptor_set_map(DescriptorSetMapCompFunction);
 
@@ -121,12 +121,12 @@ void Turbo::Core::TPipeline::InternalCreate()
 
 void Turbo::Core::TPipeline::InternalDestroy()
 {
-    delete this->pipelineLayout;
+    //delete this->pipelineLayout;
 }
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, TPipelineType type, std::vector<TRefPtr<TShader>> &shaders, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->type = type;
@@ -142,7 +142,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, TPipelineType 
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr && vertexShader != nullptr && fragmentShader != nullptr)
+    if (device.Valid() && vertexShader.Valid() && fragmentShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -159,7 +159,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache)
 {
-    if (device != nullptr && vertexShader != nullptr && tessellationControlShader != nullptr && tessellationEvaluationShader != nullptr && fragmentShader != nullptr)
+    if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && fragmentShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -178,7 +178,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr && vertexShader != nullptr && geometryShader != nullptr && fragmentShader != nullptr)
+    if (device.Valid() && vertexShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -196,7 +196,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr && vertexShader != nullptr && tessellationControlShader != nullptr && tessellationEvaluationShader != nullptr && geometryShader != nullptr && fragmentShader != nullptr)
+    if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -216,7 +216,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TMeshShader> &meshShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache)
 {
-    if (device != nullptr && meshShader != nullptr && fragmentShader != nullptr)
+    if (device.Valid() && meshShader.Valid() && fragmentShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -233,7 +233,7 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr && computeShader != nullptr)
+    if (device.Valid() && computeShader.Valid())
     {
         this->device = device;
         this->type = TPipelineType::Compute;

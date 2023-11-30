@@ -833,7 +833,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
 Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint)
 {
     // glslang to spir-v
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->type = type;
@@ -941,7 +941,7 @@ Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, 
 
 Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, size_t size, uint32_t *code, const std::string &entryPoint)
 {
-    if (device != nullptr || size == 0 || code == nullptr)
+    if (device->Valid() && size != 0 && code != nullptr)
     {
         this->device = device;
         this->type = type;
