@@ -19,7 +19,7 @@ Turbo::Core::TVulkanAllocator::~TVulkanAllocator()
 
 Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::Instance()
 {
-    if (TVulkanAllocator::instance == nullptr)
+    if (!TVulkanAllocator::instance.Valid())
     {
         TVulkanAllocator::instance = new TVulkanAllocator();
     }
@@ -28,9 +28,10 @@ Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocato
 
 void Turbo::Core::TVulkanAllocator::Destory()
 {
-    if (TVulkanAllocator::instance != nullptr)
+    if (TVulkanAllocator::instance.Valid())
     {
-        delete TVulkanAllocator::instance;
+        // delete TVulkanAllocator::instance;
+        TVulkanAllocator::instance = nullptr;
     }
 }
 

@@ -3,7 +3,7 @@
 
 Turbo::Core::TVersion Turbo::Core::TVersion::TurboVersion(0, 0, 0, 16);
 
-Turbo::Core::TVersion::TVersion() : TObject()
+Turbo::Core::TVersion::TVersion() : Turbo::Core::TInfo()
 {
     this->major = 0;
     this->minor = 0;
@@ -11,7 +11,7 @@ Turbo::Core::TVersion::TVersion() : TObject()
     this->develop = 0;
 }
 
-Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop) : TObject()
+Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop) : Turbo::Core::TInfo()
 {
     this->major = major;
     this->minor = minor;
@@ -19,7 +19,7 @@ Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, 
     this->develop = develop;
 }
 
-Turbo::Core::TVersion::TVersion(const TVersion &version) : TObject()
+Turbo::Core::TVersion::TVersion(const TVersion &version) : Turbo::Core::TInfo()
 {
     if (this != &version)
     {

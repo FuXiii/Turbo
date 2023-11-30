@@ -10,10 +10,11 @@
 
 void Turbo::Extension::TSwapchain::InternalCreate()
 {
-    Turbo::Core::TDevice *device = this->surface->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    if (device != nullptr && vk_device != VK_NULL_HANDLE && device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = this->surface->GetDevice();
+    if (device.Valid() && device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
     {
+        VkDevice vk_device = device->GetVkDevice();
+
         // imageCount
         if ((this->surface->GetMinImageCount() > this->minImageCount) || (this->surface->GetMaxImageCount() < this->minImageCount))
         {
@@ -120,7 +121,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
             vk_swapchain_create_info_khr.clipped = VK_TRUE;
         }
         vk_swapchain_create_info_khr.oldSwapchain = VK_NULL_HANDLE;
-        if (this->oldSwapchain != nullptr)
+        if (this->oldSwapchain.Valid())
         {
             vk_swapchain_create_info_khr.oldSwapchain = this->oldSwapchain->GetVkSwapchainKHR();
         }
@@ -169,7 +170,7 @@ void Turbo::Extension::TSwapchain::InternalDestroy()
 
 Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
 {
-    if (surface != nullptr)
+    if (surface.Valid())
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
         if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
@@ -207,7 +208,7 @@ Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &s
 
 Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatInfo format, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
 {
-    if (surface != nullptr)
+    if (surface.Valid())
     {
         Turbo::Core::TDevice *device = surface->GetDevice();
         if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
@@ -277,10 +278,10 @@ Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &s
 
 Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t width, uint32_t height, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, TSurfaceTransformBits transform, TCompositeAlphaBits compositeAlpha, TPresentMode presentMode, bool isClipped)
 {
-    if (surface != nullptr)
+    if (surface.Valid())
     {
-        Turbo::Core::TDevice *device = surface->GetDevice();
-        if (device != nullptr)
+        Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = surface->GetDevice();
+        if (device.Valid())
         {
             if (device->GetPhysicalDevice()->IsSupportFormat(formatType))
             {
@@ -330,10 +331,10 @@ Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &s
 
 Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &surface, uint32_t minImageCount, Turbo::Core::TFormatType formatType, uint32_t imageArrayLayers, Turbo::Core::TImageUsages usages, bool isClipped)
 {
-    if (surface != nullptr)
+    if (surface.Valid())
     {
-        Turbo::Core::TDevice *device = surface->GetDevice();
-        if (device != nullptr)
+        Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = surface->GetDevice();
+        if (device.Valid())
         {
             if (device->GetPhysicalDevice()->IsSupportFormat(formatType))
             {
@@ -415,7 +416,7 @@ Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSurface> &s
 
 Turbo::Extension::TSwapchain::TSwapchain(const Turbo::Core::TRefPtr<TSwapchain> &oldSwapchain)
 {
-    if (oldSwapchain != nullptr)
+    if (oldSwapchain.Valid())
     {
         Turbo::Core::TDevice *device = oldSwapchain->GetSurface()->GetDevice();
         if (device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
@@ -472,12 +473,12 @@ Turbo::Core::TResult Turbo::Extension::TSwapchain::AcquireNextImage(uint64_t tim
         VkSemaphore signal_semaphore = VK_NULL_HANDLE;
         VkFence signal_fence = VK_NULL_HANDLE;
 
-        if (signalSemphore != nullptr)
+        if (signalSemphore.Valid())
         {
             signal_semaphore = signalSemphore->GetVkSemaphore();
         }
 
-        if (signalFence != nullptr)
+        if (signalFence.Valid())
         {
             signal_fence = signalFence->GetVkFence();
         }

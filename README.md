@@ -3932,3 +3932,12 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TSurface`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TSurface`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
   >* `./engine/core`下的`TSurface`类内更新`InternalDestroy`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSwapchain`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSwapchain`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSwapchain`类内更新构造函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TVersion.cpp`修正其继承自`TInfo`。
+  >* `./engine/core`下的`TVmaAllocator`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TVulkanAllocator`类内`Destory()`静态成员函数内移除对`delete`的使用。
+

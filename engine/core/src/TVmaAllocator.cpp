@@ -51,7 +51,7 @@ void Turbo::Core::TVmaAllocator::InternalDestroy()
 
 Turbo::Core::TVmaAllocator::TVmaAllocator(const TRefPtr<TDevice> &device) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->vmaAllocator = malloc(sizeof(VmaAllocator));
