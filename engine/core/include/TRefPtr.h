@@ -3,6 +3,7 @@
 #define TURBO_CORE_TREFPTR_H
 #include <assert.h>
 #include <type_traits>
+#include <cstdint>
 
 namespace Turbo
 {

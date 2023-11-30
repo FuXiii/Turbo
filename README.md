@@ -3940,4 +3940,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr`进行适配。
   >* `./engine/core`下的`TVulkanAllocator`类内`Destory()`静态成员函数内移除对`delete`的使用。
-
+  >* `./engine/core`下的`TRefPtr.h`中增加`cstdint`头文件。
+  >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr`进行适配。

@@ -60,7 +60,7 @@ Turbo::Core::TVulkanLoader::~TVulkanLoader()
 
 Turbo::Core::TRefPtr<Turbo::Core::TVulkanLoader> Turbo::Core::TVulkanLoader::Instance()
 {
-    if (TVulkanLoader::vulkanLoader == nullptr)
+    if (!TVulkanLoader::vulkanLoader.Valid())
     {
         TVulkanLoader::vulkanLoader = new TVulkanLoader();
     }
@@ -70,9 +70,10 @@ Turbo::Core::TRefPtr<Turbo::Core::TVulkanLoader> Turbo::Core::TVulkanLoader::Ins
 
 void Turbo::Core::TVulkanLoader::Destroy()
 {
-    if (TVulkanLoader::vulkanLoader != nullptr)
+    if (TVulkanLoader::vulkanLoader.Valid())
     {
-        delete TVulkanLoader::vulkanLoader;
+        // delete TVulkanLoader::vulkanLoader;
+        TVulkanLoader::vulkanLoader = nullptr;
     }
 }
 
