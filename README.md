@@ -3943,3 +3943,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下的`TRefPtr.h`中增加`cstdint`头文件。
   >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
   >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr`进行适配。
+
+* 2023/12/1 设计架构
+  >
+  >* `./.gitignore`下增加对`thirdparty`第三方库的追踪忽略。

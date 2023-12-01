@@ -4,3 +4,9 @@ build/
 *.vscode/
 imgui.ini
 install/
+
+thirdparty/glfw/
+thirdparty/glm/
+thirdparty/imgui/
+thirdparty/KTX-Software/
+thirdparty/tinygltf/
