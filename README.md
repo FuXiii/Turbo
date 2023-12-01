@@ -3948,4 +3948,15 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./.gitignore`下增加对`thirdparty`第三方库的追踪忽略。
   >* `./engine/framegraph`下的`TFrameGraph.hpp`内的`TResourceProxy<T>`增加`T resource`的限制描述备注。
-
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TResourceProxy<T>`内的`uint32_t id`成员修改为`ID id`。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TRenderPass`内的`AddSubpass()`成员函数。函数形参增加默认值。并返回索引值
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`Turbo::FrameGraph::TFrameGraph::TBuilder`内的`CreateSubpass()`成员函数。去掉不必要的临时变量。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsWrite(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsRead(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsInput(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Write(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Read(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Input(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Compile()`成员函数。增加对计数引用数为`0`的判断。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Execute()`成员函数。资源只在`PassNode`有效的情况下创建和销毁。
+  >* `./engine/framegraph`下`TFrameGraph.hpp`内的`TFrameGraph`内增加`std::string ToHtml()`成员函数。方便输出查看。

@@ -105,7 +105,7 @@ template <typename T>
 class TResourceProxy : public TVirtualResourceProxy
 {
   private:
-    uint32_t id;
+    ID id;
     typename T::Descriptor descriptor;
     T resource; // FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
                 // NOTE: 正常来说 T 类型必须满足如下条件
@@ -137,6 +137,10 @@ class TSubpass
     TSubpass() = default;
     ~TSubpass() = default;
 
+    bool IsWrite(TResource resource);
+    bool IsRead(TResource resource);
+    bool IsInput(TResource resource);
+
     void Write(TResource resource);
     void Read(TResource resource);
     void Input(TResource resource);
@@ -162,7 +166,7 @@ class TRenderPass
     TRenderPass() = default;
     ~TRenderPass() = default;
 
-    void AddSubpass(const TSubpass &subpass);
+    size_t AddSubpass(const TSubpass &subpass = TSubpass());
 
     std::vector<Turbo::FrameGraph::TSubpass> GetSubpasses();
     Turbo::FrameGraph::TSubpass GetSubpass(size_t index);
@@ -298,8 +302,8 @@ class TFrameGraph
         TBuilder(TFrameGraph &frameGraph, TPassNode &passNode);
 
       private:
-        TResource Read(TResource resource);
-        TResource Write(TResource resource);
+        TResource Read(TResource resource);  // NOTE: for PassNode add read resource
+        TResource Write(TResource resource); // NOTE: for PassNode add write resource
 
       public:
         template <typename T>
@@ -334,6 +338,7 @@ class TFrameGraph
     void Execute(void *context = nullptr, void *allocator = nullptr);
 
     std::string ToMermaid();
+    std::string ToHtml();
 
     TBlackboard &GetBlackboard();
 };
