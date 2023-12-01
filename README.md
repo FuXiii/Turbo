@@ -3947,3 +3947,5 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/12/1 设计架构
   >
   >* `./.gitignore`下增加对`thirdparty`第三方库的追踪忽略。
+  >* `./engine/framegraph`下的`TFrameGraph.hpp`内的`TResourceProxy<T>`增加`T resource`的限制描述备注。
+

@@ -108,6 +108,11 @@ class TResourceProxy : public TVirtualResourceProxy
     uint32_t id;
     typename T::Descriptor descriptor;
     T resource; // FIXME: 此处可能会有问题，用户不一定指定带有默认构造函数的资源类，详见Issue文档
+                // NOTE: 正常来说 T 类型必须满足如下条件
+                // NOTE: * 有默认构造函数
+                // NOTE: * 有 T::Create(const std::string&, const T::Descriptor&, void*) 成员函数
+                // NOTE: * 有 T::Destroy(void*) 成员函数
+                // NOTE: 最好使用标准库中的模板类型判断进行限制
 
   public:
     TResourceProxy(const std::string &name, uint32_t id, typename T::Descriptor &&descriptor);
