@@ -78,7 +78,7 @@ VkPipelineCache Turbo::Core::TPipelineCache::GetVkPipelineCache()
     return this->vkPipelineCache;
 }
 
-size_t Turbo::Core::TPipelineCache::GetSize()
+size_t Turbo::Core::TPipelineCache::GetSize() const
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
@@ -91,7 +91,7 @@ size_t Turbo::Core::TPipelineCache::GetSize()
     return cache_size;
 }
 
-Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst)
+Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst) const
 {
     VkDevice vk_device = this->device->GetVkDevice();
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
@@ -123,7 +123,7 @@ Turbo::Core::TResult Turbo::Core::TPipelineCache::GetData(size_t size, void *dst
     return TResult::FAIL;
 }
 
-uint32_t Turbo::Core::TPipelineCache::GetHeaderSize()
+uint32_t Turbo::Core::TPipelineCache::GetHeaderSize() const
 {
     VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
     // this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);// FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
@@ -144,7 +144,7 @@ uint32_t Turbo::Core::TPipelineCache::GetHeaderSize()
     return vk_pipeline_cache_header_version_one.headerSize;
 }
 
-Turbo::Core::TPipelineCacheHeaderVersion Turbo::Core::TPipelineCache::GetHeaderVersion()
+Turbo::Core::TPipelineCacheHeaderVersion Turbo::Core::TPipelineCache::GetHeaderVersion() const
 {
     VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
     // this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);// FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
@@ -177,7 +177,7 @@ Turbo::Core::TPipelineCacheHeaderVersion Turbo::Core::TPipelineCache::GetHeaderV
     return TPipelineCacheHeaderVersion::ONE;
 }
 
-Turbo::Core::TVendorInfo Turbo::Core::TPipelineCache::GetVendor()
+Turbo::Core::TVendorInfo Turbo::Core::TPipelineCache::GetVendor() const
 {
     VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
     // this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);// FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
@@ -232,7 +232,7 @@ Turbo::Core::TVendorInfo Turbo::Core::TPipelineCache::GetVendor()
     return TVendorInfo(vendor_type, vendor_id);
 }
 
-uint32_t Turbo::Core::TPipelineCache::GetDeviceID()
+uint32_t Turbo::Core::TPipelineCache::GetDeviceID() const
 {
     VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
     // this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);// FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
@@ -253,7 +253,7 @@ uint32_t Turbo::Core::TPipelineCache::GetDeviceID()
     return vk_pipeline_cache_header_version_one.deviceID;
 }
 
-std::vector<uint8_t> Turbo::Core::TPipelineCache::GetUUID()
+std::vector<uint8_t> Turbo::Core::TPipelineCache::GetUUID() const
 {
     VkPipelineCacheHeaderVersionOne vk_pipeline_cache_header_version_one = {};
     // this->GetData(sizeof(VkPipelineCacheHeaderVersionOne), &vk_pipeline_cache_header_version_one);// FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中

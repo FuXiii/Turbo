@@ -38,14 +38,14 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
   public:
     VkPipelineCache GetVkPipelineCache();
 
-    size_t GetSize();
-    TResult GetData(size_t size, void *dst);
+    size_t GetSize() const;
+    TResult GetData(size_t size, void *dst) const;
 
-    uint32_t GetHeaderSize();                       // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
-    TPipelineCacheHeaderVersion GetHeaderVersion(); // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
-    TVendorInfo GetVendor();                        // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
-    uint32_t GetDeviceID();                         // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
-    std::vector<uint8_t> GetUUID();                 // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
+    uint32_t GetHeaderSize() const;                       // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
+    TPipelineCacheHeaderVersion GetHeaderVersion() const; // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
+    TVendorInfo GetVendor() const;                        // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
+    uint32_t GetDeviceID() const;                         // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
+    std::vector<uint8_t> GetUUID() const;                 // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
 
   public:
     virtual std::string ToString() override;

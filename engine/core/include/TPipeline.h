@@ -91,7 +91,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TRefPtr<TPipelineLayout> GetPipelineLayout();
     VkPipeline GetVkPipeline();
 
-    TPipelineType GetType();
+    TPipelineType GetType() const;
     std::vector<TRefPtr<TShader>> GetShaders();
 
     TRefPtr<TDevice> GetDevice();

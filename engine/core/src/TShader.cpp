@@ -1028,13 +1028,13 @@ Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TShader::GetDevice()
     return this->device;
 }
 
-VkShaderStageFlags Turbo::Core::TShader::GetVkShaderStageFlags()
+VkShaderStageFlags Turbo::Core::TShader::GetVkShaderStageFlags() const
 {
     VkShaderStageFlags vk_shader_stage_flags = this->GetVkShaderStageFlagBits();
     return vk_shader_stage_flags;
 }
 
-VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits()
+VkShaderStageFlagBits Turbo::Core::TShader::GetVkShaderStageFlagBits() const
 {
     switch (this->type)
     {
@@ -1104,72 +1104,72 @@ VkShaderModule Turbo::Core::TShader::GetVkShaderModule()
     return this->vkShaderModule;
 }
 
-const std::string &Turbo::Core::TShader::GetEntryPoint()
+const std::string &Turbo::Core::TShader::GetEntryPoint() const
 {
     return this->entryPoint;
 }
 
-const std::vector<Turbo::Core::TUniformBufferDescriptor *> &Turbo::Core::TShader::GetUniformBufferDescriptors()
+const std::vector<Turbo::Core::TUniformBufferDescriptor *> &Turbo::Core::TShader::GetUniformBufferDescriptors() const
 {
     return this->uniformBufferDescriptors;
 }
 
-const std::vector<Turbo::Core::TStorageBufferDescriptor *> &Turbo::Core::TShader::GetStorageBufferDescriptors()
+const std::vector<Turbo::Core::TStorageBufferDescriptor *> &Turbo::Core::TShader::GetStorageBufferDescriptors() const
 {
     return this->storageBufferDescriptors;
 }
 
-const std::vector<Turbo::Core::TCombinedImageSamplerDescriptor *> &Turbo::Core::TShader::GetCombinedImageSamplerDescriptors()
+const std::vector<Turbo::Core::TCombinedImageSamplerDescriptor *> &Turbo::Core::TShader::GetCombinedImageSamplerDescriptors() const
 {
     return this->combinedImageSamplerDescriptors;
 }
 
-const std::vector<Turbo::Core::TSampledImageDescriptor *> &Turbo::Core::TShader::GetSampledImageDescriptors()
+const std::vector<Turbo::Core::TSampledImageDescriptor *> &Turbo::Core::TShader::GetSampledImageDescriptors() const
 {
     return this->sampledImageDescriptors;
 }
 
-const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetSamplerDescriptors()
+const std::vector<Turbo::Core::TSamplerDescriptor *> &Turbo::Core::TShader::GetSamplerDescriptors() const
 {
     return this->samplerDescriptors;
 }
 
-const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TShader::GetPushConstantDescriptors()
+const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TShader::GetPushConstantDescriptors() const
 {
     return this->pushConstantDescriptors;
 }
 
-const std::vector<Turbo::Core::TInputAttachmentDescriptor *> &Turbo::Core::TShader::GetInputAttachmentDescriptors()
+const std::vector<Turbo::Core::TInputAttachmentDescriptor *> &Turbo::Core::TShader::GetInputAttachmentDescriptors() const
 {
     return this->inputAttachmentDescriptors;
 }
 
-const std::vector<Turbo::Core::TStorageImageDescriptor *> &Turbo::Core::TShader::GetStorageImageDescriptors()
+const std::vector<Turbo::Core::TStorageImageDescriptor *> &Turbo::Core::TShader::GetStorageImageDescriptors() const
 {
     return this->storageImageDescriptors;
 }
 
-const std::vector<Turbo::Core::TAccelerationStructureDescriptor *> &Turbo::Core::TShader::GetAccelerationStructureDescriptors()
+const std::vector<Turbo::Core::TAccelerationStructureDescriptor *> &Turbo::Core::TShader::GetAccelerationStructureDescriptors() const
 {
     return this->accelerationStructureDescriptors;
 }
 
-std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs()
+std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetInputs() const
 {
     return this->inputs;
 }
 
-std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs()
+std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs() const
 {
     return this->outputs;
 }
 
-const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants()
+const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants() const
 {
     return this->specializationConstants;
 }
 
-Turbo::Core::TShaderType Turbo::Core::TShader::GetType()
+Turbo::Core::TShaderType Turbo::Core::TShader::GetType() const
 {
     return this->type;
 }

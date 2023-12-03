@@ -70,16 +70,16 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
 
     VkSwapchainKHR GetVkSwapchainKHR();
 
-    uint32_t GetMinImageCount();
-    Turbo::Core::TFormatInfo GetFormat();
-    uint32_t GetWidth();
-    uint32_t GetHeight();
-    uint32_t GetImageArrayLayers();
-    Turbo::Core::TImageUsages GetUsages();
-    TSurfaceTransformBits GetTransform();
-    TCompositeAlphaBits GetCompositeAlpha();
-    TPresentMode GetPresentMode();
-    bool GetIsClipped();
+    uint32_t GetMinImageCount() const;
+    Turbo::Core::TFormatInfo GetFormat() const;
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+    uint32_t GetImageArrayLayers() const;
+    Turbo::Core::TImageUsages GetUsages() const;
+    TSurfaceTransformBits GetTransform() const;
+    TCompositeAlphaBits GetCompositeAlpha() const;
+    TPresentMode GetPresentMode() const;
+    bool GetIsClipped() const;
 
   public:
     virtual std::string ToString() override;

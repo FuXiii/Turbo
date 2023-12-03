@@ -525,52 +525,52 @@ VkSwapchainKHR Turbo::Extension::TSwapchain::GetVkSwapchainKHR()
     return this->vkSwapchainKHR;
 }
 
-uint32_t Turbo::Extension::TSwapchain::GetMinImageCount()
+uint32_t Turbo::Extension::TSwapchain::GetMinImageCount() const
 {
     return this->minImageCount;
 }
 
-Turbo::Core::TFormatInfo Turbo::Extension::TSwapchain::GetFormat()
+Turbo::Core::TFormatInfo Turbo::Extension::TSwapchain::GetFormat() const
 {
     return this->format;
 }
 
-uint32_t Turbo::Extension::TSwapchain::GetWidth()
+uint32_t Turbo::Extension::TSwapchain::GetWidth() const
 {
     return this->width;
 }
 
-uint32_t Turbo::Extension::TSwapchain::GetHeight()
+uint32_t Turbo::Extension::TSwapchain::GetHeight() const
 {
     return this->height;
 }
 
-uint32_t Turbo::Extension::TSwapchain::GetImageArrayLayers()
+uint32_t Turbo::Extension::TSwapchain::GetImageArrayLayers() const
 {
     return this->imageArrayLayers;
 }
 
-Turbo::Core::TImageUsages Turbo::Extension::TSwapchain::GetUsages()
+Turbo::Core::TImageUsages Turbo::Extension::TSwapchain::GetUsages() const
 {
     return this->usages;
 }
 
-Turbo::Extension::TSurfaceTransformBits Turbo::Extension::TSwapchain::GetTransform()
+Turbo::Extension::TSurfaceTransformBits Turbo::Extension::TSwapchain::GetTransform() const
 {
     return this->transform;
 }
 
-Turbo::Extension::TCompositeAlphaBits Turbo::Extension::TSwapchain::GetCompositeAlpha()
+Turbo::Extension::TCompositeAlphaBits Turbo::Extension::TSwapchain::GetCompositeAlpha() const
 {
     return this->compositeAlpha;
 }
 
-Turbo::Extension::TPresentMode Turbo::Extension::TSwapchain::GetPresentMode()
+Turbo::Extension::TPresentMode Turbo::Extension::TSwapchain::GetPresentMode() const
 {
     return this->presentMode;
 }
 
-bool Turbo::Extension::TSwapchain::GetIsClipped()
+bool Turbo::Extension::TSwapchain::GetIsClipped() const
 {
     return this->isClipped;
 }

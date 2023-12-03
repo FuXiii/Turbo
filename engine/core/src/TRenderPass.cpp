@@ -163,17 +163,17 @@ Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TRenderPass::GetDevice()
     return this->device;
 }
 
-const std::vector<Turbo::Core::TAttachment> &Turbo::Core::TRenderPass::GetAttachments()
+const std::vector<Turbo::Core::TAttachment> &Turbo::Core::TRenderPass::GetAttachments() const
 {
     return this->attachments;
 }
 
-const std::vector<Turbo::Core::TSubpass> &Turbo::Core::TRenderPass::GetSubpasses()
+const std::vector<Turbo::Core::TSubpass> &Turbo::Core::TRenderPass::GetSubpasses() const
 {
     return this->subpasses;
 }
 
-Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass)
+Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass) const
 {
     if (subpass < this->subpasses.size())
     {

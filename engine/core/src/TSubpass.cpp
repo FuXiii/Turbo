@@ -76,27 +76,27 @@ void Turbo::Core::TSubpass::SetDepthStencilAttachmentReference(uint32_t attachme
     this->depthStencil->layout = (VkImageLayout)layout;
 }
 
-std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetColorAttachmentReferences()
+std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetColorAttachmentReferences() const
 {
     return this->colors;
 }
 
-std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetResolveAttachmentReferences()
+std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetResolveAttachmentReferences() const
 {
     return this->resolves;
 }
 
-std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetInputAttachmentReferences()
+std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetInputAttachmentReferences() const
 {
     return this->inputs;
 }
 
-std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetPreserveAttachmentReferences()
+std::vector<VkAttachmentReference> *Turbo::Core::TSubpass::GetPreserveAttachmentReferences() const
 {
     return this->preserves;
 }
 
-VkAttachmentReference *Turbo::Core::TSubpass::GetDepthStencilAttachmentReference()
+VkAttachmentReference *Turbo::Core::TSubpass::GetDepthStencilAttachmentReference() const
 {
     if (this->depthStencil->attachment != UINT32_MAX)
     {
@@ -114,7 +114,7 @@ void Turbo::Core::TSubpass::Clear()
     this->preserves->clear();
 }
 
-Turbo::Core::TPipelineType Turbo::Core::TSubpass::GetPipelineType()
+Turbo::Core::TPipelineType Turbo::Core::TSubpass::GetPipelineType() const
 {
     return this->type;
 }

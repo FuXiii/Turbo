@@ -132,28 +132,28 @@ class TShader : public Turbo::Core::TVulkanHandle
 
   public:
     TRefPtr<TDevice> GetDevice();
-    VkShaderStageFlags GetVkShaderStageFlags();
-    VkShaderStageFlagBits GetVkShaderStageFlagBits();
+    VkShaderStageFlags GetVkShaderStageFlags() const;
+    VkShaderStageFlagBits GetVkShaderStageFlagBits() const;
     VkShaderModule GetVkShaderModule();
 
-    const std::string &GetEntryPoint();
+    const std::string &GetEntryPoint() const;
 
-    const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors();
-    const std::vector<TStorageBufferDescriptor *> &GetStorageBufferDescriptors();
-    const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors();
-    const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors();
-    const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors();
-    const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors();
-    const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors();
-    const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors();
-    const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors();
+    const std::vector<TUniformBufferDescriptor *> &GetUniformBufferDescriptors() const;
+    const std::vector<TStorageBufferDescriptor *> &GetStorageBufferDescriptors() const;
+    const std::vector<TCombinedImageSamplerDescriptor *> &GetCombinedImageSamplerDescriptors() const;
+    const std::vector<TSampledImageDescriptor *> &GetSampledImageDescriptors() const;
+    const std::vector<TSamplerDescriptor *> &GetSamplerDescriptors() const;
+    const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors() const;
+    const std::vector<TInputAttachmentDescriptor *> &GetInputAttachmentDescriptors() const;
+    const std::vector<TStorageImageDescriptor *> &GetStorageImageDescriptors() const;
+    const std::vector<TAccelerationStructureDescriptor *> &GetAccelerationStructureDescriptors() const;
 
-    std::vector<TInterface> GetInputs();
-    std::vector<TInterface> GetOutputs();
+    std::vector<TInterface> GetInputs() const;
+    std::vector<TInterface> GetOutputs() const;
 
-    const std::vector<TSpecializationConstant> &GetSpecializationConstants();
+    const std::vector<TSpecializationConstant> &GetSpecializationConstants() const;
 
-    TShaderType GetType();
+    TShaderType GetType() const;
 
     //<specialization constants>
     void SetConstant(uint32_t id, bool value);

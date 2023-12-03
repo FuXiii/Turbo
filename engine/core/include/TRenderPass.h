@@ -36,11 +36,11 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
 
     TRefPtr<TDevice> GetDevice();
 
-    const std::vector<TAttachment> &GetAttachments();
+    const std::vector<TAttachment> &GetAttachments() const;
 
-    const std::vector<TSubpass> &GetSubpasses();
+    const std::vector<TSubpass> &GetSubpasses() const;
 
-    TSubpass GetSubpass(uint32_t subpass);
+    TSubpass GetSubpass(uint32_t subpass) const;
 
   public:
     virtual std::string ToString() override;

@@ -121,7 +121,7 @@ void Turbo::Core::TPipeline::InternalCreate()
 
 void Turbo::Core::TPipeline::InternalDestroy()
 {
-    //delete this->pipelineLayout;
+    // delete this->pipelineLayout;
 }
 
 Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, TPipelineType type, std::vector<TRefPtr<TShader>> &shaders, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
@@ -262,7 +262,7 @@ VkPipeline Turbo::Core::TPipeline::GetVkPipeline()
     return this->vkPipeline;
 }
 
-Turbo::Core::TPipelineType Turbo::Core::TPipeline::GetType()
+Turbo::Core::TPipelineType Turbo::Core::TPipeline::GetType() const
 {
     return this->type;
 }

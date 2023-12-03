@@ -259,6 +259,7 @@ class TRefPtr
     }
 
     // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
+    // FIXME: It best to be private
     void Release()
     {
         if (this->ptr != nullptr)

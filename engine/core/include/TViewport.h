@@ -24,12 +24,12 @@ class TViewport : public Turbo::Core::TInfo
     TViewport(float x, float y, float width, float height, float minDepth, float maxDepth);
     ~TViewport();
 
-    float GetX();
-    float GetY();
-    float GetWidth();
-    float GetHeight();
-    float GetMinDepth();
-    float GetMaxDepth();
+    float GetX() const;
+    float GetY() const;
+    float GetWidth() const;
+    float GetHeight() const;
+    float GetMinDepth() const;
+    float GetMaxDepth() const;
 
   public:
     virtual std::string ToString() override;

@@ -34,32 +34,32 @@ Turbo::Core::TVersion::~TVersion()
 {
 }
 
-uint32_t Turbo::Core::TVersion::GetVulkanVersion()
+uint32_t Turbo::Core::TVersion::GetVulkanVersion() const
 {
     return VK_MAKE_VERSION(this->major, this->minor, this->patch);
 }
 
-Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion()
+Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion() const
 {
     return TVersion(this->major, this->minor, 0, 0);
 }
 
-uint32_t Turbo::Core::TVersion::GetMajor()
+uint32_t Turbo::Core::TVersion::GetMajor() const
 {
     return this->major;
 }
 
-uint32_t Turbo::Core::TVersion::GetMinor()
+uint32_t Turbo::Core::TVersion::GetMinor() const
 {
     return this->minor;
 }
 
-uint32_t Turbo::Core::TVersion::GetPatch()
+uint32_t Turbo::Core::TVersion::GetPatch() const
 {
     return this->patch;
 }
 
-uint32_t Turbo::Core::TVersion::GetDevelop()
+uint32_t Turbo::Core::TVersion::GetDevelop() const
 {
     return this->develop;
 }

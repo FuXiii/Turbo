@@ -46,7 +46,7 @@ Turbo::Core::TSemaphore::~TSemaphore()
     this->InternalDestroy();
 }
 
-Turbo::Core::TPipelineStages Turbo::Core::TSemaphore::GetWaitDstStageMask()
+Turbo::Core::TPipelineStages Turbo::Core::TSemaphore::GetWaitDstStageMask() const
 {
     return this->waitDstStageMask;
 }

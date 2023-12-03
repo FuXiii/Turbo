@@ -17,22 +17,22 @@ std::string Turbo::Core::TScissor::ToString()
     return std::string();
 }
 
-int32_t Turbo::Core::TScissor::GetOffsetX()
+int32_t Turbo::Core::TScissor::GetOffsetX() const
 {
     return this->offsetX;
 }
 
-int32_t Turbo::Core::TScissor::GetOffsetY()
+int32_t Turbo::Core::TScissor::GetOffsetY() const
 {
     return this->offsetY;
 }
 
-uint32_t Turbo::Core::TScissor::GetWidth()
+uint32_t Turbo::Core::TScissor::GetWidth() const
 {
     return this->width;
 }
 
-uint32_t Turbo::Core::TScissor::GetHeight()
+uint32_t Turbo::Core::TScissor::GetHeight() const
 {
     return this->height;
 }

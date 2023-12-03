@@ -3989,3 +3989,16 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TMemoryHeapInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TMemoryTypeInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TPhysicalDevice.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPipeline.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPipelineCache.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TQueueFamilyInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TRenderPass.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TScissor.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSemaphore.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TShader.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSubpass.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSurface.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSwapchain.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TVendorInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TVersion.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TViewport.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。

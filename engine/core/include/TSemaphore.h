@@ -29,7 +29,7 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
 
   public:
     VkSemaphore GetVkSemaphore();
-    TPipelineStages GetWaitDstStageMask();
+    TPipelineStages GetWaitDstStageMask() const;
 
   public:
     virtual std::string ToString() override;

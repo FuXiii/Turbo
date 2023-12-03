@@ -32,20 +32,20 @@ class TQueueFamilyInfo : public TInfo
     ~TQueueFamilyInfo();
 
   public:
-    bool IsSupportGraphics();
-    bool IsSupportCompute();
-    bool IsSupportTransfer();
-    bool IsSupportSparse();
-    bool IsSupportProtected();
+    bool IsSupportGraphics() const;
+    bool IsSupportCompute() const;
+    bool IsSupportTransfer() const;
+    bool IsSupportSparse() const;
+    bool IsSupportProtected() const;
 
-    bool IsSupportPresent();
+    bool IsSupportPresent() const;
 
-    uint32_t GetQueueCount();
-    uint32_t GetTimestampValidBits();
-    VkExtent3D GetMinImageTransferGranularity();
-    uint32_t GetIndex();
+    uint32_t GetQueueCount() const;
+    uint32_t GetTimestampValidBits() const;
+    VkExtent3D GetMinImageTransferGranularity() const;
+    uint32_t GetIndex() const;
 
-    uint32_t GetPerformanceScore();
+    uint32_t GetPerformanceScore() const;
 
     bool operator==(const TQueueFamilyInfo &queueFamily) const;
     bool operator!=(const TQueueFamilyInfo &queueFamily) const;
