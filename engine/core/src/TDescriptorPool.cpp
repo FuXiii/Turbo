@@ -11,12 +11,12 @@ Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptorType type, uint32_t cou
     this->count = count;
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSize::GetDescriptorType()
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSize::GetDescriptorType() const
 {
     return this->type;
 }
 
-uint32_t Turbo::Core::TDescriptorSize::GetDescriptorCount()
+uint32_t Turbo::Core::TDescriptorSize::GetDescriptorCount() const
 {
     return this->count;
 }

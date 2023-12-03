@@ -103,7 +103,7 @@ Turbo::Core::TDescriptorSetLayout::~TDescriptorSetLayout()
     }
 }
 
-uint32_t Turbo::Core::TDescriptorSetLayout::GetSet()
+uint32_t Turbo::Core::TDescriptorSetLayout::GetSet() const
 {
     return this->descriptors[0]->GetSet();
 }
@@ -113,7 +113,7 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding)
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
 {
     for (TDescriptor *dscriptor_item : this->descriptors)
     {

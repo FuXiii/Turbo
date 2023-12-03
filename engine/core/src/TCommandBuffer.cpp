@@ -89,7 +89,7 @@ VkCommandBuffer Turbo::Core::TCommandBufferBase::GetVkCommandBuffer()
     return this->vkCommandBuffer;
 }
 
-Turbo::Core::TCommandBufferLevel Turbo::Core::TCommandBufferBase::GetLevel()
+Turbo::Core::TCommandBufferLevel Turbo::Core::TCommandBufferBase::GetLevel() const
 {
     return this->level;
 }

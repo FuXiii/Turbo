@@ -66,7 +66,7 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
   public:
     VkCommandBuffer GetVkCommandBuffer();
 
-    TCommandBufferLevel GetLevel();
+    TCommandBufferLevel GetLevel() const;
 
     TRefPtr<TCommandBufferPool> GetCommandBufferPool();
 

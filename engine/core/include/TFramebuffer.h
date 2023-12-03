@@ -33,8 +33,8 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
   public:
     VkFramebuffer GetVkFramebuffer();
 
-    uint32_t GetWidth();
-    uint32_t GetHeight();
+    uint32_t GetWidth()const;
+    uint32_t GetHeight()const;
 
     TRefPtr<TRenderPass> GetRenderPass();
 

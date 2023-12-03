@@ -26,16 +26,16 @@ class TMemoryTypeInfo : public TInfo
     ~TMemoryTypeInfo();
 
   public:
-    TMemoryHeapInfo GetMemoryHeap();
+    TMemoryHeapInfo GetMemoryHeap() const;
 
-    uint32_t GetIndex();
+    uint32_t GetIndex() const;
 
-    bool IsDeviceLocal();
-    bool IsHostVisible();
-    bool IsHostCoherent();
-    bool IsHostCached();
-    bool IsLazilyAllocated();
-    bool IsProtected();
+    bool IsDeviceLocal() const;
+    bool IsHostVisible() const;
+    bool IsHostCoherent() const;
+    bool IsHostCached() const;
+    bool IsLazilyAllocated() const;
+    bool IsProtected() const;
 
     virtual std::string ToString() override;
 };

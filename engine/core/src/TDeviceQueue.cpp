@@ -129,7 +129,7 @@ Turbo::Core::TDeviceQueue::~TDeviceQueue()
     this->InternalDestroy();
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TDeviceQueue::GetQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TDeviceQueue::GetQueueFamily() const
 {
     return this->queueFamily;
 }
@@ -211,7 +211,7 @@ void Turbo::Core::TDeviceQueue::WaitIdle()
     }
 }
 
-bool Turbo::Core::TDeviceQueue::IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface)
+bool Turbo::Core::TDeviceQueue::IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface) const
 {
     uint32_t queue_family_index = this->queueFamily.GetIndex();
     std::vector<Turbo::Core::TQueueFamilyInfo> support_queue_familys = surface->GetSupportQueueFamilys();

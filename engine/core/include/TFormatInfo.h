@@ -347,10 +347,10 @@ class TFormatInfo : public TInfo
     ~TFormatInfo();
 
   public:
-    TFormatType GetFormatType();
-    VkFormat GetVkFormat();
+    TFormatType GetFormatType() const;
+    VkFormat GetVkFormat() const;
 
-    TFormatDataTypes GetFormatDataType();
+    TFormatDataTypes GetFormatDataType() const;
 
     // bool IsPacked();
     // uint32_t GetPackGroup();
@@ -363,7 +363,7 @@ class TFormatInfo : public TInfo
     // uint32_t GetPlaneNumber();
     // TFormatReduceFactor GetReduceFactor();
 
-    uint32_t GetTexelBlockSize(); // unit byte
+    uint32_t GetTexelBlockSize() const; // unit byte
 
     // uint8_t GetRedBitSize();//unit bit
     // uint8_t GetGreenBitSize();//unit bit
@@ -372,34 +372,34 @@ class TFormatInfo : public TInfo
     // uint8_t GetDepthBitSize();//unit bit
     // uint8_t GetStencilBitSize();//unit bit
 
-    bool IsSupportBuffer();
-    bool IsSupportVertexBuffer();
+    bool IsSupportBuffer() const;
+    bool IsSupportVertexBuffer() const;
 
-    bool IsSupportLinearTiling();
-    bool IsLinearTilingSupportSampledImage();
-    bool IsLinearTilingSupportStorageImage();
-    bool IsLinearTilingSupportStorageImageAtomic();
-    bool IsLinearTilingSupportColorAttachment();
-    bool IsLinearTilingSupportColorAttachmentBlend();
-    bool IsLinearTilingSupportDepthStencilAttachment();
-    bool IsLinearTilingSupportBlitSrc();
-    bool IsLinearTilingSupportBlitDst();
-    bool IsLinearTilingSupportSampledImageFilterLinear();
-    bool IsLinearTilingSupportTransferSrc();
-    bool IsLinearTilingSupportTransferDst();
+    bool IsSupportLinearTiling() const;
+    bool IsLinearTilingSupportSampledImage() const;
+    bool IsLinearTilingSupportStorageImage() const;
+    bool IsLinearTilingSupportStorageImageAtomic() const;
+    bool IsLinearTilingSupportColorAttachment() const;
+    bool IsLinearTilingSupportColorAttachmentBlend() const;
+    bool IsLinearTilingSupportDepthStencilAttachment() const;
+    bool IsLinearTilingSupportBlitSrc() const;
+    bool IsLinearTilingSupportBlitDst() const;
+    bool IsLinearTilingSupportSampledImageFilterLinear() const;
+    bool IsLinearTilingSupportTransferSrc() const;
+    bool IsLinearTilingSupportTransferDst() const;
 
-    bool IsSupportOptimalTiling();
-    bool IsOptimalTilingSupportSampledImage();
-    bool IsOptimalTilingSupportStorageImage();
-    bool IsOptimalTilingSupportStorageImageAtomic();
-    bool IsOptimalTilingSupportColorAttachment();
-    bool IsOptimalTilingSupportColorAttachmentBlend();
-    bool IsOptimalTilingSupportDepthStencilAttachment();
-    bool IsOptimalTilingSupportBlitSrc();
-    bool IsOptimalTilingSupportBlitDst();
-    bool IsOptimalTilingSupportSampledImageFilterLinear();
-    bool IsOptimalTilingSupportTransferSrc();
-    bool IsOptimalTilingSupportTransferDst();
+    bool IsSupportOptimalTiling() const;
+    bool IsOptimalTilingSupportSampledImage() const;
+    bool IsOptimalTilingSupportStorageImage() const;
+    bool IsOptimalTilingSupportStorageImageAtomic() const;
+    bool IsOptimalTilingSupportColorAttachment() const;
+    bool IsOptimalTilingSupportColorAttachmentBlend() const;
+    bool IsOptimalTilingSupportDepthStencilAttachment() const;
+    bool IsOptimalTilingSupportBlitSrc() const;
+    bool IsOptimalTilingSupportBlitDst() const;
+    bool IsOptimalTilingSupportSampledImageFilterLinear() const;
+    bool IsOptimalTilingSupportTransferSrc() const;
+    bool IsOptimalTilingSupportTransferDst() const;
 
     bool operator==(const TFormatInfo &format) const; // TODO: Format Compatibility Classes
     bool operator!=(const TFormatInfo &format) const;

@@ -53,7 +53,7 @@ class TDeviceQueue : public TVulkanHandle
     virtual ~TDeviceQueue();
 
   public:
-    TQueueFamilyInfo GetQueueFamily();
+    TQueueFamilyInfo GetQueueFamily() const;
     TRefPtr<TDevice> GetDevice();
 
     VkQueue GetVkQueue();
@@ -63,7 +63,7 @@ class TDeviceQueue : public TVulkanHandle
 
     void WaitIdle();
 
-    bool IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface);
+    bool IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface) const;
 
     TResult Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex);
 

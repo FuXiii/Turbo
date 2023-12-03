@@ -523,17 +523,17 @@ Turbo::Core::TPhysicalDevice::~TPhysicalDevice()
     this->InternalDestroy();
 }
 
-size_t Turbo::Core::TPhysicalDevice::GetSupportLayerCount()
+size_t Turbo::Core::TPhysicalDevice::GetSupportLayerCount() const
 {
     return this->info.supportLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TPhysicalDevice::GetSupportLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TPhysicalDevice::GetSupportLayers() const
 {
     return this->info.supportLayers;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportLayer(std::string layerName)
+bool Turbo::Core::TPhysicalDevice::IsSupportLayer(std::string layerName) const
 {
     if (!layerName.empty())
     {
@@ -564,17 +564,17 @@ bool Turbo::Core::TPhysicalDevice::IsSupportLayer(std::string layerName)
     return false;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportLayer(TLayerType layerType)
+bool Turbo::Core::TPhysicalDevice::IsSupportLayer(TLayerType layerType) const
 {
     return this->IsSupportLayer(TLayerInfo::GetLayerNameByLayerType(layerType));
 }
 
-std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TPhysicalDevice::GetSupportFormats()
+std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TPhysicalDevice::GetSupportFormats() const
 {
     return TFormatInfo::GetSupportFormats(this);
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType)
+bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType) const
 {
     if (this->info.supportFormats.find(formatType) != this->info.supportFormats.end())
     {
@@ -584,32 +584,32 @@ bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType)
     return false;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatInfo format)
+bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatInfo format) const
 {
     return this->IsSupportFormat(format.GetFormatType());
 }
 
-Turbo::Core::TFormatInfo Turbo::Core::TPhysicalDevice::GetFormatInfo(TFormatType formatType)
+Turbo::Core::TFormatInfo Turbo::Core::TPhysicalDevice::GetFormatInfo(TFormatType formatType) const
 {
     Turbo::Core::TFormatInfo result;
     if (this->IsSupportFormat(formatType))
     {
-        result = this->info.supportFormats[formatType];
+        result = this->info.supportFormats.at(formatType);
     }
     return result;
 }
 
-size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount()
+size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount() const
 {
     return this->info.queueFamilys.size();
 }
 
-std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TPhysicalDevice::GetQueueFamilys()
+std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TPhysicalDevice::GetQueueFamilys() const
 {
     return this->info.queueFamilys;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsHasQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex)
+bool Turbo::Core::TPhysicalDevice::IsHasQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const
 {
     if (this->info.queueFamilys.size() > 0 && queueFamilyIndex < this->info.queueFamilys.size())
     {
@@ -619,7 +619,7 @@ bool Turbo::Core::TPhysicalDevice::IsHasQueueFamilyByIndex(TQueueFamilyIndex que
     return false;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex)
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const
 {
     if (queueFamilyIndex > this->info.queueFamilys.size() - 1)
     {
@@ -629,17 +629,17 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetQueueFamilyByInde
     return this->info.queueFamilys[queueFamilyIndex];
 }
 
-size_t Turbo::Core::TPhysicalDevice::GetMemoryTypeCount()
+size_t Turbo::Core::TPhysicalDevice::GetMemoryTypeCount() const
 {
     return this->info.memoryTypes.size();
 }
 
-std::vector<Turbo::Core::TMemoryTypeInfo> Turbo::Core::TPhysicalDevice::GetMemoryTypes()
+std::vector<Turbo::Core::TMemoryTypeInfo> Turbo::Core::TPhysicalDevice::GetMemoryTypes() const
 {
     return this->info.memoryTypes;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsHasMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex)
+bool Turbo::Core::TPhysicalDevice::IsHasMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const
 {
     if (this->info.memoryTypes.size() > 0 && memoryTypeIndex < this->info.memoryTypes.size())
     {
@@ -649,7 +649,7 @@ bool Turbo::Core::TPhysicalDevice::IsHasMemoryTypeByIndex(TMemoryTypeIndex memor
     return false;
 }
 
-Turbo::Core::TMemoryTypeInfo Turbo::Core::TPhysicalDevice::GetMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex)
+Turbo::Core::TMemoryTypeInfo Turbo::Core::TPhysicalDevice::GetMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const
 {
     if (memoryTypeIndex > this->info.memoryTypes.size() - 1)
     {
@@ -659,12 +659,12 @@ Turbo::Core::TMemoryTypeInfo Turbo::Core::TPhysicalDevice::GetMemoryTypeByIndex(
     return this->info.memoryTypes[memoryTypeIndex];
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportGraphics()
+bool Turbo::Core::TPhysicalDevice::IsSupportGraphics() const
 {
     return this->isSupportGraphics;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestGraphicsQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestGraphicsQueueFamily() const
 {
     if (this->bestGraphysicsQueueFamilyIndex != UINT32_MAX)
     {
@@ -673,12 +673,12 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestGraphicsQueue
     return TQueueFamilyInfo();
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportCompute()
+bool Turbo::Core::TPhysicalDevice::IsSupportCompute() const
 {
     return this->isSupportCompute;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestComputeQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestComputeQueueFamily() const
 {
     if (this->bestComputeQueueFamilyIndex != UINT32_MAX)
     {
@@ -687,12 +687,12 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestComputeQueueF
     return TQueueFamilyInfo();
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportTransfer()
+bool Turbo::Core::TPhysicalDevice::IsSupportTransfer() const
 {
     return this->isSupportTransfer;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestTransferQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestTransferQueueFamily() const
 {
     if (this->bestTransferQueueFamilyIndex != UINT32_MAX)
     {
@@ -701,12 +701,12 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestTransferQueue
     return TQueueFamilyInfo();
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportSparse()
+bool Turbo::Core::TPhysicalDevice::IsSupportSparse() const
 {
     return this->isSupportSparse;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestSparseQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestSparseQueueFamily() const
 {
     if (this->bestSparseQueueFamilyIndex != UINT32_MAX)
     {
@@ -715,12 +715,12 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestSparseQueueFa
     return TQueueFamilyInfo();
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportProtected()
+bool Turbo::Core::TPhysicalDevice::IsSupportProtected() const
 {
     return this->isSupportProtected;
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestProtectedQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestProtectedQueueFamily() const
 {
     if (this->bestProtectedQueueFamilyIndex != UINT32_MAX)
     {
@@ -729,7 +729,7 @@ Turbo::Core::TQueueFamilyInfo Turbo::Core::TPhysicalDevice::GetBestProtectedQueu
     return TQueueFamilyInfo();
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetPerformanceScore()
+uint32_t Turbo::Core::TPhysicalDevice::GetPerformanceScore() const
 {
     return this->performanceScore;
 }
@@ -754,42 +754,42 @@ VkPhysicalDevice Turbo::Core::TPhysicalDevice::GetVkPhysicalDevice()
     return this->vkPhysicalDevice;
 }
 
-std::string Turbo::Core::TPhysicalDevice::GetDeviceName()
+std::string Turbo::Core::TPhysicalDevice::GetDeviceName() const
 {
     return this->info.name;
 }
 
-Turbo::Core::TVersion Turbo::Core::TPhysicalDevice::GetDeviceApiVersion()
+Turbo::Core::TVersion Turbo::Core::TPhysicalDevice::GetDeviceApiVersion() const
 {
     return this->info.apiVersion;
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetDriverVersion()
+uint32_t Turbo::Core::TPhysicalDevice::GetDriverVersion() const
 {
     return this->info.driverVersion;
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetPhysicalDeviceID()
+uint32_t Turbo::Core::TPhysicalDevice::GetPhysicalDeviceID() const
 {
     return this->info.id;
 }
 
-Turbo::Core::TPhysicalDeviceType Turbo::Core::TPhysicalDevice::GetDeviceType()
+Turbo::Core::TPhysicalDeviceType Turbo::Core::TPhysicalDevice::GetDeviceType() const
 {
     return this->info.type;
 }
 
-Turbo::Core::TPipelineCacheUUID Turbo::Core::TPhysicalDevice::GetDevicePiplineCacheUUID()
+Turbo::Core::TPipelineCacheUUID Turbo::Core::TPhysicalDevice::GetDevicePiplineCacheUUID() const
 {
     return this->info.pipelineCacheUUID;
 }
 
-VkPhysicalDeviceLimits Turbo::Core::TPhysicalDevice::GetDeviceLimits()
+VkPhysicalDeviceLimits Turbo::Core::TPhysicalDevice::GetDeviceLimits() const
 {
     return this->info.limits;
 }
 
-Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeatures()
+Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeatures() const
 {
     TPhysicalDeviceFeatures physical_device_features = {};
     physical_device_features.geometryShader = this->info.features.geometryShader == VK_TRUE ? true : false;
@@ -838,25 +838,25 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TPhysicalDevice::GetDeviceFeat
     return physical_device_features;
 }
 
-Turbo::Core::TVendorInfo Turbo::Core::TPhysicalDevice::GetVendor()
+Turbo::Core::TVendorInfo Turbo::Core::TPhysicalDevice::GetVendor() const
 {
     return this->info.vendor;
 }
 
-size_t Turbo::Core::TPhysicalDevice::GetSupportExtensionCount()
+size_t Turbo::Core::TPhysicalDevice::GetSupportExtensionCount() const
 {
     return this->info.supportExtensions.size();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSupportExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSupportExtensions() const
 {
     return this->info.supportExtensions;
 }
 
-Turbo::Core::TExtensionInfo Turbo::Core::TPhysicalDevice::GetExtensionByType(TExtensionType extensionType)
+Turbo::Core::TExtensionInfo Turbo::Core::TPhysicalDevice::GetExtensionByType(TExtensionType extensionType) const
 {
     TExtensionInfo result;
-    for (TExtensionInfo &type_item : this->info.supportExtensions)
+    for (const TExtensionInfo &type_item : this->info.supportExtensions)
     {
         if (type_item.GetExtensionType() == extensionType)
         {
@@ -868,7 +868,7 @@ Turbo::Core::TExtensionInfo Turbo::Core::TPhysicalDevice::GetExtensionByType(TEx
     return result;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
+bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -885,17 +885,17 @@ bool Turbo::Core::TPhysicalDevice::IsSupportExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsSupportExtension(TExtensionType extensionType)
+bool Turbo::Core::TPhysicalDevice::IsSupportExtension(TExtensionType extensionType) const
 {
     return this->IsSupportExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(Turbo::Core::TQueueFamilyInfo &queueFamily)
+uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(Turbo::Core::TQueueFamilyInfo &queueFamily) const
 {
     return this->GetAvailableQueueCount(queueFamily.GetIndex());
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(uint32_t queueFamilyIndex)
+uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(uint32_t queueFamilyIndex) const
 {
     for (auto &item : this->availableQueueCountMap)
     {
@@ -954,7 +954,7 @@ void Turbo::Core::TPhysicalDevice::ResetQueueCountMap()
     }
 }
 
-bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -966,12 +966,12 @@ bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatType formatType, 
     return false;
 }
 
-bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->IsFormatSupportImage(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -987,12 +987,12 @@ Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatTy
     return vk_image_format_properties.maxExtent;
 }
 
-Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TExtent3D Turbo::Core::TPhysicalDevice::GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->GetMaxImageExtent(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -1004,12 +1004,12 @@ uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatType formatTy
     return 0;
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->GetMaxImageMipLevels(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -1021,12 +1021,12 @@ uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatType format
     return 0;
 }
 
-uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+uint32_t Turbo::Core::TPhysicalDevice::GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->GetMaxImageArrayLayers(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -1038,12 +1038,12 @@ Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCo
     return 0;
 }
 
-Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TSampleCounts Turbo::Core::TPhysicalDevice::GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->GetSupportImageSampleCounts(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     VkImageFormatProperties vk_image_format_properties = {};
     VkResult result = this->physicalDeviceDriver->vkGetPhysicalDeviceImageFormatProperties(this->vkPhysicalDevice, (VkFormat)formatType, (VkImageType)imageType, (VkImageTiling)tiling, usages, imageFlags, &vk_image_format_properties);
@@ -1055,12 +1055,12 @@ Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(T
     return 0;
 }
 
-Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags)
+Turbo::Core::TDeviceSize Turbo::Core::TPhysicalDevice::GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {
     return this->GetMaxImageResourceSize(format.GetFormatType(), imageType, tiling, usages, imageFlags);
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatType formatType)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatType formatType) const
 {
     VkFormatProperties format_properties = {};
     format_properties.bufferFeatures = 0;
@@ -1072,12 +1072,12 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFo
     return format_properties.linearTilingFeatures;
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatInfo &format)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetLinearFeatures(TFormatInfo &format) const
 {
     return this->GetLinearFeatures(format.GetFormatType());
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatType formatType)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatType formatType) const
 {
     VkFormatProperties format_properties = {};
     format_properties.bufferFeatures = 0;
@@ -1089,12 +1089,12 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TF
     return format_properties.optimalTilingFeatures;
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatInfo &format)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetOptimalFeatures(TFormatInfo &format) const
 {
     return this->GetOptimalFeatures(format.GetFormatType());
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatType formatType)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatType formatType) const
 {
     VkFormatProperties format_properties = {};
     format_properties.bufferFeatures = 0;
@@ -1106,7 +1106,7 @@ Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFo
     return format_properties.bufferFeatures;
 }
 
-Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatInfo &format)
+Turbo::Core::TFormatFeatures Turbo::Core::TPhysicalDevice::GetBufferFeatures(TFormatInfo &format) const
 {
     return this->GetBufferFeatures(format.GetFormatType());
 }

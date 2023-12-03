@@ -21,10 +21,10 @@ class TMemoryHeapInfo : public TInfo
     ~TMemoryHeapInfo();
 
   public:
-    bool IsDeviceLocal();
-    bool IsMultiInstance();
+    bool IsDeviceLocal() const;
+    bool IsMultiInstance() const;
 
-    TDeviceSize GetByteSize();
+    TDeviceSize GetByteSize() const;
 
     // Inherited via TObject
     virtual std::string ToString() override;

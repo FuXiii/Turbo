@@ -21,17 +21,17 @@ Turbo::Core::TException::~TException()
 {
 }
 
-Turbo::Core::TResult Turbo::Core::TException::GetResult()
+Turbo::Core::TResult Turbo::Core::TException::GetResult() const
 {
     return this->result;
 }
 
-std::string Turbo::Core::TException::GetMessage()
+std::string Turbo::Core::TException::GetMessage() const
 {
     return this->message;
 }
 
-std::string Turbo::Core::TException::GetTip()
+std::string Turbo::Core::TException::GetTip() const
 {
     return this->tip;
 }

@@ -16,12 +16,12 @@ Turbo::Core::TDescriptor::~TDescriptor()
 {
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptor::GetType()
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptor::GetType() const
 {
     return this->type;
 }
 
-VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
+VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType() const
 {
     switch (this->type)
     {
@@ -78,27 +78,27 @@ VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
     return VkDescriptorType::VK_DESCRIPTOR_TYPE_MAX_ENUM;
 }
 
-Turbo::Core::TDescriptorDataType Turbo::Core::TDescriptor::GetDataType()
+Turbo::Core::TDescriptorDataType Turbo::Core::TDescriptor::GetDataType() const
 {
     return this->dataType;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetCount()
+uint32_t Turbo::Core::TDescriptor::GetCount() const
 {
     return this->count;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetSet()
+uint32_t Turbo::Core::TDescriptor::GetSet() const
 {
     return this->set;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetBinding()
+uint32_t Turbo::Core::TDescriptor::GetBinding() const
 {
     return this->binding;
 }
 
-const std::string &Turbo::Core::TDescriptor::GetName()
+const std::string &Turbo::Core::TDescriptor::GetName() const
 {
     return this->name;
 }
@@ -186,7 +186,7 @@ Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(const TRefPtr<TS
     this->members = members;
 }
 
-uint32_t Turbo::Core::TUniformBufferDescriptor::GetSize()
+uint32_t Turbo::Core::TUniformBufferDescriptor::GetSize() const
 {
     return size;
 }
@@ -244,7 +244,7 @@ Turbo::Core::TInputAttachmentDescriptor::~TInputAttachmentDescriptor()
 {
 }
 
-uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex()
+uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex() const
 {
     return this->index;
 }

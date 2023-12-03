@@ -31,9 +31,9 @@ class TVertexAttribute : public Turbo::Core::TInfo
     ~TVertexAttribute();
 
   public:
-    uint32_t GetLocation();
-    TFormatType GetFormatType();
-    uint32_t GetOffset();
+    uint32_t GetLocation() const;
+    TFormatType GetFormatType() const;
+    uint32_t GetOffset() const;
 
     void SetLocation(uint32_t location);
     void SetFormatType(TFormatType formatType);
@@ -66,10 +66,10 @@ class TVertexBinding : public Turbo::Core::TInfo
     void AddAttribute(uint32_t location, TFormatType formatType, uint32_t offset);
     void AddAttribute(TVertexAttribute &vertexAttribute);
 
-    uint32_t GetBinding();
-    uint32_t GetStride();
-    TVertexRate GetVertexRate();
-    const std::vector<TVertexAttribute> &GetVertexAttributes();
+    uint32_t GetBinding() const;
+    uint32_t GetStride() const;
+    TVertexRate GetVertexRate() const;
+    const std::vector<TVertexAttribute> &GetVertexAttributes() const;
 
   public:
     virtual std::string ToString() override;
@@ -278,22 +278,22 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     virtual ~TGraphicsPipeline();
 
   public:
-    TTopologyType GetTopologyType();
+    TTopologyType GetTopologyType() const;
 
-    bool GetPrimitiveRestartEnable();
+    bool GetPrimitiveRestartEnable() const;
 
-    const std::vector<TVertexBinding> &GetVertexBindings();
+    const std::vector<TVertexBinding> &GetVertexBindings() const;
 
-    bool GetDepthClampEnable();
-    bool GetRasterizerDiscardEnable();
-    TPolygonMode GetPolygonMode();
-    TCullModes GetCullMode();
-    TFrontFace GetFrontFace();
-    bool GetDepthBiasEnable();
-    float GetDepthBiasConstantFactor();
-    float GetDepthBiasClamp();
-    float GetDepthBiasSlopeFactor();
-    float GetLineWidth();
+    bool GetDepthClampEnable() const;
+    bool GetRasterizerDiscardEnable()const;
+    TPolygonMode GetPolygonMode() const;
+    TCullModes GetCullMode() const;
+    TFrontFace GetFrontFace() const;
+    bool GetDepthBiasEnable() const;
+    float GetDepthBiasConstantFactor() const;
+    float GetDepthBiasClamp() const;
+    float GetDepthBiasSlopeFactor() const;
+    float GetLineWidth() const;
 
   public:
     virtual std::string ToString() override;

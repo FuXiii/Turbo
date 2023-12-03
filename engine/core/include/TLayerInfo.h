@@ -58,15 +58,15 @@ class TLayerInfo : public TInfo
     ~TLayerInfo();
 
   public:
-    TLayerType GetLayerType();
-    const std::string &GetName();
-    TVersion GetSpecificationVersion();
-    uint32_t GetImplementationVersion();
-    std::string GetDescription();
+    TLayerType GetLayerType() const;
+    const std::string &GetName() const;
+    TVersion GetSpecificationVersion() const;
+    uint32_t GetImplementationVersion() const;
+    std::string GetDescription() const;
 
-    size_t GetExtensionCount();
-    TExtensionInfo GetExtension(uint32_t index);
-    std::vector<TExtensionInfo> GetExtensions();
+    size_t GetExtensionCount() const;
+    TExtensionInfo GetExtension(uint32_t index) const;
+    std::vector<TExtensionInfo> GetExtensions() const;
 
     bool operator==(const TLayerInfo &layer) const;
     bool operator!=(const TLayerInfo &layer) const;

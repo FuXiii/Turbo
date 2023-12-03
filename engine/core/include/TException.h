@@ -2,7 +2,7 @@
 #ifndef TURBO_CORE_TException_H
 #define TURBO_CORE_TException_H
 #include "TObject.h"
-#include <stdexcept> 
+#include <stdexcept>
 
 namespace Turbo
 {
@@ -23,9 +23,9 @@ class TException : public std::runtime_error //, public Turbo::Core::TObject
     ~TException();
 
   public:
-    TResult GetResult();
-    std::string GetMessage();
-    std::string GetTip();
+    TResult GetResult() const;
+    std::string GetMessage() const;
+    std::string GetTip() const;
 
     virtual std::string ToString();
 };

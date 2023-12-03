@@ -34,7 +34,7 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
   public:
     VkDescriptorSet GetVkDescriptorSet();
 
-    uint32_t GetSet();
+    uint32_t GetSet() const;
 
     // TODO: this BindData function just for Test
     void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers);

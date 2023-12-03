@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -49,7 +51,8 @@ class TBuffer
 
   private:
     void *allocator = nullptr;
-    Turbo::Core::TBuffer *buffer = nullptr;
+    // OLD:Turbo::Core::TBuffer *buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> buffer = nullptr;
     Descriptor descriptor;
 
   public:

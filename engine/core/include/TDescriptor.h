@@ -69,14 +69,13 @@ class TDescriptor : public Turbo::Core::TInfo
     ~TDescriptor();
 
   public:
-    TDescriptorType GetType();
-    VkDescriptorType GetVkDescriptorType();
-    TDescriptorDataType GetDataType();
-    uint32_t GetCount();
-    uint32_t GetSet();
-    uint32_t GetBinding();
-    const std::string &GetName();
-
+    TDescriptorType GetType() const;
+    VkDescriptorType GetVkDescriptorType() const;
+    TDescriptorDataType GetDataType() const;
+    uint32_t GetCount() const;
+    uint32_t GetSet() const;
+    uint32_t GetBinding() const;
+    const std::string &GetName() const;
     TRefPtr<TShader> GetShader();
 
   public:
@@ -127,7 +126,7 @@ class TUniformBufferDescriptor : public TDescriptor
     TUniformBufferDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
     ~TUniformBufferDescriptor();
 
-    uint32_t GetSize();
+    uint32_t GetSize() const;
 };
 
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
@@ -181,7 +180,7 @@ class TInputAttachmentDescriptor : public TDescriptor
     TInputAttachmentDescriptor(uint32_t index, const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TInputAttachmentDescriptor();
 
-    uint32_t GetIndex();
+    uint32_t GetIndex() const;
 };
 
 // Equivalent to VkDescriptorSetLayoutBinding::descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE

@@ -116,37 +116,37 @@ VkImageView Turbo::Core::TImageView::GetVkImageView()
     return this->vkImageView;
 }
 
-Turbo::Core::TImageViewType Turbo::Core::TImageView::GetViewType()
+Turbo::Core::TImageViewType Turbo::Core::TImageView::GetViewType() const
 {
     return this->viewType;
 }
 
-Turbo::Core::TFormatInfo Turbo::Core::TImageView::GetFormat()
+Turbo::Core::TFormatInfo Turbo::Core::TImageView::GetFormat() const
 {
     return this->format;
 }
 
-Turbo::Core::TImageAspects Turbo::Core::TImageView::GetAspects()
+Turbo::Core::TImageAspects Turbo::Core::TImageView::GetAspects() const
 {
     return this->aspects;
 }
 
-uint32_t Turbo::Core::TImageView::GetBaseMipLevel()
+uint32_t Turbo::Core::TImageView::GetBaseMipLevel() const
 {
     return this->baseMipLevel;
 }
 
-uint32_t Turbo::Core::TImageView::GetLevelCount()
+uint32_t Turbo::Core::TImageView::GetLevelCount() const
 {
     return this->levelCount;
 }
 
-uint32_t Turbo::Core::TImageView::GetBaseArrayLayer()
+uint32_t Turbo::Core::TImageView::GetBaseArrayLayer() const
 {
     return this->baseArrayLayer;
 }
 
-uint32_t Turbo::Core::TImageView::GetLayerCount()
+uint32_t Turbo::Core::TImageView::GetLayerCount() const
 {
     return this->layerCount;
 }

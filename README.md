@@ -3960,3 +3960,32 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Compile()`成员函数。增加对计数引用数为`0`的判断。
   >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Execute()`成员函数。资源只在`PassNode`有效的情况下创建和销毁。
   >* `./engine/framegraph`下`TFrameGraph.hpp`内的`TFrameGraph`内增加`std::string ToHtml()`成员函数。方便输出查看。
+
+* 2023/12/2 设计架构
+  >
+  >* `./engine/render`下的`TBuffer`中增加`core/include/TRefPtr.h`头文件的引入。
+  >* `./engine/render`下的`TBuffer`类中将`Turbo::Core::TBuffer *buffer`成员改成`Turbo::Core::TRefPtr<Turbo::Core::TBuffer> buffer`。
+
+* 2023/12/3 设计架构
+  >
+  >* `./engine/core`下更新`TBuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBufferPool.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptor.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorPool.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorSet.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorSetLayout.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDevice.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDeviceQueue.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TException.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TExtensionInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TFormatInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TFramebuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TGraphicsPipeline.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TImage.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TImageView.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TInstance.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TLayerInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TMemoryHeapInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TMemoryTypeInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPhysicalDevice.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。

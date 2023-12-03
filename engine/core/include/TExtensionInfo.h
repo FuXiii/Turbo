@@ -266,9 +266,9 @@ class TExtensionInfo : public TInfo
     ~TExtensionInfo();
 
   public:
-    TExtensionType GetExtensionType();
-    const std::string &GetName();
-    uint32_t GetVersion();
+    TExtensionType GetExtensionType() const;
+    const std::string &GetName() const;
+    uint32_t GetVersion() const;
 
     bool operator==(const TExtensionInfo &extension) const;
     bool operator!=(const TExtensionInfo &extension) const;

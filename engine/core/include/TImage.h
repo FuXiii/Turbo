@@ -120,22 +120,22 @@ class TImage : public Turbo::Core::TVulkanHandle
 
   public:
     VkImage GetVkImage();
-    TFormatInfo GetFormat();
+    TFormatInfo GetFormat() const;
     TRefPtr<TDevice> GetDevice();
 
-    uint32_t GetWidth();
-    uint32_t GetHeight();
-    uint32_t GetDepth();
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+    uint32_t GetDepth() const;
 
-    TSampleCountBits GetSampleCountBits();
+    TSampleCountBits GetSampleCountBits() const;
 
-    TImageUsages GetUsages();
-    uint32_t GetMipLevels();
-    uint32_t GetArrayLayers();
+    TImageUsages GetUsages() const;
+    uint32_t GetMipLevels() const;
+    uint32_t GetArrayLayers() const;
 
-    TMemoryTypeInfo GetMemoryTypeInfo();
+    TMemoryTypeInfo GetMemoryTypeInfo() const;
 
-    bool IsMappable();
+    bool IsMappable() const;
     void *Map();
     void Unmap();
 

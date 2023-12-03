@@ -61,15 +61,15 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     TRefPtr<TPhysicalDevice> GetPhysicalDevice();
 
-    size_t GetEnabledLayersCount();
-    std::vector<TLayerInfo> GetEnabledLayers();
+    size_t GetEnabledLayersCount() const;
+    std::vector<TLayerInfo> GetEnabledLayers() const;
 
-    size_t GetEnabledExtensionCount();
+    size_t GetEnabledExtensionCount() const;
     std::vector<TExtensionInfo> GetEnabledExtensions();
-    bool IsEnabledExtension(std::string extensionName);
-    bool IsEnabledExtension(TExtensionType extensionType);
+    bool IsEnabledExtension(std::string extensionName) const;
+    bool IsEnabledExtension(TExtensionType extensionType) const;
 
-    TPhysicalDeviceFeatures GetEnableDeviceFeatures();
+    TPhysicalDeviceFeatures GetEnableDeviceFeatures() const;
 
     TRefPtr<TVmaAllocator> GetVmaAllocator();
 

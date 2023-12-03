@@ -58,36 +58,36 @@ class TInstance : public Turbo::Core::TVulkanHandle
 
   public:
     VkInstance GetVkInstance();
-    TVersion GetVulkanVersion();
+    TVersion GetVulkanVersion() const;
 
-    size_t GetSupportLayerCount();
-    std::vector<TLayerInfo> GetSupportLayers();
-    bool IsSupportLayer(std::string layerName);
-    bool IsSupportLayer(TLayerType layerType);
+    size_t GetSupportLayerCount() const;
+    std::vector<TLayerInfo> GetSupportLayers() const;
+    bool IsSupportLayer(std::string layerName) const;
+    bool IsSupportLayer(TLayerType layerType) const;
 
-    size_t GetSupportExtensionCount();
-    std::vector<TExtensionInfo> GetSupportExtensions();
-    bool IsSupportExtension(std::string extensionName);
-    bool IsSupportExtension(TExtensionType extensionType);
+    size_t GetSupportExtensionCount() const;
+    std::vector<TExtensionInfo> GetSupportExtensions() const;
+    bool IsSupportExtension(std::string extensionName) const;
+    bool IsSupportExtension(TExtensionType extensionType) const;
 
-    size_t GetEnabledLayerCount();
-    std::vector<TLayerInfo> GetEnabledLayers();
-    bool IsEnabledLayer(std::string layerName);
-    bool IsEnabledLayer(TLayerType layerType);
+    size_t GetEnabledLayerCount() const;
+    std::vector<TLayerInfo> GetEnabledLayers() const;
+    bool IsEnabledLayer(std::string layerName) const;
+    bool IsEnabledLayer(TLayerType layerType) const;
 
-    size_t GetEnabledExtensionCount();
-    std::vector<TExtensionInfo> GetEnabledExtensions();
-    bool IsEnabledExtension(std::string extensionName);
-    bool IsEnabledExtension(TExtensionType extensionType);
+    size_t GetEnabledExtensionCount() const;
+    std::vector<TExtensionInfo> GetEnabledExtensions() const;
+    bool IsEnabledExtension(std::string extensionName) const;
+    bool IsEnabledExtension(TExtensionType extensionType) const;
 
-    uint32_t GetPhysicalDeviceCount();
+    uint32_t GetPhysicalDeviceCount() const;
     TRefPtr<TPhysicalDevice> GetPhysicalDevice(uint32_t index);
     const std::vector<TRefPtr<TPhysicalDevice>> &GetPhysicalDevices();
     TRefPtr<TPhysicalDevice> GetBestPhysicalDevice();
 
     const TInstanceDriver *GetInstanceDriver();
 
-    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType) const;
 
     virtual std::string ToString() override;
 };

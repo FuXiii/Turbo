@@ -24,8 +24,8 @@ class TDescriptorSize : public Turbo::Core::TInfo
     ~TDescriptorSize();
 
   public:
-    TDescriptorType GetDescriptorType();
-    uint32_t GetDescriptorCount();
+    TDescriptorType GetDescriptorType() const;
+    uint32_t GetDescriptorCount() const;
 
   public:
     virtual std::string ToString() override;

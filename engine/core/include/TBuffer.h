@@ -64,25 +64,25 @@ class TBuffer : public TVulkanHandle
     virtual ~TBuffer();
 
   public:
-    bool IsMappable();
+    bool IsMappable() const;
     void *Map();
     void Unmap();
 
     void Flush(TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
 
   public:
-    TBufferUsageFlags GetBufferUsageFlags();
-    bool IsTransferSource();
-    bool IsTransferDestination();
-    bool IsUniformTexelBuffer();
-    bool IsStorageTexelBuffer();
-    bool IsUniformBuffer();
-    bool IsStorageBuffer();
-    bool IsIndexBuffer();
-    bool IsVertexBuffer();
-    bool IsIndirectBuffer();
+    TBufferUsageFlags GetBufferUsageFlags() const;
+    bool IsTransferSource() const;
+    bool IsTransferDestination() const;
+    bool IsUniformTexelBuffer() const;
+    bool IsStorageTexelBuffer() const;
+    bool IsUniformBuffer() const;
+    bool IsStorageBuffer() const;
+    bool IsIndexBuffer() const;
+    bool IsVertexBuffer() const;
+    bool IsIndirectBuffer() const;
 
-    TMemoryTypeInfo GetMemoryTypeInfo();
+    TMemoryTypeInfo GetMemoryTypeInfo() const;
 
     VkBuffer GetVkBuffer();
 

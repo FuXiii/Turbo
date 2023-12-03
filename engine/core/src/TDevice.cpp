@@ -1148,17 +1148,17 @@ Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TDevice::GetPhys
     return this->physicalDevice;
 }
 
-size_t Turbo::Core::TDevice::GetEnabledLayersCount()
+size_t Turbo::Core::TDevice::GetEnabledLayersCount() const
 {
     return this->enabledLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TDevice::GetEnabledLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TDevice::GetEnabledLayers() const
 {
     return this->enabledLayers;
 }
 
-size_t Turbo::Core::TDevice::GetEnabledExtensionCount()
+size_t Turbo::Core::TDevice::GetEnabledExtensionCount() const
 {
     return this->enabledExtensions.size();
 }
@@ -1168,7 +1168,7 @@ std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TDevice::GetEnabledExtensi
     return this->enabledExtensions;
 }
 
-bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName)
+bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -1185,12 +1185,12 @@ bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TDevice::IsEnabledExtension(TExtensionType extensionType)
+bool Turbo::Core::TDevice::IsEnabledExtension(TExtensionType extensionType) const
 {
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures()
+Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures() const
 {
     return this->enabledFeatures;
 }

@@ -145,91 +145,91 @@ class TPhysicalDevice : public TVulkanHandle
 
   public:
     VkPhysicalDevice GetVkPhysicalDevice();
-    std::string GetDeviceName();
-    TVersion GetDeviceApiVersion();
-    uint32_t GetDriverVersion();
-    TVendorInfo GetVendor();
-    uint32_t GetPhysicalDeviceID();
-    TPhysicalDeviceType GetDeviceType();
-    TPipelineCacheUUID GetDevicePiplineCacheUUID();
-    TPhysicalDeviceLimits GetDeviceLimits();
+    std::string GetDeviceName() const;
+    TVersion GetDeviceApiVersion() const;
+    uint32_t GetDriverVersion() const;
+    TVendorInfo GetVendor() const;
+    uint32_t GetPhysicalDeviceID() const;
+    TPhysicalDeviceType GetDeviceType() const;
+    TPipelineCacheUUID GetDevicePiplineCacheUUID() const;
+    TPhysicalDeviceLimits GetDeviceLimits() const;
     // template <typename T>
     // T GetDeviceLimit(/*enume key*/);
     // VkPhysicalDeviceSparseProperties
     // GetDeviceSparseProperties();
 
-    TPhysicalDeviceFeatures GetDeviceFeatures();
+    TPhysicalDeviceFeatures GetDeviceFeatures() const;
     // bool IsDeviceSupportFeature(enume key);
 
-    size_t GetSupportExtensionCount();
-    std::vector<TExtensionInfo> GetSupportExtensions();
-    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
-    bool IsSupportExtension(std::string extensionName);
-    bool IsSupportExtension(TExtensionType extensionType);
+    size_t GetSupportExtensionCount() const;
+    std::vector<TExtensionInfo> GetSupportExtensions() const;
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType) const;
+    bool IsSupportExtension(std::string extensionName) const;
+    bool IsSupportExtension(TExtensionType extensionType) const;
 
-    size_t GetSupportLayerCount();
-    std::vector<TLayerInfo> GetSupportLayers();
-    bool IsSupportLayer(std::string layerName);
-    bool IsSupportLayer(TLayerType layerType);
+    size_t GetSupportLayerCount() const;
+    std::vector<TLayerInfo> GetSupportLayers() const;
+    bool IsSupportLayer(std::string layerName) const;
+    bool IsSupportLayer(TLayerType layerType) const;
 
-    std::vector<TFormatInfo> GetSupportFormats();
-    bool IsSupportFormat(TFormatType formatType);
-    bool IsSupportFormat(TFormatInfo format);
-    TFormatInfo GetFormatInfo(TFormatType formatType);
+    std::vector<TFormatInfo> GetSupportFormats() const;
+    bool IsSupportFormat(TFormatType formatType) const;
+    bool IsSupportFormat(TFormatInfo format) const;
+    TFormatInfo GetFormatInfo(TFormatType formatType) const;
 
-    size_t GetQueueFamilyCount();
-    std::vector<TQueueFamilyInfo> GetQueueFamilys();
-    bool IsHasQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex);
-    TQueueFamilyInfo GetQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex);
+    size_t GetQueueFamilyCount() const;
+    std::vector<TQueueFamilyInfo> GetQueueFamilys() const;
+    bool IsHasQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const;
+    TQueueFamilyInfo GetQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const;
 
-    size_t GetMemoryTypeCount();
-    std::vector<TMemoryTypeInfo> GetMemoryTypes();
-    bool IsHasMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex);
-    TMemoryTypeInfo GetMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex);
+    size_t GetMemoryTypeCount() const;
+    std::vector<TMemoryTypeInfo> GetMemoryTypes() const;
+    bool IsHasMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const;
+    TMemoryTypeInfo GetMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const;
 
-    bool IsSupportGraphics();
-    TQueueFamilyInfo GetBestGraphicsQueueFamily();
+    bool IsSupportGraphics() const;
+    TQueueFamilyInfo GetBestGraphicsQueueFamily() const;
 
-    bool IsSupportCompute();
-    TQueueFamilyInfo GetBestComputeQueueFamily();
+    bool IsSupportCompute() const;
+    TQueueFamilyInfo GetBestComputeQueueFamily() const;
 
-    bool IsSupportTransfer();
-    TQueueFamilyInfo GetBestTransferQueueFamily();
+    bool IsSupportTransfer() const;
+    TQueueFamilyInfo GetBestTransferQueueFamily() const;
 
-    bool IsSupportSparse();
-    TQueueFamilyInfo GetBestSparseQueueFamily();
+    bool IsSupportSparse() const;
+    TQueueFamilyInfo GetBestSparseQueueFamily() const;
 
-    bool IsSupportProtected();
-    TQueueFamilyInfo GetBestProtectedQueueFamily();
+    bool IsSupportProtected() const;
+    TQueueFamilyInfo GetBestProtectedQueueFamily() const;
 
-    uint32_t GetPerformanceScore();
+    uint32_t GetPerformanceScore() const;
 
     TRefPtr<TInstance> GetInstance();
 
-    uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily);
+    uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily) const;
 
-    uint32_t GetAvailableQueueCount(uint32_t queueFamilyIndex);
+    uint32_t GetAvailableQueueCount(uint32_t queueFamilyIndex) const;
 
-    bool IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    bool IsFormatSupportImage(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    bool IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    bool IsFormatSupportImage(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
 
-    TExtent3D GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    TExtent3D GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    uint32_t GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    uint32_t GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    uint32_t GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    uint32_t GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    TSampleCounts GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    TSampleCounts GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
-    TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags);
+    TExtent3D GetMaxImageExtent(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    TExtent3D GetMaxImageExtent(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    uint32_t GetMaxImageMipLevels(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    uint32_t GetMaxImageMipLevels(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    uint32_t GetMaxImageArrayLayers(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    uint32_t GetMaxImageArrayLayers(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    TSampleCounts GetSupportImageSampleCounts(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    TSampleCounts GetSupportImageSampleCounts(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    TDeviceSize GetMaxImageResourceSize(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
+    TDeviceSize GetMaxImageResourceSize(TFormatInfo &format, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const;
 
-    TFormatFeatures GetLinearFeatures(TFormatType formatType);
-    TFormatFeatures GetLinearFeatures(TFormatInfo &format);
-    TFormatFeatures GetOptimalFeatures(TFormatType formatType);
-    TFormatFeatures GetOptimalFeatures(TFormatInfo &format);
-    TFormatFeatures GetBufferFeatures(TFormatType formatType);
-    TFormatFeatures GetBufferFeatures(TFormatInfo &format);
+    TFormatFeatures GetLinearFeatures(TFormatType formatType) const;
+    TFormatFeatures GetLinearFeatures(TFormatInfo &format) const;
+    TFormatFeatures GetOptimalFeatures(TFormatType formatType) const;
+    TFormatFeatures GetOptimalFeatures(TFormatInfo &format) const;
+    TFormatFeatures GetBufferFeatures(TFormatType formatType) const;
+    TFormatFeatures GetBufferFeatures(TFormatInfo &format) const;
 
     const TPhysicalDeviceDriver *GetPhysicalDeviceDriver();
 

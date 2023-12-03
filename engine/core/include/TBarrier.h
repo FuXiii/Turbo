@@ -74,7 +74,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
   public:
     TImageLayout GetOldLayout() const;
     TImageLayout GetNewLayout() const;
-    TRefPtr<TImage> GetImage() const;
+    TRefPtr<TImage> GetImage();
     TImageAspects GetAspects() const;
     uint32_t GetBaseMipLevel() const;
     uint32_t GetLevelCount() const;

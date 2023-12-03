@@ -277,37 +277,37 @@ Turbo::Core::TLayerInfo::~TLayerInfo()
 {
 }
 
-Turbo::Core::TLayerType Turbo::Core::TLayerInfo::GetLayerType()
+Turbo::Core::TLayerType Turbo::Core::TLayerInfo::GetLayerType() const
 {
     return this->layerType;
 }
 
-const std::string &Turbo::Core::TLayerInfo::GetName()
+const std::string &Turbo::Core::TLayerInfo::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TVersion Turbo::Core::TLayerInfo::GetSpecificationVersion()
+Turbo::Core::TVersion Turbo::Core::TLayerInfo::GetSpecificationVersion() const
 {
     return this->specificationVersion;
 }
 
-uint32_t Turbo::Core::TLayerInfo::GetImplementationVersion()
+uint32_t Turbo::Core::TLayerInfo::GetImplementationVersion() const
 {
     return this->implementationVersion;
 }
 
-std::string Turbo::Core::TLayerInfo::GetDescription()
+std::string Turbo::Core::TLayerInfo::GetDescription() const
 {
     return this->description;
 }
 
-size_t Turbo::Core::TLayerInfo::GetExtensionCount()
+size_t Turbo::Core::TLayerInfo::GetExtensionCount() const
 {
     return this->extensions.size();
 }
 
-Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index)
+Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index) const
 {
     TExtensionInfo result;
     if (index > this->extensions.size() - 1)
@@ -318,7 +318,7 @@ Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index
     return this->extensions[index];
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TLayerInfo::GetExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TLayerInfo::GetExtensions() const
 {
     return this->extensions;
 }

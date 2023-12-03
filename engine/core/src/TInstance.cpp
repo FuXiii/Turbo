@@ -5,17 +5,17 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-size_t Turbo::Core::TInstance::GetEnabledLayerCount()
+size_t Turbo::Core::TInstance::GetEnabledLayerCount() const
 {
     return this->enabledLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetEnabledLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetEnabledLayers() const
 {
     return this->enabledLayers;
 }
 
-bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName)
+bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName) const
 {
     if (!layerName.empty())
     {
@@ -46,22 +46,22 @@ bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsEnabledLayer(TLayerType layerType)
+bool Turbo::Core::TInstance::IsEnabledLayer(TLayerType layerType) const
 {
     return this->IsEnabledLayer(TLayerInfo::GetLayerNameByLayerType(layerType));
 }
 
-size_t Turbo::Core::TInstance::GetEnabledExtensionCount()
+size_t Turbo::Core::TInstance::GetEnabledExtensionCount() const
 {
     return this->enabledExtensions.size();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetEnabledExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetEnabledExtensions() const
 {
     return this->enabledExtensions;
 }
 
-bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName)
+bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -92,7 +92,7 @@ bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsEnabledExtension(TExtensionType extensionType)
+bool Turbo::Core::TInstance::IsEnabledExtension(TExtensionType extensionType) const
 {
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
@@ -131,7 +131,7 @@ VkInstance Turbo::Core::TInstance::GetVkInstance()
     return this->vkInstance;
 }
 
-Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanVersion()
+Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanVersion() const
 {
     return this->vulkanVersion;
 }
@@ -376,12 +376,12 @@ Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanInstanceVersion()
     return TVulkanLoader::GetVulkanVersion();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions() const
 {
     return this->supportExtensions;
 }
 
-bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName)
+bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -412,22 +412,22 @@ bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsSupportExtension(TExtensionType extensionType)
+bool Turbo::Core::TInstance::IsSupportExtension(TExtensionType extensionType) const
 {
     return this->IsSupportExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-size_t Turbo::Core::TInstance::GetSupportExtensionCount()
+size_t Turbo::Core::TInstance::GetSupportExtensionCount() const
 {
     return this->supportExtensions.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetSupportLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetSupportLayers() const
 {
     return this->supportLayers;
 }
 
-bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName)
+bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName) const
 {
     if (!layerName.empty())
     {
@@ -458,17 +458,17 @@ bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsSupportLayer(TLayerType layerType)
+bool Turbo::Core::TInstance::IsSupportLayer(TLayerType layerType) const
 {
     return this->IsSupportLayer(TLayerInfo::GetLayerNameByLayerType(layerType));
 }
 
-size_t Turbo::Core::TInstance::GetSupportLayerCount()
+size_t Turbo::Core::TInstance::GetSupportLayerCount() const
 {
     return this->supportLayers.size();
 }
 
-uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount()
+uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount() const
 {
     return this->physicalDevices.size();
 }
@@ -517,10 +517,10 @@ const Turbo::Core::TInstanceDriver *Turbo::Core::TInstance::GetInstanceDriver()
     return this->instanceDriver;
 }
 
-Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType)
+Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType) const
 {
     TExtensionInfo result;
-    for (TExtensionInfo &type_item : this->supportExtensions)
+    for (const TExtensionInfo &type_item : this->supportExtensions)
     {
         if (type_item.GetExtensionType() == extensionType)
         {
