@@ -47,7 +47,7 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     ~TBufferMemoryBarrier();
 
   public:
-    TRefPtr<TBuffer> GetBuffer() const;
+    TRefPtr<TBuffer> GetBuffer();
     TDeviceSize GetOffset() const;
     TDeviceSize GetSize() const;
 

@@ -52,7 +52,7 @@ Turbo::Core::TBufferMemoryBarrier::~TBufferMemoryBarrier()
 {
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer() const
+Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer()
 {
     return this->buffer;
 }
