@@ -285,7 +285,7 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     const std::vector<TVertexBinding> &GetVertexBindings() const;
 
     bool GetDepthClampEnable() const;
-    bool GetRasterizerDiscardEnable()const;
+    bool GetRasterizerDiscardEnable() const;
     TPolygonMode GetPolygonMode() const;
     TCullModes GetCullMode() const;
     TFrontFace GetFrontFace() const;

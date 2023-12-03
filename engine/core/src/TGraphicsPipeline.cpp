@@ -20,17 +20,17 @@ Turbo::Core::TVertexAttribute::~TVertexAttribute()
 {
 }
 
-uint32_t Turbo::Core::TVertexAttribute::GetLocation()const
+uint32_t Turbo::Core::TVertexAttribute::GetLocation() const
 {
     return this->location;
 }
 
-Turbo::Core::TFormatType Turbo::Core::TVertexAttribute::GetFormatType()const
+Turbo::Core::TFormatType Turbo::Core::TVertexAttribute::GetFormatType() const
 {
     return this->formatType;
 }
 
-uint32_t Turbo::Core::TVertexAttribute::GetOffset()const
+uint32_t Turbo::Core::TVertexAttribute::GetOffset() const
 {
     return this->offset;
 }
@@ -98,22 +98,22 @@ void Turbo::Core::TVertexBinding::AddAttribute(TVertexAttribute &vertexAttribute
     }
 }
 
-uint32_t Turbo::Core::TVertexBinding::GetBinding()const
+uint32_t Turbo::Core::TVertexBinding::GetBinding() const
 {
     return this->binding;
 }
 
-uint32_t Turbo::Core::TVertexBinding::GetStride()const
+uint32_t Turbo::Core::TVertexBinding::GetStride() const
 {
     return this->stride;
 }
 
-Turbo::Core::TVertexRate Turbo::Core::TVertexBinding::GetVertexRate()const
+Turbo::Core::TVertexRate Turbo::Core::TVertexBinding::GetVertexRate() const
 {
     return this->rate;
 }
 
-const std::vector<Turbo::Core::TVertexAttribute> &Turbo::Core::TVertexBinding::GetVertexAttributes()const
+const std::vector<Turbo::Core::TVertexAttribute> &Turbo::Core::TVertexBinding::GetVertexAttributes() const
 {
     return this->vertexAttributes;
 }
@@ -1423,67 +1423,67 @@ Turbo::Core::TGraphicsPipeline::~TGraphicsPipeline()
     this->InternalDestroy();
 }
 
-Turbo::Core::TTopologyType Turbo::Core::TGraphicsPipeline::GetTopologyType()const
+Turbo::Core::TTopologyType Turbo::Core::TGraphicsPipeline::GetTopologyType() const
 {
     return this->topology;
 }
 
-bool Turbo::Core::TGraphicsPipeline::GetPrimitiveRestartEnable()const
+bool Turbo::Core::TGraphicsPipeline::GetPrimitiveRestartEnable() const
 {
     return this->primitiveRestartEnable;
 }
 
-const std::vector<Turbo::Core::TVertexBinding> &Turbo::Core::TGraphicsPipeline::GetVertexBindings()const
+const std::vector<Turbo::Core::TVertexBinding> &Turbo::Core::TGraphicsPipeline::GetVertexBindings() const
 {
     return this->vertexBindings;
 }
 
-bool Turbo::Core::TGraphicsPipeline::GetDepthClampEnable()const
+bool Turbo::Core::TGraphicsPipeline::GetDepthClampEnable() const
 {
     return this->depthClampEnable;
 }
 
-bool Turbo::Core::TGraphicsPipeline::GetRasterizerDiscardEnable()const
+bool Turbo::Core::TGraphicsPipeline::GetRasterizerDiscardEnable() const
 {
     return this->rasterizerDiscardEnable;
 }
 
-Turbo::Core::TPolygonMode Turbo::Core::TGraphicsPipeline::GetPolygonMode()const
+Turbo::Core::TPolygonMode Turbo::Core::TGraphicsPipeline::GetPolygonMode() const
 {
     return this->polygonMode;
 }
 
-Turbo::Core::TCullModes Turbo::Core::TGraphicsPipeline::GetCullMode()const
+Turbo::Core::TCullModes Turbo::Core::TGraphicsPipeline::GetCullMode() const
 {
     return this->cullMode;
 }
 
-Turbo::Core::TFrontFace Turbo::Core::TGraphicsPipeline::GetFrontFace()const
+Turbo::Core::TFrontFace Turbo::Core::TGraphicsPipeline::GetFrontFace() const
 {
     return this->frontFace;
 }
 
-bool Turbo::Core::TGraphicsPipeline::GetDepthBiasEnable()const
+bool Turbo::Core::TGraphicsPipeline::GetDepthBiasEnable() const
 {
     return this->depthBiasEnable;
 }
 
-float Turbo::Core::TGraphicsPipeline::GetDepthBiasConstantFactor()const
+float Turbo::Core::TGraphicsPipeline::GetDepthBiasConstantFactor() const
 {
     return this->depthBiasConstantFactor;
 }
 
-float Turbo::Core::TGraphicsPipeline::GetDepthBiasClamp()const
+float Turbo::Core::TGraphicsPipeline::GetDepthBiasClamp() const
 {
     return this->depthBiasClamp;
 }
 
-float Turbo::Core::TGraphicsPipeline::GetDepthBiasSlopeFactor()const
+float Turbo::Core::TGraphicsPipeline::GetDepthBiasSlopeFactor() const
 {
     return this->depthBiasSlopeFactor;
 }
 
-float Turbo::Core::TGraphicsPipeline::GetLineWidth()const
+float Turbo::Core::TGraphicsPipeline::GetLineWidth() const
 {
     return this->lineWidth;
 }

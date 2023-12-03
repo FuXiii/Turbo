@@ -73,12 +73,12 @@ VkFramebuffer Turbo::Core::TFramebuffer::GetVkFramebuffer()
     return this->vkFramebuffer;
 }
 
-uint32_t Turbo::Core::TFramebuffer::GetWidth()
+uint32_t Turbo::Core::TFramebuffer::GetWidth() const
 {
     return this->width;
 }
 
-uint32_t Turbo::Core::TFramebuffer::GetHeight()
+uint32_t Turbo::Core::TFramebuffer::GetHeight() const
 {
     return this->height;
 }
