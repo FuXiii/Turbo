@@ -640,8 +640,9 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStag
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
+    std::vector<TMemoryBarrier> memory_barriers = memoryBarriers; // FIXME: Maybe unnecessary copies
     std::vector<VkMemoryBarrier> vk_memory_barriers;
-    for (const TMemoryBarrier &memory_barrier_item : memoryBarriers)
+    for (TMemoryBarrier &memory_barrier_item : memory_barriers)
     {
         VkMemoryBarrier vk_memory_barrier = {};
         vk_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -652,8 +653,9 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStag
         vk_memory_barriers.push_back(vk_memory_barrier);
     }
 
+    std::vector<TBufferMemoryBarrier> buffer_barriers = bufferBarriers; // FIXME: Maybe unnecessary copies
     std::vector<VkBufferMemoryBarrier> vk_buffer_memory_barriers;
-    for (const TBufferMemoryBarrier &memory_barrier_item : bufferBarriers)
+    for (TBufferMemoryBarrier &memory_barrier_item : buffer_barriers)
     {
         VkBufferMemoryBarrier vk_buffer_memory_barrier = {};
         vk_buffer_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -669,8 +671,9 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineBarrier(TPipelineStages srcStag
         vk_buffer_memory_barriers.push_back(vk_buffer_memory_barrier);
     }
 
+    std::vector<TImageMemoryBarrier> image_barriers = imageBarriers; // FIXME: Maybe unnecessary copies
     std::vector<VkImageMemoryBarrier> vk_image_memory_barriers;
-    for (const TImageMemoryBarrier &image_barrier_item : imageBarriers)
+    for (TImageMemoryBarrier &image_barrier_item : image_barriers)
     {
         VkImageMemoryBarrier vk_image_memory_barrier = {};
         vk_image_memory_barrier.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

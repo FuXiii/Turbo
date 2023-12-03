@@ -4002,3 +4002,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TVendorInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TVersion.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TViewport.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数。为了调用`const`形参中的非`const`函数而进行了拷贝。这可能是没有必要的拷贝？
