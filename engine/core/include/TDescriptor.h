@@ -76,7 +76,7 @@ class TDescriptor : public Turbo::Core::TInfo
     uint32_t GetSet() const;
     uint32_t GetBinding() const;
     const std::string &GetName() const;
-    TRefPtr<TShader> GetShader();
+    const TRefPtr<TShader> &GetShader();
 
   public:
     virtual std::string ToString() override;

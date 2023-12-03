@@ -69,7 +69,7 @@ class TImageView : public TVulkanHandle
     virtual ~TImageView();
 
   public:
-    TRefPtr<TImage> GetImage();
+    const TRefPtr<TImage> &GetImage();
 
     VkImageView GetVkImageView();
     TImageViewType GetViewType() const;

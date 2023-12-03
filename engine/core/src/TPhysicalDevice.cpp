@@ -734,7 +734,7 @@ uint32_t Turbo::Core::TPhysicalDevice::GetPerformanceScore() const
     return this->performanceScore;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TInstance> Turbo::Core::TPhysicalDevice::GetInstance()
+const Turbo::Core::TRefPtr<Turbo::Core::TInstance> &Turbo::Core::TPhysicalDevice::GetInstance()
 {
     return this->instance;
 }

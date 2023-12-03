@@ -46,7 +46,7 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     TRefPtr<TSecondaryCommandBuffer> AllocateSecondary();
     void Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
 
-    TRefPtr<TDeviceQueue> GetDeviceQueue();
+    const TRefPtr<TDeviceQueue> &GetDeviceQueue();
     VkCommandPool GetVkCommandPool();
 
   public:

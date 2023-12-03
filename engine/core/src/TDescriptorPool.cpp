@@ -327,7 +327,7 @@ Turbo::Core::TDescriptorPool::~TDescriptorPool()
     this->descriptorSizes.clear();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
+Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> &Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
     this->pipelineDescriptorSets.push_back(new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout));
     return this->pipelineDescriptorSets.back();
@@ -363,7 +363,7 @@ void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelin
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDescriptorPool::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDescriptorPool::GetDevice()
 {
     return this->device;
 }

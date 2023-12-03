@@ -54,7 +54,7 @@ class TDeviceQueue : public TVulkanHandle
 
   public:
     TQueueFamilyInfo GetQueueFamily() const;
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
 
     VkQueue GetVkQueue();
 

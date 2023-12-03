@@ -52,10 +52,10 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     virtual ~TDescriptorPool();
 
   public:
-    TRefPtr<TPipelineDescriptorSet> Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout);
+    TRefPtr<TPipelineDescriptorSet> &Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout);
     void Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
 
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
     VkDescriptorPool GetVkDescriptorPool();
 
   public:

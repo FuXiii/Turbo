@@ -83,12 +83,12 @@ uint32_t Turbo::Core::TFramebuffer::GetHeight() const
     return this->height;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> Turbo::Core::TFramebuffer::GetRenderPass()
+const Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> &Turbo::Core::TFramebuffer::GetRenderPass()
 {
     return this->renderPass;
 }
 
-std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> Turbo::Core::TFramebuffer::GetAttachments()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &Turbo::Core::TFramebuffer::GetAttachments()
 {
     return this->attachments;
 }

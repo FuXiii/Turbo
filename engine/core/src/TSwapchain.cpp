@@ -456,7 +456,7 @@ Turbo::Extension::TSwapchain::~TSwapchain()
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Extension::TSurface> Turbo::Extension::TSwapchain::GetSurface()
+const Turbo::Core::TRefPtr<Turbo::Extension::TSurface> &Turbo::Extension::TSwapchain::GetSurface()
 {
     return this->surface;
 }

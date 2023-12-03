@@ -47,7 +47,7 @@ Turbo::Core::TFence::~TFence()
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TFence::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TFence::GetDevice()
 {
     return this->device;
 }

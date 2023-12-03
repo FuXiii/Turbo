@@ -70,7 +70,7 @@ Turbo::Core::TEngine::~TEngine()
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TInstance> Turbo::Core::TEngine::GetInstance()
+const Turbo::Core::TRefPtr<Turbo::Core::TInstance> &Turbo::Core::TEngine::GetInstance()
 {
     return this->instance;
 }

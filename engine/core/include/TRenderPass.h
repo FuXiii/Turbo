@@ -34,7 +34,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
   public:
     VkRenderPass GetVkRenderPass();
 
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
 
     const std::vector<TAttachment> &GetAttachments() const;
 

@@ -52,7 +52,7 @@ Turbo::Core::TBufferMemoryBarrier::~TBufferMemoryBarrier()
 {
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Core::TBufferMemoryBarrier::GetBuffer()
+const Turbo::Core::TRefPtr<Turbo::Core::TBuffer> &Turbo::Core::TBufferMemoryBarrier::GetBuffer()
 {
     return this->buffer;
 }
@@ -120,7 +120,7 @@ Turbo::Core::TImageLayout Turbo::Core::TImageMemoryBarrier::GetNewLayout() const
     return this->newLayout;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageMemoryBarrier::GetImage()
+const Turbo::Core::TRefPtr<Turbo::Core::TImage> &Turbo::Core::TImageMemoryBarrier::GetImage()
 {
     return this->image;
 }

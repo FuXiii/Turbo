@@ -265,7 +265,7 @@ Turbo::Core::TFormatInfo Turbo::Core::TImage::GetFormat() const
     return this->format;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TImage::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TImage::GetDevice()
 {
     return this->device;
 }

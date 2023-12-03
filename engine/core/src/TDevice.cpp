@@ -1143,7 +1143,7 @@ VkDevice Turbo::Core::TDevice::GetVkDevice()
     return this->vkDevice;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TDevice::GetPhysicalDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> &Turbo::Core::TDevice::GetPhysicalDevice()
 {
     return this->physicalDevice;
 }
@@ -1234,7 +1234,7 @@ std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TDevice::GetDeviceQueueF
     return result;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TVmaAllocator> Turbo::Core::TDevice::GetVmaAllocator()
+const Turbo::Core::TRefPtr<Turbo::Core::TVmaAllocator> &Turbo::Core::TDevice::GetVmaAllocator()
 {
     return this->vmaAllocator;
 }

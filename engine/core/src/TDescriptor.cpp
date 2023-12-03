@@ -103,7 +103,7 @@ const std::string &Turbo::Core::TDescriptor::GetName() const
     return this->name;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TShader> Turbo::Core::TDescriptor::GetShader()
+const Turbo::Core::TRefPtr<Turbo::Core::TShader> &Turbo::Core::TDescriptor::GetShader()
 {
     return this->shader;
 }

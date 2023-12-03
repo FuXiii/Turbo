@@ -27,7 +27,7 @@ class TEngine : public TObject
     virtual ~TEngine();
 
   public:
-    TRefPtr<TInstance> GetInstance();
+    const TRefPtr<TInstance> &GetInstance();
 
     virtual std::string ToString() override;
 };

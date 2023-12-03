@@ -94,7 +94,7 @@ Turbo::Core::TCommandBufferLevel Turbo::Core::TCommandBufferBase::GetLevel() con
     return this->level;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
+const Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> &Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
 {
     return this->commandBufferPool;
 }

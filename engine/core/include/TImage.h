@@ -121,7 +121,7 @@ class TImage : public Turbo::Core::TVulkanHandle
   public:
     VkImage GetVkImage();
     TFormatInfo GetFormat() const;
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
 
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;

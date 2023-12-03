@@ -88,14 +88,14 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     virtual ~TPipeline();
 
   public:
-    TRefPtr<TPipelineLayout> GetPipelineLayout();
+    const TRefPtr<TPipelineLayout> &GetPipelineLayout();
     VkPipeline GetVkPipeline();
 
     TPipelineType GetType() const;
-    std::vector<TRefPtr<TShader>> GetShaders();
+    const std::vector<TRefPtr<TShader>> &GetShaders();
 
-    TRefPtr<TDevice> GetDevice();
-    TRefPtr<TPipelineCache> GetPipelineCache();
+    const TRefPtr<TDevice> &GetDevice();
+    const TRefPtr<TPipelineCache> &GetPipelineCache();
 
     // std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 

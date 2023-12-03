@@ -1023,7 +1023,7 @@ Turbo::Core::TShader::~TShader()
     this->size = 0;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TShader::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TShader::GetDevice()
 {
     return this->device;
 }

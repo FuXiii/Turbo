@@ -158,7 +158,7 @@ VkRenderPass Turbo::Core::TRenderPass::GetVkRenderPass()
     return this->vkRenderPass;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TRenderPass::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TRenderPass::GetDevice()
 {
     return this->device;
 }

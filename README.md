@@ -4002,4 +4002,23 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TVendorInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TVersion.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
   >* `./engine/core`下更新`TViewport.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
-  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数。为了调用`const`形参中的非`const`函数而进行了拷贝。这可能是没有必要的拷贝？
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数。为了调用`const`形参中的非`const`函数而进行了拷贝。（这可能是没有必要的拷贝）
+  >* `./engine/core`下更新`TBarrier.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TCommandBuffer.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TCommandBufferPool.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDescriptor.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDescriptorPool.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDevice.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDeviceQueue.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TEngine.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TFence.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TFramebuffer.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TImage.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TImageView.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TInstance.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TPhysicalDevice.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TPipeline.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TRenderPass.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TShader.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TSurface.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TSwapchain.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。

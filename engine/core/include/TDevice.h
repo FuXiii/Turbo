@@ -59,7 +59,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
   public:
     VkDevice GetVkDevice();
 
-    TRefPtr<TPhysicalDevice> GetPhysicalDevice();
+    const TRefPtr<TPhysicalDevice> &GetPhysicalDevice();
 
     size_t GetEnabledLayersCount() const;
     std::vector<TLayerInfo> GetEnabledLayers() const;
@@ -71,7 +71,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     TPhysicalDeviceFeatures GetEnableDeviceFeatures() const;
 
-    TRefPtr<TVmaAllocator> GetVmaAllocator();
+    const TRefPtr<TVmaAllocator> &GetVmaAllocator();
 
     TRefPtr<TDeviceQueue> GetBestGraphicsQueue();
     TRefPtr<TDeviceQueue> GetBestComputeQueue();

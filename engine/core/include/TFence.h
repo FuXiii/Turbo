@@ -28,7 +28,7 @@ class TFence : public Turbo::Core::TVulkanHandle
     virtual ~TFence();
 
   public:
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
 
     VkFence GetVkFence();
 

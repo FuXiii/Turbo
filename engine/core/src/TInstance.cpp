@@ -473,7 +473,7 @@ uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount() const
     return this->physicalDevices.size();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
+const Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> &Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
 {
     if (index > this->physicalDevices.size() - 1)
     {

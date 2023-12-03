@@ -106,7 +106,7 @@ Turbo::Core::TImageView::~TImageView()
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Core::TImageView::GetImage()
+const Turbo::Core::TRefPtr<Turbo::Core::TImage> &Turbo::Core::TImageView::GetImage()
 {
     return this->image;
 }

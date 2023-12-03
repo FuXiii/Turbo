@@ -81,7 +81,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
     bool IsEnabledExtension(TExtensionType extensionType) const;
 
     uint32_t GetPhysicalDeviceCount() const;
-    TRefPtr<TPhysicalDevice> GetPhysicalDevice(uint32_t index);
+    const TRefPtr<TPhysicalDevice> &GetPhysicalDevice(uint32_t index);
     const std::vector<TRefPtr<TPhysicalDevice>> &GetPhysicalDevices();
     TRefPtr<TPhysicalDevice> GetBestPhysicalDevice();
 

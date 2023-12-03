@@ -62,7 +62,7 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     virtual ~TSwapchain();
 
   public:
-    Turbo::Core::TRefPtr<TSurface> GetSurface();
+    const Turbo::Core::TRefPtr<TSurface> &GetSurface();
     const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> &GetImages();
 
     Turbo::Core::TResult AcquireNextImage(uint64_t timeout, const Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> &signalSemphore, const Turbo::Core::TRefPtr<Turbo::Core::TFence> &signalFence, uint32_t *index);

@@ -131,7 +131,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     virtual ~TShader();
 
   public:
-    TRefPtr<TDevice> GetDevice();
+    const TRefPtr<TDevice> &GetDevice();
     VkShaderStageFlags GetVkShaderStageFlags() const;
     VkShaderStageFlagBits GetVkShaderStageFlagBits() const;
     VkShaderModule GetVkShaderModule();

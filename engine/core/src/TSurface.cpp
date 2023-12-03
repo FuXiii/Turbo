@@ -997,7 +997,7 @@ Turbo::Core::TImageUsages Turbo::Extension::TSurface::GetSupportedUsages() const
     return this->supportedUsageFlags;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Extension::TSurface::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Extension::TSurface::GetDevice()
 {
     return this->device;
 }

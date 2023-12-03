@@ -252,7 +252,7 @@ Turbo::Core::TPipeline::~TPipeline()
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPipelineLayout> Turbo::Core::TPipeline::GetPipelineLayout()
+const Turbo::Core::TRefPtr<Turbo::Core::TPipelineLayout> &Turbo::Core::TPipeline::GetPipelineLayout()
 {
     return this->pipelineLayout;
 }
@@ -267,17 +267,17 @@ Turbo::Core::TPipelineType Turbo::Core::TPipeline::GetType() const
     return this->type;
 }
 
-std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> Turbo::Core::TPipeline::GetShaders()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> &Turbo::Core::TPipeline::GetShaders()
 {
     return this->shaders;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TPipeline::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TPipeline::GetDevice()
 {
     return this->device;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPipelineCache> Turbo::Core::TPipeline::GetPipelineCache()
+const Turbo::Core::TRefPtr<Turbo::Core::TPipelineCache> &Turbo::Core::TPipeline::GetPipelineCache()
 {
     return this->pipelineCache;
 }

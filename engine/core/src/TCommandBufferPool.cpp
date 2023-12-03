@@ -148,7 +148,7 @@ void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &sec
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TCommandBufferPool::GetDeviceQueue()
+const Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> &Turbo::Core::TCommandBufferPool::GetDeviceQueue()
 {
     return this->deviceQueue;
 }

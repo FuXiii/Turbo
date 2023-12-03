@@ -204,7 +204,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     uint32_t GetPerformanceScore() const;
 
-    TRefPtr<TInstance> GetInstance();
+    const TRefPtr<TInstance> &GetInstance();
 
     uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily) const;
 

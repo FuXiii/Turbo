@@ -256,7 +256,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha() const;
     Turbo::Core::TImageUsages GetSupportedUsages() const;
 
-    Turbo::Core::TRefPtr<Turbo::Core::TDevice> GetDevice();
+    const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &GetDevice();
 
     // Inherited via TObject
     virtual std::string ToString() override;

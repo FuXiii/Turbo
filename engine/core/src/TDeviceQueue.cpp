@@ -139,7 +139,7 @@ VkQueue Turbo::Core::TDeviceQueue::GetVkQueue()
     return this->vkQueue;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TDeviceQueue::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDeviceQueue::GetDevice()
 {
     return this->device;
 }
