@@ -274,6 +274,25 @@ class TRefPtr
         return this->Valid();
     }
 };
+
+template <typename T, typename S>
+inline TRefPtr<T> StaticCast(const TRefPtr<S> &refPtr)
+{
+    return static_cast<T *>(refPtr.Get());
+}
+
+template <typename T, typename S>
+inline TRefPtr<T> DynamicCast(const TRefPtr<S> &refPtr)
+{
+    return dynamic_cast<T *>(refPtr.Get());
+}
+
+template <typename T, typename S>
+inline TRefPtr<T> ConstCast(const TRefPtr<S> &refPtr)
+{
+    return const_cast<T *>(refPtr.Get());
+}
+
 } // namespace Core
 } // namespace Turbo
 #endif

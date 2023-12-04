@@ -45,10 +45,22 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
 
 void Turbo::Core::TCommandBufferPool::InternalDestroy()
 {
+    for (TCommandBufferBase *secondary_command_buffer_item : this->secondaryCommandBuffers)
+    {
+        secondary_command_buffer_item->InternalDestroy(); // FIXME:Normally, it is automatically destroyed when the reference count reaches zero.
+                                                          // FIXME:For now, if this->secondaryCommandBuffers not empty, it means there has some TSecondaryCommandBuffer
+                                                          // FIXME:had not been Free, so here we need force destroy it.
+    }
+
     for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
     {
-        command_buffer_item->InternalDestroy();
+        command_buffer_item->InternalDestroy(); // FIXME:Normally, it is automatically destroyed when the reference count reaches zero.
+                                                // FIXME:For now, if this->commandBuffers not empty, it means there has some TCommandBuffer
+                                                // FIXME:had not been Free, so here we need force destroy it.
     }
+
+    this->secondaryCommandBuffers.clear(); // Just clear it
+    this->commandBuffers.clear();          // Just clear it
 
     TDevice *device = this->deviceQueue->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
@@ -59,15 +71,37 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
 
 bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandBufferBase)
 {
-    for (uint32_t command_buffer_index = 0; command_buffer_index < this->commandBuffers.size(); command_buffer_index++)
+    if (commandBufferBase.Valid())
     {
-        if (this->commandBuffers[command_buffer_index] == commandBufferBase)
+        switch (commandBufferBase->GetLevel())
         {
-            this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
-            // commandBufferBase.Release(); // NOTE: It will force release memory
-            commandBufferBase = nullptr;
-            return true;
+        case TCommandBufferLevel::PRIMARY: {
+            for (uint32_t command_buffer_index = 0; command_buffer_index < this->commandBuffers.size(); command_buffer_index++)
+            {
+                if (this->commandBuffers[command_buffer_index] == commandBufferBase)
+                {
+                    this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
+                    // commandBufferBase.Release(); // NOTE: It will force release memory
+                    commandBufferBase = nullptr;
+                    return true;
+                }
+            }
         }
+        break;
+        case TCommandBufferLevel::SECONDARY: {
+            for (uint32_t secondary_command_buffer_index = 0; secondary_command_buffer_index < this->secondaryCommandBuffers.size(); secondary_command_buffer_index++)
+            {
+                if (this->secondaryCommandBuffers[secondary_command_buffer_index] == commandBufferBase)
+                {
+                    this->secondaryCommandBuffers.erase(this->secondaryCommandBuffers.begin() + secondary_command_buffer_index);
+                    // commandBufferBase.Release(); // NOTE: It will force release memory
+                    commandBufferBase = nullptr;
+                    return true;
+                }
+            }
+        }
+        break;
+        };
     }
 
     return false;
@@ -101,12 +135,10 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
     // OLD:    this->Free(this->commandBuffers[0]);
     // OLD:}
 
-    this->commandBuffers.clear(); // Just clear it
-
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Core::TCommandBufferPool::Allocate()
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &Turbo::Core::TCommandBufferPool::Allocate()
 {
     this->commandBuffers.push_back(new TCommandBuffer(this));
     return this->commandBuffers.back();
@@ -127,10 +159,10 @@ void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBuffer> &commandBuffe
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> Turbo::Core::TCommandBufferPool::AllocateSecondary()
+Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> &Turbo::Core::TCommandBufferPool::AllocateSecondary()
 {
-    this->commandBuffers.push_back(new TSecondaryCommandBuffer(this));
-    return this->commandBuffers.back();
+    this->secondaryCommandBuffers.push_back(new TSecondaryCommandBuffer(this));
+    return this->secondaryCommandBuffers.back();
 }
 
 void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)

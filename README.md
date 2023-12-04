@@ -4022,3 +4022,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TShader.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
   >* `./engine/core`下更新`TSurface.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
   >* `./engine/core`下更新`TSwapchain.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+
+* 2023/12/4 设计架构
+  >
+  >* `./engine/core`下更新`TRefPtr.h`。增加`StaticCast<T,S>`静态强制转换函数。
+  >* `./engine/core`下更新`TRefPtr.h`。增加`DynamicCast<T,S>`动态强制转换函数。
+  >* `./engine/core`下更新`TRefPtr.h`。增加`ConstCast<T,S>`常量强制转换函数。
+  >* `./engine/core`下更新`TCommandBufferPool`。将原先的`std::vector<TRefPtr<TCommandBufferBase>> commandBuffers`成员分成两个成员`std::vector<TRefPtr<TCommandBuffer>> commandBuffers`和`std::vector<TRefPtr<TSecondaryCommandBuffer>> secondaryCommandBuffers`。
+  >* `./engine/core`下更新`TCommandBufferPool`。`Allocate()`和`AllocateSecondary()`成员函数返回引用。
+  >* `./engine/core`下更新`TCommandBufferPool`的`Free(TRefPtr<TCommandBufferBase> &)`成员函数。适配一级和二级的指令缓存的释放。
+  >* `./engine/core`下更新`TCommandBufferPool`的`InternalDestroy`成员函数。适配二级的指令缓存数组的释放。
+  >* `./engine/core`下更新`TCommandBufferPool`的析构函数。将指令缓存数组的清空转移至`InternalDestroy`成员函数中。

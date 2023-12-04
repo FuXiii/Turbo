@@ -23,7 +23,10 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDeviceQueue> deviceQueue = nullptr;
     T_VULKAN_HANDLE_HANDLE VkCommandPool vkCommandPool = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBufferBase>> commandBuffers;
+    // OLD: T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBufferBase>> commandBuffers;
+
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBuffer>> commandBuffers;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TSecondaryCommandBuffer>> secondaryCommandBuffers;
 
   protected:
     virtual void AddChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer);
@@ -40,10 +43,10 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     virtual ~TCommandBufferPool();
 
   public:
-    TRefPtr<TCommandBuffer> Allocate();
+    TRefPtr<TCommandBuffer> &Allocate();
     void Free(TRefPtr<TCommandBuffer> &commandBuffer);
 
-    TRefPtr<TSecondaryCommandBuffer> AllocateSecondary();
+    TRefPtr<TSecondaryCommandBuffer> &AllocateSecondary();
     void Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
 
     const TRefPtr<TDeviceQueue> &GetDeviceQueue();
