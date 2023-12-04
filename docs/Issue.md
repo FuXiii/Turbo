@@ -218,3 +218,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - 所的`InternalDestroy`在销毁前判断当前句柄是否为`VK_NULL_HANDLE`，如果不是`VK_NULL_HANDLE`，则销毁并将句柄赋值为`VK_NULL_HANDLE`。，如果是`VK_NULL_HANDLE`，则什么也不做。
 
 - 所有`TDevice`创建或派生的子类都应该有一个`GetDevice`成员函数。考虑是否抽象出一个（接口）父类用于声明该函数。
+
+- 所有`ToString`函数都应该在结尾声明为`const`。静态对象也可以调用该函数。
