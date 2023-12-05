@@ -209,7 +209,7 @@ TRenderPass render_pass_2(subpass_chain_2);
 
 - <font color=green>**[ ✓ ]2023/4/11**</font> ~~`./engine/core`下`TGraphicsPipeline`中`VkPipelineTessellationStateCreateInfo`目前没有提供支持，需要实现相关接口，提供功能~~
 
-- 重载所有`TReferenced`子类的`virtual bool Valid()`虚函数。
+- <font color=green>**[ ✓ ]2023/12/5**</font> ~~重载所有`TReferenced`子类的`virtual bool Valid()`虚函数。~~
 
 - <font color=green>**[ ✓ ]2023/12/4**</font> ~~所有的`std::vector<...>`的形参都尝试使用`const std::vector<...>& xxx = {}`来声明使用。~~
 
