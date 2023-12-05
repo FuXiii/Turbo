@@ -102,6 +102,15 @@ std::string Turbo::Core::TInstance::ToString() const
     return std::string();
 }
 
+bool Turbo::Core::TInstance::Valid() const
+{
+    if (this->vkInstance != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
 Turbo::Core::TInstance::TInstance(std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TVersion *vulkanVersion) : Turbo::Core::TVulkanHandle()
 {
     this->vkInstance = VK_NULL_HANDLE;

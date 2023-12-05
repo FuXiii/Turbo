@@ -749,6 +749,15 @@ std::string Turbo::Core::TPhysicalDevice::ToString() const
     return std::string();
 }
 
+bool Turbo::Core::TPhysicalDevice::Valid() const
+{
+    if (this->vkPhysicalDevice != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
 VkPhysicalDevice Turbo::Core::TPhysicalDevice::GetVkPhysicalDevice()
 {
     return this->vkPhysicalDevice;

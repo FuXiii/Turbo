@@ -151,7 +151,16 @@ uint32_t Turbo::Core::TImageView::GetLayerCount() const
     return this->layerCount;
 }
 
-std::string Turbo::Core::TImageView::ToString()const
+std::string Turbo::Core::TImageView::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TImageView::Valid() const
+{
+    if (this->vkImageView != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

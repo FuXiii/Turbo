@@ -93,7 +93,16 @@ const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &Turbo::Core::T
     return this->attachments;
 }
 
-std::string Turbo::Core::TFramebuffer::ToString()const
+std::string Turbo::Core::TFramebuffer::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TFramebuffer::Valid() const
+{
+    if (this->vkFramebuffer != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

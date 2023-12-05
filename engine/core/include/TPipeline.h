@@ -56,6 +56,7 @@ typedef enum TPipelineStageBits
 } TPipelineStageBits;
 typedef VkFlags TPipelineStages;
 
+//FIXME: It's better let TPipeline to be a Pure Virtual Class
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -101,6 +102,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
   public:
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

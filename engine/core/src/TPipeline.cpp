@@ -309,7 +309,16 @@ const Turbo::Core::TRefPtr<Turbo::Core::TPipelineCache> &Turbo::Core::TPipeline:
 //     return specialization_constants;
 // }
 
-std::string Turbo::Core::TPipeline::ToString()const
+std::string Turbo::Core::TPipeline::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TPipeline::Valid() const
+{
+    if (this->pipelineLayout != VK_NULL_HANDLE && this->vkPipeline != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

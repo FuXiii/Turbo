@@ -82,6 +82,7 @@ class TImageView : public TVulkanHandle
 
     // Inherited via TObject
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

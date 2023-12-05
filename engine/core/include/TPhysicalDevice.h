@@ -234,6 +234,7 @@ class TPhysicalDevice : public TVulkanHandle
     const TPhysicalDeviceDriver *GetPhysicalDeviceDriver();
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

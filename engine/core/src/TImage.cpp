@@ -345,7 +345,16 @@ void Turbo::Core::TImage::Unmap()
     }
 }
 
-std::string Turbo::Core::TImage::ToString()const
+std::string Turbo::Core::TImage::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TImage::Valid() const
+{
+    if (this->vkImage != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }
