@@ -68,6 +68,7 @@ class TDeviceQueue : public TVulkanHandle
     TResult Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex);
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

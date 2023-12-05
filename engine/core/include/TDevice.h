@@ -84,6 +84,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     const TDeviceDriver *GetDeviceDriver();
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

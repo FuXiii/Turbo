@@ -86,7 +86,10 @@ class TBuffer : public TVulkanHandle
 
     VkBuffer GetVkBuffer();
 
+    // TODO: Add TDeviceSize GetSize() const; function
+
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

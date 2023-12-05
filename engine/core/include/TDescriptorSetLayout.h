@@ -34,6 +34,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     TDescriptorType GetDescriptorType(uint32_t binding) const;
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

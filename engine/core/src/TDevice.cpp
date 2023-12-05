@@ -1373,7 +1373,16 @@ const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
     return this->deviceDriver;
 }
 
-std::string Turbo::Core::TDevice::ToString()const
+std::string Turbo::Core::TDevice::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDevice::Valid() const
+{
+    if (this->vkDevice != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

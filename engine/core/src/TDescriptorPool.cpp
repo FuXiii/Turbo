@@ -21,7 +21,7 @@ uint32_t Turbo::Core::TDescriptorSize::GetDescriptorCount() const
     return this->count;
 }
 
-std::string Turbo::Core::TDescriptorSize::ToString()const
+std::string Turbo::Core::TDescriptorSize::ToString() const
 {
     return std::string();
 }
@@ -373,7 +373,16 @@ VkDescriptorPool Turbo::Core::TDescriptorPool::GetVkDescriptorPool()
     return this->vkDescriptorPool;
 }
 
-std::string Turbo::Core::TDescriptorPool::ToString()const
+std::string Turbo::Core::TDescriptorPool::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDescriptorPool::Valid() const
+{
+    if (this->vkDescriptorPool != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

@@ -1155,6 +1155,15 @@ void Turbo::Core::TCommandBufferBase::CmdSetLineWidth(float lineWidth)
     device->GetDeviceDriver()->vkCmdSetLineWidth(this->vkCommandBuffer, lineWidth);
 }
 
+bool Turbo::Core::TCommandBufferBase::Valid() const
+{
+    if (this->vkCommandBuffer != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
 Turbo::Core::TSecondaryCommandBuffer::TSecondaryCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::SECONDARY)
 {
 }

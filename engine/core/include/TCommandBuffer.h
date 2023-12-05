@@ -160,6 +160,8 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdClearAttachments();
 
     void CmdDispatchIndirect();
+
+    virtual bool Valid() const override;
 };
 
 class TSecondaryCommandBuffer : public Turbo::Core::TCommandBufferBase

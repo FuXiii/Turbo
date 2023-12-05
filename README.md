@@ -271,8 +271,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
    >
    > * 注意`TApplication::InitVulkan`对于验证层的修改。
    > * 搞清Turbo中一些函数返回局部变量，之后没有拷贝一份而直接传给Vulkan API后会卡住的问题
-  > * 将TApplication改成TEngine，作为Turbo最高层抽象
-  >
+   > * 将TApplication改成TEngine，作为Turbo最高层抽象
+
 * 2022/3/18
     >
     >* 继承自`TInfo`的类用于实现Vulkan相关Info功能，其中的GetVkXXXInfo等相关信息函数是返回局部变量，需要函数返回立刻保存数据，可能会有问题，先暂时这样。
@@ -4038,3 +4038,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/12/5 设计架构
   >
   >* `./engine/core`下将所有的`ToString()`函数后面都加上`const`声明。
+  >* `./engine/core`下将`TReferenced`中的`Release()`公有成员函数转移至私有。
+  >* `./engine/core`下`TBuffer`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TCommandBufferBase`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TCommandBufferPool`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDescriptorPool`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDescriptorSet`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDevice`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDeviceQueue`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TEngine`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TFence`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TFences`中增加`Valid()`函数的重写。

@@ -130,3 +130,12 @@ std::string Turbo::Core::TDescriptorSetLayout::ToString()const
 {
     return std::string();
 }
+
+bool Turbo::Core::TDescriptorSetLayout::Valid() const
+{
+    if (this->vkDescriptorSetLayout != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

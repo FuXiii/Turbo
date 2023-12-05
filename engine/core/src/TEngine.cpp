@@ -75,7 +75,12 @@ const Turbo::Core::TRefPtr<Turbo::Core::TInstance> &Turbo::Core::TEngine::GetIns
     return this->instance;
 }
 
-std::string Turbo::Core::TEngine::ToString()const
+std::string Turbo::Core::TEngine::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TEngine::Valid() const
+{
+    return this->instance.Valid();
 }

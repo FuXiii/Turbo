@@ -255,7 +255,16 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-std::string Turbo::Core::TDescriptorSet::ToString()const
+std::string Turbo::Core::TDescriptorSet::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDescriptorSet::Valid() const
+{
+    if (this->vkDescriptorSet != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

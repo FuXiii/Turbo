@@ -27,7 +27,7 @@ class TComputePipeline : public Turbo::Core::TPipeline
     virtual ~TComputePipeline();
 
   public:
-    virtual std::string ToString()const override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

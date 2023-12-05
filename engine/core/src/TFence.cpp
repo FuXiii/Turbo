@@ -84,6 +84,15 @@ std::string Turbo::Core::TFence::ToString() const
     return std::string();
 }
 
+bool Turbo::Core::TFence::Valid() const
+{
+    if (this->vkFence != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
 void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
 {
     if (fence.Valid())
@@ -116,4 +125,20 @@ Turbo::Core::TResult Turbo::Core::TFences::Wait(uint64_t timeout)
 std::string Turbo::Core::TFences::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TFences::Valid() const
+{
+    for (const std::pair<const TRefPtr<TDevice>, std::vector<TRefPtr<TFence>>> &fence_item : this->fenceMap)
+    {
+        for (const TRefPtr<Turbo::Core::TFence> &fence_item : fence_item.second)
+        {
+            if (!fence_item.Valid())
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

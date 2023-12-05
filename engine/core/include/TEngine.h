@@ -11,6 +11,7 @@ namespace Core
 class TPhysicalDevice;
 class TDevice;
 
+// FIXME: Delete this TEngine class
 class TEngine : public TObject
 {
   private:
@@ -30,6 +31,7 @@ class TEngine : public TObject
     const TRefPtr<TInstance> &GetInstance();
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

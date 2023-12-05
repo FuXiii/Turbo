@@ -12,6 +12,9 @@ class TReferenced
   private:
     mutable uint32_t referenceCount = 0;
 
+  private:
+    void Release() const; // NOTE: It will force delete the memory it occupied. If you really know what are you doing now, otherwise never call it yourself!
+
   public:
     TReferenced();
 
@@ -19,10 +22,6 @@ class TReferenced
     uint32_t UnReference() const;
 
     uint32_t GetReferenceCount() const;
-
-    // NOTE: It will force delete the memory it occupied. If you really know what are you doing now, otherwise never call it yourself!
-    // FIXME: It best to be private
-    void Release() const;
 
     virtual bool Valid() const;
 

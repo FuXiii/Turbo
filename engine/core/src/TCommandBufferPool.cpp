@@ -194,3 +194,12 @@ std::string Turbo::Core::TCommandBufferPool::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TCommandBufferPool::Valid() const
+{
+    if (this->vkCommandPool != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

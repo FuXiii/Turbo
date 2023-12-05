@@ -270,7 +270,16 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(const TRefPtr<Turbo::Ext
     return TResult::INVALID_PARAMETER;
 }
 
-std::string Turbo::Core::TDeviceQueue::ToString()const
+std::string Turbo::Core::TDeviceQueue::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDeviceQueue::Valid() const
+{
+    if (this->vkQueue != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

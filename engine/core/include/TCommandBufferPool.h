@@ -53,7 +53,8 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     VkCommandPool GetVkCommandPool();
 
   public:
-    virtual std::string ToString()const override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

@@ -215,3 +215,12 @@ std::string Turbo::Core::TBuffer::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TBuffer::Valid() const
+{
+    if (this->vkBuffer != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

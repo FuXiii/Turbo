@@ -38,6 +38,7 @@ class TFence : public Turbo::Core::TVulkanHandle
 
   public:
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 class TFences : public Turbo::Core::TObject
@@ -58,6 +59,7 @@ class TFences : public Turbo::Core::TObject
 
   public:
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core
