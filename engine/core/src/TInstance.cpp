@@ -97,7 +97,7 @@ bool Turbo::Core::TInstance::IsEnabledExtension(TExtensionType extensionType) co
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-std::string Turbo::Core::TInstance::ToString()
+std::string Turbo::Core::TInstance::ToString() const
 {
     return std::string();
 }

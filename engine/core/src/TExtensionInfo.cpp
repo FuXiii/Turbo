@@ -251,7 +251,7 @@ bool Turbo::Core::TExtensionInfo::operator!=(const TExtensionInfo &extension) co
     return false;
 }
 
-std::string Turbo::Core::TExtensionInfo::ToString()
+std::string Turbo::Core::TExtensionInfo::ToString()const
 {
     std::stringstream ss;
     ss << this->name << " : extension revision " << this->version;

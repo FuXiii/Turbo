@@ -56,7 +56,7 @@ VkSemaphore Turbo::Core::TSemaphore::GetVkSemaphore()
     return this->vkSemaphore;
 }
 
-std::string Turbo::Core::TSemaphore::ToString()
+std::string Turbo::Core::TSemaphore::ToString() const
 {
     return std::string();
 }

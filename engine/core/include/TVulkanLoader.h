@@ -372,7 +372,7 @@ class TVulkanLoader : public TObject
     TPhysicalDeviceDriver LoadPhysicalDeviceDriver(const TRefPtr<TPhysicalDevice> &physicalDevice);
     TDeviceDriver LoadDeviceDriver(const TRefPtr<TDevice> &device);
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

@@ -33,7 +33,7 @@ class TPool : public Turbo::Core::TObject
 
     const std::vector<T *> &GetPool();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 template <typename T>
@@ -91,7 +91,7 @@ const std::vector<T *> &Turbo::Core::TPool<T>::GetPool()
 }
 
 template <typename T>
-std::string Turbo::Core::TPool<T>::ToString()
+std::string Turbo::Core::TPool<T>::ToString() const
 {
     return std::string();
 }

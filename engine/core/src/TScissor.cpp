@@ -12,7 +12,7 @@ Turbo::Core::TScissor::~TScissor()
 {
 }
 
-std::string Turbo::Core::TScissor::ToString()
+std::string Turbo::Core::TScissor::ToString() const
 {
     return std::string();
 }

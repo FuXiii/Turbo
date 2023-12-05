@@ -138,7 +138,7 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-std::string Turbo::Core::TPipelineDescriptorSet::ToString()
+std::string Turbo::Core::TPipelineDescriptorSet::ToString()const
 {
     return std::string();
 }

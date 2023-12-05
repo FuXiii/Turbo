@@ -183,7 +183,7 @@ Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass) con
     return Turbo::Core::TSubpass(TPipelineType::Graphics);
 }
 
-std::string Turbo::Core::TRenderPass::ToString()
+std::string Turbo::Core::TRenderPass::ToString() const
 {
     return std::string();
 }

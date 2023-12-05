@@ -33,7 +33,7 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
     void *GetVmaAllocator();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

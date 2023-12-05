@@ -19,7 +19,7 @@ class TObject : public TReferenced
     virtual ~TObject();
 
   public:
-    virtual std::string ToString() = 0;
+    virtual std::string ToString() const = 0;
 };
 } // namespace Core
 } // namespace Turbo

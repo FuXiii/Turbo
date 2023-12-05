@@ -190,7 +190,7 @@ VkCommandPool Turbo::Core::TCommandBufferPool::GetVkCommandPool()
     return this->vkCommandPool;
 }
 
-std::string Turbo::Core::TCommandBufferPool::ToString()
+std::string Turbo::Core::TCommandBufferPool::ToString() const
 {
     return std::string();
 }

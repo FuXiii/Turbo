@@ -575,7 +575,7 @@ bool Turbo::Extension::TSwapchain::GetIsClipped() const
     return this->isClipped;
 }
 
-std::string Turbo::Extension::TSwapchain::ToString()
+std::string Turbo::Extension::TSwapchain::ToString() const
 {
     return std::string();
 }

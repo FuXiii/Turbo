@@ -75,7 +75,7 @@ void *Turbo::Core::TVmaAllocator::GetVmaAllocator()
     return this->vmaAllocator;
 }
 
-std::string Turbo::Core::TVmaAllocator::ToString()
+std::string Turbo::Core::TVmaAllocator::ToString() const
 {
     return std::string();
 }

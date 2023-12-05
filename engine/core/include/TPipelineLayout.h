@@ -36,7 +36,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
     VkPipelineLayout GetVkPipelineLayout();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

@@ -1172,7 +1172,7 @@ void Turbo::Core::TSecondaryCommandBuffer::Begin(const TRefPtr<TRenderPass> &ren
     TCommandBufferBase::Begin();
 }
 
-std::string Turbo::Core::TSecondaryCommandBuffer::ToString()
+std::string Turbo::Core::TSecondaryCommandBuffer::ToString() const
 {
     return std::string();
 }
@@ -1194,7 +1194,7 @@ void Turbo::Core::TCommandBuffer::CmdExecuteCommand(const TRefPtr<TSecondaryComm
     device->GetDeviceDriver()->vkCmdExecuteCommands(this->GetVkCommandBuffer(), 1, &vk_secondary_command_buffer);
 }
 
-std::string Turbo::Core::TCommandBuffer::ToString()
+std::string Turbo::Core::TCommandBuffer::ToString() const
 {
     return std::string();
 }

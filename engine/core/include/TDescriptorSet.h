@@ -47,7 +47,7 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
     /* FIXME: Just for Test*/ void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

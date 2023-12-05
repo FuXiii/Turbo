@@ -50,7 +50,7 @@ void Turbo::Core::TVertexAttribute::SetOffset(uint32_t offset)
     this->offset = offset;
 }
 
-std::string Turbo::Core::TVertexAttribute::ToString()
+std::string Turbo::Core::TVertexAttribute::ToString()const
 {
     return std::string();
 }
@@ -118,7 +118,7 @@ const std::vector<Turbo::Core::TVertexAttribute> &Turbo::Core::TVertexBinding::G
     return this->vertexAttributes;
 }
 
-std::string Turbo::Core::TVertexBinding::ToString()
+std::string Turbo::Core::TVertexBinding::ToString()const
 {
     return std::string();
 }
@@ -1488,7 +1488,7 @@ float Turbo::Core::TGraphicsPipeline::GetLineWidth() const
     return this->lineWidth;
 }
 
-std::string Turbo::Core::TGraphicsPipeline::ToString()
+std::string Turbo::Core::TGraphicsPipeline::ToString()const
 {
     return std::string();
 }

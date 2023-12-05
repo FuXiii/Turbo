@@ -661,7 +661,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(const TR
     return device_driver;
 }
 
-std::string Turbo::Core::TVulkanLoader::ToString()
+std::string Turbo::Core::TVulkanLoader::ToString() const
 {
     return std::string();
 }

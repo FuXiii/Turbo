@@ -151,7 +151,7 @@ uint32_t Turbo::Core::TImageView::GetLayerCount() const
     return this->layerCount;
 }
 
-std::string Turbo::Core::TImageView::ToString()
+std::string Turbo::Core::TImageView::ToString()const
 {
     return std::string();
 }

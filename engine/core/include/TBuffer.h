@@ -86,7 +86,7 @@ class TBuffer : public TVulkanHandle
 
     VkBuffer GetVkBuffer();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

@@ -56,7 +56,7 @@ Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetFinalLayout() const
     return this->finalLayout;
 }
 
-std::string Turbo::Core::TAttachment::ToString()
+std::string Turbo::Core::TAttachment::ToString() const
 {
     return std::string();
 }

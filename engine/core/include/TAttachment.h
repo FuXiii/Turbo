@@ -52,7 +52,7 @@ class TAttachment : public Turbo::Core::TInfo
     TImageLayout GetFinalLayout() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

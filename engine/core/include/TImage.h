@@ -139,7 +139,7 @@ class TImage : public Turbo::Core::TVulkanHandle
     void *Map();
     void Unmap();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

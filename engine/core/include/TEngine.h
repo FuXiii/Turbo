@@ -29,7 +29,7 @@ class TEngine : public TObject
   public:
     const TRefPtr<TInstance> &GetInstance();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

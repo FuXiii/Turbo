@@ -37,7 +37,7 @@ class TVendorInfo : public Turbo::Core::TInfo
     TVendorType GetVendorType() const;
     uint32_t GetVendorID() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

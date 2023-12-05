@@ -341,7 +341,7 @@ bool Turbo::Core::TLayerInfo::operator!=(const TLayerInfo &layer) const
     return false;
 }
 
-std::string Turbo::Core::TLayerInfo::ToString()
+std::string Turbo::Core::TLayerInfo::ToString()const
 {
     std::stringstream ss;
     ss << this->name << " (" << this->description << ") Vulkan version " << this->specificationVersion.ToString() << ", layer version " << this->implementationVersion;

@@ -48,7 +48,7 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
     std::vector<uint8_t> GetUUID() const;                 // FIXME:出现了与Vulkan标准不符的行为，初步怀疑是NVIDIA驱动Bug，与NVIDIA沟通中
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

@@ -26,7 +26,7 @@ VkColorSpaceKHR Turbo::Extension::TColorSpace::GetVkColorSpaceKHR() const
     return static_cast<VkColorSpaceKHR>(this->colorSpaceType);
 }
 
-std::string Turbo::Extension::TColorSpace::ToString()
+std::string Turbo::Extension::TColorSpace::ToString() const
 {
     switch (this->colorSpaceType)
     {
@@ -78,7 +78,7 @@ Turbo::Extension::TColorSpace Turbo::Extension::TSurfaceFormat::GetColorSpace() 
     return this->colorSpace;
 }
 
-std::string Turbo::Extension::TSurfaceFormat::ToString()
+std::string Turbo::Extension::TSurfaceFormat::ToString() const
 {
     return std::string();
 }
@@ -1002,7 +1002,7 @@ const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Extension::TSurface::Ge
     return this->device;
 }
 
-std::string Turbo::Extension::TSurface::ToString()
+std::string Turbo::Extension::TSurface::ToString() const
 {
     return std::string();
 }

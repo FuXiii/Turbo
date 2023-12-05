@@ -157,7 +157,7 @@ Turbo::Core::TComputePipeline::~TComputePipeline()
     this->InternalDestroy();
 }
 
-std::string Turbo::Core::TComputePipeline::ToString()
+std::string Turbo::Core::TComputePipeline::ToString() const
 {
     return std::string();
 }

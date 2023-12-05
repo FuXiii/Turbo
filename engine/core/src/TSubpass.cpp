@@ -119,7 +119,7 @@ Turbo::Core::TPipelineType Turbo::Core::TSubpass::GetPipelineType() const
     return this->type;
 }
 
-std::string Turbo::Core::TSubpass::ToString()
+std::string Turbo::Core::TSubpass::ToString() const
 {
     return std::string();
 }

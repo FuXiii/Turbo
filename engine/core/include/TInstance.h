@@ -89,7 +89,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
 
     TExtensionInfo GetExtensionByType(TExtensionType extensionType) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

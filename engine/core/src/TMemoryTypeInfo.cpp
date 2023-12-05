@@ -78,7 +78,7 @@ bool Turbo::Core::TMemoryTypeInfo::IsProtected() const
     return false;
 }
 
-std::string Turbo::Core::TMemoryTypeInfo::ToString()
+std::string Turbo::Core::TMemoryTypeInfo::ToString()const
 {
     return std::string();
 }

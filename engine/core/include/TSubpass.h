@@ -41,7 +41,7 @@ class TSubpass : public Turbo::Core::TInfo
     TPipelineType GetPipelineType() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

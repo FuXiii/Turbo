@@ -273,7 +273,7 @@ class TExtensionInfo : public TInfo
     bool operator==(const TExtensionInfo &extension) const;
     bool operator!=(const TExtensionInfo &extension) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

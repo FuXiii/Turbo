@@ -4034,3 +4034,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TCommandBufferPool`的`InternalDestroy`成员函数。适配二级的指令缓存数组的释放。
   >* `./engine/core`下更新`TCommandBufferPool`的析构函数。将指令缓存数组的清空转移至`InternalDestroy`成员函数中。
   >* `./docs`下更新`Issue.md`。记录一些待解决的问题。
+
+* 2023/12/5 设计架构
+  >
+  >* `./engine/core`下将所有的`ToString()`函数后面都加上`const`声明。

@@ -82,7 +82,7 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     bool GetIsClipped() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Extension
 } // namespace Turbo

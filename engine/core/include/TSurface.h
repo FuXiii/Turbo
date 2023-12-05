@@ -58,7 +58,7 @@ class TColorSpace : public Turbo::Core::TInfo
     TColorSpaceType GetColorSpaceType() const;
     VkColorSpaceKHR GetVkColorSpaceKHR() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TSurfaceFormat : public Turbo::Core::TInfo
@@ -79,7 +79,7 @@ class TSurfaceFormat : public Turbo::Core::TInfo
     Turbo::Core::TFormatInfo GetFormat() const;
     TColorSpace GetColorSpace() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 typedef enum TSurfaceTransformBits
@@ -259,7 +259,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &GetDevice();
 
     // Inherited via TObject
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Extension
 } // namespace Turbo

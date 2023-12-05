@@ -40,7 +40,7 @@ class TVertexAttribute : public Turbo::Core::TInfo
     void SetOffset(uint32_t offset);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 typedef enum class TVertexRate
@@ -72,7 +72,7 @@ class TVertexBinding : public Turbo::Core::TInfo
     const std::vector<TVertexAttribute> &GetVertexAttributes() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 typedef enum class TTopologyType
@@ -296,7 +296,7 @@ class TGraphicsPipeline : public Turbo::Core::TPipeline
     float GetLineWidth() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

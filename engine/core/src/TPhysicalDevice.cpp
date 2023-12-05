@@ -5,7 +5,7 @@
 #include "TInstance.h"
 #include "TVulkanLoader.h"
 
-std::string Turbo::Core::TPhysicalDeviceFeatures::ToString()
+std::string Turbo::Core::TPhysicalDeviceFeatures::ToString() const
 {
     return std::string();
 }
@@ -744,7 +744,7 @@ const Turbo::Core::TPhysicalDeviceDriver *Turbo::Core::TPhysicalDevice::GetPhysi
     return this->physicalDeviceDriver;
 }
 
-std::string Turbo::Core::TPhysicalDevice::ToString()
+std::string Turbo::Core::TPhysicalDevice::ToString() const
 {
     return std::string();
 }

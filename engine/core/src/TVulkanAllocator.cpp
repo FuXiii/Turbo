@@ -72,7 +72,7 @@ VkAllocationCallbacks *Turbo::Core::TVulkanAllocator::GetVkAllocationCallbacks()
     return &TVulkanAllocator::vkAllocationCallbacks;
 }
 
-std::string Turbo::Core::TVulkanAllocator::ToString()
+std::string Turbo::Core::TVulkanAllocator::ToString() const
 {
     return std::string();
 }

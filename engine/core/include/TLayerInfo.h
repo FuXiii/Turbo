@@ -71,7 +71,7 @@ class TLayerInfo : public TInfo
     bool operator==(const TLayerInfo &layer) const;
     bool operator!=(const TLayerInfo &layer) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

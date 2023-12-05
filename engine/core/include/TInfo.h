@@ -13,7 +13,7 @@ class TInfo //: public TObject
     explicit TInfo();
     ~TInfo();
 
-    virtual std::string ToString() = 0;
+    virtual std::string ToString() const = 0;
 };
 } // namespace Core
 } // namespace Turbo

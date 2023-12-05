@@ -309,7 +309,7 @@ const Turbo::Core::TRefPtr<Turbo::Core::TPipelineCache> &Turbo::Core::TPipeline:
 //     return specialization_constants;
 // }
 
-std::string Turbo::Core::TPipeline::ToString()
+std::string Turbo::Core::TPipeline::ToString()const
 {
     return std::string();
 }

@@ -42,7 +42,7 @@ class TVersion : public TInfo
     bool operator<=(const TVersion &version) const;
     bool operator>=(const TVersion &version) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

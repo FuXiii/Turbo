@@ -41,7 +41,7 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
     const std::vector<TRefPtr<TImageView>> &GetAttachments();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

@@ -79,7 +79,7 @@ class TDescriptor : public Turbo::Core::TInfo
     const TRefPtr<TShader> &GetShader();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TStructMember : public Turbo::Core::TInfo
@@ -104,7 +104,7 @@ class TStructMember : public Turbo::Core::TInfo
     TStructMember &operator=(const TStructMember &object);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 // unused sets in the layout, with zero descriptors.

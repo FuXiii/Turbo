@@ -44,7 +44,7 @@ float Turbo::Core::TViewport::GetMaxDepth() const
     return this->maxDepth;
 }
 
-std::string Turbo::Core::TViewport::ToString()
+std::string Turbo::Core::TViewport::ToString() const
 {
     return std::string();
 }

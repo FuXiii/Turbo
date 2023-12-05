@@ -345,7 +345,7 @@ void Turbo::Core::TImage::Unmap()
     }
 }
 
-std::string Turbo::Core::TImage::ToString()
+std::string Turbo::Core::TImage::ToString()const
 {
     return std::string();
 }

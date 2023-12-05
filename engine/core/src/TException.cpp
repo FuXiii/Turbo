@@ -36,7 +36,7 @@ std::string Turbo::Core::TException::GetTip() const
     return this->tip;
 }
 
-std::string Turbo::Core::TException::ToString()
+std::string Turbo::Core::TException::ToString()const
 {
     std::string result(this->what());
     return result;

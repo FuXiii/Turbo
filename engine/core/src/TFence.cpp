@@ -79,7 +79,7 @@ void Turbo::Core::TFence::WaitUntil()
     } while (result == VK_TIMEOUT);
 }
 
-std::string Turbo::Core::TFence::ToString()
+std::string Turbo::Core::TFence::ToString() const
 {
     return std::string();
 }
@@ -113,7 +113,7 @@ Turbo::Core::TResult Turbo::Core::TFences::Wait(uint64_t timeout)
     return TResult::SUCCESS;
 }
 
-std::string Turbo::Core::TFences::ToString()
+std::string Turbo::Core::TFences::ToString() const
 {
     return std::string();
 }

@@ -37,7 +37,7 @@ class TFence : public Turbo::Core::TVulkanHandle
     void WaitUntil();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TFences : public Turbo::Core::TObject
@@ -57,7 +57,7 @@ class TFences : public Turbo::Core::TObject
     TResult Wait(uint64_t timeout);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

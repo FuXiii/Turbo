@@ -279,7 +279,7 @@ std::vector<uint8_t> Turbo::Core::TPipelineCache::GetUUID() const
     return cache_uuid;
 }
 
-std::string Turbo::Core::TPipelineCache::ToString()
+std::string Turbo::Core::TPipelineCache::ToString() const
 {
     return std::string();
 }

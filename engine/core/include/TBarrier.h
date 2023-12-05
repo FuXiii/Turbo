@@ -32,7 +32,7 @@ class TMemoryBarrier : public Turbo::Core::TBarrier
     TAccess GetSrcAccess() const;
     TAccess GetDstAccess() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
@@ -51,7 +51,7 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     TDeviceSize GetOffset() const;
     TDeviceSize GetSize() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
@@ -81,7 +81,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
     uint32_t GetBaseArrayLayer() const;
     uint32_t GetLayerCount() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

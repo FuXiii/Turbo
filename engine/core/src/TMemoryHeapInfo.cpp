@@ -33,7 +33,7 @@ Turbo::Core::TDeviceSize Turbo::Core::TMemoryHeapInfo::GetByteSize() const
     return this->size;
 }
 
-std::string Turbo::Core::TMemoryHeapInfo::ToString()
+std::string Turbo::Core::TMemoryHeapInfo::ToString()const
 {
     return std::string();
 }

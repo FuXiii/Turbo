@@ -178,7 +178,7 @@ class TSecondaryCommandBuffer : public Turbo::Core::TCommandBufferBase
     void Begin(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, uint32_t subpass);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TCommandBuffer : public Turbo::Core::TCommandBufferBase
@@ -196,7 +196,7 @@ class TCommandBuffer : public Turbo::Core::TCommandBufferBase
     void CmdExecuteCommand(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

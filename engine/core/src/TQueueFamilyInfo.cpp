@@ -157,7 +157,7 @@ bool Turbo::Core::TQueueFamilyInfo::operator<(const TQueueFamilyInfo &queueFamil
     return this->index < queueFamily.index;
 }
 
-std::string Turbo::Core::TQueueFamilyInfo::ToString()
+std::string Turbo::Core::TQueueFamilyInfo::ToString()const
 {
     return std::string();
 }

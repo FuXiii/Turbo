@@ -27,7 +27,7 @@ class TException : public std::runtime_error //, public Turbo::Core::TObject
     std::string GetMessage() const;
     std::string GetTip() const;
 
-    virtual std::string ToString();
+    virtual std::string ToString() const;
 };
 } // namespace Core
 } // namespace Turbo

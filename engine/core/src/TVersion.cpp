@@ -186,7 +186,7 @@ bool Turbo::Core::TVersion::operator>=(const TVersion &version) const
     return false;
 }
 
-std::string Turbo::Core::TVersion::ToString()
+std::string Turbo::Core::TVersion::ToString() const
 {
     std::stringstream ss;
     ss << this->major << "." << this->minor << "." << this->patch << "." << this->develop;

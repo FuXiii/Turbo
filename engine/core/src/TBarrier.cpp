@@ -29,7 +29,7 @@ Turbo::Core::TAccess Turbo::Core::TMemoryBarrier::GetDstAccess() const
     return this->dstAccess;
 }
 
-std::string Turbo::Core::TMemoryBarrier::ToString()
+std::string Turbo::Core::TMemoryBarrier::ToString()const
 {
     return std::string();
 }
@@ -67,7 +67,7 @@ Turbo::Core::TDeviceSize Turbo::Core::TBufferMemoryBarrier::GetSize() const
     return this->size;
 }
 
-std::string Turbo::Core::TBufferMemoryBarrier::ToString()
+std::string Turbo::Core::TBufferMemoryBarrier::ToString()const
 {
     return std::string();
 }
@@ -150,7 +150,7 @@ uint32_t Turbo::Core::TImageMemoryBarrier::GetLayerCount() const
     return this->layerCount;
 }
 
-std::string Turbo::Core::TImageMemoryBarrier::ToString()
+std::string Turbo::Core::TImageMemoryBarrier::ToString()const
 {
     return std::string();
 }

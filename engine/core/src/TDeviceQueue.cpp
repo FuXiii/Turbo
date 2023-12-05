@@ -270,7 +270,7 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(const TRefPtr<Turbo::Ext
     return TResult::INVALID_PARAMETER;
 }
 
-std::string Turbo::Core::TDeviceQueue::ToString()
+std::string Turbo::Core::TDeviceQueue::ToString()const
 {
     return std::string();
 }

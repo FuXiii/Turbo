@@ -403,7 +403,7 @@ class TFormatInfo : public TInfo
 
     bool operator==(const TFormatInfo &format) const; // TODO: Format Compatibility Classes
     bool operator!=(const TFormatInfo &format) const;
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

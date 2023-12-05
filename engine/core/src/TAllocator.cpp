@@ -80,7 +80,7 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
 #endif
 }
 
-std::string Turbo::Core::TAllocator::ToString()
+std::string Turbo::Core::TAllocator::ToString() const
 {
     return std::string();
 }

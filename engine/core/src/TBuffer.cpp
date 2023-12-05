@@ -211,7 +211,7 @@ Turbo::Core::TMemoryTypeInfo Turbo::Core::TBuffer::GetMemoryTypeInfo() const
     return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
 }
 
-std::string Turbo::Core::TBuffer::ToString()
+std::string Turbo::Core::TBuffer::ToString()const
 {
     return std::string();
 }

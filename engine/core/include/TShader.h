@@ -48,7 +48,7 @@ class TInterface : public Turbo::Core::TStructMember
     ~TInterface();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TSpecializationConstant : public Turbo::Core::TInfo
@@ -70,7 +70,7 @@ class TSpecializationConstant : public Turbo::Core::TInfo
     uint32_t GetWidth() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TShader : public Turbo::Core::TVulkanHandle
@@ -166,7 +166,7 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::vector<uint32_t> GetSpirV() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TVertexShader : public Turbo::Core::TShader

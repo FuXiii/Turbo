@@ -25,7 +25,7 @@ Turbo::Core::TInterface::~TInterface()
 {
 }
 
-std::string Turbo::Core::TInterface::ToString()
+std::string Turbo::Core::TInterface::ToString() const
 {
     return Turbo::Core::TStructMember::ToString();
 }
@@ -58,7 +58,7 @@ uint32_t Turbo::Core::TSpecializationConstant::GetWidth() const
     return this->width;
 }
 
-std::string Turbo::Core::TSpecializationConstant::ToString()
+std::string Turbo::Core::TSpecializationConstant::ToString() const
 {
     return std::string();
 }
@@ -1219,7 +1219,7 @@ std::vector<uint32_t> Turbo::Core::TShader::GetSpirV() const
     return spirv;
 }
 
-std::string Turbo::Core::TShader::ToString()
+std::string Turbo::Core::TShader::ToString() const
 {
     std::vector<uint32_t> spirv;
     spirv.resize(this->size / sizeof(uint32_t));

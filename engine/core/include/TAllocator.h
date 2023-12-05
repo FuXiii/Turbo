@@ -24,7 +24,7 @@ class TAllocator : public TObject
     template <typename T>
     static constexpr T AlignUp(T meta, size_t alignment) noexcept;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 template <typename T>

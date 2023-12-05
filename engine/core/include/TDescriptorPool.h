@@ -28,7 +28,7 @@ class TDescriptorSize : public Turbo::Core::TInfo
     uint32_t GetDescriptorCount() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TDescriptorPool : public Turbo::Core::TVulkanHandle
@@ -59,7 +59,7 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     VkDescriptorPool GetVkDescriptorPool();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

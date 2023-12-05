@@ -33,7 +33,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
     TDescriptorType GetDescriptorType(uint32_t binding) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

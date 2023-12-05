@@ -93,7 +93,7 @@ const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &Turbo::Core::T
     return this->attachments;
 }
 
-std::string Turbo::Core::TFramebuffer::ToString()
+std::string Turbo::Core::TFramebuffer::ToString()const
 {
     return std::string();
 }

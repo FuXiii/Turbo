@@ -51,7 +51,7 @@ class TQueueFamilyInfo : public TInfo
     bool operator!=(const TQueueFamilyInfo &queueFamily) const;
     bool operator<(const TQueueFamilyInfo &queueFamily) const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

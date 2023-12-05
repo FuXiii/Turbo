@@ -43,7 +43,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     TSubpass GetSubpass(uint32_t subpass) const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

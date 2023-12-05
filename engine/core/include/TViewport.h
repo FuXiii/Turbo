@@ -32,7 +32,7 @@ class TViewport : public Turbo::Core::TInfo
     float GetMaxDepth() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

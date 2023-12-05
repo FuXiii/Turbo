@@ -77,7 +77,7 @@ class TSampler : public TVulkanHandle
     VkSampler GetVkSampler();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

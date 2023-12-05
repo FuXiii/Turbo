@@ -27,7 +27,7 @@ uint32_t Turbo::Core::TVendorInfo::GetVendorID() const
     return this->vendorID;
 }
 
-std::string Turbo::Core::TVendorInfo::ToString()
+std::string Turbo::Core::TVendorInfo::ToString() const
 {
     std::stringstream ss;
 

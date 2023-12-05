@@ -100,7 +100,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // std::vector<TSpecializationConstant> GetSpecializationConstants() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

@@ -81,7 +81,7 @@ class TImageView : public TVulkanHandle
     uint32_t GetLayerCount() const;
 
     // Inherited via TObject
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

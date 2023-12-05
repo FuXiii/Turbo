@@ -37,7 +37,7 @@ class TMemoryTypeInfo : public TInfo
     bool IsLazilyAllocated() const;
     bool IsProtected() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

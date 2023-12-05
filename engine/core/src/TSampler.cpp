@@ -103,7 +103,7 @@ VkSampler Turbo::Core::TSampler::GetVkSampler()
     return this->vkSampler;
 }
 
-std::string Turbo::Core::TSampler::ToString()
+std::string Turbo::Core::TSampler::ToString() const
 {
     return std::string();
 }

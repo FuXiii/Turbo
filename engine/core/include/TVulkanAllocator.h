@@ -31,7 +31,7 @@ class TVulkanAllocator : public TAllocator
 
     VkAllocationCallbacks *GetVkAllocationCallbacks();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

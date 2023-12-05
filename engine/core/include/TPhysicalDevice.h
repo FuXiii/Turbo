@@ -69,7 +69,7 @@ class TPhysicalDeviceFeatures : public Turbo::Core::TInfo
     ~TPhysicalDeviceFeatures() = default;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TInstance;
@@ -233,7 +233,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     const TPhysicalDeviceDriver *GetPhysicalDeviceDriver();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

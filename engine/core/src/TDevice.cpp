@@ -1373,7 +1373,7 @@ const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
     return this->deviceDriver;
 }
 
-std::string Turbo::Core::TDevice::ToString()
+std::string Turbo::Core::TDevice::ToString()const
 {
     return std::string();
 }

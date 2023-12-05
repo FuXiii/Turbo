@@ -108,7 +108,7 @@ const Turbo::Core::TRefPtr<Turbo::Core::TShader> &Turbo::Core::TDescriptor::GetS
     return this->shader;
 }
 
-std::string Turbo::Core::TDescriptor::ToString()
+std::string Turbo::Core::TDescriptor::ToString() const
 {
     return std::string();
 }
@@ -167,7 +167,7 @@ Turbo::Core::TStructMember &Turbo::Core::TStructMember::operator=(const TStructM
     return *this;
 }
 
-std::string Turbo::Core::TStructMember::ToString()
+std::string Turbo::Core::TStructMember::ToString() const
 {
     return std::string();
 }
