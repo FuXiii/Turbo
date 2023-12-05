@@ -283,3 +283,12 @@ std::string Turbo::Core::TPipelineCache::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TPipelineCache::Valid() const
+{
+    if (this->vkPipelineCache != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

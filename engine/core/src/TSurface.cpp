@@ -1006,3 +1006,12 @@ std::string Turbo::Extension::TSurface::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Extension::TSurface::Valid() const
+{
+    if (this->vkSurfaceKHR != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

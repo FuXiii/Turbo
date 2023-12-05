@@ -60,3 +60,12 @@ std::string Turbo::Core::TSemaphore::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TSemaphore::Valid() const
+{
+    if (this->vkSemaphore != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

@@ -260,6 +260,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
 
     // Inherited via TObject
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Extension
 } // namespace Turbo

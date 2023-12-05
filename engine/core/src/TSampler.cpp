@@ -107,3 +107,12 @@ std::string Turbo::Core::TSampler::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TSampler::Valid() const
+{
+    if (this->vkSampler != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

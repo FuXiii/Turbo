@@ -32,7 +32,8 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
     TPipelineStages GetWaitDstStageMask() const;
 
   public:
-    virtual std::string ToString()const override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

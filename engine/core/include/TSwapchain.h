@@ -83,6 +83,7 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
 
   public:
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Extension
 } // namespace Turbo

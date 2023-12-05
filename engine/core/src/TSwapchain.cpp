@@ -579,3 +579,12 @@ std::string Turbo::Extension::TSwapchain::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Extension::TSwapchain::Valid() const
+{
+    if (this->vkSwapchainKHR != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

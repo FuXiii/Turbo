@@ -167,6 +167,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<uint32_t> GetSpirV() const;
 
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 class TVertexShader : public Turbo::Core::TShader

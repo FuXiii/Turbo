@@ -4055,3 +4055,12 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TInstance`中增加`Valid()`函数的重写。
   >* `./engine/core`下`TPhysicalDevice`中增加`Valid()`函数的重写。
   >* `./engine/core`下`TPipeline`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineCache`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineDescriptorSet`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineLayout`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TRenderPass`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSampler`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSemaphore`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSurface`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSwapchain`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TVmaAllocator`中增加`Valid()`函数的重写。

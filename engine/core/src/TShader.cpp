@@ -1233,6 +1233,15 @@ std::string Turbo::Core::TShader::ToString() const
     return glsl.compile();
 }
 
+bool Turbo::Core::TShader::Valid() const
+{
+    if (this->vkShaderModule != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
 Turbo::Core::TVertexShader::TVertexShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, includePaths, entryPoint)
 {
 }

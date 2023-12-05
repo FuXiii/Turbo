@@ -44,6 +44,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
 
   public:
     virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

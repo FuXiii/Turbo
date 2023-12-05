@@ -93,7 +93,16 @@ VkPipelineLayout Turbo::Core::TPipelineLayout::GetVkPipelineLayout()
     return this->vkPipelineLayout;
 }
 
-std::string Turbo::Core::TPipelineLayout::ToString()const
+std::string Turbo::Core::TPipelineLayout::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TPipelineLayout::Valid() const
+{
+    if (this->vkPipelineLayout != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

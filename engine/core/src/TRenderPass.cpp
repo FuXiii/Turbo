@@ -187,3 +187,12 @@ std::string Turbo::Core::TRenderPass::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TRenderPass::Valid() const
+{
+    if (this->vkRenderPass != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}

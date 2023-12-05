@@ -79,3 +79,12 @@ std::string Turbo::Core::TVmaAllocator::ToString() const
 {
     return std::string();
 }
+
+bool Turbo::Core::TVmaAllocator::Valid() const
+{
+    if (this->vmaAllocator != nullptr)
+    {
+        return true;
+    }
+    return false;
+}
