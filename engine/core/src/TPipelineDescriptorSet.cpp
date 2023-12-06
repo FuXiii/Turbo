@@ -2,6 +2,9 @@
 #include "TDescriptorSet.h"
 #include "TException.h"
 #include "TPipelineLayout.h"
+#include "TDescriptorSetLayout.h"
+#include "TDescriptorPool.h"
+#include "TBuffer.h"
 #include <sstream>
 
 void Turbo::Core::TPipelineDescriptorSet::InternalCreate()

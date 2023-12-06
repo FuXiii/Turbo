@@ -1,5 +1,6 @@
 #include "TDescriptor.h"
 #include "TException.h"
+#include "TShader.h"
 
 Turbo::Core::TDescriptor::TDescriptor(const TRefPtr<TShader> &shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {

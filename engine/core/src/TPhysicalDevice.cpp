@@ -324,6 +324,8 @@ void Turbo::Core::TPhysicalDevice::EnumerateMemoryType()
 
 void Turbo::Core::TPhysicalDevice::EnumerateFromat()
 {
+    // TRefPtr<const TPhysicalDevice> physical_device = this;
+    // std::vector<TFormatInfo> support_formats = TFormatInfo::GetSupportFormats(physical_device);
     std::vector<TFormatInfo> support_formats = TFormatInfo::GetSupportFormats(this);
     for (TFormatInfo &format_info_item : support_formats)
     {
@@ -571,7 +573,7 @@ bool Turbo::Core::TPhysicalDevice::IsSupportLayer(TLayerType layerType) const
 
 std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TPhysicalDevice::GetSupportFormats() const
 {
-    return TFormatInfo::GetSupportFormats(this);
+    return TFormatInfo::GetSupportFormats((Turbo::Core::TPhysicalDevice *)(this));
 }
 
 bool Turbo::Core::TPhysicalDevice::IsSupportFormat(TFormatType formatType) const

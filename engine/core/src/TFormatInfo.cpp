@@ -921,7 +921,7 @@ bool Turbo::Core::TFormatInfo::operator!=(const TFormatInfo &format) const
     return false;
 }
 
-std::string Turbo::Core::TFormatInfo::ToString()const
+std::string Turbo::Core::TFormatInfo::ToString() const
 {
     return std::string();
 }

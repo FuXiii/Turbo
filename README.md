@@ -4069,3 +4069,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./engine/core`下`TFormatInfo`中移除对于`Turbo::Core::TDevice`的提前声明和头文件引入。
   >* `./engine/core`下移除所有类中对`TRefPtr<T>`成员赋`nullptr`初始值。使其通过默认的构造函数进行初始化。
+  >* `./engine/core`下`TDescriptor.cpp`开头增加对于`TShader.h`头文件的包含。
+  >* `./engine/core`下`TPhysicalDevice`中`GetSupportFormats() const`成员函数中将`this`的`const TPhysicalDevice *`指针强制转换成`TPhysicalDevice *`。用于获取支持的格式。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorSetLayout.h`头文件的包含。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorPool.h`头文件的包含。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TBuffer.h`头文件的包含。
