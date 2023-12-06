@@ -14,7 +14,7 @@ class TDevice;
 class TFence : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkFence vkFence = VK_NULL_HANDLE;
 
   protected:

@@ -76,7 +76,7 @@ class TSpecializationConstant : public Turbo::Core::TInfo
 class TShader : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkShaderModule vkShaderModule = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN
 

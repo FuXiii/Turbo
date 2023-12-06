@@ -16,7 +16,7 @@ class TCommandBuffer;
 class TRenderPass : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkRenderPass vkRenderPass = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN std::vector<TSubpass> subpasses;
     T_VULKAN_HANDLE_DATA std::vector<TAttachment> attachments;

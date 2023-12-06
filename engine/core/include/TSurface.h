@@ -116,7 +116,7 @@ typedef enum class TPresentMode
 class TSurface : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<Turbo::Core::TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
 
     bool isExternalHandle = false;

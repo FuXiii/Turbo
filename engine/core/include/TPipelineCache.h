@@ -18,7 +18,7 @@ enum class TPipelineCacheHeaderVersion
 class TPipelineCache : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
 
     size_t size;

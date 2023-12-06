@@ -22,7 +22,7 @@ namespace Extension
 class TSwapchain : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<TSurface> surface = nullptr;
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<TSurface> surface;
     T_VULKAN_HANDLE_HANDLE VkSwapchainKHR vkSwapchainKHR = VK_NULL_HANDLE;
 
     uint32_t minImageCount;
@@ -36,7 +36,7 @@ class TSwapchain : public Turbo::Core::TVulkanHandle
     TPresentMode presentMode;
     bool isClipped;
 
-    Turbo::Core::TRefPtr<TSwapchain> oldSwapchain = nullptr;
+    Turbo::Core::TRefPtr<TSwapchain> oldSwapchain;
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> images;
 

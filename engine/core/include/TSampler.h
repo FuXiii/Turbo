@@ -43,7 +43,7 @@ typedef enum class TBorderColor
 class TSampler : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkSampler vkSampler = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 

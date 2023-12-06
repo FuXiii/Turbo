@@ -90,7 +90,7 @@ class TPhysicalDevice : public TVulkanHandle
     friend class TDeviceQueue;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TInstance> instance = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TInstance> instance;
     T_VULKAN_HANDLE_HANDLE VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TDevice>> devices;
 

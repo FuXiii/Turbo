@@ -60,10 +60,10 @@ typedef VkFlags TPipelineStages;
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
-    T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
+    T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout;
     T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShader>> shaders;
-    T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache = nullptr;
+    T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache;
     TPipelineType type;
 
   protected:

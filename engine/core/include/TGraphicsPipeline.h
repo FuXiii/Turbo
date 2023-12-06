@@ -191,7 +191,7 @@ typedef enum class TBlendOp
 class TGraphicsPipeline : public Turbo::Core::TPipeline
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass;
 
     TTopologyType topology;
     bool primitiveRestartEnable;

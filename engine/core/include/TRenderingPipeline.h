@@ -29,9 +29,9 @@ class TRenderingAttachments // TODO: Inherit from TInfo
   private:
     struct TRenderingAttachment
     {
-        TRefPtr<TImageView> imageView = nullptr;
+        TRefPtr<TImageView> imageView;
         TImageLayout layout = TImageLayout::UNDEFINED;
-        TRefPtr<TImageView> resolveImageView = nullptr;
+        TRefPtr<TImageView> resolveImageView;
         TImageLayout resolveLayout = TImageLayout::UNDEFINED;
         TResolveModeBits resolveModeBits = TResolveModeBits::NONE;
         TLoadOp loadOp = TLoadOp::DONT_CARE;

@@ -15,7 +15,7 @@ class TDevice;
 class TEngine : public TObject
 {
   private:
-    TRefPtr<TInstance> instance = nullptr;
+    TRefPtr<TInstance> instance;
 
   private:
     void VerificationInitVulkan();

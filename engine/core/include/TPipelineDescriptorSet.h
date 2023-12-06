@@ -17,8 +17,8 @@ class TSampler;
 class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TPipelineLayout> pipelineLayout = nullptr;
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TPipelineLayout> pipelineLayout;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool;
     T_VULKAN_HANDLE_HANDLE std::vector<TRefPtr<TDescriptorSet>> descriptorSets;
     T_VULKAN_HANDLE_CHILDREN;
 

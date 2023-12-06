@@ -13,7 +13,7 @@ class TImageView;
 class TFramebuffer : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass;
     T_VULKAN_HANDLE_HANDLE VkFramebuffer vkFramebuffer = VK_NULL_HANDLE;
     std::vector<TRefPtr<TImageView>> attachments;
 

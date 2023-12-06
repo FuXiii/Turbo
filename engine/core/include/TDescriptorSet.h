@@ -16,8 +16,8 @@ class TSampler;
 class TDescriptorSet : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool = nullptr;
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorSetLayout> descriptorSetLayout = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorSetLayout> descriptorSetLayout;
     T_VULKAN_HANDLE_HANDLE VkDescriptorSet vkDescriptorSet = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 

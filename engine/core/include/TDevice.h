@@ -27,10 +27,10 @@ class TDevice : public Turbo::Core::TVulkanHandle
     friend class TPhysicalDevice;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TPhysicalDevice> physicalDevice = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TPhysicalDevice> physicalDevice;
     T_VULKAN_HANDLE_HANDLE VkDevice vkDevice = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TDeviceQueue>> deviceQueues;
-    T_VULKAN_HANDLE_CHILDREN TRefPtr<TVmaAllocator> vmaAllocator = nullptr;
+    T_VULKAN_HANDLE_CHILDREN TRefPtr<TVmaAllocator> vmaAllocator;
 
     T_VULKAN_HANDLE_DATA std::vector<std::vector<float>> deviceQueuePriorities;
 

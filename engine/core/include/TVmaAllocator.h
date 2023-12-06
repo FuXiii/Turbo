@@ -15,7 +15,7 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
     friend class TDevice;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocator;
     T_VULKAN_HANDLE_CHILDREN; // In CPP: VmaAllocator vmaAllocator;
 

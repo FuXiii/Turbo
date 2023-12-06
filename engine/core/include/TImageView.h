@@ -45,7 +45,7 @@ typedef VkFlags TImageAspects;
 class TImageView : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TImage> image = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TImage> image;
     T_VULKAN_HANDLE_HANDLE VkImageView vkImageView = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 
