@@ -4,6 +4,7 @@
 #include "TImage.h"
 #include "TImageView.h"
 #include "TInfo.h"
+#include "TBuffer.h"
 
 namespace Turbo
 {

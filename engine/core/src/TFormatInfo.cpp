@@ -1,5 +1,4 @@
 #include "TFormatInfo.h"
-#include "TDevice.h"
 #include "TException.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanLoader.h"

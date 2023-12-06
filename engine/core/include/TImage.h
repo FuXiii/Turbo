@@ -86,7 +86,8 @@ class TImage : public Turbo::Core::TVulkanHandle
     friend class Turbo::Extension::TSwapchain;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    // OLD:T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkImage vkImage = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;

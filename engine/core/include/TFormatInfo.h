@@ -7,8 +7,6 @@ namespace Turbo
 {
 namespace Core
 {
-class TDevice;
-
 typedef enum class TFormatType
 {
     UNDEFINED = VkFormat::VK_FORMAT_UNDEFINED,

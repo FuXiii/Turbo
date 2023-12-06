@@ -21,7 +21,7 @@ class TCommandBufferPool : public Turbo::Core::TVulkanHandle
     friend class TCommandBuffer;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDeviceQueue> deviceQueue = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDeviceQueue> deviceQueue;
     T_VULKAN_HANDLE_HANDLE VkCommandPool vkCommandPool = VK_NULL_HANDLE;
     // OLD: T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBufferBase>> commandBuffers;
 

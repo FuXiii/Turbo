@@ -4064,3 +4064,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TSurface`中增加`Valid()`函数的重写。
   >* `./engine/core`下`TSwapchain`中增加`Valid()`函数的重写。
   >* `./engine/core`下`TVmaAllocator`中增加`Valid()`函数的重写。
+
+* 2023/12/6 设计架构
+  >
+  >* `./engine/core`下`TFormatInfo`中移除对于`Turbo::Core::TDevice`的提前声明和头文件引入。
+  >* `./engine/core`下移除所类中对`TRefPtr<T>`成员赋`nullptr`初始值。

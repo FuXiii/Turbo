@@ -40,7 +40,7 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     friend class TCommandBufferPool;
 
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TCommandBufferPool> commandBufferPool = nullptr; // TCommandBufferPool *commandBufferPool = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TCommandBufferPool> commandBufferPool; // TCommandBufferPool *commandBufferPool = nullptr;
     T_VULKAN_HANDLE_HANDLE VkCommandBuffer vkCommandBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN; //???
 
@@ -48,10 +48,10 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     VkCommandBufferInheritanceInfo *vkCommandBufferInheritanceInfo = nullptr;
 
   protected:
-    TRefPtr<TRenderPass> currentRenderPass = nullptr;
-    TRefPtr<TPipeline> currentPipeline = nullptr;
+    TRefPtr<TRenderPass> currentRenderPass;
+    TRefPtr<TPipeline> currentPipeline;
     uint32_t currentSubpass = 0;
-    TRefPtr<TFramebuffer> currentFramebuffer = nullptr;
+    TRefPtr<TFramebuffer> currentFramebuffer;
 
   protected:
     virtual void InternalCreate() override;

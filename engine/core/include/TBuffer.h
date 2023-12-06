@@ -40,7 +40,7 @@ typedef VkFlags TBufferUsages;
 class TBuffer : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr; // TDevice* device = nullptr
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device; // TDevice* device = nullptr
     T_VULKAN_HANDLE_HANDLE VkBuffer vkBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
