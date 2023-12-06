@@ -70,7 +70,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
   public:
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout);
-    ~TImageMemoryBarrier();
+    ~TImageMemoryBarrier() = default;
 
   public:
     TImageLayout GetOldLayout() const;

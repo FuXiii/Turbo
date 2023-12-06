@@ -4074,3 +4074,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorSetLayout.h`头文件的包含。
   >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorPool.h`头文件的包含。
   >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TBuffer.h`头文件的包含。
+  >* `./engine/core`下`TRenderingPipeline.cpp`开头增加对于`TImageView.h`头文件的包含。
+  >* `./engine/core`下`TBarrier.h`中`TImageMemoryBarrier`的析构函数声明为`default`。
+  >* `./engine/core`下`TDescriptorPool.h`中`TDescriptorSize`的析构函数声明为`default`。

@@ -21,7 +21,7 @@ class TDescriptorSize : public Turbo::Core::TInfo
 
   public:
     TDescriptorSize(TDescriptorType type, uint32_t count);
-    ~TDescriptorSize();
+    ~TDescriptorSize() = default;
 
   public:
     TDescriptorType GetDescriptorType() const;
