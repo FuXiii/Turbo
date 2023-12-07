@@ -337,10 +337,19 @@ void Turbo::Core::TInstance::InternalCreate()
     this->instanceDriver = new TInstanceDriver();
     *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
 
-    for (TPhysicalDevice *physical_device_item : this->physicalDevices)
+    std::cout << "this->physicalDevices.size():" << this->physicalDevices.size() << std::endl;
+    try
     {
-        physical_device_item->InternalCreate();
+        for (TPhysicalDevice *physical_device_item : this->physicalDevices)
+        {
+            physical_device_item->InternalCreate();
+        }
     }
+    catch (std::exception &e)
+    {
+        std::cout << "!!!exception:" << e.what() << std::endl;
+    }
+    std::cout << "this->physicalDevices end loop" << std::endl;
 }
 
 void Turbo::Core::TInstance::InternalDestroy()

@@ -4077,3 +4077,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TRenderingPipeline.cpp`开头增加对于`TImageView.h`头文件的包含。
   >* `./engine/core`下`TBarrier.h`中`TImageMemoryBarrier`的析构函数声明为`default`。
   >* `./engine/core`下`TDescriptorPool.h`中`TDescriptorSize`的析构函数声明为`default`。
+
+* 2023/12/7 设计架构
+  >
+  >* `./engine/core`下`main.cpp`进行`TRefPtr<T>`计数引用适配。
+  >* `./engine/core`下`TDeviceQueue`中的`bool Submit(std::vector<TRefPtr<TSemaphore>> &, std::vector<TRefPtr<TSemaphore>> &,...)`更改成`bool Submit(const std::vector<TRefPtr<TSemaphore>> &, const std::vector<TRefPtr<TSemaphore>> &,...)`。形参为`const`的版本。
+  >* `./engine/core`下`TInstance`中对于`this->physicalDevices`数组遍历时出现了未知异常。尝试解决该`Bug`。
+
+  

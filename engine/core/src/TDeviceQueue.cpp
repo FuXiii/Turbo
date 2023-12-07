@@ -144,13 +144,13 @@ const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDeviceQueue::Get
     return this->device;
 }
 
-bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> &waitSemaphores, std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
+bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
 {
     std::vector<VkSemaphore> wait_semaphores;
     std::vector<VkPipelineStageFlags> wait_dst_stage_masks;
     if (!waitSemaphores.empty())
     {
-        for (TRefPtr<TSemaphore> &semaphore_item : waitSemaphores)
+        for (const TRefPtr<TSemaphore> &semaphore_item : waitSemaphores)
         {
             wait_semaphores.push_back(semaphore_item->GetVkSemaphore());
             wait_dst_stage_masks.push_back(semaphore_item->GetWaitDstStageMask());
@@ -160,7 +160,7 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TRefPtr<TSemaphore>> &waitSem
     std::vector<VkSemaphore> signal_semaphores;
     if (!signalSemaphores.empty())
     {
-        for (TRefPtr<TSemaphore> &semaphore_item : signalSemaphores)
+        for (const TRefPtr<TSemaphore> &semaphore_item : signalSemaphores)
         {
             signal_semaphores.push_back(semaphore_item->GetVkSemaphore());
         }
