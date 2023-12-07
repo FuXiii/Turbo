@@ -1754,6 +1754,9 @@ int main()
     // OLD:delete command_pool;
     // OLD:delete swapchain;
     // OLD:delete surface;
+
+    // FIXME: When destroy VkSurfaceKHR, but now the VkSwapchainKHR had not been destroied. We should destroy VkSwapchainKHR before VkSurfaceKHR.
+    // TODO: let TSurface manager it lifetime maybe a good idea
     PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
     pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();

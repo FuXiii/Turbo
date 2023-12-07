@@ -4114,3 +4114,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TDevice`下的`GetBestTransferQueue`成员函数。适配`deviceQueues`的成员变量。
   >* `./engine/core`下更新`TDevice`下的`GetBestSparseBindingQueue`成员函数。适配`deviceQueues`的成员变量。
   >* `./engine/core`下更新`TDevice`下的`GetBestProtectedQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`main.cpp`下结尾处提出对于销毁`VkSurfaceKHR`修改意见。
