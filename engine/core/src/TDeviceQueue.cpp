@@ -56,6 +56,7 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
     // TODO: load vkQueuePresentKHR function
     // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
     // FIXME: vkQueuePresentKHR
+    // FIXME: Try to use device driver function pointer (2023/12/7)
     if (this->device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
     {
         this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
@@ -65,10 +66,10 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
         throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Core::TDeviceQueue::InternalCreate()", "Please enable the VK_KHR_swapchain extension");
     }
 
-    for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
-    {
-        command_buffer_pool_item->InternalCreate();
-    }
+    // OLD:for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
+    // OLD:{
+    // OLD:    command_buffer_pool_item->InternalCreate();
+    // OLD:}
 }
 
 void Turbo::Core::TDeviceQueue::InternalDestroy()
@@ -93,12 +94,14 @@ Turbo::Core::TDeviceQueue::TDeviceQueue(const TRefPtr<TDevice> &device, TQueueFa
             this->queueFamily = queueFamily;
             this->index = index;
 
+            this->InternalCreate();
+
             this->device->AddChildHandle(this);
 
-            this->device->InternalRebuild();
+            // OLD:this->device->InternalRebuild();
 
             // 更新TPhysicalDevice下的可用queue的数量
-            device->physicalDevice->AvailableQueueCountMinusOneByQueueFamilyIndex(this->queueFamily.GetIndex());
+            // OLD:device->physicalDevice->AvailableQueueCountMinusOneByQueueFamilyIndex(this->queueFamily.GetIndex());
         }
         else
         {
@@ -115,7 +118,7 @@ Turbo::Core::TDeviceQueue::~TDeviceQueue()
 {
     this->device->RemoveChildHandle(this);
 
-    device->physicalDevice->AvailableQueueCountPlussOneByQueueFamilyIndex(this->queueFamily.GetIndex());
+    // OLD:device->physicalDevice->AvailableQueueCountPlussOneByQueueFamilyIndex(this->queueFamily.GetIndex());
 
     // this->device->InternalRebuild();
 

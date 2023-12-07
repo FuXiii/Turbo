@@ -48,8 +48,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
     virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
 
-    uint32_t GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo queueFamily);
-    std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
+    // OLD:uint32_t GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo queueFamily);
+    // OLD:std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
 
   public:
     explicit TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);

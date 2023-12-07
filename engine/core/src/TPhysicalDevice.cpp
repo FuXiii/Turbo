@@ -349,7 +349,7 @@ void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
 
     size_t queue_family_count = this->info.queueFamilys.size();
 
-    this->availableQueueCountMap.clear();
+    // OLD:this->availableQueueCountMap.clear();
 
     auto ptr = &this->info.queueFamilys;
 
@@ -409,7 +409,7 @@ void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
             }
         }
 
-        this->availableQueueCountMap[this->info.queueFamilys[queue_index]] = this->info.queueFamilys[queue_index].GetQueueCount();
+        // OLD:this->availableQueueCountMap[this->info.queueFamilys[queue_index]] = this->info.queueFamilys[queue_index].GetQueueCount();
     }
 }
 
@@ -914,62 +914,58 @@ uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(Turbo::Core::TQueu
 
 uint32_t Turbo::Core::TPhysicalDevice::GetAvailableQueueCount(uint32_t queueFamilyIndex) const
 {
-    for (auto &item : this->availableQueueCountMap)
+    if (queueFamilyIndex < this->info.queueFamilys.size())
     {
-        TQueueFamilyInfo famuly_queue = item.first;
-        if (famuly_queue.GetIndex() == queueFamilyIndex)
-        {
-            return item.second;
-        }
+        return this->info.queueFamilys[queueFamilyIndex].GetQueueCount();
     }
 
     return 0;
 }
 
-void Turbo::Core::TPhysicalDevice::AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex)
-{
-    for (auto &item : this->availableQueueCountMap)
-    {
-        TQueueFamilyInfo famuly_queue = item.first;
-        if (famuly_queue.GetIndex() == queueFamilyIndex)
-        {
-            item.second = item.second - 1;
-            break;
-        }
-    }
-}
+// OLD:void Turbo::Core::TPhysicalDevice::AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex)
+// OLD:{
+// OLD:    for (auto &item : this->availableQueueCountMap)
+// OLD:    {
+// OLD:        TQueueFamilyInfo famuly_queue = item.first;
+// OLD:        if (famuly_queue.GetIndex() == queueFamilyIndex)
+// OLD:        {
+// OLD:            item.second = item.second - 1;
+// OLD:            break;
+// OLD:        }
+// OLD:    }
+// OLD:}
 
-void Turbo::Core::TPhysicalDevice::AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex)
-{
-    for (auto &item : this->availableQueueCountMap)
-    {
-        TQueueFamilyInfo famuly_queue = item.first;
-        if (famuly_queue.GetIndex() == queueFamilyIndex)
-        {
-            item.second = item.second + 1;
-            break;
-        }
-    }
-}
+// OLD:void Turbo::Core::TPhysicalDevice::AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex)
+// OLD:{
+// OLD:    for (auto &item : this->availableQueueCountMap)
+// OLD:    {
+// OLD:        TQueueFamilyInfo famuly_queue = item.first;
+// OLD:        if (famuly_queue.GetIndex() == queueFamilyIndex)
+// OLD:        {
+// OLD:            item.second = item.second + 1;
+// OLD:            break;
+// OLD:        }
+// OLD:    }
+// OLD:}
 
-void Turbo::Core::TPhysicalDevice::ResetQueueCountMap()
-{
-    for (auto &queue_family_item : this->info.queueFamilys)
-    {
-        uint32_t queue_index = queue_family_item.GetIndex();
-        uint32_t queue_count = queue_family_item.GetQueueCount();
-
-        for (auto &available_queue_count_map_item : this->availableQueueCountMap)
-        {
-            TQueueFamilyInfo famuly_queue = available_queue_count_map_item.first;
-            if (famuly_queue.GetIndex() == queue_index)
-            {
-                available_queue_count_map_item.second = queue_count;
-                break;
-            }
-        }
-    }
-}
+// OLD:void Turbo::Core::TPhysicalDevice::ResetQueueCountMap()
+// OLD:{
+// OLD:    for (auto &queue_family_item : this->info.queueFamilys)
+// OLD:    {
+// OLD:        uint32_t queue_index = queue_family_item.GetIndex();
+// OLD:        uint32_t queue_count = queue_family_item.GetQueueCount();
+// OLD:
+// OLD:        for (auto &available_queue_count_map_item : this->availableQueueCountMap)
+// OLD:        {
+// OLD:            TQueueFamilyInfo famuly_queue = available_queue_count_map_item.first;
+// OLD:            if (famuly_queue.GetIndex() == queue_index)
+// OLD:            {
+// OLD:                available_queue_count_map_item.second = queue_count;
+// OLD:                break;
+// OLD:            }
+// OLD:        }
+// OLD:    }
+// OLD:}
 
 bool Turbo::Core::TPhysicalDevice::IsFormatSupportImage(TFormatType formatType, TImageType imageType, TImageTiling tiling, TImageUsages usages, VkImageCreateFlags imageFlags) const
 {

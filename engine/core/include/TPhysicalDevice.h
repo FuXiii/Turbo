@@ -112,7 +112,7 @@ class TPhysicalDevice : public TVulkanHandle
     T_VULKAN_HANDLE_REFRESH_DATA uint32_t bestSparseQueueFamilyIndex = UINT32_MAX;
     T_VULKAN_HANDLE_REFRESH_DATA uint32_t bestProtectedQueueFamilyIndex = UINT32_MAX;
 
-    T_VULKAN_HANDLE_REFRESH_DATA std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap;
+    // OLD:T_VULKAN_HANDLE_REFRESH_DATA std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap;
 
     TPhysicalDeviceDriver *physicalDeviceDriver = nullptr;
 
@@ -139,9 +139,9 @@ class TPhysicalDevice : public TVulkanHandle
     virtual ~TPhysicalDevice();
 
   private:
-    void AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex);
-    void AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex);
-    void ResetQueueCountMap();
+    // OLD:void AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex);
+    // OLD:void AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex);
+    // OLD:void ResetQueueCountMap();
 
   public:
     VkPhysicalDevice GetVkPhysicalDevice();

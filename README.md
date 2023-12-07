@@ -4096,3 +4096,21 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TPhysicalDevice`下的`InternalCreate()`成员函数中移除对于`TDevice::InternalCreate()`的调用。
   >* `./engine/core`下更新`TDevice`下的`InternalCreate()`成员函数中移除对于`TDeviceQueue::InternalCreate()`的调用。
   >* `./engine/core`下更新`TDevice`下的构造函数中对于`TDeviceQueue`的创建。
+  >* `./engine/core`下更新`TDeviceQueue`下的构造函数。移除对于重构`TDevice`的策略。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap`成员变量。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex)`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex)`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void ResetQueueCountMap()`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下`GetAvailableQueueCount`成员函数。
+  >* `./engine/core`下更新`TDeviceQueue`下的`InternalCreate()`成员函数中移除对于`TCommandBufferPool::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的`AddChildHandle(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`InternalDestroy(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`InternalDestroy(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetDeviceQueueCountByQueueFamily(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下移除`GetDeviceQueueCountByQueueFamily`成员函数。
+  >* `./engine/core`下更新`TDevice`下移除`GetDeviceQueueFamilyInfos`成员函数。
+  >* `./engine/core`下更新`TDevice`下的`GetBestGraphicsQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestComputeQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestTransferQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestSparseBindingQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestProtectedQueue`成员函数。适配`deviceQueues`的成员变量。
