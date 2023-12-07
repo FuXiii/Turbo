@@ -1027,6 +1027,8 @@ void Turbo::Core::TDevice::InternalCreate()
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
 
+    TRefPtr<TDevice> temp_ref_device = this;
+
     // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
     this->deviceDriver = new TDeviceDriver();
     *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this); // TODO:load dynamic rendering function
@@ -1040,6 +1042,8 @@ void Turbo::Core::TDevice::InternalCreate()
     {
         device_queue_item->InternalCreate();
     }
+
+    temp_ref_device.Unbind();
 }
 
 void Turbo::Core::TDevice::InternalDestroy()

@@ -461,6 +461,8 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
 
     this->vkPhysicalDevice = vk_physical_devices[this->index];
 
+    TRefPtr<TPhysicalDevice> temp_ref_physical_device = this;
+
     // 创建 TPhysicalDeviceDriver
     this->physicalDeviceDriver = new TPhysicalDeviceDriver();
     *this->physicalDeviceDriver = TVulkanLoader::Instance()->LoadPhysicalDeviceDriver(this);
@@ -480,6 +482,8 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
     {
         device_item->InternalCreate();
     }
+
+    temp_ref_physical_device.Unbind();
 }
 
 void Turbo::Core::TPhysicalDevice::InternalDestroy()

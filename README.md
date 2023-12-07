@@ -4082,6 +4082,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./engine/core`下`main.cpp`进行`TRefPtr<T>`计数引用适配。
   >* `./engine/core`下`TDeviceQueue`中的`bool Submit(std::vector<TRefPtr<TSemaphore>> &, std::vector<TRefPtr<TSemaphore>> &,...)`更改成`bool Submit(const std::vector<TRefPtr<TSemaphore>> &, const std::vector<TRefPtr<TSemaphore>> &,...)`。形参为`const`的版本。
-  >* `./engine/core`下`TInstance`中对于`this->physicalDevices`数组遍历时出现了未知异常。尝试解决该`Bug`。
-
-  
+  >* `./engine/core`下`TInstance`中`InternalCreate()`成员函数，对于`this->physicalDevices`数组遍历时出现了未知异常。尝试解决该`Bug`。
+  >* `./engine/core`下`TRefPtr`中移除`void Release()`成员函数。
+  >* `./engine/core`下`TReferenced`中增加`uint32_t UnReferenceWithoutDelete() const`成员函数。用于仅解除计数引用而不触发销毁判断。
+  >* `./engine/core`下`TRefPtr`中增加`T *Unbind()`成员函数。用于仅解除计数引用而不触发销毁判断。
+  >* `./engine/core`下`TInstance`中`InternalCreate()`成员函数，在内部会调用`TVulkanLoader::Instance()->LoadInstanceDriver(this)`而`this`当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下`TPhysicalDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下`TDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下创建`TDevice`和`TDeviceQueue`时内部有非常恶心的逻辑前后互调用和重建，调整这一部分使其清晰明了。（历史遗留问题，当时脑子抽了写的啥玩意？？？）

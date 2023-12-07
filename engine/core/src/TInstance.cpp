@@ -335,21 +335,19 @@ void Turbo::Core::TInstance::InternalCreate()
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
 
     this->instanceDriver = new TInstanceDriver();
-    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
 
-    std::cout << "this->physicalDevices.size():" << this->physicalDevices.size() << std::endl;
-    try
+    // NOTE: for current [this->referenceCount is 0] and [TVulkanLoader::LoadInstanceDriver(const TRefPtr<TInstance> &instance, ...)] use
+    // NOTE: [const TRefPtr<TInstance> &instance] , it will cause: If out from [TVulkanLoader::LoadInstanceDriver(...)] function
+    // NOTE: [TRefPtr] will check [this->referenceCount is 0] and then trigger [Release] call. Let [delete this] to be called.
+    // OLD:*this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);//NOTE: it will trigger [delete this]
+    TRefPtr<TInstance> temp_ref_instance = this;
+    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
+    temp_ref_instance.Unbind();
+
+    for (TPhysicalDevice *physical_device_item : this->physicalDevices)
     {
-        for (TPhysicalDevice *physical_device_item : this->physicalDevices)
-        {
-            physical_device_item->InternalCreate();
-        }
+        physical_device_item->InternalCreate();
     }
-    catch (std::exception &e)
-    {
-        std::cout << "!!!exception:" << e.what() << std::endl;
-    }
-    std::cout << "this->physicalDevices end loop" << std::endl;
 }
 
 void Turbo::Core::TInstance::InternalDestroy()

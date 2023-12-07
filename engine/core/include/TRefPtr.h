@@ -258,16 +258,27 @@ class TRefPtr
         rp.ptr = temp;
     }
 
-    // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
-    // FIXME: It best to be private
-    void Release()
+    T *Unbind()
     {
-        if (this->ptr != nullptr)
+        T *temp_ptr = this->ptr;
+        if (temp_ptr != nullptr)
         {
-            this->ptr->Release();
-            this->ptr = nullptr;
+            temp_ptr->UnReferenceWithoutDelete();
         }
+        this->ptr = nullptr;
+        return temp_ptr;
     }
+
+    // NOTE: It will force delete the memory it occupied. If you really know what are you doing, otherwise never call it yourself!
+    // FIXME: It best to be private or remove
+    // void Release()
+    //{
+    //    if (this->ptr != nullptr)
+    //    {
+    //        this->ptr->Release();
+    //        this->ptr = nullptr;
+    //    }
+    //}
 
     explicit operator bool() const
     {

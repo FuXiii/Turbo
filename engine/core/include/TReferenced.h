@@ -20,6 +20,7 @@ class TReferenced
 
     uint32_t Reference() const;
     uint32_t UnReference() const;
+    uint32_t UnReferenceWithoutDelete() const;
 
     uint32_t GetReferenceCount() const;
 
