@@ -222,3 +222,5 @@ TRenderPass render_pass_2(subpass_chain_2);
 - <font color=green>**[ ✓ ]2023/12/5**</font> ~~所有`ToString`函数都应该在结尾声明为`const`。常量对象也可以调用该函数。~~
 
 - 对着色器代码解析时，能够获取结构体内存对齐相关信息。记得保存这部分信息，并在`CPU`写入数据时根据对齐信息内部自动进行对齐计算。
+
+- `Turbo::Core::TInstance`的构造函数形参最好使用引用类型，而不是指针类型。

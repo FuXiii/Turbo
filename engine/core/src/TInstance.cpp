@@ -344,10 +344,10 @@ void Turbo::Core::TInstance::InternalCreate()
     *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
     temp_ref_instance.Unbind();
 
-    for (TPhysicalDevice *physical_device_item : this->physicalDevices)
-    {
-        physical_device_item->InternalCreate();
-    }
+    // for (TPhysicalDevice *physical_device_item : this->physicalDevices)
+    //{
+    //     physical_device_item->InternalCreate();
+    // }
 }
 
 void Turbo::Core::TInstance::InternalDestroy()

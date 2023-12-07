@@ -417,6 +417,8 @@ void Turbo::Core::TPhysicalDevice::AddChildHandle(const TRefPtr<TDevice> &device
 {
     if (device.Valid())
     {
+        // FIXME: find it, prevent duplicate additions
+
         this->devices.push_back(device);
     }
 }
@@ -478,10 +480,10 @@ void Turbo::Core::TPhysicalDevice::InternalCreate()
     this->CalculatePerformanceScore();
     this->InitDeviceQueueParameter();
 
-    for (TDevice *device_item : this->devices)
-    {
-        device_item->InternalCreate();
-    }
+    // for (TDevice *device_item : this->devices)
+    //{
+    //     device_item->InternalCreate();
+    // }
 
     temp_ref_physical_device.Unbind();
 }

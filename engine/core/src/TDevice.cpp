@@ -846,12 +846,12 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
 
 void Turbo::Core::TDevice::InternalCreate()
 {
-    std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->GetDeviceQueueFamilyInfos();
+    std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->physicalDevice->GetQueueFamilys();
     uint32_t device_queue_family_info_count = device_queue_family_infos.size();
 
     if (device_queue_family_info_count <= 0)
     {
-        return; // Vulkan Specification:device queue create count must greater than zero.
+        throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TDevice::InternalCreate", "Can not find enough queue family information on current physical device");
     }
 
     std::vector<VkDeviceQueueCreateInfo> vk_device_queue_create_infos;
@@ -861,7 +861,8 @@ void Turbo::Core::TDevice::InternalCreate()
     {
         TQueueFamilyInfo &queue_family_info = device_queue_family_infos[device_queue_index];
         uint32_t queue_family_index = queue_family_info.GetIndex();
-        uint32_t queue_family_count = this->GetDeviceQueueCountByQueueFamily(queue_family_info);
+        // OLD:uint32_t queue_family_count = this->GetDeviceQueueCountByQueueFamily(queue_family_info);
+        uint32_t queue_family_count = queue_family_info.GetQueueCount();
         this->deviceQueuePriorities[queue_family_index].resize(queue_family_count, 0.0f);
 
         vk_device_queue_create_infos[device_queue_index].sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -1038,10 +1039,10 @@ void Turbo::Core::TDevice::InternalCreate()
         this->vmaAllocator->InternalCreate();
     }
 
-    for (TDeviceQueue *device_queue_item : this->deviceQueues)
-    {
-        device_queue_item->InternalCreate();
-    }
+    // for (TDeviceQueue *device_queue_item : this->deviceQueues)
+    //{
+    //     device_queue_item->InternalCreate();
+    // }
 
     temp_ref_device.Unbind();
 }
@@ -1105,10 +1106,14 @@ Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, st
         this->physicalDevice->AddChildHandle(this);
 
         // Create TDeviceQueues
-        std::vector<TQueueFamilyInfo> queue_family_infos = this->GetPhysicalDevice()->GetQueueFamilys();
-        for (TQueueFamilyInfo queue_family_info_item : queue_family_infos)
+        std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->physicalDevice->GetQueueFamilys();
+
+        for (TQueueFamilyIndex queue_family_index = 0; queue_family_index < this->deviceQueuePriorities.size(); queue_family_index++)
         {
-            new TDeviceQueue(this, queue_family_info_item, 0);
+            for (uint32_t queue_index = 0; queue_index < this->deviceQueuePriorities[queue_family_index].size(); queue_index++)
+            {
+                new TDeviceQueue(this, device_queue_family_infos[queue_family_index], queue_index);
+            }
         }
 
         this->vmaAllocator = new TVmaAllocator(this);

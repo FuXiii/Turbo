@@ -4090,3 +4090,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TPhysicalDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
   >* `./engine/core`下`TDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
   >* `./engine/core`下创建`TDevice`和`TDeviceQueue`时内部有非常恶心的逻辑前后互调用和重建，调整这一部分使其清晰明了。（历史遗留问题，当时脑子抽了写的啥玩意？？？）
+  >* `./engine/core`下更新`TDevice`下的`InternalCreate()`函数。内部构建已知队列方式。而不是使用之前动态创建队列再反补回头重构设备方式（太麻烦，也没必要）。
+  >* `./engine/core`下更新`TDevice`下的`std::vector<TRefPtr<TDeviceQueue>> deviceQueues`成员变量修改为`std::map<TQueueFamilyIndex, std::vector<TRefPtr<TDeviceQueue>>>`类型。
+  >* `./engine/core`下更新`TInstance`下的`InternalCreate()`成员函数中移除对于`TPhysicalDevice::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TPhysicalDevice`下的`InternalCreate()`成员函数中移除对于`TDevice::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的`InternalCreate()`成员函数中移除对于`TDeviceQueue::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的构造函数中对于`TDeviceQueue`的创建。
