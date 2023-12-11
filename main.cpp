@@ -619,7 +619,7 @@ int main()
     window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
     VkInstance vk_instance = instance->GetVkInstance();
-    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
+    glfwCreateWindowSurface(vk_instance, window, nullptr, &vk_surface_khr);
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
     physical_device_features.sampleRateShading = true;
@@ -637,7 +637,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
     Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
-    Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
     uint32_t min_image_count = surface->GetMinImageCount();
 
@@ -1757,8 +1757,8 @@ int main()
 
     // FIXME: When destroy VkSurfaceKHR, but now the VkSwapchainKHR had not been destroied. We should destroy VkSwapchainKHR before VkSurfaceKHR.
     // TODO: let TSurface manager it lifetime maybe a good idea
-    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
-    pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
+    // PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+    // pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
     // OLD:delete device;
     // OLD:delete instance;

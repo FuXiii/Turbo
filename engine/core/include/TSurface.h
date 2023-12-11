@@ -120,6 +120,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
 
     bool isExternalHandle = false;
+    const VkAllocationCallbacks *externalVkAllocationCallbacks = nullptr;
 
     std::vector<Turbo::Core::TQueueFamilyInfo> supportQueueFamilys;
 
@@ -206,7 +207,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
 #else
 #endif
     // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, VkSurfaceKHR vkSurfaceKHR);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR);
 
   protected:
     virtual ~TSurface();

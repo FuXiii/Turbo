@@ -4120,3 +4120,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./docs`下`TurboDesign.drawio`增加`JobSystem`板块。用于研究`JobSystem`。
   >* `./docs`下`TurboDesign.drawio`的`JobSystem`板块增加`WorkStealingDequeue`的架构图。用于研究`JobSystem`。
+  >* `./engine/core`下`TSurface`中增加`const VkAllocationCallbacks *externalVkAllocationCallbacks`成员变量。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`TSurface`中`TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &, VkSurfaceKHR)`构造函数中增加`const VkAllocationCallbacks *pAllocator`形参。并修改相应`cpp`中的实现。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`TSurface`更新`InternalDestroy()`成员函数。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`main.cpp`更新对于`glfw`创建的外部`VkSurfaceKHR`句柄的适配。

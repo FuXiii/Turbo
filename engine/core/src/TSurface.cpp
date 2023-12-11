@@ -216,6 +216,14 @@ void Turbo::Extension::TSurface::InternalDestroy()
             }
         }
     }
+    else
+    {
+        Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = device->GetPhysicalDevice()->GetInstance();
+        if (instance.Valid() && this->vkSurfaceKHR != VK_NULL_HANDLE)
+        {
+            this->vkDestroySurfaceKHR(instance->GetVkInstance(), this->vkSurfaceKHR, this->externalVkAllocationCallbacks);
+        }
+    }
 }
 
 #if defined(TURBO_PLATFORM_WINDOWS)
@@ -436,11 +444,12 @@ Turbo::Extension::TSurface::TSurface(...)
 #else
 #endif
 
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, VkSurfaceKHR vkSurfaceKHR)
+Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR)
 {
     if (device.Valid() && vkSurfaceKHR != VK_NULL_HANDLE)
     {
         this->isExternalHandle = true;
+        this->externalVkAllocationCallbacks = pAllocator;
         this->device = device;
         this->vkSurfaceKHR = vkSurfaceKHR;
 
