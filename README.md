@@ -4119,3 +4119,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2023/12/11 设计架构
   >
   >* `./docs`下`TurboDesign.drawio`增加`JobSystem`板块。用于研究`JobSystem`。
+  >* `./docs`下`TurboDesign.drawio`的`JobSystem`板块增加`WorkStealingDequeue`的架构图。用于研究`JobSystem`。
