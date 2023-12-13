@@ -4124,3 +4124,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下`TSurface`中`TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &, VkSurfaceKHR)`构造函数中增加`const VkAllocationCallbacks *pAllocator`形参。并修改相应`cpp`中的实现。用于适配外部`VkSurfaceKHR`句柄。
   >* `./engine/core`下`TSurface`更新`InternalDestroy()`成员函数。用于适配外部`VkSurfaceKHR`句柄。
   >* `./engine/core`下`main.cpp`更新对于`glfw`创建的外部`VkSurfaceKHR`句柄的适配。
+
+* 2023/12/13 设计架构
+  >
+  >* `./engine/render`下更新`TBuffer`中的`buffer`使用默认构造初始化。
+  >* `./engine/render`下更新`TBuffer`中的`Destroy`成员函数。释放所有成员变量。
+  >* `./engine/render`下更新`TBuffer`中的`Copy`成员函数。将所有`Turbo::Core`下的计数引用对象使用`Turbo::Core::TRefPtr`承接。

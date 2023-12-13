@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core

@@ -52,7 +52,7 @@ class TBuffer
   private:
     void *allocator = nullptr;
     // OLD:Turbo::Core::TBuffer *buffer = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> buffer;
     Descriptor descriptor;
 
   public:
