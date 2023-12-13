@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -50,8 +52,11 @@ class TRenderPass
     friend class TContext;
 
   private:
-    Turbo::Core::TRenderPass *renderPass = nullptr;
-    Turbo::Core::TFramebuffer *framebuffer = nullptr;
+    // OLD:Turbo::Core::TRenderPass *renderPass = nullptr;
+    // OLD:Turbo::Core::TFramebuffer *framebuffer = nullptr;
+    // NOTE: It will allocate in TContext::BeginRenderPass(...)
+    Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> renderPass;
+    Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> framebuffer;
 
   private:
     std::vector<TSubpass> subpasses;
