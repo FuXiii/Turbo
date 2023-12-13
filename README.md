@@ -4133,3 +4133,5 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/render`下更新`TImage`中的`image`和`imageView`成员。使用`Turbo::Core::TRefPtr<T>`适配。
   >* `./engine/render`下更新`TImage`及其子类中的`CreateImageView`成员函数。使用`Turbo::Core::TRefPtr<T>`适配。
   >* `./engine/render`下更新`TImage`中的`Destroy`成员函数。释放所有成员变量。
+  >* `./engine/render`下更新`TShader`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TSampler`。使用`Turbo::Core::TRefPtr<T>`适配。

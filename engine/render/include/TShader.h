@@ -3,6 +3,8 @@
 #define TURBO_RENDER_TSHADER_H
 #include <string>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -33,7 +35,7 @@ class TShader
     TShader() = default;
     ~TShader() = default;
 
-    public:
+  public:
     // disallow copy and assignment
     TShader(TShader const &) = delete;
     TShader(TShader &&) = delete;
@@ -44,40 +46,40 @@ class TShader
 class TComputeShader : public TShader
 {
   private:
-    Turbo::Core::TComputeShader *computeShader = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TComputeShader> computeShader;
 
   public:
     TComputeShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TComputeShader(TContext *context, size_t size, uint32_t *code);
     ~TComputeShader();
 
-    Turbo::Core::TComputeShader * GetComputeShader();
+    Turbo::Core::TRefPtr<Turbo::Core::TComputeShader> GetComputeShader();
 };
 
 class TVertexShader : public TShader
 {
   private:
-    Turbo::Core::TVertexShader *vertexShader = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertexShader;
 
   public:
     TVertexShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TVertexShader(TContext *context, size_t size, uint32_t *code);
     ~TVertexShader();
 
-    Turbo::Core::TVertexShader * GetVertexShader();
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> GetVertexShader();
 };
 
 class TFragmentShader : public TShader
 {
   private:
-    Turbo::Core::TFragmentShader *fragmentShader = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragmentShader;
 
   public:
     TFragmentShader(TContext *context, TShader::TLanguage language, const std::string &code);
     TFragmentShader(TContext *context, size_t size, uint32_t *code);
     ~TFragmentShader();
 
-    Turbo::Core::TFragmentShader * GetFragmentShader();
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> GetFragmentShader();
 };
 } // namespace Render
 } // namespace Turbo
