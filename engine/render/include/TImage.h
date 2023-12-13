@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <string>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -71,13 +73,15 @@ class TImage
     friend class TContext;
 
   private:
-    Turbo::Core::TImage *image = nullptr;
-    Turbo::Core::TImageView *imageView = nullptr;
+    // OLD:Turbo::Core::TImage *image = nullptr;
+    // OLD:Turbo::Core::TImageView *imageView = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> image = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imageView = nullptr;
 
     Descriptor descriptor;
 
   protected:
-    virtual Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image);
+    virtual Turbo::Core::TRefPtr<Turbo::Core::TImageView> CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image);
 
   public:
     TImage() = default;
@@ -239,7 +243,7 @@ class TTexture2D : public TColorImage2D
     };
 
   protected:
-    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image) override;
 
   public:
     TTexture2D() = default;
@@ -262,7 +266,7 @@ class TTexture3D : public TColorImage3D
     };
 
   protected:
-    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image) override;
 
   public:
     TTexture3D() = default;
@@ -284,7 +288,7 @@ class TDepthTexture2D : public TDepthImage2D
     };
 
   protected:
-    Turbo::Core::TImageView *CreateImageView(Turbo::Core::TImage *image) override;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image) override;
 
   public:
     TDepthTexture2D() = default;

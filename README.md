@@ -4130,3 +4130,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/render`下更新`TBuffer`中的`buffer`使用默认构造初始化。
   >* `./engine/render`下更新`TBuffer`中的`Destroy`成员函数。释放所有成员变量。
   >* `./engine/render`下更新`TBuffer`中的`Copy`成员函数。将所有`Turbo::Core`下的计数引用对象使用`Turbo::Core::TRefPtr`承接。
+  >* `./engine/render`下更新`TImage`中的`image`和`imageView`成员。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TImage`及其子类中的`CreateImageView`成员函数。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TImage`中的`Destroy`成员函数。释放所有成员变量。
