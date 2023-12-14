@@ -4137,3 +4137,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/render`下更新`TSampler`。使用`Turbo::Core::TRefPtr<T>`适配。
   >* `./engine/render`下更新`TRenderPass`。使用`Turbo::Core::TRefPtr<T>`适配。
   >* `./engine/render`下更新`TGraphicsPipeline`。使用`Turbo::Core::TRefPtr<T>`适配。
+
+* 2023/12/14 设计架构
+  >
+  >* `./engine/render`下更新`TResourceAllocator`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TContext`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`使用`Turbo::Core::TRefPtr<T>`初步适配完成。

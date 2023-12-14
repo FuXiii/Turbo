@@ -75,8 +75,8 @@ class TImage
   private:
     // OLD:Turbo::Core::TImage *image = nullptr;
     // OLD:Turbo::Core::TImageView *imageView = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> image = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imageView = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> image;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imageView;
 
     Descriptor descriptor;
 
