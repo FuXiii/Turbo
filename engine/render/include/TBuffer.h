@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <core/include/TRefPtr.h>
+#include <core/include/TBuffer.h>
 
 namespace Turbo
 {

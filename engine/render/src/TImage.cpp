@@ -3,6 +3,7 @@
 #include "vulkan/vulkan_core.h"
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TException.h>
+#include <core/include/TImage.h>
 #include <core/include/TImageView.h>
 #include <core/include/TPhysicalDevice.h>
 

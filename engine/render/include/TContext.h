@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <core/include/TRefPtr.h>
+#include <core/include/TFence.h>
 
 namespace Turbo
 {
@@ -121,11 +122,18 @@ class TRenderPassPool
     void GC();
 };
 
-typedef struct TCommandBuffer
+// OLD:typedef struct TCommandBuffer
+class TCommandBuffer
 {
+  public:
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> commandBuffer;
     Turbo::Core::TRefPtr<Turbo::Core::TFence> fence;
-} TCommandBuffer;
+
+  public:
+    TCommandBuffer();
+    ~TCommandBuffer();
+    // OLD:} TCommandBuffer;
+};
 
 class TContext
 {

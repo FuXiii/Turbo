@@ -4142,4 +4142,14 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./engine/render`下更新`TResourceAllocator`。使用`Turbo::Core::TRefPtr<T>`适配。
   >* `./engine/render`下更新`TContext`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TContext`下的`Turbo::Render::TCommandBuffer`从原先的`typedef struct`转成`class`声明。
+  >* `./engine/render`下更新`TBuffer.h`下引入`Core`的`TBuffer.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TBuffer.cpp`下引入`Core`的`TDevice.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TContext.h`下引入`Core`的`TFence.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.h`下引入`Core`的`TImage.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.h`下引入`Core`的`TImageView.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.cpp`下引入`Core`的`TImage.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TResourceAllocator.cpp`下引入`Core`的`TCommandBuffer.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TShader.cpp`下引入`Core`的`TDevice.h`的头文件。通过编译。
+  >* `./engine/render`目前有些头文件有冗余。
   >* `./engine/render`使用`Turbo::Core::TRefPtr<T>`初步适配完成。

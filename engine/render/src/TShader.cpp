@@ -1,6 +1,7 @@
 #include "render/include/TShader.h"
 #include "render/include/TContext.h"
 #include <core/include/TException.h>
+#include <core/include/TDevice.h>
 #include <core/include/TShader.h>
 
 Turbo::Render::TComputeShader::TComputeShader(Turbo::Render::TContext *context, TShader::TLanguage language, const std::string &code)

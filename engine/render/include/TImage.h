@@ -7,6 +7,8 @@
 #include <string>
 
 #include <core/include/TRefPtr.h>
+#include <core/include/TImage.h>
+#include <core/include/TImageView.h>
 
 namespace Turbo
 {

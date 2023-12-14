@@ -732,6 +732,16 @@ void Turbo::Render::TFramebufferPool::GC()
     this->framebuffers.clear();
 }
 
+Turbo::Render::TCommandBuffer::TCommandBuffer()
+{
+}
+
+Turbo::Render::TCommandBuffer::~TCommandBuffer()
+{
+    this->commandBuffer = nullptr;
+    this->fence = nullptr;
+}
+
 Turbo::Render::TContext::TContext()
 {
     // check Vulkan support

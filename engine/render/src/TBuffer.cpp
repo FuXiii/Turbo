@@ -3,6 +3,7 @@
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
+#include <core/include/TDevice.h>
 #include <core/include/TDeviceQueue.h>
 #include <core/include/TException.h>
 #include <core/include/TFence.h>

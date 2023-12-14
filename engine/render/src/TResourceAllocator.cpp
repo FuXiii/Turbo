@@ -1,4 +1,5 @@
 #include "render/include/TResourceAllocator.h"
+#include <core/include/TCommandBuffer.h>
 #include <core/include/TException.h>
 
 Turbo::Render::TResourceAllocator::TResourceAllocator(TContext *context)
