@@ -4153,3 +4153,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/render`下更新`TShader.cpp`下引入`Core`的`TDevice.h`的头文件。通过编译。
   >* `./engine/render`目前有些头文件有冗余。
   >* `./engine/render`使用`Turbo::Core::TRefPtr<T>`初步适配完成。
+
+* 2023/12/18 设计架构
+  >
+  >* `./thirdparty`下更新`KTX-Software`同步到`main`分支。
+  >* `./thirdparty`下`KTX-Software`中用到了`std::make_unique`。基本上为`C++14`以上特性。为此将`Turbo`从`C++11`提升至`C++17`。
