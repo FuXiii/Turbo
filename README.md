@@ -4158,3 +4158,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* `./thirdparty`下更新`KTX-Software`同步到`main`分支。
   >* `./thirdparty`下`KTX-Software`中用到了`std::make_unique`。基本上为`C++14`以上特性。为此将`Turbo`从`C++11`提升至`C++17`。
+
+* 2024/2/26
+  >
+  >* 更新 `HelloTriangle` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
