@@ -4162,3 +4162,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/2/26
   >
   >* 更新 `HelloTriangle` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TReferenced` 优化代码调用。

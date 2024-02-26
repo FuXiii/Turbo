@@ -13,7 +13,7 @@ class TReferenced
     mutable uint32_t referenceCount = 0;
 
   private:
-    void Release() const; // NOTE: It will force delete the memory it occupied. If you really know what are you doing now, otherwise never call it yourself!
+    void Release() const; // NOTE: It will force delete the memory it occupied. If you really know what you are doing now, otherwise never call it yourself!
 
   public:
     TReferenced();
