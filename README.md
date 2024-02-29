@@ -4167,3 +4167,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/2/28
   >
   >* 更新 `PureHelloTriangle` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/2/29
+  >
+  >* 更新 `PureCombinedImageSampler` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
