@@ -4175,3 +4175,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/3/2
   >
   >* 更新 `PureSeparateImageSampler` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `PureIndexDraw` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
