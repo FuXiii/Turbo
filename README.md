@@ -4181,3 +4181,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/3/3
   >
   >* 更新 `PBRTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/4
+  >
+  >* 更新 `SecondaryCommandBufferTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
