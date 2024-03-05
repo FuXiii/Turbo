@@ -4190,3 +4190,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* 更新 `MultiDrawTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `SubpassTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `LineAndLineWidth` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
