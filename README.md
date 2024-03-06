@@ -4192,7 +4192,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `SubpassTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `LineAndLineWidth` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
 
-* 2024/3/5
+* 2024/3/6
   >
   >* 更新 `InstancedDrawTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `PerlinWorleyNoiseTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
