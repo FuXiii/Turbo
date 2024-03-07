@@ -4197,3 +4197,10 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `InstancedDrawTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `PerlinWorleyNoiseTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `CineShaderLava` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/7
+  >
+  >* 更新 `Octagrams` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ProteanClouds` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ComputePipelineTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `Auroras` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
