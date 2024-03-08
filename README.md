@@ -4212,3 +4212,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `IspGlassball11Mix` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `VolumetricCloud` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `RayMarchingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `RayMarchingBoundingBoxTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
