@@ -1,3 +1,5 @@
+//Use for check PipelineLayout memory leak in NVIDIA driver
+
 #include "core/include/TException.h"
 #include <vulkan/vulkan_core.h>
 

@@ -4219,3 +4219,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* 暂时移除 `RenderDesignTest` 示例。``Render`` 库重构中。
   >* 更新 `PushConstantTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 暂时移除 `RenderAndFrameGraph` 示例。``Render`` 库重构中。
+  >* 更新 `ClearColorTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ShaderIncludeTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `GreenFieldDiorama` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 暂时移除 `PureHelloTriangleAndFrameGraph` 示例。``Render`` 库重构中。
+  >* 更新 `VulkanDynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `DynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `NormalTexture` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
