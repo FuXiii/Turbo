@@ -59,7 +59,7 @@ Turbo是渲染引擎
 * 依赖：独立模块，无依赖。
 * 说明：`Core`作为核心模块直接与`Vulkan`沟通，是上层与`Vulkan`底层最直接的桥梁，`Turbo`中所有的`GPU`相关工作最终都会从上层回到`Core`层。
 
-![FrameGraph](https://img.shields.io/badge/FrameGraph-重构中-orange?style=flat-square&logo=appveyor)
+![FrameGraph](https://img.shields.io/badge/FrameGraph-初步完成-brightgreen?style=flat-square&logo=appveyor)
 
 * 命名空间：`Turbo::FrameGraph`
 * 文档：`./docs/TurboDesign.drawio:FrameGraph`和[FrameGraph.md](./docs/Design/FrameGraph.md)
