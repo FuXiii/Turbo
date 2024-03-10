@@ -4227,3 +4227,13 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `VulkanDynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `DynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `NormalTexture` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/10
+  >
+  >* 更新 `BRDF` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TessellationTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `GeometryShaderTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TessellationAndGeometry` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `MeshShaderTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `SpecializationConstantsTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
