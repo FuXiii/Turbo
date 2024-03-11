@@ -4237,3 +4237,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `MeshShaderTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `SpecializationConstantsTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `VulkanKHRRayTracingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/11
+  >
+  >* 更新 `VulkanKHRRayTracingTestForLighting` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForLightingShadow` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
