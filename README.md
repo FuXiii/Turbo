@@ -4242,3 +4242,12 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* 更新 `VulkanKHRRayTracingTestForLighting` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `VulkanKHRRayTracingTestForLightingShadow` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/12
+  >
+  >* 更新 `VulkanKHRRayTracingTestForLightingShadowWithTexture` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingJitterCamera` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingAnyHitShader` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForInstances` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForReflections` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForReflections_WithoutLimited` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
