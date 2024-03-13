@@ -1,6 +1,7 @@
 #include "render/include/TShader.h"
 #include "render/include/TContext.h"
 #include <core/include/TException.h>
+#include <core/include/TDevice.h>
 #include <core/include/TShader.h>
 
 Turbo::Render::TComputeShader::TComputeShader(Turbo::Render::TContext *context, TShader::TLanguage language, const std::string &code)
@@ -44,10 +45,10 @@ Turbo::Render::TComputeShader::TComputeShader(TContext *context, size_t size, ui
 
 Turbo::Render::TComputeShader::~TComputeShader()
 {
-    delete this->computeShader;
+    this->computeShader = nullptr;
 }
 
-Turbo::Core::TComputeShader *Turbo::Render::TComputeShader::GetComputeShader()
+Turbo::Core::TRefPtr<Turbo::Core::TComputeShader> Turbo::Render::TComputeShader::GetComputeShader()
 {
     return this->computeShader;
 }
@@ -93,10 +94,10 @@ Turbo::Render::TVertexShader::TVertexShader(TContext *context, size_t size, uint
 
 Turbo::Render::TVertexShader::~TVertexShader()
 {
-    delete this->vertexShader;
+    this->vertexShader = nullptr;
 }
 
-Turbo::Core::TVertexShader *Turbo::Render::TVertexShader::GetVertexShader()
+Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> Turbo::Render::TVertexShader::GetVertexShader()
 {
     return this->vertexShader;
 }
@@ -142,10 +143,10 @@ Turbo::Render::TFragmentShader::TFragmentShader(TContext *context, size_t size, 
 
 Turbo::Render::TFragmentShader::~TFragmentShader()
 {
-    delete fragmentShader;
+    fragmentShader = nullptr;
 }
 
-Turbo::Core::TFragmentShader *Turbo::Render::TFragmentShader::GetFragmentShader()
+Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> Turbo::Render::TFragmentShader::GetFragmentShader()
 {
     return this->fragmentShader;
 }

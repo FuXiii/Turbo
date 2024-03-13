@@ -13,16 +13,11 @@
 #elif defined(TURBO_PLATFORM_ANDROID)
 #include "vulkan/vulkan_android.h"
 #elif defined(TURBO_PLATFORM_LINUX)
-#include <wayland-client.h>
-
-#include "vulkan/vulkan_wayland.h"
-
-#include <xcb/xcb.h>
-
-#include "vulkan/vulkan_xcb.h"
-
 #include <X11/Xlib.h>
-
+#include <wayland-client.h>
+#include <xcb/xcb.h>
+#include "vulkan/vulkan_wayland.h"
+#include "vulkan/vulkan_xcb.h"
 #include "vulkan/vulkan_xlib.h"
 #elif defined(TURBO_PLATFORM_UNIX)
 #endif
@@ -60,10 +55,10 @@ class TColorSpace : public Turbo::Core::TInfo
     ~TColorSpace();
 
   public:
-    TColorSpaceType GetColorSpaceType();
-    VkColorSpaceKHR GetVkColorSpaceKHR();
+    TColorSpaceType GetColorSpaceType() const;
+    VkColorSpaceKHR GetVkColorSpaceKHR() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 class TSurfaceFormat : public Turbo::Core::TInfo
@@ -81,10 +76,10 @@ class TSurfaceFormat : public Turbo::Core::TInfo
     ~TSurfaceFormat();
 
   public:
-    Turbo::Core::TFormatInfo GetFormat();
-    TColorSpace GetColorSpace();
+    Turbo::Core::TFormatInfo GetFormat() const;
+    TColorSpace GetColorSpace() const;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 typedef enum TSurfaceTransformBits
@@ -121,24 +116,25 @@ typedef enum class TPresentMode
 class TSurface : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT Turbo::Core::TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT Turbo::Core::TRefPtr<Turbo::Core::TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkSurfaceKHR vkSurfaceKHR = VK_NULL_HANDLE;
 
     bool isExternalHandle = false;
+    const VkAllocationCallbacks *externalVkAllocationCallbacks = nullptr;
 
     std::vector<Turbo::Core::TQueueFamilyInfo> supportQueueFamilys;
 
-    uint32_t minImageCount;
-    uint32_t maxImageCount;
-    Turbo::Core::TExtent2D currentExtent;
-    Turbo::Core::TExtent2D minImageExtent;
-    Turbo::Core::TExtent2D maxImageExtent;
-    uint32_t maxImageArrayLayers;
+    mutable uint32_t minImageCount;
+    mutable uint32_t maxImageCount;
+    mutable Turbo::Core::TExtent2D currentExtent;
+    mutable Turbo::Core::TExtent2D minImageExtent;
+    mutable Turbo::Core::TExtent2D maxImageExtent;
+    mutable uint32_t maxImageArrayLayers;
 
-    Turbo::Extension::TSurfaceTransforms supportedTransforms;
-    Turbo::Extension::TSurfaceTransformBits currentTransform;
-    Turbo::Extension::TCompositeAlphas supportedCompositeAlpha;
-    Turbo::Core::TImageUsages supportedUsageFlags;
+    mutable Turbo::Extension::TSurfaceTransforms supportedTransforms;
+    mutable Turbo::Extension::TSurfaceTransformBits currentTransform;
+    mutable Turbo::Extension::TCompositeAlphas supportedCompositeAlpha;
+    mutable Turbo::Core::TImageUsages supportedUsageFlags;
 
     std::vector<Turbo::Extension::TSurfaceFormat> surfaceFormats;
     std::vector<Turbo::Extension::TPresentMode> presentModes;
@@ -187,7 +183,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
 
   private:
     void GetSurfaceSupportQueueFamilys();
-    void GetSurfaceCapabilities();
+    void GetSurfaceCapabilities() const;
     void GetSurfaceSupportSurfaceFormats();
     void GetSurfaceSupportPresentationMode();
 
@@ -197,73 +193,75 @@ class TSurface : public Turbo::Core::TVulkanHandle
 
   public:
 #if defined(TURBO_PLATFORM_WINDOWS)
-    explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
     explicit TSurface(...);
 #elif defined(TURBO_PLATFORM_ANDROID)
-    explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
 #elif defined(TURBO_PLATFORM_LINUX)
-    explicit TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface);
-    explicit TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window);
-    explicit TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, wl_display *display, wl_surface *surface);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, xcb_connection_t *connection, xcb_window_t window);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, Display *dpy, Window window);
 #elif defined(__unix) || defined(__unix__)
     explicit TSurface(...);
 #else
 #endif
     // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
-    explicit TSurface(Turbo::Core::TDevice *device, VkSurfaceKHR vkSurfaceKHR);
+    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR);
 
-    ~TSurface();
+  protected:
+    virtual ~TSurface();
 
   public:
     VkSurfaceKHR GetVkSurfaceKHR();
 
-    uint32_t GetMinImageCount();
-    uint32_t GetMaxImageCount();
-    Turbo::Core::TExtent2D GetCurrentExtent();
-    uint32_t GetCurrentWidth();
-    uint32_t GetCurrentHeight();
-    Turbo::Core::TExtent2D GetMinImageExtent();
-    uint32_t GetMinWidth();
-    uint32_t GetMinHeight();
-    Turbo::Core::TExtent2D GetMaxImageExtent();
-    uint32_t GetMaxWidth();
-    uint32_t GetMaxHeight();
-    uint32_t GetMaxImageArrayLayers();
+    uint32_t GetMinImageCount() const;
+    uint32_t GetMaxImageCount() const;
+    Turbo::Core::TExtent2D GetCurrentExtent() const;
+    uint32_t GetCurrentWidth() const;
+    uint32_t GetCurrentHeight() const;
+    Turbo::Core::TExtent2D GetMinImageExtent() const;
+    uint32_t GetMinWidth() const;
+    uint32_t GetMinHeight() const;
+    Turbo::Core::TExtent2D GetMaxImageExtent() const;
+    uint32_t GetMaxWidth() const;
+    uint32_t GetMaxHeight() const;
+    uint32_t GetMaxImageArrayLayers() const;
 
-    bool IsSupportIdentityTransform();
-    bool IsSupportRotate90Transform();
-    bool IsSupportRotate180Transform();
-    bool IsSupportRotate270Transform();
-    bool IsSupportHorizontalMirrorTransform();
-    bool IsSupportHorizontalMirrorRotate90Transform();
-    bool IsSupportHorizontalMirrorRotate180Transform();
-    bool IsSupportHorizontalMirrorRotate270Transform();
-    bool IsSupportInheritTransform();
+    bool IsSupportIdentityTransform() const;
+    bool IsSupportRotate90Transform() const;
+    bool IsSupportRotate180Transform() const;
+    bool IsSupportRotate270Transform() const;
+    bool IsSupportHorizontalMirrorTransform() const;
+    bool IsSupportHorizontalMirrorRotate90Transform() const;
+    bool IsSupportHorizontalMirrorRotate180Transform() const;
+    bool IsSupportHorizontalMirrorRotate270Transform() const;
+    bool IsSupportInheritTransform() const;
 
-    bool IsSupportCompositeAlphaOpaque();
-    bool IsSupportCompositeAlphaPreMultiplied();
-    bool IsSupportCompositeAlphaPostMultiplied();
-    bool IsSupportCompositeAlphaInherit();
+    bool IsSupportCompositeAlphaOpaque() const;
+    bool IsSupportCompositeAlphaPreMultiplied() const;
+    bool IsSupportCompositeAlphaPostMultiplied() const;
+    bool IsSupportCompositeAlphaInherit() const;
 
-    bool IsSupportPresentModeImmediate();
-    bool IsSupportPresentModeMailbox();
-    bool IsSupportPresentModeFifo();
-    bool IsSupportPresentModeFifoRelaxed();
+    bool IsSupportPresentModeImmediate() const;
+    bool IsSupportPresentModeMailbox() const;
+    bool IsSupportPresentModeFifo() const;
+    bool IsSupportPresentModeFifoRelaxed() const;
 
-    std::vector<Turbo::Extension::TSurfaceFormat> GetSurfaceFormats();
-    std::vector<Turbo::Extension::TPresentMode> GetPresentModes();
+    std::vector<Turbo::Extension::TSurfaceFormat> GetSurfaceFormats() const;
+    std::vector<Turbo::Extension::TPresentMode> GetPresentModes() const;
 
-    std::vector<Turbo::Core::TQueueFamilyInfo> GetSupportQueueFamilys();
-    Turbo::Extension::TSurfaceTransforms GetSupportedTransforms();
-    Turbo::Extension::TSurfaceTransformBits GetCurrentTransform();
-    Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha();
-    Turbo::Core::TImageUsages GetSupportedUsages();
+    std::vector<Turbo::Core::TQueueFamilyInfo> GetSupportQueueFamilys() const;
+    Turbo::Extension::TSurfaceTransforms GetSupportedTransforms() const;
+    Turbo::Extension::TSurfaceTransformBits GetCurrentTransform() const;
+    Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha() const;
+    Turbo::Core::TImageUsages GetSupportedUsages() const;
 
-    Turbo::Core::TDevice *GetDevice();
+    const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &GetDevice();
 
     // Inherited via TObject
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Extension
 } // namespace Turbo

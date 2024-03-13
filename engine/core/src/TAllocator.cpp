@@ -72,7 +72,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
 
 void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
 {
-    //std::cout << "TAllocator::Free::" << pMemory << std::endl;
+    // std::cout << "TAllocator::Free::" << pMemory << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_free(pMemory);
 #else
@@ -80,7 +80,7 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
 #endif
 }
 
-std::string Turbo::Core::TAllocator::ToString()
+std::string Turbo::Core::TAllocator::ToString() const
 {
     return std::string();
 }

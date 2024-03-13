@@ -29,9 +29,9 @@ void Turbo::Core::TFence::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyFence(vk_device, this->vkFence, allocator);
 }
 
-Turbo::Core::TFence::TFence(TDevice *device)
+Turbo::Core::TFence::TFence(const TRefPtr<TDevice> &device)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->InternalCreate();
@@ -47,7 +47,7 @@ Turbo::Core::TFence::~TFence()
     this->InternalDestroy();
 }
 
-Turbo::Core::TDevice *Turbo::Core::TFence::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TFence::GetDevice()
 {
     return this->device;
 }
@@ -79,14 +79,23 @@ void Turbo::Core::TFence::WaitUntil()
     } while (result == VK_TIMEOUT);
 }
 
-std::string Turbo::Core::TFence::ToString()
+std::string Turbo::Core::TFence::ToString() const
 {
     return std::string();
 }
 
-void Turbo::Core::TFences::Add(TFence *fence)
+bool Turbo::Core::TFence::Valid() const
 {
-    if (fence != nullptr && fence->GetVkFence() != VK_NULL_HANDLE)
+    if (this->vkFence != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
+{
+    if (fence.Valid())
     {
         TDevice *device = fence->GetDevice();
         this->fenceMap[device].push_back(fence);
@@ -95,7 +104,7 @@ void Turbo::Core::TFences::Add(TFence *fence)
 
 Turbo::Core::TResult Turbo::Core::TFences::Wait(uint64_t timeout)
 {
-    for (std::pair<Turbo::Core::TDevice *const, std::vector<Turbo::Core::TFence *>> &fence_item : this->fenceMap)
+    for (std::pair<const TRefPtr<TDevice>, std::vector<TRefPtr<TFence>>> &fence_item : this->fenceMap)
     {
         std::vector<VkFence> vk_fences;
         for (Turbo::Core::TFence *fence_item : fence_item.second)
@@ -113,7 +122,23 @@ Turbo::Core::TResult Turbo::Core::TFences::Wait(uint64_t timeout)
     return TResult::SUCCESS;
 }
 
-std::string Turbo::Core::TFences::ToString()
+std::string Turbo::Core::TFences::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TFences::Valid() const
+{
+    for (const std::pair<const TRefPtr<TDevice>, std::vector<TRefPtr<TFence>>> &fence_item : this->fenceMap)
+    {
+        for (const TRefPtr<Turbo::Core::TFence> &fence_item : fence_item.second)
+        {
+            if (!fence_item.Valid())
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

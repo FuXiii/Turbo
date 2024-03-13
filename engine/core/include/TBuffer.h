@@ -4,7 +4,6 @@
 #include "TMemoryTypeInfo.h"
 #include "TVulkanHandle.h"
 
-
 namespace Turbo
 {
 namespace Core
@@ -41,7 +40,7 @@ typedef VkFlags TBufferUsages;
 class TBuffer : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device; // TDevice* device = nullptr
     T_VULKAN_HANDLE_HANDLE VkBuffer vkBuffer = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
@@ -59,32 +58,38 @@ class TBuffer : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
-    ~TBuffer();
+    explicit TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
 
-    bool IsMappable();
+  protected:
+    virtual ~TBuffer();
+
+  public:
+    bool IsMappable() const;
     void *Map();
     void Unmap();
 
     void Flush(TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
 
   public:
-    TBufferUsageFlags GetBufferUsageFlags();
-    bool IsTransferSource();
-    bool IsTransferDestination();
-    bool IsUniformTexelBuffer();
-    bool IsStorageTexelBuffer();
-    bool IsUniformBuffer();
-    bool IsStorageBuffer();
-    bool IsIndexBuffer();
-    bool IsVertexBuffer();
-    bool IsIndirectBuffer();
+    TBufferUsageFlags GetBufferUsageFlags() const;
+    bool IsTransferSource() const;
+    bool IsTransferDestination() const;
+    bool IsUniformTexelBuffer() const;
+    bool IsStorageTexelBuffer() const;
+    bool IsUniformBuffer() const;
+    bool IsStorageBuffer() const;
+    bool IsIndexBuffer() const;
+    bool IsVertexBuffer() const;
+    bool IsIndirectBuffer() const;
 
-    TMemoryTypeInfo GetMemoryTypeInfo();
+    TMemoryTypeInfo GetMemoryTypeInfo() const;
 
     VkBuffer GetVkBuffer();
 
-    virtual std::string ToString() override;
+    // TODO: Add TDeviceSize GetSize() const; function
+
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

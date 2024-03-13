@@ -17,9 +17,9 @@ class TSampler;
 class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TPipelineLayout *pipelineLayout = nullptr;
-    T_VULKAN_HANDLE_PARENT TDescriptorPool *descriptorPool = nullptr;
-    T_VULKAN_HANDLE_HANDLE std::vector<TDescriptorSet *> descriptorSets;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TPipelineLayout> pipelineLayout;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool;
+    T_VULKAN_HANDLE_HANDLE std::vector<TRefPtr<TDescriptorSet>> descriptorSets;
     T_VULKAN_HANDLE_CHILDREN;
 
   protected:
@@ -27,23 +27,27 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TPipelineDescriptorSet(TDescriptorPool *descriptorPool, TPipelineLayout *pipelineLayout);
-    ~TPipelineDescriptorSet();
+    explicit TPipelineDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TPipelineLayout> &pipelineLayout);
 
-    const std::vector<TDescriptorSet *> &GetDescriptorSet();
+  protected:
+    virtual ~TPipelineDescriptorSet();
+
+  public:
+    const std::vector<TRefPtr<TDescriptorSet>> &GetDescriptorSet();
 
     // TODO: this BindData function just for Test
-    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers);
-    void BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement = 0);
-    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers);
-    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews);
-    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &samplers);
+    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers);
+    void BindData(uint32_t set, uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement = 0);
+    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers);
+    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews);
+    void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &samplers);
 
     // FIXME: Need a ACCELERATION_STRUCTURE binding function
     /* FIXME: Just for Test*/ void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures);
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

@@ -13,9 +13,9 @@ class TImageView;
 class TFramebuffer : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TRenderPass *renderPass = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TRenderPass> renderPass;
     T_VULKAN_HANDLE_HANDLE VkFramebuffer vkFramebuffer = VK_NULL_HANDLE;
-    std::vector<TImageView *> attachments;
+    std::vector<TRefPtr<TImageView>> attachments;
 
     uint32_t width;
     uint32_t height;
@@ -25,20 +25,24 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments);
-    ~TFramebuffer();
+    TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments);
 
-    VkFramebuffer GetVkFramebuffer();
-
-    uint32_t GetWidth();
-    uint32_t GetHeight();
-
-    TRenderPass *GetRenderPass();
-
-    std::vector<TImageView *> GetAttachments();
+  protected:
+    virtual ~TFramebuffer();
 
   public:
-    virtual std::string ToString() override;
+    VkFramebuffer GetVkFramebuffer();
+
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+
+    const TRefPtr<TRenderPass> &GetRenderPass();
+
+    const std::vector<TRefPtr<TImageView>> &GetAttachments();
+
+  public:
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

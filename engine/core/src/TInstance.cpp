@@ -5,17 +5,17 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-size_t Turbo::Core::TInstance::GetEnabledLayerCount()
+size_t Turbo::Core::TInstance::GetEnabledLayerCount() const
 {
     return this->enabledLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetEnabledLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetEnabledLayers() const
 {
     return this->enabledLayers;
 }
 
-bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName)
+bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName) const
 {
     if (!layerName.empty())
     {
@@ -46,22 +46,22 @@ bool Turbo::Core::TInstance::IsEnabledLayer(std::string layerName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsEnabledLayer(TLayerType layerType)
+bool Turbo::Core::TInstance::IsEnabledLayer(TLayerType layerType) const
 {
     return this->IsEnabledLayer(TLayerInfo::GetLayerNameByLayerType(layerType));
 }
 
-size_t Turbo::Core::TInstance::GetEnabledExtensionCount()
+size_t Turbo::Core::TInstance::GetEnabledExtensionCount() const
 {
     return this->enabledExtensions.size();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetEnabledExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetEnabledExtensions() const
 {
     return this->enabledExtensions;
 }
 
-bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName)
+bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -92,14 +92,23 @@ bool Turbo::Core::TInstance::IsEnabledExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsEnabledExtension(TExtensionType extensionType)
+bool Turbo::Core::TInstance::IsEnabledExtension(TExtensionType extensionType) const
 {
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-std::string Turbo::Core::TInstance::ToString()
+std::string Turbo::Core::TInstance::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TInstance::Valid() const
+{
+    if (this->vkInstance != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }
 
 Turbo::Core::TInstance::TInstance(std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TVersion *vulkanVersion) : Turbo::Core::TVulkanHandle()
@@ -131,7 +140,7 @@ VkInstance Turbo::Core::TInstance::GetVkInstance()
     return this->vkInstance;
 }
 
-Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanVersion()
+Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanVersion() const
 {
     return this->vulkanVersion;
 }
@@ -187,9 +196,9 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
     return VkResult::VK_SUCCESS;
 }
 
-bool Turbo::Core::TInstance::IsHaveHandle(TPhysicalDevice *physicalDevice)
+bool Turbo::Core::TInstance::IsHaveHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
-    if (physicalDevice != nullptr)
+    if (physicalDevice.Valid())
     {
         if (physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
         {
@@ -208,9 +217,9 @@ bool Turbo::Core::TInstance::IsHaveHandle(TPhysicalDevice *physicalDevice)
     return true;
 }
 
-void Turbo::Core::TInstance::AddChildHandle(TPhysicalDevice *physicalDevice)
+void Turbo::Core::TInstance::AddChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
-    if (physicalDevice != nullptr)
+    if (physicalDevice.Valid())
     {
         if (!this->IsHaveHandle(physicalDevice))
         {
@@ -219,7 +228,7 @@ void Turbo::Core::TInstance::AddChildHandle(TPhysicalDevice *physicalDevice)
     }
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::RemoveChildHandle(TPhysicalDevice *physicalDevice)
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::RemoveChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     // We don't need to remove it,because physical device created by instance.we just delete is at ~TInstance()
     return nullptr;
@@ -326,12 +335,19 @@ void Turbo::Core::TInstance::InternalCreate()
     this->supportExtensions = TExtensionInfo::GetInstanceExtensions();
 
     this->instanceDriver = new TInstanceDriver();
-    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
 
-    for (TPhysicalDevice *physical_device_item : this->physicalDevices)
-    {
-        physical_device_item->InternalCreate();
-    }
+    // NOTE: for current [this->referenceCount is 0] and [TVulkanLoader::LoadInstanceDriver(const TRefPtr<TInstance> &instance, ...)] use
+    // NOTE: [const TRefPtr<TInstance> &instance] , it will cause: If out from [TVulkanLoader::LoadInstanceDriver(...)] function
+    // NOTE: [TRefPtr] will check [this->referenceCount is 0] and then trigger [Release] call. Let [delete this] to be called.
+    // OLD:*this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);//NOTE: it will trigger [delete this]
+    TRefPtr<TInstance> temp_ref_instance = this;
+    *this->instanceDriver = TVulkanLoader::Instance()->LoadInstanceDriver(this);
+    temp_ref_instance.Unbind();
+
+    // for (TPhysicalDevice *physical_device_item : this->physicalDevices)
+    //{
+    //     physical_device_item->InternalCreate();
+    // }
 }
 
 void Turbo::Core::TInstance::InternalDestroy()
@@ -376,12 +392,12 @@ Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanInstanceVersion()
     return TVulkanLoader::GetVulkanVersion();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TInstance::GetSupportExtensions() const
 {
     return this->supportExtensions;
 }
 
-bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName)
+bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -412,22 +428,22 @@ bool Turbo::Core::TInstance::IsSupportExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsSupportExtension(TExtensionType extensionType)
+bool Turbo::Core::TInstance::IsSupportExtension(TExtensionType extensionType) const
 {
     return this->IsSupportExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-size_t Turbo::Core::TInstance::GetSupportExtensionCount()
+size_t Turbo::Core::TInstance::GetSupportExtensionCount() const
 {
     return this->supportExtensions.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetSupportLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TInstance::GetSupportLayers() const
 {
     return this->supportLayers;
 }
 
-bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName)
+bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName) const
 {
     if (!layerName.empty())
     {
@@ -458,22 +474,22 @@ bool Turbo::Core::TInstance::IsSupportLayer(std::string layerName)
     return false;
 }
 
-bool Turbo::Core::TInstance::IsSupportLayer(TLayerType layerType)
+bool Turbo::Core::TInstance::IsSupportLayer(TLayerType layerType) const
 {
     return this->IsSupportLayer(TLayerInfo::GetLayerNameByLayerType(layerType));
 }
 
-size_t Turbo::Core::TInstance::GetSupportLayerCount()
+size_t Turbo::Core::TInstance::GetSupportLayerCount() const
 {
     return this->supportLayers.size();
 }
 
-uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount()
+uint32_t Turbo::Core::TInstance::GetPhysicalDeviceCount() const
 {
     return this->physicalDevices.size();
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
+const Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> &Turbo::Core::TInstance::GetPhysicalDevice(uint32_t index)
 {
     if (index > this->physicalDevices.size() - 1)
     {
@@ -483,12 +499,12 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t
     return this->physicalDevices[index];
 }
 
-const std::vector<Turbo::Core::TPhysicalDevice *> &Turbo::Core::TInstance::GetPhysicalDevices()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice>> &Turbo::Core::TInstance::GetPhysicalDevices()
 {
     return this->physicalDevices;
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetBestPhysicalDevice()
+Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> Turbo::Core::TInstance::GetBestPhysicalDevice()
 {
     uint32_t physical_device_count = this->GetPhysicalDeviceCount();
 
@@ -517,10 +533,10 @@ const Turbo::Core::TInstanceDriver *Turbo::Core::TInstance::GetInstanceDriver()
     return this->instanceDriver;
 }
 
-Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType)
+Turbo::Core::TExtensionInfo Turbo::Core::TInstance::GetExtensionByType(TExtensionType extensionType) const
 {
     TExtensionInfo result;
-    for (TExtensionInfo &type_item : this->supportExtensions)
+    for (const TExtensionInfo &type_item : this->supportExtensions)
     {
         if (type_item.GetExtensionType() == extensionType)
         {

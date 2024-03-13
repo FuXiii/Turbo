@@ -16,47 +16,47 @@ Turbo::Core::TAttachment::~TAttachment()
 {
 }
 
-Turbo::Core::TFormatInfo Turbo::Core::TAttachment::GetFormat()
+Turbo::Core::TFormatInfo Turbo::Core::TAttachment::GetFormat() const
 {
     return this->format;
 }
 
-Turbo::Core::TSampleCountBits Turbo::Core::TAttachment::GetVkSampleCountFlagBits()
+Turbo::Core::TSampleCountBits Turbo::Core::TAttachment::GetVkSampleCountFlagBits() const
 {
     return this->samples;
 }
 
-Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetLoadOp()
+Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetLoadOp() const
 {
     return this->loadOp;
 }
 
-Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStoreOp()
+Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStoreOp() const
 {
     return this->storeOp;
 }
 
-Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetStencilLoadOp()
+Turbo::Core::TLoadOp Turbo::Core::TAttachment::GetStencilLoadOp() const
 {
     return this->stencilLoadOp;
 }
 
-Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStencilStoreOp()
+Turbo::Core::TStoreOp Turbo::Core::TAttachment::GetStencilStoreOp() const
 {
     return this->stencilStoreOp;
 }
 
-Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetInitialLayout()
+Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetInitialLayout() const
 {
     return this->initialLayout;
 }
 
-Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetFinalLayout()
+Turbo::Core::TImageLayout Turbo::Core::TAttachment::GetFinalLayout() const
 {
     return this->finalLayout;
 }
 
-std::string Turbo::Core::TAttachment::ToString()
+std::string Turbo::Core::TAttachment::ToString() const
 {
     return std::string();
 }

@@ -3,6 +3,8 @@
 #define TURBO_RENDER_TPIPELINE_H
 #include <stdint.h>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -45,7 +47,8 @@ class TGraphicsPipeline : public TPipeline
     friend class TGraphicsPipelinePool;
     friend class TContext;
 
-    Turbo::Core::TGraphicsPipeline *graphicsPipeline = nullptr;
+    // NOTE: It will allocate in TContext::Draw(...)
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphicsPipeline;
 
   public:
     typedef enum class TTopology

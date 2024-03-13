@@ -3,7 +3,7 @@
 
 Turbo::Core::TVersion Turbo::Core::TVersion::TurboVersion(0, 0, 0, 16);
 
-Turbo::Core::TVersion::TVersion() : TObject()
+Turbo::Core::TVersion::TVersion() : Turbo::Core::TInfo()
 {
     this->major = 0;
     this->minor = 0;
@@ -11,7 +11,7 @@ Turbo::Core::TVersion::TVersion() : TObject()
     this->develop = 0;
 }
 
-Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop) : TObject()
+Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop) : Turbo::Core::TInfo()
 {
     this->major = major;
     this->minor = minor;
@@ -19,7 +19,7 @@ Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, 
     this->develop = develop;
 }
 
-Turbo::Core::TVersion::TVersion(const TVersion &version) : TObject()
+Turbo::Core::TVersion::TVersion(const TVersion &version) : Turbo::Core::TInfo()
 {
     if (this != &version)
     {
@@ -34,32 +34,32 @@ Turbo::Core::TVersion::~TVersion()
 {
 }
 
-uint32_t Turbo::Core::TVersion::GetVulkanVersion()
+uint32_t Turbo::Core::TVersion::GetVulkanVersion() const
 {
     return VK_MAKE_VERSION(this->major, this->minor, this->patch);
 }
 
-Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion()
+Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion() const
 {
     return TVersion(this->major, this->minor, 0, 0);
 }
 
-uint32_t Turbo::Core::TVersion::GetMajor()
+uint32_t Turbo::Core::TVersion::GetMajor() const
 {
     return this->major;
 }
 
-uint32_t Turbo::Core::TVersion::GetMinor()
+uint32_t Turbo::Core::TVersion::GetMinor() const
 {
     return this->minor;
 }
 
-uint32_t Turbo::Core::TVersion::GetPatch()
+uint32_t Turbo::Core::TVersion::GetPatch() const
 {
     return this->patch;
 }
 
-uint32_t Turbo::Core::TVersion::GetDevelop()
+uint32_t Turbo::Core::TVersion::GetDevelop() const
 {
     return this->develop;
 }
@@ -186,7 +186,7 @@ bool Turbo::Core::TVersion::operator>=(const TVersion &version) const
     return false;
 }
 
-std::string Turbo::Core::TVersion::ToString()
+std::string Turbo::Core::TVersion::ToString() const
 {
     std::stringstream ss;
     ss << this->major << "." << this->minor << "." << this->patch << "." << this->develop;

@@ -17,19 +17,48 @@ bool Turbo::FrameGraph::TNodeHandle::IsValid()
     return false;
 }
 
-void Turbo::FrameGraph::TSubpass::Write(TResource resource)
+bool Turbo::FrameGraph::TSubpass::IsWrite(TResource resource)
 {
-    bool is_found = false;
     for (TResource resource_item : this->writes)
     {
         if (resource_item.id == resource.id)
         {
-            is_found = true;
-            break;
+            return true;
         }
     }
 
-    if (!is_found)
+    return false;
+}
+
+bool Turbo::FrameGraph::TSubpass::IsRead(TResource resource)
+{
+    for (TResource resource_item : this->reads)
+    {
+        if (resource_item.id == resource.id)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Turbo::FrameGraph::TSubpass::IsInput(TResource resource)
+{
+    for (TResource resource_item : this->inputs)
+    {
+        if (resource_item.id == resource.id)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Turbo::FrameGraph::TSubpass::Write(TResource resource)
+{
+    if (!this->IsWrite(resource))
     {
         this->writes.push_back(resource);
     }
@@ -37,17 +66,7 @@ void Turbo::FrameGraph::TSubpass::Write(TResource resource)
 
 void Turbo::FrameGraph::TSubpass::Read(TResource resource)
 {
-    bool is_found = false;
-    for (TResource resource_item : this->reads)
-    {
-        if (resource_item.id == resource.id)
-        {
-            is_found = true;
-            break;
-        }
-    }
-
-    if (!is_found)
+    if (!this->IsRead(resource))
     {
         this->reads.push_back(resource);
     }
@@ -55,17 +74,7 @@ void Turbo::FrameGraph::TSubpass::Read(TResource resource)
 
 void Turbo::FrameGraph::TSubpass::Input(TResource resource)
 {
-    bool is_found = false;
-    for (TResource resource_item : this->inputs)
-    {
-        if (resource_item.id == resource.id)
-        {
-            is_found = true;
-            break;
-        }
-    }
-
-    if (!is_found)
+    if (!this->IsInput(resource))
     {
         this->inputs.push_back(resource);
     }
@@ -116,9 +125,10 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TSubpass::GetInput(size_t index)
     return this->inputs[index];
 }
 
-void Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
+size_t Turbo::FrameGraph::TRenderPass::AddSubpass(const TSubpass &subpass)
 {
     this->subpasses.push_back(subpass);
+    return this->subpasses.size() - 1;
 }
 
 std::vector<Turbo::FrameGraph::TSubpass> Turbo::FrameGraph::TRenderPass::GetSubpasses()
@@ -357,11 +367,7 @@ Turbo::FrameGraph::TResource Turbo::FrameGraph::TFrameGraph::TBuilder::Write(TRe
 
 Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass Turbo::FrameGraph::TFrameGraph::TBuilder::CreateSubpass()
 {
-    Turbo::FrameGraph::TSubpass subpass;
-    this->passNode.renderPass.AddSubpass(subpass);
-
-    uint32_t subpass_index = this->passNode.renderPass.subpasses.size() - 1;
-
+    uint32_t subpass_index = this->passNode.renderPass.AddSubpass();
     return Turbo::FrameGraph::TFrameGraph::TBuilder::TSubpass(this, subpass_index);
 }
 
@@ -480,12 +486,12 @@ void Turbo::FrameGraph::TFrameGraph::Compile()
 
         TResourceNode &resource_node = this->resourceNodes->at(resource.id);
         TPassNode &writer = this->passNodes->at(resource_node.writer.id);
-        if (--writer.refCount == 0)
+        if (writer.refCount == 0 || --writer.refCount == 0)
         {
             for (TResource &read_resource_item : writer.reads)
             {
                 TResourceNode &read_resource_node = this->resourceNodes->at(read_resource_item.id);
-                if (--read_resource_node.refCount == 0)
+                if (read_resource_node.refCount || --read_resource_node.refCount == 0)
                 {
                     unref_resources.push(read_resource_item);
                 }
@@ -539,23 +545,24 @@ void Turbo::FrameGraph::TFrameGraph::Execute(void *context, void *allocator)
 {
     for (TPassNode &pass_node_item : *this->passNodes)
     {
-        TResources resources(*this, pass_node_item);
-
-        for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.devirtualizes)
-        {
-            virtual_resource_item->Create(allocator);
-        }
-
         if (pass_node_item.refCount > 0)
         {
-            pass_node_item.passExecutorProxy->Executor(resources, context);
-        }
+            TResources resources(*this, pass_node_item);
 
-        for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.destroies)
-        {
-            // FIXME: 此处不应该真的去销毁相应的资源，正常应该标记对应资源需要被回收，进而异步的回收资源
-            // FIXME: 详情见Issue文档
-            virtual_resource_item->Destroy(allocator);
+            for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.devirtualizes)
+            {
+                virtual_resource_item->Create(allocator);
+            }
+
+            pass_node_item.passExecutorProxy->Executor(resources, context);
+
+            for (TVirtualResourceProxy *virtual_resource_item : pass_node_item.destroies)
+            {
+                // FIXME: 此处不应该真的去销毁相应的资源，正常应该标记对应资源需要被回收，进而异步的回收资源
+                // FIXME: 详情见Issue文档
+                // NOTE: 在执行 GPU 指令时，此时可能指令还没有执行，这时销毁资源会导致未定义行为
+                virtual_resource_item->Destroy(allocator);
+            }
         }
     }
 }
@@ -734,6 +741,22 @@ std::string Turbo::FrameGraph::TFrameGraph::ToMermaid()
         }
     }
     return mermaid_string_stream.str();
+}
+
+std::string Turbo::FrameGraph::TFrameGraph::ToHtml()
+{
+    std::stringstream ss_to_html;
+    ss_to_html << "<html>" << std::endl;
+    ss_to_html << "<body>" << std::endl;
+    ss_to_html << "<script src=\"https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js\"></script>" << std::endl;
+    ss_to_html << "<script>mermaid.initialize({startOnLoad:true});</script>" << std::endl;
+    ss_to_html << "<div class=\"mermaid\">" << std::endl;
+    ss_to_html << this->ToMermaid() << std::endl;
+    ss_to_html << "</div>" << std::endl;
+    ss_to_html << "</body>" << std::endl;
+    ss_to_html << "</html>" << std::endl;
+
+    return ss_to_html.str();
 }
 
 Turbo::FrameGraph::TBlackboard &Turbo::FrameGraph::TFrameGraph::GetBlackboard()

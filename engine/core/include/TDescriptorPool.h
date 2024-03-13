@@ -21,20 +21,22 @@ class TDescriptorSize : public Turbo::Core::TInfo
 
   public:
     TDescriptorSize(TDescriptorType type, uint32_t count);
-
-    TDescriptorType GetDescriptorType();
-    uint32_t GetDescriptorCount();
+    ~TDescriptorSize() = default;
 
   public:
-    virtual std::string ToString() override;
+    TDescriptorType GetDescriptorType() const;
+    uint32_t GetDescriptorCount() const;
+
+  public:
+    virtual std::string ToString() const override;
 };
 
 class TDescriptorPool : public Turbo::Core::TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkDescriptorPool vkDescriptorPool = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TPipelineDescriptorSet>> pipelineDescriptorSets;
 
     uint32_t maxSetsCount;
     std::vector<TDescriptorSize> descriptorSizes;
@@ -44,17 +46,21 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
-    ~TDescriptorPool();
+    explicit TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
 
-    TPipelineDescriptorSet *Allocate(TPipelineLayout *pipelineLayout);
-    void Free(TPipelineDescriptorSet *pipelineDescriptorSet);
+  protected:
+    virtual ~TDescriptorPool();
 
-    TDevice *GetDevice();
+  public:
+    TRefPtr<TPipelineDescriptorSet> &Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout);
+    void Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
+
+    const TRefPtr<TDevice> &GetDevice();
     VkDescriptorPool GetVkDescriptorPool();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

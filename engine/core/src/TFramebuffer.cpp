@@ -48,9 +48,10 @@ void Turbo::Core::TFramebuffer::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyFramebuffer(vk_device, this->vkFramebuffer, allocator);
 }
 
-Turbo::Core::TFramebuffer::TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TFramebuffer::TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments) : Turbo::Core::TVulkanHandle()
 {
-    if (renderPass != nullptr && attachments.size() > 0)
+    // OLD: if (renderPass != nullptr && attachments.size() > 0)
+    if (renderPass.Valid())
     {
         this->renderPass = renderPass;
         this->attachments = attachments;
@@ -72,27 +73,36 @@ VkFramebuffer Turbo::Core::TFramebuffer::GetVkFramebuffer()
     return this->vkFramebuffer;
 }
 
-uint32_t Turbo::Core::TFramebuffer::GetWidth()
+uint32_t Turbo::Core::TFramebuffer::GetWidth() const
 {
     return this->width;
 }
 
-uint32_t Turbo::Core::TFramebuffer::GetHeight()
+uint32_t Turbo::Core::TFramebuffer::GetHeight() const
 {
     return this->height;
 }
 
-Turbo::Core::TRenderPass *Turbo::Core::TFramebuffer::GetRenderPass()
+const Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> &Turbo::Core::TFramebuffer::GetRenderPass()
 {
     return this->renderPass;
 }
 
-std::vector<Turbo::Core::TImageView *> Turbo::Core::TFramebuffer::GetAttachments()
+const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &Turbo::Core::TFramebuffer::GetAttachments()
 {
     return this->attachments;
 }
 
-std::string Turbo::Core::TFramebuffer::ToString()
+std::string Turbo::Core::TFramebuffer::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TFramebuffer::Valid() const
+{
+    if (this->vkFramebuffer != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

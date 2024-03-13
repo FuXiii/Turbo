@@ -27,9 +27,9 @@ void Turbo::Core::TSemaphore::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroySemaphore(vk_device, this->vkSemaphore, allocator);
 }
 
-Turbo::Core::TSemaphore::TSemaphore(TDevice *device, VkPipelineStageFlags waitDstStageMask)
+Turbo::Core::TSemaphore::TSemaphore(const TRefPtr<TDevice> &device, VkPipelineStageFlags waitDstStageMask)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->waitDstStageMask = waitDstStageMask;
@@ -46,7 +46,7 @@ Turbo::Core::TSemaphore::~TSemaphore()
     this->InternalDestroy();
 }
 
-Turbo::Core::TPipelineStages Turbo::Core::TSemaphore::GetWaitDstStageMask()
+Turbo::Core::TPipelineStages Turbo::Core::TSemaphore::GetWaitDstStageMask() const
 {
     return this->waitDstStageMask;
 }
@@ -56,7 +56,16 @@ VkSemaphore Turbo::Core::TSemaphore::GetVkSemaphore()
     return this->vkSemaphore;
 }
 
-std::string Turbo::Core::TSemaphore::ToString()
+std::string Turbo::Core::TSemaphore::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TSemaphore::Valid() const
+{
+    if (this->vkSemaphore != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

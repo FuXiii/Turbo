@@ -271,8 +271,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
    >
    > * 注意`TApplication::InitVulkan`对于验证层的修改。
    > * 搞清Turbo中一些函数返回局部变量，之后没有拷贝一份而直接传给Vulkan API后会卡住的问题
-  > * 将TApplication改成TEngine，作为Turbo最高层抽象
-  >
+   > * 将TApplication改成TEngine，作为Turbo最高层抽象
+
 * 2022/3/18
     >
     >* 继承自`TInfo`的类用于实现Vulkan相关Info功能，其中的GetVkXXXInfo等相关信息函数是返回局部变量，需要函数返回立刻保存数据，可能会有问题，先暂时这样。
@@ -3750,3 +3750,514 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `./engine/core`下更新`TPhysicalDevice`类中`GetDeviceFeatures()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的赋值。
   >* `./engine/core`下更新`TDevice`类中`InternalCreate()`成员函数中增加对`VkPhysicalDeviceShaderClockFeaturesKHR`特性的激活。
   >* `./samples`下更新`VulkanKHRRayTracingTestForGLTF`示例。用于研究对于`glTF`模型文件的光线追踪渲染。增加对于`VK_KHR_shader_clock`扩展和相关特性的支持。
+
+* 2023/11/15 设计架构
+  >
+  >* `./engine/core`下新增`TReferenced`类。用于计数引用内存回收机制。
+
+* 2023/11/16 设计架构
+  >
+  >* `./engine/core`下更新`TReferenced`类中的`UnReference()`成员函数。修正`delete`返回对象内部变量的`Bug`。
+  >* `./samples`下增加`ReferencedTest`示例。用于计数引用内存回收机制测试。
+  >* `./engine/core`下新增`ref_ptr`类。用于计数引用内存回收机制。
+
+* 2023/11/17 设计架构
+  >
+  >* `./engine/core`下更新`ref_ptr`类。用于计数引用内存回收机制。
+
+* 2023/11/18 设计架构
+  >
+  >* `./engine/core`下将`ref_ptr`重命名为`TRefPtr`(统一命名规则)。用于计数引用内存回收机制。
+  >* `./engine/core`下更新`TRefPtr`。用于计数引用内存回收机制。
+
+* 2023/11/19 设计架构
+  >
+  >* `Turbo`使用`Turbo::Core::TRefPtr`和`Turbo::Core::TReferenced`进行重构。
+  >* `./engine/core`下将`Turbo::Core::TObject`继承自`Turbo::Core::TReferenced`。
+  >* `./engine/core`下将`Turbo::Core::TInfo`暂时取消继承自`Turbo::Core::TObject`。
+  >* `Turbo`中将所有继承自`Turbo::Core::TObject`的子类的析构函数全部转成`protected`权限。
+  >* `./engine/core`下将`TBarrier.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TCommandBuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TCommandBufferPool.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/20 设计架构
+  >
+  >* `./engine/core`下将`TComputePipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptor.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorPool.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorSet.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDescriptorSetLayout.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDevice.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TDeviceQueue.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/21 设计架构
+  >
+  >* `./engine/core`下将`TEngine.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TFence.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TFramebuffer.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TGraphicsPipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TImage.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/22 设计架构
+  >
+  >* `./engine/core`下将`TImageView.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TInstance.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TPhysicalDevice.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TPipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TPipelineCache.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TPipelineDescriptorSet.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TPipelineLayout.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TRenderingPipeline.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TRenderPass.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSampler.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSemaphore.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TShader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+
+* 2023/11/23 设计架构
+  >
+  >* `./engine/core`下将`TSurface.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TSwapchain.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVmaAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVulkanAllocator.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下将`TVulkanLoader.h`及其`cpp`中的所有计数引用子类使用`Turbo::Core::TRefPtr`维护。
+  >* `./engine/core`下更新`TRefPtr`中使用`class`声明的模板关键字，使用`typename`替代。
+  >* `./engine/core`下更新`TReferenced`中增加`virtual bool Valid() const`成员虚函数。用于判定该引用是否有效（用于自定义判定有效性）。
+  >* `./engine/core`下更新`TRefPtr`中更新`bool Valid() const`成员函数。增加对该指针自身对象的有效性判断（用于自定义判定有效性）。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TBufferMemoryBarrier`构造函数的`buffer`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TImageMemoryBarrier`构造函数的`image`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TBarrier.cpp`中更新`TImageMemoryBarrier`构造函数的`imageView`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`构造函数的`commandBufferPool`参数使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdBindPipelineDescriptorSet`成员函数使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`的`Free(const TRefPtr<TCommandBufferBase> &commandBufferBase)`成员函数移除对`delete`的使用。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`~TCommandBufferPool`析构函数，使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TCommandBuffer> &commandBuffer)`成员函数，使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`Free(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)`成员函数，使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`CmdBindDescriptorSets`成员函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdBeginRendering`成员函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdUpdateBuffer`成员函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TCommandBuffer.cpp`中更新`TCommandBufferBase`的`CmdPushConstants`成员函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorPool.cpp`中更新`TDescriptorPool`的构造函数中，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorPool.cpp`中更新`TDescriptorPool`的`Free`成员函数，回收资源。
+  >* `./engine/core`下更新`TCommandBufferPool.cpp`中更新`TCommandBufferPool`的`Free`成员函数，回收资源。
+
+* 2023/11/24 设计架构
+  >
+  >* `./engine/core`下的`TDescriptorPool`类内增加`std::vector<TRefPtr<TPipelineDescriptorSet>> pipelineDescriptorSets`成员。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Allocate(...)`成员函数。内部使用容器存储。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Free(...)`成员函数。内部判断是否为该池分配。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`~TDescriptorPool()`析构函数。回收所有分配的描述符。
+  >* `./engine/core`下更新`TDescriptorSet.cpp`中更新`TDescriptorSet`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorSet.cpp`中更新`TDescriptorSet`的`BindData`成员函数，使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDescriptorSetLayout.cpp`中`TDescriptorSetLayout`的`InternalCreate`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDescriptorSetLayout.cpp`中`TDescriptorSetLayout`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`AddChildHandle`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`InternalCreate`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`InternalDestroy`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的析构函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TDevice.cpp`中`TDevice`的`GetDeviceQueueCountByQueueFamily`成员函数，使用`Turbo::Core::TRefPtr<T>`。
+  >* `./engine/core`下更新`TDeviceQueue`中的`Submit`成员函数。将指针变成引用。并在内部适配`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDeviceQueue`。增加只使用`Fence`的`Submit`成员函数。并在内部适配`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下更新`TDeviceQueue.cpp`中`TDeviceQueue`的`Present`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TDeviceQueue.cpp`中`TDeviceQueue`的`AddChildHandle`成员函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`VerificationInitVulkan`成员函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的析构函数，移除对于`delete`的显式调用。
+  >* `./engine/core`下更新`TEngine.cpp`中`TEngine`的`GetInstance`函数，使用`Turbo::Core::TRefPtr`适配。
+  >* `./engine/core`下更新`TException`。继承自`std::runtime_error`。并移除不必要的成员变量和函数。
+  >* `./engine/core`下更新`TFence.cpp`中`TFence`的构造函数，使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下更新`TFence.cpp`中`TFence`的`Wait`成员函数，使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdBindDescriptorSets`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdBindVertexBuffers`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetViewport`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdSetScissor`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数，`std::vector`形参使用`const`进行适配。
+  >* `./engine/core`下更新`TAttachment`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TBufferMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TImageMemoryBarrier`中所有信息获取函数后增加`const`。
+  >* `./engine/core`下更新`TReferenced`中增加`void Release() const`成员函数。用于内存强制回收。
+  >* `./engine/core`下更新`TRefPtr<T>`中增加`void Release()`成员函数。用于内存强制回收。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Allocate`成员函数。优化调用。
+  >* `./engine/core`下更新`TCommandBufferPool`中`AllocateSecondary`成员函数。优化调用。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TSecondaryCommandBuffer> &)`成员函数。修正导致错误递归`Bug`。
+  >* `./engine/core`下更新`TCommandBufferPool`中`Free(TRefPtr<TCommandBufferBase> &)`成员函数。优化调用，并强制回收内存。
+
+* 2023/11/27 设计架构
+  >
+  >* `./engine/core`下的`TCommandBufferPool`类内更新`Free(TRefPtr<TCommandBufferBase> &)`成员函数。移除对于`TRefPtr::Release()`的调用。
+  >* `./engine/core`下的`TDescriptorPool`类内更新`Free(TRefPtr<TPipelineDescriptorSet> &)`成员函数。
+  >* `./engine/core`下的`TReferenced`类内增加`uint32_t GetReferenceCount() const`成员函数。
+  >* `./engine/core`下的`TReferenced`类内更新`uint32_t referenceCount`成员从`protected`转成`private`。
+  >* `./engine/core`下的`TRefPtr`类内增加`uint32_t ReferenceCount() const`成员函数。
+  >* `./engine/core`下的`TFences`类内更新`Add(const TRefPtr<TFence> &)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFormatInfo`类内更新`GetSupportFormats(TPhysicalDevice *)`成员函数为`GetSupportFormats(const TRefPtr<TPhysicalDevice> &)`。
+  >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(TPhysicalDevice *, TFormatType)`成员函数为`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`。
+  >* `./engine/core`下的`TFormatInfo`类内更新`GetSupportFormats(const TRefPtr<TPhysicalDevice> &)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFormatInfo`类内更新`IsSupportFormat(const TRefPtr<TPhysicalDevice> &, TFormatType)`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TFramebuffer`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr`。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新`InternalCreate()`函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TGraphicsPipeline`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TImage`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TImageView`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TInstance`类内更新`IsHaveHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TInstance`类内更新`AddChildHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TLayerInfo`类内更新`GetPhysicalDeviceLayerCount(TPhysicalDevice *)`成员函数。修改为`GetPhysicalDeviceLayerCount(const TRefPtr<TPhysicalDevice> &)`。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TLayerInfo`类内更新`GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice)`成员函数。修改为`GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &)`
+  >* `./engine/core`下的`TPhysicalDevice`类内更新`AddChildHandle`成员函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPhysicalDevice`类内更新构造函数。使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+
+* 2023/11/30 设计架构
+  >
+  >* `./engine/core`下的`TPipeline`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipeline`类内更新`InternalCreate()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipeline`类内更新`InternalDestroy()`成员函数。移除对于`pipelineLayout`内存回收。
+  >* `./engine/core`下的`TPipelineCache`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`InternalCreate()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`InternalDestroy()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新`BindData()`成员函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TPipelineLayout`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TPipelineDescriptorSet`类内更新析构函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TRenderingPipeline`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TRenderingPipeline`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TRenderPass`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSampler`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSemaphore`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TShader`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TShader`类内更新构造函数，修正之前有效性判断的代码错误。
+  >* `./engine/core`下的`TSurface`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSurface`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSurface`类内更新`InternalDestroy`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSwapchain`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TSwapchain`类内更新`InternalCreate`函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TSwapchain`类内更新构造函数。使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TVersion.cpp`修正其继承自`TInfo`。
+  >* `./engine/core`下的`TVmaAllocator`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanAllocator`类内使用`Turbo::Core::TRefPtr`进行适配。
+  >* `./engine/core`下的`TVulkanAllocator`类内`Destory()`静态成员函数内移除对`delete`的使用。
+  >* `./engine/core`下的`TRefPtr.h`中增加`cstdint`头文件。
+  >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr::Valid()`进行有效性判断。
+  >* `./engine/core`下的`TVulkanLoader`类内使用`Turbo::Core::TRefPtr`进行适配。
+
+* 2023/12/1 设计架构
+  >
+  >* `./.gitignore`下增加对`thirdparty`第三方库的追踪忽略。
+  >* `./engine/framegraph`下的`TFrameGraph.hpp`内的`TResourceProxy<T>`增加`T resource`的限制描述备注。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TResourceProxy<T>`内的`uint32_t id`成员修改为`ID id`。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TRenderPass`内的`AddSubpass()`成员函数。函数形参增加默认值。并返回索引值
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`Turbo::FrameGraph::TFrameGraph::TBuilder`内的`CreateSubpass()`成员函数。去掉不必要的临时变量。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsWrite(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsRead(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内增加`bool IsInput(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Write(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Read(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TSubpass`内的`void Input(TResource resource)`成员函数。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Compile()`成员函数。增加对计数引用数为`0`的判断。
+  >* `./engine/framegraph`下更新`TFrameGraph.hpp`内的`TFrameGraph`内的`Execute()`成员函数。资源只在`PassNode`有效的情况下创建和销毁。
+  >* `./engine/framegraph`下`TFrameGraph.hpp`内的`TFrameGraph`内增加`std::string ToHtml()`成员函数。方便输出查看。
+
+* 2023/12/2 设计架构
+  >
+  >* `./engine/render`下的`TBuffer`中增加`core/include/TRefPtr.h`头文件的引入。
+  >* `./engine/render`下的`TBuffer`类中将`Turbo::Core::TBuffer *buffer`成员改成`Turbo::Core::TRefPtr<Turbo::Core::TBuffer> buffer`。
+
+* 2023/12/3 设计架构
+  >
+  >* `./engine/core`下更新`TBuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBufferPool.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptor.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorPool.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorSet.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDescriptorSetLayout.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDevice.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TDeviceQueue.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TException.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TExtensionInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TFormatInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TFramebuffer.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TGraphicsPipeline.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TImage.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TImageView.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TInstance.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TLayerInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TMemoryHeapInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TMemoryTypeInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPhysicalDevice.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPipeline.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TPipelineCache.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TQueueFamilyInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TRenderPass.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TScissor.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSemaphore.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TShader.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSubpass.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSurface.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TSwapchain.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TVendorInfo.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TVersion.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TViewport.h`中对所有的信息获取函数后增加`const`。并更新相应`cpp`文件。
+  >* `./engine/core`下更新`TCommandBufferBase`中`CmdPipelineBarrier`成员函数。为了调用`const`形参中的非`const`函数而进行了拷贝。（这可能是没有必要的拷贝）
+  >* `./engine/core`下更新`TBarrier.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TCommandBuffer.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TCommandBufferPool.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDescriptor.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDescriptorPool.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDevice.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TDeviceQueue.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TEngine.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TFence.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TFramebuffer.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TImage.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TImageView.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TInstance.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TPhysicalDevice.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TPipeline.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TRenderPass.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TShader.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TSurface.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+  >* `./engine/core`下更新`TSwapchain.h`所有的`TRefPtr<T>`返回函数，都使用`const TRefPtr<T>&`格式返回（减少不必要的拷贝构造）。
+
+* 2023/12/4 设计架构
+  >
+  >* `./engine/core`下更新`TRefPtr.h`。增加`StaticCast<T,S>`静态强制转换函数。
+  >* `./engine/core`下更新`TRefPtr.h`。增加`DynamicCast<T,S>`动态强制转换函数。
+  >* `./engine/core`下更新`TRefPtr.h`。增加`ConstCast<T,S>`常量强制转换函数。
+  >* `./engine/core`下更新`TCommandBufferPool`。将原先的`std::vector<TRefPtr<TCommandBufferBase>> commandBuffers`成员分成两个成员`std::vector<TRefPtr<TCommandBuffer>> commandBuffers`和`std::vector<TRefPtr<TSecondaryCommandBuffer>> secondaryCommandBuffers`。
+  >* `./engine/core`下更新`TCommandBufferPool`。`Allocate()`和`AllocateSecondary()`成员函数返回引用。
+  >* `./engine/core`下更新`TCommandBufferPool`的`Free(TRefPtr<TCommandBufferBase> &)`成员函数。适配一级和二级的指令缓存的释放。
+  >* `./engine/core`下更新`TCommandBufferPool`的`InternalDestroy`成员函数。适配二级的指令缓存数组的释放。
+  >* `./engine/core`下更新`TCommandBufferPool`的析构函数。将指令缓存数组的清空转移至`InternalDestroy`成员函数中。
+  >* `./docs`下更新`Issue.md`。记录一些待解决的问题。
+
+* 2023/12/5 设计架构
+  >
+  >* `./engine/core`下将所有的`ToString()`函数后面都加上`const`声明。
+  >* `./engine/core`下将`TReferenced`中的`Release()`公有成员函数转移至私有。
+  >* `./engine/core`下`TBuffer`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TCommandBufferBase`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TCommandBufferPool`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDescriptorPool`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDescriptorSet`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDevice`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TDeviceQueue`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TEngine`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TFence`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TFences`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TFramebuffer`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TImage`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TImageView`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TInstance`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPhysicalDevice`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipeline`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineCache`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineDescriptorSet`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TPipelineLayout`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TRenderPass`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSampler`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSemaphore`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSurface`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TSwapchain`中增加`Valid()`函数的重写。
+  >* `./engine/core`下`TVmaAllocator`中增加`Valid()`函数的重写。
+
+* 2023/12/6 设计架构
+  >
+  >* `./engine/core`下`TFormatInfo`中移除对于`Turbo::Core::TDevice`的提前声明和头文件引入。
+  >* `./engine/core`下移除所有类中对`TRefPtr<T>`成员赋`nullptr`初始值。使其通过默认的构造函数进行初始化。
+  >* `./engine/core`下`TDescriptor.cpp`开头增加对于`TShader.h`头文件的包含。
+  >* `./engine/core`下`TPhysicalDevice`中`GetSupportFormats() const`成员函数中将`this`的`const TPhysicalDevice *`指针强制转换成`TPhysicalDevice *`。用于获取支持的格式。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorSetLayout.h`头文件的包含。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TDescriptorPool.h`头文件的包含。
+  >* `./engine/core`下`TPipelineDescriptorSet.cpp`开头增加对于`TBuffer.h`头文件的包含。
+  >* `./engine/core`下`TRenderingPipeline.cpp`开头增加对于`TImageView.h`头文件的包含。
+  >* `./engine/core`下`TBarrier.h`中`TImageMemoryBarrier`的析构函数声明为`default`。
+  >* `./engine/core`下`TDescriptorPool.h`中`TDescriptorSize`的析构函数声明为`default`。
+
+* 2023/12/7 设计架构
+  >
+  >* `./engine/core`下`main.cpp`进行`TRefPtr<T>`计数引用适配。
+  >* `./engine/core`下`TDeviceQueue`中的`bool Submit(std::vector<TRefPtr<TSemaphore>> &, std::vector<TRefPtr<TSemaphore>> &,...)`更改成`bool Submit(const std::vector<TRefPtr<TSemaphore>> &, const std::vector<TRefPtr<TSemaphore>> &,...)`。形参为`const`的版本。
+  >* `./engine/core`下`TInstance`中`InternalCreate()`成员函数，对于`this->physicalDevices`数组遍历时出现了未知异常。尝试解决该`Bug`。
+  >* `./engine/core`下`TRefPtr`中移除`void Release()`成员函数。
+  >* `./engine/core`下`TReferenced`中增加`uint32_t UnReferenceWithoutDelete() const`成员函数。用于仅解除计数引用而不触发销毁判断。
+  >* `./engine/core`下`TRefPtr`中增加`T *Unbind()`成员函数。用于仅解除计数引用而不触发销毁判断。
+  >* `./engine/core`下`TInstance`中`InternalCreate()`成员函数，在内部会调用`TVulkanLoader::Instance()->LoadInstanceDriver(this)`而`this`当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下`TPhysicalDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下`TDevice`中`InternalCreate()`成员函数，在内部某些函数会使用`TRefPtr`引用`this`，当前的计数引用是`0`，当执行完该函数后计数引用发现自身引用数为`0`，将会触发`自销毁（delete this）`这将导致不必要的异常`Bug`。修正。
+  >* `./engine/core`下创建`TDevice`和`TDeviceQueue`时内部有非常恶心的逻辑前后互调用和重建，调整这一部分使其清晰明了。（历史遗留问题，当时脑子抽了写的啥玩意？？？）
+  >* `./engine/core`下更新`TDevice`下的`InternalCreate()`函数。内部构建已知队列方式。而不是使用之前动态创建队列再反补回头重构设备方式（太麻烦，也没必要）。
+  >* `./engine/core`下更新`TDevice`下的`std::vector<TRefPtr<TDeviceQueue>> deviceQueues`成员变量修改为`std::map<TQueueFamilyIndex, std::vector<TRefPtr<TDeviceQueue>>>`类型。
+  >* `./engine/core`下更新`TInstance`下的`InternalCreate()`成员函数中移除对于`TPhysicalDevice::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TPhysicalDevice`下的`InternalCreate()`成员函数中移除对于`TDevice::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的`InternalCreate()`成员函数中移除对于`TDeviceQueue::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的构造函数中对于`TDeviceQueue`的创建。
+  >* `./engine/core`下更新`TDeviceQueue`下的构造函数。移除对于重构`TDevice`的策略。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`std::map<TQueueFamilyInfo, uint32_t> availableQueueCountMap`成员变量。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void AvailableQueueCountMinusOneByQueueFamilyIndex(uint32_t queueFamilyIndex)`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void AvailableQueueCountPlussOneByQueueFamilyIndex(uint32_t queueFamilyIndex)`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下移除`void ResetQueueCountMap()`成员函数。
+  >* `./engine/core`下更新`TPhysicalDevice`下`GetAvailableQueueCount`成员函数。
+  >* `./engine/core`下更新`TDeviceQueue`下的`InternalCreate()`成员函数中移除对于`TCommandBufferPool::InternalCreate()`的调用。
+  >* `./engine/core`下更新`TDevice`下的`AddChildHandle(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`InternalDestroy(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`InternalDestroy(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetDeviceQueueCountByQueueFamily(..)`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下移除`GetDeviceQueueCountByQueueFamily`成员函数。
+  >* `./engine/core`下更新`TDevice`下移除`GetDeviceQueueFamilyInfos`成员函数。
+  >* `./engine/core`下更新`TDevice`下的`GetBestGraphicsQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestComputeQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestTransferQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestSparseBindingQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`TDevice`下的`GetBestProtectedQueue`成员函数。适配`deviceQueues`的成员变量。
+  >* `./engine/core`下更新`main.cpp`下结尾处提出对于销毁`VkSurfaceKHR`修改意见。
+
+* 2023/12/11 设计架构
+  >
+  >* `./docs`下`TurboDesign.drawio`增加`JobSystem`板块。用于研究`JobSystem`。
+  >* `./docs`下`TurboDesign.drawio`的`JobSystem`板块增加`WorkStealingDequeue`的架构图。用于研究`JobSystem`。
+  >* `./engine/core`下`TSurface`中增加`const VkAllocationCallbacks *externalVkAllocationCallbacks`成员变量。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`TSurface`中`TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &, VkSurfaceKHR)`构造函数中增加`const VkAllocationCallbacks *pAllocator`形参。并修改相应`cpp`中的实现。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`TSurface`更新`InternalDestroy()`成员函数。用于适配外部`VkSurfaceKHR`句柄。
+  >* `./engine/core`下`main.cpp`更新对于`glfw`创建的外部`VkSurfaceKHR`句柄的适配。
+
+* 2023/12/13 设计架构
+  >
+  >* `./engine/render`下更新`TBuffer`中的`buffer`使用默认构造初始化。
+  >* `./engine/render`下更新`TBuffer`中的`Destroy`成员函数。释放所有成员变量。
+  >* `./engine/render`下更新`TBuffer`中的`Copy`成员函数。将所有`Turbo::Core`下的计数引用对象使用`Turbo::Core::TRefPtr`承接。
+  >* `./engine/render`下更新`TImage`中的`image`和`imageView`成员。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TImage`及其子类中的`CreateImageView`成员函数。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TImage`中的`Destroy`成员函数。释放所有成员变量。
+  >* `./engine/render`下更新`TShader`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TSampler`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TRenderPass`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TGraphicsPipeline`。使用`Turbo::Core::TRefPtr<T>`适配。
+
+* 2023/12/14 设计架构
+  >
+  >* `./engine/render`下更新`TResourceAllocator`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TContext`。使用`Turbo::Core::TRefPtr<T>`适配。
+  >* `./engine/render`下更新`TContext`下的`Turbo::Render::TCommandBuffer`从原先的`typedef struct`转成`class`声明。
+  >* `./engine/render`下更新`TBuffer.h`下引入`Core`的`TBuffer.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TBuffer.cpp`下引入`Core`的`TDevice.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TContext.h`下引入`Core`的`TFence.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.h`下引入`Core`的`TImage.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.h`下引入`Core`的`TImageView.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TImage.cpp`下引入`Core`的`TImage.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TResourceAllocator.cpp`下引入`Core`的`TCommandBuffer.h`的头文件。通过编译。
+  >* `./engine/render`下更新`TShader.cpp`下引入`Core`的`TDevice.h`的头文件。通过编译。
+  >* `./engine/render`目前有些头文件有冗余。
+  >* `./engine/render`使用`Turbo::Core::TRefPtr<T>`初步适配完成。
+
+* 2023/12/18 设计架构
+  >
+  >* `./thirdparty`下更新`KTX-Software`同步到`main`分支。
+  >* `./thirdparty`下`KTX-Software`中用到了`std::make_unique`。基本上为`C++14`以上特性。为此将`Turbo`从`C++11`提升至`C++17`。
+
+* 2024/2/26
+  >
+  >* 更新 `HelloTriangle` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TReferenced` 优化代码调用。
+
+* 2024/2/28
+  >
+  >* 更新 `PureHelloTriangle` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/2/29
+  >
+  >* 更新 `PureCombinedImageSampler` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/2
+  >
+  >* 更新 `PureSeparateImageSampler` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `PureIndexDraw` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TurboTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/3
+  >
+  >* 更新 `PBRTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/4
+  >
+  >* 更新 `SecondaryCommandBufferTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/5
+  >
+  >* 更新 `MultiDrawTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `SubpassTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `LineAndLineWidth` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/6
+  >
+  >* 更新 `InstancedDrawTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `PerlinWorleyNoiseTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `CineShaderLava` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/7
+  >
+  >* 更新 `Octagrams` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ProteanClouds` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ComputePipelineTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `Auroras` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/8
+  >
+  >* 更新 `ComputerPipelineGeneratePerlinWorley` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ComputerPipelineGenerateWorley` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `IspGlassball11Mix` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VolumetricCloud` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `RayMarchingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `RayMarchingBoundingBoxTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `RayMarchingPerlinWorleyNoise` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/9
+  >
+  >* 暂时移除 `RenderDesignTest` 示例。``Render`` 库重构中。
+  >* 更新 `PushConstantTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 暂时移除 `RenderAndFrameGraph` 示例。``Render`` 库重构中。
+  >* 更新 `ClearColorTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `ShaderIncludeTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `GreenFieldDiorama` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 暂时移除 `PureHelloTriangleAndFrameGraph` 示例。``Render`` 库重构中。
+  >* 更新 `VulkanDynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `DynamicRenderingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `NormalTexture` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/10
+  >
+  >* 更新 `BRDF` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TessellationTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `GeometryShaderTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `TessellationAndGeometry` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `MeshShaderTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `SpecializationConstantsTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/11
+  >
+  >* 更新 `VulkanKHRRayTracingTestForLighting` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForLightingShadow` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/12
+  >
+  >* 更新 `VulkanKHRRayTracingTestForLightingShadowWithTexture` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingJitterCamera` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingAnyHitShader` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForInstances` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForReflections` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForReflections_WithoutLimited` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/13
+  >
+  >* 更新 `VulkanKHRRayTracingTestForMultiClosestHits` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForAnimationTLAS` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForAnimationBLAS` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForIntersectionShader` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForCallableShader` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanRayQueryTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+  >* 更新 `VulkanKHRRayTracingTestForGLTF` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。

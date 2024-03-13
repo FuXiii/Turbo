@@ -216,17 +216,17 @@ Turbo::Core::TExtensionInfo::~TExtensionInfo()
 {
 }
 
-Turbo::Core::TExtensionType Turbo::Core::TExtensionInfo::GetExtensionType()
+Turbo::Core::TExtensionType Turbo::Core::TExtensionInfo::GetExtensionType() const
 {
     return this->extensionType;
 }
 
-const std::string &Turbo::Core::TExtensionInfo::GetName()
+const std::string &Turbo::Core::TExtensionInfo::GetName() const
 {
     return this->name;
 }
 
-uint32_t Turbo::Core::TExtensionInfo::GetVersion()
+uint32_t Turbo::Core::TExtensionInfo::GetVersion() const
 {
     return this->version;
 }
@@ -251,7 +251,7 @@ bool Turbo::Core::TExtensionInfo::operator!=(const TExtensionInfo &extension) co
     return false;
 }
 
-std::string Turbo::Core::TExtensionInfo::ToString()
+std::string Turbo::Core::TExtensionInfo::ToString()const
 {
     std::stringstream ss;
     ss << this->name << " : extension revision " << this->version;

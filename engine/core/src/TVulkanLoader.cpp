@@ -6,7 +6,7 @@
 #include <Windows.h>
 #endif
 
-Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanLoader> Turbo::Core::TVulkanLoader::vulkanLoader = nullptr;
 
 Turbo::Core::TVulkanLoader::TVulkanLoader()
 {
@@ -58,9 +58,9 @@ Turbo::Core::TVulkanLoader::~TVulkanLoader()
 {
 }
 
-Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::Instance()
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanLoader> Turbo::Core::TVulkanLoader::Instance()
 {
-    if (TVulkanLoader::vulkanLoader == nullptr)
+    if (!TVulkanLoader::vulkanLoader.Valid())
     {
         TVulkanLoader::vulkanLoader = new TVulkanLoader();
     }
@@ -70,9 +70,10 @@ Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::Instance()
 
 void Turbo::Core::TVulkanLoader::Destroy()
 {
-    if (TVulkanLoader::vulkanLoader != nullptr)
+    if (TVulkanLoader::vulkanLoader.Valid())
     {
-        delete TVulkanLoader::vulkanLoader;
+        // delete TVulkanLoader::vulkanLoader;
+        TVulkanLoader::vulkanLoader = nullptr;
     }
 }
 
@@ -197,7 +198,7 @@ Turbo::Core::TGlobalDriver Turbo::Core::TVulkanLoader::LoadGlobalDriver()
     return global_driver;
 }
 
-Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TInstance *instance)
+Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(const TRefPtr<TInstance> &instance)
 {
     Turbo::Core::TInstanceDriver instance_driver = {};
 
@@ -231,7 +232,7 @@ Turbo::Core::TInstanceDriver Turbo::Core::TVulkanLoader::LoadInstanceDriver(TIns
     return instance_driver;
 }
 
-Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice)
+Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDeviceDriver(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     Turbo::Core::TPhysicalDeviceDriver physical_device_driver = {};
     Turbo::Core::TInstance *instance = physicalDevice->GetInstance();
@@ -333,7 +334,7 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
     return physical_device_driver;
 }
 
-Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
+Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(const TRefPtr<TDevice> &device)
 {
     TDeviceDriver device_driver = {};
     Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
@@ -660,7 +661,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     return device_driver;
 }
 
-std::string Turbo::Core::TVulkanLoader::ToString()
+std::string Turbo::Core::TVulkanLoader::ToString() const
 {
     return std::string();
 }

@@ -12,15 +12,15 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-void Turbo::Core::TDeviceQueue::AddChildHandle(TCommandBufferPool *commandBufferPool)
+void Turbo::Core::TDeviceQueue::AddChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool)
 {
-    if (commandBufferPool != nullptr)
+    if (commandBufferPool.Valid())
     {
         this->commandBufferPools.push_back(commandBufferPool);
     }
 }
 
-Turbo::Core::TCommandBufferPool *Turbo::Core::TDeviceQueue::RemoveChildHandle(TCommandBufferPool *commandBufferPool)
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> Turbo::Core::TDeviceQueue::RemoveChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool)
 {
     Turbo::Core::TCommandBufferPool *result = nullptr;
     uint32_t index = 0;
@@ -56,6 +56,7 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
     // TODO: load vkQueuePresentKHR function
     // FIXME: If device not enable VK_KHR_swapchain extension we can not load:
     // FIXME: vkQueuePresentKHR
+    // FIXME: Try to use device driver function pointer (2023/12/7)
     if (this->device->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN))
     {
         this->vkQueuePresentKHR = TVulkanLoader::Instance()->LoadDeviceFunction<PFN_vkQueuePresentKHR>(this->device, "vkQueuePresentKHR");
@@ -65,10 +66,10 @@ void Turbo::Core::TDeviceQueue::InternalCreate()
         throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Core::TDeviceQueue::InternalCreate()", "Please enable the VK_KHR_swapchain extension");
     }
 
-    for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
-    {
-        command_buffer_pool_item->InternalCreate();
-    }
+    // OLD:for (TCommandBufferPool *command_buffer_pool_item : this->commandBufferPools)
+    // OLD:{
+    // OLD:    command_buffer_pool_item->InternalCreate();
+    // OLD:}
 }
 
 void Turbo::Core::TDeviceQueue::InternalDestroy()
@@ -82,7 +83,7 @@ void Turbo::Core::TDeviceQueue::InternalDestroy()
     this->vkQueue = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TDeviceQueue::TDeviceQueue(TDevice *device, TQueueFamilyInfo &queueFamily, uint32_t index) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDeviceQueue::TDeviceQueue(const TRefPtr<TDevice> &device, TQueueFamilyInfo &queueFamily, uint32_t index) : Turbo::Core::TVulkanHandle()
 {
     if (device != nullptr && queueFamily.GetIndex() != UINT32_MAX)
     {
@@ -93,12 +94,14 @@ Turbo::Core::TDeviceQueue::TDeviceQueue(TDevice *device, TQueueFamilyInfo &queue
             this->queueFamily = queueFamily;
             this->index = index;
 
+            this->InternalCreate();
+
             this->device->AddChildHandle(this);
 
-            this->device->InternalRebuild();
+            // OLD:this->device->InternalRebuild();
 
             // 更新TPhysicalDevice下的可用queue的数量
-            device->physicalDevice->AvailableQueueCountMinusOneByQueueFamilyIndex(this->queueFamily.GetIndex());
+            // OLD:device->physicalDevice->AvailableQueueCountMinusOneByQueueFamilyIndex(this->queueFamily.GetIndex());
         }
         else
         {
@@ -115,7 +118,7 @@ Turbo::Core::TDeviceQueue::~TDeviceQueue()
 {
     this->device->RemoveChildHandle(this);
 
-    device->physicalDevice->AvailableQueueCountPlussOneByQueueFamilyIndex(this->queueFamily.GetIndex());
+    // OLD:device->physicalDevice->AvailableQueueCountPlussOneByQueueFamilyIndex(this->queueFamily.GetIndex());
 
     // this->device->InternalRebuild();
 
@@ -129,7 +132,7 @@ Turbo::Core::TDeviceQueue::~TDeviceQueue()
     this->InternalDestroy();
 }
 
-Turbo::Core::TQueueFamilyInfo Turbo::Core::TDeviceQueue::GetQueueFamily()
+Turbo::Core::TQueueFamilyInfo Turbo::Core::TDeviceQueue::GetQueueFamily() const
 {
     return this->queueFamily;
 }
@@ -139,18 +142,18 @@ VkQueue Turbo::Core::TDeviceQueue::GetVkQueue()
     return this->vkQueue;
 }
 
-Turbo::Core::TDevice *Turbo::Core::TDeviceQueue::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDeviceQueue::GetDevice()
 {
     return this->device;
 }
 
-bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores, std::vector<TSemaphore *> *signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)
+bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
 {
     std::vector<VkSemaphore> wait_semaphores;
     std::vector<VkPipelineStageFlags> wait_dst_stage_masks;
-    if (waitSemaphores != nullptr)
+    if (!waitSemaphores.empty())
     {
-        for (TSemaphore *semaphore_item : *waitSemaphores)
+        for (const TRefPtr<TSemaphore> &semaphore_item : waitSemaphores)
         {
             wait_semaphores.push_back(semaphore_item->GetVkSemaphore());
             wait_dst_stage_masks.push_back(semaphore_item->GetWaitDstStageMask());
@@ -158,9 +161,9 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
     }
 
     std::vector<VkSemaphore> signal_semaphores;
-    if (signalSemaphores != nullptr)
+    if (!signalSemaphores.empty())
     {
-        for (TSemaphore *semaphore_item : *signalSemaphores)
+        for (const TRefPtr<TSemaphore> &semaphore_item : signalSemaphores)
         {
             signal_semaphores.push_back(semaphore_item->GetVkSemaphore());
         }
@@ -180,7 +183,7 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
     VkFence vk_fence = VK_NULL_HANDLE;
-    if (fence != nullptr)
+    if (fence.Valid())
     {
         vk_fence = fence->GetVkFence();
     }
@@ -194,6 +197,14 @@ bool Turbo::Core::TDeviceQueue::Submit(std::vector<TSemaphore *> *waitSemaphores
     return true;
 }
 
+bool Turbo::Core::TDeviceQueue::Submit(const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence)
+{
+    std::vector<TRefPtr<TSemaphore>> wait_semaphores;
+    std::vector<TRefPtr<TSemaphore>> signal_semaphores;
+
+    return this->Submit(wait_semaphores, signal_semaphores, commandBuffer, fence);
+}
+
 void Turbo::Core::TDeviceQueue::WaitIdle()
 {
     VkResult result = this->device->GetDeviceDriver()->vkQueueWaitIdle(this->vkQueue);
@@ -203,7 +214,7 @@ void Turbo::Core::TDeviceQueue::WaitIdle()
     }
 }
 
-bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *surface)
+bool Turbo::Core::TDeviceQueue::IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface) const
 {
     uint32_t queue_family_index = this->queueFamily.GetIndex();
     std::vector<Turbo::Core::TQueueFamilyInfo> support_queue_familys = surface->GetSupportQueueFamilys();
@@ -218,9 +229,9 @@ bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *sur
     return false;
 }
 
-Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)
+Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex)
 {
-    if (swapchain != nullptr)
+    if (swapchain.Valid())
     {
         VkSwapchainKHR vk_swapchain_khr = swapchain->GetVkSwapchainKHR();
         uint32_t image_index = imageIndex;
@@ -262,7 +273,16 @@ Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapc
     return TResult::INVALID_PARAMETER;
 }
 
-std::string Turbo::Core::TDeviceQueue::ToString()
+std::string Turbo::Core::TDeviceQueue::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDeviceQueue::Valid() const
+{
+    if (this->vkQueue != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

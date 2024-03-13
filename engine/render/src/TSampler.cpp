@@ -18,7 +18,9 @@ void Turbo::Render::TSampler::Destroy(void *allocator)
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
+        // FIXME: call [sampler = nullptr] in [resource_allocator->DestroySampler(...)];
         resource_allocator->DestroySampler(this->sampler);
+        memset(&this->descriptor, 0, sizeof(this->descriptor));
     }
 }
 

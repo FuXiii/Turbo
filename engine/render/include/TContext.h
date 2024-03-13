@@ -10,6 +10,9 @@
 #include <stdint.h>
 #include <vector>
 
+#include <core/include/TRefPtr.h>
+#include <core/include/TFence.h>
+
 namespace Turbo
 {
 namespace Core
@@ -56,7 +59,7 @@ class TGraphicsPipelinePool
     TContext *context = nullptr;
 
     // TODO: 需要一个类似于快表的数据结构来加速查询
-    std::map<Turbo::Core::TRenderPass *, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TGraphicsPipeline *>>> graphicsPipelineMap;
+    std::map<Turbo::Core::TRefPtr<Turbo::Core::TRenderPass>, std::map<uint32_t /*subpass*/, std::vector<Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline>>>> graphicsPipelineMap;
 
   private:
     void CreateGraphicsPipeline(Turbo::Render::TRenderPass &renderPass, uint32_t subpass, Turbo::Render::TGraphicsPipeline &graphicsPipeline);
@@ -78,7 +81,7 @@ class TFramebufferPool
     TContext *context = nullptr;
 
   private:
-    std::vector<Turbo::Core::TFramebuffer *> framebuffers;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> framebuffers;
 
   private:
     void CreateFramebuffer(Turbo::Render::TRenderPass &renderPass);
@@ -101,7 +104,7 @@ class TRenderPassPool
     TFramebufferPool *framebufferPool = nullptr;
 
   private:
-    std::vector<Turbo::Core::TRenderPass *> renderPasses;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TRenderPass>> renderPasses;
 
   private:
     void CreateRenderPass(Turbo::Render::TRenderPass &renderPass);
@@ -119,20 +122,27 @@ class TRenderPassPool
     void GC();
 };
 
-typedef struct TCommandBuffer
+// OLD:typedef struct TCommandBuffer
+class TCommandBuffer
 {
-    Turbo::Core::TCommandBuffer *commandBuffer = nullptr;
-    Turbo::Core::TFence *fence = nullptr;
-} TCommandBuffer;
+  public:
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> commandBuffer;
+    Turbo::Core::TRefPtr<Turbo::Core::TFence> fence;
+
+  public:
+    TCommandBuffer();
+    ~TCommandBuffer();
+    // OLD:} TCommandBuffer;
+};
 
 class TContext
 {
   private:
-    Turbo::Core::TInstance *instance = nullptr;
-    Turbo::Core::TPhysicalDevice *physicalDevice = nullptr;
-    Turbo::Core::TDevice *device = nullptr;
-    Turbo::Core::TDeviceQueue *graphicsQueue = nullptr;
-    Turbo::Core::TCommandBufferPool *commandBufferPool = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance;
+    Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> physicalDevice;
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device;
+    Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> graphicsQueue;
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> commandBufferPool;
 
     Turbo::Render::TCommandBuffer currentCommandBuffer;
     std::vector<Turbo::Render::TCommandBuffer> commandBuffers;
@@ -143,7 +153,7 @@ class TContext
 
     // for BindVeretxAttribute(...)
     std::vector<Turbo::Core::TVertexBinding *> vertexBindings;
-    std::vector<Turbo::Core::TBuffer *> vertexBuffers;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> vertexBuffers;
 
     // for BindDescriptor(...)
     using TSetID = uint32_t;
@@ -197,10 +207,10 @@ class TContext
         }
     } TDescriptorID;
 
-    std::map<TDescriptorID, std::vector<Turbo::Core::TBuffer *>, TDescriptorID> uniformBufferMap;
-    std::map<TDescriptorID, std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>>, TDescriptorID> combinedImageSamplerMap;
-    std::map<TDescriptorID, std::vector<Turbo::Core::TImageView *>, TDescriptorID> sampledImageMap;
-    std::map<TDescriptorID, std::vector<Turbo::Core::TSampler *>, TDescriptorID> samplerMap;
+    std::map<TDescriptorID, std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>>, TDescriptorID> uniformBufferMap;
+    std::map<TDescriptorID, std::vector<std::pair<Turbo::Core::TRefPtr<Turbo::Core::TImageView>, Turbo::Core::TRefPtr<Turbo::Core::TSampler>>>, TDescriptorID> combinedImageSamplerMap;
+    std::map<TDescriptorID, std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>>, TDescriptorID> sampledImageMap;
+    std::map<TDescriptorID, std::vector<Turbo::Core::TRefPtr<Turbo::Core::TSampler>>, TDescriptorID> samplerMap;
 
     std::map<TSetID, std::map<TBindingID, TDescriptorMapType>> descriptorMap;
 
@@ -213,17 +223,17 @@ class TContext
     TContext();
     ~TContext();
 
-    Turbo::Core::TImage *CreateImage(const Turbo::Render::TImage::Descriptor &descriptor);
-    void DestroyImage(Turbo::Core::TImage *image);
-    // Turbo::Core::TImage *CreateCubeImage(uint32_t width, uint32_t height,uint32_t depth,uint32_t layer/*, flags,TImage*/);
-    Turbo::Core::TBuffer *CreateBuffer(const Turbo::Render::TBuffer::Descriptor &descriptor);
-    void DestroyBuffer(Turbo::Core::TBuffer *buffer);
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> CreateImage(const Turbo::Render::TImage::Descriptor &descriptor);
+    void DestroyImage(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image);
 
-    Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
-    void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> CreateBuffer(const Turbo::Render::TBuffer::Descriptor &descriptor);
+    void DestroyBuffer(Turbo::Core::TRefPtr<Turbo::Core::TBuffer> &buffer);
 
-    Turbo::Core::TSampler *CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor);
-    void DestroySampler(Turbo::Core::TSampler *sampler);
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> AllocateCommandBuffer();
+    void FreeCommandBuffer(Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &commandBuffer);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TSampler> CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor);
+    void DestroySampler(Turbo::Core::TRefPtr<Turbo::Core::TSampler> &sampler);
 
     void ClearTexture(Turbo::Render::TTexture2D &texture2D, float r = 0, float g = 0, float b = 0, float a = 0);
 
@@ -280,7 +290,7 @@ class TContext
                 }
 
                 // TODO:更新到目标【描述符资源数组】中
-                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap.at(descriptor_id);
+                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> &uniform_buffers = this->uniformBufferMap.at(descriptor_id);
                 for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
                 {
                     uniform_buffers.push_back(uniform_buffer_item.buffer);
@@ -293,7 +303,7 @@ class TContext
             {
                 // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
                 // 说明找到了Set，但没有Binding
-                std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[descriptor_id];
+                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> &uniform_buffers = this->uniformBufferMap[descriptor_id];
                 for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
                 {
                     uniform_buffers.push_back(uniform_buffer_item.buffer);
@@ -305,7 +315,7 @@ class TContext
         else
         {
             // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-            std::vector<Turbo::Core::TBuffer *> &uniform_buffers = this->uniformBufferMap[descriptor_id];
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> &uniform_buffers = this->uniformBufferMap[descriptor_id];
             for (const Turbo::Render::TUniformBuffer<T> &uniform_buffer_item : uniformBuffers)
             {
                 uniform_buffers.push_back(uniform_buffer_item.buffer);

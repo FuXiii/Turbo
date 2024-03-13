@@ -43,7 +43,7 @@ typedef enum class TBorderColor
 class TSampler : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkSampler vkSampler = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 
@@ -68,13 +68,17 @@ class TSampler : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TSampler(TDevice *device, TFilter minFilter = TFilter::LINEAR, TFilter magFilter = TFilter::LINEAR, TMipmapMode mipmapMode = TMipmapMode::LINEAR, TAddressMode addressModeU = TAddressMode::REPEAT, TAddressMode addressModeV = TAddressMode::REPEAT, TAddressMode addressModeW = TAddressMode::REPEAT, TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE, float mipLodBias = 0.0f, float minLod = 0.0f, float maxLod = 0.0f);
-    ~TSampler();
+    explicit TSampler(const TRefPtr<TDevice> &device, TFilter minFilter = TFilter::LINEAR, TFilter magFilter = TFilter::LINEAR, TMipmapMode mipmapMode = TMipmapMode::LINEAR, TAddressMode addressModeU = TAddressMode::REPEAT, TAddressMode addressModeV = TAddressMode::REPEAT, TAddressMode addressModeW = TAddressMode::REPEAT, TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE, float mipLodBias = 0.0f, float minLod = 0.0f, float maxLod = 0.0f);
 
+  protected:
+    virtual ~TSampler();
+
+  public:
     VkSampler GetVkSampler();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

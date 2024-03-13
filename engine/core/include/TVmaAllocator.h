@@ -15,7 +15,7 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
     friend class TDevice;
 
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocator;
     T_VULKAN_HANDLE_CHILDREN; // In CPP: VmaAllocator vmaAllocator;
 
@@ -24,14 +24,17 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TVmaAllocator(TDevice *device);
-    ~TVmaAllocator();
+    TVmaAllocator(const TRefPtr<TDevice> &device);
+
+  protected:
+    virtual ~TVmaAllocator();
 
   public:
     void *GetVmaAllocator();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 
 } // namespace Core

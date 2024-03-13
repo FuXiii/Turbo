@@ -12,8 +12,8 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
     for (TDescriptor *descriptor_item : this->descriptors)
     {
         uint32_t binding = descriptor_item->GetBinding();
-        TShader *shader = descriptor_item->GetShader();
-        if (shader != nullptr)
+        TRefPtr<TShader> shader = descriptor_item->GetShader();
+        if (shader.Valid())
         {
             binding_map[binding].push_back(descriptor_item);
         }
@@ -35,8 +35,8 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
                 vk_descriptor_set_layout_binding.stageFlags = 0;
                 for (TDescriptor *descriptor_item : descriptors)
                 {
-                    TShader *shader = descriptor_item->GetShader();
-                    if (shader != nullptr)
+                    TRefPtr<TShader> shader = descriptor_item->GetShader();
+                    if (shader.Valid())
                     {
                         vk_descriptor_set_layout_binding.stageFlags |= descriptor_item->GetShader()->GetVkShaderStageFlags();
                     }
@@ -52,7 +52,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
         }
     }
 
-    VkDescriptorSetLayoutCreateInfo vk_descriptor_set_layout_create_info={};
+    VkDescriptorSetLayoutCreateInfo vk_descriptor_set_layout_create_info = {};
     vk_descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     vk_descriptor_set_layout_create_info.pNext = nullptr;
     vk_descriptor_set_layout_create_info.flags = 0;
@@ -75,9 +75,9 @@ void Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, this->vkDescriptorSetLayout, allocator);
 }
 
-Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->descriptors = descriptors;
@@ -103,7 +103,7 @@ Turbo::Core::TDescriptorSetLayout::~TDescriptorSetLayout()
     }
 }
 
-uint32_t Turbo::Core::TDescriptorSetLayout::GetSet()
+uint32_t Turbo::Core::TDescriptorSetLayout::GetSet() const
 {
     return this->descriptors[0]->GetSet();
 }
@@ -113,7 +113,7 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding)
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
 {
     for (TDescriptor *dscriptor_item : this->descriptors)
     {
@@ -126,7 +126,16 @@ Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorTyp
     throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");
 }
 
-std::string Turbo::Core::TDescriptorSetLayout::ToString()
+std::string Turbo::Core::TDescriptorSetLayout::ToString()const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDescriptorSetLayout::Valid() const
+{
+    if (this->vkDescriptorSetLayout != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

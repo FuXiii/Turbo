@@ -24,7 +24,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT
     T_VULKAN_HANDLE_HANDLE VkInstance vkInstance = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TPhysicalDevice *> physicalDevices;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TPhysicalDevice>> physicalDevices;
 
     T_VULKAN_HANDLE_DATA std::vector<TLayerInfo> enabledLayers;
     T_VULKAN_HANDLE_DATA std::vector<TExtensionInfo> enabledExtensions;
@@ -36,9 +36,9 @@ class TInstance : public Turbo::Core::TVulkanHandle
     TInstanceDriver *instanceDriver = nullptr;
 
   protected:
-    bool IsHaveHandle(TPhysicalDevice *physicalDevice);
-    virtual void AddChildHandle(TPhysicalDevice *physicalDevice);
-    virtual TPhysicalDevice *RemoveChildHandle(TPhysicalDevice *physicalDevice);
+    bool IsHaveHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    virtual void AddChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    virtual TRefPtr<TPhysicalDevice> RemoveChildHandle(const TRefPtr<TPhysicalDevice> &physicalDevice);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
     virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
@@ -53,44 +53,44 @@ class TInstance : public Turbo::Core::TVulkanHandle
   public:
     explicit TInstance(std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TVersion *vulkanVersion = nullptr);
     // explicit TInstance(const TInstance &instance) = delete;
-    ~TInstance();
+  protected:
+    virtual ~TInstance();
 
   public:
     VkInstance GetVkInstance();
-    TVersion GetVulkanVersion();
+    TVersion GetVulkanVersion() const;
 
-    size_t GetSupportLayerCount();
-    std::vector<TLayerInfo> GetSupportLayers();
-    bool IsSupportLayer(std::string layerName);
-    bool IsSupportLayer(TLayerType layerType);
+    size_t GetSupportLayerCount() const;
+    std::vector<TLayerInfo> GetSupportLayers() const;
+    bool IsSupportLayer(std::string layerName) const;
+    bool IsSupportLayer(TLayerType layerType) const;
 
-    size_t GetSupportExtensionCount();
-    std::vector<TExtensionInfo> GetSupportExtensions();
-    bool IsSupportExtension(std::string extensionName);
-    bool IsSupportExtension(TExtensionType extensionType);
+    size_t GetSupportExtensionCount() const;
+    std::vector<TExtensionInfo> GetSupportExtensions() const;
+    bool IsSupportExtension(std::string extensionName) const;
+    bool IsSupportExtension(TExtensionType extensionType) const;
 
-    size_t GetEnabledLayerCount();
-    std::vector<TLayerInfo> GetEnabledLayers();
-    bool IsEnabledLayer(std::string layerName);
-    bool IsEnabledLayer(TLayerType layerType);
+    size_t GetEnabledLayerCount() const;
+    std::vector<TLayerInfo> GetEnabledLayers() const;
+    bool IsEnabledLayer(std::string layerName) const;
+    bool IsEnabledLayer(TLayerType layerType) const;
 
-    size_t GetEnabledExtensionCount();
-    std::vector<TExtensionInfo> GetEnabledExtensions();
-    bool IsEnabledExtension(std::string extensionName);
-    bool IsEnabledExtension(TExtensionType extensionType);
+    size_t GetEnabledExtensionCount() const;
+    std::vector<TExtensionInfo> GetEnabledExtensions() const;
+    bool IsEnabledExtension(std::string extensionName) const;
+    bool IsEnabledExtension(TExtensionType extensionType) const;
 
-    uint32_t GetPhysicalDeviceCount();
-    TPhysicalDevice *GetPhysicalDevice(uint32_t index);
-    const std::vector<TPhysicalDevice *> &GetPhysicalDevices();
-    TPhysicalDevice *GetBestPhysicalDevice();
+    uint32_t GetPhysicalDeviceCount() const;
+    const TRefPtr<TPhysicalDevice> &GetPhysicalDevice(uint32_t index);
+    const std::vector<TRefPtr<TPhysicalDevice>> &GetPhysicalDevices();
+    TRefPtr<TPhysicalDevice> GetBestPhysicalDevice();
 
     const TInstanceDriver *GetInstanceDriver();
 
-    TExtensionInfo GetExtensionByType(TExtensionType extensionType);
+    TExtensionInfo GetExtensionByType(TExtensionType extensionType) const;
 
-
-
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

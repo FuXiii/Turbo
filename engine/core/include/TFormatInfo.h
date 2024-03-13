@@ -1,14 +1,12 @@
 #pragma once
 #ifndef TURBO_CORE_TFORMAT_H
 #define TURBO_CORE_TFORMAT_H
-#include "TObject.h"
+#include "TInfo.h"
 
 namespace Turbo
 {
 namespace Core
 {
-class TDevice;
-
 typedef enum class TFormatType
 {
     UNDEFINED = VkFormat::VK_FORMAT_UNDEFINED,
@@ -330,15 +328,15 @@ typedef VkFlags TFormatFeatures;
 
 class TPhysicalDevice;
 
-class TFormatInfo : public TObject
+class TFormatInfo : public TInfo
 {
   private:
     TFormatType formatType = TFormatType::UNDEFINED;
     TFormatProperties formatProperties = {};
 
   public:
-    static std::vector<TFormatInfo> GetSupportFormats(TPhysicalDevice *physicalDevice);
-    static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);
+    static std::vector<TFormatInfo> GetSupportFormats(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    static bool IsSupportFormat(const TRefPtr<TPhysicalDevice> &physicalDevice, TFormatType formatType);
 
   public:
     TFormatInfo();
@@ -347,10 +345,10 @@ class TFormatInfo : public TObject
     ~TFormatInfo();
 
   public:
-    TFormatType GetFormatType();
-    VkFormat GetVkFormat();
+    TFormatType GetFormatType() const;
+    VkFormat GetVkFormat() const;
 
-    TFormatDataTypes GetFormatDataType();
+    TFormatDataTypes GetFormatDataType() const;
 
     // bool IsPacked();
     // uint32_t GetPackGroup();
@@ -363,7 +361,7 @@ class TFormatInfo : public TObject
     // uint32_t GetPlaneNumber();
     // TFormatReduceFactor GetReduceFactor();
 
-    uint32_t GetTexelBlockSize(); // unit byte
+    uint32_t GetTexelBlockSize() const; // unit byte
 
     // uint8_t GetRedBitSize();//unit bit
     // uint8_t GetGreenBitSize();//unit bit
@@ -372,38 +370,38 @@ class TFormatInfo : public TObject
     // uint8_t GetDepthBitSize();//unit bit
     // uint8_t GetStencilBitSize();//unit bit
 
-    bool IsSupportBuffer();
-    bool IsSupportVertexBuffer();
+    bool IsSupportBuffer() const;
+    bool IsSupportVertexBuffer() const;
 
-    bool IsSupportLinearTiling();
-    bool IsLinearTilingSupportSampledImage();
-    bool IsLinearTilingSupportStorageImage();
-    bool IsLinearTilingSupportStorageImageAtomic();
-    bool IsLinearTilingSupportColorAttachment();
-    bool IsLinearTilingSupportColorAttachmentBlend();
-    bool IsLinearTilingSupportDepthStencilAttachment();
-    bool IsLinearTilingSupportBlitSrc();
-    bool IsLinearTilingSupportBlitDst();
-    bool IsLinearTilingSupportSampledImageFilterLinear();
-    bool IsLinearTilingSupportTransferSrc();
-    bool IsLinearTilingSupportTransferDst();
+    bool IsSupportLinearTiling() const;
+    bool IsLinearTilingSupportSampledImage() const;
+    bool IsLinearTilingSupportStorageImage() const;
+    bool IsLinearTilingSupportStorageImageAtomic() const;
+    bool IsLinearTilingSupportColorAttachment() const;
+    bool IsLinearTilingSupportColorAttachmentBlend() const;
+    bool IsLinearTilingSupportDepthStencilAttachment() const;
+    bool IsLinearTilingSupportBlitSrc() const;
+    bool IsLinearTilingSupportBlitDst() const;
+    bool IsLinearTilingSupportSampledImageFilterLinear() const;
+    bool IsLinearTilingSupportTransferSrc() const;
+    bool IsLinearTilingSupportTransferDst() const;
 
-    bool IsSupportOptimalTiling();
-    bool IsOptimalTilingSupportSampledImage();
-    bool IsOptimalTilingSupportStorageImage();
-    bool IsOptimalTilingSupportStorageImageAtomic();
-    bool IsOptimalTilingSupportColorAttachment();
-    bool IsOptimalTilingSupportColorAttachmentBlend();
-    bool IsOptimalTilingSupportDepthStencilAttachment();
-    bool IsOptimalTilingSupportBlitSrc();
-    bool IsOptimalTilingSupportBlitDst();
-    bool IsOptimalTilingSupportSampledImageFilterLinear();
-    bool IsOptimalTilingSupportTransferSrc();
-    bool IsOptimalTilingSupportTransferDst();
+    bool IsSupportOptimalTiling() const;
+    bool IsOptimalTilingSupportSampledImage() const;
+    bool IsOptimalTilingSupportStorageImage() const;
+    bool IsOptimalTilingSupportStorageImageAtomic() const;
+    bool IsOptimalTilingSupportColorAttachment() const;
+    bool IsOptimalTilingSupportColorAttachmentBlend() const;
+    bool IsOptimalTilingSupportDepthStencilAttachment() const;
+    bool IsOptimalTilingSupportBlitSrc() const;
+    bool IsOptimalTilingSupportBlitDst() const;
+    bool IsOptimalTilingSupportSampledImageFilterLinear() const;
+    bool IsOptimalTilingSupportTransferSrc() const;
+    bool IsOptimalTilingSupportTransferDst() const;
 
     bool operator==(const TFormatInfo &format) const; // TODO: Format Compatibility Classes
     bool operator!=(const TFormatInfo &format) const;
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 } // namespace Core
 } // namespace Turbo

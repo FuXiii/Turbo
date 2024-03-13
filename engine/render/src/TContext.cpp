@@ -167,16 +167,17 @@ bool Turbo::Render::TGraphicsPipelinePool::Allocate(Turbo::Render::TRenderPass &
 
 void Turbo::Render::TGraphicsPipelinePool::GC()
 {
-    for (auto &render_pass_item : this->graphicsPipelineMap)
-    {
-        for (auto &subpass_item : render_pass_item.second)
-        {
-            for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
-            {
-                delete graphics_pipeline_item; // FIXME: <<<---此时发生了内存泄漏
-            }
-        }
-    }
+    // NOTE: Because we use Turbo::Core::TRefPtr so we don't need to explicit delete the memory
+    // for (auto &render_pass_item : this->graphicsPipelineMap)
+    //{
+    //    for (auto &subpass_item : render_pass_item.second)
+    //    {
+    //        for (Turbo::Core::TGraphicsPipeline *graphics_pipeline_item : subpass_item.second)
+    //        {
+    //            delete graphics_pipeline_item; // FIXME: <<<---此时发生了内存泄漏
+    //        }
+    //    }
+    //}
 
     this->graphicsPipelineMap.clear();
 }
@@ -199,10 +200,13 @@ Turbo::Render::TRenderPassPool::~TRenderPassPool()
     // TODO:release this->renderPassProxies;
     delete this->framebufferPool;
 
-    for (Turbo::Core::TRenderPass *render_pass_item : this->renderPasses)
-    {
-        delete render_pass_item;
-    }
+    // NOTE: Because we use Turbo::Core::TRefPtr so we don't need to explicit delete the memory
+    // for (Turbo::Core::TRenderPass *render_pass_item : this->renderPasses)
+    //{
+    //    delete render_pass_item;
+    //}
+
+    this->renderPasses.clear();
 
     this->context = nullptr;
 }
@@ -640,10 +644,7 @@ Turbo::Render::TFramebufferPool::TFramebufferPool(TContext *context)
 
 Turbo::Render::TFramebufferPool::~TFramebufferPool()
 {
-    for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
-    {
-        delete frame_buffer_item;
-    }
+    this->GC();
 
     this->context = nullptr;
 }
@@ -654,7 +655,7 @@ void Turbo::Render::TFramebufferPool::CreateFramebuffer(Turbo::Render::TRenderPa
     // TODO:add into this->framebuffers
     std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
 
-    std::vector<Turbo::Core::TImageView *> attachments;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> attachments;
     for (Turbo::Render::TImage &image_item : render_pass_attachments)
     {
         attachments.push_back(image_item.imageView);
@@ -670,7 +671,7 @@ bool Turbo::Render::TFramebufferPool::Find(Turbo::Render::TRenderPass &renderPas
         Turbo::Core::TFramebuffer *core_frame_buffer = frame_buffer_item;
         if (core_frame_buffer != nullptr && renderPass.renderPass != nullptr)
         {
-            std::vector<Turbo::Core::TImageView *> frame_buffer_attachments = core_frame_buffer->GetAttachments();
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> frame_buffer_attachments = core_frame_buffer->GetAttachments();
             std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
 
             uint32_t frame_buffer_attachment_count = frame_buffer_attachments.size();
@@ -722,12 +723,23 @@ void Turbo::Render::TFramebufferPool::Free(Turbo::Render::TRenderPass &renderPas
 
 void Turbo::Render::TFramebufferPool::GC()
 {
-    for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
-    {
-        delete frame_buffer_item;
-    }
+    // NOTE: Because we use Turbo::Core::TRefPtr so we don't need to explicit delete the memory any more
+    // for (Turbo::Core::TFramebuffer *frame_buffer_item : this->framebuffers)
+    //{
+    //     delete frame_buffer_item;
+    // }
 
     this->framebuffers.clear();
+}
+
+Turbo::Render::TCommandBuffer::TCommandBuffer()
+{
+}
+
+Turbo::Render::TCommandBuffer::~TCommandBuffer()
+{
+    this->commandBuffer = nullptr;
+    this->fence = nullptr;
 }
 
 Turbo::Render::TContext::TContext()
@@ -741,7 +753,7 @@ Turbo::Render::TContext::TContext()
     Turbo::Core::TVersion support_vulkan_version = Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion();
 
     // temp instance for collect information
-    Turbo::Core::TInstance *temp_instance = new Turbo::Core::TInstance();
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> temp_instance = new Turbo::Core::TInstance();
     Turbo::Core::TVersion temp_vulkan_version = temp_instance->GetVulkanVersion();
     Turbo::Core::TPhysicalDevice *temp_best_physical_device = temp_instance->GetBestPhysicalDevice();
 
@@ -750,13 +762,15 @@ Turbo::Render::TContext::TContext()
         if (temp_best_physical_device->GetDeviceApiVersion().GetValidVulkanVersion() >= support_vulkan_version.GetValidVulkanVersion())
         {
             Turbo::Core::TVersion instance_support_vulkan_version = support_vulkan_version.GetValidVulkanVersion();
-            delete temp_instance;
+            // OLD: delete temp_instance;
+            temp_instance = nullptr;
             temp_instance = new Turbo::Core::TInstance(nullptr, nullptr, &instance_support_vulkan_version);
         }
         else
         {
             Turbo::Core::TVersion device_support_vulkan_version = temp_best_physical_device->GetDeviceApiVersion().GetValidVulkanVersion();
-            delete temp_instance;
+            // OLD:delete temp_instance;
+            temp_instance = nullptr;
             temp_instance = new Turbo::Core::TInstance(nullptr, nullptr, &device_support_vulkan_version);
         }
     }
@@ -765,7 +779,8 @@ Turbo::Render::TContext::TContext()
     std::vector<Turbo::Core::TLayerInfo> instance_support_layers = temp_instance->GetSupportLayers();
     std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions = temp_instance->GetSupportExtensions();
 
-    delete temp_instance;
+    // OLD:delete temp_instance;
+    temp_instance = nullptr;
 
     Turbo::Core::TLayerInfo khronos_validation_layer;
     for (Turbo::Core::TLayerInfo &layer : instance_support_layers)
@@ -907,19 +922,21 @@ Turbo::Render::TContext::~TContext()
 
     if (this->currentCommandBuffer.fence != nullptr)
     {
-        delete this->currentCommandBuffer.fence;
+        // OLD:delete this->currentCommandBuffer.fence;
         this->currentCommandBuffer.fence = nullptr;
     }
 
-    delete this->commandBufferPool;
+    // OLD:delete this->commandBufferPool;
     this->commandBufferPool = nullptr;
     this->graphicsQueue = nullptr;
-    delete this->device;
+    // OLD:delete this->device;
+    this->device = nullptr;
     this->physicalDevice = nullptr;
-    delete this->instance;
+    // OLD:delete this->instance;
+    this->instance = nullptr;
 }
 
-Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Render::TContext::CreateImage(const TImage::Descriptor &descriptor)
 {
     TImageCreateFlags image_create_flags = descriptor.flags;
     TFormat format = descriptor.format;
@@ -999,15 +1016,16 @@ Turbo::Core::TImage *Turbo::Render::TContext::CreateImage(const TImage::Descript
     return new Turbo::Core::TImage(this->device, vk_image_create_flags, type, format_type, width, height, depth, mip_levels, layers, sample_count_bits, image_tiling, image_usages, memory_flags, layout);
 }
 
-void Turbo::Render::TContext::DestroyImage(Turbo::Core::TImage *image)
+void Turbo::Render::TContext::DestroyImage(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
     if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
     {
-        delete image;
+        // OLD:delete image;
+        image = nullptr;
     }
 }
 
-Turbo::Core::TBuffer *Turbo::Render::TContext::CreateBuffer(const TBuffer::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Render::TContext::CreateBuffer(const TBuffer::Descriptor &descriptor)
 {
     TImageUsages usages = descriptor.usages;
     uint32_t size = descriptor.size;
@@ -1042,34 +1060,36 @@ Turbo::Core::TBuffer *Turbo::Render::TContext::CreateBuffer(const TBuffer::Descr
     return new Turbo::Core::TBuffer(this->device, 0, buffer_usages, memory_flags, size);
 }
 
-void Turbo::Render::TContext::DestroyBuffer(Turbo::Core::TBuffer *buffer)
+void Turbo::Render::TContext::DestroyBuffer(Turbo::Core::TRefPtr<Turbo::Core::TBuffer> &buffer)
 {
     if (buffer != nullptr && buffer->GetVkBuffer() != VK_NULL_HANDLE)
     {
-        delete buffer;
+        // OLD:delete buffer;
+        buffer = nullptr;
     }
 }
 
-Turbo::Core::TCommandBuffer *Turbo::Render::TContext::AllocateCommandBuffer()
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Render::TContext::AllocateCommandBuffer()
 {
     return this->commandBufferPool->Allocate();
 }
 
-void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
+void Turbo::Render::TContext::FreeCommandBuffer(Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &commandBuffer)
 {
     this->commandBufferPool->Free(commandBuffer);
 }
 
-Turbo::Core::TSampler *Turbo::Render::TContext::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TSampler> Turbo::Render::TContext::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
 {
     return new Turbo::Core::TSampler(this->device, (Turbo::Core::TFilter)descriptor.min, (Turbo::Core::TFilter)descriptor.max, (Turbo::Core::TMipmapMode)descriptor.mipmap, (Turbo::Core::TAddressMode)descriptor.U, (Turbo::Core::TAddressMode)descriptor.V, (Turbo::Core::TAddressMode)descriptor.W);
 }
 
-void Turbo::Render::TContext::DestroySampler(Turbo::Core::TSampler *sampler)
+void Turbo::Render::TContext::DestroySampler(Turbo::Core::TRefPtr<Turbo::Core::TSampler> &sampler)
 {
     if (sampler != nullptr && sampler->GetVkSampler() != VK_NULL_HANDLE)
     {
-        delete sampler;
+        // OLD:delete sampler;
+        sampler = nullptr;
     }
 }
 
@@ -1190,7 +1210,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
             }
 
             // TODO:更新到目标【描述符资源数组】中
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at(descriptor_id);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap.at(descriptor_id);
             for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
             {
                 sampled_images.push_back(texture_2d_item.imageView);
@@ -1203,7 +1223,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
         {
             // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
             // 说明找到了Set，但没有Binding
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap[descriptor_id];
             for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
             {
                 sampled_images.push_back(texture_2d_item.imageView);
@@ -1215,7 +1235,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
     else
     {
         // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap[descriptor_id];
         for (const Turbo::Render::TTexture2D &texture_2d_item : texture2Ds)
         {
             sampled_images.push_back(texture_2d_item.imageView);
@@ -1270,7 +1290,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
             }
 
             // TODO:更新到目标【描述符资源数组】中
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap.at(descriptor_id);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap.at(descriptor_id);
             for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
             {
                 sampled_images.push_back(texture_3d_item.imageView);
@@ -1283,7 +1303,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
         {
             // TODO:增加新的Binding（BindingMap增加新项目）。并将std::vector<各种uinform资源类型>存入相应缓存
             // 说明找到了Set，但没有Binding
-            std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap[descriptor_id];
             for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
             {
                 sampled_images.push_back(texture_3d_item.imageView);
@@ -1295,7 +1315,7 @@ void Turbo::Render::TContext::BindDescriptor(TSetID set, TBindingID binding, con
     else
     {
         // TODO:增加新的Set，Binding映射（SetMap中增加新项）。并将std::vector<各种uinform资源类型>存入相应缓存
-        std::vector<Turbo::Core::TImageView *> &sampled_images = this->sampledImageMap[descriptor_id];
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &sampled_images = this->sampledImageMap[descriptor_id];
         for (const Turbo::Render::TTexture3D &texture_3d_item : texture3Ds)
         {
             sampled_images.push_back(texture_3d_item.imageView);
@@ -1368,7 +1388,7 @@ void Turbo::Render::TContext::Flush()
     {
         this->currentCommandBuffer.commandBuffer->End();
 
-        this->graphicsQueue->Submit(nullptr, nullptr, this->currentCommandBuffer.commandBuffer, this->currentCommandBuffer.fence);
+        this->graphicsQueue->Submit(this->currentCommandBuffer.commandBuffer, this->currentCommandBuffer.fence);
         this->commandBuffers.push_back(this->currentCommandBuffer);
 
         this->currentCommandBuffer.commandBuffer = this->commandBufferPool->Allocate();
@@ -1379,13 +1399,13 @@ void Turbo::Render::TContext::Flush()
 
 bool Turbo::Render::TContext::Wait(uint64_t timeout)
 {
-    Turbo::Core::TFences fences;
+    Turbo::Core::TRefPtr<Turbo::Core::TFences> fences = new Turbo::Core::TFences();
     for (Turbo::Render::TCommandBuffer &command_buffer_item : this->commandBuffers)
     {
-        fences.Add(command_buffer_item.fence);
+        fences->Add(command_buffer_item.fence);
     }
 
-    Turbo::Core::TResult result = fences.Wait(timeout);
+    Turbo::Core::TResult result = fences->Wait(timeout);
     if (result == Turbo::Core::TResult::TIMEOUT)
     {
         for (std::vector<Turbo::Render::TCommandBuffer>::iterator it = this->commandBuffers.begin(); it != this->commandBuffers.end();)
@@ -1395,7 +1415,8 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
 
             if (result == Turbo::Core::TResult::SUCCESS)
             {
-                delete command_buffer.fence;
+                // OLD: delete command_buffer.fence;
+                command_buffer.fence = nullptr;
                 this->commandBufferPool->Free(command_buffer.commandBuffer);
                 it = this->commandBuffers.erase(it);
             }
@@ -1409,7 +1430,8 @@ bool Turbo::Render::TContext::Wait(uint64_t timeout)
 
     for (Turbo::Render::TCommandBuffer &command_buffer_item : this->commandBuffers)
     {
-        delete command_buffer_item.fence;
+        // OLD:delete command_buffer_item.fence;
+        command_buffer_item.fence = nullptr;
         this->commandBufferPool->Free(command_buffer_item.commandBuffer);
     }
 

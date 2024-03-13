@@ -14,37 +14,37 @@ Turbo::Core::TViewport::~TViewport()
 {
 }
 
-float Turbo::Core::TViewport::GetX()
+float Turbo::Core::TViewport::GetX() const
 {
     return this->x;
 }
 
-float Turbo::Core::TViewport::GetY()
+float Turbo::Core::TViewport::GetY() const
 {
     return this->y;
 }
 
-float Turbo::Core::TViewport::GetWidth()
+float Turbo::Core::TViewport::GetWidth() const
 {
     return this->width;
 }
 
-float Turbo::Core::TViewport::GetHeight()
+float Turbo::Core::TViewport::GetHeight() const
 {
     return this->height;
 }
 
-float Turbo::Core::TViewport::GetMinDepth()
+float Turbo::Core::TViewport::GetMinDepth() const
 {
     return this->minDepth;
 }
 
-float Turbo::Core::TViewport::GetMaxDepth()
+float Turbo::Core::TViewport::GetMaxDepth() const
 {
     return this->maxDepth;
 }
 
-std::string Turbo::Core::TViewport::ToString()
+std::string Turbo::Core::TViewport::ToString() const
 {
     return std::string();
 }

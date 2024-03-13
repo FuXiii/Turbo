@@ -20,12 +20,14 @@ class TComputePipeline : public Turbo::Core::TPipeline
     virtual void InternalDestroy() override;
 
   public:
-    TComputePipeline(TComputeShader *computeShader);
-    TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader);
-    ~TComputePipeline();
+    TComputePipeline(const TRefPtr<TComputeShader> &computeShader);
+    TComputePipeline(const TRefPtr<TPipelineCache> &pipelineCache, const TRefPtr<TComputeShader> &computeShader);
+
+  protected:
+    virtual ~TComputePipeline();
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

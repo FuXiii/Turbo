@@ -49,9 +49,9 @@ void Turbo::Core::TVmaAllocator::InternalDestroy()
     vmaDestroyAllocator(*vma_allocator);
 }
 
-Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TVmaAllocator::TVmaAllocator(const TRefPtr<TDevice> &device) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->vmaAllocator = malloc(sizeof(VmaAllocator));
@@ -75,7 +75,16 @@ void *Turbo::Core::TVmaAllocator::GetVmaAllocator()
     return this->vmaAllocator;
 }
 
-std::string Turbo::Core::TVmaAllocator::ToString()
+std::string Turbo::Core::TVmaAllocator::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TVmaAllocator::Valid() const
+{
+    if (this->vmaAllocator != nullptr)
+    {
+        return true;
+    }
+    return false;
 }

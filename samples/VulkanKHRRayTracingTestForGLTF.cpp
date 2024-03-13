@@ -170,18 +170,18 @@ struct VERTEX
 
 struct BOTTOM_LEVEL_ACCELERATION_STRUCTURE
 {
-    Turbo::Core::TBuffer *vertexBuffer = nullptr;
-    Turbo::Core::TBuffer *indexBuffer = nullptr;
-    Turbo::Core::TBuffer *materialBuffer = nullptr;
-    Turbo::Core::TBuffer *bottomLevelAccelerationStructureBuffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> vertexBuffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> indexBuffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> materialBuffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> bottomLevelAccelerationStructureBuffer = nullptr;
     VkAccelerationStructureKHR bottomLevelAccelerationStructure = VK_NULL_HANDLE;
 };
 
 struct TOP_LEVEL_ACCELERATION_STRUCTUR
 {
-    Turbo::Core::TBuffer *topLevelAccelerationStructureBuffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> topLevelAccelerationStructureBuffer = nullptr;
     VkAccelerationStructureKHR topLevelAccelerationStructure = VK_NULL_HANDLE;
-    Turbo::Core::TBuffer *instancBuffer = nullptr; // 实体缓存
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> instancBuffer = nullptr; // 实体缓存
 };
 
 struct BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS
@@ -191,7 +191,7 @@ struct BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS
     VkDeviceAddress materialDeviceAddress;
 };
 
-BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue, MESH &mesh)
+BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo::Core::TRefPtr<Turbo::Core::TDevice> device, Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue, MESH &mesh)
 {
     assert(device != nullptr);
     assert(queue != nullptr);
@@ -213,10 +213,10 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
     auto physical_device_driver = physical_device->GetPhysicalDeviceDriver();
     auto device_driver = device->GetDeviceDriver();
 
-    Turbo::Core::TBuffer *device_local_vertex_buffer = nullptr;
-    Turbo::Core::TBuffer *device_local_index_buffer = nullptr;
-    Turbo::Core::TBuffer *device_local_material_buffer = nullptr;
-    Turbo::Core::TBuffer *bottom_level_acceleration_structure_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> device_local_vertex_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> device_local_index_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> device_local_material_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> bottom_level_acceleration_structure_buffer = nullptr;
     VkAccelerationStructureKHR bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
 
     {
@@ -249,23 +249,20 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
 
         device_local_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(VERTEX) * vertexs.size());
         {
-            Turbo::Core::TBuffer *staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX) * vertexs.size());
+            Turbo::Core::TRefPtr<Turbo::Core::TBuffer> staging_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VERTEX) * vertexs.size());
             memcpy(staging_vertex_buffer->Map(), vertexs.data(), sizeof(VERTEX) * vertexs.size());
             staging_vertex_buffer->Unmap();
 
-            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             command_buffer->CmdCopyBuffer(staging_vertex_buffer, device_local_vertex_buffer, 0, 0, sizeof(VERTEX) * vertexs.size());
             command_buffer->End();
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
 
-            delete fence;
             command_pool->Free(command_buffer);
-            delete command_pool;
-            delete staging_vertex_buffer;
         }
 
         VkDeviceAddress device_local_vertex_buffer_device_address = 0;
@@ -298,23 +295,20 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
 
         device_local_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(INDEX) * mesh.INDICES_data.size());
         {
-            Turbo::Core::TBuffer *staging_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDEX) * mesh.INDICES_data.size());
+            Turbo::Core::TRefPtr<Turbo::Core::TBuffer> staging_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(INDEX) * mesh.INDICES_data.size());
             memcpy(staging_index_buffer->Map(), mesh.INDICES_data.data(), sizeof(INDEX) * mesh.INDICES_data.size());
             staging_index_buffer->Unmap();
 
-            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             command_buffer->CmdCopyBuffer(staging_index_buffer, device_local_index_buffer, 0, 0, sizeof(INDEX) * mesh.INDICES_data.size());
             command_buffer->End();
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
 
-            delete fence;
             command_pool->Free(command_buffer);
-            delete command_pool;
-            delete staging_index_buffer;
         }
 
         VkDeviceAddress device_local_index_buffer_device_address = 0;
@@ -420,7 +414,7 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
 
         std::cout << "Create VkAccelerationStructureKHR Success" << std::endl;
 
-        Turbo::Core::TBuffer *scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.buildScratchSize);
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, vk_acceleration_structure_build_sizes_info_khr.buildScratchSize);
 
         VkBufferDeviceAddressInfo scratch_buffer_device_address_info = {};
         scratch_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -462,18 +456,16 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
         build_range_infos.push_back(vk_acceleration_structure_build_range_info_khrs.data());
         // TODO: compaction query pool for compact acceleration structure
         {
-            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             device->GetDeviceDriver()->vkCmdBuildAccelerationStructuresKHR(command_buffer->GetVkCommandBuffer(), 1, &vk_acceleration_structure_build_geometry_info_khr, build_range_infos.data());
             command_buffer->End();
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
 
-            delete fence;
             command_pool->Free(command_buffer);
-            delete command_pool;
         }
 
         // TODO: compact acceleration structure
@@ -496,26 +488,25 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
 
             std::cout << "Create VkQueryPool Success" << std::endl;
 
-            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
             device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &bottom_level_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
             command_buffer->End();
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
 
             VkDeviceSize compact_size = 0;
             device->GetDeviceDriver()->vkGetQueryPoolResults(vk_device, query_pool, 0, 1, sizeof(VkDeviceSize), &compact_size, sizeof(VkDeviceSize), VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
             std::cout << "compact size:" << compact_size << std::endl;
 
-            delete fence;
             command_pool->Free(command_buffer);
 
             VkAccelerationStructureKHR compact_bottom_level_acceleration_structure_khr = VK_NULL_HANDLE;
 
-            Turbo::Core::TBuffer *compact_bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
+            Turbo::Core::TRefPtr<Turbo::Core::TBuffer> compact_bottom_level_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
 
             VkAccelerationStructureCreateInfoKHR compact_vk_acceleration_structure_create_info_khr = {};
             compact_vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -547,43 +538,35 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
             device->GetDeviceDriver()->vkCmdCopyAccelerationStructureKHR(command_buffer->GetVkCommandBuffer(), &vk_copy_acceleration_structure_info_khr);
             command_buffer->End();
             fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
-            delete fence;
             command_pool->Free(command_buffer);
-            delete command_pool;
             device->GetDeviceDriver()->vkDestroyQueryPool(vk_device, query_pool, vk_allocation_callbacks);
 
             // destroy no compact acceleration structure
             device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(vk_device, bottom_level_acceleration_structure_khr, vk_allocation_callbacks);
-            delete bottom_level_acceleration_structure_buffer;
 
             // set acceleration structure value to compact version
             bottom_level_acceleration_structure_khr = compact_bottom_level_acceleration_structure_khr;
             bottom_level_acceleration_structure_buffer = compact_bottom_level_acceleration_structure_buffer;
         }
 
-        delete scratch_buffer;
-
         device_local_material_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS | Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(MATERIAL));
         {
-            Turbo::Core::TBuffer *staging_material_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(MATERIAL));
+            Turbo::Core::TRefPtr<Turbo::Core::TBuffer> staging_material_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(MATERIAL));
             memcpy(staging_material_buffer->Map(), &(mesh.material), sizeof(MATERIAL));
             staging_material_buffer->Unmap();
 
-            Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-            Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             command_buffer->CmdCopyBuffer(staging_material_buffer, device_local_material_buffer, 0, 0, sizeof(MATERIAL));
             command_buffer->End();
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            queue->Submit(nullptr, nullptr, command_buffer, fence);
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(command_buffer, fence);
             fence->WaitUntil();
 
-            delete fence;
             command_pool->Free(command_buffer);
-            delete command_pool;
-            delete staging_material_buffer;
         }
     }
 
@@ -597,7 +580,7 @@ BOTTOM_LEVEL_ACCELERATION_STRUCTURE CreateBottomLevelAccelerationStructure(Turbo
     return bottom_level_acceleration_structur;
 }
 
-TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue, std::vector<NODE> &nodes, std::vector<BOTTOM_LEVEL_ACCELERATION_STRUCTURE> bottomLevelAccelerationStructures)
+TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core::TRefPtr<Turbo::Core::TDevice> device, Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue, std::vector<NODE> &nodes, std::vector<BOTTOM_LEVEL_ACCELERATION_STRUCTURE> bottomLevelAccelerationStructures)
 {
     assert(device != nullptr);
     assert(queue != nullptr);
@@ -606,9 +589,9 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
     auto physical_device_driver = physical_device->GetPhysicalDeviceDriver();
     auto device_driver = device->GetDeviceDriver();
 
-    Turbo::Core::TBuffer *top_level_acceleration_structure_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> top_level_acceleration_structure_buffer = nullptr;
     VkAccelerationStructureKHR top_level_acceleration_structure_khr = VK_NULL_HANDLE;
-    Turbo::Core::TBuffer *instance_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> instance_buffer = nullptr;
 
     std::vector<VkAccelerationStructureInstanceKHR> vk_acceleration_structure_instances;
     for (uint32_t instance_index = 0; instance_index < nodes.size(); instance_index++)
@@ -636,10 +619,10 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
     }
 
     {
-        Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-        Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
-        Turbo::Core::TBuffer *staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
         void *staging_ptr = staging_buffer->Map();
         if (staging_ptr)
         {
@@ -653,14 +636,11 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
         command_buffer->CmdCopyBuffer(staging_buffer, instance_buffer, 0, 0, sizeof(VkAccelerationStructureInstanceKHR) * vk_acceleration_structure_instances.size());
         command_buffer->End();
 
-        Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, command_buffer, fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+        queue->Submit(command_buffer, fence);
         fence->WaitUntil();
 
-        delete fence;
-        delete staging_buffer;
         command_pool->Free(command_buffer);
-        delete command_pool;
     }
 
     VkBufferDeviceAddressInfo instance_buffer_device_address_info = {};
@@ -747,7 +727,7 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
 
     std::cout << "vkCreateAccelerationStructureKHR create Top Level VkAccelerationStructureKHR Success" << std::endl;
 
-    Turbo::Core::TBuffer *top_level_scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize);
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> top_level_scratch_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, top_level_acceleration_structure_build_sizes_info_khr.buildScratchSize);
 
     VkBufferDeviceAddressInfo top_level_scratch_buffer_device_address_info = {};
     top_level_scratch_buffer_device_address_info.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -786,20 +766,18 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
 
     // Build Top Acceleration Structure
     {
-        Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-        Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
         command_buffer->Begin();
         device->GetDeviceDriver()->vkCmdBuildAccelerationStructuresKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_build_geometry_info_khr, top_level_acceleration_structure_ppBuildRangeInfos.data());
         command_buffer->End();
 
-        Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, command_buffer, fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+        queue->Submit(command_buffer, fence);
         fence->WaitUntil();
 
-        delete fence;
         command_pool->Free(command_buffer);
-        delete command_pool;
     }
 
     // Top Level Acceleration Structure Compact
@@ -822,26 +800,25 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
 
         std::cout << "Create VkQueryPool Success" << std::endl;
 
-        Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-        Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
         command_buffer->Begin();
         device->GetDeviceDriver()->vkCmdResetQueryPool(command_buffer->GetVkCommandBuffer(), query_pool, 0, 1);
         device->GetDeviceDriver()->vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer->GetVkCommandBuffer(), 1, &top_level_acceleration_structure_khr, VkQueryType::VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, query_pool, 0);
         command_buffer->End();
-        Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, command_buffer, fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+        queue->Submit(command_buffer, fence);
         fence->WaitUntil();
 
         VkDeviceSize compact_size = 0;
         device->GetDeviceDriver()->vkGetQueryPoolResults(device->GetVkDevice(), query_pool, 0, 1, sizeof(VkDeviceSize), &compact_size, sizeof(VkDeviceSize), VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
         std::cout << "top level acceleration structure compact size:" << compact_size << std::endl;
 
-        delete fence;
         command_pool->Free(command_buffer);
 
         VkAccelerationStructureKHR compact_acceleration_structure_khr = VK_NULL_HANDLE;
 
-        Turbo::Core::TBuffer *compact_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> compact_acceleration_structure_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_ACCELERATION_STRUCTURE_STORAGE | Turbo::Core::TBufferUsageBits::BUFFER_SHADER_DEVICE_ADDRESS, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, compact_size);
 
         VkAccelerationStructureCreateInfoKHR compact_vk_acceleration_structure_create_info_khr = {};
         compact_vk_acceleration_structure_create_info_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -873,23 +850,18 @@ TOP_LEVEL_ACCELERATION_STRUCTUR CreateTopLevelAccelerationStructure(Turbo::Core:
         device->GetDeviceDriver()->vkCmdCopyAccelerationStructureKHR(command_buffer->GetVkCommandBuffer(), &vk_copy_acceleration_structure_info_khr);
         command_buffer->End();
         fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, command_buffer, fence);
+        queue->Submit(command_buffer, fence);
         fence->WaitUntil();
-        delete fence;
         command_pool->Free(command_buffer);
-        delete command_pool;
         device->GetDeviceDriver()->vkDestroyQueryPool(device->GetVkDevice(), query_pool, vk_allocation_callbacks);
 
         // destroy no compact acceleration structure
         device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), top_level_acceleration_structure_khr, vk_allocation_callbacks);
-        delete top_level_acceleration_structure_buffer;
 
         // set acceleration structure value to compact version
         top_level_acceleration_structure_khr = compact_acceleration_structure_khr;
         top_level_acceleration_structure_buffer = compact_acceleration_structure_buffer;
     }
-
-    delete top_level_scratch_buffer;
 
     TOP_LEVEL_ACCELERATION_STRUCTUR top_level_acceleration_structure = {};
     top_level_acceleration_structure.topLevelAccelerationStructureBuffer = top_level_acceleration_structure_buffer;
@@ -1044,10 +1016,15 @@ int main()
     }
     //</gltf>
 
-    Turbo::Core::TEngine engine;
+    std::vector<Turbo::Core::TLayerInfo> support_layers;
+    std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions;
+    {
+        Turbo::Core::TRefPtr<Turbo::Core::TInstance> temp_instance = new Turbo::Core::TInstance();
+        support_layers = temp_instance->GetSupportLayers();
+        instance_support_extensions = temp_instance->GetSupportExtensions();
+    }
 
     Turbo::Core::TLayerInfo khronos_validation;
-    std::vector<Turbo::Core::TLayerInfo> support_layers = engine.GetInstance().GetSupportLayers();
     for (Turbo::Core::TLayerInfo &layer : support_layers)
     {
         if (layer.GetLayerType() == Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION)
@@ -1064,7 +1041,6 @@ int main()
     }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_instance_extensions;
-    std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions = engine.GetInstance().GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : instance_support_extensions)
     {
         if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SURFACE)
@@ -1098,14 +1074,13 @@ int main()
     }
 
     Turbo::Core::TVersion instance_version(1, 2, 0, 0);
-    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
-    Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
+    Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> physical_device = instance->GetBestPhysicalDevice();
 
     Turbo::Core::TPhysicalDeviceFeatures physical_device_support_features = physical_device->GetDeviceFeatures();
 
     if (!physical_device_support_features.accelerationStructure || !physical_device_support_features.rayTracingPipeline || !physical_device_support_features.shaderDeviceClock)
     {
-        delete instance;
         std::cout << "Please use a GPU which support hardware real-time ray tracing" << std::endl;
         return 0;
     }
@@ -1154,28 +1129,28 @@ int main()
         }
     }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
-    Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
+    Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
-    Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
     uint32_t min_image_count = surface->GetMinImageCount();
 
     uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
 
-    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
-    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> swapchain_images = swapchain->GetImages();
 
-    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
-    for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
+    for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
     {
-        Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         swapchain_image_views.push_back(swapchain_view);
     }
 
-    Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-    Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -1190,36 +1165,35 @@ int main()
     matrixs_buffer_data.v = view;
     matrixs_buffer_data.p = projection;
 
-    Turbo::Core::TBuffer *matrixs_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs_buffer_data));
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> matrixs_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs_buffer_data));
     void *mvp_ptr = matrixs_buffer->Map();
     memcpy(mvp_ptr, &matrixs_buffer_data, sizeof(matrixs_buffer_data));
     matrixs_buffer->Unmap();
 
-    Turbo::Core::TBuffer *my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(my_buffer_data));
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> my_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(my_buffer_data));
     void *my_buffer_ptr = my_buffer->Map();
     memcpy(my_buffer_ptr, &my_buffer_data, sizeof(my_buffer_data));
     my_buffer->Unmap();
 
-    Turbo::Core::TImage *depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-    Turbo::Core::TImageView *depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
     // for ray tracing image
-    Turbo::Core::TImage *ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
-    Turbo::Core::TImageView *ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     {
 
-        Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
 
         change_ray_tracing_image_layout_command_buffer->Begin();
         change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
         change_ray_tracing_image_layout_command_buffer->End();
 
-        Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> change_image_layout_fence = new Turbo::Core::TFence(device);
 
-        queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+        queue->Submit(change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
 
         change_image_layout_fence->WaitUntil();
-        delete change_image_layout_fence;
 
         command_pool->Free(change_ray_tracing_image_layout_command_buffer);
     }
@@ -1238,7 +1212,7 @@ int main()
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::INPUT_ATTACHMENT, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::ACCELERATION_STRUCTURE, 1000));
 
-    Turbo::Core::TDescriptorPool *descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     const Turbo::Core::TDeviceDriver *device_driver = device->GetDeviceDriver();
     const Turbo::Core::TPhysicalDeviceDriver *physical_device_driver = physical_device->GetPhysicalDeviceDriver();
@@ -1322,33 +1296,30 @@ int main()
         bottom_level_acceleration_structure_device_addresses.push_back(ray_tracing_bottom_level_acceleration_structure);
     }
 
-    Turbo::Core::TBuffer *bottom_level_acceleration_structure_device_address_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> bottom_level_acceleration_structure_device_address_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_STORAGE_BUFFER, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
     {
-        Turbo::Core::TBuffer *staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> staging_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
         memcpy(staging_buffer->Map(), bottom_level_acceleration_structure_device_addresses.data(), sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
         staging_buffer->Unmap();
 
-        Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-        Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
         command_buffer->Begin();
         command_buffer->CmdCopyBuffer(staging_buffer, bottom_level_acceleration_structure_device_address_buffer, 0, 0, sizeof(BOTTOM_LEVEL_ACCELERATION_STRUCTURE_DEVICE_ADDRESS) * bottom_level_acceleration_structure_device_addresses.size());
         command_buffer->End();
-        Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, command_buffer, fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+        queue->Submit(command_buffer, fence);
         fence->WaitUntil();
 
-        delete fence;
         command_pool->Free(command_buffer);
-        delete command_pool;
-        delete staging_buffer;
     }
 
     TOP_LEVEL_ACCELERATION_STRUCTUR top_level_acceleration_structure = CreateTopLevelAccelerationStructure(device, queue, nodes, bottom_level_acceleration_structures);
 
     // Ray Tracing Pipeline
-    Turbo::Core::TRayGenerationShader *ray_generation_shader_test = nullptr;
-    Turbo::Core::TMissShader *miss_shader_test = nullptr;
-    Turbo::Core::TClosestHitShader *closest_hit_shader_test = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TRayGenerationShader> ray_generation_shader_test = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TMissShader> miss_shader_test = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TClosestHitShader> closest_hit_shader_test = nullptr;
 
     VkDescriptorSetLayout ray_tracing_descriptor_set_layout = VK_NULL_HANDLE;
     VkDescriptorSet ray_tracing_descriptor_set = VK_NULL_HANDLE;
@@ -1360,7 +1331,7 @@ int main()
     VkStridedDeviceAddressRegionKHR closest_hit_binding_table = {};
     VkStridedDeviceAddressRegionKHR callable_binding_table = {}; /*Not used but need statement because vkCmdTraceRaysKHR(..., const VkStridedDeviceAddressRegionKHR* pCallableShaderBindingTable, ...) must be a valid pointer to a valid VkStridedDeviceAddressRegionKHR structure <https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap40.html#VUID-vkCmdTraceRaysKHR-pCallableShaderBindingTable-parameter>*/
 
-    Turbo::Core::TBuffer *sbt_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> sbt_buffer = nullptr;
     {
         VkDescriptorSetLayoutBinding vk_ray_tracing_binding_acceleration_structure = {};
         vk_ray_tracing_binding_acceleration_structure.binding = 0;
@@ -1722,10 +1693,10 @@ int main()
         sbt_buffer->Unmap();
     }
 
-    std::vector<Turbo::Core::TBuffer *> my_buffers;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> my_buffers;
     my_buffers.push_back(my_buffer);
 
-    std::vector<Turbo::Core::TBuffer *> matrixs_buffers;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> matrixs_buffers;
     matrixs_buffers.push_back(matrixs_buffer);
 
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
@@ -1747,19 +1718,19 @@ int main()
     attachemts.push_back(swapchain_color_attachment);
     attachemts.push_back(depth_attachment);
 
-    Turbo::Core::TRenderPass *render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
+    Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
 
     Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
     Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
 
-    std::vector<Turbo::Core::TFramebuffer *> swpachain_framebuffers;
-    for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> swpachain_framebuffers;
+    for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_image_view_item : swapchain_image_views)
     {
-        std::vector<Turbo::Core::TImageView *> image_views;
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> image_views;
         image_views.push_back(swapchain_image_view_item);
         image_views.push_back(depth_image_view);
 
-        Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
+        Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, image_views);
         swpachain_framebuffers.push_back(swapchain_framebuffer);
     }
 
@@ -1769,63 +1740,60 @@ int main()
 
     ImGui::StyleColorsDark();
 
-    Turbo::Core::TSampler *imgui_sampler = new Turbo::Core::TSampler(device);
-    Turbo::Core::TShader *imgui_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
-    Turbo::Core::TShader *imgui_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
+    Turbo::Core::TRefPtr<Turbo::Core::TSampler> imgui_sampler = new Turbo::Core::TSampler(device);
+    Turbo::Core::TRefPtr<Turbo::Core::TShader> imgui_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
+    Turbo::Core::TRefPtr<Turbo::Core::TShader> imgui_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
 
     Turbo::Core::TVertexBinding imgui_vertex_binding(0, sizeof(ImDrawVert), Turbo::Core::TVertexRate::VERTEX);
     imgui_vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, pos));  // position
     imgui_vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, uv));   // uv
     imgui_vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R8G8B8A8_UNORM, IM_OFFSETOF(ImDrawVert, col)); // color
 
-    std::vector<Turbo::Core::TShader *> imgui_shaders;
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> imgui_shaders;
     imgui_shaders.push_back(imgui_vertex_shader);
     imgui_shaders.push_back(imgui_fragment_shader);
 
     std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
     imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-    Turbo::Core::TGraphicsPipeline *imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     unsigned char *imgui_font_pixels;
     int imgui_font_width, imgui_font_height;
     io.Fonts->GetTexDataAsRGBA32(&imgui_font_pixels, &imgui_font_width, &imgui_font_height);
     size_t imgui_upload_size = imgui_font_width * imgui_font_height * 4 * sizeof(char);
 
-    Turbo::Core::TImage *imgui_font_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, imgui_font_width, imgui_font_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
-    Turbo::Core::TImageView *imgui_font_image_view = new Turbo::Core::TImageView(imgui_font_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, imgui_font_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> imgui_font_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, imgui_font_width, imgui_font_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imgui_font_image_view = new Turbo::Core::TImageView(imgui_font_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, imgui_font_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     {
-        Turbo::Core::TBuffer *imgui_font_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, imgui_upload_size);
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_font_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, imgui_upload_size);
         void *imgui_font_ptr = imgui_font_buffer->Map();
         memcpy(imgui_font_ptr, imgui_font_pixels, imgui_upload_size);
         imgui_font_buffer->Unmap();
 
-        Turbo::Core::TCommandBuffer *imgui_copy_command_buffer = command_pool->Allocate();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> imgui_copy_command_buffer = command_pool->Allocate();
         imgui_copy_command_buffer->Begin();
         imgui_copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, imgui_font_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         imgui_copy_command_buffer->CmdCopyBufferToImage(imgui_font_buffer, imgui_font_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, imgui_font_width, imgui_font_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, imgui_font_width, imgui_font_height, 1);
         imgui_copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, imgui_font_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         imgui_copy_command_buffer->End();
 
-        Turbo::Core::TFence *imgui_font_copy_fence = new Turbo::Core::TFence(device);
-        queue->Submit(nullptr, nullptr, imgui_copy_command_buffer, imgui_font_copy_fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> imgui_font_copy_fence = new Turbo::Core::TFence(device);
+        queue->Submit(imgui_copy_command_buffer, imgui_font_copy_fence);
 
         imgui_font_copy_fence->WaitUntil();
-
-        delete imgui_font_buffer;
-        delete imgui_font_copy_fence;
     }
 
-    std::vector<std::pair<Turbo::Core::TImageView *, Turbo::Core::TSampler *>> imgui_combined_image_samplers;
+    std::vector<std::pair<Turbo::Core::TRefPtr<Turbo::Core::TImageView>, Turbo::Core::TRefPtr<Turbo::Core::TSampler>>> imgui_combined_image_samplers;
     imgui_combined_image_samplers.push_back(std::make_pair(imgui_font_image_view, imgui_sampler));
 
-    Turbo::Core::TPipelineDescriptorSet *imgui_pipeline_descriptor_set = descriptor_pool->Allocate(imgui_pipeline->GetPipelineLayout());
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> imgui_pipeline_descriptor_set = descriptor_pool->Allocate(imgui_pipeline->GetPipelineLayout());
     imgui_pipeline_descriptor_set->BindData(0, 0, 0, imgui_combined_image_samplers);
 
     io.Fonts->TexID = (ImTextureID)(intptr_t)(imgui_font_image->GetVkImage());
 
-    Turbo::Core::TBuffer *imgui_vertex_buffer = nullptr;
-    Turbo::Core::TBuffer *imgui_index_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_vertex_buffer = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_index_buffer = nullptr;
     //</IMGUI>
 
     glm::vec3 camera_position = glm::vec3(1.00025, -1.50862, -2.52088);
@@ -1848,7 +1816,7 @@ int main()
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
-        Turbo::Core::TSemaphore *wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
         Turbo::Core::TResult result = swapchain->AcquireNextImageUntil(wait_image_ready, nullptr, &current_image_index);
         switch (result)
         {
@@ -2158,18 +2126,6 @@ int main()
                     size_t vertex_size = draw_data->TotalVtxCount * sizeof(ImDrawVert);
                     size_t index_size = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
 
-                    if (imgui_vertex_buffer != nullptr)
-                    {
-                        delete imgui_vertex_buffer;
-                        imgui_vertex_buffer = nullptr;
-                    }
-
-                    if (imgui_index_buffer != nullptr)
-                    {
-                        delete imgui_index_buffer;
-                        imgui_index_buffer = nullptr;
-                    }
-
                     imgui_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, vertex_size);
                     imgui_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, index_size);
 
@@ -2189,7 +2145,7 @@ int main()
                     command_buffer->CmdBindPipeline(imgui_pipeline);
                     command_buffer->CmdBindPipelineDescriptorSet(imgui_pipeline_descriptor_set);
 
-                    std::vector<Turbo::Core::TBuffer *> imgui_vertex_buffers;
+                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> imgui_vertex_buffers;
                     imgui_vertex_buffers.push_back(imgui_vertex_buffer);
                     command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
                     command_buffer->CmdBindIndexBuffer(imgui_index_buffer, 0, sizeof(ImDrawIdx) == 2 ? Turbo::Core::TIndexType::UINT16 : Turbo::Core::TIndexType::UINT32);
@@ -2225,7 +2181,7 @@ int main()
                                     command_buffer->CmdBindPipeline(imgui_pipeline);
                                     command_buffer->CmdBindPipelineDescriptorSet(imgui_pipeline_descriptor_set);
 
-                                    std::vector<Turbo::Core::TBuffer *> __imgui_vertex_buffers;
+                                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> __imgui_vertex_buffers;
                                     __imgui_vertex_buffers.push_back(imgui_vertex_buffer);
                                     command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
                                     command_buffer->CmdBindIndexBuffer(imgui_index_buffer, 0, sizeof(ImDrawIdx) == 2 ? Turbo::Core::TIndexType::UINT16 : Turbo::Core::TIndexType::UINT32);
@@ -2287,15 +2243,13 @@ int main()
             command_buffer->CmdEndRenderPass();
             command_buffer->End();
 
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TSemaphore>> wait_semaphores;
             wait_semaphores.push_back(wait_image_ready);
 
-            queue->Submit(&wait_semaphores, nullptr, command_buffer, fence);
+            queue->Submit(wait_semaphores, {}, command_buffer, fence);
 
             fence->WaitUntil(); // or you can use semaphore to wait for get higher performance
-
-            delete fence;
 
             command_buffer->Reset(); // you can create an command buffer each for one swapchain image,for now just one command buffer
 
@@ -2313,40 +2267,22 @@ int main()
                 swapchain_images.clear();
 
                 // destroy swapchain image views
-                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-                {
-                    delete image_view_item;
-                }
-
                 swapchain_image_views.clear();
 
                 // destroy depth image and view
-                delete depth_image_view;
-                delete depth_image;
-
                 // destroy framebuffer
-                for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
-                {
-                    delete frame_buffer_item;
-                }
                 swpachain_framebuffers.clear();
 
                 // destroy ray tracing image
-                delete ray_tracing_image_view;
-                delete ray_tracing_image;
-
                 // recreate swapchain
-                Turbo::Extension::TSwapchain *old_swapchain = swapchain;
-                Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
-                delete old_swapchain;
-
+                Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
                 swapchain = new_swapchain;
 
                 // recreate swapchain image views
                 swapchain_images = swapchain->GetImages();
-                for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+                for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
                 {
-                    Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                    Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                     swapchain_image_views.push_back(swapchain_view);
                 }
 
@@ -2355,13 +2291,13 @@ int main()
                 depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
                 // recreate framebuffer
-                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+                for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> image_view_item : swapchain_image_views)
                 {
-                    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
+                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
                     swapchain_image_views.push_back(image_view_item);
                     swapchain_image_views.push_back(depth_image_view);
 
-                    Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
+                    Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                     swpachain_framebuffers.push_back(swapchain_framebuffer);
                 }
 
@@ -2369,18 +2305,17 @@ int main()
                 ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
                 ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                 {
-                    Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+                    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
 
                     change_ray_tracing_image_layout_command_buffer->Begin();
                     change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
                     change_ray_tracing_image_layout_command_buffer->End();
 
-                    Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+                    Turbo::Core::TRefPtr<Turbo::Core::TFence> change_image_layout_fence = new Turbo::Core::TFence(device);
 
-                    queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+                    queue->Submit(change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
 
                     change_image_layout_fence->WaitUntil();
-                    delete change_image_layout_fence;
 
                     command_pool->Free(change_ray_tracing_image_layout_command_buffer);
                 }
@@ -2434,40 +2369,22 @@ int main()
             swapchain_images.clear();
 
             // destroy swapchain image views
-            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-            {
-                delete image_view_item;
-            }
-
             swapchain_image_views.clear();
 
             // destroy depth image and view
-            delete depth_image_view;
-            delete depth_image;
-
             // destroy framebuffer
-            for (Turbo::Core::TFramebuffer *frame_buffer_item : swpachain_framebuffers)
-            {
-                delete frame_buffer_item;
-            }
             swpachain_framebuffers.clear();
 
             // destroy ray tracing image
-            delete ray_tracing_image_view;
-            delete ray_tracing_image;
-
             // recreate swapchain
-            Turbo::Extension::TSwapchain *old_swapchain = swapchain;
-            Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
-            delete old_swapchain;
-
+            Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
             swapchain = new_swapchain;
 
             // recreate swapchain image views
             swapchain_images = swapchain->GetImages();
-            for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
             {
-                Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                 swapchain_image_views.push_back(swapchain_view);
             }
 
@@ -2476,13 +2393,13 @@ int main()
             depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
             // recreate framebuffer
-            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> image_view_item : swapchain_image_views)
             {
-                std::vector<Turbo::Core::TImageView *> swapchain_image_views;
+                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
                 swapchain_image_views.push_back(image_view_item);
                 swapchain_image_views.push_back(depth_image_view);
 
-                Turbo::Core::TFramebuffer *swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
+                Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                 swpachain_framebuffers.push_back(swapchain_framebuffer);
             }
 
@@ -2490,18 +2407,17 @@ int main()
             ray_tracing_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
             ray_tracing_image_view = new Turbo::Core::TImageView(ray_tracing_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, ray_tracing_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
             {
-                Turbo::Core::TCommandBuffer *change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
+                Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> change_ray_tracing_image_layout_command_buffer = command_pool->Allocate();
 
                 change_ray_tracing_image_layout_command_buffer->Begin();
                 change_ray_tracing_image_layout_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, ray_tracing_image_view);
                 change_ray_tracing_image_layout_command_buffer->End();
 
-                Turbo::Core::TFence *change_image_layout_fence = new Turbo::Core::TFence(device);
+                Turbo::Core::TRefPtr<Turbo::Core::TFence> change_image_layout_fence = new Turbo::Core::TFence(device);
 
-                queue->Submit(nullptr, nullptr, change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
+                queue->Submit(change_ray_tracing_image_layout_command_buffer, change_image_layout_fence);
 
                 change_image_layout_fence->WaitUntil();
-                delete change_image_layout_fence;
 
                 command_pool->Free(change_ray_tracing_image_layout_command_buffer);
             }
@@ -2534,81 +2450,26 @@ int main()
         }
         break;
         }
-
-        delete wait_image_ready;
         //</End Rendering>
     }
 
-    if (imgui_vertex_buffer != nullptr)
-    {
-        delete imgui_vertex_buffer;
-    }
-    if (imgui_index_buffer != nullptr)
-    {
-        delete imgui_index_buffer;
-    }
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
-    delete imgui_font_image_view;
-    delete imgui_font_image;
-    delete imgui_pipeline;
-    delete imgui_vertex_shader;
-    delete imgui_fragment_shader;
-    delete imgui_sampler;
-
-    for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
-    {
-        delete framebuffer_item;
-    }
-
-    delete render_pass;
-
-    delete sbt_buffer;
 
     device_driver->vkDestroyPipeline(device->GetVkDevice(), ray_tracing_pipeline, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
     device_driver->vkDestroyPipelineLayout(device->GetVkDevice(), ray_tracing_pipeline_layout, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
     device_driver->vkFreeDescriptorSets(device->GetVkDevice(), descriptor_pool->GetVkDescriptorPool(), 1, &ray_tracing_descriptor_set);
     device_driver->vkDestroyDescriptorSetLayout(device->GetVkDevice(), ray_tracing_descriptor_set_layout, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
 
-    delete ray_generation_shader_test;
-    delete miss_shader_test;
-    delete closest_hit_shader_test;
-
-    delete descriptor_pool;
-    delete depth_image_view;
-    delete depth_image;
-    for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-    {
-        delete image_view_item;
-    }
-    delete my_buffer;
-    delete matrixs_buffer;
-
-    device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), top_level_acceleration_structure.topLevelAccelerationStructure, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
-    delete top_level_acceleration_structure.topLevelAccelerationStructureBuffer;
-    delete top_level_acceleration_structure.instancBuffer;
+    device_driver->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), top_level_acceleration_structure.topLevelAccelerationStructure, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
 
     for (BOTTOM_LEVEL_ACCELERATION_STRUCTURE &bottom_level_acceleration_structure_item : bottom_level_acceleration_structures)
     {
-        device->GetDeviceDriver()->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), bottom_level_acceleration_structure_item.bottomLevelAccelerationStructure, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
-        delete bottom_level_acceleration_structure_item.bottomLevelAccelerationStructureBuffer;
-        delete bottom_level_acceleration_structure_item.indexBuffer;
-        delete bottom_level_acceleration_structure_item.vertexBuffer;
-        delete bottom_level_acceleration_structure_item.materialBuffer;
+        device_driver->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), bottom_level_acceleration_structure_item.bottomLevelAccelerationStructure, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
     }
-
-    delete bottom_level_acceleration_structure_device_address_buffer;
-
-    delete ray_tracing_image_view;
-    delete ray_tracing_image;
+   
     command_pool->Free(command_buffer);
-    delete command_pool;
-    delete swapchain;
-    delete surface;
-    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
-    pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
+   
     glfwTerminate();
-    delete device;
-    delete instance;
 
     return 0;
 }

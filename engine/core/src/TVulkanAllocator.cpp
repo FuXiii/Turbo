@@ -1,7 +1,7 @@
 #include "TVulkanAllocator.h"
 
 VkAllocationCallbacks Turbo::Core::TVulkanAllocator::vkAllocationCallbacks;
-Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::instance = nullptr;
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::instance = nullptr;
 
 Turbo::Core::TVulkanAllocator::TVulkanAllocator()
 {
@@ -17,9 +17,9 @@ Turbo::Core::TVulkanAllocator::~TVulkanAllocator()
 {
 }
 
-Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::Instance()
+Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::Instance()
 {
-    if (TVulkanAllocator::instance == nullptr)
+    if (!TVulkanAllocator::instance.Valid())
     {
         TVulkanAllocator::instance = new TVulkanAllocator();
     }
@@ -28,9 +28,10 @@ Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::Instance()
 
 void Turbo::Core::TVulkanAllocator::Destory()
 {
-    if (TVulkanAllocator::instance != nullptr)
+    if (TVulkanAllocator::instance.Valid())
     {
-        delete TVulkanAllocator::instance;
+        // delete TVulkanAllocator::instance;
+        TVulkanAllocator::instance = nullptr;
     }
 }
 
@@ -71,7 +72,7 @@ VkAllocationCallbacks *Turbo::Core::TVulkanAllocator::GetVkAllocationCallbacks()
     return &TVulkanAllocator::vkAllocationCallbacks;
 }
 
-std::string Turbo::Core::TVulkanAllocator::ToString()
+std::string Turbo::Core::TVulkanAllocator::ToString() const
 {
     return std::string();
 }

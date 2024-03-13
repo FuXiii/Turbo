@@ -13,9 +13,7 @@
 #include "core/include/TShader.h"
 
 #include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
 #include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
 
 #include "core/include/TDescriptorPool.h"
 #include "core/include/TDescriptorSet.h"
@@ -25,30 +23,29 @@
 #include "core/include/TFence.h"
 #include "core/include/TSemaphore.h"
 
-#include <fstream>
-
 #include <GLFW/glfw3.h>
 
 #include "core/include/TSurface.h"
 #include "core/include/TSwapchain.h"
 
-#include <math.h>
-
 #include "TPipelineDescriptorSet.h"
-#include "TSampler.h"
 
 #include "core/include/TVulkanLoader.h"
 
-#include <memory>
 #include <stdio.h>
 #include <string.h>
 
 int main()
 {
-    Turbo::Core::TEngine engine;
+    std::vector<Turbo::Core::TLayerInfo> support_layers;
+    std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions;
+    {
+        Turbo::Core::TRefPtr<Turbo::Core::TInstance> temp_instance = new Turbo::Core::TInstance();
+        support_layers = temp_instance->GetSupportLayers();
+        instance_support_extensions = temp_instance->GetSupportExtensions();
+    }
 
     Turbo::Core::TLayerInfo khronos_validation;
-    std::vector<Turbo::Core::TLayerInfo> support_layers = engine.GetInstance().GetSupportLayers();
     for (Turbo::Core::TLayerInfo &layer : support_layers)
     {
         if (layer.GetLayerType() == Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION)
@@ -65,7 +62,6 @@ int main()
     }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_instance_extensions;
-    std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions = engine.GetInstance().GetSupportExtensions();
     for (Turbo::Core::TExtensionInfo &extension : instance_support_extensions)
     {
         if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SURFACE)
@@ -91,8 +87,8 @@ int main()
     }
 
     Turbo::Core::TVersion instance_version(1, 0, 0, 0);
-    Turbo::Core::TInstance *instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
-    Turbo::Core::TPhysicalDevice *physical_device = instance->GetBestPhysicalDevice();
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
+    Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
         return -1;
@@ -116,10 +112,10 @@ int main()
         }
     }
 
-    Turbo::Core::TDevice *device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions);
-    Turbo::Core::TDeviceQueue *queue = device->GetBestGraphicsQueue();
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions);
+    Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
-    Turbo::Extension::TSurface *surface = new Turbo::Extension::TSurface(device, vk_surface_khr);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
     uint32_t max_image_count = surface->GetMaxImageCount();
     uint32_t min_image_count = surface->GetMinImageCount();
 
@@ -150,19 +146,19 @@ int main()
         return 0;
     }
 
-    Turbo::Extension::TSwapchain *swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, swapchain_support_format, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, swapchain_support_format, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
-    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> swapchain_images = swapchain->GetImages();
 
-    std::vector<Turbo::Core::TImageView *> swapchain_image_views;
-    for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
+    for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
     {
-        Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
         swapchain_image_views.push_back(swapchain_view);
     }
 
-    Turbo::Core::TCommandBufferPool *command_pool = new Turbo::Core::TCommandBufferPool(queue);
-    Turbo::Core::TCommandBuffer *command_buffer = command_pool->Allocate();
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
     bool show_demo_window = true;
 
@@ -172,7 +168,7 @@ int main()
 
         //<Begin Rendering>
         uint32_t current_image_index = UINT32_MAX;
-        Turbo::Core::TSemaphore *wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
         Turbo::Core::TResult result = swapchain->AcquireNextImageUntil(wait_image_ready, nullptr, &current_image_index);
         switch (result)
         {
@@ -190,21 +186,19 @@ int main()
             command_buffer->Begin();
 
             // ClearColor
-            Turbo::Core::TImageView *current_swapchain_image_view = swapchain_image_views[current_image_index];
+            Turbo::Core::TRefPtr<Turbo::Core::TImageView> current_swapchain_image_view = swapchain_image_views[current_image_index];
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, current_swapchain_image_view);
             command_buffer->CmdClearColorImage(current_swapchain_image_view->GetImage(), Turbo::Core::TImageLayout::GENERAL, r, g, b, 1);
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, current_swapchain_image_view);
             command_buffer->End();
 
-            Turbo::Core::TFence *fence = new Turbo::Core::TFence(device);
-            std::vector<Turbo::Core::TSemaphore *> wait_semaphores;
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TSemaphore>> wait_semaphores;
             wait_semaphores.push_back(wait_image_ready);
 
-            queue->Submit(&wait_semaphores, nullptr, command_buffer, fence);
+            queue->Submit(wait_semaphores, {}, command_buffer, fence);
 
             fence->WaitUntil(); // or you can use semaphore to wait for get higher performance
-
-            delete fence;
 
             command_buffer->Reset(); // you can create an command buffer each for one swapchain image,for now just one command buffer
 
@@ -222,25 +216,17 @@ int main()
                 swapchain_images.clear();
 
                 // destroy swapchain image views
-                for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-                {
-                    delete image_view_item;
-                }
-
                 swapchain_image_views.clear();
 
                 // recreate swapchain
-                Turbo::Extension::TSwapchain *old_swapchain = swapchain;
-                Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
-                delete old_swapchain;
-
+                Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
                 swapchain = new_swapchain;
 
                 // recreate swapchain image views
                 swapchain_images = swapchain->GetImages();
-                for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+                for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
                 {
-                    Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                    Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                     swapchain_image_views.push_back(swapchain_view);
                 }
             }
@@ -271,25 +257,17 @@ int main()
             swapchain_images.clear();
 
             // destroy swapchain image views
-            for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-            {
-                delete image_view_item;
-            }
-
             swapchain_image_views.clear();
 
             // recreate swapchain
-            Turbo::Extension::TSwapchain *old_swapchain = swapchain;
-            Turbo::Extension::TSwapchain *new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
-            delete old_swapchain;
-
+            Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
             swapchain = new_swapchain;
 
             // recreate swapchain image views
             swapchain_images = swapchain->GetImages();
-            for (Turbo::Core::TImage *swapchain_image_item : swapchain_images)
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
             {
-                Turbo::Core::TImageView *swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, swapchain_support_format, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                 swapchain_image_views.push_back(swapchain_view);
             }
         }
@@ -299,24 +277,11 @@ int main()
         }
         break;
         }
-
-        delete wait_image_ready;
         //</End Rendering>
     }
 
-    for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-    {
-        delete image_view_item;
-    }
     command_pool->Free(command_buffer);
-    delete command_pool;
-    delete swapchain;
-    delete surface;
-    PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
-    pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
-    delete device;
-    delete instance;
 
     return 0;
 }

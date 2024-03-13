@@ -8,7 +8,7 @@ Turbo::Core::TPhysicalDeviceInfo::~TPhysicalDeviceInfo()
 {
 }
 
-std::string Turbo::Core::TPhysicalDeviceInfo::ToString()
+std::string Turbo::Core::TPhysicalDeviceInfo::ToString() const
 {
     return std::string();
 }

@@ -32,16 +32,16 @@ class TSubpass : public Turbo::Core::TInfo
     void SetDepthStencilAttachmentReference(uint32_t attachment, TImageLayout layout);
     void Clear();
 
-    std::vector<VkAttachmentReference> *GetColorAttachmentReferences();
-    std::vector<VkAttachmentReference> *GetResolveAttachmentReferences();
-    std::vector<VkAttachmentReference> *GetInputAttachmentReferences();
-    std::vector<VkAttachmentReference> *GetPreserveAttachmentReferences();
-    VkAttachmentReference *GetDepthStencilAttachmentReference();
+    std::vector<VkAttachmentReference> *GetColorAttachmentReferences() const;
+    std::vector<VkAttachmentReference> *GetResolveAttachmentReferences() const;
+    std::vector<VkAttachmentReference> *GetInputAttachmentReferences() const;
+    std::vector<VkAttachmentReference> *GetPreserveAttachmentReferences() const;
+    VkAttachmentReference *GetDepthStencilAttachmentReference() const;
 
-    TPipelineType GetPipelineType();
+    TPipelineType GetPipelineType() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

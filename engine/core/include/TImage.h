@@ -86,7 +86,8 @@ class TImage : public Turbo::Core::TVulkanHandle
     friend class Turbo::Extension::TSwapchain;
 
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device = nullptr;
+    // OLD:T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkImage vkImage = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocation = nullptr;
     T_VULKAN_HANDLE_HANDLE void *vmaAllocationInfo = nullptr;
@@ -109,35 +110,38 @@ class TImage : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   private:
-    TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout); // for swapchain
+    TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout); // for swapchain
 
   public:
-    [[deprecated]] explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
-    explicit TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
-    ~TImage();
+    [[deprecated]] explicit TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
+    explicit TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
+
+  protected:
+    virtual ~TImage();
 
   public:
     VkImage GetVkImage();
-    TFormatInfo GetFormat();
-    TDevice *GetDevice();
+    TFormatInfo GetFormat() const;
+    const TRefPtr<TDevice> &GetDevice();
 
-    uint32_t GetWidth();
-    uint32_t GetHeight();
-    uint32_t GetDepth();
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+    uint32_t GetDepth() const;
 
-    TSampleCountBits GetSampleCountBits();
+    TSampleCountBits GetSampleCountBits() const;
 
-    TImageUsages GetUsages();
-    uint32_t GetMipLevels();
-    uint32_t GetArrayLayers();
+    TImageUsages GetUsages() const;
+    uint32_t GetMipLevels() const;
+    uint32_t GetArrayLayers() const;
 
-    TMemoryTypeInfo GetMemoryTypeInfo();
+    TMemoryTypeInfo GetMemoryTypeInfo() const;
 
-    bool IsMappable();
+    bool IsMappable() const;
     void *Map();
     void Unmap();
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

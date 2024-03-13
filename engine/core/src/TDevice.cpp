@@ -8,15 +8,31 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
+void Turbo::Core::TDevice::AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
 {
-    if (deviceQueue != nullptr)
+    if (deviceQueue.Valid())
     {
-        this->deviceQueues.push_back(deviceQueue);
+        std::vector<TRefPtr<TDeviceQueue>> &device_queues = this->deviceQueues[deviceQueue->queueFamily.index];
+
+        bool is_find = false;
+
+        for (TRefPtr<TDeviceQueue> &device_queue_item : device_queues)
+        {
+            if (device_queue_item == deviceQueue)
+            {
+                is_find = true;
+                break;
+            }
+        }
+
+        if (!is_find)
+        {
+            device_queues.push_back(deviceQueue);
+        }
     }
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue *deviceQueue)
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::RemoveChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
 {
     // Turbo::Core::TDeviceQueue *result = nullptr;
     // uint32_t index = 0;
@@ -846,12 +862,12 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
 
 void Turbo::Core::TDevice::InternalCreate()
 {
-    std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->GetDeviceQueueFamilyInfos();
+    std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->physicalDevice->GetQueueFamilys();
     uint32_t device_queue_family_info_count = device_queue_family_infos.size();
 
     if (device_queue_family_info_count <= 0)
     {
-        return; // Vulkan Specification:device queue create count must greater than zero.
+        throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TDevice::InternalCreate", "Can not find enough queue family information on current physical device");
     }
 
     std::vector<VkDeviceQueueCreateInfo> vk_device_queue_create_infos;
@@ -861,7 +877,8 @@ void Turbo::Core::TDevice::InternalCreate()
     {
         TQueueFamilyInfo &queue_family_info = device_queue_family_infos[device_queue_index];
         uint32_t queue_family_index = queue_family_info.GetIndex();
-        uint32_t queue_family_count = this->GetDeviceQueueCountByQueueFamily(queue_family_info);
+        // OLD:uint32_t queue_family_count = this->GetDeviceQueueCountByQueueFamily(queue_family_info);
+        uint32_t queue_family_count = queue_family_info.GetQueueCount();
         this->deviceQueuePriorities[queue_family_index].resize(queue_family_count, 0.0f);
 
         vk_device_queue_create_infos[device_queue_index].sType = VkStructureType::VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -1027,29 +1044,36 @@ void Turbo::Core::TDevice::InternalCreate()
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDevice::InternalCreate::vkCreateDevice");
     }
 
+    TRefPtr<TDevice> temp_ref_device = this;
+
     // TODO: use TVulkanLoader load all device-specific function(return device-specific function table)
     this->deviceDriver = new TDeviceDriver();
     *this->deviceDriver = TVulkanLoader::Instance()->LoadDeviceDriver(this); // TODO:load dynamic rendering function
 
-    if (this->vmaAllocator != nullptr)
+    if (this->vmaAllocator.Valid())
     {
         this->vmaAllocator->InternalCreate();
     }
 
-    for (TDeviceQueue *device_queue_item : this->deviceQueues)
-    {
-        device_queue_item->InternalCreate();
-    }
+    // for (TDeviceQueue *device_queue_item : this->deviceQueues)
+    //{
+    //     device_queue_item->InternalCreate();
+    // }
+
+    temp_ref_device.Unbind();
 }
 
 void Turbo::Core::TDevice::InternalDestroy()
 {
-    for (TDeviceQueue *device_queue_item : this->deviceQueues)
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        device_queue_item->InternalDestroy();
+        for (TRefPtr<TDeviceQueue> &device_queue_item : device_queues_item.second)
+        {
+            device_queue_item->InternalDestroy();
+        }
     }
 
-    if (this->vmaAllocator != nullptr)
+    if (this->vmaAllocator.Valid())
     {
         this->vmaAllocator->InternalDestroy();
     }
@@ -1068,7 +1092,7 @@ void Turbo::Core::TDevice::InternalDestroy()
     }
 }
 
-Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
 {
     /*
     Vulkan Spec::1.2.156
@@ -1076,7 +1100,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
     bit of flags must not be set
     */
 
-    if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
+    if (physicalDevice.Valid())
     {
         this->physicalDevice = physicalDevice;
 
@@ -1101,10 +1125,14 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
         this->physicalDevice->AddChildHandle(this);
 
         // Create TDeviceQueues
-        std::vector<TQueueFamilyInfo> queue_family_infos = this->GetPhysicalDevice()->GetQueueFamilys();
-        for (TQueueFamilyInfo queue_family_info_item : queue_family_infos)
+        std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->physicalDevice->GetQueueFamilys();
+
+        for (TQueueFamilyIndex queue_family_index = 0; queue_family_index < this->deviceQueuePriorities.size(); queue_family_index++)
         {
-            new TDeviceQueue(this, queue_family_info_item, 0);
+            for (uint32_t queue_index = 0; queue_index < this->deviceQueuePriorities[queue_family_index].size(); queue_index++)
+            {
+                new TDeviceQueue(this, device_queue_family_infos[queue_family_index], queue_index);
+            }
         }
 
         this->vmaAllocator = new TVmaAllocator(this);
@@ -1121,14 +1149,17 @@ Turbo::Core::TDevice::~TDevice()
     {
         this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
 
-        delete this->vmaAllocator;
+        // delete this->vmaAllocator;
         this->vmaAllocator = nullptr;
 
         this->physicalDevice->RemoveChildHandle(this);
 
-        for (TDeviceQueue *device_queue_item : this->deviceQueues)
+        for (auto &device_queues_item : this->deviceQueues)
         {
-            delete device_queue_item;
+            for (TRefPtr<TDeviceQueue> &device_queue_item : device_queues_item.second)
+            {
+                device_queue_item = nullptr;
+            }
         }
 
         this->deviceQueues.clear();
@@ -1142,22 +1173,22 @@ VkDevice Turbo::Core::TDevice::GetVkDevice()
     return this->vkDevice;
 }
 
-Turbo::Core::TPhysicalDevice *Turbo::Core::TDevice::GetPhysicalDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> &Turbo::Core::TDevice::GetPhysicalDevice()
 {
     return this->physicalDevice;
 }
 
-size_t Turbo::Core::TDevice::GetEnabledLayersCount()
+size_t Turbo::Core::TDevice::GetEnabledLayersCount() const
 {
     return this->enabledLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TDevice::GetEnabledLayers()
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TDevice::GetEnabledLayers() const
 {
     return this->enabledLayers;
 }
 
-size_t Turbo::Core::TDevice::GetEnabledExtensionCount()
+size_t Turbo::Core::TDevice::GetEnabledExtensionCount() const
 {
     return this->enabledExtensions.size();
 }
@@ -1167,7 +1198,7 @@ std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TDevice::GetEnabledExtensi
     return this->enabledExtensions;
 }
 
-bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName)
+bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName) const
 {
     if (!extensionName.empty())
     {
@@ -1184,175 +1215,193 @@ bool Turbo::Core::TDevice::IsEnabledExtension(std::string extensionName)
     return false;
 }
 
-bool Turbo::Core::TDevice::IsEnabledExtension(TExtensionType extensionType)
+bool Turbo::Core::TDevice::IsEnabledExtension(TExtensionType extensionType) const
 {
     return this->IsEnabledExtension(TExtensionInfo::GetExtensionNameByExtensionType(extensionType));
 }
 
-Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures()
+Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatures() const
 {
     return this->enabledFeatures;
 }
 
-uint32_t Turbo::Core::TDevice::GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo queueFamily)
-{
-    uint32_t count = 0;
+// OLD:uint32_t Turbo::Core::TDevice::GetDeviceQueueCountByQueueFamily(TQueueFamilyInfo queueFamily)
+// OLD:{
+// OLD:    uint32_t count = 0;
+// OLD:
+// OLD:    auto device_queues_find_result = this->deviceQueues.find(queueFamily.index);
+// OLD:    if (device_queues_find_result != this->deviceQueues.end())
+// OLD:    {
+// OLD:        return device_queues_find_result->second.size();
+// OLD:    }
+// OLD:
+// OLD:    return count;
+// OLD:}
 
-    for (auto *item : this->deviceQueues)
-    {
-        if (item->GetQueueFamily().GetIndex() == queueFamily.GetIndex())
-        {
-            count = count + 1;
-        }
-    }
+// OLD:std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TDevice::GetDeviceQueueFamilyInfos()
+// OLD:{
+// OLD:    std::vector<Turbo::Core::TQueueFamilyInfo> result;
+// OLD:    for (TDeviceQueue *device_queue_item : this->deviceQueues)
+// OLD:    {
+// OLD:        bool is_found = false;
+// OLD:        for (TQueueFamilyInfo &item : result)
+// OLD:        {
+// OLD:            if (item.GetIndex() == device_queue_item->GetQueueFamily().GetIndex())
+// OLD:            {
+// OLD:                is_found = true;
+// OLD:                break;
+// OLD:            }
+// OLD:        }
+// OLD:
+// OLD:        if (!is_found)
+// OLD:        {
+// OLD:            result.push_back(device_queue_item->GetQueueFamily());
+// OLD:        }
+// OLD:    }
+// OLD:
+// OLD:    return result;
+// OLD:}
 
-    return count;
-}
-
-std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TDevice::GetDeviceQueueFamilyInfos()
-{
-    std::vector<Turbo::Core::TQueueFamilyInfo> result;
-    for (TDeviceQueue *device_queue_item : this->deviceQueues)
-    {
-        bool is_found = false;
-        for (TQueueFamilyInfo &item : result)
-        {
-            if (item.GetIndex() == device_queue_item->GetQueueFamily().GetIndex())
-            {
-                is_found = true;
-                break;
-            }
-        }
-
-        if (!is_found)
-        {
-            result.push_back(device_queue_item->GetQueueFamily());
-        }
-    }
-
-    return result;
-}
-
-Turbo::Core::TVmaAllocator *Turbo::Core::TDevice::GetVmaAllocator()
+const Turbo::Core::TRefPtr<Turbo::Core::TVmaAllocator> &Turbo::Core::TDevice::GetVmaAllocator()
 {
     return this->vmaAllocator;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestGraphicsQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
-    uint32_t index = UINT32_MAX;
+    uint32_t queue_family_index = UINT32_MAX;
     uint32_t score = 0;
-    for (uint32_t device_queue_index = 0; device_queue_index < device_queues_size; device_queue_index++)
+
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        TQueueFamilyInfo queue_family_info = this->deviceQueues[device_queue_index]->queueFamily;
+        TQueueFamilyInfo queue_family_info = this->physicalDevice->GetQueueFamilyByIndex(device_queues_item.first);
         if (queue_family_info.IsSupportGraphics() && queue_family_info.score > score)
         {
-            index = device_queue_index;
+            queue_family_index = queue_family_info.index;
             score = queue_family_info.score;
         }
     }
 
-    if (index != UINT32_MAX)
+    if (queue_family_index != UINT32_MAX)
     {
-        result = this->deviceQueues[index];
+        if (!this->deviceQueues[queue_family_index].empty())
+        {
+            result = this->deviceQueues[queue_family_index][0];
+        }
     }
 
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestComputeQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
-    uint32_t index = UINT32_MAX;
+    uint32_t queue_family_index = UINT32_MAX;
     uint32_t score = 0;
-    for (uint32_t device_queue_index = 0; device_queue_index < device_queues_size; device_queue_index++)
+
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        TQueueFamilyInfo queue_family_info = this->deviceQueues[device_queue_index]->queueFamily;
+        TQueueFamilyInfo queue_family_info = this->physicalDevice->GetQueueFamilyByIndex(device_queues_item.first);
         if (queue_family_info.IsSupportCompute() && queue_family_info.score > score)
         {
-            index = device_queue_index;
+            queue_family_index = queue_family_info.index;
             score = queue_family_info.score;
         }
     }
 
-    if (index != UINT32_MAX)
+    if (queue_family_index != UINT32_MAX)
     {
-        result = this->deviceQueues[index];
+        if (!this->deviceQueues[queue_family_index].empty())
+        {
+            result = this->deviceQueues[queue_family_index][0];
+        }
     }
 
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestTransferQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
-    uint32_t index = UINT32_MAX;
+    uint32_t queue_family_index = UINT32_MAX;
     uint32_t score = 0;
-    for (uint32_t device_queue_index = 0; device_queue_index < device_queues_size; device_queue_index++)
+
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        TQueueFamilyInfo queue_family_info = this->deviceQueues[device_queue_index]->queueFamily;
+        TQueueFamilyInfo queue_family_info = this->physicalDevice->GetQueueFamilyByIndex(device_queues_item.first);
         if (queue_family_info.IsSupportTransfer() && queue_family_info.score > score)
         {
-            index = device_queue_index;
+            queue_family_index = queue_family_info.index;
             score = queue_family_info.score;
         }
     }
 
-    if (index != UINT32_MAX)
+    if (queue_family_index != UINT32_MAX)
     {
-        result = this->deviceQueues[index];
+        if (!this->deviceQueues[queue_family_index].empty())
+        {
+            result = this->deviceQueues[queue_family_index][0];
+        }
     }
 
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestSparseBindingQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
-    uint32_t index = UINT32_MAX;
+    uint32_t queue_family_index = UINT32_MAX;
     uint32_t score = 0;
-    for (uint32_t device_queue_index = 0; device_queue_index < device_queues_size; device_queue_index++)
+
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        TQueueFamilyInfo queue_family_info = this->deviceQueues[device_queue_index]->queueFamily;
+        TQueueFamilyInfo queue_family_info = this->physicalDevice->GetQueueFamilyByIndex(device_queues_item.first);
         if (queue_family_info.IsSupportSparse() && queue_family_info.score > score)
         {
-            index = device_queue_index;
+            queue_family_index = queue_family_info.index;
             score = queue_family_info.score;
         }
     }
 
-    if (index != UINT32_MAX)
+    if (queue_family_index != UINT32_MAX)
     {
-        result = this->deviceQueues[index];
+        if (!this->deviceQueues[queue_family_index].empty())
+        {
+            result = this->deviceQueues[queue_family_index][0];
+        }
     }
 
     return result;
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
+Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestProtectedQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
-    uint32_t index = UINT32_MAX;
+    uint32_t queue_family_index = UINT32_MAX;
     uint32_t score = 0;
-    for (uint32_t device_queue_index = 0; device_queue_index < device_queues_size; device_queue_index++)
+
+    for (auto &device_queues_item : this->deviceQueues)
     {
-        TQueueFamilyInfo queue_family_info = this->deviceQueues[device_queue_index]->queueFamily;
+        TQueueFamilyInfo queue_family_info = this->physicalDevice->GetQueueFamilyByIndex(device_queues_item.first);
         if (queue_family_info.IsSupportProtected() && queue_family_info.score > score)
         {
-            index = device_queue_index;
+            queue_family_index = queue_family_info.index;
             score = queue_family_info.score;
         }
     }
 
-    if (index != UINT32_MAX)
+    if (queue_family_index != UINT32_MAX)
     {
-        result = this->deviceQueues[index];
+        if (!this->deviceQueues[queue_family_index].empty())
+        {
+            result = this->deviceQueues[queue_family_index][0];
+        }
     }
 
     return result;
@@ -1372,7 +1421,16 @@ const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
     return this->deviceDriver;
 }
 
-std::string Turbo::Core::TDevice::ToString()
+std::string Turbo::Core::TDevice::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDevice::Valid() const
+{
+    if (this->vkDevice != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

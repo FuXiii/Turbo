@@ -7,12 +7,12 @@
 #include "TVulkanLoader.h"
 #include <stdint.h>
 
-void Turbo::Core::TCommandBufferPool::AddChildHandle(TCommandBuffer *commandBuffer)
+void Turbo::Core::TCommandBufferPool::AddChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer)
 {
     // Nothing to do, this is duty to Allocate()
 }
 
-Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::RemoveChildHandle(TCommandBuffer *commandBuffer)
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Core::TCommandBufferPool::RemoveChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer)
 {
     // Nothing to do, this is duty to TPool
     return nullptr;
@@ -45,10 +45,22 @@ void Turbo::Core::TCommandBufferPool::InternalCreate()
 
 void Turbo::Core::TCommandBufferPool::InternalDestroy()
 {
+    for (TCommandBufferBase *secondary_command_buffer_item : this->secondaryCommandBuffers)
+    {
+        secondary_command_buffer_item->InternalDestroy(); // FIXME:Normally, it is automatically destroyed when the reference count reaches zero.
+                                                          // FIXME:For now, if this->secondaryCommandBuffers not empty, it means there has some TSecondaryCommandBuffer
+                                                          // FIXME:had not been Free, so here we need force destroy it.
+    }
+
     for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
     {
-        command_buffer_item->InternalDestroy();
+        command_buffer_item->InternalDestroy(); // FIXME:Normally, it is automatically destroyed when the reference count reaches zero.
+                                                // FIXME:For now, if this->commandBuffers not empty, it means there has some TCommandBuffer
+                                                // FIXME:had not been Free, so here we need force destroy it.
     }
+
+    this->secondaryCommandBuffers.clear(); // Just clear it
+    this->commandBuffers.clear();          // Just clear it
 
     TDevice *device = this->deviceQueue->GetDevice();
     VkDevice vk_device = device->GetVkDevice();
@@ -57,30 +69,48 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyCommandPool(vk_device, this->vkCommandPool, allocator);
 }
 
-void Turbo::Core::TCommandBufferPool::Free(TCommandBufferBase *commandBufferBase)
+bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandBufferBase)
 {
-    uint32_t index = 0;
-    bool is_found = false;
-    for (TCommandBufferBase *command_buffer_item : this->commandBuffers)
+    if (commandBufferBase.Valid())
     {
-        if (command_buffer_item == commandBufferBase)
+        switch (commandBufferBase->GetLevel())
         {
-            is_found = true;
-            break;
+        case TCommandBufferLevel::PRIMARY: {
+            for (uint32_t command_buffer_index = 0; command_buffer_index < this->commandBuffers.size(); command_buffer_index++)
+            {
+                if (this->commandBuffers[command_buffer_index] == commandBufferBase)
+                {
+                    this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
+                    // commandBufferBase.Release(); // NOTE: It will force release memory
+                    commandBufferBase = nullptr;
+                    return true;
+                }
+            }
         }
-        index = index + 1;
+        break;
+        case TCommandBufferLevel::SECONDARY: {
+            for (uint32_t secondary_command_buffer_index = 0; secondary_command_buffer_index < this->secondaryCommandBuffers.size(); secondary_command_buffer_index++)
+            {
+                if (this->secondaryCommandBuffers[secondary_command_buffer_index] == commandBufferBase)
+                {
+                    this->secondaryCommandBuffers.erase(this->secondaryCommandBuffers.begin() + secondary_command_buffer_index);
+                    // commandBufferBase.Release(); // NOTE: It will force release memory
+                    commandBufferBase = nullptr;
+                    return true;
+                }
+            }
+        }
+        break;
+        };
     }
 
-    if (is_found)
-    {
-        delete this->commandBuffers[index];
-        this->commandBuffers.erase(this->commandBuffers.begin() + index);
-    }
+    return false;
 }
 
-Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TCommandBufferPool::TCommandBufferPool(const TRefPtr<TDeviceQueue> &deviceQueue) : Turbo::Core::TVulkanHandle()
 {
-    if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
+    // if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
+    if (deviceQueue.Valid())
     {
         this->deviceQueue = deviceQueue;
 
@@ -98,40 +128,59 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
 {
     this->deviceQueue->RemoveChildHandle(this);
 
-    for (; this->commandBuffers.size() > 0;)
-    {
-        TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
-        this->Free(command_buffer_base);
-    }
+    // OLD:for (; this->commandBuffers.size() > 0;)
+    // OLD:{
+    // OLD:    // TCommandBufferBase *command_buffer_base = this->commandBuffers[0];
+    // OLD:    // this->Free(command_buffer_base);
+    // OLD:    this->Free(this->commandBuffers[0]);
+    // OLD:}
 
     this->InternalDestroy();
 }
 
-Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::Allocate()
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &Turbo::Core::TCommandBufferPool::Allocate()
 {
-    Turbo::Core::TCommandBuffer *command_buffer = new TCommandBuffer(this);
-    this->commandBuffers.push_back(command_buffer);
-    return command_buffer;
+    this->commandBuffers.push_back(new TCommandBuffer(this));
+    return this->commandBuffers.back();
 }
 
-void Turbo::Core::TCommandBufferPool::Free(TCommandBuffer *commandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBuffer> &commandBuffer)
 {
-    this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
+    // OLD: this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
+    TRefPtr<TCommandBufferBase> command_buffer_base = commandBuffer;
+    if (this->Free(command_buffer_base))
+    {
+        // NOTE: Now reference count should be 1
+        if (commandBuffer.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
+        commandBuffer = nullptr;
+    }
 }
 
-Turbo::Core::TSecondaryCommandBuffer *Turbo::Core::TCommandBufferPool::AllocateSecondary()
+Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> &Turbo::Core::TCommandBufferPool::AllocateSecondary()
 {
-    Turbo::Core::TSecondaryCommandBuffer *secondary_command_buffer = new TSecondaryCommandBuffer(this);
-    this->commandBuffers.push_back(secondary_command_buffer);
-    return secondary_command_buffer;
+    this->secondaryCommandBuffers.push_back(new TSecondaryCommandBuffer(this));
+    return this->secondaryCommandBuffers.back();
 }
 
-void Turbo::Core::TCommandBufferPool::Free(TSecondaryCommandBuffer *secondaryCommandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
 {
-    this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
+    // OLD: this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
+    TRefPtr<TCommandBufferBase> command_buffer_base = secondaryCommandBuffer;
+    if (this->Free(command_buffer_base))
+    {
+        // NOTE: Now reference count should be 1
+        if (secondaryCommandBuffer.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
+        secondaryCommandBuffer = nullptr;
+    }
 }
 
-Turbo::Core::TDeviceQueue *Turbo::Core::TCommandBufferPool::GetDeviceQueue()
+const Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> &Turbo::Core::TCommandBufferPool::GetDeviceQueue()
 {
     return this->deviceQueue;
 }
@@ -141,7 +190,16 @@ VkCommandPool Turbo::Core::TCommandBufferPool::GetVkCommandPool()
     return this->vkCommandPool;
 }
 
-std::string Turbo::Core::TCommandBufferPool::ToString()
+std::string Turbo::Core::TCommandBufferPool::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TCommandBufferPool::Valid() const
+{
+    if (this->vkCommandPool != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

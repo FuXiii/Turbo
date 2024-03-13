@@ -3,10 +3,11 @@
 #include "vulkan/vulkan_core.h"
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TException.h>
+#include <core/include/TImage.h>
 #include <core/include/TImageView.h>
 #include <core/include/TPhysicalDevice.h>
 
-Turbo::Core::TImageView *Turbo::Render::TImage::CreateImageView(Turbo::Core::TImage *image)
+Turbo::Core::TRefPtr<Turbo::Core::TImageView> Turbo::Render::TImage::CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
     // TODO: nothing
     return nullptr;
@@ -43,17 +44,16 @@ void Turbo::Render::TImage::Create(const std::string &name, const Descriptor &de
 void Turbo::Render::TImage::Destroy(void *allocator)
 {
     // TODO:destroy Turbo::Core::ImageView
-    if (this->imageView != nullptr)
-    {
-        delete this->imageView;
-        this->imageView = nullptr;
-    }
+    // OLD:delete this->imageView;
+    this->imageView = nullptr;
 
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         resource_allocator->DestroyImage(this->image);
     }
+
+    memset(&this->descriptor, 0, sizeof(this->descriptor));
 }
 
 Turbo::Render::TFormat Turbo::Render::TImage::GetFormat() const
@@ -536,9 +536,9 @@ void Turbo::Render::TDepthImage2D::Create(const std::string &name, const Descrip
     Turbo::Render::TDepthImage::Create(name, depth_image_descriptor, allocator);
 }
 
-Turbo::Core::TImageView *Turbo::Render::TTexture2D::CreateImageView(Turbo::Core::TImage *image)
+Turbo::Core::TRefPtr<Turbo::Core::TImageView> Turbo::Render::TTexture2D::CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    if (image.Valid())
     {
         return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, 1);
     }
@@ -560,9 +560,9 @@ void Turbo::Render::TTexture2D::Create(const std::string &name, const Descriptor
     TColorImage2D::Create(name, color_image2d_descriptor, allocator);
 }
 
-Turbo::Core::TImageView *Turbo::Render::TTexture3D::CreateImageView(Turbo::Core::TImage *image)
+Turbo::Core::TRefPtr<Turbo::Core::TImageView> Turbo::Render::TTexture3D::CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    if (image.Valid())
     {
         return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_3D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, image->GetMipLevels(), 0, 1);
     }
@@ -583,9 +583,9 @@ void Turbo::Render::TTexture3D::Create(const std::string &name, const Descriptor
     TColorImage3D::Create(name, color_image3d_descriptor, allocator);
 }
 
-Turbo::Core::TImageView *Turbo::Render::TDepthTexture2D::CreateImageView(Turbo::Core::TImage *image)
+Turbo::Core::TRefPtr<Turbo::Core::TImageView> Turbo::Render::TDepthTexture2D::CreateImageView(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
-    if (image != nullptr && image->GetVkImage() != VK_NULL_HANDLE)
+    if (image.Valid())
     {
         return new Turbo::Core::TImageView(image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, image->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, image->GetMipLevels(), 0, 1);
     }

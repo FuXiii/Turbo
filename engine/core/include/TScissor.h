@@ -22,13 +22,14 @@ class TScissor : public Turbo::Core::TInfo
     TScissor(int32_t offsetX, int32_t offsetY, uint32_t width, uint32_t height);
     ~TScissor();
 
-    int32_t GetOffsetX();
-    int32_t GetOffsetY();
-    uint32_t GetWidth();
-    uint32_t GetHeight();
+  public:
+    int32_t GetOffsetX() const;
+    int32_t GetOffsetY() const;
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
 
   public:
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 } // namespace Core

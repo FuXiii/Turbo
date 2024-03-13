@@ -6,39 +6,39 @@
 
 namespace Turbo
 {
-	namespace Core
-	{
-		typedef VkMemoryPropertyFlags TMemoryPropertyFlags;
+namespace Core
+{
+typedef VkMemoryPropertyFlags TMemoryPropertyFlags;
 
-		class TMemoryTypeInfo :public TInfo
-		{
-		public:
-			friend class TPhysicalDevice;
+class TMemoryTypeInfo : public TInfo
+{
+  public:
+    friend class TPhysicalDevice;
 
-		private:
-			TMemoryPropertyFlags memoryPropertyFlags;
-			TMemoryHeapInfo memoryHeap;
+  private:
+    TMemoryPropertyFlags memoryPropertyFlags;
+    TMemoryHeapInfo memoryHeap;
 
-			uint32_t index;
+    uint32_t index;
 
-		public:
-			explicit TMemoryTypeInfo();
-			~TMemoryTypeInfo();
+  public:
+    explicit TMemoryTypeInfo();
+    ~TMemoryTypeInfo();
 
-		public:
-			TMemoryHeapInfo GetMemoryHeap();
+  public:
+    TMemoryHeapInfo GetMemoryHeap() const;
 
-			uint32_t GetIndex();
+    uint32_t GetIndex() const;
 
-			bool IsDeviceLocal();
-			bool IsHostVisible();
-			bool IsHostCoherent();
-			bool IsHostCached();
-			bool IsLazilyAllocated();
-			bool IsProtected();
+    bool IsDeviceLocal() const;
+    bool IsHostVisible() const;
+    bool IsHostCoherent() const;
+    bool IsHostCached() const;
+    bool IsLazilyAllocated() const;
+    bool IsProtected() const;
 
-			virtual std::string ToString() override;
-		};
-	}
-}
+    virtual std::string ToString() const override;
+};
+} // namespace Core
+} // namespace Turbo
 #endif // !TURBO_CORE_TMEMORYTYPE_H

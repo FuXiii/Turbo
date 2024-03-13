@@ -1,34 +1,38 @@
 #pragma once
 #ifndef TURBO_CORE_TAPPLICATION_H
 #define TURBO_CORE_TAPPLICATION_H
-#include "TObject.h"
 #include "TInstance.h"
+#include "TObject.h"
 
 namespace Turbo
 {
-	namespace Core
-	{
-		class TPhysicalDevice;
-		class TDevice;
+namespace Core
+{
+class TPhysicalDevice;
+class TDevice;
 
-		class TEngine : public TObject
-		{
-		private:
-			TInstance *instance = nullptr;
+// FIXME: Delete this TEngine class
+class TEngine : public TObject
+{
+  private:
+    TRefPtr<TInstance> instance;
 
-		private:
-			void VerificationInitVulkan();
-			void InitVulkan(TVersion version);
+  private:
+    void VerificationInitVulkan();
+    void InitVulkan(TVersion version);
 
-		public:
-			explicit TEngine();
-			~TEngine();
-  
-		public:
-			TInstance &GetInstance();
+  public:
+    explicit TEngine();
 
-			virtual std::string ToString() override;
-		};
-	}
-}
+  protected:
+    virtual ~TEngine();
+
+  public:
+    const TRefPtr<TInstance> &GetInstance();
+
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
+};
+} // namespace Core
+} // namespace Turbo
 #endif // TURBO_CORE_TAPPLICATION_H

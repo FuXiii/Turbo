@@ -31,9 +31,9 @@ class TDeviceQueue : public TVulkanHandle
     friend class TCommandBufferPool;
 
   private:
-    T_VULKAN_HANDLE_PARENT TDevice *device;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkQueue vkQueue = VK_NULL_HANDLE;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TCommandBufferPool *> commandBufferPools;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TCommandBufferPool>> commandBufferPools;
 
     T_VULKAN_HANDLE_DATA TQueueFamilyInfo queueFamily;
     T_VULKAN_HANDLE_DATA uint32_t index;
@@ -41,30 +41,34 @@ class TDeviceQueue : public TVulkanHandle
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkQueuePresentKHR vkQueuePresentKHR = nullptr;
 
   protected:
-    virtual void AddChildHandle(TCommandBufferPool *commandBufferPool);
-    virtual TCommandBufferPool *RemoveChildHandle(TCommandBufferPool *commandBufferPool);
+    virtual void AddChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool);
+    virtual TRefPtr<TCommandBufferPool> RemoveChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDeviceQueue(TDevice *device, TQueueFamilyInfo &queueFamily, uint32_t index);
-    ~TDeviceQueue();
+    explicit TDeviceQueue(const TRefPtr<TDevice> &device, TQueueFamilyInfo &queueFamily, uint32_t index);
+
+  protected:
+    virtual ~TDeviceQueue();
 
   public:
-    TQueueFamilyInfo GetQueueFamily();
-    TDevice *GetDevice();
+    TQueueFamilyInfo GetQueueFamily() const;
+    const TRefPtr<TDevice> &GetDevice();
 
     VkQueue GetVkQueue();
 
-    bool Submit(std::vector<TSemaphore *> *waitSemaphores, std::vector<TSemaphore *> *signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
+    bool Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence);
+    bool Submit(const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence);
 
     void WaitIdle();
 
-    bool IsSupportSurface(Turbo::Extension::TSurface *surface);
+    bool IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface) const;
 
-    TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex);
+    TResult Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex);
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

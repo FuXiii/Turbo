@@ -11,17 +11,17 @@ Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptorType type, uint32_t cou
     this->count = count;
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSize::GetDescriptorType()
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSize::GetDescriptorType() const
 {
     return this->type;
 }
 
-uint32_t Turbo::Core::TDescriptorSize::GetDescriptorCount()
+uint32_t Turbo::Core::TDescriptorSize::GetDescriptorCount() const
 {
     return this->count;
 }
 
-std::string Turbo::Core::TDescriptorSize::ToString()
+std::string Turbo::Core::TDescriptorSize::ToString() const
 {
     return std::string();
 }
@@ -161,9 +161,9 @@ void Turbo::Core::TDescriptorPool::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorPool(vk_device, this->vkDescriptorPool, allocator);
 }
 
-Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorPool::TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->maxSetsCount = maxSetsCount;
@@ -318,21 +318,52 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
 
 Turbo::Core::TDescriptorPool::~TDescriptorPool()
 {
+    for (; this->pipelineDescriptorSets.size() > 0;)
+    {
+        this->Free(this->pipelineDescriptorSets[0]);
+    }
+
     this->InternalDestroy();
     this->descriptorSizes.clear();
 }
 
-Turbo::Core::TPipelineDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TPipelineLayout *pipelineLayout)
+Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> &Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
 {
-    return new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout);
+    this->pipelineDescriptorSets.push_back(new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout));
+    return this->pipelineDescriptorSets.back();
 }
 
-void Turbo::Core::TDescriptorPool::Free(TPipelineDescriptorSet *pipelineDescriptorSet)
+void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
 {
-    delete pipelineDescriptorSet;
+    // delete pipelineDescriptorSet;
+    uint32_t index = 0;
+    bool is_found = false;
+    for (Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> &pipeline_descriptor_set_item : this->pipelineDescriptorSets)
+    {
+        if (pipeline_descriptor_set_item == pipelineDescriptorSet)
+        {
+            is_found = true;
+            break;
+        }
+        index = index + 1;
+    }
+
+    if (is_found)
+    {
+        // delete this->commandBuffers[index];
+        this->pipelineDescriptorSets.erase(this->pipelineDescriptorSets.begin() + index);
+        // pipelineDescriptorSet.Release(); // NOTE: It will force release memory
+
+        // NOTE: Now reference count should be 1
+        if (pipelineDescriptorSet.ReferenceCount() != 1)
+        {
+            // FIXME: maybe need throw a exception?
+        }
+        pipelineDescriptorSet = nullptr;
+    }
 }
 
-Turbo::Core::TDevice *Turbo::Core::TDescriptorPool::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDescriptorPool::GetDevice()
 {
     return this->device;
 }
@@ -342,7 +373,16 @@ VkDescriptorPool Turbo::Core::TDescriptorPool::GetVkDescriptorPool()
     return this->vkDescriptorPool;
 }
 
-std::string Turbo::Core::TDescriptorPool::ToString()
+std::string Turbo::Core::TDescriptorPool::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDescriptorPool::Valid() const
+{
+    if (this->vkDescriptorPool != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

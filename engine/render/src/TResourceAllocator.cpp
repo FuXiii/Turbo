@@ -1,4 +1,5 @@
 #include "render/include/TResourceAllocator.h"
+#include <core/include/TCommandBuffer.h>
 #include <core/include/TException.h>
 
 Turbo::Render::TResourceAllocator::TResourceAllocator(TContext *context)
@@ -23,42 +24,42 @@ Turbo::Render::TContext *Turbo::Render::TResourceAllocator::GetContext()
     return this->context;
 }
 
-Turbo::Core::TImage *Turbo::Render::TResourceAllocator::CreateImage(const TImage::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TImage> Turbo::Render::TResourceAllocator::CreateImage(const TImage::Descriptor &descriptor)
 {
     return this->context->CreateImage(descriptor);
 }
 
-void Turbo::Render::TResourceAllocator::DestroyImage(Turbo::Core::TImage *image)
+void Turbo::Render::TResourceAllocator::DestroyImage(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image)
 {
     this->context->DestroyImage(image);
 }
 
-Turbo::Core::TBuffer *Turbo::Render::TResourceAllocator::CreateBuffer(const TBuffer::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TBuffer> Turbo::Render::TResourceAllocator::CreateBuffer(const TBuffer::Descriptor &descriptor)
 {
     return this->context->CreateBuffer(descriptor);
 }
 
-void Turbo::Render::TResourceAllocator::DestroyBuffer(Turbo::Core::TBuffer *buffer)
+void Turbo::Render::TResourceAllocator::DestroyBuffer(Turbo::Core::TRefPtr<Turbo::Core::TBuffer> &buffer)
 {
     this->context->DestroyBuffer(buffer);
 }
 
-Turbo::Core::TCommandBuffer *Turbo::Render::TResourceAllocator::AllocateCommandBuffer()
+Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Render::TResourceAllocator::AllocateCommandBuffer()
 {
     return this->context->AllocateCommandBuffer();
 }
 
-void Turbo::Render::TResourceAllocator::FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer)
+void Turbo::Render::TResourceAllocator::FreeCommandBuffer(Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &commandBuffer)
 {
     this->context->FreeCommandBuffer(commandBuffer);
 }
 
-Turbo::Core::TSampler *Turbo::Render::TResourceAllocator::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
+Turbo::Core::TRefPtr<Turbo::Core::TSampler> Turbo::Render::TResourceAllocator::CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor)
 {
     return this->context->CreateSampler(descriptor);
 }
 
-void Turbo::Render::TResourceAllocator::DestroySampler(Turbo::Core::TSampler *sampler)
+void Turbo::Render::TResourceAllocator::DestroySampler(Turbo::Core::TRefPtr<Turbo::Core::TSampler> &sampler)
 {
     this->context->DestroySampler(sampler);
 }

@@ -3,6 +3,8 @@
 #define TURBO_RENDER_TSAMPLER_H
 #include <string>
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -54,7 +56,7 @@ class TSampler
 
   private:
     void *allocator = nullptr;
-    Turbo::Core::TSampler *sampler = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TSampler> sampler;
     Descriptor descriptor;
 
   public:

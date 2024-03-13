@@ -132,9 +132,9 @@ void Turbo::Core::TRenderPass::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyRenderPass(vk_device, this->vkRenderPass, allocator);
 }
 
-Turbo::Core::TRenderPass::TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TRenderPass::TRenderPass(const TRefPtr<TDevice> &device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr || subpasses.size() == 0)
+    if (device.Valid() || subpasses.size() == 0)
     {
         this->device = device;
         this->subpasses = subpasses;
@@ -158,22 +158,22 @@ VkRenderPass Turbo::Core::TRenderPass::GetVkRenderPass()
     return this->vkRenderPass;
 }
 
-Turbo::Core::TDevice *Turbo::Core::TRenderPass::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TRenderPass::GetDevice()
 {
     return this->device;
 }
 
-const std::vector<Turbo::Core::TAttachment> &Turbo::Core::TRenderPass::GetAttachments()
+const std::vector<Turbo::Core::TAttachment> &Turbo::Core::TRenderPass::GetAttachments() const
 {
     return this->attachments;
 }
 
-const std::vector<Turbo::Core::TSubpass> &Turbo::Core::TRenderPass::GetSubpasses()
+const std::vector<Turbo::Core::TSubpass> &Turbo::Core::TRenderPass::GetSubpasses() const
 {
     return this->subpasses;
 }
 
-Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass)
+Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass) const
 {
     if (subpass < this->subpasses.size())
     {
@@ -183,7 +183,16 @@ Turbo::Core::TSubpass Turbo::Core::TRenderPass::GetSubpass(uint32_t subpass)
     return Turbo::Core::TSubpass(TPipelineType::Graphics);
 }
 
-std::string Turbo::Core::TRenderPass::ToString()
+std::string Turbo::Core::TRenderPass::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TRenderPass::Valid() const
+{
+    if (this->vkRenderPass != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

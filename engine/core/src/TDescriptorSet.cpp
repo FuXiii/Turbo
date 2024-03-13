@@ -40,9 +40,9 @@ void Turbo::Core::TDescriptorSet::InternalDestroy()
     device->GetDeviceDriver()->vkFreeDescriptorSets(vk_device, vk_descriptor_pool, 1, &this->vkDescriptorSet);
 }
 
-Turbo::Core::TDescriptorSet::TDescriptorSet(TDescriptorPool *descriptorPool, TDescriptorSetLayout *descriptorSetLayout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSet::TDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TDescriptorSetLayout> &descriptorSetLayout) : Turbo::Core::TVulkanHandle()
 {
-    if (descriptorPool != nullptr && descriptorSetLayout != nullptr)
+    if (descriptorPool.Valid() && descriptorSetLayout.Valid())
     {
         this->descriptorPool = descriptorPool;
         this->descriptorSetLayout = descriptorSetLayout;
@@ -64,12 +64,12 @@ VkDescriptorSet Turbo::Core::TDescriptorSet::GetVkDescriptorSet()
     return this->vkDescriptorSet;
 }
 
-uint32_t Turbo::Core::TDescriptorSet::GetSet()
+uint32_t Turbo::Core::TDescriptorSet::GetSet() const
 {
     return this->descriptorSetLayout->GetSet();
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TBuffer *> &buffers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers)
 {
     Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
 
@@ -105,18 +105,18 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
 {
-    std::vector<TBuffer *> buffers;
+    std::vector<TRefPtr<TBuffer>> buffers;
     buffers.push_back(buffer);
 
     this->BindData(binding, dstArrayElement, buffers);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (std::pair<TImageView *, TSampler *> &combined_image_sampler_item : combinedImageSamplers)
+    for (std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>> &combined_image_sampler_item : combinedImageSamplers)
     {
         TImageView *image_view = combined_image_sampler_item.first;
         TSampler *sampler = combined_image_sampler_item.second;
@@ -146,7 +146,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TImageView *> &imageViews)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
 
@@ -200,7 +200,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TSampler *> &sampler)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &sampler)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
     for (TSampler *sampler_item : sampler)
@@ -255,7 +255,16 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-std::string Turbo::Core::TDescriptorSet::ToString()
+std::string Turbo::Core::TDescriptorSet::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TDescriptorSet::Valid() const
+{
+    if (this->vkDescriptorSet != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

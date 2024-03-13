@@ -1,7 +1,8 @@
 #include "TDescriptor.h"
 #include "TException.h"
+#include "TShader.h"
 
-Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
+Turbo::Core::TDescriptor::TDescriptor(const TRefPtr<TShader> &shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {
     this->shader = shader;
     this->type = type;
@@ -16,12 +17,12 @@ Turbo::Core::TDescriptor::~TDescriptor()
 {
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptor::GetType()
+Turbo::Core::TDescriptorType Turbo::Core::TDescriptor::GetType() const
 {
     return this->type;
 }
 
-VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
+VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType() const
 {
     switch (this->type)
     {
@@ -78,37 +79,37 @@ VkDescriptorType Turbo::Core::TDescriptor::GetVkDescriptorType()
     return VkDescriptorType::VK_DESCRIPTOR_TYPE_MAX_ENUM;
 }
 
-Turbo::Core::TDescriptorDataType Turbo::Core::TDescriptor::GetDataType()
+Turbo::Core::TDescriptorDataType Turbo::Core::TDescriptor::GetDataType() const
 {
     return this->dataType;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetCount()
+uint32_t Turbo::Core::TDescriptor::GetCount() const
 {
     return this->count;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetSet()
+uint32_t Turbo::Core::TDescriptor::GetSet() const
 {
     return this->set;
 }
 
-uint32_t Turbo::Core::TDescriptor::GetBinding()
+uint32_t Turbo::Core::TDescriptor::GetBinding() const
 {
     return this->binding;
 }
 
-const std::string &Turbo::Core::TDescriptor::GetName()
+const std::string &Turbo::Core::TDescriptor::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TShader *Turbo::Core::TDescriptor::GetShader()
+const Turbo::Core::TRefPtr<Turbo::Core::TShader> &Turbo::Core::TDescriptor::GetShader()
 {
     return this->shader;
 }
 
-std::string Turbo::Core::TDescriptor::ToString()
+std::string Turbo::Core::TDescriptor::ToString() const
 {
     return std::string();
 }
@@ -167,7 +168,7 @@ Turbo::Core::TStructMember &Turbo::Core::TStructMember::operator=(const TStructM
     return *this;
 }
 
-std::string Turbo::Core::TStructMember::ToString()
+std::string Turbo::Core::TStructMember::ToString() const
 {
     return std::string();
 }
@@ -180,13 +181,13 @@ Turbo::Core::TNaNDescriptor::~TNaNDescriptor()
 {
 }
 
-Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
 {
     this->size = size;
     this->members = members;
 }
 
-uint32_t Turbo::Core::TUniformBufferDescriptor::GetSize()
+uint32_t Turbo::Core::TUniformBufferDescriptor::GetSize() const
 {
     return size;
 }
@@ -195,7 +196,7 @@ Turbo::Core::TUniformBufferDescriptor::~TUniformBufferDescriptor()
 {
 }
 
-Turbo::Core::TStorageBufferDescriptor::TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TStorageBufferDescriptor::TStorageBufferDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_BUFFER, dataType, set, binding, count, name)
 {
 }
 
@@ -203,7 +204,7 @@ Turbo::Core::TStorageBufferDescriptor::~TStorageBufferDescriptor()
 {
 }
 
-Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
+Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
 {
 }
 
@@ -211,7 +212,7 @@ Turbo::Core::TCombinedImageSamplerDescriptor::~TCombinedImageSamplerDescriptor()
 {
 }
 
-Turbo::Core::TSampledImageDescriptor::TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLED_IMAGE, dataType, set, binding, count, name)
+Turbo::Core::TSampledImageDescriptor::TSampledImageDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLED_IMAGE, dataType, set, binding, count, name)
 {
 }
 
@@ -219,7 +220,7 @@ Turbo::Core::TSampledImageDescriptor::~TSampledImageDescriptor()
 {
 }
 
-Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLER, dataType, set, binding, count, name)
+Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::SAMPLER, dataType, set, binding, count, name)
 {
 }
 
@@ -227,7 +228,7 @@ Turbo::Core::TSamplerDescriptor::~TSamplerDescriptor()
 {
 }
 
-Turbo::Core::TPushConstantDescriptor::TPushConstantDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TUniformBufferDescriptor(shader, dataType, UINT32_MAX, UINT32_MAX, count, name, members, size)
+Turbo::Core::TPushConstantDescriptor::TPushConstantDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TUniformBufferDescriptor(shader, dataType, UINT32_MAX, UINT32_MAX, count, name, members, size)
 {
 }
 
@@ -235,7 +236,7 @@ Turbo::Core::TPushConstantDescriptor::~TPushConstantDescriptor()
 {
 }
 
-Turbo::Core::TInputAttachmentDescriptor::TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::INPUT_ATTACHMENT, dataType, set, binding, count, name)
+Turbo::Core::TInputAttachmentDescriptor::TInputAttachmentDescriptor(uint32_t index, const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::INPUT_ATTACHMENT, dataType, set, binding, count, name)
 {
     this->index = index;
 }
@@ -244,12 +245,12 @@ Turbo::Core::TInputAttachmentDescriptor::~TInputAttachmentDescriptor()
 {
 }
 
-uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex()
+uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex() const
 {
     return this->index;
 }
 
-Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_IMAGE, dataType, set, binding, count, name)
+Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::STORAGE_IMAGE, dataType, set, binding, count, name)
 {
 }
 
@@ -257,7 +258,7 @@ Turbo::Core::TStorageImageDescriptor::~TStorageImageDescriptor()
 {
 }
 
-Turbo::Core::TAccelerationStructureDescriptor::TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::ACCELERATION_STRUCTURE, dataType, set, binding, count, name)
+Turbo::Core::TAccelerationStructureDescriptor::TAccelerationStructureDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptorType::ACCELERATION_STRUCTURE, dataType, set, binding, count, name)
 {
 }
 

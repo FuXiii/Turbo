@@ -5,30 +5,30 @@
 
 namespace Turbo
 {
-	namespace Core
-	{
-		class TMemoryHeapInfo :public TInfo
-		{
-		public:
-			friend class TPhysicalDevice;
+namespace Core
+{
+class TMemoryHeapInfo : public TInfo
+{
+  public:
+    friend class TPhysicalDevice;
 
-		private:
-			TMemoryHeapFlags memoryHeapFlags;
-			TDeviceSize size;
+  private:
+    TMemoryHeapFlags memoryHeapFlags;
+    TDeviceSize size;
 
-		public:
-			explicit TMemoryHeapInfo();
-			~TMemoryHeapInfo();
+  public:
+    explicit TMemoryHeapInfo();
+    ~TMemoryHeapInfo();
 
-		public:
-			bool IsDeviceLocal();
-			bool IsMultiInstance();
+  public:
+    bool IsDeviceLocal() const;
+    bool IsMultiInstance() const;
 
-			TDeviceSize GetByteSize();
+    TDeviceSize GetByteSize() const;
 
-			// Inherited via TObject
-			virtual std::string ToString() override;
-		};
-	}
-}
+    // Inherited via TObject
+    virtual std::string ToString() const override;
+};
+} // namespace Core
+} // namespace Turbo
 #endif // !TURBO_CORE_TMEMORYHEAP_H

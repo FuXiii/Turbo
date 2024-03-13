@@ -1,15 +1,14 @@
 #include "TFormatInfo.h"
-#include "TDevice.h"
 #include "TException.h"
 #include "TPhysicalDevice.h"
 #include "TVulkanLoader.h"
 
 std::vector<VkFormat> TAllFormats = {VK_FORMAT_R4G4_UNORM_PACK8, VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_B4G4R4A4_UNORM_PACK16, VK_FORMAT_R5G6B5_UNORM_PACK16, VK_FORMAT_B5G6R5_UNORM_PACK16, VK_FORMAT_R5G5B5A1_UNORM_PACK16, VK_FORMAT_B5G5R5A1_UNORM_PACK16, VK_FORMAT_A1R5G5B5_UNORM_PACK16, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R8_USCALED, VK_FORMAT_R8_SSCALED, VK_FORMAT_R8_UINT, VK_FORMAT_R8_SINT, VK_FORMAT_R8_SRGB, VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R8G8_USCALED, VK_FORMAT_R8G8_SSCALED, VK_FORMAT_R8G8_UINT, VK_FORMAT_R8G8_SINT, VK_FORMAT_R8G8_SRGB, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R8G8B8_USCALED, VK_FORMAT_R8G8B8_SSCALED, VK_FORMAT_R8G8B8_UINT, VK_FORMAT_R8G8B8_SINT, VK_FORMAT_R8G8B8_SRGB, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_B8G8R8_SNORM, VK_FORMAT_B8G8R8_USCALED, VK_FORMAT_B8G8R8_SSCALED, VK_FORMAT_B8G8R8_UINT, VK_FORMAT_B8G8R8_SINT, VK_FORMAT_B8G8R8_SRGB, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_USCALED, VK_FORMAT_R8G8B8A8_SSCALED, VK_FORMAT_R8G8B8A8_UINT, VK_FORMAT_R8G8B8A8_SINT, VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_USCALED, VK_FORMAT_B8G8R8A8_SSCALED, VK_FORMAT_B8G8R8A8_UINT, VK_FORMAT_B8G8R8A8_SINT, VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_A8B8G8R8_UNORM_PACK32, VK_FORMAT_A8B8G8R8_SNORM_PACK32, VK_FORMAT_A8B8G8R8_USCALED_PACK32, VK_FORMAT_A8B8G8R8_SSCALED_PACK32, VK_FORMAT_A8B8G8R8_UINT_PACK32, VK_FORMAT_A8B8G8R8_SINT_PACK32, VK_FORMAT_A8B8G8R8_SRGB_PACK32, VK_FORMAT_A2R10G10B10_UNORM_PACK32, VK_FORMAT_A2R10G10B10_SNORM_PACK32, VK_FORMAT_A2R10G10B10_USCALED_PACK32, VK_FORMAT_A2R10G10B10_SSCALED_PACK32, VK_FORMAT_A2R10G10B10_UINT_PACK32, VK_FORMAT_A2R10G10B10_SINT_PACK32, VK_FORMAT_A2B10G10R10_UNORM_PACK32, VK_FORMAT_A2B10G10R10_SNORM_PACK32, VK_FORMAT_A2B10G10R10_USCALED_PACK32, VK_FORMAT_A2B10G10R10_SSCALED_PACK32, VK_FORMAT_A2B10G10R10_UINT_PACK32, VK_FORMAT_A2B10G10R10_SINT_PACK32, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_USCALED, VK_FORMAT_R16_SSCALED, VK_FORMAT_R16_UINT, VK_FORMAT_R16_SINT, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_USCALED, VK_FORMAT_R16G16_SSCALED, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_USCALED, VK_FORMAT_R16G16B16_SSCALED, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_USCALED, VK_FORMAT_R16G16B16A16_SSCALED, VK_FORMAT_R16G16B16A16_UINT, VK_FORMAT_R16G16B16A16_SINT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R64_UINT, VK_FORMAT_R64_SINT, VK_FORMAT_R64_SFLOAT, VK_FORMAT_R64G64_UINT, VK_FORMAT_R64G64_SINT, VK_FORMAT_R64G64_SFLOAT, VK_FORMAT_R64G64B64_UINT, VK_FORMAT_R64G64B64_SINT, VK_FORMAT_R64G64B64_SFLOAT, VK_FORMAT_R64G64B64A64_UINT, VK_FORMAT_R64G64B64A64_SINT, VK_FORMAT_R64G64B64A64_SFLOAT, VK_FORMAT_B10G11R11_UFLOAT_PACK32, VK_FORMAT_E5B9G9R9_UFLOAT_PACK32, VK_FORMAT_D16_UNORM, VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D32_SFLOAT, VK_FORMAT_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_BC1_RGB_UNORM_BLOCK, VK_FORMAT_BC1_RGB_SRGB_BLOCK, VK_FORMAT_BC1_RGBA_UNORM_BLOCK, VK_FORMAT_BC1_RGBA_SRGB_BLOCK, VK_FORMAT_BC2_UNORM_BLOCK, VK_FORMAT_BC2_SRGB_BLOCK, VK_FORMAT_BC3_UNORM_BLOCK, VK_FORMAT_BC3_SRGB_BLOCK, VK_FORMAT_BC4_UNORM_BLOCK, VK_FORMAT_BC4_SNORM_BLOCK, VK_FORMAT_BC5_UNORM_BLOCK, VK_FORMAT_BC5_SNORM_BLOCK, VK_FORMAT_BC6H_UFLOAT_BLOCK, VK_FORMAT_BC6H_SFLOAT_BLOCK, VK_FORMAT_BC7_UNORM_BLOCK, VK_FORMAT_BC7_SRGB_BLOCK, VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK, VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK, VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK, VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK, VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK, VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK, VK_FORMAT_EAC_R11_UNORM_BLOCK, VK_FORMAT_EAC_R11_SNORM_BLOCK, VK_FORMAT_EAC_R11G11_UNORM_BLOCK, VK_FORMAT_EAC_R11G11_SNORM_BLOCK, VK_FORMAT_ASTC_4x4_UNORM_BLOCK, VK_FORMAT_ASTC_4x4_SRGB_BLOCK, VK_FORMAT_ASTC_5x4_UNORM_BLOCK, VK_FORMAT_ASTC_5x4_SRGB_BLOCK, VK_FORMAT_ASTC_5x5_UNORM_BLOCK, VK_FORMAT_ASTC_5x5_SRGB_BLOCK, VK_FORMAT_ASTC_6x5_UNORM_BLOCK, VK_FORMAT_ASTC_6x5_SRGB_BLOCK, VK_FORMAT_ASTC_6x6_UNORM_BLOCK, VK_FORMAT_ASTC_6x6_SRGB_BLOCK, VK_FORMAT_ASTC_8x5_UNORM_BLOCK, VK_FORMAT_ASTC_8x5_SRGB_BLOCK, VK_FORMAT_ASTC_8x6_UNORM_BLOCK, VK_FORMAT_ASTC_8x6_SRGB_BLOCK, VK_FORMAT_ASTC_8x8_UNORM_BLOCK, VK_FORMAT_ASTC_8x8_SRGB_BLOCK, VK_FORMAT_ASTC_10x5_UNORM_BLOCK, VK_FORMAT_ASTC_10x5_SRGB_BLOCK, VK_FORMAT_ASTC_10x6_UNORM_BLOCK, VK_FORMAT_ASTC_10x6_SRGB_BLOCK, VK_FORMAT_ASTC_10x8_UNORM_BLOCK, VK_FORMAT_ASTC_10x8_SRGB_BLOCK, VK_FORMAT_ASTC_10x10_UNORM_BLOCK, VK_FORMAT_ASTC_10x10_SRGB_BLOCK, VK_FORMAT_ASTC_12x10_UNORM_BLOCK, VK_FORMAT_ASTC_12x10_SRGB_BLOCK, VK_FORMAT_ASTC_12x12_UNORM_BLOCK, VK_FORMAT_ASTC_12x12_SRGB_BLOCK, VK_FORMAT_G8B8G8R8_422_UNORM, VK_FORMAT_B8G8R8G8_422_UNORM, VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM, VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, VK_FORMAT_G8_B8R8_2PLANE_422_UNORM, VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM, VK_FORMAT_R10X6_UNORM_PACK16, VK_FORMAT_R10X6G10X6_UNORM_2PACK16, VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16, VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16, VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16, VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16, VK_FORMAT_R12X4_UNORM_PACK16, VK_FORMAT_R12X4G12X4_UNORM_2PACK16, VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16, VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16, VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16, VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16, VK_FORMAT_G16B16G16R16_422_UNORM, VK_FORMAT_B16G16R16G16_422_UNORM, VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM, VK_FORMAT_G16_B16R16_2PLANE_420_UNORM, VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM, VK_FORMAT_G16_B16R16_2PLANE_422_UNORM, VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM, VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG, VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG, VK_FORMAT_PVRTC2_2BPP_UNORM_BLOCK_IMG, VK_FORMAT_PVRTC2_4BPP_UNORM_BLOCK_IMG, VK_FORMAT_PVRTC1_2BPP_SRGB_BLOCK_IMG, VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG, VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG, VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG, VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_5x4_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_5x5_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_6x5_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_6x6_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_8x5_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_8x6_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_8x8_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_10x5_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_10x6_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_10x8_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_10x10_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_12x10_SFLOAT_BLOCK_EXT, VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK_EXT, VK_FORMAT_G8B8G8R8_422_UNORM_KHR, VK_FORMAT_B8G8R8G8_422_UNORM_KHR, VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM_KHR, VK_FORMAT_G8_B8R8_2PLANE_420_UNORM_KHR, VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM_KHR, VK_FORMAT_G8_B8R8_2PLANE_422_UNORM_KHR, VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM_KHR, VK_FORMAT_R10X6_UNORM_PACK16_KHR, VK_FORMAT_R10X6G10X6_UNORM_2PACK16_KHR, VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16_KHR, VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16_KHR, VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16_KHR, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16_KHR, VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16_KHR, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16_KHR, VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16_KHR, VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16_KHR, VK_FORMAT_R12X4_UNORM_PACK16_KHR, VK_FORMAT_R12X4G12X4_UNORM_2PACK16_KHR, VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16_KHR, VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16_KHR, VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16_KHR, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16_KHR, VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16_KHR, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16_KHR, VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16_KHR, VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16_KHR, VK_FORMAT_G16B16G16R16_422_UNORM_KHR, VK_FORMAT_B16G16R16G16_422_UNORM_KHR, VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM_KHR, VK_FORMAT_G16_B16R16_2PLANE_420_UNORM_KHR, VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM_KHR, VK_FORMAT_G16_B16R16_2PLANE_422_UNORM_KHR, VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM_KHR};
 
-std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormats(TPhysicalDevice *physicalDevice)
+std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormats(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     std::vector<TFormatInfo> formats;
-    if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
+    if (physicalDevice.Valid())
     {
         PFN_vkGetPhysicalDeviceFormatProperties pfn_vk_get_physical_device_format_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceFormatProperties>(physicalDevice->GetInstance(), "vkGetPhysicalDeviceFormatProperties");
 
@@ -33,9 +32,9 @@ std::vector<Turbo::Core::TFormatInfo> Turbo::Core::TFormatInfo::GetSupportFormat
     return formats;
 }
 
-bool Turbo::Core::TFormatInfo::IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType)
+bool Turbo::Core::TFormatInfo::IsSupportFormat(const TRefPtr<TPhysicalDevice> &physicalDevice, TFormatType formatType)
 {
-    if (physicalDevice != nullptr && physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE)
+    if (physicalDevice.Valid())
     {
         std::vector<TFormatInfo> support_formats = TFormatInfo::GetSupportFormats(physicalDevice);
         size_t support_format_count = support_formats.size();
@@ -77,17 +76,17 @@ Turbo::Core::TFormatInfo::~TFormatInfo()
 {
 }
 
-Turbo::Core::TFormatType Turbo::Core::TFormatInfo::GetFormatType()
+Turbo::Core::TFormatType Turbo::Core::TFormatInfo::GetFormatType() const
 {
     return this->formatType;
 }
 
-VkFormat Turbo::Core::TFormatInfo::GetVkFormat()
+VkFormat Turbo::Core::TFormatInfo::GetVkFormat() const
 {
     return static_cast<VkFormat>(this->formatType);
 }
 
-Turbo::Core::TFormatDataTypes Turbo::Core::TFormatInfo::GetFormatDataType()
+Turbo::Core::TFormatDataTypes Turbo::Core::TFormatInfo::GetFormatDataType() const
 {
     TFormatDataTypes types = 0;
 
@@ -381,7 +380,7 @@ Turbo::Core::TFormatDataTypes Turbo::Core::TFormatInfo::GetFormatDataType()
     return types;
 }
 
-uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
+uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize() const
 {
     switch (this->GetVkFormat())
     {
@@ -671,7 +670,7 @@ uint32_t Turbo::Core::TFormatInfo::GetTexelBlockSize()
     }
 }
 
-bool Turbo::Core::TFormatInfo::IsSupportBuffer()
+bool Turbo::Core::TFormatInfo::IsSupportBuffer() const
 {
     if (this->formatProperties.bufferFeatures != 0)
     {
@@ -680,7 +679,7 @@ bool Turbo::Core::TFormatInfo::IsSupportBuffer()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsSupportVertexBuffer()
+bool Turbo::Core::TFormatInfo::IsSupportVertexBuffer() const
 {
     if ((this->formatProperties.bufferFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT)
     {
@@ -688,7 +687,7 @@ bool Turbo::Core::TFormatInfo::IsSupportVertexBuffer()
     }
     return false;
 }
-bool Turbo::Core::TFormatInfo::IsSupportLinearTiling()
+bool Turbo::Core::TFormatInfo::IsSupportLinearTiling() const
 {
     if ((this->formatProperties.bufferFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT)
     {
@@ -697,7 +696,7 @@ bool Turbo::Core::TFormatInfo::IsSupportLinearTiling()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImage()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImage() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)
     {
@@ -706,7 +705,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImage()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImage()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImage() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)
     {
@@ -715,7 +714,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImage()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImageAtomic()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImageAtomic() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT)
     {
@@ -724,7 +723,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportStorageImageAtomic()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachment()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachment() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
     {
@@ -733,7 +732,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachment()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachmentBlend()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachmentBlend() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
     {
@@ -742,7 +741,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportColorAttachmentBlend()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportDepthStencilAttachment()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportDepthStencilAttachment() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
     {
@@ -751,7 +750,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportDepthStencilAttachment()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitSrc()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitSrc() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT)
     {
@@ -760,7 +759,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitSrc()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitDst()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitDst() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT)
     {
@@ -769,7 +768,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportBlitDst()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImageFilterLinear()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImageFilterLinear() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)
     {
@@ -778,7 +777,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportSampledImageFilterLinear()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferSrc()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferSrc() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT)
     {
@@ -787,7 +786,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferSrc()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferDst()
+bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferDst() const
 {
     if ((this->formatProperties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT)
     {
@@ -796,7 +795,7 @@ bool Turbo::Core::TFormatInfo::IsLinearTilingSupportTransferDst()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsSupportOptimalTiling()
+bool Turbo::Core::TFormatInfo::IsSupportOptimalTiling() const
 {
     if (this->formatProperties.optimalTilingFeatures != 0)
     {
@@ -805,7 +804,7 @@ bool Turbo::Core::TFormatInfo::IsSupportOptimalTiling()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImage()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImage() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)
     {
@@ -814,7 +813,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImage()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImage()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImage() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)
     {
@@ -823,7 +822,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImage()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImageAtomic()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImageAtomic() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT)
     {
@@ -832,7 +831,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportStorageImageAtomic()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachment()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachment() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
     {
@@ -841,7 +840,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachment()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachmentBlend()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachmentBlend() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
     {
@@ -850,7 +849,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportColorAttachmentBlend()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportDepthStencilAttachment()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportDepthStencilAttachment() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
     {
@@ -859,7 +858,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportDepthStencilAttachment()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitSrc()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitSrc() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_SRC_BIT)
     {
@@ -868,7 +867,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitSrc()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitDst()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitDst() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT)
     {
@@ -877,7 +876,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportBlitDst()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImageFilterLinear()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImageFilterLinear() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)
     {
@@ -886,7 +885,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportSampledImageFilterLinear()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferSrc()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferSrc() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_SRC_BIT)
     {
@@ -895,7 +894,7 @@ bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferSrc()
     return false;
 }
 
-bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferDst()
+bool Turbo::Core::TFormatInfo::IsOptimalTilingSupportTransferDst() const
 {
     if ((this->formatProperties.optimalTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) == VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT)
     {
@@ -922,7 +921,7 @@ bool Turbo::Core::TFormatInfo::operator!=(const TFormatInfo &format) const
     return false;
 }
 
-std::string Turbo::Core::TFormatInfo::ToString()
+std::string Turbo::Core::TFormatInfo::ToString() const
 {
     return std::string();
 }

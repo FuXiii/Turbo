@@ -3,6 +3,7 @@
 #include <core/include/TBuffer.h>
 #include <core/include/TCommandBuffer.h>
 #include <core/include/TCommandBufferPool.h>
+#include <core/include/TDevice.h>
 #include <core/include/TDeviceQueue.h>
 #include <core/include/TException.h>
 #include <core/include/TFence.h>
@@ -21,10 +22,15 @@ void Turbo::Render::TBuffer::Create(const std::string &name, const Descriptor &d
 
 void Turbo::Render::TBuffer::Destroy(void *allocator)
 {
+    // FIXME: the allocator had been storage in TBuffer::allocator
+    // FIXME: maybe this [if(allocator != nullptr)] is redundant
     if (allocator != nullptr)
     {
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         resource_allocator->DestroyBuffer(this->buffer);
+        this->allocator = nullptr;
+        this->buffer = nullptr;
+        memset(&this->descriptor, 0, sizeof(this->descriptor));
     }
 }
 
@@ -70,18 +76,17 @@ void Turbo::Render::TBuffer::Copy(void *src, uint64_t size)
             {
                 Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
                 Turbo::Render::TContext *context = resource_allocator->GetContext();
-                Turbo::Core::TDeviceQueue *queue = context->GetDeviceQueue();
+                Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = context->GetDeviceQueue();
 
-                Turbo::Core::TCommandBuffer *command_buffer = resource_allocator->AllocateCommandBuffer();
+                Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = resource_allocator->AllocateCommandBuffer();
                 command_buffer->Begin();
                 command_buffer->CmdCopyBuffer(temp_buffer.buffer, this->buffer, 0, 0, copy_size);
                 command_buffer->End();
 
-                Turbo::Core::TFence *copy_fence = new Turbo::Core::TFence(context->GetDevice());
-                queue->Submit(nullptr, nullptr, command_buffer, copy_fence);
+                Turbo::Core::TRefPtr<Turbo::Core::TFence> copy_fence = new Turbo::Core::TFence(context->GetDevice());
+                queue->Submit(command_buffer, copy_fence);
                 copy_fence->WaitUntil();
 
-                delete copy_fence;
                 resource_allocator->FreeCommandBuffer(command_buffer);
             }
 
@@ -99,18 +104,17 @@ void Turbo::Render::TBuffer::Copy(TBuffer *src, uint64_t srcOffset, uint64_t siz
 
         Turbo::Render::TResourceAllocator *resource_allocator = static_cast<Turbo::Render::TResourceAllocator *>(allocator);
         Turbo::Render::TContext *context = resource_allocator->GetContext();
-        Turbo::Core::TDeviceQueue *queue = context->GetDeviceQueue();
+        Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = context->GetDeviceQueue();
 
-        Turbo::Core::TCommandBuffer *command_buffer = resource_allocator->AllocateCommandBuffer();
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = resource_allocator->AllocateCommandBuffer();
         command_buffer->Begin();
         command_buffer->CmdCopyBuffer(src->buffer, this->buffer, srcOffset, 0, copy_size);
         command_buffer->End();
 
-        Turbo::Core::TFence *copy_fence = new Turbo::Core::TFence(context->GetDevice());
-        queue->Submit(nullptr, nullptr, command_buffer, copy_fence);
+        Turbo::Core::TRefPtr<Turbo::Core::TFence> copy_fence = new Turbo::Core::TFence(context->GetDevice());
+        queue->Submit(command_buffer, copy_fence);
         copy_fence->WaitUntil();
 
-        delete copy_fence;
         resource_allocator->FreeCommandBuffer(command_buffer);
     }
 }

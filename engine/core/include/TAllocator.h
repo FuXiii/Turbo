@@ -12,7 +12,9 @@ class TAllocator : public TObject
 {
   public:
     explicit TAllocator();
-    ~TAllocator();
+
+  protected:
+    virtual ~TAllocator();
 
   public:
     static void *VKAPI_PTR Allocate(size_t size, size_t alignment);
@@ -22,7 +24,7 @@ class TAllocator : public TObject
     template <typename T>
     static constexpr T AlignUp(T meta, size_t alignment) noexcept;
 
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
 };
 
 template <typename T>

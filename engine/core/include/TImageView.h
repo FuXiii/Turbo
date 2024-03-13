@@ -45,7 +45,7 @@ typedef VkFlags TImageAspects;
 class TImageView : public TVulkanHandle
 {
   private:
-    T_VULKAN_HANDLE_PARENT TImage *image = nullptr;
+    T_VULKAN_HANDLE_PARENT TRefPtr<TImage> image;
     T_VULKAN_HANDLE_HANDLE VkImageView vkImageView = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN;
 
@@ -62,23 +62,27 @@ class TImageView : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    [[deprecated]] explicit TImageView(TImage *image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    explicit TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    ~TImageView();
+    [[deprecated]] explicit TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    explicit TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
 
-    TImage *GetImage();
+  protected:
+    virtual ~TImageView();
+
+  public:
+    const TRefPtr<TImage> &GetImage();
 
     VkImageView GetVkImageView();
-    TImageViewType GetViewType();
-    TFormatInfo GetFormat();
-    TImageAspects GetAspects();
-    uint32_t GetBaseMipLevel();
-    uint32_t GetLevelCount();
-    uint32_t GetBaseArrayLayer();
-    uint32_t GetLayerCount();
+    TImageViewType GetViewType() const;
+    TFormatInfo GetFormat() const;
+    TImageAspects GetAspects() const;
+    uint32_t GetBaseMipLevel() const;
+    uint32_t GetLevelCount() const;
+    uint32_t GetBaseArrayLayer() const;
+    uint32_t GetLayerCount() const;
 
     // Inherited via TObject
-    virtual std::string ToString() override;
+    virtual std::string ToString() const override;
+    virtual bool Valid() const override;
 };
 } // namespace Core
 } // namespace Turbo

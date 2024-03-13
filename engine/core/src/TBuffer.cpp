@@ -42,7 +42,7 @@ void Turbo::Core::TBuffer::InternalDestroy()
     vmaDestroyBuffer(*vma_allocator, this->vkBuffer, *vma_allocation);
 }
 
-Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
+Turbo::Core::TBuffer::TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
 {
     if (device != nullptr)
     {
@@ -70,12 +70,12 @@ Turbo::Core::TBuffer::~TBuffer()
     this->vmaAllocationInfo = nullptr;
 }
 
-Turbo::Core::TBufferUsageFlags Turbo::Core::TBuffer::GetBufferUsageFlags()
+Turbo::Core::TBufferUsageFlags Turbo::Core::TBuffer::GetBufferUsageFlags() const
 {
     return this->usages;
 }
 
-bool Turbo::Core::TBuffer::IsTransferSource()
+bool Turbo::Core::TBuffer::IsTransferSource() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
     {
@@ -85,7 +85,7 @@ bool Turbo::Core::TBuffer::IsTransferSource()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsTransferDestination()
+bool Turbo::Core::TBuffer::IsTransferDestination() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT)
     {
@@ -95,7 +95,7 @@ bool Turbo::Core::TBuffer::IsTransferDestination()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsUniformTexelBuffer()
+bool Turbo::Core::TBuffer::IsUniformTexelBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT)
     {
@@ -105,7 +105,7 @@ bool Turbo::Core::TBuffer::IsUniformTexelBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsStorageTexelBuffer()
+bool Turbo::Core::TBuffer::IsStorageTexelBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT)
     {
@@ -115,7 +115,7 @@ bool Turbo::Core::TBuffer::IsStorageTexelBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsUniformBuffer()
+bool Turbo::Core::TBuffer::IsUniformBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
     {
@@ -125,7 +125,7 @@ bool Turbo::Core::TBuffer::IsUniformBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsStorageBuffer()
+bool Turbo::Core::TBuffer::IsStorageBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
     {
@@ -135,7 +135,7 @@ bool Turbo::Core::TBuffer::IsStorageBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsIndexBuffer()
+bool Turbo::Core::TBuffer::IsIndexBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
     {
@@ -145,7 +145,7 @@ bool Turbo::Core::TBuffer::IsIndexBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsVertexBuffer()
+bool Turbo::Core::TBuffer::IsVertexBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
     {
@@ -155,7 +155,7 @@ bool Turbo::Core::TBuffer::IsVertexBuffer()
     return false;
 }
 
-bool Turbo::Core::TBuffer::IsIndirectBuffer()
+bool Turbo::Core::TBuffer::IsIndirectBuffer() const
 {
     if (this->usages & VkBufferUsageFlagBits::VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
     {
@@ -170,7 +170,7 @@ VkBuffer Turbo::Core::TBuffer::GetVkBuffer()
     return this->vkBuffer;
 }
 
-bool Turbo::Core::TBuffer::IsMappable()
+bool Turbo::Core::TBuffer::IsMappable() const
 {
     if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
     {
@@ -205,13 +205,22 @@ void Turbo::Core::TBuffer::Flush(TDeviceSize offset, TDeviceSize size)
     vmaFlushAllocation(*vma_allocator, *((VmaAllocation *)this->vmaAllocation), offset, size);
 }
 
-Turbo::Core::TMemoryTypeInfo Turbo::Core::TBuffer::GetMemoryTypeInfo()
+Turbo::Core::TMemoryTypeInfo Turbo::Core::TBuffer::GetMemoryTypeInfo() const
 {
     uint32_t memory_type_index = ((VmaAllocationInfo *)this->vmaAllocationInfo)->memoryType;
     return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
 }
 
-std::string Turbo::Core::TBuffer::ToString()
+std::string Turbo::Core::TBuffer::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TBuffer::Valid() const
+{
+    if (this->vkBuffer != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

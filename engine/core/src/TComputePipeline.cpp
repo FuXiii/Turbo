@@ -142,12 +142,12 @@ void Turbo::Core::TComputePipeline::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TComputePipeline::TComputePipeline(TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader)
+Turbo::Core::TComputePipeline::TComputePipeline(const TRefPtr<TComputeShader> &computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader)
 {
     this->InternalCreate();
 }
 
-Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
+Turbo::Core::TComputePipeline::TComputePipeline(const TRefPtr<TPipelineCache> &pipelineCache, const TRefPtr<TComputeShader> &computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
 {
     this->InternalCreate();
 }
@@ -157,7 +157,7 @@ Turbo::Core::TComputePipeline::~TComputePipeline()
     this->InternalDestroy();
 }
 
-std::string Turbo::Core::TComputePipeline::ToString()
+std::string Turbo::Core::TComputePipeline::ToString() const
 {
     return std::string();
 }

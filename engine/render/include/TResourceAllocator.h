@@ -5,6 +5,8 @@
 #include "TImage.h"
 #include "TSampler.h"
 
+#include <core/include/TRefPtr.h>
+
 namespace Turbo
 {
 namespace Core
@@ -32,17 +34,17 @@ class TResourceAllocator
 
     TContext *GetContext();
 
-    Turbo::Core::TImage *CreateImage(const Turbo::Render::TImage::Descriptor &descriptor);
-    void DestroyImage(Turbo::Core::TImage *image);
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> CreateImage(const Turbo::Render::TImage::Descriptor &descriptor);
+    void DestroyImage(Turbo::Core::TRefPtr<Turbo::Core::TImage> &image);
 
-    Turbo::Core::TBuffer *CreateBuffer(const Turbo::Render::TBuffer::Descriptor &descriptor);
-    void DestroyBuffer(Turbo::Core::TBuffer *buffer);
+    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> CreateBuffer(const Turbo::Render::TBuffer::Descriptor &descriptor);
+    void DestroyBuffer(Turbo::Core::TRefPtr<Turbo::Core::TBuffer> &buffer);
 
-    Turbo::Core::TCommandBuffer *AllocateCommandBuffer();
-    void FreeCommandBuffer(Turbo::Core::TCommandBuffer *commandBuffer);
+    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> AllocateCommandBuffer();
+    void FreeCommandBuffer(Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &commandBuffer);
 
-    Turbo::Core::TSampler *CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor);
-    void DestroySampler(Turbo::Core::TSampler *sampler);
+    Turbo::Core::TRefPtr<Turbo::Core::TSampler> CreateSampler(const Turbo::Render::TSampler::Descriptor &descriptor);
+    void DestroySampler(Turbo::Core::TRefPtr<Turbo::Core::TSampler> &sampler);
 };
 } // namespace Render
 } // namespace Turbo

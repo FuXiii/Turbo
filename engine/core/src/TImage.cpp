@@ -163,7 +163,7 @@ void Turbo::Core::TImage::InternalDestroy()
     vmaDestroyImage(*vma_allocator, this->vkImage, *vma_allocation);
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     this->device = device;
     this->vkImage = vkImage;
@@ -181,9 +181,9 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags
     this->layout = layout;
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         this->device = device;
         this->imageFlags = imageFlags;
@@ -209,9 +209,9 @@ Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TIma
     }
 }
 
-Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
+Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
 {
-    if (device != nullptr)
+    if (device.Valid())
     {
         TPhysicalDevice *physical_device = device->GetPhysicalDevice();
         if (physical_device->IsSupportFormat(formatType))
@@ -260,58 +260,58 @@ VkImage Turbo::Core::TImage::GetVkImage()
     return this->vkImage;
 }
 
-Turbo::Core::TFormatInfo Turbo::Core::TImage::GetFormat()
+Turbo::Core::TFormatInfo Turbo::Core::TImage::GetFormat() const
 {
     return this->format;
 }
 
-Turbo::Core::TDevice *Turbo::Core::TImage::GetDevice()
+const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TImage::GetDevice()
 {
     return this->device;
 }
 
-uint32_t Turbo::Core::TImage::GetWidth()
+uint32_t Turbo::Core::TImage::GetWidth() const
 {
     return this->extent.width;
 }
 
-uint32_t Turbo::Core::TImage::GetHeight()
+uint32_t Turbo::Core::TImage::GetHeight() const
 {
     return this->extent.height;
 }
 
-uint32_t Turbo::Core::TImage::GetDepth()
+uint32_t Turbo::Core::TImage::GetDepth() const
 {
     return this->extent.depth;
 }
 
-Turbo::Core::TSampleCountBits Turbo::Core::TImage::GetSampleCountBits()
+Turbo::Core::TSampleCountBits Turbo::Core::TImage::GetSampleCountBits() const
 {
     return this->samples;
 }
 
-Turbo::Core::TImageUsages Turbo::Core::TImage::GetUsages()
+Turbo::Core::TImageUsages Turbo::Core::TImage::GetUsages() const
 {
     return this->usages;
 }
 
-uint32_t Turbo::Core::TImage::GetMipLevels()
+uint32_t Turbo::Core::TImage::GetMipLevels() const
 {
     return this->mipLevels;
 }
 
-uint32_t Turbo::Core::TImage::GetArrayLayers()
+uint32_t Turbo::Core::TImage::GetArrayLayers() const
 {
     return this->arrayLayers;
 }
 
-Turbo::Core::TMemoryTypeInfo Turbo::Core::TImage::GetMemoryTypeInfo()
+Turbo::Core::TMemoryTypeInfo Turbo::Core::TImage::GetMemoryTypeInfo() const
 {
     uint32_t memory_type_index = ((VmaAllocationInfo *)this->vmaAllocationInfo)->memoryType;
     return this->device->GetPhysicalDevice()->GetMemoryTypeByIndex(memory_type_index);
 }
 
-bool Turbo::Core::TImage::IsMappable()
+bool Turbo::Core::TImage::IsMappable() const
 {
     if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))
     {
@@ -345,7 +345,16 @@ void Turbo::Core::TImage::Unmap()
     }
 }
 
-std::string Turbo::Core::TImage::ToString()
+std::string Turbo::Core::TImage::ToString() const
 {
     return std::string();
+}
+
+bool Turbo::Core::TImage::Valid() const
+{
+    if (this->vkImage != VK_NULL_HANDLE)
+    {
+        return true;
+    }
+    return false;
 }

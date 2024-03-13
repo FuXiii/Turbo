@@ -83,11 +83,11 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers(
     return layers;
 }
 
-size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(TPhysicalDevice *physicalDevice)
+size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     uint32_t layer_count = 0;
 
-    if (physicalDevice != nullptr && (physicalDevice->GetVkPhysicalDevice() != VK_NULL_HANDLE))
+    if (physicalDevice.Valid())
     {
         VkResult result = VkResult::VK_ERROR_UNKNOWN;
         PFN_vkEnumerateDeviceLayerProperties pfn_vk_enumerate_device_layer_properties = TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkEnumerateDeviceLayerProperties>(physicalDevice->GetInstance(), "vkEnumerateDeviceLayerProperties");
@@ -106,7 +106,7 @@ size_t Turbo::Core::TLayerInfo::GetPhysicalDeviceLayerCount(TPhysicalDevice *phy
     return layer_count;
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice)
+std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &physicalDevice)
 {
     std::vector<Turbo::Core::TLayerInfo> layers;
     VkResult result = VkResult::VK_ERROR_UNKNOWN;
@@ -277,37 +277,37 @@ Turbo::Core::TLayerInfo::~TLayerInfo()
 {
 }
 
-Turbo::Core::TLayerType Turbo::Core::TLayerInfo::GetLayerType()
+Turbo::Core::TLayerType Turbo::Core::TLayerInfo::GetLayerType() const
 {
     return this->layerType;
 }
 
-const std::string &Turbo::Core::TLayerInfo::GetName()
+const std::string &Turbo::Core::TLayerInfo::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TVersion Turbo::Core::TLayerInfo::GetSpecificationVersion()
+Turbo::Core::TVersion Turbo::Core::TLayerInfo::GetSpecificationVersion() const
 {
     return this->specificationVersion;
 }
 
-uint32_t Turbo::Core::TLayerInfo::GetImplementationVersion()
+uint32_t Turbo::Core::TLayerInfo::GetImplementationVersion() const
 {
     return this->implementationVersion;
 }
 
-std::string Turbo::Core::TLayerInfo::GetDescription()
+std::string Turbo::Core::TLayerInfo::GetDescription() const
 {
     return this->description;
 }
 
-size_t Turbo::Core::TLayerInfo::GetExtensionCount()
+size_t Turbo::Core::TLayerInfo::GetExtensionCount() const
 {
     return this->extensions.size();
 }
 
-Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index)
+Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index) const
 {
     TExtensionInfo result;
     if (index > this->extensions.size() - 1)
@@ -318,7 +318,7 @@ Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index
     return this->extensions[index];
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TLayerInfo::GetExtensions()
+std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TLayerInfo::GetExtensions() const
 {
     return this->extensions;
 }
@@ -341,7 +341,7 @@ bool Turbo::Core::TLayerInfo::operator!=(const TLayerInfo &layer) const
     return false;
 }
 
-std::string Turbo::Core::TLayerInfo::ToString()
+std::string Turbo::Core::TLayerInfo::ToString()const
 {
     std::stringstream ss;
     ss << this->name << " (" << this->description << ") Vulkan version " << this->specificationVersion.ToString() << ", layer version " << this->implementationVersion;

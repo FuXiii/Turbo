@@ -3,161 +3,161 @@
 
 void Turbo::Core::TQueueFamilyInfo::CalculatePerformanceScore()
 {
-	if (this->IsSupportGraphics())
-	{
-		this->score += 5;
-	}
+    if (this->IsSupportGraphics())
+    {
+        this->score += 5;
+    }
 
-	if (this->IsSupportCompute())
-	{
-		this->score += 4;
-	}
+    if (this->IsSupportCompute())
+    {
+        this->score += 4;
+    }
 
-	if (this->IsSupportTransfer())
-	{
-		this->score += 3;
-	}
+    if (this->IsSupportTransfer())
+    {
+        this->score += 3;
+    }
 
-	if (this->IsSupportSparse())
-	{
-		this->score += 2;
-	}
+    if (this->IsSupportSparse())
+    {
+        this->score += 2;
+    }
 
-	if (this->IsSupportPresent())
-	{
-		this->score += 1;
-	}
+    if (this->IsSupportPresent())
+    {
+        this->score += 1;
+    }
 }
 
 Turbo::Core::TQueueFamilyInfo::TQueueFamilyInfo() : Turbo::Core::TInfo()
 {
-	this->queueFlags = 0;
-	this->queueCount = 0;
-	this->timestampValidBits = 0;
-	this->minImageTransferGranularity.width = 0;
-	this->minImageTransferGranularity.height = 0;
-	this->minImageTransferGranularity.depth = 0;
-	this->index = UINT32_MAX;
-	this->score = 0;
+    this->queueFlags = 0;
+    this->queueCount = 0;
+    this->timestampValidBits = 0;
+    this->minImageTransferGranularity.width = 0;
+    this->minImageTransferGranularity.height = 0;
+    this->minImageTransferGranularity.depth = 0;
+    this->index = UINT32_MAX;
+    this->score = 0;
 }
 
 Turbo::Core::TQueueFamilyInfo::TQueueFamilyInfo(const TQueueFamilyInfo &obj)
 {
-	this->queueFlags = obj.queueFlags;
-	this->queueCount = obj.queueCount;
-	this->timestampValidBits = obj.timestampValidBits;
-	this->minImageTransferGranularity.width = obj.minImageTransferGranularity.width;
-	this->minImageTransferGranularity.height = obj.minImageTransferGranularity.height;
-	this->minImageTransferGranularity.depth = obj.minImageTransferGranularity.depth;
-	this->index = obj.index;
-	this->score = obj.score;
+    this->queueFlags = obj.queueFlags;
+    this->queueCount = obj.queueCount;
+    this->timestampValidBits = obj.timestampValidBits;
+    this->minImageTransferGranularity.width = obj.minImageTransferGranularity.width;
+    this->minImageTransferGranularity.height = obj.minImageTransferGranularity.height;
+    this->minImageTransferGranularity.depth = obj.minImageTransferGranularity.depth;
+    this->index = obj.index;
+    this->score = obj.score;
 }
 
 Turbo::Core::TQueueFamilyInfo::~TQueueFamilyInfo()
 {
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportGraphics()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportGraphics() const
 {
-	if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_GRAPHICS_BIT)
-	{
-		return true;
-	}
+    if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_GRAPHICS_BIT)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportCompute()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportCompute() const
 {
-	if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_COMPUTE_BIT)
-	{
-		return true;
-	}
+    if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_COMPUTE_BIT)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportTransfer()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportTransfer() const
 {
-	if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_TRANSFER_BIT)
-	{
-		return true;
-	}
+    if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_TRANSFER_BIT)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportSparse()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportSparse() const
 {
-	if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_SPARSE_BINDING_BIT)
-	{
-		return true;
-	}
+    if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_SPARSE_BINDING_BIT)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportProtected()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportProtected() const
 {
-	if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_PROTECTED_BIT)
-	{
-		return true;
-	}
+    if (this->queueFlags & VkQueueFlagBits::VK_QUEUE_PROTECTED_BIT)
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-bool Turbo::Core::TQueueFamilyInfo::IsSupportPresent()
+bool Turbo::Core::TQueueFamilyInfo::IsSupportPresent() const
 {
-	if (this->IsSupportGraphics() || this->IsSupportCompute())
-	{
-		return true;
-	}
+    if (this->IsSupportGraphics() || this->IsSupportCompute())
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-uint32_t Turbo::Core::TQueueFamilyInfo::GetQueueCount()
+uint32_t Turbo::Core::TQueueFamilyInfo::GetQueueCount() const
 {
-	return this->queueCount;
+    return this->queueCount;
 }
 
-uint32_t Turbo::Core::TQueueFamilyInfo::GetTimestampValidBits()
+uint32_t Turbo::Core::TQueueFamilyInfo::GetTimestampValidBits() const
 {
-	return this->timestampValidBits;
+    return this->timestampValidBits;
 }
 
-VkExtent3D Turbo::Core::TQueueFamilyInfo::GetMinImageTransferGranularity()
+VkExtent3D Turbo::Core::TQueueFamilyInfo::GetMinImageTransferGranularity() const
 {
-	return this->minImageTransferGranularity;
+    return this->minImageTransferGranularity;
 }
 
-uint32_t Turbo::Core::TQueueFamilyInfo::GetIndex()
+uint32_t Turbo::Core::TQueueFamilyInfo::GetIndex() const
 {
-	return this->index;
+    return this->index;
 }
 
-uint32_t Turbo::Core::TQueueFamilyInfo::GetPerformanceScore()
+uint32_t Turbo::Core::TQueueFamilyInfo::GetPerformanceScore() const
 {
-	return this->score;
+    return this->score;
 }
 
 bool Turbo::Core::TQueueFamilyInfo::operator==(const TQueueFamilyInfo &queueFamily) const
 {
-	return this->index == queueFamily.index;
+    return this->index == queueFamily.index;
 }
 
 bool Turbo::Core::TQueueFamilyInfo::operator!=(const TQueueFamilyInfo &queueFamily) const
 {
-	return this->index != queueFamily.index;
+    return this->index != queueFamily.index;
 }
 
 bool Turbo::Core::TQueueFamilyInfo::operator<(const TQueueFamilyInfo &queueFamily) const
 {
-	return this->index < queueFamily.index;
+    return this->index < queueFamily.index;
 }
 
-std::string Turbo::Core::TQueueFamilyInfo::ToString()
+std::string Turbo::Core::TQueueFamilyInfo::ToString()const
 {
-	return std::string();
+    return std::string();
 }
