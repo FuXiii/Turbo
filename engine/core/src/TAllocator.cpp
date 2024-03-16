@@ -1,14 +1,15 @@
 #include "TAllocator.h"
 
-#if defined(ANDROID) || defined(__ANDROID__)
+#if defined(TURBO_PLATFORM_ANDROID)
 #include <cstdlib>
 #elif defined(__APPLE__) || defined(__ANDROID__) || (defined(__linux__) && defined(__GLIBCXX__) && !defined(_GLIBCXX_HAVE_ALIGNED_ALLOC))
 #include <cstdlib>
 #if defined(__APPLE__)
 #include <AvailabilityMacros.h>
 #endif
+#elif defined(TURBO_PLATFORM_WINDOWS)
+#include <malloc.h>
 #else
-// #include <malloc.h>
 #include <cstdlib>
 #endif
 
@@ -23,7 +24,7 @@ Turbo::Core::TAllocator::~TAllocator()
 void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
 {
     // std::cout << "TAllocator::Allocation" << std::endl;
-#if defined(ANDROID) || defined(__ANDROID__)
+#if defined(TURBO_PLATFORM_ANDROID)
     if (alignment < sizeof(void *))
     {
         alignment = sizeof(void *);
@@ -66,8 +67,9 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
     // std::cout << "TAllocator::Reallocation" << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_realloc(pOriginal, size, alignment);
-#endif
+#else
     return realloc(pOriginal, size);
+#endif
 }
 
 void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)

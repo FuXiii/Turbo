@@ -4261,3 +4261,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 `VulkanKHRRayTracingTestForCallableShader` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `VulkanRayQueryTest` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
   >* 更新 `VulkanKHRRayTracingTestForGLTF` 示例。使用 `Turbo::Core::TRefPtr<T>` 适配。
+
+* 2024/3/17
+  >
+  >* 更新 ``TAllocator`` ，优化代码结构。
