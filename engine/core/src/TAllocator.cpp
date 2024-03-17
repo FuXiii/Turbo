@@ -1,17 +1,68 @@
 #include "TAllocator.h"
 
-#if defined(TURBO_PLATFORM_ANDROID)
-#include <cstdlib>
-#elif defined(__APPLE__) || defined(__ANDROID__) || (defined(__linux__) && defined(__GLIBCXX__) && !defined(_GLIBCXX_HAVE_ALIGNED_ALLOC))
-#include <cstdlib>
-#if defined(__APPLE__)
-#include <AvailabilityMacros.h>
-#endif
-#elif defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_WINDOWS)
 #include <malloc.h>
-#else
+#elif defined(TURBO_PLATFORM_LINUX)
+#include <malloc.h>
+#elif defined(TURBO_PLATFORM_ANDROID)
 #include <cstdlib>
+#else
+#include <stdlib.h>
 #endif
+
+#include <algorithm>
+
+void *TGetAlignedMeta(void *alignedPtr)
+{
+    if (alignedPtr)
+    {
+        return ((void **)alignedPtr)[-1];
+    }
+    return nullptr;
+}
+
+size_t TGetAlignedSize(void *alignedPtr)
+{
+    if (alignedPtr)
+    {
+        return *(size_t *)((uintptr_t)alignedPtr - sizeof(void *) - sizeof(size_t));
+    }
+    return 0;
+}
+
+void *TAlignedMalloc(size_t size, size_t alignment)
+{
+    size_t meta_point_size = sizeof(void *);
+    size_t aligned_size = sizeof(size_t);
+    size_t meta_size = aligned_size + meta_point_size + alignment - 1 + size;
+
+    void *meta = malloc(meta_size);
+
+    uintptr_t start = (uintptr_t)meta + aligned_size + meta_point_size;
+
+    void *aligned_meta = (void *)Turbo::Core::TAllocator::AlignUp(start, alignment);
+
+    *(void **)((uintptr_t)aligned_meta - meta_point_size) = meta;
+    *(size_t *)((uintptr_t)aligned_meta - (meta_point_size + aligned_size)) = size;
+
+    return aligned_meta;
+}
+
+void TAlignedFree(void *alignedPtr)
+{
+    if (alignedPtr)
+    {
+        free(TGetAlignedMeta(alignedPtr));
+    }
+}
+
+void *TAlignedRealloc(void *origin, size_t size, size_t alignment)
+{
+    void *new_meta = TAlignedMalloc(size, alignment);
+    memcpy(new_meta, origin, std::min(size, TGetAlignedSize(origin)));
+    TAlignedFree(origin);
+    return new_meta;
+}
 
 Turbo::Core::TAllocator::TAllocator()
 {
@@ -24,41 +75,18 @@ Turbo::Core::TAllocator::~TAllocator()
 void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
 {
     // std::cout << "TAllocator::Allocation" << std::endl;
-#if defined(TURBO_PLATFORM_ANDROID)
-    if (alignment < sizeof(void *))
-    {
-        alignment = sizeof(void *);
-    }
-
-    return memalign(alignment, size);
-#elif defined(__APPLE__) || defined(__ANDROID__) || (defined(__linux__) && defined(__GLIBCXX__) && !defined(_GLIBCXX_HAVE_ALIGNED_ALLOC))
-#if defined(__APPLE__) && (defined(MAC_OS_X_VERSION_10_16) || defined(__IPHONE_14_0))
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_16 || __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
-    // For C++14, usr/include/malloc/_malloc.h declares aligned_alloc()) only
-    // with the MacOSX11.0 SDK in Xcode 12 (which is what adds
-    // MAC_OS_X_VERSION_10_16), even though the function is marked
-    // availabe for 10.15. That's why the preprocessor checks for 10.16 but
-    // the __builtin_available checks for 10.15.
-    // People who use C++17 could call aligned_alloc with the 10.15 SDK already.
-    if (__builtin_available(macOS 10.15, iOS 13, *))
-        return aligned_alloc(alignment, size);
-#endif
-#endif
-    if (alignment < sizeof(void *))
-    {
-        alignment = sizeof(void *);
-    }
-
-    void *pointer;
-    if (posix_memalign(&pointer, alignment, size) == 0)
-        return pointer;
-    return nullptr;
-#elif defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_malloc(size, alignment);
 #elif defined(TURBO_PLATFORM_LINUX)
-    return aligned_alloc(alignment, size);
+    return memalign(alignment, size);
+#elif defined(TURBO_PLATFORM_ANDROID)
+    if (alignment < sizeof(void *))
+    {
+        alignment = sizeof(void *);
+    }
+    return memalign(alignment, size);
 #else
-    return aligned_alloc(alignment, size);
+    return TAlignedMalloc(size, alignment);
 #endif
 }
 
@@ -67,8 +95,26 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
     // std::cout << "TAllocator::Reallocation" << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_realloc(pOriginal, size, alignment);
+#elif defined(TURBO_PLATFORM_LINUX)
+    void *new_memory = memalign(alignment, size);
+    if (new_memory)
+    {
+        memcpy(new_memory, pOriginal, std::min(malloc_usable_size(pOriginal), size));
+        free(pOriginal);
+        return new_memory;
+    }
+    return pOriginal;
+#elif defined(TURBO_PLATFORM_ANDROID)
+    void *new_memory = memalign(alignment, size);
+    if (new_memory)
+    {
+        memcpy(new_memory, pOriginal, std::min(malloc_usable_size(pOriginal), size));
+        free(pOriginal);
+        return new_memory;
+    }
+    return pOriginal;
 #else
-    return realloc(pOriginal, size);
+    return TAlignedRealloc(pOriginal, size, alignment);
 #endif
 }
 
@@ -77,8 +123,12 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
     // std::cout << "TAllocator::Free::" << pMemory << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_free(pMemory);
+#elif defined(TURBO_PLATFORM_LINUX)
+    free(pMemory);
+#elif defined(TURBO_PLATFORM_ANDROID)
+    free(pMemory);
 #else
-    return free(pMemory);
+    return TAlignedRealloc(pOriginal, size, alignment);
 #endif
 }
 

@@ -4264,4 +4264,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 
 * 2024/3/17
   >
-  >* 更新 ``TAllocator`` ，优化代码结构。
+  >* 更新 ``TAllocator`` ，优化代码结构。尝试实现自定义内存分配器。
