@@ -2,6 +2,7 @@
 
 #include "core/include/TException.h"
 #include <vulkan/vulkan_core.h>
+#include "core/include/TVulkanAllocator.h"
 
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -29,18 +30,19 @@ PFN_vkQueuePresentKHR vk_QueuePresentKHR = nullptr;
 
 void *VKAPI_PTR Allocation(void *pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    return _aligned_malloc(size, alignment);
+    return Turbo::Core::TVulkanAllocator::Allocate(pUserData, size, alignment, allocationScope);
 }
 
 void *VKAPI_PTR Reallocate(void *pUserData, void *pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    return _aligned_realloc(pOriginal, size, alignment);
+    return Turbo::Core::TVulkanAllocator::Reallocate(pUserData, pOriginal, size, alignment, allocationScope);
 }
 
 void VKAPI_PTR Free(void *pUserData, void *pMemory)
 {
-    return _aligned_free(pMemory);
+    return Turbo::Core::TVulkanAllocator::Free(pUserData, pMemory);
 }
+
 
 int main()
 {

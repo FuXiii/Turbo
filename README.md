@@ -4269,3 +4269,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/3/18
   >
   >* 更新 ``TAllocator`` ，优化自定义内存分配器代码结构。尝试增加内存头，简化结构管理。并转移至 ``Turbo::Core`` 命名空间。
+  >* 更新 ``VulkanTest`` 示例，使用 ``TVulkanAllocator`` 。使得 ``Linux`` 通过编译。
+  >* 更新 ``VulkanAllocatorTest`` 示例，使用 ``TVulkanAllocator`` 。使得 ``Linux`` 通过编译。
+  >* 更新 ``KTX-Software`` 到主分支。
