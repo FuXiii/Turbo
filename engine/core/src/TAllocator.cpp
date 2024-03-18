@@ -82,6 +82,21 @@ void *AlignedRealloc(void *origin, size_t size, size_t alignment)
     AlignedFree(origin);
     return new_meta;
 }
+
+void *aligned_alloc(size_t alignment, size_t size)
+{
+    return Turbo::Core::AlignedMalloc(size, alignment);
+}
+
+void *aligned_ralloc(void *ptr, size_t alignment, size_t size)
+{
+    return Turbo::Core::AlignedRealloc(ptr, size, alignment);
+}
+
+void aligned_free(void *ptr)
+{
+    Turbo::Core::AlignedFree(ptr);
+}
 } // namespace Core
 } // namespace Turbo
 
@@ -107,7 +122,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
     }
     return memalign(alignment, size);
 #else
-    return Turbo::Core::AlignedMalloc(size, alignment);
+    return Turbo::Core::aligned_alloc(alignment, size);
 #endif
 }
 
@@ -135,7 +150,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
     }
     return pOriginal;
 #else
-    return Turbo::Core::AlignedRealloc(pOriginal, size, alignment);
+    return Turbo::Core::aligned_ralloc(pOriginal, alignment, size);
 #endif
 }
 
@@ -149,7 +164,7 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
 #elif defined(TURBO_PLATFORM_ANDROID)
     free(pMemory);
 #else
-    return Turbo::Core::AlignedFree(pMemory);
+    return Turbo::Core::aligned_free(pMemory);
 #endif
 }
 
