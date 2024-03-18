@@ -12,57 +12,78 @@
 
 #include <algorithm>
 
-void *TGetAlignedMeta(void *alignedPtr)
+namespace Turbo
+{
+namespace Core
+{
+struct NAlignedMemoryHeader
+{
+    void *meta = nullptr;
+    size_t alignedSize = 0;
+};
+
+Turbo::Core::NAlignedMemoryHeader GetAlignedMemoryHeader(void *alignedPtr)
+{
+    size_t aligned_memory_header_size = sizeof(Turbo::Core::NAlignedMemoryHeader);
+    Turbo::Core::NAlignedMemoryHeader *aligned_memory_header = (Turbo::Core::NAlignedMemoryHeader *)((uintptr_t)alignedPtr - aligned_memory_header_size);
+    return *aligned_memory_header;
+}
+
+void *GetAlignedMeta(void *alignedPtr)
 {
     if (alignedPtr)
     {
-        return ((void **)alignedPtr)[-1];
+        return GetAlignedMemoryHeader(alignedPtr).meta;
     }
     return nullptr;
 }
 
-size_t TGetAlignedSize(void *alignedPtr)
+size_t GetAlignedSize(void *alignedPtr)
 {
     if (alignedPtr)
     {
-        return *(size_t *)((uintptr_t)alignedPtr - sizeof(void *) - sizeof(size_t));
+        return GetAlignedMemoryHeader(alignedPtr).alignedSize;
     }
     return 0;
 }
 
-void *TAlignedMalloc(size_t size, size_t alignment)
+void *AlignedMalloc(size_t size, size_t alignment)
 {
-    size_t meta_point_size = sizeof(void *);
-    size_t aligned_size = sizeof(size_t);
-    size_t meta_size = aligned_size + meta_point_size + alignment - 1 + size;
+    size_t aligned_memory_header_size = sizeof(Turbo::Core::NAlignedMemoryHeader);
+    size_t meta_size = aligned_memory_header_size + alignment - 1 + size;
 
     void *meta = malloc(meta_size);
 
-    uintptr_t start = (uintptr_t)meta + aligned_size + meta_point_size;
+    uintptr_t start = (uintptr_t)meta + aligned_memory_header_size;
 
     void *aligned_meta = (void *)Turbo::Core::TAllocator::AlignUp(start, alignment);
 
-    *(void **)((uintptr_t)aligned_meta - meta_point_size) = meta;
-    *(size_t *)((uintptr_t)aligned_meta - (meta_point_size + aligned_size)) = size;
+    {
+        Turbo::Core::NAlignedMemoryHeader *aligned_memory_header = (Turbo::Core::NAlignedMemoryHeader *)((uintptr_t)aligned_meta - aligned_memory_header_size);
+        aligned_memory_header->meta = meta;
+        aligned_memory_header->alignedSize = size;
+    }
 
     return aligned_meta;
 }
 
-void TAlignedFree(void *alignedPtr)
+void AlignedFree(void *alignedPtr)
 {
     if (alignedPtr)
     {
-        free(TGetAlignedMeta(alignedPtr));
+        free(GetAlignedMeta(alignedPtr));
     }
 }
 
-void *TAlignedRealloc(void *origin, size_t size, size_t alignment)
+void *AlignedRealloc(void *origin, size_t size, size_t alignment)
 {
-    void *new_meta = TAlignedMalloc(size, alignment);
-    memcpy(new_meta, origin, std::min(size, TGetAlignedSize(origin)));
-    TAlignedFree(origin);
+    void *new_meta = AlignedMalloc(size, alignment);
+    memcpy(new_meta, origin, std::min(size, GetAlignedSize(origin)));
+    AlignedFree(origin);
     return new_meta;
 }
+} // namespace Core
+} // namespace Turbo
 
 Turbo::Core::TAllocator::TAllocator()
 {
@@ -86,7 +107,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
     }
     return memalign(alignment, size);
 #else
-    return TAlignedMalloc(size, alignment);
+    return Turbo::Core::AlignedMalloc(size, alignment);
 #endif
 }
 
@@ -114,7 +135,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
     }
     return pOriginal;
 #else
-    return TAlignedRealloc(pOriginal, size, alignment);
+    return Turbo::Core::AlignedRealloc(pOriginal, size, alignment);
 #endif
 }
 
@@ -128,7 +149,7 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
 #elif defined(TURBO_PLATFORM_ANDROID)
     free(pMemory);
 #else
-    return TAlignedRealloc(pOriginal, size, alignment);
+    return Turbo::Core::AlignedFree(pMemory);
 #endif
 }
 
