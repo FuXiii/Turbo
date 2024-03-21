@@ -4272,3 +4272,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* 更新 ``VulkanTest`` 示例，使用 ``TVulkanAllocator`` 。使得 ``Linux`` 通过编译。
   >* 更新 ``VulkanAllocatorTest`` 示例，使用 ``TVulkanAllocator`` 。使得 ``Linux`` 通过编译。
   >* 更新 ``KTX-Software`` 到主分支。
+
+* 2024/3/21
+  >
+  >* 更新 ``TBarrier.h`` 适配各函数从指针自动内部转 ``Turbo::Core::TRefPtr<T>`` 。
