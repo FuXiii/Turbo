@@ -357,3 +357,7 @@ target_include_directories(ReferencedTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ReferencedTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ReferencedTest PUBLIC ${LIBS})
 
+add_executable(PointCloud ./PointCloud.cpp ${IMGUI_SOURCE_PATH} ../thirdparty/ply/plyfile.cpp)
+target_include_directories(PointCloud PUBLIC ${INCLUDE_PARTH} ../thirdparty/ply)
+target_link_directories(PointCloud PUBLIC ${LINK_PARTH})
+target_link_libraries(PointCloud PUBLIC ${LIBS})

@@ -1087,9 +1087,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >#include <vulkan/vulkan_xlib.h>
   >  ```
   >
-  >  `TSurface`中增加`TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)`构造函数，用于适配`wayland`
-  >  `TSurface`中`InternalCreate()`适配`Linux`的`wayland`
-  >  `TSurface`中`GetSurfaceSupportQueueFamilys()`适配`Linux`的`wayland`
+  > `TSurface`中增加`TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)`构造函数，用于适配`wayland`
+  > `TSurface`中`InternalCreate()`适配`Linux`的`wayland`
+  > `TSurface`中`GetSurfaceSupportQueueFamilys()`适配`Linux`的`wayland`
 
 * 2022/6/15 设计架构
   >
@@ -2137,11 +2137,11 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >* `Turbo::Core`层与`Turbo::Render`有同名头文件，会有冲突，使用`Turbo::Core`的头文件使用`core/include/...`，使用`Turbo::Render`的头文件使用`render/include/...`，同时修改`CMakeList.txt`中的相关设置
   >* `./engine/render`下`TShader`中增加如下，使得`Shader`必须通过`new`创建:
   >
-  >  ```CXX
-  >  TShader(TShader const &) = delete;
-  >  TShader(TShader &&) = delete;
-  >  TShader &operator=(TShader const &) = delete;
-  >  TShader &operator=(TShader &&) = delete;
+  > ```CXX
+  > TShader(TShader const &) = delete;
+  > TShader(TShader &&) = delete;
+  > TShader &operator=(TShader const &) = delete;
+  > TShader &operator=(TShader &&) = delete;
   >  ```
   >
   >* `./engine/render`下`TComputePipeline`中增加`TComputePipeline(Turbo::Render::TComputeShader *computeShader)`构造函数
@@ -4276,3 +4276,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/3/21
   >
   >* 更新 ``TBarrier.h`` 适配各函数从指针自动内部转 ``Turbo::Core::TRefPtr<T>`` 。
+
+* 2024/6/27
+  >
+  >* ``thirdparty`` 下增加 ``ply`` 文件夹，用于存储 ``ply`` 文件读写源码。
+  >* ``samples`` 下增加 ``PointCloud.cpp`` 示例，用于点云。
