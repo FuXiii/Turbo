@@ -4281,3 +4281,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   >
   >* ``thirdparty`` 下增加 ``ply`` 文件夹，用于存储 ``ply`` 文件读写源码。
   >* ``samples`` 下增加 ``PointCloud.cpp`` 示例，用于点云。
+
+* 2024/6/30
+  >
+  >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。读取并解析 ``ply`` 点云文件。
