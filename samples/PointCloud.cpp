@@ -50,6 +50,24 @@
 
 #include <imgui.h>
 
+std::string ReadTextFile(const std::string &filename)
+{
+    std::vector<std::string> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
+}
+
+#define TEX_SIZE 512
+
 typedef struct POSITION
 {
     float x;
@@ -71,6 +89,14 @@ typedef struct PlyPointData
     POSITION position;
     COLOR color;
 } PlyPointData;
+
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+
+const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.vert");
+
+const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.frag");
 
 std::vector<PlyPointData> LoadPly(const std::string &url)
 {
@@ -279,8 +305,9 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
     Turbo::Core::TRefPtr<Turbo::Core::TImage> points_position_image = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_position_image_view = nullptr;
     {
-        uint32_t tex_size = 512;
+        uint32_t tex_size = TEX_SIZE;
 
         std::vector<POSITION> points_position;
         for (auto &point : points_data)
@@ -288,9 +315,9 @@ int main()
             points_position.push_back(point.position);
         }
 
-        if (points_position.size() > (512 * 512))
+        if (points_position.size() > (tex_size * tex_size))
         {
-            throw std::runtime_error("points count exceed 512 * 512 = 262,144");
+            throw std::runtime_error("points count exceed " + std::to_string(tex_size) + "*" + std::to_string(tex_size) + "=" + std::to_string(tex_size * tex_size));
         }
 
         Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, points_position.size() * sizeof(POSITION));
@@ -342,11 +369,14 @@ int main()
         fence->WaitUntil();
 
         command_pool->Free(temp_command_buffer);
+
+        points_position_image_view = new Turbo::Core::TImageView(points_position_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_position_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     }
 
     Turbo::Core::TRefPtr<Turbo::Core::TImage> points_color_image = nullptr;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_color_image_view = nullptr;
     {
-        uint32_t tex_size = 512;
+        uint32_t tex_size = TEX_SIZE;
 
         std::vector<COLOR> points_color;
         for (auto &point : points_data)
@@ -354,9 +384,9 @@ int main()
             points_color.push_back(point.color);
         }
 
-        if (points_color.size() > (512 * 512))
+        if (points_color.size() > (tex_size * tex_size))
         {
-            throw std::runtime_error("points count exceed 512 * 512 = 262,144");
+            throw std::runtime_error("points count exceed " + std::to_string(tex_size) + "*" + std::to_string(tex_size) + "=" + std::to_string(tex_size * tex_size));
         }
 
         Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_color_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, points_color.size() * sizeof(COLOR));
@@ -408,12 +438,78 @@ int main()
         fence->WaitUntil();
 
         command_pool->Free(temp_command_buffer);
+
+        points_color_image_view = new Turbo::Core::TImageView(points_color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
     }
+
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> my_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_VERT_SHADER_STR);
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
+
+    std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLED_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::INPUT_ATTACHMENT, 1000));
+
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
+
+    Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
+    subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
+    subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
+
+    Turbo::Core::TSubpass subpass1(Turbo::Core::TPipelineType::Graphics);
+    subpass1.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL); // swapchain color image
+
+    std::vector<Turbo::Core::TSubpass> subpasses;
+    subpasses.push_back(subpass);  // subpass 0
+    subpasses.push_back(subpass1); // subpass 1
+
+    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+    std::vector<Turbo::Core::TAttachment> attachemts;
+    attachemts.push_back(swapchain_color_attachment);
+    attachemts.push_back(depth_attachment);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
+
+    // Turbo::Core::TVertexBinding position_binding(0, sizeof(POSITION), Turbo::Core::TVertexRate::VERTEX);
+    // position_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, 0); // position
+
+    Turbo::Core::TViewport viewport(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight(), 0, 1);
+    Turbo::Core::TScissor scissor(0, 0, surface->GetCurrentWidth(), surface->GetCurrentHeight());
+
+    std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
+
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::POINT_LIST, false, false, false, Turbo::Core::TPolygonMode::POINT, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
+
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> posints_pos_image_views;
+    posints_pos_image_views.push_back(points_position_image_view);
+
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> posints_color_image_views;
+    posints_color_image_views.push_back(points_color_image_view);
+
+    graphics_pipeline_descriptor_set->BindData(0, 0, 0, posints_pos_image_views);
+    graphics_pipeline_descriptor_set->BindData(0, 1, 0, posints_color_image_views);
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
     }
+
+    descriptor_pool->Free(graphics_pipeline_descriptor_set);
+    command_pool->Free(command_buffer);
 
     glfwTerminate();
 

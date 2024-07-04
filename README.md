@@ -4289,3 +4289,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/7/1
   >
   >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。将点云数据写入纹理中存储。
+
+* 2024/7/4
+  >
+  >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。
