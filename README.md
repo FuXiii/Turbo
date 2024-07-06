@@ -4293,3 +4293,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/7/4
   >
   >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。
+
+* 2024/7/6
+  >
+  >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。
