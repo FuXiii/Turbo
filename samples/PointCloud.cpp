@@ -204,6 +204,57 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
         std::cout << "ply == nullptr" << std::endl;
     }
 
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            PlyPointData ply_point_data;
+            ply_point_data.position.x = i;
+            ply_point_data.position.y = 0;
+            ply_point_data.position.z = 0;
+            ply_point_data.position.w = 0;
+            ply_point_data.color.r = 1;
+            ply_point_data.color.g = 0;
+            ply_point_data.color.b = 0;
+            ply_point_data.color.a = 1;
+
+            result.push_back(ply_point_data);
+        }
+    }
+
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            PlyPointData ply_point_data;
+            ply_point_data.position.x = 0;
+            ply_point_data.position.y = i;
+            ply_point_data.position.z = 0;
+            ply_point_data.position.w = 0;
+            ply_point_data.color.r = 0;
+            ply_point_data.color.g = 1;
+            ply_point_data.color.b = 0;
+            ply_point_data.color.a = 1;
+
+            result.push_back(ply_point_data);
+        }
+    }
+
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            PlyPointData ply_point_data;
+            ply_point_data.position.x = 0;
+            ply_point_data.position.y = 0;
+            ply_point_data.position.z = i;
+            ply_point_data.position.w = 0;
+            ply_point_data.color.r = 0;
+            ply_point_data.color.g = 0;
+            ply_point_data.color.b = 1;
+            ply_point_data.color.a = 1;
+
+            result.push_back(ply_point_data);
+        }
+    }
+
     return result;
 }
 
@@ -737,7 +788,7 @@ int main()
 
                 glm::vec3 forward_axis = glm::vec3(0, 0, 1);
                 glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
-                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(1, 0, 0));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(vertical_angle), glm::vec3(1, 0, 0));
 
                 look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
                 look_forward = glm::normalize(look_forward);
@@ -798,7 +849,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("VolumeTest"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin("PointCloud"); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 
