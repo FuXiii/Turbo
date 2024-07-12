@@ -204,11 +204,13 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
         std::cout << "ply == nullptr" << std::endl;
     }
 
+#define AXIS_SCALE 0.001
+
     {
         for (int i = 0; i < 1000; i++)
         {
             PlyPointData ply_point_data;
-            ply_point_data.position.x = i;
+            ply_point_data.position.x = i * AXIS_SCALE;
             ply_point_data.position.y = 0;
             ply_point_data.position.z = 0;
             ply_point_data.position.w = 0;
@@ -226,7 +228,7 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
         {
             PlyPointData ply_point_data;
             ply_point_data.position.x = 0;
-            ply_point_data.position.y = i;
+            ply_point_data.position.y = i * AXIS_SCALE;
             ply_point_data.position.z = 0;
             ply_point_data.position.w = 0;
             ply_point_data.color.r = 0;
@@ -244,7 +246,7 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
             PlyPointData ply_point_data;
             ply_point_data.position.x = 0;
             ply_point_data.position.y = 0;
-            ply_point_data.position.z = i;
+            ply_point_data.position.z = i * AXIS_SCALE;
             ply_point_data.position.w = 0;
             ply_point_data.color.r = 0;
             ply_point_data.color.g = 0;
@@ -509,10 +511,9 @@ int main()
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
     glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+    view = glm::translate(view, glm::vec3(-10.0f, 0.0f, 0));
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 100.0f);
@@ -786,16 +787,16 @@ int main()
                 float delte_time = io.DeltaTime;
                 float speed = 1;
 
-                glm::vec3 forward_axis = glm::vec3(0, 0, 1);
-                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(-horizontal_angle), glm::vec3(0, 1, 0));
-                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(vertical_angle), glm::vec3(1, 0, 0));
+                glm::vec3 forward_axis = glm::vec3(1, 0, 0);
+                glm::mat4 forward_rotate_mat = glm::rotate(glm::mat4(1), glm::radians(horizontal_angle), glm::vec3(0, 0, 1));
+                forward_rotate_mat = glm::rotate(forward_rotate_mat, glm::radians(-vertical_angle), glm::vec3(0, 1, 0));
 
                 look_forward = forward_rotate_mat * glm::vec4(forward_axis, 1.0);
                 look_forward = glm::normalize(look_forward);
 
                 glm::vec3 forward_dir = look_forward;                  // 向前向量
-                glm::vec3 up_dir = glm::vec3(0, 1, 0);                 // 向上向量
-                glm::vec3 right_dir = glm::cross(forward_dir, up_dir); // 向右向量
+                glm::vec3 up_dir = glm::vec3(0, 0, 1);                 // 向上向量
+                glm::vec3 right_dir = glm::cross(up_dir, forward_dir); // 向右向量
                 up_dir = glm::cross(right_dir, forward_dir);
 
                 right_dir = glm::normalize(right_dir);
@@ -829,9 +830,7 @@ int main()
                     camera_position += right_dir * speed * delte_time;
                 }
 
-                // model = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                 model = glm::mat4(1.0f);
-                // model = model * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
                 glm::vec3 look_point = camera_position + forward_dir;
                 view = glm::lookAt(camera_position, look_point, up_dir);
