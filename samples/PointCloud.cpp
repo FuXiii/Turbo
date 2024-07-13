@@ -94,11 +94,18 @@ struct MATRIXS_BUFFER_DATA
     glm::mat4 p;
 };
 
-typedef struct PlyPointData
+typedef struct Point
 {
     POSITION position;
     COLOR color;
-} PlyPointData;
+} Point;
+
+typedef struct PlyData
+{
+    std::vector<Point> points;
+    POSITION min;
+    POSITION max;
+} PlyData;
 
 const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
 
@@ -108,16 +115,20 @@ const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/PointCl
 
 const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.frag");
 
-std::vector<PlyPointData> LoadPly(const std::string &url)
+PlyData LoadPly(const std::string &url)
 {
-    std::vector<PlyPointData> result;
+    PlyData result;
+
+    POSITION min = {0, 0, 0, 0};
+    POSITION max = {0, 0, 0, 0};
 
     int elements_count = 0;
     char **elements;
     int file_type;
     float version;
 
-    PlyFile *ply = ply_open_for_reading(const_cast<char *>(std::string("../../asset/models/points.ply").c_str()), &elements_count, &elements, &file_type, &version);
+    // PlyFile *ply = ply_open_for_reading(const_cast<char *>(std::string("../../asset/models/points.ply").c_str()), &elements_count, &elements, &file_type, &version);
+    PlyFile *ply = ply_open_for_reading(const_cast<char *>(url.c_str()), &elements_count, &elements, &file_type, &version);
     if (ply != nullptr)
     {
         // std::cout << "ply != nullptr" << std::endl;
@@ -168,7 +179,7 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
                     ply_get_element(ply, &vertex);
 
                     {
-                        PlyPointData ply_point_data;
+                        Point ply_point_data;
                         ply_point_data.position.x = vertex.x;
                         ply_point_data.position.y = vertex.y;
                         ply_point_data.position.z = vertex.z;
@@ -178,7 +189,43 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
                         ply_point_data.color.b = vertex.b / 255.0f;
                         ply_point_data.color.a = vertex.a / 255.0f;
 
-                        result.push_back(ply_point_data);
+                        result.points.push_back(ply_point_data);
+
+                        {
+                            {
+                                if (min.x > ply_point_data.position.x)
+                                {
+                                    min.x = ply_point_data.position.x;
+                                }
+
+                                if (min.y > ply_point_data.position.y)
+                                {
+                                    min.y = ply_point_data.position.y;
+                                }
+
+                                if (min.z > ply_point_data.position.z)
+                                {
+                                    min.z = ply_point_data.position.z;
+                                }
+                            }
+
+                            {
+                                if (max.x < ply_point_data.position.x)
+                                {
+                                    min.x = ply_point_data.position.x;
+                                }
+
+                                if (max.y < ply_point_data.position.y)
+                                {
+                                    min.y = ply_point_data.position.y;
+                                }
+
+                                if (max.z < ply_point_data.position.z)
+                                {
+                                    min.z = ply_point_data.position.z;
+                                }
+                            }
+                        }
                     }
 
                     {
@@ -204,56 +251,291 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
         std::cout << "ply == nullptr" << std::endl;
     }
 
-#define AXIS_SCALE 0.001
+    result.min = min;
+    result.max = max;
+
+    // #define AXIS_SCALE 0.001
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             PlyPointData ply_point_data;
+    //             ply_point_data.position.x = i * AXIS_SCALE;
+    //             ply_point_data.position.y = 0;
+    //             ply_point_data.position.z = 0;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 1;
+    //             ply_point_data.color.g = 0;
+    //             ply_point_data.color.b = 0;
+    //             ply_point_data.color.a = 1;
+    //
+    //             result.push_back(ply_point_data);
+    //         }
+    //     }
+    //
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             PlyPointData ply_point_data;
+    //             ply_point_data.position.x = 0;
+    //             ply_point_data.position.y = i * AXIS_SCALE;
+    //             ply_point_data.position.z = 0;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 0;
+    //             ply_point_data.color.g = 1;
+    //             ply_point_data.color.b = 0;
+    //             ply_point_data.color.a = 1;
+    //
+    //             result.push_back(ply_point_data);
+    //         }
+    //     }
+    //
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             PlyPointData ply_point_data;
+    //             ply_point_data.position.x = 0;
+    //             ply_point_data.position.y = 0;
+    //             ply_point_data.position.z = i * AXIS_SCALE;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 0;
+    //             ply_point_data.color.g = 0;
+    //             ply_point_data.color.b = 1;
+    //             ply_point_data.color.a = 1;
+    //
+    //             result.push_back(ply_point_data);
+    //         }
+    //     }
+
+    return result;
+}
+
+typedef struct PointsPositionImage
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> image;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imageView;
+} PointsPositionImage;
+
+typedef struct PointsColorImage
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> image;
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imageView;
+} PointsColorImage;
+
+typedef struct PointsImageData
+{
+    PointsPositionImage pointsPositionImage;
+    PointsColorImage pointsColorImage;
+    uint32_t count = 0;
+} PointsImageData;
+
+std::vector<Point> PlyDatasToPoints(const std::vector<PlyData> &plyDatas)
+{
+    std::vector<Point> result;
 
     {
-        for (int i = 0; i < 1000; i++)
+        for (auto &ply_data_item : plyDatas)
         {
-            PlyPointData ply_point_data;
-            ply_point_data.position.x = i * AXIS_SCALE;
-            ply_point_data.position.y = 0;
-            ply_point_data.position.z = 0;
-            ply_point_data.position.w = 0;
-            ply_point_data.color.r = 1;
-            ply_point_data.color.g = 0;
-            ply_point_data.color.b = 0;
-            ply_point_data.color.a = 1;
-
-            result.push_back(ply_point_data);
+            for (auto &point_item : ply_data_item.points)
+            {
+                result.push_back(point_item);
+            }
         }
     }
 
-    {
-        for (int i = 0; i < 1000; i++)
-        {
-            PlyPointData ply_point_data;
-            ply_point_data.position.x = 0;
-            ply_point_data.position.y = i * AXIS_SCALE;
-            ply_point_data.position.z = 0;
-            ply_point_data.position.w = 0;
-            ply_point_data.color.r = 0;
-            ply_point_data.color.g = 1;
-            ply_point_data.color.b = 0;
-            ply_point_data.color.a = 1;
+    return result;
+}
 
-            result.push_back(ply_point_data);
+std::vector<PointsImageData> CreateAllPointsImageData(const std::vector<Point> &points, Turbo::Core::TRefPtr<Turbo::Core::TDevice> device, Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue, Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> commandPool)
+{
+    std::vector<PointsImageData> result;
+
+    auto tex_size = TEX_SIZE;
+    auto tex_content_size = tex_size * tex_size;
+
+    auto loop_count = points.size() / tex_content_size;
+    auto residue_count = points.size() % tex_content_size;
+
+    auto create_points_position_image = [&](const std::vector<POSITION> &pointsPosition) -> PointsPositionImage {
+        PointsPositionImage points_position_image_result;
+
+        {
+            Turbo::Core::TRefPtr<Turbo::Core::TImage> points_position_image = nullptr;
+            Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_position_image_view = nullptr;
+            {
+                Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, pointsPosition.size() * sizeof(POSITION));
+                void *volumn_ptr = points_position_buffer->Map();
+                memcpy(volumn_ptr, pointsPosition.data(), pointsPosition.size() * sizeof(POSITION));
+                points_position_buffer->Unmap();
+
+                points_position_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, tex_size, tex_size, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+                Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> temp_command_buffer = commandPool->Allocate();
+                temp_command_buffer->Begin();
+                temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, points_position_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                {
+                    uint32_t row = pointsPosition.size() / tex_size;
+                    uint32_t residue = pointsPosition.size() - row * tex_size;
+
+                    {
+                        uint32_t copy_buffer_offset = 0;
+                        uint32_t copy_image_offset_x = 0;
+                        uint32_t copy_image_offset_y = 0;
+                        uint32_t copy_image_offset_z = 0;
+                        uint32_t copy_width = tex_size;
+                        uint32_t copy_height = row;
+                        uint32_t copy_depth = 1;
+                        uint32_t copy_mip_level = 0;
+                        temp_command_buffer->CmdCopyBufferToImage(points_position_buffer, points_position_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
+                    }
+
+                    if (residue > 0)
+                    {
+                        uint32_t copy_buffer_offset = row * tex_size * sizeof(POSITION);
+                        uint32_t copy_image_offset_x = 0;
+                        uint32_t copy_image_offset_y = row;
+                        uint32_t copy_image_offset_z = 0;
+                        uint32_t copy_width = residue;
+                        uint32_t copy_height = 1;
+                        uint32_t copy_depth = 1;
+                        uint32_t copy_mip_level = 0;
+                        temp_command_buffer->CmdCopyBufferToImage(points_position_buffer, points_position_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
+                    }
+                }
+                temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, points_position_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                temp_command_buffer->End();
+
+                Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+
+                queue->Submit(temp_command_buffer, fence);
+
+                fence->WaitUntil();
+
+                commandPool->Free(temp_command_buffer);
+
+                points_position_image_view = new Turbo::Core::TImageView(points_position_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_position_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            }
+
+            points_position_image_result.image = points_position_image;
+            points_position_image_result.imageView = points_position_image_view;
         }
+
+        return points_position_image_result;
+    };
+
+    auto create_points_color_image = [&](const std::vector<COLOR> &pointsColor) -> PointsColorImage {
+        PointsColorImage points_color_image_result;
+
+        {
+            Turbo::Core::TRefPtr<Turbo::Core::TImage> points_color_image = nullptr;
+            Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_color_image_view = nullptr;
+            {
+                Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_color_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, pointsColor.size() * sizeof(COLOR));
+                void *volumn_ptr = points_color_buffer->Map();
+                memcpy(volumn_ptr, pointsColor.data(), pointsColor.size() * sizeof(COLOR));
+                points_color_buffer->Unmap();
+
+                points_color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, tex_size, tex_size, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+
+                Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> temp_command_buffer = commandPool->Allocate();
+                temp_command_buffer->Begin();
+                temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, points_color_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                {
+                    uint32_t row = pointsColor.size() / tex_size;
+                    uint32_t residue = pointsColor.size() - row * tex_size;
+
+                    {
+                        uint32_t copy_buffer_offset = 0;
+                        uint32_t copy_image_offset_x = 0;
+                        uint32_t copy_image_offset_y = 0;
+                        uint32_t copy_image_offset_z = 0;
+                        uint32_t copy_width = tex_size;
+                        uint32_t copy_height = row;
+                        uint32_t copy_depth = 1;
+                        uint32_t copy_mip_level = 0;
+                        temp_command_buffer->CmdCopyBufferToImage(points_color_buffer, points_color_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
+                    }
+
+                    if (residue > 0)
+                    {
+                        uint32_t copy_buffer_offset = row * tex_size * sizeof(COLOR);
+                        uint32_t copy_image_offset_x = 0;
+                        uint32_t copy_image_offset_y = row;
+                        uint32_t copy_image_offset_z = 0;
+                        uint32_t copy_width = residue;
+                        uint32_t copy_height = 1;
+                        uint32_t copy_depth = 1;
+                        uint32_t copy_mip_level = 0;
+                        temp_command_buffer->CmdCopyBufferToImage(points_color_buffer, points_color_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
+                    }
+                }
+                temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, points_color_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                temp_command_buffer->End();
+
+                Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+
+                queue->Submit(temp_command_buffer, fence);
+
+                fence->WaitUntil();
+
+                commandPool->Free(temp_command_buffer);
+
+                points_color_image_view = new Turbo::Core::TImageView(points_color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            }
+
+            points_color_image_result.image = points_color_image;
+            points_color_image_result.imageView = points_color_image_view;
+        }
+
+        return points_color_image_result;
+    };
+
+    for (size_t loop_index = 0; loop_index < loop_count; loop_index++)
+    {
+        std::vector<POSITION> points_position;
+        std::vector<COLOR> points_color;
+        {
+            auto offset = loop_index * tex_content_size;
+
+            for (size_t point_index = 0; point_index < tex_content_size; point_index++)
+            {
+                points_position.push_back(points[point_index + offset].position);
+                points_color.push_back(points[point_index + offset].color);
+            }
+        }
+
+        auto points_position_image = create_points_position_image(points_position);
+        auto points_color_image = create_points_color_image(points_color);
+
+        PointsImageData temp_points_image_data;
+        temp_points_image_data.pointsPositionImage = points_position_image;
+        temp_points_image_data.pointsColorImage = points_color_image;
+        temp_points_image_data.count = points_position.size();
+
+        result.push_back(temp_points_image_data);
     }
 
+    if (residue_count > 0)
     {
-        for (int i = 0; i < 1000; i++)
+        std::vector<POSITION> points_position;
+        std::vector<COLOR> points_color;
         {
-            PlyPointData ply_point_data;
-            ply_point_data.position.x = 0;
-            ply_point_data.position.y = 0;
-            ply_point_data.position.z = i * AXIS_SCALE;
-            ply_point_data.position.w = 0;
-            ply_point_data.color.r = 0;
-            ply_point_data.color.g = 0;
-            ply_point_data.color.b = 1;
-            ply_point_data.color.a = 1;
+            auto offset = loop_count * tex_content_size;
 
-            result.push_back(ply_point_data);
+            for (size_t point_index = 0; point_index < residue_count; point_index++)
+            {
+                points_position.push_back(points[point_index + offset].position);
+                points_color.push_back(points[point_index + offset].color);
+            }
+
+            auto points_position_image = create_points_position_image(points_position);
+            auto points_color_image = create_points_color_image(points_color);
+
+            PointsImageData temp_points_image_data;
+            temp_points_image_data.pointsPositionImage = points_position_image;
+            temp_points_image_data.pointsColorImage = points_color_image;
+            temp_points_image_data.count = points_position.size();
+
+            result.push_back(temp_points_image_data);
         }
     }
 
@@ -262,11 +544,41 @@ std::vector<PlyPointData> LoadPly(const std::string &url)
 
 int main()
 {
-    auto points_data = LoadPly("../../asset/models/points.ply");
-    size_t point_count = points_data.size();
+    // 512 * 512 = 262,144
+    std::vector<PlyData> ply_datas;
+    {
+        for (size_t test_index = 0; test_index < 10; test_index++)
+        {
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0000_00/scene0000_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0001_00/scene0001_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0002_00/scene0002_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0003_00/scene0003_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0004_00/scene0004_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0005_00/scene0005_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0006_00/scene0006_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0007_00/scene0007_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0008_00/scene0008_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0009_00/scene0009_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0010_00/scene0010_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0011_00/scene0011_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0012_00/scene0012_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0013_00/scene0013_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0014_00/scene0014_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0015_00/scene0015_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0016_00/scene0016_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0017_00/scene0017_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0018_00/scene0018_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0019_00/scene0019_00_vh_clean_2.labels.ply"));
+            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0020_00/scene0020_00_vh_clean_2.labels.ply"));
+        }
+    }
 
-    std::cout << "points_data::size::" << points_data.size() << ":: ----------------------------------------------------------------------------------" << std::endl;
+    auto points = PlyDatasToPoints(ply_datas);
+    ply_datas.clear();
 
+    size_t all_point_count = points.size();
+
+    std::cout << "points::size::" << points.size() << ":: ----------------------------------------------------------------------------------" << std::endl;
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << ":: ----------------------------------------------------------------------------------" << std::endl;
 
     std::vector<Turbo::Core::TLayerInfo> support_layers;
@@ -370,143 +682,8 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> points_position_image = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_position_image_view = nullptr;
-    {
-        uint32_t tex_size = TEX_SIZE;
-
-        std::vector<POSITION> points_position;
-        for (auto &point : points_data)
-        {
-            points_position.push_back(point.position);
-        }
-
-        if (points_position.size() > (tex_size * tex_size))
-        {
-            throw std::runtime_error("points count exceed " + std::to_string(tex_size) + "*" + std::to_string(tex_size) + "=" + std::to_string(tex_size * tex_size));
-        }
-
-        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_position_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, points_position.size() * sizeof(POSITION));
-        void *volumn_ptr = points_position_buffer->Map();
-        memcpy(volumn_ptr, points_position.data(), points_position.size() * sizeof(POSITION));
-        points_position_buffer->Unmap();
-
-        points_position_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, tex_size, tex_size, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-
-        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> temp_command_buffer = command_pool->Allocate();
-        temp_command_buffer->Begin();
-        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, points_position_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        {
-            uint32_t row = points_position.size() / tex_size;
-            uint32_t residue = points_position.size() - row * tex_size;
-
-            {
-                uint32_t copy_buffer_offset = 0;
-                uint32_t copy_image_offset_x = 0;
-                uint32_t copy_image_offset_y = 0;
-                uint32_t copy_image_offset_z = 0;
-                uint32_t copy_width = tex_size;
-                uint32_t copy_height = row;
-                uint32_t copy_depth = 1;
-                uint32_t copy_mip_level = 0;
-                temp_command_buffer->CmdCopyBufferToImage(points_position_buffer, points_position_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
-            }
-
-            if (residue > 0)
-            {
-                uint32_t copy_buffer_offset = row * tex_size * sizeof(POSITION);
-                uint32_t copy_image_offset_x = 0;
-                uint32_t copy_image_offset_y = row;
-                uint32_t copy_image_offset_z = 0;
-                uint32_t copy_width = residue;
-                uint32_t copy_height = 1;
-                uint32_t copy_depth = 1;
-                uint32_t copy_mip_level = 0;
-                temp_command_buffer->CmdCopyBufferToImage(points_position_buffer, points_position_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
-            }
-        }
-        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, points_position_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        temp_command_buffer->End();
-
-        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
-
-        queue->Submit(temp_command_buffer, fence);
-
-        fence->WaitUntil();
-
-        command_pool->Free(temp_command_buffer);
-
-        points_position_image_view = new Turbo::Core::TImageView(points_position_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_position_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    }
-
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> points_color_image = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TImageView> points_color_image_view = nullptr;
-    {
-        uint32_t tex_size = TEX_SIZE;
-
-        std::vector<COLOR> points_color;
-        for (auto &point : points_data)
-        {
-            points_color.push_back(point.color);
-        }
-
-        if (points_color.size() > (tex_size * tex_size))
-        {
-            throw std::runtime_error("points count exceed " + std::to_string(tex_size) + "*" + std::to_string(tex_size) + "=" + std::to_string(tex_size * tex_size));
-        }
-
-        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> points_color_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, points_color.size() * sizeof(COLOR));
-        void *volumn_ptr = points_color_buffer->Map();
-        memcpy(volumn_ptr, points_color.data(), points_color.size() * sizeof(COLOR));
-        points_color_buffer->Unmap();
-
-        points_color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, tex_size, tex_size, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-
-        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> temp_command_buffer = command_pool->Allocate();
-        temp_command_buffer->Begin();
-        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, points_color_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        {
-            uint32_t row = points_color.size() / tex_size;
-            uint32_t residue = points_color.size() - row * tex_size;
-
-            {
-                uint32_t copy_buffer_offset = 0;
-                uint32_t copy_image_offset_x = 0;
-                uint32_t copy_image_offset_y = 0;
-                uint32_t copy_image_offset_z = 0;
-                uint32_t copy_width = tex_size;
-                uint32_t copy_height = row;
-                uint32_t copy_depth = 1;
-                uint32_t copy_mip_level = 0;
-                temp_command_buffer->CmdCopyBufferToImage(points_color_buffer, points_color_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
-            }
-
-            if (residue > 0)
-            {
-                uint32_t copy_buffer_offset = row * tex_size * sizeof(COLOR);
-                uint32_t copy_image_offset_x = 0;
-                uint32_t copy_image_offset_y = row;
-                uint32_t copy_image_offset_z = 0;
-                uint32_t copy_width = residue;
-                uint32_t copy_height = 1;
-                uint32_t copy_depth = 1;
-                uint32_t copy_mip_level = 0;
-                temp_command_buffer->CmdCopyBufferToImage(points_color_buffer, points_color_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, copy_buffer_offset, /*copy_width*/ 0, /*copy_height*/ 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, copy_mip_level, 0, 1, copy_image_offset_x, copy_image_offset_y, copy_image_offset_z, copy_width, copy_height, copy_depth);
-            }
-        }
-        temp_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, points_color_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        temp_command_buffer->End();
-
-        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
-
-        queue->Submit(temp_command_buffer, fence);
-
-        fence->WaitUntil();
-
-        command_pool->Free(temp_command_buffer);
-
-        points_color_image_view = new Turbo::Core::TImageView(points_color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, points_color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-    }
+    auto all_points_image_data = CreateAllPointsImageData(points, device, queue, command_pool);
+    points.clear();
 
     MATRIXS_BUFFER_DATA matrixs_buffer_data = {};
 
@@ -577,20 +754,41 @@ int main()
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
 
     Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::POINT_LIST, false, false, false, Turbo::Core::TPolygonMode::POINT, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
-    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_pos_image_views;
-    points_pos_image_views.push_back(points_position_image_view);
+    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet>> graphics_pipeline_descriptor_sets;
+    for (auto &points_image_data_item : all_points_image_data)
+    {
+        Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_pos_image_views;
+        points_pos_image_views.push_back(points_image_data_item.pointsPositionImage.imageView);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_color_image_views;
-    points_color_image_views.push_back(points_color_image_view);
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_color_image_views;
+        points_color_image_views.push_back(points_image_data_item.pointsColorImage.imageView);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> matrixs_buffers;
-    matrixs_buffers.push_back(matrixs_buffer);
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> matrixs_buffers;
+        matrixs_buffers.push_back(matrixs_buffer);
 
-    graphics_pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
-    graphics_pipeline_descriptor_set->BindData(0, 1, 0, points_pos_image_views);
-    graphics_pipeline_descriptor_set->BindData(0, 2, 0, points_color_image_views);
+        pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
+        pipeline_descriptor_set->BindData(0, 1, 0, points_pos_image_views);
+        pipeline_descriptor_set->BindData(0, 2, 0, points_color_image_views);
+
+        graphics_pipeline_descriptor_sets.push_back(pipeline_descriptor_set);
+    }
+
+    // Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> graphics_pipeline_descriptor_set = descriptor_pool->Allocate(graphics_pipeline->GetPipelineLayout());
+    //
+    // std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_pos_image_views;
+    // points_pos_image_views.push_back(points_position_image_view);
+    //
+    // std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> points_color_image_views;
+    // points_color_image_views.push_back(points_color_image_view);
+    //
+    // std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> matrixs_buffers;
+    // matrixs_buffers.push_back(matrixs_buffer);
+    //
+    // graphics_pipeline_descriptor_set->BindData(0, 0, 0, matrixs_buffers);
+    // graphics_pipeline_descriptor_set->BindData(0, 1, 0, points_pos_image_views);
+    // graphics_pipeline_descriptor_set->BindData(0, 2, 0, points_color_image_views);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> swpachain_framebuffers;
     for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_image_view_item : swapchain_image_views)
@@ -853,6 +1051,7 @@ int main()
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::Text((std::string("All point count : ") + std::to_string(all_point_count)).c_str());
                 ImGui::End();
             }
             //</IMGUI Update>
@@ -871,10 +1070,15 @@ int main()
             // Graphics Pipeline Draw
             command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
             command_buffer->CmdBindPipeline(graphics_pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(graphics_pipeline_descriptor_set);
+            // command_buffer->CmdBindPipelineDescriptorSet(graphics_pipeline_descriptor_set);
             command_buffer->CmdSetViewport(frame_viewports);
             command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDraw(1, point_count, 0, 0);
+            for (size_t points_image_index = 0; points_image_index < all_points_image_data.size(); points_image_index++)
+            {
+                auto draw_instance_count = all_points_image_data[points_image_index].count;
+                command_buffer->CmdBindPipelineDescriptorSet(graphics_pipeline_descriptor_sets[points_image_index]);
+                command_buffer->CmdDraw(1, draw_instance_count, 0, 0);
+            }
             command_buffer->CmdNextSubpass();
 
             //<IMGUI Rendering>
@@ -1154,7 +1358,11 @@ int main()
         //</End Rendering>
     }
 
-    descriptor_pool->Free(graphics_pipeline_descriptor_set);
+    for (auto pipeline_descriptor_set_item : graphics_pipeline_descriptor_sets)
+    {
+        descriptor_pool->Free(pipeline_descriptor_set_item);
+    }
+
     command_pool->Free(command_buffer);
 
     glfwTerminate();
