@@ -4305,3 +4305,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/7/14
   >
   >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。使其支持千万级别的点云数据。
+
+* 2024/7/15
+  >
+  >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。移除重复点云文件的读取。
