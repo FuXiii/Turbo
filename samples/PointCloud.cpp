@@ -544,33 +544,30 @@ std::vector<PointsImageData> CreateAllPointsImageData(const std::vector<Point> &
 
 int main()
 {
-    // 512 * 512 = 262,144
     std::vector<PlyData> ply_datas;
     {
-        for (size_t test_index = 0; test_index < 10; test_index++)
-        {
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0000_00/scene0000_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0001_00/scene0001_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0002_00/scene0002_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0003_00/scene0003_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0004_00/scene0004_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0005_00/scene0005_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0006_00/scene0006_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0007_00/scene0007_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0008_00/scene0008_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0009_00/scene0009_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0010_00/scene0010_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0011_00/scene0011_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0012_00/scene0012_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0013_00/scene0013_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0014_00/scene0014_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0015_00/scene0015_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0016_00/scene0016_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0017_00/scene0017_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0018_00/scene0018_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0019_00/scene0019_00_vh_clean_2.labels.ply"));
-            ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0020_00/scene0020_00_vh_clean_2.labels.ply"));
-        }
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0000_00/scene0000_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0001_00/scene0001_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0002_00/scene0002_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0003_00/scene0003_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0004_00/scene0004_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0005_00/scene0005_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0006_00/scene0006_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0007_00/scene0007_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0008_00/scene0008_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0009_00/scene0009_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0010_00/scene0010_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0011_00/scene0011_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0012_00/scene0012_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0013_00/scene0013_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0014_00/scene0014_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0015_00/scene0015_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0016_00/scene0016_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0017_00/scene0017_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0018_00/scene0018_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0019_00/scene0019_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0020_00/scene0020_00_vh_clean_2.labels.ply"));
+        //... 在此增加其他 ply 点云数据;
     }
 
     auto points = PlyDatasToPoints(ply_datas);
