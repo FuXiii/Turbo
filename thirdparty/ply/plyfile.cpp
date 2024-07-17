@@ -6,7 +6,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
-#include <exception>
+#include <stdexcept>
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996)

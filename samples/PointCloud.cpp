@@ -146,13 +146,13 @@ PlyData LoadPly(const std::string &url)
 
                 struct PlyVectex
                 {
-                    float x;
-                    float y;
-                    float z;
-                    unsigned char r;
-                    unsigned char g;
-                    unsigned char b;
-                    unsigned char a;
+                    float x = 0;
+                    float y = 0;
+                    float z = 0;
+                    unsigned char r = 0;
+                    unsigned char g = 0;
+                    unsigned char b = 0;
+                    unsigned char a = 0;
                 };
 
                 PlyProperty vert_props[] = {
@@ -254,57 +254,74 @@ PlyData LoadPly(const std::string &url)
     result.min = min;
     result.max = max;
 
-    // #define AXIS_SCALE 0.001
-    //     {
-    //         for (int i = 0; i < 1000; i++)
-    //         {
-    //             PlyPointData ply_point_data;
-    //             ply_point_data.position.x = i * AXIS_SCALE;
-    //             ply_point_data.position.y = 0;
-    //             ply_point_data.position.z = 0;
-    //             ply_point_data.position.w = 0;
-    //             ply_point_data.color.r = 1;
-    //             ply_point_data.color.g = 0;
-    //             ply_point_data.color.b = 0;
-    //             ply_point_data.color.a = 1;
+    //#define AXIS_SCALE 0.001
+    //    {
+    //        for (int i = 0; i < 1000; i++)
+    //        {
+    //            Point ply_point_data;
+    //            ply_point_data.position.x = i * AXIS_SCALE;
+    //            ply_point_data.position.y = 0;
+    //            ply_point_data.position.z = 0;
+    //            ply_point_data.position.w = 0;
+    //            ply_point_data.color.r = 1;
+    //            ply_point_data.color.g = 0;
+    //            ply_point_data.color.b = 0;
+    //            ply_point_data.color.a = 1;
     //
-    //             result.push_back(ply_point_data);
-    //         }
-    //     }
+    //            result.points.push_back(ply_point_data);
+    //        }
+    //    }
     //
-    //     {
-    //         for (int i = 0; i < 1000; i++)
-    //         {
-    //             PlyPointData ply_point_data;
-    //             ply_point_data.position.x = 0;
-    //             ply_point_data.position.y = i * AXIS_SCALE;
-    //             ply_point_data.position.z = 0;
-    //             ply_point_data.position.w = 0;
-    //             ply_point_data.color.r = 0;
-    //             ply_point_data.color.g = 1;
-    //             ply_point_data.color.b = 0;
-    //             ply_point_data.color.a = 1;
+    //    {
+    //        for (int i = 0; i < 1000; i++)
+    //        {
+    //            Point ply_point_data;
+    //            ply_point_data.position.x = 0;
+    //            ply_point_data.position.y = i * AXIS_SCALE;
+    //            ply_point_data.position.z = 0;
+    //            ply_point_data.position.w = 0;
+    //            ply_point_data.color.r = 0;
+    //            ply_point_data.color.g = 1;
+    //            ply_point_data.color.b = 0;
+    //            ply_point_data.color.a = 1;
     //
-    //             result.push_back(ply_point_data);
-    //         }
-    //     }
+    //            result.points.push_back(ply_point_data);
+    //        }
+    //    }
     //
-    //     {
-    //         for (int i = 0; i < 1000; i++)
-    //         {
-    //             PlyPointData ply_point_data;
-    //             ply_point_data.position.x = 0;
-    //             ply_point_data.position.y = 0;
-    //             ply_point_data.position.z = i * AXIS_SCALE;
-    //             ply_point_data.position.w = 0;
-    //             ply_point_data.color.r = 0;
-    //             ply_point_data.color.g = 0;
-    //             ply_point_data.color.b = 1;
-    //             ply_point_data.color.a = 1;
+    //    {
+    //        for (int i = 0; i < 1000; i++)
+    //        {
+    //            Point ply_point_data;
+    //            ply_point_data.position.x = 0;
+    //            ply_point_data.position.y = 0;
+    //            ply_point_data.position.z = i * AXIS_SCALE;
+    //            ply_point_data.position.w = 0;
+    //            ply_point_data.color.r = 0;
+    //            ply_point_data.color.g = 0;
+    //            ply_point_data.color.b = 1;
+    //            ply_point_data.color.a = 1;
     //
-    //             result.push_back(ply_point_data);
-    //         }
-    //     }
+    //            result.points.push_back(ply_point_data);
+    //        }
+    //    }
+    //
+    //    {
+    //        for (int i = 0; i < 1000; i++)
+    //        {
+    //            Point ply_point_data;
+    //            ply_point_data.position.x = i * AXIS_SCALE;
+    //            ply_point_data.position.y = i * AXIS_SCALE;
+    //            ply_point_data.position.z = i * AXIS_SCALE;
+    //            ply_point_data.position.w = 0;
+    //            ply_point_data.color.r = 1;
+    //            ply_point_data.color.g = 1;
+    //            ply_point_data.color.b = 0;
+    //            ply_point_data.color.a = 1;
+    //
+    //            result.points.push_back(ply_point_data);
+    //        }
+    //    }
 
     return result;
 }
@@ -546,27 +563,28 @@ int main()
 {
     std::vector<PlyData> ply_datas;
     {
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0000_00/scene0000_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0001_00/scene0001_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0002_00/scene0002_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0003_00/scene0003_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0004_00/scene0004_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0005_00/scene0005_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0006_00/scene0006_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0007_00/scene0007_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0008_00/scene0008_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0009_00/scene0009_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0010_00/scene0010_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0011_00/scene0011_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0012_00/scene0012_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0013_00/scene0013_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0014_00/scene0014_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0015_00/scene0015_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0016_00/scene0016_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0017_00/scene0017_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0018_00/scene0018_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0019_00/scene0019_00_vh_clean_2.labels.ply"));
-        ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0020_00/scene0020_00_vh_clean_2.labels.ply"));
+        ply_datas.push_back(LoadPly("../..//asset/models/points.ply"));
+        // ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0000_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0001_00/scene0001_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0002_00/scene0002_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0003_00/scene0003_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0004_00/scene0004_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0005_00/scene0005_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0006_00/scene0006_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0007_00/scene0007_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0008_00/scene0008_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0009_00/scene0009_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0010_00/scene0010_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0011_00/scene0011_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0012_00/scene0012_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0013_00/scene0013_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0014_00/scene0014_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0015_00/scene0015_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0016_00/scene0016_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0017_00/scene0017_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0018_00/scene0018_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0019_00/scene0019_00_vh_clean_2.labels.ply"));
+        //  ply_datas.push_back(LoadPly("E:/TestDelete/points/scene0020_00/scene0020_00_vh_clean_2.labels.ply"));
         //... 在此增加其他 ply 点云数据;
     }
 

@@ -4309,3 +4309,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/7/15
   >
   >* 更新 ``samples`` 下 ``PointCloud.cpp`` 示例。移除重复点云文件的读取。
+
+* 2024/7/17
+  >
+  >* 更新 ``CMakeLists.txt`` 增加 ``Windows`` 平台下 ``WIN32`` 宏的声明。在某些情况下 `clang` 编译器不能自动定义该宏。

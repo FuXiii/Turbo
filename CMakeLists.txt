@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Turbo)
 
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    message(STATUS "This is Linux system.")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    message(STATUS "This is Windows system.")
+    add_definitions(-DWIN32)
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    message(STATUS "This is MacOS system.")
+else()
+    message(STATUS "This is an unsupported system.")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunused-function")
