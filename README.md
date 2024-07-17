@@ -4313,3 +4313,8 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 * 2024/7/17
   >
   >* 更新 ``CMakeLists.txt`` 增加 ``Windows`` 平台下 ``WIN32`` 宏的声明。在某些情况下 `clang` 编译器不能自动定义该宏。
+
+* 2024/7/18
+  >
+  >* 更新 ``TImage.cpp`` 中 ``InternalDestroy()`` 成员函数对于外部 ``VkImage`` 在回收时不需要调用 ``vmaDestroyImage`` 回收图片
+  >* 修正 ``TSurface.cpp`` 中对于外部 ``VkSurfaceKHR`` 在回收时没有获取 ``vkDestroySurfaceKHR`` 函数的 ``bug``
