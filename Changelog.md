@@ -4,6 +4,7 @@
 
 >* 将 ``point_cloud`` 分支合并到 ``dev`` 分支
 >* 将 ``README`` 中的 ``Log`` 日志转移到此 ``更新日志`` 中。
+>* 增加对 ``sample`` 下 ``VolumeTest`` 示例的编译输出。
 
 ## 归档历史 Log
 
