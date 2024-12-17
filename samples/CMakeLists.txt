@@ -357,3 +357,12 @@ target_include_directories(ReferencedTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(ReferencedTest PUBLIC ${LINK_PARTH})
 target_link_libraries(ReferencedTest PUBLIC ${LIBS})
 
+add_executable(PointCloud ./PointCloud.cpp ${IMGUI_SOURCE_PATH} ../thirdparty/ply/plyfile.cpp)
+target_include_directories(PointCloud PUBLIC ${INCLUDE_PARTH} ../thirdparty/ply)
+target_link_directories(PointCloud PUBLIC ${LINK_PARTH})
+target_link_libraries(PointCloud PUBLIC ${LIBS})
+
+add_executable(VolumeTest ./VolumeTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VolumeTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VolumeTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VolumeTest PUBLIC ${LIBS})

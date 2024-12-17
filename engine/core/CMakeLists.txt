@@ -1,6 +1,6 @@
 project(TCore)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 aux_source_directory(./src/ SRCS)

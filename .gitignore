@@ -10,3 +10,7 @@ thirdparty/glm/
 thirdparty/imgui/
 thirdparty/KTX-Software/
 thirdparty/tinygltf/
+
+engine/core/thirdparty/glslang
+engine/core/thirdparty/SPIRV-Cross
+engine/core/thirdparty/VulkanMemoryAllocator
