@@ -258,6 +258,4 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 
 ## Log
 
-* 2024/12/17
-  >
-  >日志文件转移到了 [更新日志](./Changelog.md)
+> **(2024/12/17)** 日志文件转移到了 [更新日志](./Changelog.md)
