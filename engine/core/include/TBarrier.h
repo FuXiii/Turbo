@@ -44,12 +44,13 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     TDeviceSize size;
 
   public:
-    TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
+    [[deprecated]] TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     ~TBufferMemoryBarrier();
 
   public:
-    const TRefPtr<TBuffer> &GetBuffer();
+    // /*deprecated*/ const TRefPtr<TBuffer> &GetBuffer();
+    TBuffer *GetBuffer();
     TDeviceSize GetOffset() const;
     TDeviceSize GetSize() const;
 
@@ -69,16 +70,17 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
     uint32_t layerCount;
 
   public:
-    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
+    //[[deprecated]] TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImage> &image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel = 0, uint32_t levelCount = VK_REMAINING_MIP_LEVELS, uint32_t baseArrayLayer = 0, uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS);
-    TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout);
+    //[[deprecated]] TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TImageView> imageView, TImageLayout oldLayout, TImageLayout newLayout);
     TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *imageView, TImageLayout oldLayout, TImageLayout newLayout);
     ~TImageMemoryBarrier() = default;
 
   public:
     TImageLayout GetOldLayout() const;
     TImageLayout GetNewLayout() const;
-    const TRefPtr<TImage> &GetImage();
+    // [[deprecated]] const TRefPtr<TImage> &GetImage();
+    TImage *GetImage();
     TImageAspects GetAspects() const;
     uint32_t GetBaseMipLevel() const;
     uint32_t GetLevelCount() const;

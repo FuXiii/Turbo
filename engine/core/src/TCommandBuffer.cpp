@@ -59,18 +59,32 @@ void Turbo::Core::TCommandBufferBase::InternalDestroy()
     device->GetDeviceDriver()->vkFreeCommandBuffers(vk_device, command_pool, command_buffer_count, &this->vkCommandBuffer);
 }
 
-Turbo::Core::TCommandBufferBase::TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
+// Turbo::Core::TCommandBufferBase::TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
+//{
+//     if (commandBufferPool->Valid())
+//     {
+//         this->commandBufferPool = commandBufferPool;
+//         this->level = level;
+//
+//         this->InternalCreate();
+//     }
+//     else
+//     {
+//         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::TCommandBuffer");
+//     }
+// }
+
+Turbo::Core::TCommandBufferBase::TCommandBufferBase(TCommandBufferPool *commandBufferPool, TCommandBufferLevel level) : Turbo::Core::TVulkanHandle()
 {
-    if (commandBufferPool->Valid())
+    if (!TRefPtr<TCommandBufferPool>(commandBufferPool)->Valid())
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::TCommandBuffer");
+    }
+
     {
         this->commandBufferPool = commandBufferPool;
         this->level = level;
-
         this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::TCommandBuffer");
     }
 }
 
@@ -94,7 +108,7 @@ Turbo::Core::TCommandBufferLevel Turbo::Core::TCommandBufferBase::GetLevel() con
     return this->level;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> &Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
+Turbo::Core::TCommandBufferPool *Turbo::Core::TCommandBufferBase::GetCommandBufferPool()
 {
     return this->commandBufferPool;
 }
@@ -141,107 +155,240 @@ bool Turbo::Core::TCommandBufferBase::Begin()
     return false;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
+// void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
+//{
+//     TDevice *device = renderPass->GetDevice();
+//     TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+//
+//     std::vector<TAttachment> attachemnts = renderPass->GetAttachments();
+//     uint32_t attachemnts_count = attachemnts.size();
+//
+//     // TODO: Attachment clear color data should define in attachemnt
+//     std::vector<VkClearValue> vk_clear_values;
+//     for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
+//     {
+//         TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
+//         TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
+//         TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
+//
+//         if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+//         {
+//             VkClearValue vk_clear_value = {};
+//             vk_clear_value.depthStencil.depth = 1.0f;
+//             vk_clear_value.depthStencil.stencil = 0.0f;
+//
+//             vk_clear_values.push_back(vk_clear_value);
+//         }
+//         else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
+//         {
+//             TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+//
+//             VkClearColorValue vk_clear_color_value = {};
+//             if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+//             {
+//                 vk_clear_color_value.int32[0] = (int32_t)0;
+//                 vk_clear_color_value.int32[1] = (int32_t)0;
+//                 vk_clear_color_value.int32[2] = (int32_t)0;
+//                 vk_clear_color_value.int32[3] = (int32_t)0;
+//             }
+//             else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+//             {
+//                 vk_clear_color_value.uint32[0] = (uint32_t)0;
+//                 vk_clear_color_value.uint32[1] = (uint32_t)0;
+//                 vk_clear_color_value.uint32[2] = (uint32_t)0;
+//                 vk_clear_color_value.uint32[3] = (uint32_t)0;
+//             }
+//             else
+//             {
+//                 vk_clear_color_value.float32[0] = 0;
+//                 vk_clear_color_value.float32[1] = 0;
+//                 vk_clear_color_value.float32[2] = 0;
+//                 vk_clear_color_value.float32[3] = 0;
+//             }
+//
+//             VkClearValue vk_clear_value = {};
+//             vk_clear_value.color = vk_clear_color_value;
+//
+//             vk_clear_values.push_back(vk_clear_value);
+//         }
+//         else
+//         {
+//             VkClearValue vk_clear_value = {};
+//             vk_clear_values.push_back(vk_clear_value);
+//         }
+//     }
+//
+//     VkRenderPassBeginInfo vk_render_pass_begin_info = {};
+//     vk_render_pass_begin_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//     vk_render_pass_begin_info.pNext = nullptr;
+//     vk_render_pass_begin_info.renderPass = renderPass->GetVkRenderPass();
+//     vk_render_pass_begin_info.framebuffer = framebuffer->GetVkFramebuffer();
+//     vk_render_pass_begin_info.renderArea.offset.x = offsetX;
+//     vk_render_pass_begin_info.renderArea.offset.y = offsetY;
+//     vk_render_pass_begin_info.renderArea.extent.width = width;
+//     vk_render_pass_begin_info.renderArea.extent.height = height;
+//     if (width == TURBO_WHOLE_EXTENT)
+//     {
+//         vk_render_pass_begin_info.renderArea.extent.width = framebuffer->GetWidth();
+//     }
+//     if (height == TURBO_WHOLE_EXTENT)
+//     {
+//         vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
+//     }
+//     vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
+//     vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
+//
+//     switch (subpassContents)
+//     {
+//     case TSubpassContents::INLINE: {
+//         device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+//     }
+//     break;
+//     case TSubpassContents::SECONDARY_COMMAND_BUFFERS: {
+//         device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+//     }
+//     break;
+//     }
+//
+//     this->currentRenderPass = renderPass;
+//     this->currentFramebuffer = framebuffer;
+// }
+
+void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, TSubpassContents subpassContents, uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height)
 {
-    TDevice *device = renderPass->GetDevice();
-    TPhysicalDevice *physical_device = device->GetPhysicalDevice();
-
-    std::vector<TAttachment> attachemnts = renderPass->GetAttachments();
-    uint32_t attachemnts_count = attachemnts.size();
-
-    // TODO: Attachment clear color data should define in attachemnt
-    std::vector<VkClearValue> vk_clear_values;
-    for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
+    if (!TRefPtr<TRenderPass>(renderPass)->Valid() || !TRefPtr<TFramebuffer>(framebuffer)->Valid())
     {
-        TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
-        TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
-        TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
+        return;
+    }
 
-        if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+    {
+        TDevice *device = renderPass->GetDevice();
+        TPhysicalDevice *physical_device = device->GetPhysicalDevice();
+
+        std::vector<TAttachment> attachemnts = renderPass->GetAttachments();
+        uint32_t attachemnts_count = attachemnts.size();
+
+        // TODO: Attachment clear color data should define in attachemnt
+        std::vector<VkClearValue> vk_clear_values;
+        for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
         {
-            VkClearValue vk_clear_value = {};
-            vk_clear_value.depthStencil.depth = 1.0f;
-            vk_clear_value.depthStencil.stencil = 0.0f;
+            TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
+            TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
+            TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
 
-            vk_clear_values.push_back(vk_clear_value);
-        }
-        else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
-        {
-            TFormatDataTypes format_data_types = format_info.GetFormatDataType();
-
-            VkClearColorValue vk_clear_color_value = {};
-            if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+            if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
             {
-                vk_clear_color_value.int32[0] = (int32_t)0;
-                vk_clear_color_value.int32[1] = (int32_t)0;
-                vk_clear_color_value.int32[2] = (int32_t)0;
-                vk_clear_color_value.int32[3] = (int32_t)0;
+                VkClearValue vk_clear_value = {};
+                vk_clear_value.depthStencil.depth = 1.0f;
+                vk_clear_value.depthStencil.stencil = 0.0f;
+
+                vk_clear_values.push_back(vk_clear_value);
             }
-            else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+            else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
             {
-                vk_clear_color_value.uint32[0] = (uint32_t)0;
-                vk_clear_color_value.uint32[1] = (uint32_t)0;
-                vk_clear_color_value.uint32[2] = (uint32_t)0;
-                vk_clear_color_value.uint32[3] = (uint32_t)0;
+                TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+
+                VkClearColorValue vk_clear_color_value = {};
+                if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                {
+                    vk_clear_color_value.int32[0] = (int32_t)0;
+                    vk_clear_color_value.int32[1] = (int32_t)0;
+                    vk_clear_color_value.int32[2] = (int32_t)0;
+                    vk_clear_color_value.int32[3] = (int32_t)0;
+                }
+                else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                {
+                    vk_clear_color_value.uint32[0] = (uint32_t)0;
+                    vk_clear_color_value.uint32[1] = (uint32_t)0;
+                    vk_clear_color_value.uint32[2] = (uint32_t)0;
+                    vk_clear_color_value.uint32[3] = (uint32_t)0;
+                }
+                else
+                {
+                    vk_clear_color_value.float32[0] = 0;
+                    vk_clear_color_value.float32[1] = 0;
+                    vk_clear_color_value.float32[2] = 0;
+                    vk_clear_color_value.float32[3] = 0;
+                }
+
+                VkClearValue vk_clear_value = {};
+                vk_clear_value.color = vk_clear_color_value;
+
+                vk_clear_values.push_back(vk_clear_value);
             }
             else
             {
-                vk_clear_color_value.float32[0] = 0;
-                vk_clear_color_value.float32[1] = 0;
-                vk_clear_color_value.float32[2] = 0;
-                vk_clear_color_value.float32[3] = 0;
+                VkClearValue vk_clear_value = {};
+                vk_clear_values.push_back(vk_clear_value);
             }
-
-            VkClearValue vk_clear_value = {};
-            vk_clear_value.color = vk_clear_color_value;
-
-            vk_clear_values.push_back(vk_clear_value);
         }
-        else
+
+        VkRenderPassBeginInfo vk_render_pass_begin_info = {};
+        vk_render_pass_begin_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        vk_render_pass_begin_info.pNext = nullptr;
+        vk_render_pass_begin_info.renderPass = renderPass->GetVkRenderPass();
+        vk_render_pass_begin_info.framebuffer = framebuffer->GetVkFramebuffer();
+        vk_render_pass_begin_info.renderArea.offset.x = offsetX;
+        vk_render_pass_begin_info.renderArea.offset.y = offsetY;
+        vk_render_pass_begin_info.renderArea.extent.width = width;
+        vk_render_pass_begin_info.renderArea.extent.height = height;
+        if (width == TURBO_WHOLE_EXTENT)
         {
-            VkClearValue vk_clear_value = {};
-            vk_clear_values.push_back(vk_clear_value);
+            vk_render_pass_begin_info.renderArea.extent.width = framebuffer->GetWidth();
         }
-    }
+        if (height == TURBO_WHOLE_EXTENT)
+        {
+            vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
+        }
+        vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
+        vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
 
-    VkRenderPassBeginInfo vk_render_pass_begin_info = {};
-    vk_render_pass_begin_info.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    vk_render_pass_begin_info.pNext = nullptr;
-    vk_render_pass_begin_info.renderPass = renderPass->GetVkRenderPass();
-    vk_render_pass_begin_info.framebuffer = framebuffer->GetVkFramebuffer();
-    vk_render_pass_begin_info.renderArea.offset.x = offsetX;
-    vk_render_pass_begin_info.renderArea.offset.y = offsetY;
-    vk_render_pass_begin_info.renderArea.extent.width = width;
-    vk_render_pass_begin_info.renderArea.extent.height = height;
-    if (width == TURBO_WHOLE_EXTENT)
-    {
-        vk_render_pass_begin_info.renderArea.extent.width = framebuffer->GetWidth();
-    }
-    if (height == TURBO_WHOLE_EXTENT)
-    {
-        vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
-    }
-    vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
-    vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
+        switch (subpassContents)
+        {
+        case TSubpassContents::INLINE: {
+            device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+        }
+        break;
+        case TSubpassContents::SECONDARY_COMMAND_BUFFERS: {
+            device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+        }
+        break;
+        }
 
-    switch (subpassContents)
-    {
-    case TSubpassContents::INLINE: {
-        device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+        this->currentRenderPass = renderPass;
+        this->currentFramebuffer = framebuffer;
     }
-    break;
-    case TSubpassContents::SECONDARY_COMMAND_BUFFERS: {
-        device->GetDeviceDriver()->vkCmdBeginRenderPass(this->vkCommandBuffer, &vk_render_pass_begin_info, VkSubpassContents::VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-    }
-    break;
-    }
-
-    this->currentRenderPass = renderPass;
-    this->currentFramebuffer = framebuffer;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindPipeline(const TRefPtr<TPipeline> &pipeline)
+// void Turbo::Core::TCommandBufferBase::CmdBindPipeline(const TRefPtr<TPipeline> &pipeline)
+//{
+//     TDevice *device = pipeline->GetDevice();
+//     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+//
+//     switch (pipeline->GetType())
+//     {
+//     case TPipelineType::Compute: {
+//         vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+//     }
+//     break;
+//     case TPipelineType::Graphics: {
+//         vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
+//     }
+//     break;
+//     }
+//
+//     device->GetDeviceDriver()->vkCmdBindPipeline(this->vkCommandBuffer, vk_pipeline_bind_point, pipeline->GetVkPipeline());
+//
+//     this->currentPipeline = pipeline;
+// }
+
+void Turbo::Core::TCommandBufferBase::CmdBindPipeline(TPipeline *pipeline)
 {
+    if (!TRefPtr<TPipeline>(pipeline).Valid())
+    {
+        return;
+    }
+
     TDevice *device = pipeline->GetDevice();
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
@@ -262,7 +409,40 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipeline(const TRefPtr<TPipeline> &
     this->currentPipeline = pipeline;
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
+// void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
+//{
+//     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+//
+//     if (this->currentPipeline.Valid() && !descriptorSets.empty())
+//     {
+//         switch (this->currentPipeline->GetType())
+//         {
+//         case TPipelineType::Compute: {
+//             vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
+//         }
+//         break;
+//         case TPipelineType::Graphics: {
+//             vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
+//         }
+//         break;
+//         }
+//
+//         std::vector<VkDescriptorSet> vk_descriptor_sets;
+//         for (TDescriptorSet *descriptor_set_item : descriptorSets)
+//         {
+//             vk_descriptor_sets.push_back(descriptor_set_item->GetVkDescriptorSet());
+//         }
+//
+//         TDevice *device = this->currentPipeline->GetDevice();
+//         device->GetDeviceDriver()->vkCmdBindDescriptorSets(this->vkCommandBuffer, vk_pipeline_bind_point, this->currentPipeline->GetPipelineLayout()->GetVkPipelineLayout(), firstSet, vk_descriptor_sets.size(), vk_descriptor_sets.data(), 0, nullptr);
+//     }
+//     else
+//     {
+//         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TCommandBuffer::CmdBindDescriptorSets");
+//     }
+// }
+
+void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TDescriptorSet *> &descriptorSets)
 {
     VkPipelineBindPoint vk_pipeline_bind_point = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE;
 
@@ -283,6 +463,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, c
         std::vector<VkDescriptorSet> vk_descriptor_sets;
         for (TDescriptorSet *descriptor_set_item : descriptorSets)
         {
+            // TODO: check TDescriptorSet item valid?
             vk_descriptor_sets.push_back(descriptor_set_item->GetVkDescriptorSet());
         }
 
@@ -295,14 +476,31 @@ void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, c
     }
 }
 
-void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
+// void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
+//{
+//     std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
+//
+//     for (TRefPtr<Turbo::Core::TDescriptorSet> &descriptor_set_item : descriptor_sets)
+//     {
+//         uint32_t first_set = descriptor_set_item->GetSet();
+//         std::vector<Turbo::Core::TDescriptorSet *> descriptor_set{descriptor_set_item};
+//         this->CmdBindDescriptorSets(first_set, descriptor_set);
+//     }
+// }
+
+void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet)
 {
+    if (!TRefPtr<TPipelineDescriptorSet>(pipelineDescriptorSet).Valid())
+    {
+        return;
+    }
+
     std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
 
     for (TRefPtr<Turbo::Core::TDescriptorSet> &descriptor_set_item : descriptor_sets)
     {
         uint32_t first_set = descriptor_set_item->GetSet();
-        std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_set{descriptor_set_item};
+        std::vector<Turbo::Core::TDescriptorSet *> descriptor_set{descriptor_set_item};
         this->CmdBindDescriptorSets(first_set, descriptor_set);
     }
 }

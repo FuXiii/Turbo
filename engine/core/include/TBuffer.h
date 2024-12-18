@@ -58,7 +58,8 @@ class TBuffer : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
+    //[[deprecated]] TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
+    TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size);
 
   protected:
     virtual ~TBuffer();

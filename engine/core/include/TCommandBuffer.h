@@ -58,7 +58,8 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level);
+    //[[deprecated]] TCommandBufferBase(const TRefPtr<TCommandBufferPool> &commandBufferPool, TCommandBufferLevel level);
+    TCommandBufferBase(TCommandBufferPool *commandBufferPool, TCommandBufferLevel level);
 
   protected:
     virtual ~TCommandBufferBase();
@@ -68,14 +69,19 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 
     TCommandBufferLevel GetLevel() const;
 
-    const TRefPtr<TCommandBufferPool> &GetCommandBufferPool();
+    // [[deprecated]] const TRefPtr<TCommandBufferPool> &GetCommandBufferPool();
+    TCommandBufferPool *GetCommandBufferPool();
 
   public:
     bool Begin();
-    void CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
-    void CmdBindPipeline(const TRefPtr<TPipeline> &pipeline);
-    void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
-    void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
+    //[[deprecated]] void CmdBeginRenderPass(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
+    void CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
+    //[[deprecated]] void CmdBindPipeline(const TRefPtr<TPipeline> &pipeline);
+    void CmdBindPipeline(TPipeline *pipeline);
+    //[[deprecated]] void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
+    void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TDescriptorSet *> &descriptorSets = {});
+    //[[deprecated]]void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
+    void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
     void CmdSetViewport(const std::vector<TViewport> &viewports = {});
     void CmdSetScissor(const std::vector<TScissor> &scissors = {});
