@@ -78,11 +78,12 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdBeginRenderPass(TRenderPass *renderPass, TFramebuffer *framebuffer, TSubpassContents subpassContents = TSubpassContents::INLINE, uint32_t offsetX = 0, uint32_t offsetY = 0, uint32_t width = TURBO_WHOLE_EXTENT, uint32_t height = TURBO_WHOLE_EXTENT);
     //[[deprecated]] void CmdBindPipeline(const TRefPtr<TPipeline> &pipeline);
     void CmdBindPipeline(TPipeline *pipeline);
-    //[[deprecated]] void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
+    void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
     void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TDescriptorSet *> &descriptorSets = {});
     //[[deprecated]]void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
     void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
+    void CmdBindVertexBuffers(const std::vector<TBuffer *> &vertexBuffers = {});
     void CmdSetViewport(const std::vector<TViewport> &viewports = {});
     void CmdSetScissor(const std::vector<TScissor> &scissors = {});
     void CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
@@ -113,22 +114,30 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImage> &image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
     void CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImageView> &imageView);
 
-    void CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, uint32_t data = 0);
-    void CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, float data = 0.0f);
+    //[[deprecated]] void CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, uint32_t data = 0);
+    void CmdFillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, uint32_t data = 0);
+    //[[deprecated]] void CmdFillBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, float data = 0.0f);
+    void CmdFillBuffer(TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE, float data = 0.0f);
 
     // The special value VK_WHOLE_SIZE is not accepted for the size parameter to
     // vkCmdUpdateBuffer() because it is also used as the size of the host memory region that is the
     // source of the data. The maximum size of data that can be placed in a buffer with
     // vkCmdUpdateBuffer() is 65,536 bytes.
-    void CmdUpdateBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size, const void *data);
-    void CmdCopyBuffer(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size);
+    //[[deprecated]] void CmdUpdateBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size, const void *data);
+    void CmdUpdateBuffer(TBuffer *buffer, TDeviceSize offset, TDeviceSize size, const void *data);
+    //[[deprecated]] void CmdCopyBuffer(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size);
+    void CmdCopyBuffer(TBuffer *srcBuffer, TBuffer *dstBuffer, TDeviceSize srcOffset, TDeviceSize dstOffset, TDeviceSize size);
 
     // - The VkImageSubresourceRange::aspectMask members of the elements of the pRanges array must each only include VK_IMAGE_ASPECT_COLOR_BIT
     // - imageLayout specifies the current layout of the image subresource ranges to be cleared, and must be VK_IMAGE_LAYOUT_GENERAL or VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL.
-    void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects);
-    void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a);
-    void CmdClearColorImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
+    //[[deprecated]] void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    //[[deprecated]] void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects);
+    //[[deprecated]] void CmdClearColorImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a);
+    //[[deprecated]] void CmdClearColorImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
+    void CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, TImageAspects aspects);
+    void CmdClearColorImage(TImage *image, TImageLayout layout, float r, float g, float b, float a);
+    void CmdClearColorImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
 
     // imageLayout specifies the current layout of the image subresource ranges to be cleared, and must be VK_IMAGE_LAYOUT_GENERAL or VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL.
     void CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);

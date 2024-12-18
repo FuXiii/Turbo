@@ -1,5 +1,9 @@
 # 更新日志
 
+## 2024/12/19
+
+>* ``TReferenced`` 下增加 ``static bool Valid(const TReferenced* ref)`` 静态函数。用于指针有效性检查。
+
 ## 2024/12/18
 
 >* 将形参和返回中的 ``TRefPtr`` 去除掉，正常不需要强制为 ``TRefPtr`` 略显冗余繁琐。只需要成员变量为 ``TRefPtr`` 即可进行自动化内存管理。

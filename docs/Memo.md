@@ -1,3 +1,5 @@
+# 备忘录
+
 ```CXX
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     bindings.resize(binding_count);
@@ -29,4 +31,32 @@
         ints.erase(int_iterator);
         int_iterator++;
     }
+```
+
+## 容器对应 TRefPtr<T> 和 T* 类型的形参问题
+
+```CXX
+    void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
+    void CmdBindVertexBuffers(const std::vector<TBuffer *> &vertexBuffers = {});
+    //FIX::对于如上 vector<TRefPtr<TBuffer>/TBuffer *> 形参，考虑使用 模板：
+    template<typename T>
+    void CmdBindVertexBuffers(const std::vector<T> &vertexBuffers = {});//需要对 T 进行限制
+```
+
+## 使用 TRefPtr<T>(ptr).Valid() 检查 ptr 的问题
+
+```CXX
+void SomeFun(T* ptr)
+{
+    //FIX::建议使用专门的检查函数，或构造函数
+    if(!TRefPtr<T>(ptr).Valid())//该行结束可能会导致 ptr 进行 delete
+    {
+        return;
+    }
+
+    ...//Do valid
+}
+
+T* t = new T();
+SomeFun(t);//SomeFun 结束之后 t 如果没人使用将会被 delete
 ```

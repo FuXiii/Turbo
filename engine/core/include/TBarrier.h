@@ -44,7 +44,7 @@ class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
     TDeviceSize size;
 
   public:
-    [[deprecated]] TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
+    //[[deprecated]] TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset = 0, TDeviceSize size = VK_WHOLE_SIZE);
     ~TBufferMemoryBarrier();
 

@@ -34,23 +34,23 @@ std::string Turbo::Core::TMemoryBarrier::ToString() const
     return std::string();
 }
 
-Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
-{
-    if (buffer.Valid())
-    {
-        this->buffer = buffer;
-        this->offset = offset;
-        this->size = size;
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier");
-    }
-}
+//Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, const TRefPtr<TBuffer> &buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
+//{
+//    if (buffer.Valid())
+//    {
+//        this->buffer = buffer;
+//        this->offset = offset;
+//        this->size = size;
+//    }
+//    else
+//    {
+//        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier");
+//    }
+//}
 
 Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TBuffer *buffer, TDeviceSize offset, TDeviceSize size) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (!TRefPtr<TBuffer>(buffer)->Valid())
+    if (!Turbo::Core::TReferenced::Valid(buffer))
     {
         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBufferMemoryBarrier::TBufferMemoryBarrier");
     }
@@ -107,7 +107,7 @@ std::string Turbo::Core::TBufferMemoryBarrier::ToString() const
 
 Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImage *image, TImageLayout oldLayout, TImageLayout newLayout, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (!TRefPtr<TImage>(image)->Valid())
+    if (!Turbo::Core::TReferenced::Valid(image))
     {
         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier");
     }
@@ -145,7 +145,7 @@ Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess
 
 Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier(TAccess srcAccess, TAccess dstAccess, TImageView *imageView, TImageLayout oldLayout, TImageLayout newLayout) : Turbo::Core::TMemoryBarrier(srcAccess, dstAccess)
 {
-    if (!TRefPtr<TImageView>(imageView)->Valid())
+    if (!Turbo::Core::TReferenced::Valid(imageView))
     {
         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TImageMemoryBarrier::TImageMemoryBarrier");
     }

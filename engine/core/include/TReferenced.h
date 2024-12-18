@@ -26,6 +26,8 @@ class TReferenced
 
     virtual bool Valid() const;
 
+    static bool Valid(const TReferenced* ref);
+
   protected:
     virtual ~TReferenced();
 };
