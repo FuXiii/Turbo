@@ -3,6 +3,7 @@
 ## 2024/12/19
 
 >* ``TReferenced`` 下增加 ``static bool Valid(const TReferenced* ref)`` 静态函数。用于指针有效性检查。
+>* 修正 ``TCommandBuffer`` 中对 ``TRefPtr`` 的冗余使用。
 
 ## 2024/12/18
 

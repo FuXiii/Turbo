@@ -140,29 +140,43 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdClearColorImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0);
 
     // imageLayout specifies the current layout of the image subresource ranges to be cleared, and must be VK_IMAGE_LAYOUT_GENERAL or VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL.
-    void CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    void CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects);
-    void CmdClearDepthStencilImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float depth = 0, uint32_t stencil = 0);
+    //[[deprecated]] void CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    //[[deprecated]] void CmdClearDepthStencilImage(const TRefPtr<TImage> &image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects);
+    //[[deprecated]] void CmdClearDepthStencilImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float depth = 0, uint32_t stencil = 0);
+    void CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void CmdClearDepthStencilImage(TImage *image, TImageLayout layout, float depth, uint32_t stencil, TImageAspects aspects);
+    void CmdClearDepthStencilImage(TImageView *imageView, TImageLayout layout, float depth = 0, uint32_t stencil = 0);
 
-    void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects);
-    void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil);
-    void CmdClearImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0, float depth = 0, uint32_t stencil = 0);
+    //[[deprecated]] void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    //[[deprecated]] void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects);
+    //[[deprecated]] void CmdClearImage(const TRefPtr<TImage> &image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil);
+    //[[deprecated]] void CmdClearImage(const TRefPtr<TImageView> &imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0, float depth = 0, uint32_t stencil = 0);
+    void CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    void CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil, TImageAspects aspects);
+    void CmdClearImage(TImage *image, TImageLayout layout, float r, float g, float b, float a, float depth, uint32_t stencil);
+    void CmdClearImage(TImageView *imageView, TImageLayout layout, float r = 0, float g = 0, float b = 0, float a = 0, float depth = 0, uint32_t stencil = 0);
 
-    void CmdCopyBufferToImage(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TImage> &dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
-    void CmdCopyImageToBuffer(const TRefPtr<TImage> &srcImage, TImageLayout layout, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
-    void CmdCopyImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+    //[[deprecated]] void CmdCopyBufferToImage(const TRefPtr<TBuffer> &srcBuffer, const TRefPtr<TImage> &dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
+    //[[deprecated]] void CmdCopyImageToBuffer(const TRefPtr<TImage> &srcImage, TImageLayout layout, const TRefPtr<TBuffer> &dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
+    //[[deprecated]] void CmdCopyImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+    void CmdCopyBufferToImage(TBuffer *srcBuffer, TImage *dstImage, TImageLayout layout, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
+    void CmdCopyImageToBuffer(TImage *srcImage, TImageLayout layout, TBuffer *dstBuffer, TDeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, TImageAspects aspects, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount, int32_t imageOffsetX, int32_t imageOffsetY, int32_t imageOffsetZ, uint32_t imageWidth, uint32_t imageHeight, uint32_t imageDepth);
+    void CmdCopyImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcImageOffsetX, int32_t srcImageOffsetY, int32_t srcImageOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstImageOffsetX, int32_t dstImageOffsetY, int32_t dstImageOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
-    void CmdBindIndexBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TIndexType indexType = TIndexType::UINT32);
+    //[[deprecated]] void CmdBindIndexBuffer(const TRefPtr<TBuffer> &buffer, TDeviceSize offset = 0, TIndexType indexType = TIndexType::UINT32);
+    void CmdBindIndexBuffer(TBuffer *buffer, TDeviceSize offset = 0, TIndexType indexType = TIndexType::UINT32);
     void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
 
-    void CmdBlitImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter = TFilter::LINEAR);
+    //[[deprecated]] void CmdBlitImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter = TFilter::LINEAR);
+    void CmdBlitImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, int32_t srcStartOffsetX, int32_t srcStartOffsetY, int32_t srcStartOffsetZ, int32_t srcEndOffsetX, int32_t srcEndOffsetY, int32_t srcEndOffsetZ, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t dstStartOffsetX, int32_t dstStartOffsetY, int32_t dstStartOffsetZ, int32_t dstEndOffsetX, int32_t dstEndOffsetY, int32_t dstEndOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, TFilter filter = TFilter::LINEAR);
 
-    void CmdResolveImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+    //[[deprecated]] void CmdResolveImage(const TRefPtr<TImage> &srcImage, TImageLayout srcLayout, const TRefPtr<TImage> &dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
+    void CmdResolveImage(TImage *srcImage, TImageLayout srcLayout, TImage *dstImage, TImageLayout dstLayout, TImageAspects srcAspects, uint32_t srcMipLevel, uint32_t srcBaseArrayLayer, uint32_t srcLayerCount, int32_t srcOffsetX, int32_t srcOffsety, int32_t srcOffsetZ, TImageAspects dstAspects, uint32_t dstMipLevel, uint32_t dstBaseArrayLayer, uint32_t dstLayerCount, int32_t dstOffsetX, int32_t dstOffsety, int32_t dstOffsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
     void CmdSetLineWidth(float lineWidth);
 
-    void CmdPushConstants(const TRefPtr<TPipelineLayout> &pipelineLayout, uint32_t offset, uint32_t size, const void *values);
+    //[[deprecated]] void CmdPushConstants(const TRefPtr<TPipelineLayout> &pipelineLayout, uint32_t offset, uint32_t size, const void *values);
+    void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
     void CmdPushConstants(uint32_t offset, uint32_t size, const void *values);
 
     void CmdDispatch(uint32_t workGroupsX, uint32_t workGroupsY, uint32_t workGroupsZ);
@@ -192,7 +206,8 @@ class TSecondaryCommandBuffer : public Turbo::Core::TCommandBufferBase
 
   public:
     void Begin() = delete;
-    void Begin(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, uint32_t subpass);
+    //[[deprecated]] void Begin(const TRefPtr<TRenderPass> &renderPass, const TRefPtr<TFramebuffer> &framebuffer, uint32_t subpass);
+    void Begin(TRenderPass *renderPass, TFramebuffer *framebuffer, uint32_t subpass);
 
   public:
     virtual std::string ToString() const override;
@@ -204,13 +219,15 @@ class TCommandBuffer : public Turbo::Core::TCommandBufferBase
     friend class TCommandBufferPool;
 
   public:
-    TCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool);
+    //[[deprecated]] TCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool);
+    TCommandBuffer(TCommandBufferPool *commandBufferPool);
 
   protected:
     virtual ~TCommandBuffer();
 
   public:
-    void CmdExecuteCommand(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
+    //[[deprecated]] void CmdExecuteCommand(const TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer);
+    void CmdExecuteCommand(TSecondaryCommandBuffer *secondaryCommandBuffer);
 
   public:
     virtual std::string ToString() const override;

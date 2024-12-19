@@ -58,12 +58,3 @@ bool Turbo::Core::TReferenced::Valid() const
 {
     return true;
 }
-
-bool Turbo::Core::TReferenced::Valid(const TReferenced *ref)
-{
-    if (ref != nullptr && ref->Valid())
-    {
-        return true;
-    }
-    return false;
-}
