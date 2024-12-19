@@ -20,6 +20,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
+    //vulkanFunctions.vkGetPhysicalDeviceProperties = instance->GetInstanceDriver()->vkGetPhysicalDeviceProperties;
 
     VmaAllocatorCreateFlags vma_allocator_create_flags = 0;
     if ((physical_device->GetDeviceFeatures().bufferDeviceAddress && this->device->GetEnableDeviceFeatures().bufferDeviceAddress) || (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0)))
