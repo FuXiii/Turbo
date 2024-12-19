@@ -66,40 +66,6 @@ class TRefC : public TRefB
     }
 };
 
-// template <typename... T>
-// struct check_all;
-//
-// template <typename T>
-// struct check_all<T>
-//{
-//     // static constexpr bool value = std::is_same<T, int>::value;
-//     static constexpr bool value = std::is_base_of<Turbo::Core::TReferenced, T>::value;
-// };
-//
-// template <typename First, typename... Rest>
-// struct check_all<First, Rest...>
-//{
-//     // static constexpr bool value = std::is_same<First, int>::value && check_all<Rest...>::value;
-//     static constexpr bool value = std::is_base_of<Turbo::Core::TReferenced, First>::value && check_all<Rest...>::value;
-// };
-//
-// template <typename... T, std::enable_if_t<check_all<T...>::value, bool> = true>
-// void foo(T*... args)
-//{
-//     (std::cout << ... << args) << '\n';
-// }
-//
-// int maian()
-//{
-//     TRefA *a = new TRefA;
-//     TRefB *b = new TRefB;
-//     TRefC *c = new TRefC;
-//     foo(a, b, c); // 正确，所有参数都是int
-//     //foo(1, 2, 3); // 正确，所有参数都是int
-//     // foo(1, 2, "3"); // 错误，有一个参数不是int
-//     return 0;
-// }
-
 int main()
 {
     std::cout << "Hello World" << std::endl;
