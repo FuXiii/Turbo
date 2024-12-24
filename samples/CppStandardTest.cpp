@@ -1,6 +1,8 @@
 #include <iostream>
 #include <list>
 #include <type_traits>
+#include <vector>
+#include <TRefPtr.h>
 
 struct A_Test
 {
@@ -66,6 +68,31 @@ class TRefC : public TRefB
     }
 };
 
+//void TestVectorRefs(const std::vector<Turbo::Core::TReferenced *> &refs)
+//{
+//    for (Turbo::Core::TReferenced *ref : refs)
+//    {
+//        std::cout << ref->Valid() << std::endl;
+//    }
+//}
+//
+//void TestVectorRefs(const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> &refs)
+//{
+//    for (Turbo::Core::TReferenced *ref : refs)
+//    {
+//        std::cout << ref->Valid() << std::endl;
+//    }
+//}
+
+template <typename T>
+void TestVectorRefs(const std::vector<T> &refs)
+{
+    for (Turbo::Core::TReferenced *ref : refs)
+    {
+        std::cout << ref->Valid() << std::endl;
+    }
+}
+
 int main()
 {
     std::cout << "Hello World" << std::endl;
@@ -91,11 +118,25 @@ int main()
         TRefB *b = new TRefB;
         TRefC *c = new TRefC;
 
-        std::cout << "Valids(a, a, a) :" << Turbo::Core::TReferenced::Valid(a, a, a) << std::endl;
-        std::cout << "Valids(a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c) << std::endl;
-        std::cout << "Valids(a, b, c, a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c, a, b, c) << std::endl;
-        std::cout << "Valids(a, c) :" << Turbo::Core::TReferenced::Valid(a, c) << std::endl;
-        std::cout << "Valids(c) :" << Turbo::Core::TReferenced::Valid(c) << std::endl;
-        // std::cout << "Valids() :" << Turbo::Core::TReferenced::Valids(nullptr) << std::endl;
+        std::vector<Turbo::Core::TReferenced *> refs_with_ptr;
+        refs_with_ptr.push_back(a);
+        refs_with_ptr.push_back(b);
+        refs_with_ptr.push_back(c);
+
+        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> refs_with_refptr;
+        refs_with_refptr.push_back(a);
+        refs_with_refptr.push_back(b);
+        refs_with_refptr.push_back(c);
+
+        TestVectorRefs(refs_with_ptr);
+        std::cout << "-----------" << std::endl;
+        TestVectorRefs(refs_with_refptr);
+
+        // std::cout << "Valids(a, a, a) :" << Turbo::Core::TReferenced::Valid(a, a, a) << std::endl;
+        // std::cout << "Valids(a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c) << std::endl;
+        // std::cout << "Valids(a, b, c, a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c, a, b, c) << std::endl;
+        // std::cout << "Valids(a, c) :" << Turbo::Core::TReferenced::Valid(a, c) << std::endl;
+        // std::cout << "Valids(c) :" << Turbo::Core::TReferenced::Valid(c) << std::endl;
+        //  std::cout << "Valids() :" << Turbo::Core::TReferenced::Valids(nullptr) << std::endl;
     }
 }

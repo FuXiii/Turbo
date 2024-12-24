@@ -1,5 +1,15 @@
 # 更新日志
 
+## Memo
+
+[备忘录](./docs/Memo.md)
+
+## 2024/12/24
+
+>* ``asset`` 文件夹下增加 ``global_wind.bin``，该文件内存有全球流场数据。
+>* 增加 ``gizmo`` 文件夹，用于存放乱七八糟的一些工具测试之类的代码。
+>* ``gizmo`` 下增加 ``GlobalWind.h/.cpp`` 文件，用于读取 ``global_wind.bin`` 文件。
+
 ## 2024/12/19
 
 >* ``TReferenced`` 下增加 ``static bool Valid(const TReferenced* ref)`` 静态函数。用于指针有效性检查。

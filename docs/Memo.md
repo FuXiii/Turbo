@@ -38,9 +38,10 @@
 ```CXX
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
     void CmdBindVertexBuffers(const std::vector<TBuffer *> &vertexBuffers = {});
-    //FIX::对于如上 vector<TRefPtr<TBuffer>/TBuffer *> 形参，考虑使用 模板：
+    //FIX::对于如上 vector<TRefPtr<TBuffer>/TBuffer *> 形参，考虑使用 模板，这样就不需要声明两个函数了，只需要声明一个模板函数即可：
     template<typename T>
     void CmdBindVertexBuffers(const std::vector<T> &vertexBuffers = {});//需要对 T 进行限制
+    //NOTE: 该方法编程方便，但可读性较差。
 ```
 
 ## 使用 TRefPtr<T>(ptr).Valid() 检查 ptr 的问题
