@@ -80,6 +80,10 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdBindPipeline(TPipeline *pipeline);
     void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets = {});
     void CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TDescriptorSet *> &descriptorSets = {});
+
+    //template <typename T>
+    //void CmdBindDescriptorSets(uint32_t firstSet, const T &descriptorSets = {});
+
     //[[deprecated]]void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
     void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
