@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2024/12/27
+
+>* 修正 ``TCommandBuffer`` 中对于 ``vector<TRefPtr<T>/T*>`` 使用，使用 ``模板`` 代替明确类型，类型推断交给编译器。
+>* 修正 ``TCommandBufferPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TComputePipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+
 ## 2024/12/24
 
 >* ``asset`` 文件夹下增加 ``global_wind.bin``，该文件内存有全球流场数据。

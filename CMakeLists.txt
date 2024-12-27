@@ -21,6 +21,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_BUILD_TYPE "debug")
 
+#add_compile_options(-w)
+
 add_subdirectory(./engine)
 add_subdirectory(./thirdparty)
 add_subdirectory(./samples)

@@ -94,8 +94,8 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
 
-    std::vector<TRefPtr<TShader>> shaders = this->GetShaders();
-    for (const TRefPtr<TShader> &shader_item : shaders)
+    std::vector<TShader *> shaders = this->GetShaders();
+    for (auto &shader_item : shaders)
     {
         VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
         vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

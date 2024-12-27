@@ -181,11 +181,16 @@ class TRefPtr
         return (this->ptr < rp.ptr);
     }
 
-    template <typename Inherit>
-    bool operator==(const TRefPtr<Inherit> &rp) const
-    {
-        return (this->ptr == rp.ptr);
-    }
+    // bool operator==(const TRefPtr<T> &rp) const
+    //{
+    //     return (this->ptr == rp.ptr);
+    // }
+
+    // template <typename Inherit>
+    // bool operator==(const TRefPtr<Inherit> &rp) const
+    //{
+    //     return (this->ptr == rp.ptr);
+    // }
 
     template <typename Inherit>
     bool operator!=(const TRefPtr<Inherit> &rp) const
@@ -194,19 +199,29 @@ class TRefPtr
     }
 
     template <typename Inherit>
-    bool operator<(const Inherit *ptr) const
+    bool operator<(Inherit *ptr) const
     {
         return (this->ptr < ptr);
     }
 
+    // bool operator==(T *ptr) const
+    //{
+    //     return (this->ptr == ptr);
+    // }
+
+    // bool operator==(const T *ptr) const
+    //{
+    //     return (this->ptr == ptr);
+    // }
+
     template <typename Inherit>
-    bool operator==(const Inherit *ptr) const
+    bool operator==(Inherit *ptr) const
     {
         return (this->ptr == ptr);
     }
 
     template <typename Inherit>
-    bool operator!=(const Inherit *ptr) const
+    bool operator!=(Inherit *ptr) const
     {
         return (this->ptr != ptr);
     }

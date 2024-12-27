@@ -50,7 +50,7 @@ void Turbo::Core::TVertexAttribute::SetOffset(uint32_t offset)
     this->offset = offset;
 }
 
-std::string Turbo::Core::TVertexAttribute::ToString()const
+std::string Turbo::Core::TVertexAttribute::ToString() const
 {
     return std::string();
 }
@@ -118,7 +118,7 @@ const std::vector<Turbo::Core::TVertexAttribute> &Turbo::Core::TVertexBinding::G
     return this->vertexAttributes;
 }
 
-std::string Turbo::Core::TVertexBinding::ToString()const
+std::string Turbo::Core::TVertexBinding::ToString() const
 {
     return std::string();
 }
@@ -127,10 +127,10 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
 
-    std::vector<TRefPtr<TShader>> shaders = this->GetShaders();
+    std::vector<TShader *> shaders = this->GetShaders();
     std::map<TRefPtr<TShader>, std::vector<VkSpecializationMapEntry>> shader_specialization_map_entry_map;
     std::map<TRefPtr<TShader>, VkSpecializationInfo> shader_specialization_info_map;
-    for (TRefPtr<TShader> &shader_item : shaders)
+    for (auto &shader_item : shaders)
     {
         const std::vector<TSpecializationConstant> &specialization_constants = shader_item->GetSpecializationConstants();
         const std::map<uint32_t, TShader::TConstValue> &specializations = shader_item->GetSpecializations();
@@ -1488,7 +1488,7 @@ float Turbo::Core::TGraphicsPipeline::GetLineWidth() const
     return this->lineWidth;
 }
 
-std::string Turbo::Core::TGraphicsPipeline::ToString()const
+std::string Turbo::Core::TGraphicsPipeline::ToString() const
 {
     return std::string();
 }

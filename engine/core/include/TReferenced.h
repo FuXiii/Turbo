@@ -45,15 +45,15 @@ class TReferenced
     };
 
     template <typename... T, std::enable_if_t<TCheckAllBaseOfReferenced<T...>::value, bool> = true>
-    static bool Valid(T *...ref)
+    static bool Valid(const T *...ref)
     {
         const std::size_t count = sizeof...(ref);
         if (count != 0)
         {
-            TReferenced *refs[count] = {ref...};
+            const TReferenced *refs[count] = {ref...};
             for (std::size_t index = 0; index < count; index++)
             {
-                TReferenced *ref_item = refs[index];
+                const TReferenced *ref_item = refs[index];
                 if (ref_item == nullptr || !ref_item->Valid())
                 {
                     return false;
