@@ -2,6 +2,7 @@
 #include <list>
 #include <type_traits>
 #include <vector>
+#include <forward_list>
 #include <TRefPtr.h>
 
 struct A_Test
@@ -68,21 +69,21 @@ class TRefC : public TRefB
     }
 };
 
-//void TestVectorRefs(const std::vector<Turbo::Core::TReferenced *> &refs)
+// void TestVectorRefs(const std::vector<Turbo::Core::TReferenced *> &refs)
 //{
-//    for (Turbo::Core::TReferenced *ref : refs)
-//    {
-//        std::cout << ref->Valid() << std::endl;
-//    }
-//}
+//     for (Turbo::Core::TReferenced *ref : refs)
+//     {
+//         std::cout << ref->Valid() << std::endl;
+//     }
+// }
 //
-//void TestVectorRefs(const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> &refs)
+// void TestVectorRefs(const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> &refs)
 //{
-//    for (Turbo::Core::TReferenced *ref : refs)
-//    {
-//        std::cout << ref->Valid() << std::endl;
-//    }
-//}
+//     for (Turbo::Core::TReferenced *ref : refs)
+//     {
+//         std::cout << ref->Valid() << std::endl;
+//     }
+// }
 
 template <typename T>
 void TestVectorRefs(const std::vector<T> &refs)
@@ -91,6 +92,20 @@ void TestVectorRefs(const std::vector<T> &refs)
     {
         std::cout << ref->Valid() << std::endl;
     }
+}
+
+class TRef : public Turbo::Core::TReferenced
+{
+};
+
+//void Test(const std::vector<TRef *> ref)
+//{
+//    std::cout << ref.size() << std::endl;
+//}
+
+void Test(const std::vector<Turbo::Core::TRefPtr<TRef>> ref)
+{
+    std::cout << ref.size() << std::endl;
 }
 
 int main()

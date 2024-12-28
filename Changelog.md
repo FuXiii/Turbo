@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2024/12/28
+
+>* 修正 ``TCommandBuffer`` 取消使用 ``模板`` （可读性较差）。
+>* 修正 ``TDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptorPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptor`` 中对于 ``TRefPtr`` 的冗余使用。
+
 ## 2024/12/27
 
 >* 修正 ``TCommandBuffer`` 中对于 ``vector<TRefPtr<T>/T*>`` 使用，使用 ``模板`` 代替明确类型，类型推断交给编译器。

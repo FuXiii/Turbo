@@ -4,6 +4,7 @@
 #include "TPipelineDescriptorSet.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
+#include "TPipelineLayout.h"
 
 Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptorType type, uint32_t count)
 {
@@ -161,9 +162,9 @@ void Turbo::Core::TDescriptorPool::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorPool(vk_device, this->vkDescriptorPool, allocator);
 }
 
-Turbo::Core::TDescriptorPool::TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->maxSetsCount = maxSetsCount;
@@ -327,13 +328,13 @@ Turbo::Core::TDescriptorPool::~TDescriptorPool()
     this->descriptorSizes.clear();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> &Turbo::Core::TDescriptorPool::Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout)
+Turbo::Core::TPipelineDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TPipelineLayout *pipelineLayout)
 {
     this->pipelineDescriptorSets.push_back(new Turbo::Core::TPipelineDescriptorSet(this, pipelineLayout));
     return this->pipelineDescriptorSets.back();
 }
 
-void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet)
+void Turbo::Core::TDescriptorPool::Free(TPipelineDescriptorSet *pipelineDescriptorSet)
 {
     // delete pipelineDescriptorSet;
     uint32_t index = 0;
@@ -352,18 +353,18 @@ void Turbo::Core::TDescriptorPool::Free(TRefPtr<TPipelineDescriptorSet> &pipelin
     {
         // delete this->commandBuffers[index];
         this->pipelineDescriptorSets.erase(this->pipelineDescriptorSets.begin() + index);
-        // pipelineDescriptorSet.Release(); // NOTE: It will force release memory
-
-        // NOTE: Now reference count should be 1
-        if (pipelineDescriptorSet.ReferenceCount() != 1)
-        {
-            // FIXME: maybe need throw a exception?
-        }
+        //// pipelineDescriptorSet.Release(); // NOTE: It will force release memory
+        //
+        //// NOTE: Now reference count should be 1
+        // if (pipelineDescriptorSet.ReferenceCount() != 1)
+        //{
+        //     // FIXME: maybe need throw a exception?
+        // }
         pipelineDescriptorSet = nullptr;
     }
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TDescriptorPool::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TDescriptorPool::GetDevice()
 {
     return this->device;
 }
