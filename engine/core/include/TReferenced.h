@@ -62,7 +62,6 @@ class TReferenced
         }
         return true;
     }
-
   protected:
     virtual ~TReferenced();
 };

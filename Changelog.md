@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2024/12/30
+
+>* 修正 ``TDescriptorSetLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDevice`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRefPtr`` 中增加 ``RefsToPtrs<T>(...)`` 函数。用于将 ``vector<TRefPtr<T>>`` 转成 ``vector<T*>`` 。
+>* 修正 ``TDeviceQueue`` 中对于 ``TRefPtr`` 的冗余使用。
+
 ## 2024/12/28
 
 >* 修正 ``TCommandBuffer`` 取消使用 ``模板`` （可读性较差）。

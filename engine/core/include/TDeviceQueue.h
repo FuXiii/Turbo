@@ -41,31 +41,32 @@ class TDeviceQueue : public TVulkanHandle
     VULKAN_DEVICE_API VULKAN_EXTENSION PFN_vkQueuePresentKHR vkQueuePresentKHR = nullptr;
 
   protected:
-    virtual void AddChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool);
-    virtual TRefPtr<TCommandBufferPool> RemoveChildHandle(const TRefPtr<TCommandBufferPool> &commandBufferPool);
+    virtual void AddChildHandle(TCommandBufferPool *commandBufferPool);
+    virtual void RemoveChildHandle(TCommandBufferPool *commandBufferPool);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDeviceQueue(const TRefPtr<TDevice> &device, TQueueFamilyInfo &queueFamily, uint32_t index);
+    explicit TDeviceQueue(TDevice *device, TQueueFamilyInfo &queueFamily, uint32_t index);
 
   protected:
     virtual ~TDeviceQueue();
 
   public:
     TQueueFamilyInfo GetQueueFamily() const;
-    const TRefPtr<TDevice> &GetDevice();
+    TDevice *GetDevice();
 
     VkQueue GetVkQueue();
 
-    bool Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence);
-    bool Submit(const TRefPtr<TCommandBuffer> &commandBuffer, const TRefPtr<TFence> &fence);
+    bool Submit(const std::vector<TSemaphore *> &waitSemaphores, const std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
+    bool Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
+    bool Submit(TCommandBuffer *commandBuffer, TFence *fence);
 
     void WaitIdle();
 
-    bool IsSupportSurface(const TRefPtr<Turbo::Extension::TSurface> &surface) const;
+    bool IsSupportSurface(Turbo::Extension::TSurface *surface) const;
 
-    TResult Present(const TRefPtr<Turbo::Extension::TSwapchain> &swapchain, uint32_t imageIndex);
+    TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex);
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

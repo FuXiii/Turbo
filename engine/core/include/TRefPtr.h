@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <type_traits>
 #include <cstdint>
-
+#include <vector>
 namespace Turbo
 {
 namespace Core
@@ -317,6 +317,22 @@ template <typename T, typename S>
 inline TRefPtr<T> ConstCast(const TRefPtr<S> &refPtr)
 {
     return const_cast<T *>(refPtr.Get());
+}
+
+template <typename T>
+std::vector<T *> RefsToPtrs(const std::vector<Turbo::Core::TRefPtr<T>> &refs)
+{
+    std::vector<T *> result;
+    size_t size = refs.size();
+    if (size != 0)
+    {
+        result.resize(size, nullptr);
+        for (size_t index = 0; index < size; index++)
+        {
+            result[index] = refs[index];
+        }
+    }
+    return result;
 }
 
 } // namespace Core

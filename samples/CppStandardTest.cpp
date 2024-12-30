@@ -98,19 +98,32 @@ class TRef : public Turbo::Core::TReferenced
 {
 };
 
-//void Test(const std::vector<TRef *> ref)
+// void Test(const std::vector<TRef *> ref)
 //{
-//    std::cout << ref.size() << std::endl;
-//}
+//     std::cout << ref.size() << std::endl;
+// }
 
 void Test(const std::vector<Turbo::Core::TRefPtr<TRef>> ref)
 {
     std::cout << ref.size() << std::endl;
 }
 
+bool Return(bool v) // Test clang and clangd
+{
+    if (v)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 int main()
 {
     std::cout << "Hello World" << std::endl;
+    std::cout << "Return: " << Return(true) << std::endl;
 
     bool is_class = std::is_class_v<A_Test>;
     std::cout << is_class << ":A_Test" << std::endl;
