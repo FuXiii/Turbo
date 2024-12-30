@@ -411,12 +411,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipeline(TPipeline *pipeline)
 
 void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TRefPtr<TDescriptorSet>> &descriptorSets)
 {
-    std::vector<TDescriptorSet *> descriptor_sets;
-    for (auto &item : descriptorSets)
-    {
-        descriptor_sets.push_back(item);
-    }
-    this->CmdBindDescriptorSets(firstSet, descriptor_sets);
+    this->CmdBindDescriptorSets(firstSet, Turbo::Core::RefsToPtrs(descriptorSets));
 }
 
 void Turbo::Core::TCommandBufferBase::CmdBindDescriptorSets(uint32_t firstSet, const std::vector<TDescriptorSet *> &descriptorSets)
@@ -503,13 +498,7 @@ void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(const std::vector<TBu
 
 void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers)
 {
-    std::vector<TBuffer *> vertex_buffers;
-    for (auto &item : vertexBuffers)
-    {
-        vertex_buffers.push_back(item);
-    }
-
-    this->CmdBindVertexBuffers(vertex_buffers);
+    this->CmdBindVertexBuffers(Turbo::Core::RefsToPtrs(vertexBuffers));
 }
 
 void Turbo::Core::TCommandBufferBase::CmdSetViewport(const std::vector<TViewport> &viewports)

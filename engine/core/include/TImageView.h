@@ -62,14 +62,14 @@ class TImageView : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    [[deprecated]] explicit TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
-    explicit TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    [[deprecated]] TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatInfo format, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
+    TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount);
 
   protected:
     virtual ~TImageView();
 
   public:
-    const TRefPtr<TImage> &GetImage();
+    TImage *GetImage();
 
     VkImageView GetVkImageView();
     TImageViewType GetViewType() const;

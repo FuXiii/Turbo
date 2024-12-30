@@ -48,7 +48,7 @@ const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSet>> &Turbo::Cor
     return this->descriptorSets;
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -65,15 +65,25 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers)
 {
-    std::vector<TRefPtr<TBuffer>> buffers;
+    this->BindData(set, binding, dstArrayElement, Turbo::Core::RefsToPtrs(buffers));
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+{
+    std::vector<TBuffer *> buffers;
     buffers.push_back(buffer);
 
     this->BindData(set, binding, dstArrayElement, buffers);
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
+{
+    this->BindData(set, binding, buffer.Get(), dstArrayElement);
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -90,7 +100,32 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
+{
+    std::vector<std::pair<TImageView *, TSampler *>> combined_image_samplers;
+    for (auto &item : combinedImageSamplers)
+    {
+        combined_image_samplers.push_back(std::make_pair(item.first.Get(), item.second.Get()));
+    }
+
+    this->BindData(set, binding, dstArrayElement, combined_image_samplers);
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const std::pair<TImageView *, TSampler *> &combinedImageSampler, uint32_t dstArrayElement)
+{
+    std::vector<std::pair<TImageView *, TSampler *>> combined_image_samplers;
+    combined_image_samplers.push_back(combinedImageSampler);
+
+    this->BindData(set, binding, dstArrayElement, combined_image_samplers);
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, const std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>> &combinedImageSampler, uint32_t dstArrayElement)
+{
+    std::pair<TImageView *, TSampler *> combined_image_sampler = std::make_pair(combinedImageSampler.first.Get(), combinedImageSampler.second.Get());
+    this->BindData(set, binding, combined_image_sampler, dstArrayElement);
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TImageView *> &imageViews)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -107,7 +142,22 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
 }
 
-void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &samplers)
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TImageView>> &imageViews)
+{
+    this->BindData(set, binding, dstArrayElement, Turbo::Core::RefsToPtrs(imageViews));
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, TImageView *imageView)
+{
+    std::vector<TImageView *> image_views;
+    image_views.push_back(imageView);
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const TRefPtr<TImageView> &imageViews)
+{
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TSampler *> &samplers)
 {
     for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
     {
@@ -122,6 +172,11 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
     std::stringstream ss;
     ss << "There not have TDescriptorSet set=" << set << " ,please check the number of set";
     throw Turbo::Core::TException(TResult::UNSUPPORTED, "Turbo::Core::TPipelineDescriptorSet::BindData", ss.str());
+}
+
+void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TSampler>> &samplers)
+{
+    this->BindData(set, binding, dstArrayElement, Turbo::Core::RefsToPtrs(samplers));
 }
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)

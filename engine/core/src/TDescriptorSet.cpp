@@ -107,13 +107,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers)
 {
-    std::vector<TBuffer *> temp_buffers;
-    for (auto &item : buffers)
-    {
-        temp_buffers.push_back(item);
-    }
-
-    this->BindData(binding, dstArrayElement, temp_buffers);
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(buffers));
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
@@ -162,9 +156,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     for (auto &item : combinedImageSamplers)
     {
         combined_image_samplers.push_back(std::make_pair(item.first.Get(), item.second.Get()));
-        // combined_image_samplers.push_back(std::make_pair(item.first, item.second));
     }
-
     this->BindData(binding, dstArrayElement, combined_image_samplers);
 }
 
@@ -231,13 +223,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TImageView>> &imageViews)
 {
-    std::vector<TImageView *> image_views;
-    for (auto &item : imageViews)
-    {
-        image_views.push_back(item);
-    }
-
-    this->BindData(binding, dstArrayElement, imageViews);
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(imageViews));
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TImageView *imageView, uint32_t dstArrayElement)
@@ -279,12 +265,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TSampler>> &samplers)
 {
-    std::vector<TSampler *> temp_samples;
-    for (auto &item : samplers)
-    {
-        temp_samples.push_back(item);
-    }
-    this->BindData(binding, dstArrayElement, samplers);
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(samplers));
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TSampler *sampler, uint32_t dstArrayElement)

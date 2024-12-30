@@ -31,9 +31,9 @@ void Turbo::Core::TPipelineCache::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyPipelineCache(vk_device, this->vkPipelineCache, allocator);
 }
 
-Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device)
+Turbo::Core::TPipelineCache::TPipelineCache(TDevice *device)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->size = 0;
@@ -46,9 +46,9 @@ Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device)
     }
 }
 
-Turbo::Core::TPipelineCache::TPipelineCache(const TRefPtr<TDevice> &device, size_t size, void *data)
+Turbo::Core::TPipelineCache::TPipelineCache(TDevice *device, size_t size, void *data)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->size = 0;

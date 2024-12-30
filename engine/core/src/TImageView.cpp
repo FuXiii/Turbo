@@ -71,9 +71,9 @@ Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType
     }
 }
 
-Turbo::Core::TImageView::TImageView(const TRefPtr<TImage> &image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+Turbo::Core::TImageView::TImageView(TImage *image, TImageViewType viewType, TFormatType formatType, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
-    if (image.Valid())
+    if (Turbo::Core::TReferenced::Valid(image))
     {
         TPhysicalDevice *physical_device = image->GetDevice()->GetPhysicalDevice();
         if (physical_device->IsSupportFormat(formatType))
@@ -106,7 +106,7 @@ Turbo::Core::TImageView::~TImageView()
     this->InternalDestroy();
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TImage> &Turbo::Core::TImageView::GetImage()
+Turbo::Core::TImage *Turbo::Core::TImageView::GetImage()
 {
     return this->image;
 }

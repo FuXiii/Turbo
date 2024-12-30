@@ -127,13 +127,13 @@ class TPhysicalDevice : public TVulkanHandle
     void EnumerateFromat();
 
   protected:
-    virtual void AddChildHandle(const TRefPtr<TDevice> &device);
-    virtual TRefPtr<TDevice> RemoveChildHandle(const TRefPtr<TDevice> &device);
+    virtual void AddChildHandle(TDevice *device);
+    virtual void RemoveChildHandle(TDevice *device);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
 
   public:
-    explicit TPhysicalDevice(const TRefPtr<TInstance> &instance, uint32_t index);
+    TPhysicalDevice(TInstance *instance, uint32_t index);
 
   protected:
     virtual ~TPhysicalDevice();
@@ -204,7 +204,7 @@ class TPhysicalDevice : public TVulkanHandle
 
     uint32_t GetPerformanceScore() const;
 
-    const TRefPtr<TInstance> &GetInstance();
+    TInstance *GetInstance();
 
     uint32_t GetAvailableQueueCount(TQueueFamilyInfo &queueFamily) const;
 
