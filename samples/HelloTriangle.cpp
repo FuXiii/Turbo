@@ -236,7 +236,7 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> swapchain_images = swapchain->GetImages();
+    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
     for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
@@ -733,7 +733,7 @@ int main()
 
                 // recreate swapchain image views
                 swapchain_images = swapchain->GetImages();
-                for (Turbo::Core::TRefPtr<Turbo::Core::TImage> &swapchain_image_item : swapchain_images)
+                for (auto &swapchain_image_item : swapchain_images)
                 {
                     Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                     swapchain_image_views.push_back(swapchain_view);
@@ -813,7 +813,7 @@ int main()
 
             // recreate swapchain image views
             swapchain_images = swapchain->GetImages();
-            for (Turbo::Core::TRefPtr<Turbo::Core::TImage> &swapchain_image_item : swapchain_images)
+            for (auto &swapchain_image_item : swapchain_images)
             {
                 Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                 swapchain_image_views.push_back(swapchain_view);

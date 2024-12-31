@@ -162,7 +162,7 @@ void Turbo::Core::TDescriptorPool::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorPool(vk_device, this->vkDescriptorPool, allocator);
 }
 
-Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsCount, const std::vector<TDescriptorSize> &descriptorSizes) : Turbo::Core::TVulkanHandle()
 {
     if (Turbo::Core::TReferenced::Valid(device))
     {
@@ -182,7 +182,7 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
         uint32_t input_attachment_count = 0;
         uint32_t acceleration_structure_count = 0;
 
-        for (TDescriptorSize &descriptor_size_item : descriptorSizes)
+        for (const TDescriptorSize &descriptor_size_item : descriptorSizes)
         {
             switch (descriptor_size_item.GetDescriptorType())
             {

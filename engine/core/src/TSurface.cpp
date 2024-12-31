@@ -227,9 +227,9 @@ void Turbo::Extension::TSurface::InternalDestroy()
 }
 
 #if defined(TURBO_PLATFORM_WINDOWS)
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -272,9 +272,9 @@ Turbo::Extension::TSurface::TSurface(...)
 {
 }
 #elif defined(TURBO_PLATFORM_ANDROID)
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, ANativeWindow *window)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, ANativeWindow *window)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -311,9 +311,9 @@ Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDe
     }
 }
 #elif defined(TURBO_PLATFORM_LINUX)
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, wl_display *display, wl_surface *surface)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -353,9 +353,9 @@ Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDe
     }
 }
 
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, xcb_connection_t *connection, xcb_window_t window)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -395,9 +395,9 @@ Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDe
     }
 }
 
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, Display *dpy, Window window)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->isExternalHandle = false;
         this->device = device;
@@ -444,9 +444,9 @@ Turbo::Extension::TSurface::TSurface(...)
 #else
 #endif
 
-Turbo::Extension::TSurface::TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR)
 {
-    if (device.Valid() && vkSurfaceKHR != VK_NULL_HANDLE)
+    if (Turbo::Core::TReferenced::Valid(device) && vkSurfaceKHR != VK_NULL_HANDLE)
     {
         this->isExternalHandle = true;
         this->externalVkAllocationCallbacks = pAllocator;
@@ -1007,7 +1007,7 @@ Turbo::Core::TImageUsages Turbo::Extension::TSurface::GetSupportedUsages() const
     return this->supportedUsageFlags;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Extension::TSurface::GetDevice()
+Turbo::Core::TDevice *Turbo::Extension::TSurface::GetDevice()
 {
     return this->device;
 }

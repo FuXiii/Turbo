@@ -467,9 +467,9 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(TPipelineDesc
         return;
     }
 
-    std::vector<TRefPtr<Turbo::Core::TDescriptorSet>> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
+    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
 
-    for (TRefPtr<Turbo::Core::TDescriptorSet> &descriptor_set_item : descriptor_sets)
+    for (Turbo::Core::TDescriptorSet *descriptor_set_item : descriptor_sets)
     {
         uint32_t first_set = descriptor_set_item->GetSet();
         std::vector<Turbo::Core::TDescriptorSet *> descriptor_set{descriptor_set_item};

@@ -4,12 +4,45 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2024/12/31
+
+>* 更新 ``TPipelineDescriptorSet`` 中增加对单一资源的绑定。
+>* 更新 ``TRefPtr`` 中增加 ``PtrsToRefs<T>`` 函数。用于将指针型数组转成计数引用数组。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptorPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFramebuffer`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRenderingPipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRenderPass`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSampler`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSemaphore`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TShader`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSurface`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSwapchain`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVmaAllocator`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVulkanAllocator`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVulkanLoader`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``sample`` 下示例，适配 ``TRefPtr`` 的冗余使用。
+
 ## 2024/12/30
 
 >* 修正 ``TDescriptorSetLayout`` 中对于 ``TRefPtr`` 的冗余使用。
 >* 修正 ``TDevice`` 中对于 ``TRefPtr`` 的冗余使用。
 >* 修正 ``TRefPtr`` 中增加 ``RefsToPtrs<T>(...)`` 函数。用于将 ``vector<TRefPtr<T>>`` 转成 ``vector<T*>`` 。
 >* 修正 ``TDeviceQueue`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFence`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFormatInfo`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFramebuffer`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TGraphicsPipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TImage`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TImageView`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TInstance`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TLayerInfo`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPhysicalDevice`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineCache`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
 
 ## 2024/12/28
 

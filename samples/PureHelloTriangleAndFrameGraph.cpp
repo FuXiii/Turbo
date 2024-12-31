@@ -211,17 +211,17 @@ int main()
                     temp_context->Wait(UINT64_MAX);
                     // TODO: present
                     uint32_t index = UINT32_MAX;
-                    Turbo::Core::TFence *acquire_next_image_fence = new Turbo::Core::TFence(temp_context->GetDevice());
+                    Turbo::Core::TRefPtr<Turbo::Core::TFence> acquire_next_image_fence = new Turbo::Core::TFence(temp_context->GetDevice());
                     Turbo::Core::TResult result = swapchain->AcquireNextImageUntil(nullptr, acquire_next_image_fence, &index);
                     acquire_next_image_fence->WaitUntil();
-                    delete acquire_next_image_fence;
+                    // delete acquire_next_image_fence;
                     if (result == Turbo::Core::TResult::SUCCESS)
                     {
                         // TODO:Blit Image
 
                         auto show_target = swapchain_image_views[index];
 
-                        Turbo::Core::TFence *fence = new Turbo::Core::TFence(temp_context->GetDevice());
+                        Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(temp_context->GetDevice());
                         Turbo::Core::TCommandBuffer *cb = temp_context->AllocateCommandBuffer();
                         cb->Begin();
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::GENERAL, show_target);
@@ -229,11 +229,10 @@ int main()
                         cb->CmdBlitImage(temp_context->GetTextureImage(color_texture), Turbo::Core::TImageLayout::GENERAL, show_target->GetImage(), Turbo::Core::TImageLayout::GENERAL, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, current_width, current_height, 1, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1);
                         cb->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::GENERAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, show_target);
                         cb->End();
-                        temp_context->GetDeviceQueue()->Submit(nullptr, nullptr, cb, fence);
+                        temp_context->GetDeviceQueue()->Submit(cb, fence);
 
                         fence->WaitUntil();
 
-                        delete fence;
                         temp_context->FreeCommandBuffer(cb);
                         Turbo::Core::TResult result = temp_context->GetDeviceQueue()->Present(swapchain, index);
                         switch (result)
@@ -244,10 +243,10 @@ int main()
 
                             swapchain_images.clear();
 
-                            for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
-                            {
-                                delete swapchain_image_view_item;
-                            }
+                            // for (Turbo::Core::TImageView *swapchain_image_view_item : swapchain_image_views)
+                            //{
+                            //     delete swapchain_image_view_item;
+                            // }
 
                             swapchain_image_views.clear();
 

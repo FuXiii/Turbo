@@ -315,7 +315,7 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> swapchain_images = swapchain->GetImages();
+    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
     for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
@@ -1035,9 +1035,9 @@ int main()
 
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     descriptor_pool->Free(pipeline_descriptor_set);
-    
+
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

@@ -40,7 +40,7 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
 
     TRenderPass *GetRenderPass();
 
-    const std::vector<TImageView *> &GetAttachments();
+    std::vector<TImageView *> GetAttachments();
 
   public:
     virtual std::string ToString() const override;

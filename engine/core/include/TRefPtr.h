@@ -322,17 +322,33 @@ inline TRefPtr<T> ConstCast(const TRefPtr<S> &refPtr)
 template <typename T>
 std::vector<T *> RefsToPtrs(const std::vector<Turbo::Core::TRefPtr<T>> &refs)
 {
-    std::vector<T *> result;
+    std::vector<T *> ptrs;
     size_t size = refs.size();
     if (size != 0)
     {
-        result.resize(size, nullptr);
+        ptrs.resize(size, nullptr);
         for (size_t index = 0; index < size; index++)
         {
-            result[index] = refs[index];
+            ptrs[index] = refs[index];
         }
     }
-    return result;
+    return ptrs;
+}
+
+template <typename T>
+std::vector<Turbo::Core::TRefPtr<T>> PtrsToRefs(const std::vector<T *> &ptrs)
+{
+    std::vector<Turbo::Core::TRefPtr<T>> refs;
+    size_t size = ptrs.size();
+    if (size != 0)
+    {
+        refs.resize(size, nullptr);
+        for (size_t index = 0; index < size; index++)
+        {
+            refs[index] = ptrs[index];
+        }
+    }
+    return refs;
 }
 
 } // namespace Core

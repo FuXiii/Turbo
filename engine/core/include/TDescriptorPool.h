@@ -47,7 +47,7 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
 
   public:
     // TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
-    TDescriptorPool(TDevice *device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
+    TDescriptorPool(TDevice *device, uint32_t maxSetsCount,const std::vector<TDescriptorSize> &descriptorSizes);
 
   protected:
     virtual ~TDescriptorPool();

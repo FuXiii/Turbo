@@ -53,9 +53,24 @@ void Turbo::Core::TPipelineLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
 }
 
-Turbo::Core::TPipelineLayout::TPipelineLayout(const TRefPtr<TDevice> &device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
+Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
+    {
+        this->device = device;
+        this->descriptorSetLayouts = Turbo::Core::PtrsToRefs(descriptorSetLayouts);
+        this->pushConstantDescriptors = pushConstantDescriptors;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
+    }
+}
+
+Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
+{
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->descriptorSetLayouts = descriptorSetLayouts;
@@ -78,9 +93,9 @@ Turbo::Core::TPipelineLayout::~TPipelineLayout()
     }
 }
 
-const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout>> &Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
+std::vector<Turbo::Core::TDescriptorSetLayout *> Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
 {
-    return this->descriptorSetLayouts;
+    return Turbo::Core::RefsToPtrs(this->descriptorSetLayouts);
 }
 
 const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TPipelineLayout::GetPushConstantDescriptors()

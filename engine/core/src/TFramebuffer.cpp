@@ -88,7 +88,7 @@ Turbo::Core::TRenderPass *Turbo::Core::TFramebuffer::GetRenderPass()
     return this->renderPass;
 }
 
-const std::vector<Turbo::Core::TImageView *> &Turbo::Core::TFramebuffer::GetAttachments()
+std::vector<Turbo::Core::TImageView *> Turbo::Core::TFramebuffer::GetAttachments()
 {
     return Turbo::Core::RefsToPtrs(this->attachments);
 }

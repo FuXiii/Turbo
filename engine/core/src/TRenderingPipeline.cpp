@@ -9,7 +9,7 @@
 #include "TImageView.h"
 // #include "vulkan/vulkan_core.h"
 
-void Turbo::Core::TRenderingAttachments::AddColorAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, const TRefPtr<TImageView> &resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::AddColorAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
 {
     TRenderingAttachment rendering_attachment = {};
     rendering_attachment.imageView = imageView;
@@ -23,12 +23,12 @@ void Turbo::Core::TRenderingAttachments::AddColorAttachment(const TRefPtr<TImage
     this->colorAttachments.push_back(rendering_attachment);
 }
 
-void Turbo::Core::TRenderingAttachments::AddColorAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::AddColorAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
 {
     this->AddColorAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
 }
 
-void Turbo::Core::TRenderingAttachments::SetDepthAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, const TRefPtr<TImageView> &resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::SetDepthAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
 {
     this->depthAttachment.imageView = imageView;
     this->depthAttachment.layout = layout;
@@ -39,12 +39,12 @@ void Turbo::Core::TRenderingAttachments::SetDepthAttachment(const TRefPtr<TImage
     this->depthAttachment.storeOp = storeOp;
 }
 
-void Turbo::Core::TRenderingAttachments::SetDepthAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::SetDepthAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
 {
     this->SetDepthAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
 }
 
-void Turbo::Core::TRenderingAttachments::SetStencilAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, const TRefPtr<TImageView> &resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::SetStencilAttachment(TImageView *imageView, TImageLayout layout, TImageView *resolveImageView, TImageLayout resolveLayout, TResolveModeBits resolveModeBits, TLoadOp loadOp, TStoreOp storeOp)
 {
     this->stencilAttachment.imageView = imageView;
     this->stencilAttachment.layout = layout;
@@ -55,7 +55,7 @@ void Turbo::Core::TRenderingAttachments::SetStencilAttachment(const TRefPtr<TIma
     this->stencilAttachment.storeOp = storeOp;
 }
 
-void Turbo::Core::TRenderingAttachments::SetStencilAttachment(const TRefPtr<TImageView> &imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
+void Turbo::Core::TRenderingAttachments::SetStencilAttachment(TImageView *imageView, TImageLayout layout, TLoadOp loadOp, TStoreOp storeOp)
 {
     this->SetStencilAttachment(imageView, layout, nullptr, TImageLayout::UNDEFINED, TResolveModeBits::NONE, loadOp, storeOp);
 }
@@ -381,7 +381,7 @@ void Turbo::Core::TRenderingPipeline::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TAttachmentsFormat &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TFragmentShader> &fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
+Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TAttachmentsFormat &renderingAttachments, std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
 {
     Turbo::Core::TPhysicalDeviceFeatures physical_device_feature = vertexShader->GetDevice()->GetEnableDeviceFeatures();
     if (physical_device_feature.dynamicRendering)

@@ -22,7 +22,7 @@ class TSemaphore : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TSemaphore(const TRefPtr<TDevice> &device, TPipelineStages waitDstStageMask);
+    TSemaphore(TDevice*device, TPipelineStages waitDstStageMask);
 
   protected:
     virtual ~TSemaphore();

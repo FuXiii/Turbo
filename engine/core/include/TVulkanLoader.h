@@ -350,27 +350,27 @@ class TVulkanLoader : public TObject
     Function Load(void *context, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = nullptr);
 
   public:
-    static TRefPtr<TVulkanLoader> Instance();
+    static TVulkanLoader *Instance();
     static void Destroy();
 
     static TVersion GetVulkanVersion();
 
     template <typename Function>
-    Function LoadInstanceFunction(const TRefPtr<TInstance> &instance, const char *name);
+    Function LoadInstanceFunction(TInstance *instance, const char *name);
 
     template <typename Function>
     Function LoadInstanceFunction(VkInstance instance, const char *name);
 
     template <typename Function>
-    Function LoadDeviceFunction(const TRefPtr<TDevice> &device, const char *name);
+    Function LoadDeviceFunction(TDevice *device, const char *name);
 
     template <typename Function>
     Function LoadDeviceFunction(VkDevice device, const char *name, PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr);
 
     TGlobalDriver LoadGlobalDriver();
-    TInstanceDriver LoadInstanceDriver(const TRefPtr<TInstance> &instance);
-    TPhysicalDeviceDriver LoadPhysicalDeviceDriver(const TRefPtr<TPhysicalDevice> &physicalDevice);
-    TDeviceDriver LoadDeviceDriver(const TRefPtr<TDevice> &device);
+    TInstanceDriver LoadInstanceDriver(TInstance *instance);
+    TPhysicalDeviceDriver LoadPhysicalDeviceDriver(TPhysicalDevice *physicalDevice);
+    TDeviceDriver LoadDeviceDriver(TDevice *device);
 
     virtual std::string ToString() const override;
 };
@@ -409,7 +409,7 @@ Function Turbo::Core::TVulkanLoader::Load(void *context, const char *name, PFN_v
 }
 
 template <typename Function>
-Function Turbo::Core::TVulkanLoader::LoadInstanceFunction(const TRefPtr<TInstance> &instance, const char *name)
+Function Turbo::Core::TVulkanLoader::LoadInstanceFunction(TInstance *instance, const char *name)
 {
     return this->LoadInstanceFunction<Function>(instance->GetVkInstance(), name);
 }
@@ -421,7 +421,7 @@ Function Turbo::Core::TVulkanLoader::LoadInstanceFunction(VkInstance instance, c
 }
 
 template <typename Function>
-Function Turbo::Core::TVulkanLoader::LoadDeviceFunction(const TRefPtr<TDevice> &device, const char *name)
+Function Turbo::Core::TVulkanLoader::LoadDeviceFunction(TDevice *device, const char *name)
 {
     PFN_vkGetDeviceProcAddr vk_get_device_proc_addr = device->GetPhysicalDevice()->GetInstance()->GetInstanceDriver()->vkGetDeviceProcAddr;
     return this->LoadDeviceFunction<Function>(device->GetVkDevice(), name, vk_get_device_proc_addr);
