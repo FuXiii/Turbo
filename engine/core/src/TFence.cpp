@@ -29,9 +29,9 @@ void Turbo::Core::TFence::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyFence(vk_device, this->vkFence, allocator);
 }
 
-Turbo::Core::TFence::TFence(const TRefPtr<TDevice> &device)
+Turbo::Core::TFence::TFence(TDevice *device)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->InternalCreate();
@@ -47,7 +47,7 @@ Turbo::Core::TFence::~TFence()
     this->InternalDestroy();
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TFence::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TFence::GetDevice()
 {
     return this->device;
 }
@@ -93,9 +93,9 @@ bool Turbo::Core::TFence::Valid() const
     return false;
 }
 
-void Turbo::Core::TFences::Add(const TRefPtr<TFence> &fence)
+void Turbo::Core::TFences::Add(TFence *fence)
 {
-    if (fence.Valid())
+    if (Turbo::Core::TReferenced::Valid(fence))
     {
         TDevice *device = fence->GetDevice();
         this->fenceMap[device].push_back(fence);

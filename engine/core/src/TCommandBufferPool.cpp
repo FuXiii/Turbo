@@ -7,12 +7,12 @@
 #include "TVulkanLoader.h"
 #include <stdint.h>
 
-void Turbo::Core::TCommandBufferPool::AddChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer)
+void Turbo::Core::TCommandBufferPool::AddChildHandle(TCommandBuffer *commandBuffer)
 {
     // Nothing to do, this is duty to Allocate()
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> Turbo::Core::TCommandBufferPool::RemoveChildHandle(const TRefPtr<TCommandBuffer> &commandBuffer)
+Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::RemoveChildHandle(TCommandBuffer *commandBuffer)
 {
     // Nothing to do, this is duty to TPool
     return nullptr;
@@ -69,9 +69,9 @@ void Turbo::Core::TCommandBufferPool::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyCommandPool(vk_device, this->vkCommandPool, allocator);
 }
 
-bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandBufferBase)
+bool Turbo::Core::TCommandBufferPool::Free(const TCommandBufferBase *commandBufferBase)
 {
-    if (commandBufferBase.Valid())
+    if (Turbo::Core::TReferenced::Valid(commandBufferBase))
     {
         switch (commandBufferBase->GetLevel())
         {
@@ -82,7 +82,7 @@ bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandB
                 {
                     this->commandBuffers.erase(this->commandBuffers.begin() + command_buffer_index);
                     // commandBufferBase.Release(); // NOTE: It will force release memory
-                    commandBufferBase = nullptr;
+                    // commandBufferBase = nullptr;
                     return true;
                 }
             }
@@ -95,7 +95,7 @@ bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandB
                 {
                     this->secondaryCommandBuffers.erase(this->secondaryCommandBuffers.begin() + secondary_command_buffer_index);
                     // commandBufferBase.Release(); // NOTE: It will force release memory
-                    commandBufferBase = nullptr;
+                    // commandBufferBase = nullptr;
                     return true;
                 }
             }
@@ -107,15 +107,14 @@ bool Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBufferBase> &commandB
     return false;
 }
 
-Turbo::Core::TCommandBufferPool::TCommandBufferPool(const TRefPtr<TDeviceQueue> &deviceQueue) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TCommandBufferPool::TCommandBufferPool(TDeviceQueue *deviceQueue) : Turbo::Core::TVulkanHandle()
 {
     // if (deviceQueue != nullptr && deviceQueue->GetVkQueue() != VK_NULL_HANDLE)
-    if (deviceQueue.Valid())
+    // if (deviceQueue.Valid())
+    if (Turbo::Core::TReferenced::Valid(deviceQueue))
     {
         this->deviceQueue = deviceQueue;
-
         this->InternalCreate();
-
         this->deviceQueue->AddChildHandle(this);
     }
     else
@@ -138,49 +137,49 @@ Turbo::Core::TCommandBufferPool::~TCommandBufferPool()
     this->InternalDestroy();
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> &Turbo::Core::TCommandBufferPool::Allocate()
+Turbo::Core::TCommandBuffer *Turbo::Core::TCommandBufferPool::Allocate()
 {
     this->commandBuffers.push_back(new TCommandBuffer(this));
     return this->commandBuffers.back();
 }
 
-void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TCommandBuffer> &commandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TCommandBuffer *commandBuffer)
 {
     // OLD: this->Free(static_cast<TCommandBufferBase *>(commandBuffer));
-    TRefPtr<TCommandBufferBase> command_buffer_base = commandBuffer;
-    if (this->Free(command_buffer_base))
+    // TRefPtr<TCommandBufferBase> command_buffer_base = commandBuffer;
+    if (this->Free((TCommandBufferBase *)commandBuffer))
     {
         // NOTE: Now reference count should be 1
-        if (commandBuffer.ReferenceCount() != 1)
-        {
-            // FIXME: maybe need throw a exception?
-        }
-        commandBuffer = nullptr;
+        // if (commandBuffer.ReferenceCount() != 1)
+        //{
+        //    // FIXME: maybe need throw a exception?
+        //}
+        // commandBuffer = nullptr;
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TSecondaryCommandBuffer> &Turbo::Core::TCommandBufferPool::AllocateSecondary()
+Turbo::Core::TSecondaryCommandBuffer *Turbo::Core::TCommandBufferPool::AllocateSecondary()
 {
     this->secondaryCommandBuffers.push_back(new TSecondaryCommandBuffer(this));
     return this->secondaryCommandBuffers.back();
 }
 
-void Turbo::Core::TCommandBufferPool::Free(TRefPtr<TSecondaryCommandBuffer> &secondaryCommandBuffer)
+void Turbo::Core::TCommandBufferPool::Free(TSecondaryCommandBuffer *secondaryCommandBuffer)
 {
     // OLD: this->Free(static_cast<TCommandBufferBase *>(secondaryCommandBuffer));
-    TRefPtr<TCommandBufferBase> command_buffer_base = secondaryCommandBuffer;
-    if (this->Free(command_buffer_base))
+    // TRefPtr<TCommandBufferBase> command_buffer_base = secondaryCommandBuffer;
+    if (this->Free((TCommandBufferBase *)secondaryCommandBuffer))
     {
         // NOTE: Now reference count should be 1
-        if (secondaryCommandBuffer.ReferenceCount() != 1)
-        {
-            // FIXME: maybe need throw a exception?
-        }
-        secondaryCommandBuffer = nullptr;
+        // if (secondaryCommandBuffer.ReferenceCount() != 1)
+        //{
+        //    // FIXME: maybe need throw a exception?
+        //}
+        // secondaryCommandBuffer = nullptr;
     }
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> &Turbo::Core::TCommandBufferPool::GetDeviceQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TCommandBufferPool::GetDeviceQueue()
 {
     return this->deviceQueue;
 }

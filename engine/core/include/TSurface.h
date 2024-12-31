@@ -193,21 +193,21 @@ class TSurface : public Turbo::Core::TVulkanHandle
 
   public:
 #if defined(TURBO_PLATFORM_WINDOWS)
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, HINSTANCE hinstance, HWND hwnd);
+    explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
     explicit TSurface(...);
 #elif defined(TURBO_PLATFORM_ANDROID)
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
+    explicit TSurface(Turbo::Core::TDevice *device, ANativeWindow *window); // FIXME:VK_KHR_ANDROID_SURFACE
 #elif defined(TURBO_PLATFORM_LINUX)
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, wl_display *display, wl_surface *surface);
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, xcb_connection_t *connection, xcb_window_t window);
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, Display *dpy, Window window);
+    explicit TSurface(Turbo::Core::TDevice *device, wl_display *display, wl_surface *surface);
+    explicit TSurface(Turbo::Core::TDevice *device, xcb_connection_t *connection, xcb_window_t window);
+    explicit TSurface(Turbo::Core::TDevice *device, Display *dpy, Window window);
 #elif defined(__unix) || defined(__unix__)
     explicit TSurface(...);
 #else
 #endif
     // TDevice *device and vkSurfaceKHR should come frome same VkInstance,and make sure you had open the correct extensions
-    explicit TSurface(const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR);
+    explicit TSurface(Turbo::Core::TDevice *device, const VkAllocationCallbacks *pAllocator, VkSurfaceKHR vkSurfaceKHR);
 
   protected:
     virtual ~TSurface();
@@ -257,7 +257,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     Turbo::Extension::TCompositeAlphas GetSupportedCompositeAlpha() const;
     Turbo::Core::TImageUsages GetSupportedUsages() const;
 
-    const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &GetDevice();
+    Turbo::Core::TDevice *GetDevice();
 
     // Inherited via TObject
     virtual std::string ToString() const override;

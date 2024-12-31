@@ -335,8 +335,8 @@ class TFormatInfo : public TInfo
     TFormatProperties formatProperties = {};
 
   public:
-    static std::vector<TFormatInfo> GetSupportFormats(const TRefPtr<TPhysicalDevice> &physicalDevice);
-    static bool IsSupportFormat(const TRefPtr<TPhysicalDevice> &physicalDevice, TFormatType formatType);
+    static std::vector<TFormatInfo> GetSupportFormats(TPhysicalDevice *physicalDevice);
+    static bool IsSupportFormat(TPhysicalDevice *physicalDevice, TFormatType formatType);
 
   public:
     TFormatInfo();

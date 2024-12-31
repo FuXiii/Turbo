@@ -166,7 +166,7 @@ void Turbo::Core::TImage::InternalDestroy()
     }
 }
 
-Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TImage::TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout) : Turbo::Core::TVulkanHandle()
 {
     this->device = device;
     this->vkImage = vkImage;
@@ -212,9 +212,9 @@ Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags i
     }
 }
 
-Turbo::Core::TImage::TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
+Turbo::Core::TImage::TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         TPhysicalDevice *physical_device = device->GetPhysicalDevice();
         if (physical_device->IsSupportFormat(formatType))
@@ -268,7 +268,7 @@ Turbo::Core::TFormatInfo Turbo::Core::TImage::GetFormat() const
     return this->format;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TImage::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TImage::GetDevice()
 {
     return this->device;
 }

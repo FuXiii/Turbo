@@ -65,7 +65,7 @@ class TDescriptor : public Turbo::Core::TInfo
     std::string name;
 
   public:
-    TDescriptor(const TRefPtr<TShader> &shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
   public:
@@ -76,7 +76,7 @@ class TDescriptor : public Turbo::Core::TInfo
     uint32_t GetSet() const;
     uint32_t GetBinding() const;
     const std::string &GetName() const;
-    const TRefPtr<TShader> &GetShader();
+    TShader *GetShader();
 
   public:
     virtual std::string ToString() const override;
@@ -123,7 +123,7 @@ class TUniformBufferDescriptor : public TDescriptor
     std::vector<TStructMember> members;
 
   public:
-    TUniformBufferDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
+    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
     ~TUniformBufferDescriptor();
 
     uint32_t GetSize() const;
@@ -133,7 +133,7 @@ class TUniformBufferDescriptor : public TDescriptor
 class TStorageBufferDescriptor : public TDescriptor
 {
   public:
-    TStorageBufferDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TStorageBufferDescriptor();
 };
 
@@ -142,7 +142,7 @@ class TCombinedImageSamplerDescriptor : public TDescriptor
 {
   private:
   public:
-    TCombinedImageSamplerDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TCombinedImageSamplerDescriptor();
 };
 
@@ -151,7 +151,7 @@ class TSampledImageDescriptor : public TDescriptor
 {
   private:
   public:
-    TSampledImageDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TSampledImageDescriptor();
 };
 
@@ -159,14 +159,14 @@ class TSampledImageDescriptor : public TDescriptor
 class TSamplerDescriptor : public TDescriptor
 {
   public:
-    TSamplerDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TSamplerDescriptor();
 };
 
 class TPushConstantDescriptor : public TUniformBufferDescriptor
 {
   public:
-    TPushConstantDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
+    TPushConstantDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
     ~TPushConstantDescriptor();
 };
 
@@ -177,7 +177,7 @@ class TInputAttachmentDescriptor : public TDescriptor
     uint32_t index;
 
   public:
-    TInputAttachmentDescriptor(uint32_t index, const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TInputAttachmentDescriptor();
 
     uint32_t GetIndex() const;
@@ -188,7 +188,7 @@ class TStorageImageDescriptor : public TDescriptor
 {
   private:
   public:
-    TStorageImageDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TStorageImageDescriptor();
 };
 
@@ -196,7 +196,7 @@ class TAccelerationStructureDescriptor : public TDescriptor
 {
   private:
   public:
-    TAccelerationStructureDescriptor(const TRefPtr<TShader> &shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TAccelerationStructureDescriptor();
 };
 } // namespace Core

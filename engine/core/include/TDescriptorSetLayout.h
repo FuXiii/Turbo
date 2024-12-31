@@ -23,7 +23,8 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors);
+    // TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors);
+    TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors);
 
   protected:
     virtual ~TDescriptorSetLayout();

@@ -671,7 +671,7 @@ bool Turbo::Render::TFramebufferPool::Find(Turbo::Render::TRenderPass &renderPas
         Turbo::Core::TFramebuffer *core_frame_buffer = frame_buffer_item;
         if (core_frame_buffer != nullptr && renderPass.renderPass != nullptr)
         {
-            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> frame_buffer_attachments = core_frame_buffer->GetAttachments();
+            std::vector<Turbo::Core::TImageView*> frame_buffer_attachments = core_frame_buffer->GetAttachments();
             std::vector<Turbo::Render::TImage> render_pass_attachments = renderPass.GetAttachments();
 
             uint32_t frame_buffer_attachment_count = frame_buffer_attachments.size();

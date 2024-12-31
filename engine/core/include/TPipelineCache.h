@@ -29,8 +29,8 @@ class TPipelineCache : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipelineCache(const TRefPtr<TDevice> &device);
-    TPipelineCache(const TRefPtr<TDevice> &device, size_t size, void *data);
+    TPipelineCache(TDevice *device);
+    TPipelineCache(TDevice *device, size_t size, void *data);
 
   protected:
     virtual ~TPipelineCache();

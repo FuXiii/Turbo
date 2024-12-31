@@ -110,11 +110,11 @@ class TImage : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   private:
-    TImage(const TRefPtr<TDevice> &device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout); // for swapchain
+    TImage(TDevice *device, VkImage vkImage, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TImageLayout layout); // for swapchain
 
   public:
-    [[deprecated]] explicit TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
-    explicit TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
+    [[deprecated]] TImage(const TRefPtr<TDevice> &device, VkImageCreateFlags imageFlags, TImageType type, TFormatInfo format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
+    TImage(TDevice *device, VkImageCreateFlags imageFlags, TImageType type, TFormatType formatType, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, uint32_t arrayLayers, TSampleCountBits samples, TImageTiling tiling, TImageUsages usages, TMemoryFlags memoryFlags, TImageLayout layout = TImageLayout::UNDEFINED);
 
   protected:
     virtual ~TImage();
@@ -122,7 +122,7 @@ class TImage : public Turbo::Core::TVulkanHandle
   public:
     VkImage GetVkImage();
     TFormatInfo GetFormat() const;
-    const TRefPtr<TDevice> &GetDevice();
+    TDevice *GetDevice();
 
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;

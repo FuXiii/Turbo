@@ -45,8 +45,8 @@ class TLayerInfo : public TInfo
     static size_t GetInstanceLayerCount();
     static std::vector<TLayerInfo> GetInstanceLayers();
 
-    static size_t GetPhysicalDeviceLayerCount(const TRefPtr<TPhysicalDevice> &physicalDevice);
-    static std::vector<TLayerInfo> GetPhysicalDeviceLayers(const TRefPtr<TPhysicalDevice> &physicalDevice);
+    static size_t GetPhysicalDeviceLayerCount(TPhysicalDevice *physicalDevice);
+    static std::vector<TLayerInfo> GetPhysicalDeviceLayers(TPhysicalDevice *physicalDevice);
 
     static TLayerType GetLayerTypeByLayerName(std::string layerName);
     static std::string GetLayerNameByLayerType(TLayerType layerType);

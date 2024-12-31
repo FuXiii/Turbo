@@ -148,7 +148,7 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, swapchain_support_format, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImage>> swapchain_images = swapchain->GetImages();
+    std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
     for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)

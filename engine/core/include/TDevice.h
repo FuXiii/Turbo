@@ -42,8 +42,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     TDeviceDriver *deviceDriver = nullptr;
 
   protected:
-    virtual void AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue);
-    virtual TRefPtr<TDeviceQueue> RemoveChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue);
+    virtual void AddChildHandle(TDeviceQueue *deviceQueue);
+    virtual void RemoveChildHandle(TDeviceQueue *deviceQueue);
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
     virtual void InspectExtensionAndVersionDependencies(TExtensionType extensionType);
@@ -52,7 +52,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     // OLD:std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
 
   public:
-    explicit TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
+    explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
 
   protected:
     virtual ~TDevice();
@@ -60,7 +60,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
   public:
     VkDevice GetVkDevice();
 
-    const TRefPtr<TPhysicalDevice> &GetPhysicalDevice();
+    TPhysicalDevice *GetPhysicalDevice();
 
     size_t GetEnabledLayersCount() const;
     std::vector<TLayerInfo> GetEnabledLayers() const;
@@ -72,13 +72,13 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     TPhysicalDeviceFeatures GetEnableDeviceFeatures() const;
 
-    const TRefPtr<TVmaAllocator> &GetVmaAllocator();
+    TVmaAllocator *GetVmaAllocator();
 
-    TRefPtr<TDeviceQueue> GetBestGraphicsQueue();
-    TRefPtr<TDeviceQueue> GetBestComputeQueue();
-    TRefPtr<TDeviceQueue> GetBestTransferQueue();
-    TRefPtr<TDeviceQueue> GetBestSparseBindingQueue();
-    TRefPtr<TDeviceQueue> GetBestProtectedQueue();
+    TDeviceQueue *GetBestGraphicsQueue();
+    TDeviceQueue *GetBestComputeQueue();
+    TDeviceQueue *GetBestTransferQueue();
+    TDeviceQueue *GetBestSparseBindingQueue();
+    TDeviceQueue *GetBestProtectedQueue();
 
     void WaitIdle();
 
