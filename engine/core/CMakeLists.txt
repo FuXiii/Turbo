@@ -3,6 +3,9 @@ project(TCore)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
+set(VMA_STATIC_VULKAN_FUNCTIONS OFF)
+set(VMA_DYNAMIC_VULKAN_FUNCTIONS ON)
+
 aux_source_directory(./src/ SRCS)
 
 add_subdirectory(./thirdparty)

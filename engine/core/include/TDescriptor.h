@@ -123,7 +123,7 @@ class TUniformBufferDescriptor : public TDescriptor
     std::vector<TStructMember> members;
 
   public:
-    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size);
+    TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, const std::vector<TStructMember> &members, uint32_t size);
     ~TUniformBufferDescriptor();
 
     uint32_t GetSize() const;

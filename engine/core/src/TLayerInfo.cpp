@@ -318,7 +318,7 @@ Turbo::Core::TExtensionInfo Turbo::Core::TLayerInfo::GetExtension(uint32_t index
     return this->extensions[index];
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TLayerInfo::GetExtensions() const
+const std::vector<Turbo::Core::TExtensionInfo> &Turbo::Core::TLayerInfo::GetExtensions() const
 {
     return this->extensions;
 }

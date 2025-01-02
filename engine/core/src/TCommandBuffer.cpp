@@ -547,6 +547,19 @@ void Turbo::Core::TCommandBufferBase::CmdSetScissor(const std::vector<TScissor> 
     }
 }
 
+void Turbo::Core::TCommandBufferBase::CmdSetViewport(const TViewport &viewport)
+{
+    std::vector<TViewport> viewports;
+    viewports.push_back(viewport);
+    this->CmdSetViewport(viewports);
+}
+
+void Turbo::Core::TCommandBufferBase::CmdSetScissor(const TScissor &scissor)
+{
+    std::vector<TScissor> scissors;
+    scissors.push_back(scissor);
+    this->CmdSetScissor(scissors);
+}
 void Turbo::Core::TCommandBufferBase::CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();

@@ -26,7 +26,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TRenderPass(TDevice *device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
+    TRenderPass(TDevice *device, const std::vector<TAttachment> &attachments, const std::vector<TSubpass> &subpasses);
 
   protected:
     virtual ~TRenderPass();

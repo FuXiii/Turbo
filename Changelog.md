@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/2
+
+>* 修正 ``TInstance`` 中 ``GetPhysicalDevices()`` 返回数组引用的 ``Bug`` 。
+>* 修正 ``std::vector`` 引用和非引用。查漏补缺。
+>* ``TCommandBuffer``中增加设置单个 ``TViewport`` 和 ``TScissor`` 的 ``CmdSetViewport/Scissor(...)`` 函数版本。
+>* 更新 ``CMakeLists.txt``中对于依赖库编译参数的设置。用户不再需要手动设置编译参数，``Turbo`` 自动配置了默认值。
+
 ## 2024/12/31
 
 >* 更新 ``TPipelineDescriptorSet`` 中增加对单一资源的绑定。

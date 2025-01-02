@@ -82,7 +82,7 @@ class TInstance : public Turbo::Core::TVulkanHandle
 
     uint32_t GetPhysicalDeviceCount() const;
     TPhysicalDevice *GetPhysicalDevice(uint32_t index);
-    const std::vector<TPhysicalDevice *> &GetPhysicalDevices();
+    std::vector<TPhysicalDevice *> GetPhysicalDevices();
     TPhysicalDevice *GetBestPhysicalDevice();
 
     const TInstanceDriver *GetInstanceDriver();

@@ -128,14 +128,6 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
     5. 设置相关`CMake`参数如下：
 
         ```CPP
-        KTX_FEATURE_LOADTEST_APPS=OFF//如果您想加载KTX测试，请设置ON
-        KTX_FEATURE_DOC=OFF//如果您想生成KTX文档，请设置ON
-        KTX_FEATURE_STATIC_LIBRARY=ON //目前Turbo按照静态库使用KTX
-
-        //2022/7/30 关于解决Turbo核心库的依赖库问题解决，核心库对于VulkanMemoryAllocator使用动态加载Vulkan API方式，这也是Turbo引擎加载Vulkan API的方式
-        VMA_STATIC_VULKAN_FUNCTIONS=OFF
-        VMA_DYNAMIC_VULKAN_FUNCTIONS=ON
-        
         TCORE_SHARED_LIBS=ON //2023/9/21 Turbo的核心库输出为动态库，如果想输出为静态库请设置为OFF
         ```
 
@@ -152,7 +144,7 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
 
 ## RoadMap
 
-*注：该`RoadMap`章节信息有滞后性，引擎具体细节和开发计划请查看后面的开发`Log`章节(更新的比较频繁)*
+*注：该`RoadMap`章节信息有滞后性，引擎具体细节和开发计划请查看后面的[更新日志](./Changelog.md)(更新的比较频繁)*
 
 2022/5/15
 
@@ -234,9 +226,9 @@ git clone --recursive git@github.com:FuXiii/Turbo.git
   * HDR（应该算是延迟渲染的一部分）
   * **[ ✓ ]** 实例化渲染
   * 间接渲染
-  * 细分着色器
-  * 几何着色器
-  * `Vulkan`光追标准
+  * **[ ✓ ]** 细分着色器
+  * **[ ✓ ]** 几何着色器
+  * `Vulkan`光追标准（提供示例，还未设置`Turbo`接口）
   * 多线程
   * **[ ✓ ]** 计算着色器
   * **[ ✓ ]** 计算管线

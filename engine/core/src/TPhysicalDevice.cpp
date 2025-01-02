@@ -532,7 +532,7 @@ size_t Turbo::Core::TPhysicalDevice::GetSupportLayerCount() const
     return this->info.supportLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TPhysicalDevice::GetSupportLayers() const
+const std::vector<Turbo::Core::TLayerInfo> &Turbo::Core::TPhysicalDevice::GetSupportLayers() const
 {
     return this->info.supportLayers;
 }
@@ -608,7 +608,7 @@ size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount() const
     return this->info.queueFamilys.size();
 }
 
-std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TPhysicalDevice::GetQueueFamilys() const
+const std::vector<Turbo::Core::TQueueFamilyInfo> &Turbo::Core::TPhysicalDevice::GetQueueFamilys() const
 {
     return this->info.queueFamilys;
 }
@@ -638,7 +638,7 @@ size_t Turbo::Core::TPhysicalDevice::GetMemoryTypeCount() const
     return this->info.memoryTypes.size();
 }
 
-std::vector<Turbo::Core::TMemoryTypeInfo> Turbo::Core::TPhysicalDevice::GetMemoryTypes() const
+const std::vector<Turbo::Core::TMemoryTypeInfo> &Turbo::Core::TPhysicalDevice::GetMemoryTypes() const
 {
     return this->info.memoryTypes;
 }
@@ -861,7 +861,7 @@ size_t Turbo::Core::TPhysicalDevice::GetSupportExtensionCount() const
     return this->info.supportExtensions.size();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSupportExtensions() const
+const std::vector<Turbo::Core::TExtensionInfo> &Turbo::Core::TPhysicalDevice::GetSupportExtensions() const
 {
     return this->info.supportExtensions;
 }

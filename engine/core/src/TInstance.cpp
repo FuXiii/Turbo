@@ -498,7 +498,7 @@ Turbo::Core::TPhysicalDevice *Turbo::Core::TInstance::GetPhysicalDevice(uint32_t
     return this->physicalDevices[index];
 }
 
-const std::vector<Turbo::Core::TPhysicalDevice *> &Turbo::Core::TInstance::GetPhysicalDevices()
+std::vector<Turbo::Core::TPhysicalDevice *> Turbo::Core::TInstance::GetPhysicalDevices()
 {
     return Turbo::Core::RefsToPtrs(this->physicalDevices);
 }

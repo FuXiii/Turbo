@@ -24,7 +24,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
   public:
     // TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors);
-    TDescriptorSetLayout(TDevice *device, std::vector<TDescriptor *> &descriptors);
+    TDescriptorSetLayout(TDevice *device, const std::vector<TDescriptor *> &descriptors);
 
   protected:
     virtual ~TDescriptorSetLayout();

@@ -90,12 +90,14 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 
     //[[deprecated]]void CmdBindPipelineDescriptorSet(const TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
     void CmdBindPipelineDescriptorSet(TPipelineDescriptorSet *pipelineDescriptorSet);
-    
+
     void CmdBindVertexBuffers(const std::vector<TBuffer *> &vertexBuffers = {});
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
 
     void CmdSetViewport(const std::vector<TViewport> &viewports = {});
     void CmdSetScissor(const std::vector<TScissor> &scissors = {});
+    void CmdSetViewport(const TViewport &viewport);
+    void CmdSetScissor(const TScissor &scissor);
 
     void CmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
     void CmdNextSubpass();

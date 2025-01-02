@@ -66,7 +66,7 @@ class TLayerInfo : public TInfo
 
     size_t GetExtensionCount() const;
     TExtensionInfo GetExtension(uint32_t index) const;
-    std::vector<TExtensionInfo> GetExtensions() const;
+    const std::vector<TExtensionInfo> &GetExtensions() const;
 
     bool operator==(const TLayerInfo &layer) const;
     bool operator!=(const TLayerInfo &layer) const;

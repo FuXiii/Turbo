@@ -162,13 +162,13 @@ class TPhysicalDevice : public TVulkanHandle
     // bool IsDeviceSupportFeature(enume key);
 
     size_t GetSupportExtensionCount() const;
-    std::vector<TExtensionInfo> GetSupportExtensions() const;
+    const std::vector<TExtensionInfo> &GetSupportExtensions() const;
     TExtensionInfo GetExtensionByType(TExtensionType extensionType) const;
     bool IsSupportExtension(std::string extensionName) const;
     bool IsSupportExtension(TExtensionType extensionType) const;
 
     size_t GetSupportLayerCount() const;
-    std::vector<TLayerInfo> GetSupportLayers() const;
+    const std::vector<TLayerInfo> &GetSupportLayers() const;
     bool IsSupportLayer(std::string layerName) const;
     bool IsSupportLayer(TLayerType layerType) const;
 
@@ -178,12 +178,12 @@ class TPhysicalDevice : public TVulkanHandle
     TFormatInfo GetFormatInfo(TFormatType formatType) const;
 
     size_t GetQueueFamilyCount() const;
-    std::vector<TQueueFamilyInfo> GetQueueFamilys() const;
+    const std::vector<TQueueFamilyInfo> &GetQueueFamilys() const;
     bool IsHasQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const;
     TQueueFamilyInfo GetQueueFamilyByIndex(TQueueFamilyIndex queueFamilyIndex) const;
 
     size_t GetMemoryTypeCount() const;
-    std::vector<TMemoryTypeInfo> GetMemoryTypes() const;
+    const std::vector<TMemoryTypeInfo> &GetMemoryTypes() const;
     bool IsHasMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const;
     TMemoryTypeInfo GetMemoryTypeByIndex(TMemoryTypeIndex memoryTypeIndex) const;
 

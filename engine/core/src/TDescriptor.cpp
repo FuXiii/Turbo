@@ -181,7 +181,7 @@ Turbo::Core::TNaNDescriptor::~TNaNDescriptor()
 {
 }
 
-Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, const std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptorType::UNIFORM_BUFFER, dataType, set, binding, count, name)
 {
     this->size = size;
     this->members = members;

@@ -21,6 +21,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 #set(CMAKE_BUILD_TYPE "debug")
 
+set(KTX_FEATURE_LOADTEST_APPS OFF)
+set(KTX_FEATURE_DOC OFF)
+set(KTX_FEATURE_STATIC_LIBRAR ON)
+
 #add_compile_options(-w)
 
 add_subdirectory(./engine)

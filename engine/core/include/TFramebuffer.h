@@ -26,8 +26,8 @@ class TFramebuffer : public Turbo::Core::TVulkanHandle
 
   public:
     // TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments);
-    TFramebuffer(TRenderPass *renderPass, std::vector<TRefPtr<TImageView>> &attachments);
-    TFramebuffer(TRenderPass *renderPass, std::vector<TImageView *> &attachments);
+    TFramebuffer(TRenderPass *renderPass, const std::vector<TRefPtr<TImageView>> &attachments);
+    TFramebuffer(TRenderPass *renderPass, const std::vector<TImageView *> &attachments);
 
   protected:
     virtual ~TFramebuffer();
