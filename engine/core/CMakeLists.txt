@@ -19,7 +19,18 @@ else()
 message(FATAL_ERROR "Can not find VulkanMemoryAllocator")
 endif()
 
-message(STATUS "${VMA_SRCS}")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py")
+execute_process(
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang"
+    RESULT_VARIABLE update_glslang_sources_result_variable
+)
+if(NOT update_glslang_sources_result_variable EQUAL 0)
+message(FATAL_ERROR "")
+endif()
+else()
+message(FATAL_ERROR "Can not find update_glslang_sources.py in glslang")
+endif()
 
 option(TCORE_SHARED_LIBS "flag to create TCore shared libraries if on" OFF)
 
@@ -28,13 +39,21 @@ if(TCORE_SHARED_LIBS)
     add_library(${PROJECT_NAME} SHARED
         ${VMA_SRCS}
         #$<TARGET_OBJECTS:VulkanMemoryAllocator>
-        $<TARGET_OBJECTS:MachineIndependent>
         $<TARGET_OBJECTS:glslang>
         $<TARGET_OBJECTS:glslang-default-resource-limits>
-        $<TARGET_OBJECTS:OGLCompiler>
-        $<TARGET_OBJECTS:OSDependent>
-        $<TARGET_OBJECTS:GenericCodeGen>
-        $<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:SPVRemapper>
+        #$<TARGET_OBJECTS:MachineIndependent>
+        #$<TARGET_OBJECTS:OGLCompiler>
+        #$<TARGET_OBJECTS:OSDependent>
+        #$<TARGET_OBJECTS:GenericCodeGen>
+        #$<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:SPIRV-Tools>
+        $<TARGET_OBJECTS:SPIRV-Tools-lint>
+        $<TARGET_OBJECTS:SPIRV-Tools-opt>
+        $<TARGET_OBJECTS:SPIRV-Tools-reduce>
+        $<TARGET_OBJECTS:SPIRV-Tools-shared>
+        $<TARGET_OBJECTS:SPIRV-Tools-diff>
+        $<TARGET_OBJECTS:SPIRV-Tools-link>
         $<TARGET_OBJECTS:spirv-cross-core>
         $<TARGET_OBJECTS:spirv-cross-glsl>
         $<TARGET_OBJECTS:spirv-cross-hlsl>
@@ -45,13 +64,21 @@ else()
     add_library(${PROJECT_NAME} STATIC
         ${VMA_SRCS}
         #$<TARGET_OBJECTS:VulkanMemoryAllocator>
-        $<TARGET_OBJECTS:MachineIndependent>
         $<TARGET_OBJECTS:glslang>
         $<TARGET_OBJECTS:glslang-default-resource-limits>
-        $<TARGET_OBJECTS:OGLCompiler>
-        $<TARGET_OBJECTS:OSDependent>
-        $<TARGET_OBJECTS:GenericCodeGen>
-        $<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:SPVRemapper>
+        #$<TARGET_OBJECTS:MachineIndependent>
+        #$<TARGET_OBJECTS:OGLCompiler>
+        #$<TARGET_OBJECTS:OSDependent>
+        #$<TARGET_OBJECTS:GenericCodeGen>
+        #$<TARGET_OBJECTS:SPIRV>
+        $<TARGET_OBJECTS:SPIRV-Tools>
+        $<TARGET_OBJECTS:SPIRV-Tools-lint>
+        $<TARGET_OBJECTS:SPIRV-Tools-opt>
+        $<TARGET_OBJECTS:SPIRV-Tools-reduce>
+        $<TARGET_OBJECTS:SPIRV-Tools-shared>
+        $<TARGET_OBJECTS:SPIRV-Tools-diff>
+        $<TARGET_OBJECTS:SPIRV-Tools-link>
         $<TARGET_OBJECTS:spirv-cross-core>
         $<TARGET_OBJECTS:spirv-cross-glsl>
         $<TARGET_OBJECTS:spirv-cross-hlsl>
