@@ -2,6 +2,9 @@
 #ifndef TURBO_CORE_TDESCRIPTORSET_H
 #define TURBO_CORE_TDESCRIPTORSET_H
 #include "TVulkanHandle.h"
+#include "TDescriptorSetLayout.h"
+#include "TBuffer.h"
+#include "TDescriptorPool.h"
 
 namespace Turbo
 {
@@ -26,7 +29,7 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TDescriptorSetLayout> &descriptorSetLayout);
+    TDescriptorSet(TDescriptorPool *descriptorPool, TDescriptorSetLayout *descriptorSetLayout);
 
   protected:
     virtual ~TDescriptorSet();
@@ -37,14 +40,24 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
     uint32_t GetSet() const;
 
     // TODO: this BindData function just for Test
-    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers);
-    void BindData(uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement = 0);
-    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers);
-    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews);
-    void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &sampler);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers);
+    void BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement = 0);
+
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers);
+    void BindData(uint32_t binding, const std::pair<TImageView *, TSampler *> &combinedImageSampler, uint32_t dstArrayElement = 0);
+
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TImageView *> &imageViews);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TImageView>> &imageViews);
+    void BindData(uint32_t binding, TImageView *imageView, uint32_t dstArrayElement = 0);
+
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TSampler *> &samplers);
+    void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TSampler>> &samplers);
+    void BindData(uint32_t binding, TSampler *sampler, uint32_t dstArrayElement = 0);
 
     // FIXME: Need a ACCELERATION_STRUCTURE binding function
-    /* FIXME: Just for Test*/ void BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures);
+    /* FIXME: Just for Test*/ void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<VkAccelerationStructureKHR> &accelerationStructures);
 
   public:
     virtual std::string ToString() const override;

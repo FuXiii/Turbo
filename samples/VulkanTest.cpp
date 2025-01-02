@@ -335,7 +335,7 @@ int main()
 
     vk_QueuePresentKHR = (PFN_vkQueuePresentKHR)vk_GetDeviceProcAddr(vk_device, "vkQueuePresentKHR");
     assert(vk_QueuePresentKHR && "vkQueuePresentKHR");
-
+    
     std::vector<VkQueue> vk_queues;
     for (VkDeviceQueueCreateInfo &vk_device_queue_create_info_item : vk_device_queue_create_infos)
     {

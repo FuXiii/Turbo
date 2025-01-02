@@ -47,9 +47,9 @@ void Turbo::Core::TSampler::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroySampler(vk_device, this->vkSampler, allocator);
 }
 
-Turbo::Core::TSampler::TSampler(const TRefPtr<TDevice> &device, TFilter minFilter, TFilter magFilter, TMipmapMode mipmapMode, TAddressMode addressModeU, TAddressMode addressModeV, TAddressMode addressModeW, TBorderColor borderColor, float mipLodBias, float minLod, float maxLod)
+Turbo::Core::TSampler::TSampler(TDevice *device, TFilter minFilter, TFilter magFilter, TMipmapMode mipmapMode, TAddressMode addressModeU, TAddressMode addressModeV, TAddressMode addressModeW, TBorderColor borderColor, float mipLodBias, float minLod, float maxLod)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
 

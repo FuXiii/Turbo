@@ -68,7 +68,7 @@ class TSampler : public TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TSampler(const TRefPtr<TDevice> &device, TFilter minFilter = TFilter::LINEAR, TFilter magFilter = TFilter::LINEAR, TMipmapMode mipmapMode = TMipmapMode::LINEAR, TAddressMode addressModeU = TAddressMode::REPEAT, TAddressMode addressModeV = TAddressMode::REPEAT, TAddressMode addressModeW = TAddressMode::REPEAT, TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE, float mipLodBias = 0.0f, float minLod = 0.0f, float maxLod = 0.0f);
+    explicit TSampler(TDevice *device, TFilter minFilter = TFilter::LINEAR, TFilter magFilter = TFilter::LINEAR, TMipmapMode mipmapMode = TMipmapMode::LINEAR, TAddressMode addressModeU = TAddressMode::REPEAT, TAddressMode addressModeV = TAddressMode::REPEAT, TAddressMode addressModeW = TAddressMode::REPEAT, TBorderColor borderColor = TBorderColor::FLOAT_OPAQUE_WHITE, float mipLodBias = 0.0f, float minLod = 0.0f, float maxLod = 0.0f);
 
   protected:
     virtual ~TSampler();

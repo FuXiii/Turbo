@@ -366,3 +366,6 @@ add_executable(VolumeTest ./VolumeTest.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(VolumeTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VolumeTest PUBLIC ${LINK_PARTH})
 target_link_libraries(VolumeTest PUBLIC ${LIBS})
+
+add_executable(ReadGlobalWind ./ReadGlobalWind.cpp ${IMGUI_SOURCE_PATH} ../gizmo/GlobalWind.cpp)
+target_include_directories(ReadGlobalWind PUBLIC ${INCLUDE_PARTH} ../gizmo)

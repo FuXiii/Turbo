@@ -1,12 +1,12 @@
 #include "TDescriptorSet.h"
-#include "TBuffer.h"
-#include "TDescriptorPool.h"
-#include "TDescriptorSetLayout.h"
+// #include "TBuffer.h"
+
+// #include "TDescriptorSetLayout.h"
 #include "TDevice.h"
 #include "TException.h"
 #include "TImageView.h"
 #include "TSampler.h"
-#include "TVulkanAllocator.h"
+// #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
 void Turbo::Core::TDescriptorSet::InternalCreate()
@@ -40,9 +40,9 @@ void Turbo::Core::TDescriptorSet::InternalDestroy()
     device->GetDeviceDriver()->vkFreeDescriptorSets(vk_device, vk_descriptor_pool, 1, &this->vkDescriptorSet);
 }
 
-Turbo::Core::TDescriptorSet::TDescriptorSet(const TRefPtr<TDescriptorPool> &descriptorPool, const TRefPtr<TDescriptorSetLayout> &descriptorSetLayout) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSet::TDescriptorSet(TDescriptorPool *descriptorPool, TDescriptorSetLayout *descriptorSetLayout) : Turbo::Core::TVulkanHandle()
 {
-    if (descriptorPool.Valid() && descriptorSetLayout.Valid())
+    if (Turbo::Core::TReferenced::Valid(descriptorPool, descriptorSetLayout))
     {
         this->descriptorPool = descriptorPool;
         this->descriptorSetLayout = descriptorSetLayout;
@@ -69,7 +69,7 @@ uint32_t Turbo::Core::TDescriptorSet::GetSet() const
     return this->descriptorSetLayout->GetSet();
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TBuffer>> &buffers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {
     Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
 
@@ -105,18 +105,22 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const TRefPtr<TBuffer> &buffer, uint32_t dstArrayElement)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers)
 {
-    std::vector<TRefPtr<TBuffer>> buffers;
-    buffers.push_back(buffer);
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(buffers));
+}
 
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement)
+{
+    std::vector<TBuffer *> buffers;
+    buffers.push_back(buffer);
     this->BindData(binding, dstArrayElement, buffers);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>> &combined_image_sampler_item : combinedImageSamplers)
+    for (auto &combined_image_sampler_item : combinedImageSamplers)
     {
         TImageView *image_view = combined_image_sampler_item.first;
         TSampler *sampler = combined_image_sampler_item.second;
@@ -146,7 +150,24 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TImageView>> &imageViews)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
+{
+    std::vector<std::pair<TImageView *, TSampler *>> combined_image_samplers;
+    for (auto &item : combinedImageSamplers)
+    {
+        combined_image_samplers.push_back(std::make_pair(item.first.Get(), item.second.Get()));
+    }
+    this->BindData(binding, dstArrayElement, combined_image_samplers);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const std::pair<TImageView *, TSampler *> &combinedImageSampler, uint32_t dstArrayElement)
+{
+    std::vector<std::pair<TImageView *, TSampler *>> combined_image_samplers;
+    combined_image_samplers.push_back(combinedImageSampler);
+    this->BindData(binding, dstArrayElement, combined_image_samplers);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TImageView *> &imageViews)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
 
@@ -200,10 +221,22 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<TRefPtr<TSampler>> &sampler)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TImageView>> &imageViews)
+{
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(imageViews));
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TImageView *imageView, uint32_t dstArrayElement)
+{
+    std::vector<TImageView *> image_views;
+    image_views.push_back(imageView);
+    this->BindData(binding, dstArrayElement, image_views);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TSampler *> &samplers)
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (TSampler *sampler_item : sampler)
+    for (TSampler *sampler_item : samplers)
     {
         VkDescriptorImageInfo vk_descriptor_image_info = {};
         vk_descriptor_image_info.sampler = sampler_item->GetVkSampler();
@@ -219,7 +252,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
     vk_write_descriptor_set.dstBinding = binding;
     vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = sampler.size();
+    vk_write_descriptor_set.descriptorCount = samplers.size();
     vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
     vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
     vk_write_descriptor_set.pBufferInfo = nullptr;
@@ -230,7 +263,19 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
-void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TSampler>> &samplers)
+{
+    this->BindData(binding, dstArrayElement, Turbo::Core::RefsToPtrs(samplers));
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TSampler *sampler, uint32_t dstArrayElement)
+{
+    std::vector<TSampler *> temp_samples;
+    temp_samples.push_back(sampler);
+    this->BindData(binding, dstArrayElement, temp_samples);
+}
+
+void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<VkAccelerationStructureKHR> &accelerationStructures)
 {
     VkWriteDescriptorSetAccelerationStructureKHR vk_write_descriptor_set_acceleration_structure_khr;
     vk_write_descriptor_set_acceleration_structure_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;

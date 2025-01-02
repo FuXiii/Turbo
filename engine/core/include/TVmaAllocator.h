@@ -24,7 +24,7 @@ class TVmaAllocator : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TVmaAllocator(const TRefPtr<TDevice> &device);
+    TVmaAllocator(TDevice*device);
 
   protected:
     virtual ~TVmaAllocator();

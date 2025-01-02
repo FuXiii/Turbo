@@ -17,7 +17,7 @@ Turbo::Core::TVulkanAllocator::~TVulkanAllocator()
 {
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TVulkanAllocator> Turbo::Core::TVulkanAllocator::Instance()
+Turbo::Core::TVulkanAllocator *Turbo::Core::TVulkanAllocator::Instance()
 {
     if (!TVulkanAllocator::instance.Valid())
     {

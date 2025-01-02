@@ -1,5 +1,89 @@
 # 更新日志
 
+## Memo
+
+[备忘录](./docs/Memo.md)
+
+## 2025/1/2
+
+>* 修正 ``TInstance`` 中 ``GetPhysicalDevices()`` 返回数组引用的 ``Bug`` 。
+>* 修正 ``std::vector`` 引用和非引用。查漏补缺。
+>* ``TCommandBuffer``中增加设置单个 ``TViewport`` 和 ``TScissor`` 的 ``CmdSetViewport/Scissor(...)`` 函数版本。
+>* 更新 ``CMakeLists.txt``中对于依赖库编译参数的设置。用户不再需要手动设置编译参数，``Turbo`` 自动配置了默认值。
+>* 适配 ``glslang 15.1.0``
+>* 适配 ``VulkanMemoryAllocator 3.2.0``
+
+## 2024/12/31
+
+>* 更新 ``TPipelineDescriptorSet`` 中增加对单一资源的绑定。
+>* 更新 ``TRefPtr`` 中增加 ``PtrsToRefs<T>`` 函数。用于将指针型数组转成计数引用数组。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptorPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFramebuffer`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRenderingPipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRenderPass`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSampler`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSemaphore`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TShader`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSurface`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TSwapchain`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVmaAllocator`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVulkanAllocator`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TVulkanLoader`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``sample`` 下示例，适配 ``TRefPtr`` 的冗余使用。
+
+## 2024/12/30
+
+>* 修正 ``TDescriptorSetLayout`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDevice`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TRefPtr`` 中增加 ``RefsToPtrs<T>(...)`` 函数。用于将 ``vector<TRefPtr<T>>`` 转成 ``vector<T*>`` 。
+>* 修正 ``TDeviceQueue`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFence`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFormatInfo`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TFramebuffer`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TGraphicsPipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TImage`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TImageView`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TInstance`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TLayerInfo`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPhysicalDevice`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineCache`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TPipelineDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+
+## 2024/12/28
+
+>* 修正 ``TCommandBuffer`` 取消使用 ``模板`` （可读性较差）。
+>* 修正 ``TDescriptorSet`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptorPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TDescriptor`` 中对于 ``TRefPtr`` 的冗余使用。
+
+## 2024/12/27
+
+>* 修正 ``TCommandBuffer`` 中对于 ``vector<TRefPtr<T>/T*>`` 使用，使用 ``模板`` 代替明确类型，类型推断交给编译器。
+>* 修正 ``TCommandBufferPool`` 中对于 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TComputePipeline`` 中对于 ``TRefPtr`` 的冗余使用。
+
+## 2024/12/24
+
+>* ``asset`` 文件夹下增加 ``global_wind.bin``，该文件内存有全球流场数据。
+>* 增加 ``gizmo`` 文件夹，用于存放乱七八糟的一些工具测试之类的代码。
+>* ``gizmo`` 下增加 ``GlobalWind.h/.cpp`` 文件，用于读取 ``global_wind.bin`` 文件。
+>* ``sample`` 下增加 ``ReadGlobalWind`` 示例，用于测试读取 ``global_wind.bin`` 文件。
+
+## 2024/12/19
+
+>* ``TReferenced`` 下增加 ``static bool Valid(const TReferenced* ref)`` 静态函数。用于指针有效性检查。
+>* 修正 ``TCommandBuffer`` 中对 ``TRefPtr`` 的冗余使用。
+
+## 2024/12/18
+
+>* 将形参和返回中的 ``TRefPtr`` 去除掉，正常不需要强制为 ``TRefPtr`` 略显冗余繁琐。只需要成员变量为 ``TRefPtr`` 即可进行自动化内存管理。
+>* 修正 ``TBarrier`` 中对 ``TRefPtr`` 的冗余使用。
+>* 修正 ``TBuffer`` 中对 ``TRefPtr`` 的冗余使用。
+
 ## 2024/12/17
 
 >* 将 ``point_cloud`` 分支合并到 ``dev`` 分支

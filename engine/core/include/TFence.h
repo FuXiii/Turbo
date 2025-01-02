@@ -22,13 +22,13 @@ class TFence : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TFence(const TRefPtr<TDevice> &device);
+    TFence(TDevice *device);
 
   protected:
     virtual ~TFence();
 
   public:
-    const TRefPtr<TDevice> &GetDevice();
+    TDevice *GetDevice();
 
     VkFence GetVkFence();
 
@@ -53,7 +53,7 @@ class TFences : public Turbo::Core::TObject
     virtual ~TFences() = default;
 
   public:
-    void Add(const TRefPtr<TFence> &fence);
+    void Add(TFence *fence);
 
     TResult Wait(uint64_t timeout);
 

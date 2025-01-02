@@ -26,7 +26,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TRenderPass(const TRefPtr<TDevice> &device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses);
+    TRenderPass(TDevice *device, const std::vector<TAttachment> &attachments, const std::vector<TSubpass> &subpasses);
 
   protected:
     virtual ~TRenderPass();
@@ -34,7 +34,7 @@ class TRenderPass : public Turbo::Core::TVulkanHandle
   public:
     VkRenderPass GetVkRenderPass();
 
-    const TRefPtr<TDevice> &GetDevice();
+    TDevice *GetDevice();
 
     const std::vector<TAttachment> &GetAttachments() const;
 

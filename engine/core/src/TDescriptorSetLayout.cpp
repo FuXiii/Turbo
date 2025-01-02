@@ -75,9 +75,9 @@ void Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, this->vkDescriptorSetLayout, allocator);
 }
 
-Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout(TDevice *device, const std::vector<TDescriptor *> &descriptors) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->descriptors = descriptors;
@@ -126,7 +126,7 @@ Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorTyp
     throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");
 }
 
-std::string Turbo::Core::TDescriptorSetLayout::ToString()const
+std::string Turbo::Core::TDescriptorSetLayout::ToString() const
 {
     return std::string();
 }

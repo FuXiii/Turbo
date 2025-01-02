@@ -830,10 +830,10 @@ void Turbo::Core::TShader::InternalParseSpirV()
     }
 }
 
-Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint)
+Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint)
 {
     // glslang to spir-v
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->type = type;
@@ -939,7 +939,7 @@ Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, 
     }
 }
 
-Turbo::Core::TShader::TShader(const TRefPtr<TDevice> &device, TShaderType type, size_t size, uint32_t *code, const std::string &entryPoint)
+Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, size_t size, uint32_t *code, const std::string &entryPoint)
 {
     if (device->Valid() && size != 0 && code != nullptr)
     {
@@ -1023,7 +1023,7 @@ Turbo::Core::TShader::~TShader()
     this->size = 0;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TShader::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TShader::GetDevice()
 {
     return this->device;
 }
@@ -1242,114 +1242,114 @@ bool Turbo::Core::TShader::Valid() const
     return false;
 }
 
-Turbo::Core::TVertexShader::TVertexShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, includePaths, entryPoint)
+Turbo::Core::TVertexShader::TVertexShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TVertexShader::TVertexShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, size, code, entryPoint)
+Turbo::Core::TVertexShader::TVertexShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::VERTEX, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TFragmentShader::TFragmentShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, language, code, includePaths, entryPoint)
+Turbo::Core::TFragmentShader::TFragmentShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TFragmentShader::TFragmentShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, size, code, entryPoint)
+Turbo::Core::TFragmentShader::TFragmentShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::FRAGMENT, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TComputeShader::TComputeShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, language, code, includePaths, entryPoint)
+Turbo::Core::TComputeShader::TComputeShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TComputeShader::TComputeShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, size, code, entryPoint)
+Turbo::Core::TComputeShader::TComputeShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::COMPUTE, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TTessellationControlShader::TTessellationControlShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, language, code, includePaths, entryPoint)
+Turbo::Core::TTessellationControlShader::TTessellationControlShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TTessellationControlShader::TTessellationControlShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, size, code, entryPoint)
+Turbo::Core::TTessellationControlShader::TTessellationControlShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_CONTROL, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, language, code, includePaths, entryPoint)
+Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, size, code, entryPoint)
+Turbo::Core::TTessellationEvaluationShader::TTessellationEvaluationShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TESSELLATION_EVALUATION, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TGeometryShader::TGeometryShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, language, code, includePaths, entryPoint)
+Turbo::Core::TGeometryShader::TGeometryShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TGeometryShader::TGeometryShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, size, code, entryPoint)
+Turbo::Core::TGeometryShader::TGeometryShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::GEOMETRY, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TTaskShader::TTaskShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, language, code, includePaths, entryPoint)
+Turbo::Core::TTaskShader::TTaskShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TTaskShader::TTaskShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, size, code, entryPoint)
+Turbo::Core::TTaskShader::TTaskShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::TASK, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TMeshShader::TMeshShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, language, code, includePaths, entryPoint)
+Turbo::Core::TMeshShader::TMeshShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TMeshShader::TMeshShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, size, code, entryPoint)
+Turbo::Core::TMeshShader::TMeshShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MESH, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TRayGenerationShader::TRayGenerationShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, language, code, includePaths, entryPoint)
+Turbo::Core::TRayGenerationShader::TRayGenerationShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TRayGenerationShader::TRayGenerationShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, size, code, entryPoint)
+Turbo::Core::TRayGenerationShader::TRayGenerationShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::RAY_GENERATION, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TAnyHitShader::TAnyHitShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, language, code, includePaths, entryPoint)
+Turbo::Core::TAnyHitShader::TAnyHitShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TAnyHitShader::TAnyHitShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, size, code, entryPoint)
+Turbo::Core::TAnyHitShader::TAnyHitShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::ANY_HIT, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TClosestHitShader::TClosestHitShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, language, code, includePaths, entryPoint)
+Turbo::Core::TClosestHitShader::TClosestHitShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TClosestHitShader::TClosestHitShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, size, code, entryPoint)
+Turbo::Core::TClosestHitShader::TClosestHitShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CLOSEST_HIT, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TMissShader::TMissShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, language, code, includePaths, entryPoint)
+Turbo::Core::TMissShader::TMissShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TMissShader::TMissShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, size, code, entryPoint)
+Turbo::Core::TMissShader::TMissShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::MISS, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TIntersectionShader::TIntersectionShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, language, code, includePaths, entryPoint)
+Turbo::Core::TIntersectionShader::TIntersectionShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TIntersectionShader::TIntersectionShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, size, code, entryPoint)
+Turbo::Core::TIntersectionShader::TIntersectionShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::INTERSECTION, size, code, entryPoint)
 {
 }
 
-Turbo::Core::TCallableShader::TCallableShader(const TRefPtr<TDevice> &device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, language, code, includePaths, entryPoint)
+Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, language, code, includePaths, entryPoint)
 {
 }
 
-Turbo::Core::TCallableShader::TCallableShader(const TRefPtr<TDevice> &device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, size, code, entryPoint)
+Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, size, code, entryPoint)
 {
 }

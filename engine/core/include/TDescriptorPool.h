@@ -46,16 +46,17 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    explicit TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
+    // TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
+    TDescriptorPool(TDevice *device, uint32_t maxSetsCount,const std::vector<TDescriptorSize> &descriptorSizes);
 
   protected:
     virtual ~TDescriptorPool();
 
   public:
-    TRefPtr<TPipelineDescriptorSet> &Allocate(const TRefPtr<TPipelineLayout> &pipelineLayout);
-    void Free(TRefPtr<TPipelineDescriptorSet> &pipelineDescriptorSet);
+    TPipelineDescriptorSet *Allocate(TPipelineLayout *pipelineLayout);
+    void Free(TPipelineDescriptorSet *pipelineDescriptorSet);
 
-    const TRefPtr<TDevice> &GetDevice();
+    TDevice *GetDevice();
     VkDescriptorPool GetVkDescriptorPool();
 
   public:

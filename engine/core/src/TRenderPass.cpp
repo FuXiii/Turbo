@@ -132,9 +132,9 @@ void Turbo::Core::TRenderPass::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyRenderPass(vk_device, this->vkRenderPass, allocator);
 }
 
-Turbo::Core::TRenderPass::TRenderPass(const TRefPtr<TDevice> &device, std::vector<TAttachment> &attachments, std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TRenderPass::TRenderPass(TDevice *device, const std::vector<TAttachment> &attachments, const std::vector<TSubpass> &subpasses) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid() || subpasses.size() == 0)
+    if (Turbo::Core::TReferenced::Valid(device) || subpasses.size() == 0)
     {
         this->device = device;
         this->subpasses = subpasses;
@@ -158,7 +158,7 @@ VkRenderPass Turbo::Core::TRenderPass::GetVkRenderPass()
     return this->vkRenderPass;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TRenderPass::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TRenderPass::GetDevice()
 {
     return this->device;
 }

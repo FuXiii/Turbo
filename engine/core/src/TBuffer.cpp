@@ -42,9 +42,32 @@ void Turbo::Core::TBuffer::InternalDestroy()
     vmaDestroyBuffer(*vma_allocator, this->vkBuffer, *vma_allocation);
 }
 
-Turbo::Core::TBuffer::TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
+// Turbo::Core::TBuffer::TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
+//{
+//     if (device->Valid())
+//     {
+//         this->device = device;
+//         this->bufferFlags = bufferFlags;
+//         this->memoryFlags = memoryFlags;
+//         this->usages = usages;
+//         this->size = size;
+//         this->vmaAllocation = malloc(sizeof(VmaAllocation));
+//         this->vmaAllocationInfo = malloc(sizeof(VmaAllocationInfo));
+//         this->InternalCreate();
+//     }
+//     else
+//     {
+//         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBuffer::TBuffer");
+//     }
+// }
+
+Turbo::Core::TBuffer::TBuffer(TDevice *device, VkBufferCreateFlags bufferFlags, TBufferUsages usages, TMemoryFlags memoryFlags, TDeviceSize size)
 {
-    if (device != nullptr)
+    if (!Turbo::Core::TReferenced::Valid(device))
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBuffer::TBuffer");
+    }
+
     {
         this->device = device;
         this->bufferFlags = bufferFlags;
@@ -54,10 +77,6 @@ Turbo::Core::TBuffer::TBuffer(const TRefPtr<TDevice> &device, VkBufferCreateFlag
         this->vmaAllocation = malloc(sizeof(VmaAllocation));
         this->vmaAllocationInfo = malloc(sizeof(VmaAllocationInfo));
         this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TBuffer::TBuffer");
     }
 }
 

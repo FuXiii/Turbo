@@ -19,7 +19,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror -Wno-switch -Wno-missing-field-initializers -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function")
 
-set(CMAKE_BUILD_TYPE "debug")
+#set(CMAKE_BUILD_TYPE "debug")
+
+set(KTX_FEATURE_LOADTEST_APPS OFF)
+set(KTX_FEATURE_DOC OFF)
+set(KTX_FEATURE_STATIC_LIBRAR ON)
+
+#add_compile_options(-w)
 
 add_subdirectory(./engine)
 add_subdirectory(./thirdparty)

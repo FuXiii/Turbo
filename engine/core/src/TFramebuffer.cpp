@@ -48,13 +48,27 @@ void Turbo::Core::TFramebuffer::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyFramebuffer(vk_device, this->vkFramebuffer, allocator);
 }
 
-Turbo::Core::TFramebuffer::TFramebuffer(const TRefPtr<TRenderPass> &renderPass, std::vector<TRefPtr<TImageView>> &attachments) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TFramebuffer::TFramebuffer(TRenderPass *renderPass, const std::vector<TRefPtr<TImageView>> &attachments) : Turbo::Core::TVulkanHandle()
 {
     // OLD: if (renderPass != nullptr && attachments.size() > 0)
-    if (renderPass.Valid())
+    if (Turbo::Core::TReferenced::Valid(renderPass))
     {
         this->renderPass = renderPass;
         this->attachments = attachments;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TFramebuffer::TFramebuffer");
+    }
+}
+
+Turbo::Core::TFramebuffer::TFramebuffer(TRenderPass *renderPass, const std::vector<TImageView *> &attachments) : Turbo::Core::TVulkanHandle()
+{
+    if (Turbo::Core::TReferenced::Valid(renderPass))
+    {
+        this->renderPass = renderPass;
+        this->attachments = Turbo::Core::PtrsToRefs(attachments);
         this->InternalCreate();
     }
     else
@@ -83,14 +97,14 @@ uint32_t Turbo::Core::TFramebuffer::GetHeight() const
     return this->height;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> &Turbo::Core::TFramebuffer::GetRenderPass()
+Turbo::Core::TRenderPass *Turbo::Core::TFramebuffer::GetRenderPass()
 {
     return this->renderPass;
 }
 
-const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> &Turbo::Core::TFramebuffer::GetAttachments()
+std::vector<Turbo::Core::TImageView *> Turbo::Core::TFramebuffer::GetAttachments()
 {
-    return this->attachments;
+    return Turbo::Core::RefsToPtrs(this->attachments);
 }
 
 std::string Turbo::Core::TFramebuffer::ToString() const

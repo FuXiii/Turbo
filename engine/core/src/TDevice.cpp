@@ -8,9 +8,9 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-void Turbo::Core::TDevice::AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
+void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
 {
-    if (deviceQueue.Valid())
+    if (Turbo::Core::TReferenced::Valid(deviceQueue))
     {
         std::vector<TRefPtr<TDeviceQueue>> &device_queues = this->deviceQueues[deviceQueue->queueFamily.index];
 
@@ -32,49 +32,10 @@ void Turbo::Core::TDevice::AddChildHandle(const TRefPtr<TDeviceQueue> &deviceQue
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::RemoveChildHandle(const TRefPtr<TDeviceQueue> &deviceQueue)
+void Turbo::Core::TDevice::RemoveChildHandle(TDeviceQueue *deviceQueue)
 {
-    // Turbo::Core::TDeviceQueue *result = nullptr;
-    // uint32_t index = 0;
-    // bool is_found = false;
-    // uint32_t device_queues_count = this->deviceQueues.size();
-
-    // for (uint32_t device_queue_index = 0; device_queue_index < device_queues_count; device_queue_index++)
-    // {
-    //     if (this->deviceQueues[device_queue_index] == deviceQueue)
-    //     {
-    //         result = this->deviceQueues[device_queue_index];
-    //         index = device_queue_index;
-    //         is_found = true;
-    //         break;
-    //     }
-    // }
-
-    // if (result != nullptr && is_found)
-    // {
-    //     this->deviceQueues.erase(this->deviceQueues.begin() + index);
-    // }
-
-    // device_queues_count = this->deviceQueues.size();
-
-    // // refresh DeviceQueue::index
-    // std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_familys = this->GetDeviceQueueFamilyInfos();
-    // for (Turbo::Core::TQueueFamilyInfo &queue_family_item : device_queue_familys)
-    // {
-    //     uint32_t index = 0;
-    //     for (uint32_t device_queue_index = 0; device_queue_index < device_queues_count; device_queue_index++)
-    //     {
-    //         if (this->deviceQueues[device_queue_index]->queueFamily.index == queue_family_item.index)
-    //         {
-    //             this->deviceQueues[device_queue_index]->index = index;
-    //             index = index + 1;
-    //         }
-    //     }
-    // }
-    // return result;
-
     // We don't need to remove it,because queue created by device.we just delete is at ~TDevice()
-    return nullptr;
+    // return nullptr;
 }
 
 void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType extensionType)
@@ -1092,7 +1053,7 @@ void Turbo::Core::TDevice::InternalDestroy()
     }
 }
 
-Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TPhysicalDeviceFeatures *enabledFeatures) : Turbo::Core::TVulkanHandle()
 {
     /*
     Vulkan Spec::1.2.156
@@ -1100,7 +1061,7 @@ Turbo::Core::TDevice::TDevice(const TRefPtr<TPhysicalDevice> &physicalDevice, st
     bit of flags must not be set
     */
 
-    if (physicalDevice.Valid())
+    if (Turbo::Core::TReferenced::Valid(physicalDevice))
     {
         this->physicalDevice = physicalDevice;
 
@@ -1173,7 +1134,7 @@ VkDevice Turbo::Core::TDevice::GetVkDevice()
     return this->vkDevice;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> &Turbo::Core::TDevice::GetPhysicalDevice()
+Turbo::Core::TPhysicalDevice *Turbo::Core::TDevice::GetPhysicalDevice()
 {
     return this->physicalDevice;
 }
@@ -1262,12 +1223,12 @@ Turbo::Core::TPhysicalDeviceFeatures Turbo::Core::TDevice::GetEnableDeviceFeatur
 // OLD:    return result;
 // OLD:}
 
-const Turbo::Core::TRefPtr<Turbo::Core::TVmaAllocator> &Turbo::Core::TDevice::GetVmaAllocator()
+Turbo::Core::TVmaAllocator *Turbo::Core::TDevice::GetVmaAllocator()
 {
     return this->vmaAllocator;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestGraphicsQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestGraphicsQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1295,7 +1256,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestGra
     return result;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestComputeQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestComputeQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1323,7 +1284,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestCom
     return result;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestTransferQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestTransferQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1351,7 +1312,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestTra
     return result;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestSparseBindingQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestSparseBindingQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();
@@ -1379,7 +1340,7 @@ Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestSpa
     return result;
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> Turbo::Core::TDevice::GetBestProtectedQueue()
+Turbo::Core::TDeviceQueue *Turbo::Core::TDevice::GetBestProtectedQueue()
 {
     TDeviceQueue *result = nullptr;
     uint32_t device_queues_size = this->deviceQueues.size();

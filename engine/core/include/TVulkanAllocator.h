@@ -18,7 +18,7 @@ class TVulkanAllocator : public TAllocator
     ~TVulkanAllocator();
 
   public:
-    static TRefPtr<TVulkanAllocator> Instance();
+    static TVulkanAllocator* Instance();
     static void Destory();
 
   public:

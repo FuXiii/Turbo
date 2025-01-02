@@ -413,9 +413,9 @@ void Turbo::Core::TPhysicalDevice::InitDeviceQueueParameter()
     }
 }
 
-void Turbo::Core::TPhysicalDevice::AddChildHandle(const TRefPtr<TDevice> &device)
+void Turbo::Core::TPhysicalDevice::AddChildHandle(TDevice *device)
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         // FIXME: find it, prevent duplicate additions
 
@@ -423,9 +423,8 @@ void Turbo::Core::TPhysicalDevice::AddChildHandle(const TRefPtr<TDevice> &device
     }
 }
 
-Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TPhysicalDevice::RemoveChildHandle(const TRefPtr<TDevice> &device)
+void Turbo::Core::TPhysicalDevice::RemoveChildHandle(TDevice *device)
 {
-    Turbo::Core::TDevice *result = nullptr;
     uint32_t index = 0;
     bool is_found = false;
     uint32_t devices_count = this->devices.size();
@@ -434,19 +433,16 @@ Turbo::Core::TRefPtr<Turbo::Core::TDevice> Turbo::Core::TPhysicalDevice::RemoveC
     {
         if (this->devices[device_index] == device)
         {
-            result = this->devices[device_index];
             index = device_index;
             is_found = true;
             break;
         }
     }
 
-    if (result != nullptr && is_found)
+    if (is_found)
     {
         this->devices.erase(this->devices.begin() + index);
     }
-
-    return result;
 }
 
 void Turbo::Core::TPhysicalDevice::InternalCreate()
@@ -501,9 +497,9 @@ void Turbo::Core::TPhysicalDevice::InternalDestroy()
     this->vkPhysicalDevice = VK_NULL_HANDLE;
 }
 
-Turbo::Core::TPhysicalDevice::TPhysicalDevice(const TRefPtr<TInstance> &instance, uint32_t index) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPhysicalDevice::TPhysicalDevice(TInstance *instance, uint32_t index) : Turbo::Core::TVulkanHandle()
 {
-    if (instance.Valid())
+    if (Turbo::Core::TReferenced::Valid(instance))
     {
         this->instance = instance;
         this->index = index;
@@ -536,7 +532,7 @@ size_t Turbo::Core::TPhysicalDevice::GetSupportLayerCount() const
     return this->info.supportLayers.size();
 }
 
-std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TPhysicalDevice::GetSupportLayers() const
+const std::vector<Turbo::Core::TLayerInfo> &Turbo::Core::TPhysicalDevice::GetSupportLayers() const
 {
     return this->info.supportLayers;
 }
@@ -612,7 +608,7 @@ size_t Turbo::Core::TPhysicalDevice::GetQueueFamilyCount() const
     return this->info.queueFamilys.size();
 }
 
-std::vector<Turbo::Core::TQueueFamilyInfo> Turbo::Core::TPhysicalDevice::GetQueueFamilys() const
+const std::vector<Turbo::Core::TQueueFamilyInfo> &Turbo::Core::TPhysicalDevice::GetQueueFamilys() const
 {
     return this->info.queueFamilys;
 }
@@ -642,7 +638,7 @@ size_t Turbo::Core::TPhysicalDevice::GetMemoryTypeCount() const
     return this->info.memoryTypes.size();
 }
 
-std::vector<Turbo::Core::TMemoryTypeInfo> Turbo::Core::TPhysicalDevice::GetMemoryTypes() const
+const std::vector<Turbo::Core::TMemoryTypeInfo> &Turbo::Core::TPhysicalDevice::GetMemoryTypes() const
 {
     return this->info.memoryTypes;
 }
@@ -742,7 +738,7 @@ uint32_t Turbo::Core::TPhysicalDevice::GetPerformanceScore() const
     return this->performanceScore;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TInstance> &Turbo::Core::TPhysicalDevice::GetInstance()
+Turbo::Core::TInstance *Turbo::Core::TPhysicalDevice::GetInstance()
 {
     return this->instance;
 }
@@ -865,7 +861,7 @@ size_t Turbo::Core::TPhysicalDevice::GetSupportExtensionCount() const
     return this->info.supportExtensions.size();
 }
 
-std::vector<Turbo::Core::TExtensionInfo> Turbo::Core::TPhysicalDevice::GetSupportExtensions() const
+const std::vector<Turbo::Core::TExtensionInfo> &Turbo::Core::TPhysicalDevice::GetSupportExtensions() const
 {
     return this->info.supportExtensions;
 }

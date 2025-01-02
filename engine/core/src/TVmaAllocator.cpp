@@ -20,6 +20,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = Turbo::Core::TVulkanLoader::Instance()->LoadGlobalDriver().vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = instance->GetInstanceDriver()->vkGetDeviceProcAddr;
+    // vulkanFunctions.vkGetPhysicalDeviceProperties = instance->GetInstanceDriver()->vkGetPhysicalDeviceProperties;
 
     VmaAllocatorCreateFlags vma_allocator_create_flags = 0;
     if ((physical_device->GetDeviceFeatures().bufferDeviceAddress && this->device->GetEnableDeviceFeatures().bufferDeviceAddress) || (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0)))
@@ -49,9 +50,9 @@ void Turbo::Core::TVmaAllocator::InternalDestroy()
     vmaDestroyAllocator(*vma_allocator);
 }
 
-Turbo::Core::TVmaAllocator::TVmaAllocator(const TRefPtr<TDevice> &device) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TVmaAllocator::TVmaAllocator(TDevice *device) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid())
+    if (Turbo::Core::TReferenced::Valid(device))
     {
         this->device = device;
         this->vmaAllocator = malloc(sizeof(VmaAllocator));

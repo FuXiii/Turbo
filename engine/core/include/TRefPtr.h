@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <type_traits>
 #include <cstdint>
-
+#include <vector>
 namespace Turbo
 {
 namespace Core
@@ -181,11 +181,16 @@ class TRefPtr
         return (this->ptr < rp.ptr);
     }
 
-    template <typename Inherit>
-    bool operator==(const TRefPtr<Inherit> &rp) const
-    {
-        return (this->ptr == rp.ptr);
-    }
+    // bool operator==(const TRefPtr<T> &rp) const
+    //{
+    //     return (this->ptr == rp.ptr);
+    // }
+
+    // template <typename Inherit>
+    // bool operator==(const TRefPtr<Inherit> &rp) const
+    //{
+    //     return (this->ptr == rp.ptr);
+    // }
 
     template <typename Inherit>
     bool operator!=(const TRefPtr<Inherit> &rp) const
@@ -194,19 +199,29 @@ class TRefPtr
     }
 
     template <typename Inherit>
-    bool operator<(const Inherit *ptr) const
+    bool operator<(Inherit *ptr) const
     {
         return (this->ptr < ptr);
     }
 
+    // bool operator==(T *ptr) const
+    //{
+    //     return (this->ptr == ptr);
+    // }
+
+    // bool operator==(const T *ptr) const
+    //{
+    //     return (this->ptr == ptr);
+    // }
+
     template <typename Inherit>
-    bool operator==(const Inherit *ptr) const
+    bool operator==(Inherit *ptr) const
     {
         return (this->ptr == ptr);
     }
 
     template <typename Inherit>
-    bool operator!=(const Inherit *ptr) const
+    bool operator!=(Inherit *ptr) const
     {
         return (this->ptr != ptr);
     }
@@ -302,6 +317,38 @@ template <typename T, typename S>
 inline TRefPtr<T> ConstCast(const TRefPtr<S> &refPtr)
 {
     return const_cast<T *>(refPtr.Get());
+}
+
+template <typename T>
+std::vector<T *> RefsToPtrs(const std::vector<Turbo::Core::TRefPtr<T>> &refs)
+{
+    std::vector<T *> ptrs;
+    size_t size = refs.size();
+    if (size != 0)
+    {
+        ptrs.resize(size, nullptr);
+        for (size_t index = 0; index < size; index++)
+        {
+            ptrs[index] = refs[index];
+        }
+    }
+    return ptrs;
+}
+
+template <typename T>
+std::vector<Turbo::Core::TRefPtr<T>> PtrsToRefs(const std::vector<T *> &ptrs)
+{
+    std::vector<Turbo::Core::TRefPtr<T>> refs;
+    size_t size = ptrs.size();
+    if (size != 0)
+    {
+        refs.resize(size, nullptr);
+        for (size_t index = 0; index < size; index++)
+        {
+            refs[index] = ptrs[index];
+        }
+    }
+    return refs;
 }
 
 } // namespace Core

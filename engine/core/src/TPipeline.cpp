@@ -140,15 +140,16 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, TPipelineType 
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid() && vertexShader.Valid() && fragmentShader.Valid())
+    // if (device.Valid() && vertexShader.Valid() && fragmentShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, vertexShader, fragmentShader))
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
         this->shaders.push_back(vertexShader);
         this->shaders.push_back(fragmentShader);
-        this->pipelineCache = pipelineCache;
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
         this->InternalCreate();
     }
     else
@@ -157,55 +158,18 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache)
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)
 {
-    if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && fragmentShader.Valid())
-    {
-        this->device = device;
-        this->type = TPipelineType::Graphics;
-        this->shaders.push_back(vertexShader);
-        this->shaders.push_back(tessellationControlShader);
-        this->shaders.push_back(tessellationEvaluationShader);
-        this->shaders.push_back(fragmentShader);
-        this->pipelineCache = pipelineCache;
-        this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
-    }
-}
-
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
-{
-    if (device.Valid() && vertexShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
-    {
-        this->device = device;
-        this->type = TPipelineType::Graphics;
-        this->shaders.push_back(vertexShader);
-        this->shaders.push_back(geometryShader);
-        this->shaders.push_back(fragmentShader);
-        this->pipelineCache = pipelineCache;
-        this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
-    }
-}
-
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TVertexShader> &vertexShader, const TRefPtr<TTessellationControlShader> &tessellationControlShader, const TRefPtr<TTessellationEvaluationShader> &tessellationEvaluationShader, const TRefPtr<TGeometryShader> &geometryShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
-{
-    if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
+    // if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && fragmentShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, vertexShader, tessellationControlShader, tessellationEvaluationShader, fragmentShader))
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
         this->shaders.push_back(vertexShader);
         this->shaders.push_back(tessellationControlShader);
         this->shaders.push_back(tessellationEvaluationShader);
-        this->shaders.push_back(geometryShader);
         this->shaders.push_back(fragmentShader);
-        this->pipelineCache = pipelineCache;
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
         this->InternalCreate();
     }
     else
@@ -214,15 +178,56 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TMeshShader> &meshShader, const TRefPtr<TFragmentShader> &fragmentShader, const TRefPtr<TPipelineCache> &pipelineCache)
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid() && meshShader.Valid() && fragmentShader.Valid())
+    // if (device.Valid() && vertexShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, vertexShader, geometryShader, fragmentShader))
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaders.push_back(vertexShader);
+        this->shaders.push_back(geometryShader);
+        this->shaders.push_back(fragmentShader);
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TVertexShader *vertexShader, TTessellationControlShader *tessellationControlShader, TTessellationEvaluationShader *tessellationEvaluationShader, TGeometryShader *geometryShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+{
+    // if (device.Valid() && vertexShader.Valid() && tessellationControlShader.Valid() && tessellationEvaluationShader.Valid() && geometryShader.Valid() && fragmentShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, vertexShader, tessellationControlShader, tessellationEvaluationShader, geometryShader, fragmentShader))
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaders.push_back(vertexShader);
+        this->shaders.push_back(tessellationControlShader);
+        this->shaders.push_back(tessellationEvaluationShader);
+        this->shaders.push_back(geometryShader);
+        this->shaders.push_back(fragmentShader);
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TMeshShader *meshShader, TFragmentShader *fragmentShader, TPipelineCache *pipelineCache)
+{
+    // if (device.Valid() && meshShader.Valid() && fragmentShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, meshShader, fragmentShader))
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
         this->shaders.push_back(meshShader);
         this->shaders.push_back(fragmentShader);
-        this->pipelineCache = pipelineCache;
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
         this->InternalCreate();
     }
     else
@@ -231,14 +236,15 @@ Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (device.Valid() && computeShader.Valid())
+    // if (device.Valid() && computeShader.Valid())
+    if (Turbo::Core::TReferenced::Valid(device, computeShader))
     {
         this->device = device;
         this->type = TPipelineType::Compute;
         this->shaders.push_back(computeShader);
-        this->pipelineCache = pipelineCache;
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
         this->InternalCreate();
     }
     else
@@ -252,7 +258,7 @@ Turbo::Core::TPipeline::~TPipeline()
     this->InternalDestroy();
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TPipelineLayout> &Turbo::Core::TPipeline::GetPipelineLayout()
+Turbo::Core::TPipelineLayout *Turbo::Core::TPipeline::GetPipelineLayout()
 {
     return this->pipelineLayout;
 }
@@ -267,17 +273,22 @@ Turbo::Core::TPipelineType Turbo::Core::TPipeline::GetType() const
     return this->type;
 }
 
-const std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> &Turbo::Core::TPipeline::GetShaders()
+std::vector<Turbo::Core::TShader *> Turbo::Core::TPipeline::GetShaders()
 {
-    return this->shaders;
+    std::vector<Turbo::Core::TShader *> result;
+    for (auto &shader : this->shaders)
+    {
+        result.push_back(shader);
+    }
+    return result;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TDevice> &Turbo::Core::TPipeline::GetDevice()
+Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()
 {
     return this->device;
 }
 
-const Turbo::Core::TRefPtr<Turbo::Core::TPipelineCache> &Turbo::Core::TPipeline::GetPipelineCache()
+Turbo::Core::TPipelineCache *Turbo::Core::TPipeline::GetPipelineCache()
 {
     return this->pipelineCache;
 }
