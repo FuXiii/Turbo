@@ -123,6 +123,17 @@ Turbo::Core::TInstance::TInstance(std::vector<TLayerInfo> *enabledLayers, std::v
     }
 }
 
+Turbo::Core::TInstance::TInstance(const std::vector<TLayerInfo> &enabledLayers, const std::vector<TExtensionInfo> &enabledExtensions, const TVersion &version) : Turbo::Core::TVulkanHandle()
+{
+    this->vkInstance = VK_NULL_HANDLE;
+    VkResult result = this->CreateVkInstance(&enabledLayers, &enabledExtensions, &version);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        this->vulkanVersion = TVersion(0, 0, 0, 0);
+        throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Core::TInstance::TInstance");
+    }
+}
+
 Turbo::Core::TInstance::~TInstance()
 {
     for (TPhysicalDevice *physical_device : this->physicalDevices)
@@ -145,7 +156,7 @@ Turbo::Core::TVersion Turbo::Core::TInstance::GetVulkanVersion() const
     return this->vulkanVersion;
 }
 
-VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TVersion *vulkanVersion)
+VkResult Turbo::Core::TInstance::CreateVkInstance(const std::vector<TLayerInfo> *enabledLayers, const std::vector<TExtensionInfo> *enabledExtensions, const TVersion *vulkanVersion)
 {
     VkResult result = VkResult::VK_NOT_READY;
 
@@ -163,12 +174,12 @@ VkResult Turbo::Core::TInstance::CreateVkInstance(std::vector<TLayerInfo> *enabl
             this->vulkanVersion = TVersion(1, 0, 0, 0);
         }
 
-        if (enabledLayers != nullptr)
+        if (enabledLayers != nullptr && !enabledLayers->empty())
         {
             this->enabledLayers = *enabledLayers;
         }
 
-        if (enabledExtensions != nullptr)
+        if (enabledExtensions != nullptr && !enabledExtensions->empty())
         {
             this->enabledExtensions = *enabledExtensions;
         }
