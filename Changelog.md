@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/3
+
+>* 修正 ``TCore`` 编译时依赖 ``glslang`` 库。
+
 ## 2025/1/2
 
 >* 修正 ``TInstance`` 中 ``GetPhysicalDevices()`` 返回数组引用的 ``Bug`` 。
