@@ -9,6 +9,8 @@
 >* 修正 ``TCore`` 编译时依赖 ``glslang`` 库。
 >* 所有示例都增加 ``TURBO_ASSET_ROOT`` 宏指向 `asset` 资源文件夹。自动化配置资源路径，不再需要手动配置了。
 >* 增加 ``samples\FlowField`` 文件夹。用于存放流场相关示例。
+>* ``FlowField`` 下增加 ``ShowWindByTex`` 示例。用于使用纹理显示 ``流场图``。
+>* ``TInstance`` 增加引用版本构造。
 
 ## 2025/1/2
 
