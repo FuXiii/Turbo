@@ -38,53 +38,30 @@ if(TCORE_SHARED_LIBS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     add_library(${PROJECT_NAME} SHARED
         ${VMA_SRCS}
-        #$<TARGET_OBJECTS:VulkanMemoryAllocator>
-        $<TARGET_OBJECTS:glslang>
-        $<TARGET_OBJECTS:glslang-default-resource-limits>
-        $<TARGET_OBJECTS:SPVRemapper>
-        #$<TARGET_OBJECTS:MachineIndependent>
-        #$<TARGET_OBJECTS:OGLCompiler>
-        #$<TARGET_OBJECTS:OSDependent>
-        #$<TARGET_OBJECTS:GenericCodeGen>
-        #$<TARGET_OBJECTS:SPIRV>
-        $<TARGET_OBJECTS:SPIRV-Tools>
-        $<TARGET_OBJECTS:SPIRV-Tools-lint>
-        $<TARGET_OBJECTS:SPIRV-Tools-opt>
-        $<TARGET_OBJECTS:SPIRV-Tools-reduce>
-        $<TARGET_OBJECTS:SPIRV-Tools-shared>
-        $<TARGET_OBJECTS:SPIRV-Tools-diff>
-        $<TARGET_OBJECTS:SPIRV-Tools-link>
-        $<TARGET_OBJECTS:spirv-cross-core>
-        $<TARGET_OBJECTS:spirv-cross-glsl>
-        $<TARGET_OBJECTS:spirv-cross-hlsl>
         ${SRCS}
     )
     target_compile_definitions(${PROJECT_NAME} PUBLIC TCORE_SHARED_LIBS)
 else() 
     add_library(${PROJECT_NAME} STATIC
         ${VMA_SRCS}
-        #$<TARGET_OBJECTS:VulkanMemoryAllocator>
-        $<TARGET_OBJECTS:glslang>
-        $<TARGET_OBJECTS:glslang-default-resource-limits>
-        $<TARGET_OBJECTS:SPVRemapper>
-        #$<TARGET_OBJECTS:MachineIndependent>
-        #$<TARGET_OBJECTS:OGLCompiler>
-        #$<TARGET_OBJECTS:OSDependent>
-        #$<TARGET_OBJECTS:GenericCodeGen>
-        #$<TARGET_OBJECTS:SPIRV>
-        $<TARGET_OBJECTS:SPIRV-Tools>
-        $<TARGET_OBJECTS:SPIRV-Tools-lint>
-        $<TARGET_OBJECTS:SPIRV-Tools-opt>
-        $<TARGET_OBJECTS:SPIRV-Tools-reduce>
-        $<TARGET_OBJECTS:SPIRV-Tools-shared>
-        $<TARGET_OBJECTS:SPIRV-Tools-diff>
-        $<TARGET_OBJECTS:SPIRV-Tools-link>
-        $<TARGET_OBJECTS:spirv-cross-core>
-        $<TARGET_OBJECTS:spirv-cross-glsl>
-        $<TARGET_OBJECTS:spirv-cross-hlsl>
         ${SRCS}
     )
 endif()
+
+target_link_libraries(${PROJECT_NAME} 
+PRIVATE glslang
+PRIVATE glslang-default-resource-limits
+#PRIVATE SPIRV-Tools
+#PRIVATE SPIRV-Tools-lint
+#PRIVATE SPIRV-Tools-opt
+#PRIVATE SPIRV-Tools-reduce
+#PRIVATE SPIRV-Tools-shared
+#PRIVATE SPIRV-Tools-diff
+#PRIVATE SPIRV-Tools-link
+PRIVATE spirv-cross-core
+PRIVATE spirv-cross-glsl
+PRIVATE spirv-cross-hlsl
+)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
     VMA_STATIC_VULKAN_FUNCTIONS=$<BOOL:${VMA_STATIC_VULKAN_FUNCTIONS}>
