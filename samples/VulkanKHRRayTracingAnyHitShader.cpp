@@ -51,6 +51,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -70,21 +72,21 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.vert");
+const std::string GEOM_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.geom");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rmiss");
-const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShaderShadow.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rchit");
-const std::string ANY_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShader.rahit");
-const std::string SHADOW_ANY_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingAnyHitShaderShadow.rahit");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShader.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShader.rmiss");
+const std::string SHADOW_MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShaderShadow.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShader.rchit");
+const std::string ANY_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShader.rahit");
+const std::string SHADOW_ANY_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingAnyHitShaderShadow.rahit");
 
-const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
+const std::string SHADER_INCLUDE_PATH = asset_root + "/shaders";
 
 typedef struct POSITION
 {
@@ -178,7 +180,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/Suzanne_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/Suzanne_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -477,7 +479,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/checkerboard_rgba.ktx";
+        std::string ktx_filename = asset_root + "/images/checkerboard_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -2588,9 +2590,9 @@ int main()
 
     device_driver->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), top_level_acceleration_structure_khr, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
     device_driver->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), bottom_level_acceleration_structure_khr, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
-   
+
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

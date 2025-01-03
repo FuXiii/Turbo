@@ -43,6 +43,8 @@
 #include <stdio.h>
 #include <string.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -59,11 +61,11 @@ std::string ReadTextFile(const std::string &filename)
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.vert");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/shader_include_test.vert");
 
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.frag");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/shader_include_test.frag");
 
-const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
+const std::string SHADER_INCLUDE_PATH = asset_root + "/shaders";
 
 typedef struct POSITION
 {

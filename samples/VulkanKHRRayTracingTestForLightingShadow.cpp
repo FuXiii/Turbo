@@ -48,6 +48,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -67,17 +69,17 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.vert");
+const std::string GEOM_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.geom");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadow.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadow.rmiss");
-const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowShadow.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadow.rchit");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadow.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadow.rmiss");
+const std::string SHADOW_MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadowShadow.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadow.rchit");
 
 typedef struct POSITION
 {
@@ -159,7 +161,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/material_sphere_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];

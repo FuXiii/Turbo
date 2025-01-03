@@ -65,3 +65,5 @@ TCore
 glfw
 ktx
 )
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")

@@ -49,6 +49,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -68,13 +70,13 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.vert");
-const std::string TESC_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.tesc");
-const std::string TESE_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.tese");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/TessellationTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/TessellationTest.vert");
+const std::string TESC_SHADER_STR = ReadTextFile(asset_root + "/shaders/TessellationTest.tesc");
+const std::string TESE_SHADER_STR = ReadTextFile(asset_root + "/shaders/TessellationTest.tese");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/TessellationTest.frag");
 
 typedef struct POSITION
 {
@@ -143,7 +145,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/material_sphere.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -1060,7 +1062,7 @@ int main()
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     descriptor_pool->Free(pipeline_descriptor_set);
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

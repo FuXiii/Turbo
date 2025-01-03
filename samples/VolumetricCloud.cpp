@@ -54,6 +54,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -101,17 +103,17 @@ std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t 
     return data;
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string MY_PERLIN_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+const std::string MY_PERLIN_WORLEY_COMPUTE_SHADER_STR = ReadTextFile(asset_root + "/shaders/perlin-worley.comp");
 
-const std::string MY_WORLEY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/worley.comp");
+const std::string MY_WORLEY_COMPUTE_SHADER_STR = ReadTextFile(asset_root + "/shaders/worley.comp");
 
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string MY_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/volumetric_cloud.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/volumetric_cloud.frag");
 
 typedef struct POSITION
 {
@@ -1019,9 +1021,9 @@ int main()
     descriptor_pool->Free(graphics_pipeline_descriptor_set);
     descriptor_pool->Free(perlin_worley_compute_pipeline_descriptor_set);
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
-    
+
     command_pool->Free(command_buffer);
-  
+
     glfwTerminate();
 
     return 0;

@@ -266,6 +266,8 @@ int main()
 {
 
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
+    
+    std::string asset_root(TURBO_ASSET_ROOT);
 
     std::vector<Turbo::Core::TLayerInfo> support_layers;
     std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions;

@@ -40,6 +40,8 @@
 #include <string.h>
 #include <utility>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
                                     "    float value;\n"
@@ -242,7 +244,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = asset_root+"/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;

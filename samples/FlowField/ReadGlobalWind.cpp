@@ -3,7 +3,9 @@
 
 int main()
 {
-    GlobalWind gw("../../asset/global_wind.bin");
+    std::string asset_root(TURBO_ASSET_ROOT);
+
+    GlobalWind gw(asset_root + "/global_wind.bin");
     auto width = gw.Width();
     auto height = gw.Height();
 

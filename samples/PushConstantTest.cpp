@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <string.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -91,13 +93,13 @@ std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t 
     return data;
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.vert");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/push_constant.vert");
 
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.frag");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/push_constant.frag");
 
 typedef struct POSITION
 {
@@ -819,9 +821,9 @@ int main()
 
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     descriptor_pool->Free(pipeline_descriptor_set);
-   
+
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

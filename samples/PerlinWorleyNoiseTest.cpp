@@ -50,6 +50,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -451,7 +453,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -679,7 +681,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = asset_root + "/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -739,7 +741,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("../../asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile((asset_root + "/images/cubemap_yokohama_rgba.ktx").c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;

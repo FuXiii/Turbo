@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <string.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -63,13 +65,13 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.vert");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/SpecializationConstantsTest.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/SpecializationConstantsTest.frag");
 
-const std::string COMP_SHADER_STR = ReadTextFile("../../asset/shaders/SpecializationConstantsTest.comp");
+const std::string COMP_SHADER_STR = ReadTextFile(asset_root + "/shaders/SpecializationConstantsTest.comp");
 
 typedef struct POSITION
 {

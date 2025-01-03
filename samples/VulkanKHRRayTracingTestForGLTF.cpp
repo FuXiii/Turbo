@@ -50,6 +50,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -69,13 +71,13 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/VulkanKHRRayTracingTestForglTF.rchit");
-const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile(asset_root + "/shaders/VulkanKHRRayTracingTestForglTF.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/VulkanKHRRayTracingTestForglTF.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/VulkanKHRRayTracingTestForglTF.rchit");
+const std::string SHADER_INCLUDE_PATH = asset_root + "/shaders";
 
 typedef uint32_t INDEX;
 
@@ -894,7 +896,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/CornellBox/cornellBox.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/CornellBox/cornellBox.gltf");
         const tinygltf::Scene &default_scene = model.scenes[model.defaultScene];
 
         // NOTE: 多个 node 允许公用同一个 mesh
@@ -2466,9 +2468,9 @@ int main()
     {
         device_driver->vkDestroyAccelerationStructureKHR(device->GetVkDevice(), bottom_level_acceleration_structure_item.bottomLevelAccelerationStructure, Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks());
     }
-   
+
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

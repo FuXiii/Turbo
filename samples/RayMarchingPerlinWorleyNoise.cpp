@@ -51,6 +51,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -98,15 +100,15 @@ std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t 
     return data;
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string MY_COMPUTE_SHADER_STR = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+const std::string MY_COMPUTE_SHADER_STR = ReadTextFile(asset_root + "/shaders/perlin-worley.comp");
 
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string MY_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/ray_marching_perlin_worley_noise.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/ray_marching_perlin_worley_noise.frag");
 
 typedef struct POSITION
 {

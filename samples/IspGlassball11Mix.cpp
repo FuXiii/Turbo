@@ -50,6 +50,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -461,7 +463,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("../../asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile((asset_root + "/images/cubemap_yokohama_rgba.ktx").c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
@@ -1085,11 +1087,10 @@ int main()
         //</End Rendering>
     }
 
-    
     descriptor_pool->Free(graphics_pipeline_descriptor_set);
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

@@ -47,6 +47,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -66,11 +68,11 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/NormalTexture.vert");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/NormalTexture.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/NormalTexture.vert");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/NormalTexture.frag");
 
 typedef struct POSITION
 {
@@ -147,7 +149,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/material_sphere_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -386,7 +388,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> albedo_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = asset_root + "/images/RockCliffLayered/albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -442,7 +444,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> normal_ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/RockCliffLayered/normal.ktx";
+        std::string ktx_filename = asset_root + "/images/RockCliffLayered/normal.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;

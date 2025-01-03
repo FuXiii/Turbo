@@ -44,6 +44,8 @@
 #include <string>
 #include <utility>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 void OutputMemoryInfo(Turbo::Core::TMemoryTypeInfo &memoryTypeInfo)
 {
     Turbo::Core::TMemoryTypeInfo current_memory_type_info = memoryTypeInfo;
@@ -381,7 +383,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = asset_root + "/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;

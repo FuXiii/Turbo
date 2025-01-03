@@ -50,6 +50,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -107,13 +109,13 @@ typedef struct PlyData
     POSITION max;
 } PlyData;
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.vert");
+const std::string MY_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/PointCloud.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/PointCloud.frag");
 
 PlyData LoadPly(const std::string &url)
 {
@@ -127,7 +129,6 @@ PlyData LoadPly(const std::string &url)
     int file_type;
     float version;
 
-    // PlyFile *ply = ply_open_for_reading(const_cast<char *>(std::string("../../asset/models/points.ply").c_str()), &elements_count, &elements, &file_type, &version);
     PlyFile *ply = ply_open_for_reading(const_cast<char *>(url.c_str()), &elements_count, &elements, &file_type, &version);
     if (ply != nullptr)
     {
@@ -563,7 +564,7 @@ int main()
 {
     std::vector<PlyData> ply_datas;
     {
-        ply_datas.push_back(LoadPly("../../asset/models/points.ply"));
+        ply_datas.push_back(LoadPly(asset_root + "/models/points.ply"));
         //... 在此增加其他 ply 点云数据;
     }
 

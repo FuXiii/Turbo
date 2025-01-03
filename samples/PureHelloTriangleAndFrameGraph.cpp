@@ -30,6 +30,8 @@
 
 #include <GLFW/glfw3.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 std::string ReadTextFile(const std::string &filename)
 {
     std::vector<std::string> data;
@@ -131,8 +133,8 @@ int main()
     Turbo::Render::TAttributeID color_attribute_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32B32_SFLOAT, offsetof(VertexData, color));
     vertex_buffer.Copy(vertex_data.data(), sizeof(VertexData) * vertex_data.size());
 
-    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile("../../asset/shaders/pure_triangle.vert"));
-    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile("../../asset/shaders/pure_triangle.frag"));
+    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile(asset_root + "/shaders/pure_triangle.vert"));
+    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile(asset_root + "/shaders/pure_triangle.frag"));
 
     while (!glfwWindowShouldClose(window))
     {

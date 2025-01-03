@@ -54,6 +54,8 @@
 
 #include <imgui.h>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
@@ -101,13 +103,13 @@ std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t 
     return data;
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/post_processing.vert");
+const std::string MY_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/post_processing.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/VolumnTest.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/VolumnTest.frag");
 
 typedef struct POSITION
 {
@@ -1100,7 +1102,7 @@ int main()
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
 
     command_pool->Free(command_buffer);
-  
+
     PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
     pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
