@@ -87,3 +87,65 @@ void SomeFun(T* ptr)
 T* t = new T();
 SomeFun(t);//SomeFun 结束之后 t 如果没人使用将会被 delete
 ```
+
+## VkFormat
+
+VK_FORMAT_MAX_ENUM = 0x7FFFFFFF
+使用一个 uint32_t 就可以代表 VkFormat 中所有的格式
+
+engine\core\src\TFormatInfo.cpp 下的 `std::vector<VkFormat> TAllFormats` 用于存储 `Vulkan` 所有的格式声明，
+之后通过 `vkGetPhysicalDeviceFormatProperties(...)` 函数遍历每一个 `VkFormat` 来确定是否支持该格式。
+
+其中的 `TAllFormats` 目前是写死的，不是很优雅，`Vulkan` 可能会随着版本的发布新增格式，可能需要随时更新适配 `TAllFormats` 中的值。
+需要一种方式动态遍历 `VkFormat` 中的所有项，但 `C/C++` 并不支持直接遍历枚举，并且 `VkFormat` 中有重复值。
+
+需要一个容器可以随时维护 `VkFormat` ，并支持遍历。
+
+`vkconfig` 是通过解析 `vulkaninfo(vulkaninfoSDK)` 生成 `vulkaninfo.json` 文件，之后解析该文件。
+
+`vulkaninfo` 通过 `vulkaninfo.hpp` 解析其中的 `format_ranges` 。
+
+`vulkaninfo.hpp` 好像是通过 `vulkan` 的 `vk.xml` 生成的？
+
+使用 `vulkaninfo.hpp` 中声明的 `format_ranges` 是个好主意。官方维护，值得信赖。(ﾟ∀。)
+
+```CXX
+struct FormatRange {
+    // the Vulkan standard version that supports this format range, or 0 if non-standard
+    APIVersion minimum_instance_version;
+
+    // The name of the extension that supports this format range, or NULL if the range
+    // is only part of the standard
+    const char *extension_name;
+
+    // The first and last supported formats within this range.
+    VkFormat first_format;
+    VkFormat last_format;
+};
+
+auto format_ranges = std::array{
+    FormatRange{0, nullptr, static_cast<VkFormat>(0), static_cast<VkFormat>(184)},
+    FormatRange{VK_API_VERSION_1_1, nullptr, static_cast<VkFormat>(1000156000), static_cast<VkFormat>(1000156033)},
+    FormatRange{0, VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME, static_cast<VkFormat>(1000156000), static_cast<VkFormat>(1000156033)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000330000), static_cast<VkFormat>(1000330003)},
+    FormatRange{0, VK_EXT_YCBCR_2PLANE_444_FORMATS_EXTENSION_NAME, static_cast<VkFormat>(1000330000), static_cast<VkFormat>(1000330003)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000340000), static_cast<VkFormat>(1000340001)},
+    FormatRange{0, VK_EXT_4444_FORMATS_EXTENSION_NAME, static_cast<VkFormat>(1000340000), static_cast<VkFormat>(1000340001)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000066000), static_cast<VkFormat>(1000066013)},
+    FormatRange{0, VK_EXT_TEXTURE_COMPRESSION_ASTC_HDR_EXTENSION_NAME, static_cast<VkFormat>(1000066000), static_cast<VkFormat>(1000066013)},
+    FormatRange{VK_API_VERSION_1_4, nullptr, static_cast<VkFormat>(1000470000), static_cast<VkFormat>(1000470001)},
+    FormatRange{0, VK_KHR_MAINTENANCE_5_EXTENSION_NAME, static_cast<VkFormat>(1000470000), static_cast<VkFormat>(1000470001)},
+    FormatRange{0, VK_IMG_FORMAT_PVRTC_EXTENSION_NAME, static_cast<VkFormat>(1000054000), static_cast<VkFormat>(1000054007)},
+    FormatRange{0, VK_NV_OPTICAL_FLOW_EXTENSION_NAME, static_cast<VkFormat>(1000464000), static_cast<VkFormat>(1000464000)},
+};
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+void vkGetPhysicalDeviceFormatProperties(
+    VkPhysicalDevice                            physicalDevice,
+    VkFormat                                    format,
+    VkFormatProperties*                         pFormatProperties);
+```
+
+If no format feature flags are supported, the format itself is not supported, and images of that format cannot be created.
