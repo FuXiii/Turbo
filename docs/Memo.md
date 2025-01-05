@@ -87,3 +87,15 @@ void SomeFun(T* ptr)
 T* t = new T();
 SomeFun(t);//SomeFun 结束之后 t 如果没人使用将会被 delete
 ```
+
+## Linux(Deepin V23)
+
+wayland-client.h : sudo apt install libwayland-dev
+
+## VulkanMmeoryAllocator
+
+engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
+
+#include <vulkan/vulkan_win32.h>
+
+在 Linux 平台编译是个 `Bug`
