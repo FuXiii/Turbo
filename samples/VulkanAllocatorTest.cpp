@@ -1,8 +1,8 @@
 //Use for check PipelineLayout memory leak in NVIDIA driver
 
-#include "core/include/TException.h"
+#include <TException.h>
 #include <vulkan/vulkan_core.h>
-#include "core/include/TVulkanAllocator.h"
+#include <TVulkanAllocator.h>
 
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>

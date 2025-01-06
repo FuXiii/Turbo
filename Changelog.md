@@ -4,6 +4,16 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/6
+
+>* `samples` 下增加 `VkFormatTest` 示例。用于研究测试 `VkFormat` 。
+>* `TFormatInfo.cpp` 下移除 `std::vector<VkFormat> TAllFormats`。改用范围`format_ranges`遍历所有格式。
+>* `samples` 下所有使用 `TCore` 头文件示例取消使用相对头文件路径。
+
+## 2025/1/5
+
+>* 尝试 `Linux` 平台编译。
+
 ## 2025/1/3
 
 >* 修正 ``TCore`` 编译时依赖 ``glslang`` 库。

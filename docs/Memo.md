@@ -149,3 +149,27 @@ void vkGetPhysicalDeviceFormatProperties(
 ```
 
 If no format feature flags are supported, the format itself is not supported, and images of that format cannot be created.
+
+### TFormatType
+
+声明维护 `TFormatType`（与 `VkFormat` 一致），但 `Vulkan` 可能在新版本中推出新的 `枚举项` ，也就是说，`Turbo`中的声明类型可能比`Vulkan`的少，没那么全。所以底层对于
+`TFormatType`的使用按照一个`uint32_t`使用即可，这样如果用户要使用`Turbo`中没有的类型，只需要使用`类型强转`即可。
+
+```CXX
+
+TFormatType ft = (TFormatType)(TFormatType中未声明的有效VkFormat枚举值);
+
+//在底层ft按照整数（VkFormat）使用
+```
+
+## Linux(Deepin V23)
+
+wayland-client.h : sudo apt install libwayland-dev
+
+## VulkanMmeoryAllocator
+
+engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
+
+### include <vulkan/vulkan_win32.h>
+
+在 Linux 平台编译是个 `Bug`

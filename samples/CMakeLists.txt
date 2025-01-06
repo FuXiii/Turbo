@@ -8,8 +8,8 @@ target_link_libraries(${Sample} PUBLIC ${Libs})
 endfunction()
 
 set(INCLUDE_PARTH 
-PUBLIC ${CMAKE_SOURCE_DIR}/engine/render 
-PUBLIC ${CMAKE_SOURCE_DIR}/engine/framegraph
+#PUBLIC ${CMAKE_SOURCE_DIR}/engine/render 
+#PUBLIC ${CMAKE_SOURCE_DIR}/engine/framegraph
 PUBLIC ${CMAKE_SOURCE_DIR}/engine/core
 PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/glm/
 PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/tinygltf/
@@ -19,17 +19,17 @@ PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/KTX-Software/include/
 )
 
 set(LINK_PARTH 
-PUBLIC /engine/render/ 
-PUBLIC /engine/framegraph/ 
-PUBLIC /engine/core/
-PUBLIC /thirdparty/glfw/src/
-PUBLIC /thirdparty/KTX-Software/
+#PUBLIC /engine/render/ 
+#PUBLIC /engine/framegraph/ 
+PUBLIC ${CMAKE_SOURCE_DIR}/engine/core/
+PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/glfw/src/
+PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/KTX-Software/
 )
 
 set(LIBS 
-TRender
+#TRender
 TCore 
-TFrameGraph
+#TFrameGraph
 glfw
 ktx
 )
@@ -42,11 +42,11 @@ ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui_widgets.cpp
 ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
 )
 
-add_executable(FrameGraphSample ./FrameGraphSample.cpp)
-target_include_directories(FrameGraphSample PUBLIC ${INCLUDE_PARTH})
-target_link_directories(FrameGraphSample PUBLIC ${LINK_PARTH})
-target_link_libraries(FrameGraphSample PUBLIC ${LIBS})
-target_compile_definitions(FrameGraphSample PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")
+#add_executable(FrameGraphSample ./FrameGraphSample.cpp)
+#target_include_directories(FrameGraphSample PUBLIC ${INCLUDE_PARTH})
+#target_link_directories(FrameGraphSample PUBLIC ${LINK_PARTH})
+#target_link_libraries(FrameGraphSample PUBLIC ${LIBS})
+#target_compile_definitions(FrameGraphSample PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")
 
 add_executable(HelloTriangle ./HelloTriangle.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(HelloTriangle PUBLIC ${INCLUDE_PARTH})
@@ -428,6 +428,12 @@ target_include_directories(VolumeTest PUBLIC ${INCLUDE_PARTH})
 target_link_directories(VolumeTest PUBLIC ${LINK_PARTH})
 target_link_libraries(VolumeTest PUBLIC ${LIBS})
 target_compile_definitions(VolumeTest PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")
+
+add_executable(VkFormatTest ./VkFormatTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(VkFormatTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(VkFormatTest PUBLIC ${LINK_PARTH})
+target_link_libraries(VkFormatTest PUBLIC ${LIBS})
+target_compile_definitions(VkFormatTest PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")
 
 add_subdirectory(./FlowField)
 
