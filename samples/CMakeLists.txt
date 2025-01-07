@@ -621,5 +621,14 @@ PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
 PUBLIC TURBO_PROJECT_NAME="VkFormatTest"
 )
 
+add_executable(SwapchainTest ./SwapchainTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(SwapchainTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(SwapchainTest PUBLIC ${LINK_PARTH})
+target_link_libraries(SwapchainTest PUBLIC ${LIBS})
+target_compile_definitions(SwapchainTest 
+PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
+)
+
 add_subdirectory(./FlowField)
 

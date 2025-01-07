@@ -12,6 +12,7 @@
 >* `TBarrier` 中移除 `TRefPtr<T>` 的冗余使用。
 >* `TInfo` 及其子类中移除 `TRefPtr<T>` 的冗余使用。
 >* `ShowWindByTex` 更新加载 ``global_wind.bin`` 到纹理中。
+>* 增加 `SwapchainTest` 示例。用于测试 ``交换链`` 。
 
 ## 2025/1/6
 

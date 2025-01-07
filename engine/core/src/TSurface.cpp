@@ -6,6 +6,7 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 #include <cstddef>
+#include <algorithm>
 
 Turbo::Extension::TColorSpace::TColorSpace(TColorSpaceType colorSpaceType)
 {
@@ -586,7 +587,7 @@ void Turbo::Extension::TSurface::GetSurfaceCapabilities() const
         this->maxImageCount = surface_capanilities.maxImageCount;
         if (this->maxImageCount < this->minImageCount)
         {
-            this->maxImageCount = this->minImageCount;
+            std::swap(this->minImageCount, this->maxImageCount);
         }
         this->currentExtent = surface_capanilities.currentExtent;
         this->minImageExtent = surface_capanilities.minImageExtent;

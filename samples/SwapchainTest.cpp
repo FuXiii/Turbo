@@ -1,6 +1,5 @@
 #include <iostream>
 #include <TInstance.h>
-// #include <TExtensionInfo.h>
 #include <GLFW/glfw3.h>
 #include <TPhysicalDevice.h>
 #include <TDevice.h>
@@ -10,15 +9,8 @@
 #include <TImageView.h>
 #include <TCommandBufferPool.h>
 #include <TCommandBuffer.h>
-#include <GlobalWind.h>
 #include <TFence.h>
 #include <TSemaphore.h>
-
-template <typename T>
-T Max(const T &a, const T &b)
-{
-    return a > b ? a : b;
-}
 
 std::string asset_root(TURBO_ASSET_ROOT);
 
@@ -131,32 +123,9 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
 
-    // Turbo::Core::TFormatType swapchain_image_format = surface->GetSupportFormats()[0].GetFormat().GetFormatType();
-    Turbo::Core::TFormatType swapchain_image_format = Turbo::Core::TFormatType::UNDEFINED;
-    {
-        bool is_support_B8G8R8A8_SRGB = false;
-        auto surface_support_formats = surface->GetSupportFormats();
-        for (auto &item : surface_support_formats)
-        {
-            auto format = item.GetFormat();
-            if (format.GetFormatType() == Turbo::Core::TFormatType::B8G8R8A8_SRGB)
-            {
-                is_support_B8G8R8A8_SRGB = true;
-                break;
-            }
-        }
+    Turbo::Core::TFormatType swapchain_image_format = surface->GetSupportFormats().begin()->GetFormat().GetFormatType();
 
-        if (is_support_B8G8R8A8_SRGB)
-        {
-            swapchain_image_format = Turbo::Core::TFormatType::B8G8R8A8_SRGB;
-        }
-        else
-        {
-            swapchain_image_format = surface_support_formats[0].GetFormat().GetFormatType();
-        }
-    }
-
-    Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, Max(surface->GetMinImageCount(), surface->GetMaxImageCount()), swapchain_image_format, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
+    Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, surface->GetMaxImageCount(), swapchain_image_format, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
     for (auto &item : swapchain->GetImages())
@@ -167,74 +136,24 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
 
-    auto load_flow_field_to_image = [&]() -> Turbo::Core::TImage * {
-        GlobalWind gw(asset_root + "/global_wind.bin");
-        auto width = gw.Width();
-        auto height = gw.Height();
-
-        size_t flow_field_size = width * height * sizeof(float) * 4;
-
-        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> flow_field_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, flow_field_size);
-        {
-            void *buffer_ptr = flow_field_buffer->Map();
-
-            std::cout << "height=" << height << std::endl;
-            std::cout << "width=" << width << std::endl;
-
-            for (size_t row = 0; row < height; row++)
-            {
-                for (size_t column = 0; column < width; column++)
-                {
-                    auto value = gw.Get(row, column);
-
-                    float lat = value.lat;
-                    float lon = value.lon;
-                    float u = value.u;
-                    float v = value.v;
-
-                    size_t offset = (row * width + column) * sizeof(float) * 4;
-                    memcpy((char *)buffer_ptr + offset + 0 * sizeof(float), &lat, sizeof(lat));
-                    memcpy((char *)buffer_ptr + offset + 1 * sizeof(float), &lon, sizeof(lon));
-                    memcpy((char *)buffer_ptr + offset + 2 * sizeof(float), &u, sizeof(u));
-                    memcpy((char *)buffer_ptr + offset + 3 * sizeof(float), &v, sizeof(v));
-                }
-            }
-
-            flow_field_buffer->Unmap();
-        }
-
-        Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
-        {
-            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> copy_command_buffer = command_pool->Allocate();
-            copy_command_buffer->Begin();
-            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-            copy_command_buffer->CmdCopyBufferToImage(flow_field_buffer, result, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, width, height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, width, height, 1);
-            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-            copy_command_buffer->End();
-
-            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
-            queue->Submit(copy_command_buffer, fence);
-            fence->WaitUntil();
-            command_pool->Free(copy_command_buffer);
-        }
-
-        return result;
-    };
-
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> flow_field = load_flow_field_to_image();
-
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        float time = glfwGetTime();
 
         uint32_t current_image_index = UINT32_MAX;
         Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
         switch (swapchain->AcquireNextImageUntil(wait_image_ready, nullptr, &current_image_index))
         {
         case Turbo::Core::TResult::SUCCESS: {
+
+            Turbo::Core::TImageView *current_swapchain_image_view = swapchain_image_views[current_image_index];
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
-            command_buffer->CmdCopyImage(flow_field, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, flow_field, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, flow_field->GetWidth(), flow_field->GetHeight(), 1);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, current_swapchain_image_view);
+            command_buffer->CmdClearColorImage(current_swapchain_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, (std::sin(time) + 1) * 0.5, (std::cos(time) + 1) * 0.5, (std::cos(0.5 * time) + 1) * 0.5, 1);
+            command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::PRESENT_SRC_KHR, current_swapchain_image_view);
             command_buffer->End();
             {
                 Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
