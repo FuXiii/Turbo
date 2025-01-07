@@ -11,6 +11,7 @@
 >* `TCommandBuffer` 中移除 `TRefPtr<T>` 的冗余使用。
 >* `TBarrier` 中移除 `TRefPtr<T>` 的冗余使用。
 >* `TInfo` 及其子类中移除 `TRefPtr<T>` 的冗余使用。
+>* `ShowWindByTex` 更新加载 ``global_wind.bin`` 到纹理中。
 
 ## 2025/1/6
 

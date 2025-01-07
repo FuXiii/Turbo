@@ -12,6 +12,7 @@
 #include <TCommandBuffer.h>
 #include <GlobalWind.h>
 #include <TFence.h>
+#include <TSemaphore.h>
 
 template <typename T>
 T Max(const T &a, const T &b)
@@ -165,23 +166,52 @@ int main()
     }
 
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
-    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
-    auto load_flow_field_to_image = [&]() -> Turbo::Core::TImage * {
+    auto load_flow_field_to_image = [&](Turbo::Core::TImage *test) -> Turbo::Core::TImage * {
         GlobalWind gw(asset_root + "/global_wind.bin");
         auto width = gw.Width();
         auto height = gw.Height();
 
-        size_t flow_field_size = 0;
-        gw.Load(flow_field_size, nullptr);
+        // size_t flow_field_size = 0;
+        // gw.Load(flow_field_size, nullptr);
+
+        size_t flow_field_size = width * height * sizeof(float) * 4;
 
         Turbo::Core::TRefPtr<Turbo::Core::TBuffer> flow_field_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, flow_field_size);
         {
-            gw.Load(flow_field_size, flow_field_buffer->Map());
+            // gw.Load(flow_field_size, flow_field_buffer->Map());
+            // flow_field_buffer->Unmap();
+
+            void *buffer_ptr = flow_field_buffer->Map();
+
+            std::cout << "height=" << height << std::endl;
+            std::cout << "width=" << width << std::endl;
+
+            for (size_t row = 0; row < height; row++)
+            {
+                // std::cout << "row=" << row << std::endl;
+                for (size_t column = 0; column < width; column++)
+                {
+                    auto value = gw.Get(row, column);
+
+                    float lat = value.lat;
+                    float lon = value.lon;
+                    float u = value.u;
+                    float v = value.v;
+
+                    size_t offset = (row * width + column) * sizeof(float) * 4;
+                    memcpy((char *)buffer_ptr + offset + 0 * sizeof(float), &lat, sizeof(lat));
+                    memcpy((char *)buffer_ptr + offset + 1 * sizeof(float), &lon, sizeof(lon));
+                    memcpy((char *)buffer_ptr + offset + 2 * sizeof(float), &u, sizeof(u));
+                    memcpy((char *)buffer_ptr + offset + 3 * sizeof(float), &v, sizeof(v));
+                }
+            }
+
             flow_field_buffer->Unmap();
         }
 
         Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+        test = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
         {
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> copy_command_buffer = command_pool->Allocate();
             copy_command_buffer->Begin();
@@ -199,14 +229,55 @@ int main()
         return result;
     };
 
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> flow_field = load_flow_field_to_image();
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> test;
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> flow_field = load_flow_field_to_image(test);
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-    }
 
-    command_pool->Free(command_buffer);
+        uint32_t current_image_index = UINT32_MAX;
+        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        switch (swapchain->AcquireNextImageUntil(wait_image_ready, nullptr, &current_image_index))
+        {
+        case Turbo::Core::TResult::SUCCESS: {
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
+            command_buffer->Begin();
+            command_buffer->CmdCopyImage(flow_field, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, flow_field, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, flow_field->GetWidth(), flow_field->GetHeight(), 1);
+            command_buffer->End();
+            {
+                Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+                queue->Submit(command_buffer, fence);
+                fence->WaitUntil();
+                command_pool->Free(command_buffer);
+            }
+            command_pool->Free(command_buffer);
+            Turbo::Core::TResult present_result = queue->Present(swapchain, current_image_index);
+        }
+        break;
+        case Turbo::Core::TResult::TIMEOUT: {
+        }
+        break;
+        case Turbo::Core::TResult::NOT_READY: {
+        }
+        break;
+        case Turbo::Core::TResult::MISMATCH: {
+            device->WaitIdle();
+            swapchain = new Turbo::Extension::TSwapchain(swapchain);
+            swapchain_image_views.clear();
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain->GetImages())
+            {
+                Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, swapchain_image_format, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                swapchain_image_views.push_back(swapchain_view);
+            }
+        }
+        break;
+        default: {
+            //
+        }
+        break;
+        }
+    }
 
     glfwTerminate();
     return 0;
