@@ -1951,7 +1951,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForLightingShadow");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);

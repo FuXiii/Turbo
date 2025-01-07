@@ -293,7 +293,7 @@ int main()
     int window_width = 1920 / 2.0;
     int window_height = 1080 / 2.0;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, TURBO_PROJECT_NAME, NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
@@ -925,7 +925,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("BRDF");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 // ImGui::SliderFloat("angle", &angle, 0.0f, 360);                   // Edit 1 float using a slider from 0.0f to 1.0f

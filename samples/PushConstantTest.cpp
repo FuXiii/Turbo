@@ -500,7 +500,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Push Constant Test");                                    // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME);                                    // Create a window called "Hello, world!" and append into it.
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f);                       // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Push Constant:");                                         // Display some text (you can use a format strings too)
                 ImGui::SliderFloat("a", &PUSH_CONSTANT_DATA.a, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f

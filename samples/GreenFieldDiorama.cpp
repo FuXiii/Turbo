@@ -478,7 +478,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("GreenFieldDiorama");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("shadertoy url: https://www.shadertoy.com/view/7dSGW1");
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();

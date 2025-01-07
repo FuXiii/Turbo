@@ -970,7 +970,7 @@ bool Turbo::Extension::TSurface::IsSupportPresentModeFifoRelaxed() const
     return false;
 }
 
-std::vector<Turbo::Extension::TSurfaceFormat> Turbo::Extension::TSurface::GetSurfaceFormats() const
+std::vector<Turbo::Extension::TSurfaceFormat> Turbo::Extension::TSurface::GetSupportFormats() const
 {
     return this->surfaceFormats;
 }

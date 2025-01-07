@@ -1041,7 +1041,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("PointCloud"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 

@@ -121,7 +121,7 @@ int main()
 
     uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
 
-    std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = surface->GetSurfaceFormats();
+    std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = surface->GetSupportFormats();
     Turbo::Core::TFormatType swapchain_support_format = Turbo::Core::TFormatType::UNDEFINED;
     for (Turbo::Extension::TSurfaceFormat &surface_format_item : surface_formats)
     {

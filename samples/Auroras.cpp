@@ -266,7 +266,7 @@ int main()
 {
 
     std::cout << "Vulkan Version:" << Turbo::Core::TVulkanLoader::Instance()->GetVulkanVersion().ToString() << std::endl;
-    
+
     std::string asset_root(TURBO_ASSET_ROOT);
 
     std::vector<Turbo::Core::TLayerInfo> support_layers;
@@ -328,7 +328,7 @@ int main()
     int window_width = 1920 / 2.0;
     int window_height = 1080 / 2.0;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, TURBO_PROJECT_NAME, NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
     VkInstance vk_instance = instance->GetVkInstance();
     glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
@@ -597,7 +597,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME); // Create a window called "Hello, world!" and append into it.
 
                 ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
 

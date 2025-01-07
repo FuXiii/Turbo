@@ -150,6 +150,24 @@ void vkGetPhysicalDeviceFormatProperties(
 
 If no format feature flags are supported, the format itself is not supported, and images of that format cannot be created.
 
+### Image Format
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkGetPhysicalDeviceImageFormatProperties(
+    VkPhysicalDevice                            physicalDevice,
+    VkFormat                                    format,
+    VkImageType                                 type,
+    VkImageTiling                               tiling,
+    VkImageUsageFlags                           usage,
+    VkImageCreateFlags                          flags,
+    VkImageFormatProperties*                    pImageFormatProperties);
+```
+
+The ``format``, ``type``, ``tiling``, ``usage``, and ``flags`` parameters correspond to parameters that would be consumed by ``vkCreateImage`` (as members of ``VkImageCreateInfo``).
+
+If format is not a supported image format, or if the combination of ``format``, ``type``, ``tiling``, ``usage``, and ``flags`` is not supported for images, then ``vkGetPhysicalDeviceImageFormatProperties`` returns ``VK_ERROR_FORMAT_NOT_SUPPORTED``.
+
 ### TFormatType
 
 声明维护 `TFormatType`（与 `VkFormat` 一致），但 `Vulkan` 可能在新版本中推出新的 `枚举项` ，也就是说，`Turbo`中的声明类型可能比`Vulkan`的少，没那么全。所以底层对于
@@ -173,3 +191,5 @@ engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
 ### include <vulkan/vulkan_win32.h>
 
 在 Linux 平台编译是个 `Bug`
+
+## Extension

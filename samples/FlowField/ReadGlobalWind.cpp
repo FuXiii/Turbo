@@ -1,10 +1,10 @@
 #include <GlobalWind.h>
 #include <iostream>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 int main()
 {
-    std::string asset_root(TURBO_ASSET_ROOT);
-
     GlobalWind gw(asset_root + "/global_wind.bin");
     auto width = gw.Width();
     auto height = gw.Height();

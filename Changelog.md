@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/7
+
+>* `samples` 下所有示例增加 `TURBO_PROJECT_NAME` 宏。用于表示当前示例名称。
+>* `TSurface` 的 `GetSurfaceFormats()` 函数重命名为 `GetSupportFormats()`。
+
 ## 2025/1/6
 
 >* `samples` 下增加 `VkFormatTest` 示例。用于研究测试 `VkFormat` 。

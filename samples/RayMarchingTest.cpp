@@ -562,7 +562,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("Hello, world!");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

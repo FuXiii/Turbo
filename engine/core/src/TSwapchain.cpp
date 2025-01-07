@@ -22,7 +22,7 @@ void Turbo::Extension::TSwapchain::InternalCreate()
         }
 
         // surfaceFormat
-        std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = this->surface->GetSurfaceFormats();
+        std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = this->surface->GetSupportFormats();
         bool is_support_surface_format = false;
         for (Turbo::Extension::TSurfaceFormat &surface_format_item : surface_formats)
         {

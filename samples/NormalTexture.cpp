@@ -861,7 +861,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("NormalTexture");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);           // Edit 1 float using a slider from 0.0f to 1.0f

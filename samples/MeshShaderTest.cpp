@@ -522,7 +522,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("MeshShaderTest");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::SliderFloat("scale", &my_buffer_data.scale, 0, 1);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
