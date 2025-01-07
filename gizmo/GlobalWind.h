@@ -26,4 +26,6 @@ class GlobalWind
     size_t Height();
 
     Value Get(size_t row, size_t column);
+
+    void Load(size_t& size, void *data);
 };

@@ -193,3 +193,7 @@ engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
 在 Linux 平台编译是个 `Bug`
 
 ## Extension
+
+## TInfo
+
+考虑是否继承自 TReferenced

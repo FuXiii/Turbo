@@ -8,6 +8,9 @@
 
 >* `samples` 下所有示例增加 `TURBO_PROJECT_NAME` 宏。用于表示当前示例名称。
 >* `TSurface` 的 `GetSurfaceFormats()` 函数重命名为 `GetSupportFormats()`。
+>* `TCommandBuffer` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TBarrier` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TInfo` 及其子类中移除 `TRefPtr<T>` 的冗余使用。
 
 ## 2025/1/6
 

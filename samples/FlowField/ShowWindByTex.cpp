@@ -10,6 +10,8 @@
 #include <TImageView.h>
 #include <TCommandBufferPool.h>
 #include <TCommandBuffer.h>
+#include <GlobalWind.h>
+#include <TFence.h>
 
 template <typename T>
 T Max(const T &a, const T &b)
@@ -128,6 +130,7 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
 
+    // Turbo::Core::TFormatType swapchain_image_format = surface->GetSupportFormats()[0].GetFormat().GetFormatType();
     Turbo::Core::TFormatType swapchain_image_format = Turbo::Core::TFormatType::UNDEFINED;
     {
         bool is_support_B8G8R8A8_SRGB = false;
@@ -163,6 +166,40 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
+
+    auto load_flow_field_to_image = [&]() -> Turbo::Core::TImage * {
+        GlobalWind gw(asset_root + "/global_wind.bin");
+        auto width = gw.Width();
+        auto height = gw.Height();
+
+        size_t flow_field_size = 0;
+        gw.Load(flow_field_size, nullptr);
+
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> flow_field_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, flow_field_size);
+        {
+            gw.Load(flow_field_size, flow_field_buffer->Map());
+            flow_field_buffer->Unmap();
+        }
+
+        Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+        {
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> copy_command_buffer = command_pool->Allocate();
+            copy_command_buffer->Begin();
+            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            copy_command_buffer->CmdCopyBufferToImage(flow_field_buffer, result, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, width, height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, width, height, 1);
+            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            copy_command_buffer->End();
+
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(copy_command_buffer, fence);
+            fence->WaitUntil();
+            command_pool->Free(copy_command_buffer);
+        }
+
+        return result;
+    };
+
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> flow_field = load_flow_field_to_image();
 
     while (!glfwWindowShouldClose(window))
     {

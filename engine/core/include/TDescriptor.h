@@ -55,7 +55,7 @@ typedef enum class TDescriptorType
 class TDescriptor : public Turbo::Core::TInfo
 {
   private:
-    TRefPtr<TShader> shader;
+    TShader *shader;
 
     TDescriptorType type;
     TDescriptorDataType dataType;

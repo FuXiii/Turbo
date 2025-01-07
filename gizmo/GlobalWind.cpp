@@ -51,3 +51,14 @@ GlobalWind::Value GlobalWind::Get(size_t row, size_t column)
 
     return value;
 }
+
+void GlobalWind::Load(size_t &size, void *data)
+{
+    this->in->seekg(-sizeof(size_t) * 2, std::ios_base::end);
+    size = this->in->tellg();
+    if (data != nullptr)
+    {
+        this->in->seekg(0);
+        this->in->read(reinterpret_cast<char *>(data), size);
+    }
+}
