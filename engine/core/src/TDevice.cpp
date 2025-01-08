@@ -1104,6 +1104,50 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
     }
 }
 
+Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, const std::vector<TLayerInfo> &enabledLayers, const std::vector<TExtensionInfo> &enabledExtensions, const TPhysicalDeviceFeatures &enableFeatures)
+{
+    if (Turbo::Core::TReferenced::Valid(physicalDevice))
+    {
+        this->physicalDevice = physicalDevice;
+
+        if (!enabledLayers.empty())
+        {
+            this->enabledLayers = enabledLayers;
+        }
+
+        if (!enabledExtensions.empty())
+        {
+            this->enabledExtensions = enabledExtensions;
+            // TODO: we need to check and add extension dependencies(missing extensions required)
+        }
+
+        {
+            this->enabledFeatures = enabledFeatures;
+        }
+
+        this->InternalCreate();
+
+        this->physicalDevice->AddChildHandle(this);
+
+        // Create TDeviceQueues
+        std::vector<Turbo::Core::TQueueFamilyInfo> device_queue_family_infos = this->physicalDevice->GetQueueFamilys();
+
+        for (TQueueFamilyIndex queue_family_index = 0; queue_family_index < this->deviceQueuePriorities.size(); queue_family_index++)
+        {
+            for (uint32_t queue_index = 0; queue_index < this->deviceQueuePriorities[queue_family_index].size(); queue_index++)
+            {
+                new TDeviceQueue(this, device_queue_family_infos[queue_family_index], queue_index);
+            }
+        }
+
+        this->vmaAllocator = new TVmaAllocator(this);
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDevice::TDevice");
+    }
+}
+
 Turbo::Core::TDevice::~TDevice()
 {
     if (this->vkDevice != VK_NULL_HANDLE)

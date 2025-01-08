@@ -1,47 +1,49 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
-#include "core/include/TVulkanAllocator.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
+#include <TVulkanAllocator.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TGraphicsPipeline.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
 #include <math.h>
 
-#include "TPipelineDescriptorSet.h"
-#include "TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 std::string ReadTextFile(const std::string &filename)
 {
@@ -59,11 +61,11 @@ std::string ReadTextFile(const std::string &filename)
     return std::string{(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.vert");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/shader_include_test.vert");
 
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/shader_include_test.frag");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/shader_include_test.frag");
 
-const std::string SHADER_INCLUDE_PATH = "../../asset/shaders";
+const std::string SHADER_INCLUDE_PATH = asset_root + "/shaders";
 
 typedef struct POSITION
 {

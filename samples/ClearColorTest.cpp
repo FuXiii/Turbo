@@ -1,36 +1,36 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
-#include "core/include/TVulkanAllocator.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
+#include <TVulkanAllocator.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TRenderPass.h"
+#include <TAttachment.h>
+#include <TRenderPass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
-#include "TPipelineDescriptorSet.h"
+#include <TPipelineDescriptorSet.h>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -121,7 +121,7 @@ int main()
 
     uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
 
-    std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = surface->GetSurfaceFormats();
+    std::vector<Turbo::Extension::TSurfaceFormat> surface_formats = surface->GetSupportFormats();
     Turbo::Core::TFormatType swapchain_support_format = Turbo::Core::TFormatType::UNDEFINED;
     for (Turbo::Extension::TSurfaceFormat &surface_format_item : surface_formats)
     {

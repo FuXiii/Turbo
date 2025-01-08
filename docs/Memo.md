@@ -87,3 +87,113 @@ void SomeFun(T* ptr)
 T* t = new T();
 SomeFun(t);//SomeFun 结束之后 t 如果没人使用将会被 delete
 ```
+
+## VkFormat
+
+VK_FORMAT_MAX_ENUM = 0x7FFFFFFF
+使用一个 uint32_t 就可以代表 VkFormat 中所有的格式
+
+engine\core\src\TFormatInfo.cpp 下的 `std::vector<VkFormat> TAllFormats` 用于存储 `Vulkan` 所有的格式声明，
+之后通过 `vkGetPhysicalDeviceFormatProperties(...)` 函数遍历每一个 `VkFormat` 来确定是否支持该格式。
+
+其中的 `TAllFormats` 目前是写死的，不是很优雅，`Vulkan` 可能会随着版本的发布新增格式，可能需要随时更新适配 `TAllFormats` 中的值。
+需要一种方式动态遍历 `VkFormat` 中的所有项，但 `C/C++` 并不支持直接遍历枚举，并且 `VkFormat` 中有重复值。
+
+需要一个容器可以随时维护 `VkFormat` ，并支持遍历。
+
+`vkconfig` 是通过解析 `vulkaninfo(vulkaninfoSDK)` 生成 `vulkaninfo.json` 文件，之后解析该文件。
+
+`vulkaninfo` 通过 `vulkaninfo.hpp` 解析其中的 `format_ranges` 。
+
+`vulkaninfo.hpp` 好像是通过 `vulkan` 的 `vk.xml` 生成的？
+
+使用 `vulkaninfo.hpp` 中声明的 `format_ranges` 是个好主意。官方维护，值得信赖。(ﾟ∀。)
+
+```CXX
+struct FormatRange {
+    // the Vulkan standard version that supports this format range, or 0 if non-standard
+    APIVersion minimum_instance_version;
+
+    // The name of the extension that supports this format range, or NULL if the range
+    // is only part of the standard
+    const char *extension_name;
+
+    // The first and last supported formats within this range.
+    VkFormat first_format;
+    VkFormat last_format;
+};
+
+auto format_ranges = std::array{
+    FormatRange{0, nullptr, static_cast<VkFormat>(0), static_cast<VkFormat>(184)},
+    FormatRange{VK_API_VERSION_1_1, nullptr, static_cast<VkFormat>(1000156000), static_cast<VkFormat>(1000156033)},
+    FormatRange{0, VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME, static_cast<VkFormat>(1000156000), static_cast<VkFormat>(1000156033)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000330000), static_cast<VkFormat>(1000330003)},
+    FormatRange{0, VK_EXT_YCBCR_2PLANE_444_FORMATS_EXTENSION_NAME, static_cast<VkFormat>(1000330000), static_cast<VkFormat>(1000330003)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000340000), static_cast<VkFormat>(1000340001)},
+    FormatRange{0, VK_EXT_4444_FORMATS_EXTENSION_NAME, static_cast<VkFormat>(1000340000), static_cast<VkFormat>(1000340001)},
+    FormatRange{VK_API_VERSION_1_3, nullptr, static_cast<VkFormat>(1000066000), static_cast<VkFormat>(1000066013)},
+    FormatRange{0, VK_EXT_TEXTURE_COMPRESSION_ASTC_HDR_EXTENSION_NAME, static_cast<VkFormat>(1000066000), static_cast<VkFormat>(1000066013)},
+    FormatRange{VK_API_VERSION_1_4, nullptr, static_cast<VkFormat>(1000470000), static_cast<VkFormat>(1000470001)},
+    FormatRange{0, VK_KHR_MAINTENANCE_5_EXTENSION_NAME, static_cast<VkFormat>(1000470000), static_cast<VkFormat>(1000470001)},
+    FormatRange{0, VK_IMG_FORMAT_PVRTC_EXTENSION_NAME, static_cast<VkFormat>(1000054000), static_cast<VkFormat>(1000054007)},
+    FormatRange{0, VK_NV_OPTICAL_FLOW_EXTENSION_NAME, static_cast<VkFormat>(1000464000), static_cast<VkFormat>(1000464000)},
+};
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+void vkGetPhysicalDeviceFormatProperties(
+    VkPhysicalDevice                            physicalDevice,
+    VkFormat                                    format,
+    VkFormatProperties*                         pFormatProperties);
+```
+
+If no format feature flags are supported, the format itself is not supported, and images of that format cannot be created.
+
+### Image Format
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkGetPhysicalDeviceImageFormatProperties(
+    VkPhysicalDevice                            physicalDevice,
+    VkFormat                                    format,
+    VkImageType                                 type,
+    VkImageTiling                               tiling,
+    VkImageUsageFlags                           usage,
+    VkImageCreateFlags                          flags,
+    VkImageFormatProperties*                    pImageFormatProperties);
+```
+
+The ``format``, ``type``, ``tiling``, ``usage``, and ``flags`` parameters correspond to parameters that would be consumed by ``vkCreateImage`` (as members of ``VkImageCreateInfo``).
+
+If format is not a supported image format, or if the combination of ``format``, ``type``, ``tiling``, ``usage``, and ``flags`` is not supported for images, then ``vkGetPhysicalDeviceImageFormatProperties`` returns ``VK_ERROR_FORMAT_NOT_SUPPORTED``.
+
+### TFormatType
+
+声明维护 `TFormatType`（与 `VkFormat` 一致），但 `Vulkan` 可能在新版本中推出新的 `枚举项` ，也就是说，`Turbo`中的声明类型可能比`Vulkan`的少，没那么全。所以底层对于
+`TFormatType`的使用按照一个`uint32_t`使用即可，这样如果用户要使用`Turbo`中没有的类型，只需要使用`类型强转`即可。
+
+```CXX
+
+TFormatType ft = (TFormatType)(TFormatType中未声明的有效VkFormat枚举值);
+
+//在底层ft按照整数（VkFormat）使用
+```
+
+## Linux(Deepin V23)
+
+wayland-client.h : sudo apt install libwayland-dev
+
+## VulkanMmeoryAllocator
+
+engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
+
+### include <vulkan/vulkan_win32.h>
+
+在 Linux 平台编译是个 `Bug`
+
+## Extension
+
+## TInfo
+
+考虑是否继承自 TReferenced

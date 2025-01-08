@@ -1,41 +1,41 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TMemoryTypeInfo.h"
-#include "core/include/TPhysicalDevice.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TMemoryTypeInfo.h>
+#include <TPhysicalDevice.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TGraphicsPipeline.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
 #include <iostream>
 
-#include "core/include/TPipelineDescriptorSet.h"
-#include "core/include/TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 
 #include <ktx.h>
 
@@ -43,6 +43,8 @@
 #include <string.h>
 #include <string>
 #include <utility>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 void OutputMemoryInfo(Turbo::Core::TMemoryTypeInfo &memoryTypeInfo)
 {
@@ -381,7 +383,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = asset_root + "/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;

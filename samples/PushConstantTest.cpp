@@ -1,41 +1,41 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TPipelineLayout.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TGraphicsPipeline.h>
+#include <TPipelineLayout.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
-#include "core/include/TPipelineDescriptorSet.h"
-#include "core/include/TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 
 #include <glm/ext.hpp>
 
@@ -43,6 +43,8 @@
 
 #include <stdio.h>
 #include <string.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
@@ -91,13 +93,13 @@ std::vector<uint8_t> ReadBinaryFile(const std::string &filename, const uint32_t 
     return data;
 }
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.vert");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/push_constant.vert");
 
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/push_constant.frag");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/push_constant.frag");
 
 typedef struct POSITION
 {
@@ -498,7 +500,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Push Constant Test");                                    // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME);                                    // Create a window called "Hello, world!" and append into it.
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f);                       // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Push Constant:");                                         // Display some text (you can use a format strings too)
                 ImGui::SliderFloat("a", &PUSH_CONSTANT_DATA.a, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
@@ -819,9 +821,9 @@ int main()
 
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
     descriptor_pool->Free(pipeline_descriptor_set);
-   
+
     command_pool->Free(command_buffer);
-   
+
     glfwTerminate();
 
     return 0;

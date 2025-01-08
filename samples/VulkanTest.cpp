@@ -1,7 +1,7 @@
-#include "core/include/TException.h"
-#include "core/include/TInstance.h"
+#include <TException.h>
+#include <TInstance.h>
 #include <vulkan/vulkan.h>
-#include "core/include/TVulkanAllocator.h"
+#include <TVulkanAllocator.h>
 
 // #include <vulkan/vulkan_core.h>
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)

@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <vector>
 
+std::string asset_root(TURBO_ASSET_ROOT);
+
 void WriteTextFile(const std::string &text, const std::string &filename)
 {
     std::ofstream out_stream;
@@ -260,7 +262,7 @@ void Test0()
     }
 
     {
-        std::string compute_shader_code = ReadTextFile("../../asset/shaders/perlin-worley.comp");
+        std::string compute_shader_code = ReadTextFile(asset_root + "/shaders/perlin-worley.comp");
         Turbo::Render::TComputeShader *compute_shader = nullptr;
         {
             std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
@@ -277,7 +279,7 @@ void Test0()
 
         delete compute_shader;
 
-        std::string vertex_shader_code = ReadTextFile("../../asset/shaders/shader_base.vert");
+        std::string vertex_shader_code = ReadTextFile(asset_root + "/shaders/shader_base.vert");
         Turbo::Render::TVertexShader *vertex_shader = nullptr;
         {
             std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
@@ -287,7 +289,7 @@ void Test0()
             std::cout << "create  Turbo::Render::TVertexShader vertex_shader use:" << delta_time.count() << "s" << std::endl;
         }
 
-        std::string fragment_shader_code = ReadTextFile("../../asset/shaders/shader_base.frag");
+        std::string fragment_shader_code = ReadTextFile(asset_root + "/shaders/shader_base.frag");
         Turbo::Render::TFragmentShader *fragment_shader = nullptr;
         {
             std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
@@ -1003,8 +1005,8 @@ void Test9()
     Turbo::Render::TAttributeID color_attribute_id = vertex_buffer.AddAttribute(Turbo::Render::TFormat::R32G32B32_SFLOAT, offsetof(VertexData, color));
     vertex_buffer.Copy(vertex_data.data(), sizeof(VertexData) * vertex_data.size());
 
-    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile("../../asset/shaders/pure_triangle.vert"));
-    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile("../../asset/shaders/pure_triangle.frag"));
+    Turbo::Render::TVertexShader *vertex_shader = new Turbo::Render::TVertexShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile(asset_root + "/shaders/pure_triangle.vert"));
+    Turbo::Render::TFragmentShader *fragment_shader = new Turbo::Render::TFragmentShader(&context, Turbo::Render::TShader::TLanguage::GLSL, ReadTextFile(asset_root + "/shaders/pure_triangle.frag"));
 
     while (!glfwWindowShouldClose(window))
     {

@@ -7,10 +7,10 @@ class GlobalWind
     class Value
     {
       public:
-        double lat = 0;
-        double lon = 0;
-        double u = 0;
-        double v = 0;
+        float lat = 0;
+        float lon = 0;
+        float u = 0;
+        float v = 0;
     };
 
   private:
@@ -26,4 +26,6 @@ class GlobalWind
     size_t Height();
 
     Value Get(size_t row, size_t column);
+
+    size_t Load(void *ptr = nullptr);
 };
