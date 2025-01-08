@@ -4,6 +4,28 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/8
+
+>* `gizmo` 下增加 `ReadFile` 用于读取常见文本和二进制文件。
+>* 更新 `global_wind.bin` 和与之相关的加载类`GlobalWind`，按照单精度浮点数进行读，加速读取速度。
+>* 更新 `ShowWindByTex` ，按照图片纹理形式显示。
+
+## 2025/1/7
+
+>* `samples` 下所有示例增加 `TURBO_PROJECT_NAME` 宏。用于表示当前示例名称。
+>* `TSurface` 的 `GetSurfaceFormats()` 函数重命名为 `GetSupportFormats()`。
+>* `TCommandBuffer` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TBarrier` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TInfo` 及其子类中移除 `TRefPtr<T>` 的冗余使用。
+>* `ShowWindByTex` 更新加载 ``global_wind.bin`` 到纹理中。
+>* 增加 `SwapchainTest` 示例。用于测试 ``交换链`` 。
+
+## 2025/1/6
+
+>* `samples` 下增加 `VkFormatTest` 示例。用于研究测试 `VkFormat` 。
+>* `TFormatInfo.cpp` 下移除 `std::vector<VkFormat> TAllFormats`。改用范围`format_ranges`遍历所有格式。
+>* `samples` 下所有使用 `TCore` 头文件示例取消使用相对头文件路径。
+
 ## 2025/1/5
 
 >* 尝试 `Linux` 平台编译。
@@ -11,6 +33,10 @@
 ## 2025/1/3
 
 >* 修正 ``TCore`` 编译时依赖 ``glslang`` 库。
+>* 所有示例都增加 ``TURBO_ASSET_ROOT`` 宏指向 `asset` 资源文件夹。自动化配置资源路径，不再需要手动配置了。
+>* 增加 ``samples\FlowField`` 文件夹。用于存放流场相关示例。
+>* ``FlowField`` 下增加 ``ShowWindByTex`` 示例。用于使用纹理显示 ``流场图``。
+>* ``TInstance`` 增加引用版本构造。
 
 ## 2025/1/2
 

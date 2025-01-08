@@ -21,7 +21,7 @@ class TVersion : public TInfo
 
   public:
     explicit TVersion();
-    explicit TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop);
+    explicit TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop = 0);
     TVersion(const TVersion &version);
     ~TVersion();
 

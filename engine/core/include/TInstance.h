@@ -48,11 +48,12 @@ class TInstance : public Turbo::Core::TVulkanHandle
     static TVersion GetVulkanInstanceVersion();
 
   private:
-    VkResult CreateVkInstance(std::vector<TLayerInfo> *enabledLayers, std::vector<TExtensionInfo> *enabledExtensions, TVersion *vulkanVersion);
+    VkResult CreateVkInstance(const std::vector<TLayerInfo> *enabledLayers, const std::vector<TExtensionInfo> *enabledExtensions, const TVersion *vulkanVersion);
 
   public:
-    explicit TInstance(std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TVersion *vulkanVersion = nullptr);
-    // explicit TInstance(const TInstance &instance) = delete;
+    TInstance(std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TVersion *vulkanVersion = nullptr);
+    TInstance(const std::vector<TLayerInfo> &enabledLayers /*= {}*/, const std::vector<TExtensionInfo> &enabledExtensions /*= {}*/, const TVersion &version /*= TVersion(1, 0, 0)*/);
+
   protected:
     virtual ~TInstance();
 
