@@ -14,7 +14,7 @@ vec2 MapToColor(vec2 meta)
 void main()
 {
     vec4 flow_field = texture(sampler2D(myFlowFieldTex, mySampler), uv, 0);
-    vec2 lat_lon = vec2(flow_field.x, flow_field.y);
-    vec2 speed = vec2(flow_field.z, flow_field.w);
+    vec2 lat_lon = flow_field.xy;
+    vec2 speed = flow_field.zw;
     out_color = vec4(MapToColor(speed), MapToColor(lat_lon));
 }
