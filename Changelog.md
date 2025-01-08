@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/8
+
+>* `gizmo` 下增加 `ReadFile` 用于读取常见文本和二进制文件。
+>* 更新 `ShowWindByTex` ，按照图片纹理形式显示。
+
 ## 2025/1/7
 
 >* `samples` 下所有示例增加 `TURBO_PROJECT_NAME` 宏。用于表示当前示例名称。
