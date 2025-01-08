@@ -139,7 +139,6 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
 
-    // Turbo::Core::TFormatType swapchain_image_format = surface->GetSupportFormats()[0].GetFormat().GetFormatType();
     Turbo::Core::TFormatType swapchain_image_format = Turbo::Core::TFormatType::UNDEFINED;
     {
         bool is_support_B8G8R8A8_SRGB = false;
@@ -180,34 +179,13 @@ int main()
         auto width = gw.Width();
         auto height = gw.Height();
 
-        size_t flow_field_size = width * height * sizeof(float) * 4;
+        std::cout << "height=" << height << std::endl;
+        std::cout << "width=" << width << std::endl;
 
+        size_t flow_field_size = gw.Load();
         Turbo::Core::TRefPtr<Turbo::Core::TBuffer> flow_field_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, flow_field_size);
         {
-            void *buffer_ptr = flow_field_buffer->Map();
-
-            std::cout << "height=" << height << std::endl;
-            std::cout << "width=" << width << std::endl;
-
-            for (size_t row = 0; row < height; row++)
-            {
-                for (size_t column = 0; column < width; column++)
-                {
-                    auto value = gw.Get(row, column);
-
-                    float lat = value.lat;
-                    float lon = value.lon;
-                    float u = value.u;
-                    float v = value.v;
-
-                    size_t offset = (row * width + column) * sizeof(float) * 4;
-                    memcpy((char *)buffer_ptr + offset + 0 * sizeof(float), &lat, sizeof(lat));
-                    memcpy((char *)buffer_ptr + offset + 1 * sizeof(float), &lon, sizeof(lon));
-                    memcpy((char *)buffer_ptr + offset + 2 * sizeof(float), &u, sizeof(u));
-                    memcpy((char *)buffer_ptr + offset + 3 * sizeof(float), &v, sizeof(v));
-                }
-            }
-
+            gw.Load(flow_field_buffer->Map());
             flow_field_buffer->Unmap();
         }
 
