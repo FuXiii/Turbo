@@ -643,5 +643,17 @@ PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
 
 add_sample(ImGuiTest ImGuiTest.cpp)
 
+add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(GlslangTest PUBLIC PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang)
+#target_link_directories(GlslangTest PUBLIC ${LINK_PARTH})
+target_link_libraries(GlslangTest 
+PRIVATE glslang
+PRIVATE glslang-default-resource-limits
+)
+target_compile_definitions(GlslangTest 
+PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+PUBLIC TURBO_PROJECT_NAME="GlslangTest"
+)
+
 add_subdirectory(./FlowField)
 

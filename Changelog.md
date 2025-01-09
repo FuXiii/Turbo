@@ -7,6 +7,7 @@
 ## 2025/1/9
 
 >* `samples` 下增加 `ImGuiTest` 示例。用于渲染 ``ImGui`` 。
+>* `samples` 下增加 `GlslangTest` 示例。用于研究 ``glslang`` 。
 
 ## 2025/1/8
 
