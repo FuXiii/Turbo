@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/9
+
+>* `samples` 下增加 `ImGuiTest` 示例。用于渲染 ``ImGui`` 。
+
 ## 2025/1/8
 
 >* `gizmo` 下增加 `ReadFile` 用于读取常见文本和二进制文件。

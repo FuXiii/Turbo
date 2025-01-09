@@ -42,6 +42,17 @@ ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui_widgets.cpp
 ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
 )
 
+function(add_sample name srcs)
+    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
+    target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/gizmo)
+    target_link_directories(${name} PUBLIC ${LINK_PARTH})
+    target_link_libraries(${name} PUBLIC ${LIBS})
+    target_compile_definitions(${name} 
+    PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+    PUBLIC TURBO_PROJECT_NAME="${name}"
+    )
+endfunction()
+
 #add_executable(FrameGraphSample ./FrameGraphSample.cpp)
 #target_include_directories(FrameGraphSample PUBLIC ${INCLUDE_PARTH})
 #target_link_directories(FrameGraphSample PUBLIC ${LINK_PARTH})
@@ -629,6 +640,8 @@ target_compile_definitions(SwapchainTest
 PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
 PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
 )
+
+add_sample(ImGuiTest ImGuiTest.cpp)
 
 add_subdirectory(./FlowField)
 
