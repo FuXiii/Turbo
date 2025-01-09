@@ -194,8 +194,8 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TSampler> imgui_sampler = new Turbo::Core::TSampler(device);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> imgui_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui.vert"));
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> imgui_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui.frag"));
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> imgui_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> imgui_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.frag"));
 
     Turbo::Core::TVertexBinding imgui_vertex_binding(0, sizeof(ImDrawVert), Turbo::Core::TVertexRate::VERTEX);
     imgui_vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, pos));  // position
@@ -265,7 +265,9 @@ int main()
 
             {
                 static bool is_show_demo_window = true;
-                ImGui::ShowDemoWindow(&is_show_demo_window);
+
+                if (is_show_demo_window)
+                    ImGui::ShowDemoWindow(&is_show_demo_window);
 
                 static float f = 0.0f;
                 static int counter = 0;
@@ -281,6 +283,8 @@ int main()
                     counter++;
                 ImGui::SameLine();
                 ImGui::Text("counter = %d", counter);
+
+                ImGui::Checkbox("show demo window", &is_show_demo_window);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();

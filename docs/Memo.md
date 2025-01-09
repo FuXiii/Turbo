@@ -197,3 +197,11 @@ engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
 ## TInfo
 
 考虑是否继承自 TReferenced
+
+## GLSL -> SPIR-V
+
+解析有问题：
+
+1. 解析信息不全。
+2. 解析信息数据来源，尝试不再使用 ``SpirV-Cross`` 只使用 ``glslang`` 。
+3. 使用 ``SpirV-Cross`` 提前信息可能有 ``bug``
