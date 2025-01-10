@@ -643,8 +643,8 @@ PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
 
 add_sample(ImGuiTest ImGuiTest.cpp)
 
-add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH})
-target_include_directories(GlslangTest PUBLIC PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang)
+add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
+target_include_directories(GlslangTest PUBLIC PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
 #target_link_directories(GlslangTest PUBLIC ${LINK_PARTH})
 target_link_libraries(GlslangTest 
 PRIVATE glslang

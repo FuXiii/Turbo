@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/10
+
+>* `asset\shaders` 下新增 ``glslangTest.vert`` 。
+>* `samples` 下更新 `GlslangTest` 示例。尝试解析 ``glslangTest.vert`` 。
+
 ## 2025/1/9
 
 >* `samples` 下增加 `ImGuiTest` 示例。用于渲染 ``ImGui`` 。
