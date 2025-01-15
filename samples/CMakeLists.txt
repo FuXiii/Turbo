@@ -655,5 +655,29 @@ PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
 PUBLIC TURBO_PROJECT_NAME="GlslangTest"
 )
 
+if(
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h" AND 
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c" AND 
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include/spirv/unified1/spirv.h"
+)
+set(SPIRV_REFLECT_SRCS 
+${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c
+)
+set(SPIRV_REFLECT_HEADERS
+${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h
+)
+set(SPIRV_REFLECT_INCLUDE_PATH
+${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include
+)
+
+add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS})
+target_include_directories(SpirvReflectTest PUBLIC PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH})
+target_compile_definitions(SpirvReflectTest 
+PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+PUBLIC TURBO_PROJECT_NAME="SpirvReflectTest"
+SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
+)
+endif()
+
 add_subdirectory(./FlowField)
 

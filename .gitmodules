@@ -25,3 +25,6 @@
 	path = engine/core/thirdparty/VulkanMemoryAllocator
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
 	branch = master
+[submodule "engine/core/thirdparty/SPIRV-Reflect"]
+	path = engine/core/thirdparty/SPIRV-Reflect
+	url = git@github.com:KhronosGroup/SPIRV-Reflect.git

@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/15
+
+>* `engine\core\thirdparty` 下新增 ``SPIRV-Reflect`` 子模块。并将其集成到 ``TCore`` 核心中。
+>* `samples` 下新增 ``SpirvReflectTest`` 示例。用于研究 ``SPIRV-Reflect`` 。
+
 ## 2025/1/14
 
 >* `asset\shaders` 下新增 ``glslangTest.frag`` 。

@@ -205,3 +205,9 @@ engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
 1. 解析信息不全。
 2. 解析信息数据来源，尝试不再使用 ``SpirV-Cross`` 只使用 ``glslang`` 。
 3. 使用 ``SpirV-Cross`` 提前信息可能有 ``bug``
+
+会有问题： ``glslang`` 只支持编译 ``GLSL`` 和 ``HLSL`` ，而市面上的着色器前端语言标准层出不穷（GLSL HLSL  Slang WebGL HIP/CUDA SYCL MetalShadingLanguage 等）， ``Turbo`` 不可能支持每一个着色器前端语言，而现在所有前端语言几乎都支持编译为 ``SPIR-V`` 后端，原则上 ``Turbo`` 只需要支持 ``SPIR-V`` 的解析和使用即可支持所有的前端着色器语言。
+
+现在的问题变成了使用 ``SPIRV-Cross/SPIRV-Reflect`` 序列化/反序列化出 ``描述符`` 信息。并进行相应的自动化适配。
+
+目测 ``SPIRV-Reflect`` 比较轻量，应该好用。
