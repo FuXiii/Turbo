@@ -658,17 +658,26 @@ PUBLIC TURBO_PROJECT_NAME="GlslangTest"
 if(
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h" AND 
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c" AND 
-EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include/spirv/unified1/spirv.h"
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include/spirv/unified1/spirv.h" AND
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.h" AND
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.cpp" AND
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.h" AND
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.cpp"
 )
     set(SPIRV_REFLECT_SRCS 
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.cpp
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.cpp
     )
     set(SPIRV_REFLECT_HEADERS
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.h
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.h
     )
     set(SPIRV_REFLECT_INCLUDE_PATH
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples
     )
     
     add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)

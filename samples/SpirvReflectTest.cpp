@@ -3,12 +3,15 @@
 #include <stdexcept>
 #include <ReadFile.h>
 
-#include <spirv_reflect.h>
+//#include <spirv_reflect.h>
+#include "spirv_reflect.h"
 
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Include/Types.h>
 #include <glslang/Public/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
+
+#include <common.h>
 
 std::string asset_root(TURBO_ASSET_ROOT);
 
@@ -160,40 +163,6 @@ std::vector<uint32_t> GlslToSpirV(const std::string &glsl, ShaderType type)
     return result;
 }
 
-void PrintModuleInfo(std::ostream &os, const SpvReflectShaderModule &obj)
-{
-    os << "entry point     : " << obj.entry_point_name << "\n";
-    os << "source lang     : " << spvReflectSourceLanguage(obj.source_language) << "\n";
-    os << "source lang ver : " << obj.source_language_version << "\n";
-    if (obj.source_language == SpvSourceLanguageHLSL)
-    {
-        os << "stage           : ";
-        switch (obj.shader_stage)
-        {
-        default:
-            break;
-        case SPV_REFLECT_SHADER_STAGE_VERTEX_BIT:
-            os << "VS";
-            break;
-        case SPV_REFLECT_SHADER_STAGE_TESSELLATION_CONTROL_BIT:
-            os << "HS";
-            break;
-        case SPV_REFLECT_SHADER_STAGE_TESSELLATION_EVALUATION_BIT:
-            os << "DS";
-            break;
-        case SPV_REFLECT_SHADER_STAGE_GEOMETRY_BIT:
-            os << "GS";
-            break;
-        case SPV_REFLECT_SHADER_STAGE_FRAGMENT_BIT:
-            os << "PS";
-            break;
-        case SPV_REFLECT_SHADER_STAGE_COMPUTE_BIT:
-            os << "CS";
-            break;
-        }
-    }
-}
-
 int main()
 {
     std::cout << "Hello World" << std::endl;
@@ -206,18 +175,36 @@ int main()
 
     PrintModuleInfo(std::cout, module);
 
-    uint32_t var_count = 0;
-    result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
-    assert(result == SPV_REFLECT_RESULT_SUCCESS);
-    std::cout << "var_count:" << var_count << std::endl;
-
-    std::vector<SpvReflectInterfaceVariable *> input_vars(var_count);
-    result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars.data());
-    assert(result == SPV_REFLECT_RESULT_SUCCESS);
-
-    for (auto &input : input_vars)
     {
-        std::cout << "\tname : " << input->name << std::endl;
+        uint32_t count = 0;
+        result = spvReflectEnumerateDescriptorSets(&module, &count, NULL);
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+        std::vector<SpvReflectDescriptorSet *> sets(count);
+        result = spvReflectEnumerateDescriptorSets(&module, &count, sets.data());
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+        std::cout << "<PrintDescriptorSet> : " << count << std::endl;
+        for (auto &set : sets)
+        {
+            PrintDescriptorSet(std::cout, *set, "\t");
+        }
+        std::cout << "</PrintDescriptorSet>" << std::endl;
+    }
+
+    {
+        uint32_t var_count = 0;
+        result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+        std::cout << "var_count:" << var_count << std::endl;
+
+        std::vector<SpvReflectInterfaceVariable *> input_vars(var_count);
+        result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars.data());
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+        for (auto &input : input_vars)
+        {
+            std::cout << "\tname : " << input->name << std::endl;
+        }
     }
 
     spvReflectDestroyShaderModule(&module);
