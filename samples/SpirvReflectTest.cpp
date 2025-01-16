@@ -160,6 +160,40 @@ std::vector<uint32_t> GlslToSpirV(const std::string &glsl, ShaderType type)
     return result;
 }
 
+void PrintModuleInfo(std::ostream &os, const SpvReflectShaderModule &obj)
+{
+    os << "entry point     : " << obj.entry_point_name << "\n";
+    os << "source lang     : " << spvReflectSourceLanguage(obj.source_language) << "\n";
+    os << "source lang ver : " << obj.source_language_version << "\n";
+    if (obj.source_language == SpvSourceLanguageHLSL)
+    {
+        os << "stage           : ";
+        switch (obj.shader_stage)
+        {
+        default:
+            break;
+        case SPV_REFLECT_SHADER_STAGE_VERTEX_BIT:
+            os << "VS";
+            break;
+        case SPV_REFLECT_SHADER_STAGE_TESSELLATION_CONTROL_BIT:
+            os << "HS";
+            break;
+        case SPV_REFLECT_SHADER_STAGE_TESSELLATION_EVALUATION_BIT:
+            os << "DS";
+            break;
+        case SPV_REFLECT_SHADER_STAGE_GEOMETRY_BIT:
+            os << "GS";
+            break;
+        case SPV_REFLECT_SHADER_STAGE_FRAGMENT_BIT:
+            os << "PS";
+            break;
+        case SPV_REFLECT_SHADER_STAGE_COMPUTE_BIT:
+            os << "CS";
+            break;
+        }
+    }
+}
+
 int main()
 {
     std::cout << "Hello World" << std::endl;
@@ -169,6 +203,8 @@ int main()
     SpvReflectShaderModule module;
     SpvReflectResult result = spvReflectCreateShaderModule(spirv.size() * sizeof(uint32_t), spirv.data(), &module);
     assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+    PrintModuleInfo(std::cout, module);
 
     uint32_t var_count = 0;
     result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
