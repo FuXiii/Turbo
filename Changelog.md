@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/16
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 实例。研究 ``SPIRV-Reflect`` 使用。
+
 ## 2025/1/15
 
 >* `engine\core\thirdparty` 下新增 ``SPIRV-Reflect`` 子模块。并将其集成到 ``TCore`` 核心中。

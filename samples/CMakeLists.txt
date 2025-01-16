@@ -644,7 +644,7 @@ PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
 add_sample(ImGuiTest ImGuiTest.cpp)
 
 add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
-target_include_directories(GlslangTest PUBLIC PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
+target_include_directories(GlslangTest PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
 #target_link_directories(GlslangTest PUBLIC ${LINK_PARTH})
 target_link_libraries(GlslangTest 
 PRIVATE glslang
@@ -660,23 +660,28 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c" AND 
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include/spirv/unified1/spirv.h"
 )
-set(SPIRV_REFLECT_SRCS 
-${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c
-)
-set(SPIRV_REFLECT_HEADERS
-${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h
-)
-set(SPIRV_REFLECT_INCLUDE_PATH
-${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include
-)
-
-add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS})
-target_include_directories(SpirvReflectTest PUBLIC PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH})
-target_compile_definitions(SpirvReflectTest 
-PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
-PUBLIC TURBO_PROJECT_NAME="SpirvReflectTest"
-SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
-)
+    set(SPIRV_REFLECT_SRCS 
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c
+    )
+    set(SPIRV_REFLECT_HEADERS
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.h
+    )
+    set(SPIRV_REFLECT_INCLUDE_PATH
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect
+    ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include
+    )
+    
+    add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
+    target_include_directories(SpirvReflectTest PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
+    target_link_libraries(SpirvReflectTest 
+    PRIVATE glslang
+    PRIVATE glslang-default-resource-limits
+    )
+    target_compile_definitions(SpirvReflectTest
+    PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+    PUBLIC TURBO_PROJECT_NAME="SpirvReflectTest"
+    SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
+    )
 endif()
 
 add_subdirectory(./FlowField)

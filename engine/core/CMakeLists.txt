@@ -44,6 +44,7 @@ set(SPIRV_REFLECT_HEADERS
 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/spirv_reflect.h
 )
 set(SPIRV_REFLECT_INCLUDE_PATH
+${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect
 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/include
 )
 else()
