@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
+#include <utility>
 #include <ReadFile.h>
 
 // #include <spirv_reflect.h>
@@ -14,6 +15,19 @@
 #include <common.h>
 
 std::string asset_root(TURBO_ASSET_ROOT);
+
+using Version = std::pair<size_t, size_t>;
+
+Version MakeVersion(size_t major = 1, size_t minor = 0)
+{
+    return std::make_pair(major, major);
+}
+
+enum class ShaderLanguage
+{
+    GLSL,
+    HLSL
+};
 
 enum class ShaderType
 {
@@ -33,8 +47,26 @@ enum class ShaderType
     MESH
 };
 
-std::vector<uint32_t> GlslToSpirV(const std::string &glsl, ShaderType type)
+std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::string &code, ShaderType type, const Version &vulkan = MakeVersion(), const Version &spirv = MakeVersion())
 {
+    auto check_vulkan_version = [&]() {
+        if (vulkan.first == 1 && spirv.second < (glslang::EShTargetClientVersion::EShTargetClientVersionCount - 1))
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+    auto check_spirv_version = [&]() {
+        if (spirv.first == 1 && spirv.second < glslang::EShTargetLanguageVersion::EShTargetLanguageVersionCount)
+        {
+            return true;
+        }
+
+        return false;
+    };
+
     auto ShaderTypeToEShLanguage = [](ShaderType type) {
         switch (type)
         {
@@ -101,20 +133,31 @@ std::vector<uint32_t> GlslToSpirV(const std::string &glsl, ShaderType type)
         }
     };
 
-    EShLanguage language = ShaderTypeToEShLanguage(type);
+    if (!check_vulkan_version())
+    {
+        throw std::runtime_error("Error : Vulkan version invalid!");
+    }
+    if (!check_spirv_version())
+    {
+        throw std::runtime_error("Error : SPIR-V version invalid!");
+    }
+
+    EShLanguage lang = ShaderTypeToEShLanguage(type);
 
     std::vector<uint32_t> result;
 
-    if (!glsl.empty() && glslang::InitializeProcess())
+    if (!code.empty() && glslang::InitializeProcess())
     {
-        auto ParseShader = [](EShLanguage language, const std::string &code) {
+        auto ParseShader = [&](EShLanguage lang, const std::string &code) {
             const char *const_code_c_str = code.c_str();
 
-            glslang::TShader *shader = new glslang::TShader(language);
+            glslang::TShader *shader = new glslang::TShader(lang);
             shader->setStrings(&const_code_c_str, 1);
-            shader->setEnvInput(glslang::EShSource::EShSourceGlsl, language, glslang::EShClient::EShClientVulkan, 100);
-            shader->setEnvClient(glslang::EShClient::EShClientVulkan, glslang::EShTargetClientVersion::EShTargetVulkan_1_0);
-            shader->setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_0);
+            shader->setEnvInput(glslang::EShSource::EShSourceGlsl, lang, glslang::EShClient::EShClientVulkan, 100);
+            // shader->setEnvClient(glslang::EShClient::EShClientVulkan, glslang::EShTargetClientVersion::EShTargetVulkan_1_0);
+            shader->setEnvClient(glslang::EShClient::EShClientVulkan, static_cast<glslang::EShTargetClientVersion>(vulkan.first << 22 | vulkan.second << 12));
+            // shader->setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_0);
+            shader->setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, static_cast<glslang::EShTargetLanguageVersion>(spirv.first << 16 | spirv.second << 8));
             EShMessages message = static_cast<EShMessages>(EShMessages::EShMsgDefault | EShMessages::EShMsgSpvRules | EShMessages::EShMsgVulkanRules | EShMessages::EShMsgAST | EShMessages::EShMsgKeepUncalled);
             if (!shader->parse(GetDefaultResources(), 100, true, message))
             {
@@ -127,7 +170,7 @@ std::vector<uint32_t> GlslToSpirV(const std::string &glsl, ShaderType type)
             return shader;
         };
 
-        glslang::TShader *shader = ParseShader(language, glsl);
+        glslang::TShader *shader = ParseShader(lang, code);
 
         glslang::TProgram *program = new glslang::TProgram();
         program->addShader(shader);
@@ -167,8 +210,11 @@ int main()
 {
     std::cout << "Hello World" << std::endl;
 
-    //auto spirv = GlslToSpirV(ReadTextFile(asset_root + "/shaders/imgui_meta.vert"), ShaderType::VERTEX);
-    auto spirv = GlslToSpirV(ReadTextFile(asset_root + "/shaders/imgui_meta.frag"), ShaderType::FRAGMENT);
+    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.vert"), ShaderType::VERTEX);
+    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.frag"), ShaderType::FRAGMENT, MakeVersion(1, 4), MakeVersion(1, 6));
+    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/volumetric_cloud.frag"), ShaderType::FRAGMENT);
+    auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.vert"), ShaderType::VERTEX);
+    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.frag"), ShaderType::FRAGMENT);
 
     SpvReflectShaderModule module;
     SpvReflectResult result = spvReflectCreateShaderModule(spirv.size() * sizeof(uint32_t), spirv.data(), &module);
