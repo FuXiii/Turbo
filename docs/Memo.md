@@ -211,3 +211,45 @@ engine/core/thirdparty/VulkanMemoryAllocator/src/VmaUsage.h 第 100 行
 现在的问题变成了使用 ``SPIRV-Cross/SPIRV-Reflect`` 序列化/反序列化出 ``描述符`` 信息。并进行相应的自动化适配。
 
 目测 ``SPIRV-Reflect`` 比较轻量，应该好用。
+
+### SPIRV-Reflect
+
+```CXX
+typedef struct SpvReflectDescriptorSet {
+  uint32_t                          set;
+  uint32_t                          binding_count;
+  SpvReflectDescriptorBinding**     bindings;
+} SpvReflectDescriptorSet;
+```
+
+```CXX
+typedef struct SpvReflectDescriptorBinding {
+  uint32_t                            spirv_id;//???
+  const char*                         name;//变量声明名称
+  uint32_t                            binding;//binding号
+  uint32_t                            input_attachment_index;//???。输入附件的index
+  uint32_t                            set;//set号
+  SpvReflectDescriptorType            descriptor_type;//枚举。描述符类型，与Vulkan对应
+  SpvReflectResourceType              resource_type;//枚举。资源类型
+  SpvReflectImageTraits               image;//结构体。???。应该是描述image/sampler信息的
+  SpvReflectBlockVariable             block;//结构体。???。应该是描述struct信息的
+  SpvReflectBindingArrayTraits        array;//结构体。???。应该是描述声明变量的维度
+  uint32_t                            count;//???
+  uint32_t                            accessed;//???
+  uint32_t                            uav_counter_id;//???
+  struct SpvReflectDescriptorBinding* uav_counter_binding;//???
+  uint32_t                            byte_address_buffer_offset_count;//???。缓存地址的比特偏移 数量
+  uint32_t*                           byte_address_buffer_offsets;//???。缓存地址的比特偏移 数据
+
+  SpvReflectTypeDescription*          type_description;//结构体。???。缓存地址的比特偏移 数据
+
+  struct {
+    uint32_t                          binding;
+    uint32_t                          set;
+  } word_offset;//???。set和binding号
+
+  SpvReflectDecorationFlags           decoration_flags;//uint32_t。无符号整数。???
+  // Requires SPV_GOOGLE_user_type
+  SpvReflectUserType                  user_type;//枚举。???。类型
+} SpvReflectDescriptorBinding;
+```

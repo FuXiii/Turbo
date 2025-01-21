@@ -257,6 +257,15 @@ int main()
         {
             std::cout << "\t{" << std::endl;
             PrintDescriptorBinding(std::cout, *binding, "\t  - ");
+
+            {
+                std::cout << std::endl << "\t-------------------" << std::endl;
+                std::cout << "\t  = input_attachment_index: " << binding->input_attachment_index << std::endl;
+                std::cout << "\t  = count: " << binding->count << std::endl;
+                std::cout << "\t  = block.name: " << binding->block.name << std::endl;
+                std::cout << "\t  = type_description->type_name: " << binding->type_description->type_name << std::endl;
+                std::cout << "\t+++++++++++++++++++" << std::endl;
+            }
             std::cout << std::endl << "\t}" << std::endl;
         }
         std::cout << "</DescriptorBindings>" << std::endl;
