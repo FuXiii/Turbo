@@ -662,7 +662,8 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/include/spirv/u
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.h" AND
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/common.cpp" AND
 EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.h" AND
-EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.cpp"
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_stream.cpp" AND
+EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/sample.hlsl"
 )
     set(SPIRV_REFLECT_SRCS 
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/spirv_reflect.c
@@ -688,6 +689,7 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/common/output_s
     )
     target_compile_definitions(SpirvReflectTest
     PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+    PUBLIC TURBO_SPIRV_REFLECT_ROOT="${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect"
     PUBLIC TURBO_PROJECT_NAME="SpirvReflectTest"
     SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
     )

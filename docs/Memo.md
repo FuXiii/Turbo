@@ -231,9 +231,9 @@ typedef struct SpvReflectDescriptorBinding {
   uint32_t                            set;//set号
   SpvReflectDescriptorType            descriptor_type;//枚举。描述符类型，与Vulkan对应
   SpvReflectResourceType              resource_type;//枚举。资源类型
-  SpvReflectImageTraits               image;//结构体。???。应该是描述image/sampler信息的
-  SpvReflectBlockVariable             block;//结构体。???。应该是描述struct信息的
-  SpvReflectBindingArrayTraits        array;//结构体。???。应该是描述声明变量的维度
+  SpvReflectImageTraits               image;//???。结构体。应该是描述image/sampler信息的
+  SpvReflectBlockVariable             block;//???。结构体。应该是描述struct信息的
+  SpvReflectBindingArrayTraits        array;//???。结构体。应该是描述声明变量的维度
   uint32_t                            count;//???
   uint32_t                            accessed;//???
   uint32_t                            uav_counter_id;//???
@@ -241,15 +241,85 @@ typedef struct SpvReflectDescriptorBinding {
   uint32_t                            byte_address_buffer_offset_count;//???。缓存地址的比特偏移 数量
   uint32_t*                           byte_address_buffer_offsets;//???。缓存地址的比特偏移 数据
 
-  SpvReflectTypeDescription*          type_description;//结构体。???。缓存地址的比特偏移 数据
+  SpvReflectTypeDescription*          type_description;//???。结构体。类型描述信息
 
   struct {
     uint32_t                          binding;
     uint32_t                          set;
   } word_offset;//???。set和binding号
 
-  SpvReflectDecorationFlags           decoration_flags;//uint32_t。无符号整数。???
+  SpvReflectDecorationFlags           decoration_flags;//???。uint32_t。无符号整数。
   // Requires SPV_GOOGLE_user_type
-  SpvReflectUserType                  user_type;//枚举。???。类型
+  SpvReflectUserType                  user_type;//???。枚举。类型
 } SpvReflectDescriptorBinding;
+```
+
+```CXX
+typedef struct SpvReflectImageTraits {
+  SpvDim                            dim;//枚举。维度
+  uint32_t                          depth;//???。深度
+  uint32_t                          arrayed;//???。数组
+  uint32_t                          ms; // 0: single-sampled; 1: multisampled
+  uint32_t                          sampled;//???
+  SpvImageFormat                    image_format;//枚举。格式【枚举值与Vulkan的VkFormat不对应】
+} SpvReflectImageTraits;
+```
+
+```CXX
+typedef struct SpvReflectBlockVariable {
+  uint32_t                          spirv_id;//???
+  const char*                       name;//名称
+  // For Push Constants, this is the lowest offset of all memebers
+  uint32_t                          offset;           // Measured in bytes //???。偏移
+  uint32_t                          absolute_offset;  // Measured in bytes //???。绝对偏移
+  uint32_t                          size;             // Measured in bytes //???。大小
+  uint32_t                          padded_size;      // Measured in bytes //???。填补大小
+  SpvReflectDecorationFlags         decoration_flags;//???。整数。
+  SpvReflectNumericTraits           numeric;//???。结构体。数字。好像分为 【标量|向量|矩阵】
+  SpvReflectArrayTraits             array;//???。结构体。数组
+  SpvReflectVariableFlags           flags;//???。整数。
+
+  uint32_t                          member_count;//成员数量
+  struct SpvReflectBlockVariable*   members;//结构体。描述成员。
+
+  SpvReflectTypeDescription*        type_description;//???。结构体。类型描述信息
+
+  struct {
+    uint32_t                          offset;
+  } word_offset;//???。偏移
+
+} SpvReflectBlockVariable;
+```
+
+```CXX
+typedef struct SpvReflectNumericTraits {
+  struct Scalar {
+    uint32_t                        width;
+    uint32_t                        signedness;
+  } scalar;//???。标量
+
+  struct Vector {
+    uint32_t                        component_count;
+  } vector;//???。向量
+
+  struct Matrix {
+    uint32_t                        column_count;
+    uint32_t                        row_count;
+    uint32_t                        stride; // Measured in bytes
+  } matrix;//???。矩阵
+} SpvReflectNumericTraits;
+```
+
+```CXX
+typedef struct SpvReflectArrayTraits {
+  uint32_t                          dims_count;//???。维度数量
+  // Each entry is either:
+  // - specialization constant dimension
+  // - OpTypeRuntimeArray
+  // - the array length otherwise
+  uint32_t                          dims[SPV_REFLECT_MAX_ARRAY_DIMS];//???。各维度分量大小
+  // Stores Ids for dimensions that are specialization constants
+  uint32_t                          spec_constant_op_ids[SPV_REFLECT_MAX_ARRAY_DIMS];//???。
+  uint32_t                          stride; // Measured in bytes //???。跨度
+} SpvReflectArrayTraits;
 ```

@@ -13,8 +13,10 @@
 #include <glslang/Public/ShaderLang.h>
 
 #include <common.h>
+#include <functional>
 
 std::string asset_root(TURBO_ASSET_ROOT);
+std::string spirv_reflect_root(TURBO_SPIRV_REFLECT_ROOT);
 
 using Version = std::pair<size_t, size_t>;
 
@@ -133,6 +135,23 @@ std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::s
         }
     };
 
+    auto LanguageToEShSource = [](const ShaderLanguage &language) {
+        glslang::EShSource result = glslang::EShSource::EShSourceNone;
+        switch (language)
+        {
+        case ShaderLanguage::GLSL: {
+            result = glslang::EShSource::EShSourceGlsl;
+        }
+        break;
+        case ShaderLanguage::HLSL: {
+            result = glslang::EShSource::EShSourceHlsl;
+        }
+        break;
+        }
+
+        return result;
+    };
+
     if (!check_vulkan_version())
     {
         throw std::runtime_error("Error : Vulkan version invalid!");
@@ -153,7 +172,7 @@ std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::s
 
             glslang::TShader *shader = new glslang::TShader(lang);
             shader->setStrings(&const_code_c_str, 1);
-            shader->setEnvInput(glslang::EShSource::EShSourceGlsl, lang, glslang::EShClient::EShClientVulkan, 100);
+            shader->setEnvInput(LanguageToEShSource(language), lang, glslang::EShClient::EShClientVulkan, 100);
             // shader->setEnvClient(glslang::EShClient::EShClientVulkan, glslang::EShTargetClientVersion::EShTargetVulkan_1_0);
             shader->setEnvClient(glslang::EShClient::EShClientVulkan, static_cast<glslang::EShTargetClientVersion>(vulkan.first << 22 | vulkan.second << 12));
             // shader->setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_0);
@@ -213,8 +232,9 @@ int main()
     // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.vert"), ShaderType::VERTEX);
     // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.frag"), ShaderType::FRAGMENT, MakeVersion(1, 4), MakeVersion(1, 6));
     // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/volumetric_cloud.frag"), ShaderType::FRAGMENT);
-    auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.vert"), ShaderType::VERTEX);
-    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.frag"), ShaderType::FRAGMENT);
+    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.vert"), ShaderType::VERTEX);
+    auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.frag"), ShaderType::FRAGMENT);
+    // auto spirv = ShaderToSpirV(ShaderLanguage::HLSL, ReadTextFile(spirv_reflect_root + "/examples/sample.hlsl"), ShaderType::VERTEX);
 
     SpvReflectShaderModule module;
     SpvReflectResult result = spvReflectCreateShaderModule(spirv.size() * sizeof(uint32_t), spirv.data(), &module);
@@ -259,11 +279,81 @@ int main()
             PrintDescriptorBinding(std::cout, *binding, "\t  - ");
 
             {
+                std::function<void(const SpvReflectBlockVariable *, const std::string &)> PrintAllBlock = [&](const SpvReflectBlockVariable *block, const std::string &ident) {
+                    {
+                        std::cout << ident << "= block->spirv_id: " << block->spirv_id << std::endl;
+                        std::cout << ident << "= block->name: " << (block->name == nullptr ? "" : block->name) << std::endl;
+                        std::cout << ident << "= block->offset: " << block->offset << std::endl;
+                        std::cout << ident << "= block->absolute_offset: " << block->absolute_offset << std::endl;
+                        std::cout << ident << "= block->size: " << block->size << std::endl;
+                        std::cout << ident << "= block->padded_size: " << block->padded_size << std::endl;
+                        std::cout << ident << "= block->decoration_flags: " << block->decoration_flags << std::endl;
+                        {
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.scalar.width: " << block->numeric.scalar.width << std::endl;
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.scalar.signedness: " << block->numeric.scalar.signedness << std::endl;
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.vector.component_count: " << block->numeric.vector.component_count << std::endl;
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.matrix.column_count: " << block->numeric.matrix.column_count << std::endl;
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.matrix.row_count: " << block->numeric.matrix.row_count << std::endl;
+                            std::cout << ident << "\t"
+                                      << "= block->numeric.matrix.stride: " << block->numeric.matrix.stride << std::endl;
+                        }
+                        std::cout << ident << "\t"
+                                  << "*********************************" << std::endl;
+                        {
+                            std::cout << ident << "\t"
+                                      << "= block->array.dims_count: " << block->array.dims_count << std::endl;
+                            for (size_t i = 0; i < block->array.dims_count; i++)
+                            {
+                                std::cout << ident << "\t\t"
+                                          << "= block->array.dims[" << i << "]: " << block->array.dims[i] << std::endl;
+                            }
+                            for (size_t i = 0; i < block->array.dims_count; i++)
+                            {
+                                std::cout << ident << "\t\t"
+                                          << "= block->array.spec_constant_op_ids[" << i << "]: " << block->array.spec_constant_op_ids[i] << std::endl;
+                            }
+                            std::cout << ident << "\t"
+                                      << "= block->array.stride: " << block->array.stride << std::endl;
+                        }
+
+                        std::cout << ident << "\t"
+                                  << "= block->flags: " << block->flags << std::endl;
+                        std::cout << ident << "\t"
+                                  << "= block->word_offset.offset: " << block->word_offset.offset << std::endl;
+                        std::cout << ident << "\t"
+                                  << "= block->member_count: " << block->member_count << std::endl;
+
+                        if (block->member_count > 0)
+                        {
+                            for (size_t index = 0; index < block->member_count; index++)
+                            {
+                                PrintAllBlock(block->members + index, ident + "\t\t");
+                            }
+                        }
+                    }
+                };
+
                 std::cout << std::endl << "\t-------------------" << std::endl;
-                std::cout << "\t  = input_attachment_index: " << binding->input_attachment_index << std::endl;
-                std::cout << "\t  = count: " << binding->count << std::endl;
-                std::cout << "\t  = block.name: " << binding->block.name << std::endl;
-                std::cout << "\t  = type_description->type_name: " << binding->type_description->type_name << std::endl;
+                std::cout << "\t  = binding->spirv_id: " << binding->spirv_id << std::endl;
+                std::cout << "\t  = binding->input_attachment_index: " << binding->input_attachment_index << std::endl;
+                {
+                    std::cout << "\t\t  = binding->image.dim: " << binding->image.dim << std::endl;
+                    std::cout << "\t\t  = binding->image.depth: " << binding->image.depth << std::endl;
+                    std::cout << "\t\t  = binding->image.arrayed: " << binding->image.arrayed << std::endl;
+                    std::cout << "\t\t  = binding->image.ms: " << binding->image.ms << std::endl;
+                    std::cout << "\t\t  = binding->image.sampled: " << binding->image.sampled << std::endl;
+                    std::cout << "\t\t  = binding->image.image_format: " << binding->image.image_format << std::endl;
+                }
+                std::cout << "\t\t*********************************" << std::endl;
+                PrintAllBlock(&binding->block, "\t\t\t");
+                std::cout << "\t  = binding->count: " << binding->count << std::endl;
+                std::cout << "\t  = binding->type_description->type_name: " << (binding->type_description->type_name == nullptr ? "" : binding->type_description->type_name) << std::endl;
+
                 std::cout << "\t+++++++++++++++++++" << std::endl;
             }
             std::cout << std::endl << "\t}" << std::endl;
@@ -338,7 +428,7 @@ int main()
             std::cout << "\t{" << std::endl;
             {
                 std::cout << "\t  - "
-                          << "name : " << push_constant->name << std::endl;
+                          << "name : " << (push_constant->name == nullptr ? "" : push_constant->name) << std::endl;
                 std::cout << "\t  - "
                           << "offset : " << push_constant->offset << std::endl;
                 std::cout << "\t  - "
