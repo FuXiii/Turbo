@@ -43,8 +43,8 @@ ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
 )
 
 function(add_sample name srcs)
-    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
-    target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/gizmo)
+    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp ${CMAKE_SOURCE_DIR}/samples/utils/ImGuiPass.cpp)
+    target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/gizmo ${CMAKE_SOURCE_DIR}/samples/utils)
     target_link_directories(${name} PUBLIC ${LINK_PARTH})
     target_link_libraries(${name} PUBLIC ${LIBS})
     target_compile_definitions(${name} 
@@ -694,6 +694,8 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/sample
     SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
     )
 endif()
+
+add_sample(ImGuiPassTest ImGuiPassTest.cpp)
 
 add_subdirectory(./FlowField)
 

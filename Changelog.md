@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/23
+
+>* `engine\core\thirdparty` 下更新 ``ImGuiTest.cpp`` 示例，支持 ``鼠标滚轮`` 操作。
+>* `samples` 下增加 ``utils`` 文件夹。用于存放 ``示例`` 常见通用程序代码。
+>* `samples/utils` 下增加 ``ImGuiPass`` 接口，尝试将 ``ImGui`` 的代码封装到一个类中。
+>* `samples` 下增加 ``ImGuiPassTest`` 示例，测试 ``ImGuiPass`` 接口。
+
 ## 2025/1/22
 
 >* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 示例，使其支持编译 ``HLSL`` 。研究 ``SPIRV-Reflect`` 使用。

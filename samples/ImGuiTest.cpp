@@ -23,6 +23,14 @@
 
 std::string asset_root(TURBO_ASSET_ROOT);
 
+void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    if (ImGui::GetCurrentContext() != nullptr)
+    {
+        ImGui::GetIO().AddMouseWheelEvent(xoffset, yoffset);
+    }
+}
+
 int main()
 {
     auto vulkan_verssion = Turbo::Core::TInstance::GetVulkanInstanceVersion();
@@ -107,6 +115,10 @@ int main()
         window = glfwCreateWindow(window_width, window_height, TURBO_PROJECT_NAME, NULL, NULL);
         VkInstance vk_instance = instance->GetVkInstance();
         glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
+
+        {
+            glfwSetScrollCallback(window, glfw_scroll_callback);
+        }
     }
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
