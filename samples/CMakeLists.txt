@@ -696,6 +696,7 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/sample
 endif()
 
 add_sample(ImGuiPassTest ImGuiPassTest.cpp)
+add_sample(InfiniteCoordinateAxis InfiniteCoordinateAxis.cpp)
 
 add_subdirectory(./FlowField)
 

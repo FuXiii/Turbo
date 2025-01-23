@@ -10,6 +10,7 @@
 >* `samples` 下增加 ``utils`` 文件夹。用于存放 ``示例`` 常见通用程序代码。
 >* `samples/utils` 下增加 ``ImGuiPass`` 接口，尝试将 ``ImGui`` 的代码封装到一个类中。
 >* `samples` 下增加 ``ImGuiPassTest`` 示例，测试 ``ImGuiPass`` 接口。
+>* `samples` 下增加 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
 
 ## 2025/1/22
 
