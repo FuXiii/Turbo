@@ -765,7 +765,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            size = glsl.get_declared_struct_size(type);
+            //size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface in_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
@@ -805,7 +805,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            size = glsl.get_declared_struct_size(type);
+            //size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);

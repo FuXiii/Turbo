@@ -32,6 +32,25 @@ else()
 message(FATAL_ERROR "Can not find update_glslang_sources.py in glslang")
 endif()
 
+if(
+EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/spirv_reflect.h" AND 
+EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/spirv_reflect.c" AND 
+EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/include/spirv/unified1/spirv.h"
+)
+set(SPIRV_REFLECT_SRCS 
+${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/spirv_reflect.c
+)
+set(SPIRV_REFLECT_HEADERS
+${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/spirv_reflect.h
+)
+set(SPIRV_REFLECT_INCLUDE_PATH
+${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect
+${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/SPIRV-Reflect/include
+)
+else()
+message(FATAL_ERROR "Can not find SPIRV-Reflect")
+endif()
+
 option(TCORE_SHARED_LIBS "flag to create TCore shared libraries if on" OFF)
 
 if(TCORE_SHARED_LIBS)
@@ -39,12 +58,16 @@ if(TCORE_SHARED_LIBS)
     add_library(${PROJECT_NAME} SHARED
         ${VMA_SRCS}
         ${SRCS}
+        ${SPIRV_REFLECT_SRCS}
+        ${SPIRV_REFLECT_HEADERS}
     )
     target_compile_definitions(${PROJECT_NAME} PUBLIC TCORE_SHARED_LIBS)
 else() 
     add_library(${PROJECT_NAME} STATIC
         ${VMA_SRCS}
         ${SRCS}
+        ${SPIRV_REFLECT_SRCS}
+        ${SPIRV_REFLECT_HEADERS}
     )
 endif()
 
@@ -70,6 +93,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     VMA_DEBUG_INITIALIZE_ALLOCATIONS=$<BOOL:${VMA_DEBUG_INITIALIZE_ALLOCATIONS}>
     VMA_DEBUG_GLOBAL_MUTEX=$<BOOL:${VMA_DEBUG_GLOBAL_MUTEX}>
     VMA_DEBUG_DONT_EXCEED_MAX_MEMORY_ALLOCATION_COUNT=$<BOOL:${VMA_DEBUG_DONT_EXCEED_MAX_MEMORY_ALLOCATION_COUNT}>
+    SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -77,4 +101,5 @@ PUBLIC ./include
 PRIVATE ./thirdparty/VulkanMemoryAllocator/include
 PRIVATE ./thirdparty/SPIRV-Cross
 PRIVATE ./thirdparty/glslang
+PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH}
 )

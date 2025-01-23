@@ -272,54 +272,60 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         std::vector<VkClearValue> vk_clear_values;
         for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
         {
-            TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
-            TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
-            TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
+            auto load_op = attachemnts[attachment_index].GetLoadOp();
+            auto stencil_load_op = attachemnts[attachment_index].GetStencilLoadOp();
 
-            if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+            if (load_op == Turbo::Core::TLoadOp::CLEAR)
             {
-                VkClearValue vk_clear_value = {};
-                vk_clear_value.depthStencil.depth = 1.0f;
-                vk_clear_value.depthStencil.stencil = 0.0f;
+                TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
+                TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
+                TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
 
-                vk_clear_values.push_back(vk_clear_value);
-            }
-            else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
-            {
-                TFormatDataTypes format_data_types = format_info.GetFormatDataType();
-
-                VkClearColorValue vk_clear_color_value = {};
-                if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
                 {
-                    vk_clear_color_value.int32[0] = (int32_t)0;
-                    vk_clear_color_value.int32[1] = (int32_t)0;
-                    vk_clear_color_value.int32[2] = (int32_t)0;
-                    vk_clear_color_value.int32[3] = (int32_t)0;
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_value.depthStencil.depth = 1.0f;
+                    vk_clear_value.depthStencil.stencil = 0.0f;
+
+                    vk_clear_values.push_back(vk_clear_value);
                 }
-                else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
                 {
-                    vk_clear_color_value.uint32[0] = (uint32_t)0;
-                    vk_clear_color_value.uint32[1] = (uint32_t)0;
-                    vk_clear_color_value.uint32[2] = (uint32_t)0;
-                    vk_clear_color_value.uint32[3] = (uint32_t)0;
+                    TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+
+                    VkClearColorValue vk_clear_color_value = {};
+                    if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                    {
+                        vk_clear_color_value.int32[0] = (int32_t)0;
+                        vk_clear_color_value.int32[1] = (int32_t)0;
+                        vk_clear_color_value.int32[2] = (int32_t)0;
+                        vk_clear_color_value.int32[3] = (int32_t)0;
+                    }
+                    else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                    {
+                        vk_clear_color_value.uint32[0] = (uint32_t)0;
+                        vk_clear_color_value.uint32[1] = (uint32_t)0;
+                        vk_clear_color_value.uint32[2] = (uint32_t)0;
+                        vk_clear_color_value.uint32[3] = (uint32_t)0;
+                    }
+                    else
+                    {
+                        vk_clear_color_value.float32[0] = 0;
+                        vk_clear_color_value.float32[1] = 0;
+                        vk_clear_color_value.float32[2] = 0;
+                        vk_clear_color_value.float32[3] = 0;
+                    }
+
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_value.color = vk_clear_color_value;
+
+                    vk_clear_values.push_back(vk_clear_value);
                 }
                 else
                 {
-                    vk_clear_color_value.float32[0] = 0;
-                    vk_clear_color_value.float32[1] = 0;
-                    vk_clear_color_value.float32[2] = 0;
-                    vk_clear_color_value.float32[3] = 0;
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_values.push_back(vk_clear_value);
                 }
-
-                VkClearValue vk_clear_value = {};
-                vk_clear_value.color = vk_clear_color_value;
-
-                vk_clear_values.push_back(vk_clear_value);
-            }
-            else
-            {
-                VkClearValue vk_clear_value = {};
-                vk_clear_values.push_back(vk_clear_value);
             }
         }
 
@@ -341,7 +347,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
             vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
         }
         vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
-        vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
+        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data();
 
         switch (subpassContents)
         {
