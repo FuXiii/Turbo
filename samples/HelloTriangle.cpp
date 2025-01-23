@@ -615,7 +615,8 @@ int main()
 
                                     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> __imgui_vertex_buffers;
                                     __imgui_vertex_buffers.push_back(imgui_vertex_buffer);
-                                    command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
+                                    //command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
+                                    command_buffer->CmdBindVertexBuffers(__imgui_vertex_buffers);
                                     command_buffer->CmdBindIndexBuffer(imgui_index_buffer, 0, sizeof(ImDrawIdx) == 2 ? Turbo::Core::TIndexType::UINT16 : Turbo::Core::TIndexType::UINT32);
 
                                     float __scale[2];
