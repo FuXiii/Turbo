@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/24
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
+>* `samples/utils` 下更新 ``ImGuiPass`` ，增加键盘输入支持。
+
 ## 2025/1/23
 
 >* `engine\core\thirdparty` 下更新 ``ImGuiTest.cpp`` 示例，支持 ``鼠标滚轮`` 操作。
