@@ -337,7 +337,7 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
 Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice *device)
 {
     TDeviceDriver device_driver = {};
-    Turbo::Core::TVersion vulkan_version = device->GetPhysicalDevice()->GetInstance()->GetVulkanVersion();
+    Turbo::Core::TVersion device_api_version = device->GetPhysicalDevice()->GetDeviceApiVersion();
 
 #if defined(VK_VERSION_1_0)
     device_driver.vkDestroyDevice = this->LoadDeviceFunction<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
@@ -463,7 +463,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
 #endif
 
 #if defined(VK_VERSION_1_1)
-    if (vulkan_version >= Turbo::Core::TVersion(1, 1, 0, 0))
+    if (device_api_version >= Turbo::Core::TVersion(1, 1, 0, 0))
     {
         device_driver.vkCmdDispatchBase = this->LoadDeviceFunction<PFN_vkCmdDispatchBase>(device, "vkCmdDispatchBase");
         device_driver.vkCmdSetDeviceMask = this->LoadDeviceFunction<PFN_vkCmdSetDeviceMask>(device, "vkCmdSetDeviceMask");
@@ -473,7 +473,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
 #endif
 
 #if defined(VK_VERSION_1_2)
-    if (vulkan_version >= Turbo::Core::TVersion(1, 2, 0, 0))
+    if (device_api_version >= Turbo::Core::TVersion(1, 2, 0, 0))
     {
         device_driver.vkGetBufferDeviceAddress = this->LoadDeviceFunction<PFN_vkGetBufferDeviceAddress>(device, "vkGetBufferDeviceAddress");
         device_driver.vkGetBufferOpaqueCaptureAddress = this->LoadDeviceFunction<PFN_vkGetBufferOpaqueCaptureAddress>(device, "vkGetBufferOpaqueCaptureAddress");
@@ -486,7 +486,7 @@ Turbo::Core::TDeviceDriver Turbo::Core::TVulkanLoader::LoadDeviceDriver(TDevice 
     // TODO: add the Extension version function of VK_KHR_dynamic_rendering
     // TODO: vkCmdBeginRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
     // TODO: vkCmdEndRenderingKHR(After TDevice::TDevice() fixed the extension dependencies)
-    if (vulkan_version >= Turbo::Core::TVersion(1, 3, 0, 0))
+    if (device_api_version >= Turbo::Core::TVersion(1, 3, 0, 0))
     {
         device_driver.vkCmdBeginRendering = this->LoadDeviceFunction<PFN_vkCmdBeginRendering>(device, "vkCmdBeginRendering");
         device_driver.vkCmdEndRendering = this->LoadDeviceFunction<PFN_vkCmdEndRendering>(device, "vkCmdEndRendering");

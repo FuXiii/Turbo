@@ -32,16 +32,15 @@ std::string asset_root(TURBO_ASSET_ROOT);
 class Camera
 {
   private:
-    glm::vec3 position;
+    glm::vec3 position = glm::vec3(0, 0, -1);
 
-    float horizontal; // radian
-    float vertical;   // radian
+    float horizontal = 0; // radian
+    float vertical = 0;   // radian
 
   private:
-    glm::vec3 CalForward()
+    glm::quat CalAttitude()
     {
-        glm::quat attitude = glm::quat(this->vertical, glm::vec3(1, 0, 0)) * glm::quat(this->horizontal, glm::vec3(0, 1, 0));
-        return attitude * glm::vec3(0, 0, 1);
+        return glm::quat(glm::radians(glm::vec3(-this->vertical, -this->horizontal, 0)));
     }
 
   public:
@@ -51,35 +50,62 @@ class Camera
         {
             ImGuiIO &io = ImGui::GetIO();
             auto mouse_delta = io.MouseDelta;
-            if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
+            if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
             {
-                this->horizontal += mouse_delta.x;
-                this->vertical += mouse_delta.y;
+                this->horizontal -= mouse_delta.x * 0.1f;
+                this->vertical -= mouse_delta.y * 0.1f;
             }
+
+            auto attitude = this->CalAttitude();
+            auto forward = attitude * glm::vec3(0, 0, 1) * 0.1f;
+            auto right = attitude * glm::vec3(1, 0, 0) * 0.1f;
 
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W))
             {
-                std::cout << "ImGuiKey_W:Down" << std::endl;
+                this->position += forward;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_A))
             {
-                std::cout << "ImGuiKey_A:Down" << std::endl;
+                this->position -= right;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_S))
             {
-                std::cout << "ImGuiKey_S:Down" << std::endl;
+                this->position -= forward;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
             {
-                std::cout << "ImGuiKey_D:Down" << std::endl;
+                this->position += right;
             }
+
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
+            {
+                this->position += right;
+            }
+
+            this->position += forward * io.MouseWheel;
         }
     }
 
     glm::mat4 CalLookAt()
     {
-        glm::vec3 forward = this->CalForward();
-        return glm::lookAt(position, position + forward, glm::cross(forward, glm::cross(forward, glm::vec3(0, 1, 0))));
+        auto attitude = this->CalAttitude();
+        auto forward = attitude * glm::vec3(0, 0, 1);
+
+        auto eye = this->position;
+        auto center = this->position + forward;
+        auto up = attitude * glm::vec3(0, -1, 0);
+
+        {
+            // std::cout << "eye       :" << eye.x << "," << eye.y << "," << eye.z << std::endl;
+            // std::cout << "center    :" << center.x << "," << center.y << "," << center.z << std::endl;
+            // std::cout << "up        :" << up.x << "," << up.y << "," << up.z << std::endl;
+            // std::cout << "forward   :" << forward.x << "," << forward.y << "," << forward.z << std::endl;
+            // std::cout << "horizontal:" << horizontal << std::endl;
+            // std::cout << "vertical  :" << vertical << std::endl;
+            std::cout << std::endl;
+        }
+
+        return glm::lookAt(eye, center, up);
     }
 };
 
@@ -238,7 +264,7 @@ int main()
     glm::vec3 eye_to_center = center - eye;
 
     matrixs.view = glm::lookAt(eye, center, glm::cross(eye_to_center, glm::cross(eye_to_center, glm::vec3(0, 1, 0))));
-    matrixs.projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 1000.0f);
+    matrixs.projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 10000.0f);
 
     Turbo::Core::TRefPtr<Turbo::Core::TBuffer> projection_view_matrix_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs));
     {
@@ -270,10 +296,10 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, attachments, subpasses);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> imgui_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.vert"));
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> imgui_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.frag"));
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.frag"));
 
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, {}, imgui_vertex_shader, imgui_fragment_shader, Turbo::Core::TTopologyType::LINE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, {}, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::LINE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, projection_view_matrix_buffer);
@@ -298,7 +324,16 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
-        auto Update = [&]() { camera.Update(); };
+        auto Update = [&]() {
+            {
+                matrixs.view = camera.CalLookAt();
+                {
+                    void *projection_view_matrix_ptr = projection_view_matrix_buffer->Map();
+                    memcpy(projection_view_matrix_ptr, &matrixs, sizeof(matrixs));
+                    projection_view_matrix_buffer->Unmap();
+                };
+            }
+        };
         Update();
 
         uint32_t current_image_index = UINT32_MAX;
@@ -352,7 +387,14 @@ int main()
                 ImGui::Checkbox("show demo window", &is_show_demo_window);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+                ImGui::Text("- W,A,S,D to move.");
+                ImGui::Text("- Push down and drag mouse right button to rotate view.");
+                ImGui::Text("- Mouse wheel forward and backward view.");
+
                 ImGui::End();
+
+                camera.Update();
             });
 
             command_buffer->End();

@@ -4,8 +4,7 @@ layout(set = 0, binding = 0) uniform MATRIXS
 {
     mat4 view;
     mat4 projection;
-}
-matrixs;
+}matrixs;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out float outCoordinate;
@@ -36,19 +35,19 @@ void main()
     }
     break;
     case 3: {
-        color = vec4(1, 0, 0, 0.7);
+        color = vec4(1, 0, 0, 0.5);
         pos = gl_VertexIndex == 0 ? vec3(0, 0, 0) : vec3(-1, 0, 0) * FLOAT_INFINITE;
         sign = -1;
     }
     break;
     case 4: {
-        color = vec4(0, 1, 0, 0.7);
+        color = vec4(0, 1, 0, 0.5);
         pos = gl_VertexIndex == 0 ? vec3(0, 0, 0) : vec3(0, -1, 0) * FLOAT_INFINITE;
         sign = -1;
     }
     break;
     case 5: {
-        color = vec4(0, 0, 1, 0.7);
+        color = vec4(0, 0, 1, 0.5);
         pos = gl_VertexIndex == 0 ? vec3(0, 0, 0) : vec3(0, 0, -1) * FLOAT_INFINITE;
         sign = -1;
     }

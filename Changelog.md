@@ -8,6 +8,7 @@
 
 >* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
 >* `samples` 下更新 ``VulkanTest`` 示例，适配 ``Linux`` 平台。输出更多 ``Vulkan`` 信息。
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，适配键鼠操作。
 
 ## 2025/1/27
 
