@@ -4,6 +4,15 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/28
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+>* `samples` 下更新 ``VulkanTest`` 示例，适配 ``Linux`` 平台。输出更多 ``Vulkan`` 信息。
+
+## 2025/1/27
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+
 ## 2025/1/24
 
 >* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
