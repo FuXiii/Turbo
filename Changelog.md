@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/1/29
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例。
+
 ## 2025/1/28
 
 >* 尝试将 ``Turbo`` 适配到 ``Linux`` 。

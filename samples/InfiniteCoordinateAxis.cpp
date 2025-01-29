@@ -102,7 +102,7 @@ class Camera
             // std::cout << "forward   :" << forward.x << "," << forward.y << "," << forward.z << std::endl;
             // std::cout << "horizontal:" << horizontal << std::endl;
             // std::cout << "vertical  :" << vertical << std::endl;
-            std::cout << std::endl;
+            // std::cout << std::endl;
         }
 
         return glm::lookAt(eye, center, up);
