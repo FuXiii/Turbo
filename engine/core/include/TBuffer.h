@@ -3,6 +3,7 @@
 #define TURBO_CORE_TBUFFER_H
 #include "TMemoryTypeInfo.h"
 #include "TVulkanHandle.h"
+#include "TReferenced.h"
 
 namespace Turbo
 {
