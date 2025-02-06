@@ -1,12 +1,5 @@
 project(TSample)
 
-function(Add_Sample Sample Srcs Incs Links Libs)
-add_executable(${Sample} ./${Sample}.cpp ${Srcs})
-target_include_directories(${Sample} PUBLIC ${Incs})
-target_link_directories(${Sample} PUBLIC ${Links})
-target_link_libraries(${Sample} PUBLIC ${Libs})
-endfunction()
-
 set(INCLUDE_PARTH 
 #PUBLIC ${CMAKE_SOURCE_DIR}/engine/render 
 #PUBLIC ${CMAKE_SOURCE_DIR}/engine/framegraph
@@ -43,13 +36,13 @@ ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
 )
 
 function(add_sample name srcs)
-    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp ${CMAKE_SOURCE_DIR}/samples/utils/ImGuiPass.cpp)
-    target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/gizmo ${CMAKE_SOURCE_DIR}/samples/utils)
+    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/samples/utils/ReadFile.cpp ${CMAKE_SOURCE_DIR}/samples/utils/ImGuiPass.cpp ${ARGN})
+    target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/samples/utils)
     target_link_directories(${name} PUBLIC ${LINK_PARTH})
     target_link_libraries(${name} PUBLIC ${LIBS})
     target_compile_definitions(${name} 
-    PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
-    PUBLIC TURBO_PROJECT_NAME="${name}"
+        PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+        PUBLIC TURBO_PROJECT_NAME="${name}"
     )
 endfunction()
 
@@ -643,8 +636,8 @@ PUBLIC TURBO_PROJECT_NAME="SwapchainTest"
 
 add_sample(ImGuiTest ImGuiTest.cpp)
 
-add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
-target_include_directories(GlslangTest PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
+add_executable(GlslangTest ./GlslangTest.cpp ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/samples/utils/ReadFile.cpp)
+target_include_directories(GlslangTest PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/samples/utils)
 #target_link_directories(GlslangTest PUBLIC ${LINK_PARTH})
 target_link_libraries(GlslangTest 
 PRIVATE glslang
@@ -681,8 +674,8 @@ EXISTS "${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples/sample
     ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/SPIRV-Reflect/examples
     )
     
-    add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS} ${CMAKE_SOURCE_DIR}/gizmo/ReadFile.cpp)
-    target_include_directories(SpirvReflectTest PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/gizmo)
+    add_executable(SpirvReflectTest ./SpirvReflectTest.cpp ${SPIRV_REFLECT_SRCS} ${SPIRV_REFLECT_HEADERS} ${CMAKE_SOURCE_DIR}/samples/utils/ReadFile.cpp)
+    target_include_directories(SpirvReflectTest PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/engine/core/thirdparty/glslang ${CMAKE_SOURCE_DIR}/samples/utils)
     target_link_libraries(SpirvReflectTest 
     PRIVATE glslang
     PRIVATE glslang-default-resource-limits

@@ -4,6 +4,15 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/6
+
+>* `.gitignore` 下增加对 ``.vscode/tasks.json`` 的版本追踪。
+>* 将 `gizmo` 下的文件移动到 ``samples/utils`` 下。
+>* `samples/FlowField` 下增加 ``ShowWindByPatch`` 示例。用面片的方式绘制风场。
+>* `samples/FlowField` 下增加 ``ShowWindByInstancedPoints`` 示例。用粒子的方式绘制风场。
+>* `engine/core` 下 ``TVulkanLoader`` 对于 ``设备函数`` 的获取，增加 ``Vulkan`` 实例版本的检查。
+>* `engine/core` 下 ``TVersion`` 使用新版规定的 ``VK_MAKE_API_VERSION`` ，遗弃使用 ``VK_MAKE_VERSION`` 。
+
 ## 2025/1/29
 
 >* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例。

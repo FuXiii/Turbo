@@ -174,7 +174,7 @@ int main()
     vk_application_info.applicationVersion = 0;
     vk_application_info.pEngineName = nullptr;
     vk_application_info.engineVersion = 0;
-    vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+    vk_application_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
 
     std::vector<std::string> enable_instance_layers;
     enable_instance_layers.push_back("VK_LAYER_KHRONOS_validation");

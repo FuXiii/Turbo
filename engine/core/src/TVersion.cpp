@@ -36,7 +36,7 @@ Turbo::Core::TVersion::~TVersion()
 
 uint32_t Turbo::Core::TVersion::GetVulkanVersion() const
 {
-    return VK_MAKE_VERSION(this->major, this->minor, this->patch);
+    return VK_MAKE_API_VERSION(0, this->major, this->minor, this->patch);
 }
 
 Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion() const
