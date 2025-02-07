@@ -136,7 +136,7 @@ Turbo::Core::TVersion Turbo::Core::TVulkanLoader::GetVulkanVersion()
         }
 
         uinstall_vulkan_lib();
-        return TVersion(VK_VERSION_MAJOR(vulkan_version), VK_VERSION_MINOR(vulkan_version), VK_VERSION_PATCH(vulkan_version), 0);
+        return TVersion(VK_API_VERSION_MAJOR(vulkan_version), VK_API_VERSION_MINOR(vulkan_version), VK_API_VERSION_PATCH(vulkan_version), 0);
     }
 
     // TODO:try to create Vulkan1.0
@@ -256,7 +256,7 @@ Turbo::Core::TPhysicalDeviceDriver Turbo::Core::TVulkanLoader::LoadPhysicalDevic
     physical_device_driver.vkGetPhysicalDeviceProperties(vk_physical_device, &vk_physical_device_properties);
 
     uint32_t physical_device_vulkan_api_version = vk_physical_device_properties.apiVersion;
-    Turbo::Core::TVersion physical_device_vulkan_version(VK_VERSION_MAJOR(physical_device_vulkan_api_version), VK_VERSION_MINOR(physical_device_vulkan_api_version), VK_VERSION_PATCH(physical_device_vulkan_api_version), 0);
+    Turbo::Core::TVersion physical_device_vulkan_version(VK_API_VERSION_MAJOR(physical_device_vulkan_api_version), VK_API_VERSION_MINOR(physical_device_vulkan_api_version), VK_API_VERSION_PATCH(physical_device_vulkan_api_version), 0);
 
     Turbo::Core::TVersion vulkan_version_1_1 = Turbo::Core::TVersion(1, 1, 0, 0);
     if (instance_version >= vulkan_version_1_1 || physical_device_vulkan_version >= vulkan_version_1_1)

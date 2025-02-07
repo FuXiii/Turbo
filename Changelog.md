@@ -4,6 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/7
+
+>* 适配 `VK_API_VERSION_VARIANT` 。
+>* 适配 `VK_API_VERSION_MAJOR` 弃用 ``VK_VERSION_MAJOR``。
+>* 适配 `VK_API_VERSION_MINOR` 弃用 ``VK_VERSION_MINOR``。
+>* 适配 `VK_API_VERSION_PATCH` 弃用 ``VK_VERSION_PATCH``。
+>* 更新 `TVersion` 适配 ``variant``。
+
 ## 2025/2/6
 
 >* `.gitignore` 下增加对 ``.vscode/tasks.json`` 的版本追踪。
