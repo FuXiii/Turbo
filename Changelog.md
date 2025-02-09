@@ -4,9 +4,127 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/9
+
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。
+
+## 2025/2/7
+
+>* 适配 `VK_API_VERSION_VARIANT` 。
+>* 适配 `VK_API_VERSION_MAJOR` 弃用 ``VK_VERSION_MAJOR``。
+>* 适配 `VK_API_VERSION_MINOR` 弃用 ``VK_VERSION_MINOR``。
+>* 适配 `VK_API_VERSION_PATCH` 弃用 ``VK_VERSION_PATCH``。
+>* 更新 `TVersion` 适配 ``variant``。
+
+## 2025/2/6
+
+>* `.gitignore` 下增加对 ``.vscode/tasks.json`` 的版本追踪。
+>* 将 `gizmo` 下的文件移动到 ``samples/utils`` 下。
+>* `samples/FlowField` 下增加 ``ShowWindByPatch`` 示例。用面片的方式绘制风场。
+>* `samples/FlowField` 下增加 ``ShowWindByInstancedPoints`` 示例。用粒子的方式绘制风场。
+>* `engine/core` 下 ``TVulkanLoader`` 对于 ``设备函数`` 的获取，增加 ``Vulkan`` 实例版本的检查。
+>* `engine/core` 下 ``TVersion`` 使用新版规定的 ``VK_MAKE_API_VERSION`` ，遗弃使用 ``VK_MAKE_VERSION`` 。
+
+## 2025/1/29
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例。
+
+## 2025/1/28
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+>* `samples` 下更新 ``VulkanTest`` 示例，适配 ``Linux`` 平台。输出更多 ``Vulkan`` 信息。
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，适配键鼠操作。
+
+## 2025/1/27
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+
+## 2025/1/24
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
+>* `samples/utils` 下更新 ``ImGuiPass`` ，增加键盘输入支持。
+
+## 2025/1/23
+
+>* `engine\core\thirdparty` 下更新 ``ImGuiTest.cpp`` 示例，支持 ``鼠标滚轮`` 操作。
+>* `samples` 下增加 ``utils`` 文件夹。用于存放 ``示例`` 常见通用程序代码。
+>* `samples/utils` 下增加 ``ImGuiPass`` 接口，尝试将 ``ImGui`` 的代码封装到一个类中。
+>* `samples` 下增加 ``ImGuiPassTest`` 示例，测试 ``ImGuiPass`` 接口。
+>* `samples` 下增加 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
+
+## 2025/1/22
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 示例，使其支持编译 ``HLSL`` 。研究 ``SPIRV-Reflect`` 使用。
+
+## 2025/1/21
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 实例。研究 ``SPIRV-Reflect`` 使用。
+
+## 2025/1/20
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 实例。研究 ``SPIRV-Reflect`` 使用。
+
+## 2025/1/18
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 实例。研究 ``SPIRV-Reflect`` 使用。
+
+## 2025/1/16
+
+>* `engine\core\thirdparty` 下更新 ``SpirvReflectTest`` 实例。研究 ``SPIRV-Reflect`` 使用。
+
+## 2025/1/15
+
+>* `engine\core\thirdparty` 下新增 ``SPIRV-Reflect`` 子模块。并将其集成到 ``TCore`` 核心中。
+>* `samples` 下新增 ``SpirvReflectTest`` 示例。用于研究 ``SPIRV-Reflect`` 。
+
+## 2025/1/14
+
+>* `asset\shaders` 下新增 ``glslangTest.frag`` 。
+>* `samples` 下更新 `GlslangTest` 示例。尝试解析 ``glslangTest.frag`` 。
+
+## 2025/1/10
+
+>* `asset\shaders` 下新增 ``glslangTest.vert`` 。
+>* `samples` 下更新 `GlslangTest` 示例。尝试解析 ``glslangTest.vert`` 。
+
+## 2025/1/9
+
+>* `samples` 下增加 `ImGuiTest` 示例。用于渲染 ``ImGui`` 。
+>* `samples` 下增加 `GlslangTest` 示例。用于研究 ``glslang`` 。
+
+## 2025/1/8
+
+>* `gizmo` 下增加 `ReadFile` 用于读取常见文本和二进制文件。
+>* 更新 `global_wind.bin` 和与之相关的加载类`GlobalWind`，按照单精度浮点数进行读，加速读取速度。
+>* 更新 `ShowWindByTex` ，按照图片纹理形式显示。
+
+## 2025/1/7
+
+>* `samples` 下所有示例增加 `TURBO_PROJECT_NAME` 宏。用于表示当前示例名称。
+>* `TSurface` 的 `GetSurfaceFormats()` 函数重命名为 `GetSupportFormats()`。
+>* `TCommandBuffer` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TBarrier` 中移除 `TRefPtr<T>` 的冗余使用。
+>* `TInfo` 及其子类中移除 `TRefPtr<T>` 的冗余使用。
+>* `ShowWindByTex` 更新加载 ``global_wind.bin`` 到纹理中。
+>* 增加 `SwapchainTest` 示例。用于测试 ``交换链`` 。
+
+## 2025/1/6
+
+>* `samples` 下增加 `VkFormatTest` 示例。用于研究测试 `VkFormat` 。
+>* `TFormatInfo.cpp` 下移除 `std::vector<VkFormat> TAllFormats`。改用范围`format_ranges`遍历所有格式。
+>* `samples` 下所有使用 `TCore` 头文件示例取消使用相对头文件路径。
+
+## 2025/1/5
+
+>* 尝试 `Linux` 平台编译。
+
 ## 2025/1/3
 
 >* 修正 ``TCore`` 编译时依赖 ``glslang`` 库。
+>* 所有示例都增加 ``TURBO_ASSET_ROOT`` 宏指向 `asset` 资源文件夹。自动化配置资源路径，不再需要手动配置了。
+>* 增加 ``samples\FlowField`` 文件夹。用于存放流场相关示例。
+>* ``FlowField`` 下增加 ``ShowWindByTex`` 示例。用于使用纹理显示 ``流场图``。
+>* ``TInstance`` 增加引用版本构造。
 
 ## 2025/1/2
 

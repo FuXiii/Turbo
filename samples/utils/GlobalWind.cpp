@@ -40,7 +40,7 @@ GlobalWind::Value GlobalWind::Get(size_t row, size_t column)
 {
     GlobalWind::Value value;
 
-    auto GetOffset = [&](size_t row, size_t column) { return (row * width + column) * sizeof(double) * 4; };
+    auto GetOffset = [&](size_t row, size_t column) { return (row * width + column) * sizeof(float) * 4; };
 
     this->in->seekg(GetOffset(row, column));
 
@@ -50,4 +50,18 @@ GlobalWind::Value GlobalWind::Get(size_t row, size_t column)
     this->in->read(reinterpret_cast<char *>(&value.v), sizeof(value.v));
 
     return value;
+}
+
+size_t GlobalWind::Load(void *ptr)
+{
+    this->in->seekg(-2 * sizeof(size_t), std::ios::end);
+    size_t result = this->in->tellg();
+
+    this->in->seekg(0);
+    if (ptr != nullptr)
+    {
+        this->in->read(reinterpret_cast<char *>(ptr), result);
+    }
+
+    return result;
 }

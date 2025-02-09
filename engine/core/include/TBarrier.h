@@ -39,7 +39,7 @@ class TMemoryBarrier : public Turbo::Core::TBarrier
 class TBufferMemoryBarrier : public Turbo::Core::TMemoryBarrier
 {
   private:
-    TRefPtr<TBuffer> buffer; // TBuffer *buffer;
+    TBuffer *buffer;
     TDeviceSize offset;
     TDeviceSize size;
 
@@ -62,7 +62,7 @@ class TImageMemoryBarrier : public Turbo::Core::TMemoryBarrier
   private:
     TImageLayout oldLayout;
     TImageLayout newLayout;
-    TRefPtr<TImage> image; // TImage *image;
+    TImage *image;
     TImageAspects aspects;
     uint32_t baseMipLevel;
     uint32_t levelCount;

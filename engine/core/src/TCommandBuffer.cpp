@@ -272,54 +272,60 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         std::vector<VkClearValue> vk_clear_values;
         for (uint32_t attachment_index = 0; attachment_index < attachemnts_count; attachment_index++)
         {
-            TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
-            TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
-            TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
+            auto load_op = attachemnts[attachment_index].GetLoadOp();
+            auto stencil_load_op = attachemnts[attachment_index].GetStencilLoadOp();
 
-            if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+            if (load_op == Turbo::Core::TLoadOp::CLEAR)
             {
-                VkClearValue vk_clear_value = {};
-                vk_clear_value.depthStencil.depth = 1.0f;
-                vk_clear_value.depthStencil.stencil = 0.0f;
+                TFormatInfo format_info = attachemnts[attachment_index].GetFormat();
+                TPhysicalDevice *physical_device = this->commandBufferPool->GetDeviceQueue()->GetDevice()->GetPhysicalDevice();
+                TFormatFeatures format_feature = physical_device->GetOptimalFeatures(format_info);
 
-                vk_clear_values.push_back(vk_clear_value);
-            }
-            else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
-            {
-                TFormatDataTypes format_data_types = format_info.GetFormatDataType();
-
-                VkClearColorValue vk_clear_color_value = {};
-                if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                if ((format_feature & TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
                 {
-                    vk_clear_color_value.int32[0] = (int32_t)0;
-                    vk_clear_color_value.int32[1] = (int32_t)0;
-                    vk_clear_color_value.int32[2] = (int32_t)0;
-                    vk_clear_color_value.int32[3] = (int32_t)0;
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_value.depthStencil.depth = 1.0f;
+                    vk_clear_value.depthStencil.stencil = 0.0f;
+
+                    vk_clear_values.push_back(vk_clear_value);
                 }
-                else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                else if ((format_feature & TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT) == TFormatFeatureBits::FEATURE_COLOR_ATTACHMENT_BIT)
                 {
-                    vk_clear_color_value.uint32[0] = (uint32_t)0;
-                    vk_clear_color_value.uint32[1] = (uint32_t)0;
-                    vk_clear_color_value.uint32[2] = (uint32_t)0;
-                    vk_clear_color_value.uint32[3] = (uint32_t)0;
+                    TFormatDataTypes format_data_types = format_info.GetFormatDataType();
+
+                    VkClearColorValue vk_clear_color_value = {};
+                    if ((format_data_types & TFormatDataTypeBits::SIGNED_INTEGER) == TFormatDataTypeBits::SIGNED_INTEGER)
+                    {
+                        vk_clear_color_value.int32[0] = (int32_t)0;
+                        vk_clear_color_value.int32[1] = (int32_t)0;
+                        vk_clear_color_value.int32[2] = (int32_t)0;
+                        vk_clear_color_value.int32[3] = (int32_t)0;
+                    }
+                    else if ((format_data_types & TFormatDataTypeBits::UNSIGNED_INTEGER) == TFormatDataTypeBits::UNSIGNED_INTEGER)
+                    {
+                        vk_clear_color_value.uint32[0] = (uint32_t)0;
+                        vk_clear_color_value.uint32[1] = (uint32_t)0;
+                        vk_clear_color_value.uint32[2] = (uint32_t)0;
+                        vk_clear_color_value.uint32[3] = (uint32_t)0;
+                    }
+                    else
+                    {
+                        vk_clear_color_value.float32[0] = 0;
+                        vk_clear_color_value.float32[1] = 0;
+                        vk_clear_color_value.float32[2] = 0;
+                        vk_clear_color_value.float32[3] = 0;
+                    }
+
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_value.color = vk_clear_color_value;
+
+                    vk_clear_values.push_back(vk_clear_value);
                 }
                 else
                 {
-                    vk_clear_color_value.float32[0] = 0;
-                    vk_clear_color_value.float32[1] = 0;
-                    vk_clear_color_value.float32[2] = 0;
-                    vk_clear_color_value.float32[3] = 0;
+                    VkClearValue vk_clear_value = {};
+                    vk_clear_values.push_back(vk_clear_value);
                 }
-
-                VkClearValue vk_clear_value = {};
-                vk_clear_value.color = vk_clear_color_value;
-
-                vk_clear_values.push_back(vk_clear_value);
-            }
-            else
-            {
-                VkClearValue vk_clear_value = {};
-                vk_clear_values.push_back(vk_clear_value);
             }
         }
 
@@ -341,7 +347,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
             vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
         }
         vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
-        vk_render_pass_begin_info.pClearValues = vk_clear_values.data();
+        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data();
 
         switch (subpassContents)
         {
@@ -594,7 +600,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
             vk_rendering_attachment_info.pNext = nullptr;
             vk_rendering_attachment_info.imageView = VK_NULL_HANDLE;
             vk_rendering_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            if (rendering_attach_item.imageView.Valid())
+            if (Turbo::Core::TReferenced::Valid(rendering_attach_item.imageView))
             {
                 vk_rendering_attachment_info.imageView = rendering_attach_item.imageView->GetVkImageView();
                 vk_rendering_attachment_info.imageLayout = static_cast<VkImageLayout>(rendering_attach_item.layout);
@@ -603,7 +609,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
             vk_rendering_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
             vk_rendering_attachment_info.resolveImageView = VK_NULL_HANDLE;
             vk_rendering_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            if (rendering_attach_item.resolveImageView.Valid())
+            if (Turbo::Core::TReferenced::Valid(rendering_attach_item.resolveImageView))
             {
                 vk_rendering_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(rendering_attach_item.resolveModeBits);
                 vk_rendering_attachment_info.resolveImageView = rendering_attach_item.resolveImageView->GetVkImageView();
@@ -613,7 +619,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
             vk_rendering_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             vk_rendering_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
             vk_rendering_attachment_info.clearValue = {};
-            if (rendering_attach_item.imageView.Valid())
+            if (Turbo::Core::TReferenced::Valid(rendering_attach_item.imageView))
             {
                 vk_rendering_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(rendering_attach_item.loadOp);
                 vk_rendering_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(rendering_attach_item.storeOp);
@@ -661,7 +667,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         depth_attachment_info.pNext = nullptr;
         depth_attachment_info.imageView = VK_NULL_HANDLE;
         depth_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        if (renderingAttachment.depthAttachment.imageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.depthAttachment.imageView))
         {
             depth_attachment_info.imageView = renderingAttachment.depthAttachment.imageView->GetVkImageView();
             depth_attachment_info.imageLayout = static_cast<VkImageLayout>(renderingAttachment.depthAttachment.layout);
@@ -669,7 +675,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         depth_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
         depth_attachment_info.resolveImageView = VK_NULL_HANDLE;
         depth_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        if (renderingAttachment.depthAttachment.resolveImageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.depthAttachment.resolveImageView))
         {
             depth_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(renderingAttachment.depthAttachment.resolveModeBits);
             depth_attachment_info.resolveImageView = renderingAttachment.depthAttachment.resolveImageView->GetVkImageView();
@@ -678,7 +684,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         depth_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depth_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depth_attachment_info.clearValue = {};
-        if (renderingAttachment.depthAttachment.imageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.depthAttachment.imageView))
         {
             depth_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(renderingAttachment.depthAttachment.loadOp);
             depth_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(renderingAttachment.depthAttachment.storeOp);
@@ -690,7 +696,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         stencil_attachment_info.pNext = nullptr;
         stencil_attachment_info.imageView = VK_NULL_HANDLE;
         stencil_attachment_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        if (renderingAttachment.stencilAttachment.imageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.stencilAttachment.imageView))
         {
             stencil_attachment_info.imageView = renderingAttachment.stencilAttachment.imageView->GetVkImageView();
             stencil_attachment_info.imageLayout = static_cast<VkImageLayout>(renderingAttachment.stencilAttachment.layout);
@@ -698,7 +704,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         stencil_attachment_info.resolveMode = VkResolveModeFlagBits::VK_RESOLVE_MODE_NONE;
         stencil_attachment_info.resolveImageView = VK_NULL_HANDLE;
         stencil_attachment_info.resolveImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        if (renderingAttachment.stencilAttachment.resolveImageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.stencilAttachment.resolveImageView))
         {
             stencil_attachment_info.resolveMode = static_cast<VkResolveModeFlagBits>(renderingAttachment.stencilAttachment.resolveModeBits);
             stencil_attachment_info.resolveImageView = renderingAttachment.stencilAttachment.resolveImageView->GetVkImageView();
@@ -707,7 +713,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         stencil_attachment_info.loadOp = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         stencil_attachment_info.storeOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
         stencil_attachment_info.clearValue = {};
-        if (renderingAttachment.stencilAttachment.imageView.Valid())
+        if (Turbo::Core::TReferenced::Valid(renderingAttachment.stencilAttachment.imageView))
         {
             stencil_attachment_info.loadOp = static_cast<VkAttachmentLoadOp>(renderingAttachment.stencilAttachment.loadOp);
             stencil_attachment_info.storeOp = static_cast<VkAttachmentStoreOp>(renderingAttachment.stencilAttachment.storeOp);
@@ -725,7 +731,7 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRendering(const TRenderingAttachme
         TRefPtr<Turbo::Core::TImage> color_attachment_first_image = nullptr;
         if (!renderingAttachment.colorAttachments.empty())
         {
-            if (renderingAttachment.colorAttachments[0].imageView.Valid())
+            if (Turbo::Core::TReferenced::Valid(renderingAttachment.colorAttachments[0].imageView))
             {
                 color_attachment_first_image = renderingAttachment.colorAttachments[0].imageView->GetImage();
             }
@@ -948,13 +954,13 @@ void Turbo::Core::TCommandBufferBase::CmdPipelineImageBarrier(TPipelineStages sr
     device->GetDeviceDriver()->vkCmdPipelineBarrier(this->vkCommandBuffer, (VkPipelineStageFlags)srcStages, (VkPipelineStageFlags)dstStages, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 0, nullptr, vk_image_memory_barriers.size(), vk_image_memory_barriers.data());
 }
 
-void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImage> &image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImage *image, TImageAspects aspects, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, image, oldLayout, newLayout, aspects, baseMipLevel, levelCount, baseArrayLayer, layerCount);
     this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, const TRefPtr<TImageView> &imageView)
+void Turbo::Core::TCommandBufferBase::CmdTransformImageLayout(TPipelineStages srcStages, TPipelineStages dstStages, TAccess srcAccess, TAccess dstAccess, TImageLayout oldLayout, TImageLayout newLayout, TImageView *imageView)
 {
     TImageMemoryBarrier image_memory_barrier(srcAccess, dstAccess, imageView, oldLayout, newLayout);
     this->CmdPipelineImageBarrier(srcStages, dstStages, image_memory_barrier);
@@ -1479,7 +1485,7 @@ bool Turbo::Core::TCommandBufferBase::Valid() const
     return false;
 }
 
-Turbo::Core::TSecondaryCommandBuffer::TSecondaryCommandBuffer(const TRefPtr<TCommandBufferPool> &commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::SECONDARY)
+Turbo::Core::TSecondaryCommandBuffer::TSecondaryCommandBuffer(TCommandBufferPool *commandBufferPool) : Turbo::Core::TCommandBufferBase(commandBufferPool, TCommandBufferLevel::SECONDARY)
 {
 }
 

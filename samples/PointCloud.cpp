@@ -1,54 +1,56 @@
 #include <iostream>
 #include <ply.h>
 
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
-#include "core/include/TVulkanAllocator.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
+#include <TVulkanAllocator.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TComputePipeline.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TComputePipeline.h>
+#include <TGraphicsPipeline.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
 #include <math.h>
 
-#include "core/include/TPipelineDescriptorSet.h"
-#include "core/include/TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
 #include <glm/ext.hpp>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 #include "glm/fwd.hpp"
 #include "glm/geometric.hpp"
 #include "glm/trigonometric.hpp"
 
 #include <imgui.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
@@ -107,13 +109,13 @@ typedef struct PlyData
     POSITION max;
 } PlyData;
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
 
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string MY_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.vert");
+const std::string MY_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/PointCloud.vert");
 
-const std::string MY_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/PointCloud.frag");
+const std::string MY_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/PointCloud.frag");
 
 PlyData LoadPly(const std::string &url)
 {
@@ -127,7 +129,6 @@ PlyData LoadPly(const std::string &url)
     int file_type;
     float version;
 
-    // PlyFile *ply = ply_open_for_reading(const_cast<char *>(std::string("../../asset/models/points.ply").c_str()), &elements_count, &elements, &file_type, &version);
     PlyFile *ply = ply_open_for_reading(const_cast<char *>(url.c_str()), &elements_count, &elements, &file_type, &version);
     if (ply != nullptr)
     {
@@ -563,7 +564,7 @@ int main()
 {
     std::vector<PlyData> ply_datas;
     {
-        ply_datas.push_back(LoadPly("../../asset/models/points.ply"));
+        ply_datas.push_back(LoadPly(asset_root + "/models/points.ply"));
         //... 在此增加其他 ply 点云数据;
     }
 
@@ -1040,7 +1041,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin("PointCloud"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME); // Create a window called "Hello, world!" and append into it.
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
 

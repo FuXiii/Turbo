@@ -52,7 +52,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     // OLD:std::vector<TQueueFamilyInfo> GetDeviceQueueFamilyInfos();
 
   public:
-    explicit TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
+    TDevice(TPhysicalDevice *physicalDevice, std::vector<TLayerInfo> *enabledLayers = nullptr, std::vector<TExtensionInfo> *enabledExtensions = nullptr, TPhysicalDeviceFeatures *enableFeatures = nullptr);
+    TDevice(TPhysicalDevice *physicalDevice, const std::vector<TLayerInfo> &enabledLayers, const std::vector<TExtensionInfo> &enabledExtensions, const TPhysicalDeviceFeatures &enableFeatures);
 
   protected:
     virtual ~TDevice();

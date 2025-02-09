@@ -2,6 +2,7 @@ build/
 *.ppm
 *.cache/
 *.vscode/
+!.vscode/tasks.json
 imgui.ini
 install/
 

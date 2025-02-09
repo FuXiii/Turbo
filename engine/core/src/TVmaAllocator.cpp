@@ -33,7 +33,7 @@ void Turbo::Core::TVmaAllocator::InternalCreate()
     vma_allocator_create_info.instance = instance->GetVkInstance();
     vma_allocator_create_info.physicalDevice = physical_device->GetVkPhysicalDevice();
     vma_allocator_create_info.device = this->device->GetVkDevice();
-    vma_allocator_create_info.vulkanApiVersion = VK_MAKE_VERSION(vulkan_version.GetMajor(), vulkan_version.GetMinor(), 0);
+    vma_allocator_create_info.vulkanApiVersion = vulkan_version.GetVulkanVersion();
     vma_allocator_create_info.pAllocationCallbacks = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
     vma_allocator_create_info.pVulkanFunctions = &vulkanFunctions;
 
