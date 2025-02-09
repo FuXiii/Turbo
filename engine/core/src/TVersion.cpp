@@ -9,14 +9,16 @@ Turbo::Core::TVersion::TVersion() : Turbo::Core::TInfo()
     this->minor = 0;
     this->patch = 0;
     this->develop = 0;
+    this->variant = 0;
 }
 
-Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop) : Turbo::Core::TInfo()
+Turbo::Core::TVersion::TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop, uint32_t variant) : Turbo::Core::TInfo()
 {
     this->major = major;
     this->minor = minor;
     this->patch = patch;
     this->develop = develop;
+    this->variant = variant;
 }
 
 Turbo::Core::TVersion::TVersion(const TVersion &version) : Turbo::Core::TInfo()
@@ -27,6 +29,7 @@ Turbo::Core::TVersion::TVersion(const TVersion &version) : Turbo::Core::TInfo()
         this->minor = version.minor;
         this->patch = version.patch;
         this->develop = version.develop;
+        this->variant = version.variant;
     }
 }
 
@@ -36,12 +39,12 @@ Turbo::Core::TVersion::~TVersion()
 
 uint32_t Turbo::Core::TVersion::GetVulkanVersion() const
 {
-    return VK_MAKE_VERSION(this->major, this->minor, this->patch);
+    return VK_MAKE_API_VERSION(0, this->major, this->minor, this->patch);
 }
 
 Turbo::Core::TVersion Turbo::Core::TVersion::GetValidVulkanVersion() const
 {
-    return TVersion(this->major, this->minor, 0, 0);
+    return TVersion(this->major, this->minor, 0, 0, 0);
 }
 
 uint32_t Turbo::Core::TVersion::GetMajor() const
@@ -62,6 +65,11 @@ uint32_t Turbo::Core::TVersion::GetPatch() const
 uint32_t Turbo::Core::TVersion::GetDevelop() const
 {
     return this->develop;
+}
+
+uint32_t Turbo::Core::TVersion::GetVariant() const
+{
+    return this->variant;
 }
 
 Turbo::Core::TVersion &Turbo::Core::TVersion::operator=(const TVersion &version)

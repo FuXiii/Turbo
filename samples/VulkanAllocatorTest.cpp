@@ -1,8 +1,8 @@
-//Use for check PipelineLayout memory leak in NVIDIA driver
+// Use for check PipelineLayout memory leak in NVIDIA driver
 
-#include "core/include/TException.h"
+#include <TException.h>
 #include <vulkan/vulkan_core.h>
-#include "core/include/TVulkanAllocator.h"
+#include <TVulkanAllocator.h>
 
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -43,7 +43,6 @@ void VKAPI_PTR Free(void *pUserData, void *pMemory)
     return Turbo::Core::TVulkanAllocator::Free(pUserData, pMemory);
 }
 
-
 int main()
 {
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
@@ -66,7 +65,7 @@ int main()
     vk_application_info.applicationVersion = 0;
     vk_application_info.pEngineName = nullptr;
     vk_application_info.engineVersion = 0;
-    vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+    vk_application_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
 
     std::vector<std::string> enable_instance_layers;
     enable_instance_layers.push_back("VK_LAYER_KHRONOS_validation");

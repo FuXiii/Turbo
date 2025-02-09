@@ -1,43 +1,43 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
-#include "core/include/TVulkanAllocator.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
+#include <TVulkanAllocator.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TGraphicsPipeline.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
-#include "core/include/TPipelineDescriptorSet.h"
-#include "core/include/TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
 #include <glm/ext.hpp>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -48,6 +48,8 @@
 #include <ktx.h>
 
 #include <imgui.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 std::string ReadTextFile(const std::string &filename)
 {
@@ -68,17 +70,17 @@ std::string ReadTextFile(const std::string &filename)
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 
-const std::string IMGUI_VERT_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.vert");
-const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/imgui.frag");
+const std::string IMGUI_VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.vert");
+const std::string IMGUI_FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/imgui.frag");
 
-const std::string VERT_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.vert");
-const std::string GEOM_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.geom");
-const std::string FRAG_SHADER_STR = ReadTextFile("../../asset/shaders/GeometryTest.frag");
+const std::string VERT_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.vert");
+const std::string GEOM_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.geom");
+const std::string FRAG_SHADER_STR = ReadTextFile(asset_root + "/shaders/GeometryTest.frag");
 
-const std::string RAY_GENERATION_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rgen");
-const std::string MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rmiss");
-const std::string SHADOW_MISS_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTextureShadow.rmiss");
-const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile("../../asset/shaders/RayTracingKHRTestForLightingShadowWithTexture.rchit");
+const std::string RAY_GENERATION_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadowWithTexture.rgen");
+const std::string MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadowWithTexture.rmiss");
+const std::string SHADOW_MISS_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadowWithTextureShadow.rmiss");
+const std::string CLOSEST_HIT_SHADER_STR = ReadTextFile(asset_root + "/shaders/RayTracingKHRTestForLightingShadowWithTexture.rchit");
 
 typedef struct POSITION
 {
@@ -160,7 +162,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere_without_Yup.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/material_sphere_without_Yup.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -459,8 +461,8 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
-        // std::string ktx_filename = "../../asset/images/RockCliffLayered/albedo.ktx";
+        std::string ktx_filename = asset_root + "/images/metalplate01_rgba.ktx";
+        // std::string ktx_filename = asset_root+"/images/RockCliffLayered/albedo.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -2034,7 +2036,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("VulkanKHRRayTracingTestForLightingShadowWithTexture");
+                ImGui::Begin(TURBO_PROJECT_NAME);
                 ImGui::Text("W,A,S,D to move.");
                 ImGui::Text("Push down and drag mouse right button to rotate view.");
                 ImGui::SliderFloat("angle", &angle, 0.0f, 360);
@@ -2452,9 +2454,7 @@ int main()
         //</End Rendering>
     }
 
-   
     descriptor_pool->Free(imgui_pipeline_descriptor_set);
-  
 
     descriptor_pool->Free(pipeline_descriptor_set);
 

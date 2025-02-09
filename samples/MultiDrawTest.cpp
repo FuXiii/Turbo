@@ -1,45 +1,45 @@
-#include "core/include/TDevice.h"
-#include "core/include/TDeviceQueue.h"
-#include "core/include/TEngine.h"
-#include "core/include/TPhysicalDevice.h"
-#include "core/include/TVulkanAllocator.h"
+#include <TDevice.h>
+#include <TDeviceQueue.h>
+#include <TEngine.h>
+#include <TPhysicalDevice.h>
+#include <TVulkanAllocator.h>
 
-#include "core/include/TBuffer.h"
-#include "core/include/TCommandBuffer.h"
-#include "core/include/TCommandBufferPool.h"
-#include "core/include/TImage.h"
-#include "core/include/TImageView.h"
+#include <TBuffer.h>
+#include <TCommandBuffer.h>
+#include <TCommandBufferPool.h>
+#include <TImage.h>
+#include <TImageView.h>
 
-#include "core/include/TShader.h"
+#include <TShader.h>
 
-#include "core/include/TAttachment.h"
-#include "core/include/TGraphicsPipeline.h"
-#include "core/include/TRenderPass.h"
-#include "core/include/TSubpass.h"
+#include <TAttachment.h>
+#include <TGraphicsPipeline.h>
+#include <TRenderPass.h>
+#include <TSubpass.h>
 
-#include "core/include/TDescriptorPool.h"
-#include "core/include/TDescriptorSet.h"
-#include "core/include/TDescriptorSetLayout.h"
-#include "core/include/TFramebuffer.h"
+#include <TDescriptorPool.h>
+#include <TDescriptorSet.h>
+#include <TDescriptorSetLayout.h>
+#include <TFramebuffer.h>
 
-#include "core/include/TFence.h"
-#include "core/include/TSemaphore.h"
+#include <TFence.h>
+#include <TSemaphore.h>
 
 #include <fstream>
 
 #include <GLFW/glfw3.h>
 
-#include "core/include/TSurface.h"
-#include "core/include/TSwapchain.h"
+#include <TSurface.h>
+#include <TSwapchain.h>
 
 #include <math.h>
 
-#include "core/include/TPipelineDescriptorSet.h"
-#include "core/include/TSampler.h"
+#include <TPipelineDescriptorSet.h>
+#include <TSampler.h>
 
 #include <glm/ext.hpp>
 
-#include "core/include/TVulkanLoader.h"
+#include <TVulkanLoader.h>
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -49,6 +49,8 @@
 #include <ktx.h>
 
 #include <imgui.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
 
 static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
@@ -334,7 +336,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/material_sphere.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/material_sphere.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[0]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -415,7 +417,7 @@ int main()
         std::string err;
         std::string warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "../../asset/models/cube.gltf");
+        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, asset_root + "/models/cube.gltf");
         const tinygltf::Scene &scene = model.scenes[model.defaultScene];
         tinygltf::Node &node = model.nodes[scene.nodes[2]];
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
@@ -674,7 +676,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TImage> ktx_image = nullptr;
     //<KTX Texture>
     {
-        std::string ktx_filename = "../../asset/images/metalplate01_rgba.ktx";
+        std::string ktx_filename = asset_root + "/images/metalplate01_rgba.ktx";
 
         ktxTexture *ktx_texture;
         KTX_error_code ktx_result;
@@ -734,7 +736,7 @@ int main()
         ktxResult result;
         ktxTexture *ktx_texture;
 
-        result = ktxTexture_CreateFromNamedFile("../../asset/images/cubemap_yokohama_rgba.ktx", KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
+        result = ktxTexture_CreateFromNamedFile((asset_root + "/images/cubemap_yokohama_rgba.ktx").c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktx_texture);
         uint32_t ktx_texture_width = ktx_texture->baseWidth;
         uint32_t ktx_texture_height = ktx_texture->baseHeight;
         uint32_t ktx_texture_mip_levels = ktx_texture->numLevels;
@@ -1128,7 +1130,7 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME); // Create a window called "Hello, world!" and append into it.
 
                 ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
 
@@ -1451,65 +1453,65 @@ int main()
         }
         break;
         case Turbo::Core::TResult::MISMATCH: {
-             // the size of the window had changed you need to recreate swapchain
+            // the size of the window had changed you need to recreate swapchain
 
-                // waite for idle
-                device->WaitIdle();
+            // waite for idle
+            device->WaitIdle();
 
-                // destroy related resource
-                // clear old swapchain image
-                swapchain_images.clear();
+            // destroy related resource
+            // clear old swapchain image
+            swapchain_images.clear();
 
-                // destroy swapchain image views
-                swapchain_image_views.clear();
+            // destroy swapchain image views
+            swapchain_image_views.clear();
 
-                // destroy color image and view
+            // destroy color image and view
 
-                // destroy depth image and view
+            // destroy depth image and view
 
-                // destroy framebuffer
-                swpachain_framebuffers.clear();
+            // destroy framebuffer
+            swpachain_framebuffers.clear();
 
-                // recreate swapchain
-                Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
-                swapchain = new_swapchain;
+            // recreate swapchain
+            Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(swapchain);
+            swapchain = new_swapchain;
 
-                // recreate swapchain image views
-                swapchain_images = swapchain->GetImages();
-                for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
-                {
-                    Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-                    swapchain_image_views.push_back(swapchain_view);
-                }
+            // recreate swapchain image views
+            swapchain_images = swapchain->GetImages();
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImage> swapchain_image_item : swapchain_images)
+            {
+                Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_view = new Turbo::Core::TImageView(swapchain_image_item, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                swapchain_image_views.push_back(swapchain_view);
+            }
 
-                // recreate color image and view
-                color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-                color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            // recreate color image and view
+            color_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::B8G8R8A8_SRGB, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            color_image_view = new Turbo::Core::TImageView(color_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, color_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-                // recreate depth image and view
-                depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
-                depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+            // recreate depth image and view
+            depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_INPUT_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY, Turbo::Core::TImageLayout::UNDEFINED);
+            depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
-                // recreate framebuffer
-                for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> image_view_item : swapchain_image_views)
-                {
-                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
-                    swapchain_image_views.push_back(image_view_item);
-                    swapchain_image_views.push_back(color_image_view);
-                    swapchain_image_views.push_back(depth_image_view);
+            // recreate framebuffer
+            for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> image_view_item : swapchain_image_views)
+            {
+                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> swapchain_image_views;
+                swapchain_image_views.push_back(image_view_item);
+                swapchain_image_views.push_back(color_image_view);
+                swapchain_image_views.push_back(depth_image_view);
 
-                    Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
-                    swpachain_framebuffers.push_back(swapchain_framebuffer);
-                }
+                Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
+                swpachain_framebuffers.push_back(swapchain_framebuffer);
+            }
 
-                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> temp_input_attachment_colors;
-                temp_input_attachment_colors.push_back(color_image_view);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> temp_input_attachment_colors;
+            temp_input_attachment_colors.push_back(color_image_view);
 
-                std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> temp_input_attachment_depths;
-                temp_input_attachment_depths.push_back(depth_image_view);
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> temp_input_attachment_depths;
+            temp_input_attachment_depths.push_back(depth_image_view);
 
-                input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, temp_input_attachment_colors);
-                input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, temp_input_attachment_depths);
+            input_attachment_pipeline_descriptor_set->BindData(0, 0, 0, temp_input_attachment_colors);
+            input_attachment_pipeline_descriptor_set->BindData(0, 1, 0, temp_input_attachment_depths);
         }
         break;
         default: {
@@ -1527,7 +1529,7 @@ int main()
     descriptor_pool->Free(pipeline_descriptor_set1);
     descriptor_pool->Free(sky_cube_pipeline_descriptor_set);
     descriptor_pool->Free(input_attachment_pipeline_descriptor_set);
-   
+
     command_pool->Free(command_buffer);
     glfwTerminate();
 

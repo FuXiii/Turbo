@@ -248,7 +248,7 @@ class TSurface : public Turbo::Core::TVulkanHandle
     bool IsSupportPresentModeFifo() const;
     bool IsSupportPresentModeFifoRelaxed() const;
 
-    std::vector<Turbo::Extension::TSurfaceFormat> GetSurfaceFormats() const;
+    std::vector<Turbo::Extension::TSurfaceFormat> GetSupportFormats() const;
     std::vector<Turbo::Extension::TPresentMode> GetPresentModes() const;
 
     std::vector<Turbo::Core::TQueueFamilyInfo> GetSupportQueueFamilys() const;

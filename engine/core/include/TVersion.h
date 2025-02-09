@@ -15,13 +15,14 @@ class TVersion : public TInfo
     uint32_t minor;
     uint32_t patch;
     uint32_t develop;
+    uint32_t variant;
 
   public:
     static TVersion TurboVersion;
 
   public:
     explicit TVersion();
-    explicit TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop);
+    explicit TVersion(uint32_t major, uint32_t minor, uint32_t patch, uint32_t develop = 0, uint32_t variant = 0);
     TVersion(const TVersion &version);
     ~TVersion();
 
@@ -33,6 +34,7 @@ class TVersion : public TInfo
     uint32_t GetMinor() const;
     uint32_t GetPatch() const;
     uint32_t GetDevelop() const;
+    uint32_t GetVariant() const;
 
     TVersion &operator=(const TVersion &version);
     bool operator==(const TVersion &version) const;
