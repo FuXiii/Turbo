@@ -37,6 +37,8 @@ class Camera
     float horizontal = 0; // radian
     float vertical = 0;   // radian
 
+    float speed = 1;
+
   private:
     glm::quat CalAttitude()
     {
@@ -62,24 +64,19 @@ class Camera
 
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W))
             {
-                this->position += forward;
+                this->position += forward * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_A))
             {
-                this->position -= right;
+                this->position -= right * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_S))
             {
-                this->position -= forward;
+                this->position -= forward * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
             {
-                this->position += right;
-            }
-
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
-            {
-                this->position += right;
+                this->position += right * this->speed;
             }
 
             this->position += forward * io.MouseWheel;
@@ -106,6 +103,11 @@ class Camera
         }
 
         return glm::lookAt(eye, center, up);
+    }
+
+    void SetSpeed(float speed)
+    {
+        this->speed = speed;
     }
 };
 
@@ -349,7 +351,7 @@ int main()
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, current_swapchain_image_view);
-            command_buffer->CmdClearColorImage(current_swapchain_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, (std::sin(current_time) + 1) * 0.5, (std::cos(current_time) + 1) * 0.5, (std::cos(0.5 * current_time) + 1) * 0.5, 1);
+            command_buffer->CmdClearColorImage(current_swapchain_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, 1);
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_swapchain_image_view);
 
             command_buffer->CmdBeginRenderPass(render_pass, framebuffers[current_image_index]);
@@ -372,12 +374,17 @@ int main()
                 static float f = 0.0f;
                 static int counter = 0;
                 static float value = 1.0f;
+                static float view_speed = 1.0f;
 
                 ImGui::Begin(TURBO_PROJECT_NAME);
 
                 ImGui::Text("This is some useful text.");
 
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f);
+                if (ImGui::SliderFloat("view speed", &view_speed, 1.0f, 100.0f))
+                {
+                    camera.SetSpeed(view_speed);
+                }
 
                 if (ImGui::Button("Button"))
                     counter++;

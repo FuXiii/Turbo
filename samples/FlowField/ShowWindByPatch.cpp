@@ -24,6 +24,7 @@
 #include <TScissor.h>
 
 #include <ImGuiPass.h>
+#include <GlobalWind.h>
 
 #include <glm/ext.hpp>
 
@@ -36,6 +37,8 @@ class Camera
 
     float horizontal = 0; // radian
     float vertical = 0;   // radian
+
+    float speed = 1;
 
   private:
     glm::quat CalAttitude()
@@ -62,24 +65,19 @@ class Camera
 
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W))
             {
-                this->position += forward;
+                this->position += forward * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_A))
             {
-                this->position -= right;
+                this->position -= right * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_S))
             {
-                this->position -= forward;
+                this->position -= forward * this->speed;
             }
             if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
             {
-                this->position += right;
-            }
-
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
-            {
-                this->position += right;
+                this->position += right * this->speed;
             }
 
             this->position += forward * io.MouseWheel;
@@ -106,6 +104,11 @@ class Camera
         }
 
         return glm::lookAt(eye, center, up);
+    }
+
+    void SetSpeed(float speed)
+    {
+        this->speed = speed;
     }
 };
 
@@ -304,6 +307,52 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, projection_view_matrix_buffer);
 
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> patch_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/Patch.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> patch_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/Patch.frag"));
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> patch_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, {}, patch_vertex_shader, patch_fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_STRIP, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+
+    auto load_flow_field_to_image = [&]() -> Turbo::Core::TImage * {
+        GlobalWind gw(asset_root + "/global_wind.bin");
+        auto width = gw.Width();
+        auto height = gw.Height();
+
+        std::cout << "height=" << height << std::endl;
+        std::cout << "width=" << width << std::endl;
+
+        size_t flow_field_size = gw.Load();
+        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> flow_field_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, flow_field_size);
+        {
+            gw.Load(flow_field_buffer->Map());
+            flow_field_buffer->Unmap();
+        }
+
+        Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+        {
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> copy_command_buffer = command_pool->Allocate();
+            copy_command_buffer->Begin();
+            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            copy_command_buffer->CmdCopyBufferToImage(flow_field_buffer, result, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, width, height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, width, height, 1);
+            copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            copy_command_buffer->End();
+
+            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
+            queue->Submit(copy_command_buffer, fence);
+            fence->WaitUntil();
+            command_pool->Free(copy_command_buffer);
+        }
+
+        return result;
+    };
+
+    Turbo::Core::TRefPtr<Turbo::Core::TImage> flow_field = load_flow_field_to_image();
+    Turbo::Core::TRefPtr<Turbo::Core::TImageView> flow_field_view = new Turbo::Core::TImageView(flow_field, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, flow_field->GetFormat().GetFormatType(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    Turbo::Core::TRefPtr<Turbo::Core::TSampler> sampler = new Turbo::Core::TSampler(device, Turbo::Core::TFilter::LINEAR, Turbo::Core::TFilter::LINEAR, Turbo::Core::TMipmapMode::LINEAR, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TAddressMode::REPEAT, Turbo::Core::TBorderColor::FLOAT_OPAQUE_WHITE, 0.0f, 0.0f, 1.0f);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> patch_pipeline_descriptor_set = descriptor_pool->Allocate(patch_pipeline->GetPipelineLayout());
+    patch_pipeline_descriptor_set->BindData(0, 0, projection_view_matrix_buffer);
+    patch_pipeline_descriptor_set->BindData(0, 1, flow_field_view);
+    patch_pipeline_descriptor_set->BindData(0, 2, sampler);
+
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> framebuffers;
     for (auto image_view : swapchain_image_views)
     {
@@ -349,7 +398,7 @@ int main()
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
             command_buffer->Begin();
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, current_swapchain_image_view);
-            command_buffer->CmdClearColorImage(current_swapchain_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, (std::sin(current_time) + 1) * 0.5, (std::cos(current_time) + 1) * 0.5, (std::cos(0.5 * current_time) + 1) * 0.5, 1);
+            command_buffer->CmdClearColorImage(current_swapchain_image_view, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, 0, 0, 1);
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_swapchain_image_view);
 
             command_buffer->CmdBeginRenderPass(render_pass, framebuffers[current_image_index]);
@@ -361,6 +410,12 @@ int main()
 
             command_buffer->CmdSetLineWidth(1);
             command_buffer->CmdDraw(2, 6, 0, 0);
+
+            {
+                command_buffer->CmdBindPipeline(patch_pipeline);
+                command_buffer->CmdBindPipelineDescriptorSet(patch_pipeline_descriptor_set);
+                command_buffer->CmdDraw(4, 1, 0, 0);
+            }
             command_buffer->CmdEndRenderPass();
 
             imgui_pass->Draw(delta_time, command_buffer, current_swapchain_image_view, [&]() {
@@ -371,13 +426,16 @@ int main()
 
                 static float f = 0.0f;
                 static int counter = 0;
-                static float value = 1.0f;
+                static float view_speed = 1.0f;
 
                 ImGui::Begin(TURBO_PROJECT_NAME);
 
                 ImGui::Text("This is some useful text.");
 
-                ImGui::SliderFloat("value", &value, 0.0f, 1.0f);
+                if (ImGui::SliderFloat("view speed", &view_speed, 1.0f, 100.0f))
+                {
+                    camera.SetSpeed(view_speed);
+                }
 
                 if (ImGui::Button("Button"))
                     counter++;
