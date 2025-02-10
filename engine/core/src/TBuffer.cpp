@@ -189,6 +189,11 @@ VkBuffer Turbo::Core::TBuffer::GetVkBuffer()
     return this->vkBuffer;
 }
 
+Turbo::Core::TDevice *Turbo::Core::TBuffer::GetDevice()
+{
+    return this->device;
+}
+
 bool Turbo::Core::TBuffer::IsMappable() const
 {
     if (((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_RANDOM) == TMemoryFlagsBits::HOST_ACCESS_RANDOM) || ((this->memoryFlags & TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE) == TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE))

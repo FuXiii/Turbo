@@ -24,104 +24,14 @@
 #include <TScissor.h>
 
 #include <ImGuiPass.h>
+#include <Camera.h>
 
 #include <glm/ext.hpp>
 
 std::string asset_root(TURBO_ASSET_ROOT);
 
-class Camera
-{
-  private:
-    glm::vec3 position = glm::vec3(0, 0, -1);
-
-    float horizontal = 0; // radian
-    float vertical = 0;   // radian
-
-    float speed = 1;
-
-  private:
-    glm::quat CalAttitude()
-    {
-        return glm::quat(glm::radians(glm::vec3(-this->vertical, -this->horizontal, 0)));
-    }
-
-  public:
-    void Update()
-    {
-        if (ImGui::GetCurrentContext() != nullptr)
-        {
-            ImGuiIO &io = ImGui::GetIO();
-            auto mouse_delta = io.MouseDelta;
-            if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
-            {
-                this->horizontal -= mouse_delta.x * 0.1f;
-                this->vertical -= mouse_delta.y * 0.1f;
-            }
-
-            auto attitude = this->CalAttitude();
-            auto forward = attitude * glm::vec3(0, 0, 1) * 0.1f;
-            auto right = attitude * glm::vec3(1, 0, 0) * 0.1f;
-
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W))
-            {
-                this->position += forward * this->speed;
-            }
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_A))
-            {
-                this->position -= right * this->speed;
-            }
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_S))
-            {
-                this->position -= forward * this->speed;
-            }
-            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D))
-            {
-                this->position += right * this->speed;
-            }
-
-            this->position += forward * io.MouseWheel;
-        }
-    }
-
-    glm::mat4 CalLookAt()
-    {
-        auto attitude = this->CalAttitude();
-        auto forward = attitude * glm::vec3(0, 0, 1);
-
-        auto eye = this->position;
-        auto center = this->position + forward;
-        auto up = attitude * glm::vec3(0, -1, 0);
-
-        {
-            // std::cout << "eye       :" << eye.x << "," << eye.y << "," << eye.z << std::endl;
-            // std::cout << "center    :" << center.x << "," << center.y << "," << center.z << std::endl;
-            // std::cout << "up        :" << up.x << "," << up.y << "," << up.z << std::endl;
-            // std::cout << "forward   :" << forward.x << "," << forward.y << "," << forward.z << std::endl;
-            // std::cout << "horizontal:" << horizontal << std::endl;
-            // std::cout << "vertical  :" << vertical << std::endl;
-            // std::cout << std::endl;
-        }
-
-        return glm::lookAt(eye, center, up);
-    }
-
-    void SetSpeed(float speed)
-    {
-        this->speed = speed;
-    }
-};
-
-typedef struct MATRIXS
-{
-    glm::mat4 view;
-    glm::mat4 projection;
-} matrixs;
-
 int main()
 {
-    matrixs matrixs;
-    Camera camera;
-
     auto vulkan_verssion = Turbo::Core::TInstance::GetVulkanInstanceVersion();
 
     std::vector<Turbo::Core::TLayerInfo> enable_layers;
@@ -229,6 +139,8 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, {}, enable_device_extensions, {});
     Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
+    Turbo::Core::TRefPtr<Camera> camera = new Camera(device);
+
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
 
     Turbo::Core::TFormatType swapchain_image_format = surface->GetSupportFormats().front().GetFormat().GetFormatType();
@@ -260,21 +172,6 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
     // Init--------------------------------------------------------------------------------
-
-    glm::vec3 eye = glm::vec3(100, 100, 100);
-    glm::vec3 center = glm::vec3(0, 0, 0);
-    glm::vec3 eye_to_center = center - eye;
-
-    matrixs.view = glm::lookAt(eye, center, glm::cross(eye_to_center, glm::cross(eye_to_center, glm::vec3(0, 1, 0))));
-    matrixs.projection = glm::perspective(glm::radians(45.0f), (float)swapchain->GetWidth() / (float)swapchain->GetHeight(), 0.1f, 10000.0f);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> projection_view_matrix_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(matrixs));
-    {
-        void *projection_view_matrix_ptr = projection_view_matrix_buffer->Map();
-        memcpy(projection_view_matrix_ptr, &matrixs, sizeof(matrixs));
-        projection_view_matrix_buffer->Unmap();
-    }
-
     Turbo::Core::TRefPtr<Turbo::Core::TImage> depth_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::D32_SFLOAT, swapchain->GetWidth(), swapchain->GetHeight(), 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_DEPTH_STENCIL_ATTACHMENT, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
     Turbo::Core::TRefPtr<Turbo::Core::TImageView> depth_image_view = new Turbo::Core::TImageView(depth_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, depth_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
@@ -304,7 +201,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, {}, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::LINE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, projection_view_matrix_buffer);
+    pipeline_descriptor_set->BindData(0, 0, camera->GetViewProjectionBuffer());
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> framebuffers;
     for (auto image_view : swapchain_image_views)
@@ -328,12 +225,7 @@ int main()
 
         auto Update = [&]() {
             {
-                matrixs.view = camera.CalLookAt();
-                {
-                    void *projection_view_matrix_ptr = projection_view_matrix_buffer->Map();
-                    memcpy(projection_view_matrix_ptr, &matrixs, sizeof(matrixs));
-                    projection_view_matrix_buffer->Unmap();
-                };
+                camera->Update();
             }
         };
         Update();
@@ -383,7 +275,7 @@ int main()
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f);
                 if (ImGui::SliderFloat("view speed", &view_speed, 1.0f, 100.0f))
                 {
-                    camera.SetSpeed(view_speed);
+                    camera->SetSpeed(view_speed);
                 }
 
                 if (ImGui::Button("Button"))
@@ -400,8 +292,6 @@ int main()
                 ImGui::Text("- Mouse wheel forward and backward view.");
 
                 ImGui::End();
-
-                camera.Update();
             });
 
             command_buffer->End();

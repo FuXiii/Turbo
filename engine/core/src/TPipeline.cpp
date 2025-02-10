@@ -327,7 +327,7 @@ std::string Turbo::Core::TPipeline::ToString() const
 
 bool Turbo::Core::TPipeline::Valid() const
 {
-    if (this->pipelineLayout != VK_NULL_HANDLE && this->vkPipeline != VK_NULL_HANDLE)
+    if (this->pipelineLayout->Valid() && this->vkPipeline != VK_NULL_HANDLE)
     {
         return true;
     }
