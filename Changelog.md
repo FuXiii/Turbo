@@ -4,6 +4,17 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/10
+
+>* `samples/utils` 下增加 ``InfiniteCoordinateAxisPass`` 用于封装 ``无限坐标轴`` 渲染。
+>* `samples/utils` 下增加 ``Camera`` 用于封装 ``相机`` 。
+>* `core` 下 `TCommandBuffer` 增加 ``GetCurrentRenderPass()`` 函数。用于获取当前绑定的 `渲染管线` 。
+>* `core` 下 `TBuffer` 增加 ``GetDevice()`` 函数。用于获取 ``缓存`` 的 ``逻辑设备`` 。
+>* `samples` 下增加 ``InfiniteCoordinateAxisPassTest`` 示例。用于测试 ``InfiniteCoordinateAxisPass`` 。
+>* `core` 下 `TPipeline` 更新 ``Valid()`` 判断逻辑。修正 ``Bug`` 。
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``InfiniteCoordinateAxisPass`` 。
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``GlobalWindPatchPass`` 封装关键代码 。
+
 ## 2025/2/9
 
 >* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。

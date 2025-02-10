@@ -113,6 +113,11 @@ Turbo::Core::TCommandBufferPool *Turbo::Core::TCommandBufferBase::GetCommandBuff
     return this->commandBufferPool;
 }
 
+Turbo::Core::TRenderPass *Turbo::Core::TCommandBufferBase::GetCurrentRenderPass()
+{
+    return this->currentRenderPass;
+}
+
 bool Turbo::Core::TCommandBufferBase::Begin()
 {
     TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
