@@ -40,7 +40,7 @@ class ImGuiPass : public Turbo::Core::TObject
     template <typename OnGUI>
     void Draw(float deltaTime, Turbo::Core::TCommandBuffer *commandBuffer, Turbo::Core::TImageView *imageView, OnGUI &&onGUI)
     {
-        if (!renderPass.Valid())
+        if (!this->renderPass.Valid())
         {
             this->Init(commandBuffer, imageView);
         }

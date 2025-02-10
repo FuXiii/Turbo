@@ -88,6 +88,8 @@ class TBuffer : public TVulkanHandle
 
     VkBuffer GetVkBuffer();
 
+    TDevice* GetDevice();
+
     // TODO: Add TDeviceSize GetSize() const; function
 
     virtual std::string ToString() const override;

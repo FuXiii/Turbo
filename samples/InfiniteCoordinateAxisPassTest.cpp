@@ -25,6 +25,7 @@
 
 #include <ImGuiPass.h>
 #include <Camera.h>
+#include <InfiniteCoordinateAxisPass.h>
 
 #include <glm/ext.hpp>
 
@@ -140,6 +141,7 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
     Turbo::Core::TRefPtr<Camera> camera = new Camera(device);
+    Turbo::Core::TRefPtr<InfiniteCoordinateAxisPass> infinite_coordinate_axis_pass = new InfiniteCoordinateAxisPass();
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
 
@@ -195,14 +197,6 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, attachments, subpasses);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.vert"));
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(std::string(TURBO_ASSET_ROOT) + "/shaders/InfiniteCoordinateAxis.frag"));
-
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, {}, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::LINE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, camera->GetViewProjectionBuffer());
-
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> framebuffers;
     for (auto image_view : swapchain_image_views)
     {
@@ -247,14 +241,11 @@ int main()
             command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TOP_OF_PIPE_BIT, Turbo::Core::TPipelineStageBits::BOTTOM_OF_PIPE_BIT, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TAccessBits::ACCESS_NONE, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL, current_swapchain_image_view);
 
             command_buffer->CmdBeginRenderPass(render_pass, framebuffers[current_image_index]);
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-
             command_buffer->CmdSetViewport(viewport);
             command_buffer->CmdSetScissor(scissor);
 
-            command_buffer->CmdSetLineWidth(1);
-            command_buffer->CmdDraw(2, 6, 0, 0);
+            infinite_coordinate_axis_pass->Draw(command_buffer, camera);
+
             command_buffer->CmdEndRenderPass();
 
             imgui_pass->Draw(delta_time, command_buffer, current_swapchain_image_view, [&]() {

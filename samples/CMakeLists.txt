@@ -36,7 +36,15 @@ ${CMAKE_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
 )
 
 function(add_sample name srcs)
-    add_executable(${name} ${srcs} ${IMGUI_SOURCE_PATH} ${CMAKE_SOURCE_DIR}/samples/utils/ReadFile.cpp ${CMAKE_SOURCE_DIR}/samples/utils/ImGuiPass.cpp ${ARGN})
+    add_executable(${name} 
+        ${srcs} 
+        ${IMGUI_SOURCE_PATH} 
+        ${CMAKE_SOURCE_DIR}/samples/utils/ReadFile.cpp
+        ${CMAKE_SOURCE_DIR}/samples/utils/ImGuiPass.cpp
+        ${CMAKE_SOURCE_DIR}/samples/utils/InfiniteCoordinateAxisPass.cpp
+        ${CMAKE_SOURCE_DIR}/samples/utils/Camera.cpp
+        ${ARGN}
+    )
     target_include_directories(${name} PUBLIC ${INCLUDE_PARTH} ${CMAKE_SOURCE_DIR}/samples/utils)
     target_link_directories(${name} PUBLIC ${LINK_PARTH})
     target_link_libraries(${name} PUBLIC ${LIBS})
@@ -690,6 +698,7 @@ endif()
 
 add_sample(ImGuiPassTest ImGuiPassTest.cpp)
 add_sample(InfiniteCoordinateAxis InfiniteCoordinateAxis.cpp)
+add_sample(InfiniteCoordinateAxisPassTest InfiniteCoordinateAxisPassTest.cpp)
 
 add_subdirectory(./FlowField)
 
