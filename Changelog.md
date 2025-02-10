@@ -13,6 +13,7 @@
 >* `samples` 下增加 ``InfiniteCoordinateAxisPassTest`` 示例。用于测试 ``InfiniteCoordinateAxisPass`` 。
 >* `core` 下 `TPipeline` 更新 ``Valid()`` 判断逻辑。修正 ``Bug`` 。
 >* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``InfiniteCoordinateAxisPass`` 。
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``GlobalWindPatchPass`` 封装关键代码 。
 
 ## 2025/2/9
 
