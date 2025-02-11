@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/11
+
+>* `samples` 下更新 ``ShowWindByInstancedPoints`` 示例。用粒子的方式绘制风场。
+
 ## 2025/2/10
 
 >* `samples/utils` 下增加 ``InfiniteCoordinateAxisPass`` 用于封装 ``无限坐标轴`` 渲染。
