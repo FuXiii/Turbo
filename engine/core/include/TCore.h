@@ -28,7 +28,7 @@
 #if defined(TURBO_PLATFORM_OPEN_HARMONY)
 #include <vulkan_ohos.h> //FIXME: If use OpenHarmony we need use vulkan_ohos.h for some extension reference
 #else
-#include "vulkan/vulkan.h"
+#include <vulkan/vulkan.h>
 #endif
 
 namespace Turbo
