@@ -1,0 +1,8 @@
+cmake: sudo apt install libx11-dev
+glfw : sudo apt install libxrandr-dev
+glfw : sudo apt install libxinerama-dev
+glfw : sudo apt install libxcursor-dev
+glfw : sudo apt install libxi-dev
+build : sudo apt install libwayland-dev
+build : sudo apt install build-essential
+build : sudo apt install freeglut3-dev

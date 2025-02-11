@@ -7,6 +7,8 @@
 #if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
+#elif defined(__linux) || defined(__linux__)
+#include <dlfcn.h>
 #endif
 
 #include <assert.h>
@@ -144,9 +146,24 @@ int main()
         throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Can not found vulkan-1.dll");
     }
 
-    vk_GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
+    vk_GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)GetProcAddress(library, "vkGetInstanceProcAddr");
     assert(vk_GetInstanceProcAddr && "vkGetInstanceProcAddr");
+#elif defined(__linux) || defined(__linux__)
+    void *library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+    if (!library)
+    {
+        library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
+    }
 
+    if (!library)
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "Can not found vulkan-1.dll");
+    }
+
+    // loader
+    vk_GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(library, "vkGetInstanceProcAddr");
+    assert(vk_GetInstanceProcAddr && "vk_GetInstanceProcAddr");
+#endif
     vk_CreateInstance = (PFN_vkCreateInstance)vk_GetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateInstance");
     assert(vk_CreateInstance && "vkCreateInstance");
 
@@ -157,7 +174,7 @@ int main()
     vk_application_info.applicationVersion = 0;
     vk_application_info.pEngineName = nullptr;
     vk_application_info.engineVersion = 0;
-    vk_application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+    vk_application_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
 
     std::vector<std::string> enable_instance_layers;
     enable_instance_layers.push_back("VK_LAYER_KHRONOS_validation");
@@ -166,7 +183,7 @@ int main()
 
     std::vector<std::string> enable_instance_extensions;
     enable_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-    enable_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+    // enable_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     {
         // enable_instance_extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     }
@@ -181,10 +198,14 @@ int main()
     vk_instance_create_info.pNext = nullptr;
     vk_instance_create_info.flags = 0;
     vk_instance_create_info.pApplicationInfo = &vk_application_info;
-    vk_instance_create_info.enabledLayerCount = instance_enabled_layer_names.size();
-    vk_instance_create_info.ppEnabledLayerNames = instance_enabled_layer_names.data();
-    vk_instance_create_info.enabledExtensionCount = instance_enabled_extension_names.size();
-    vk_instance_create_info.ppEnabledExtensionNames = instance_enabled_extension_names.data();
+    // vk_instance_create_info.enabledLayerCount = instance_enabled_layer_names.size();
+    // vk_instance_create_info.ppEnabledLayerNames = instance_enabled_layer_names.data();
+    // vk_instance_create_info.enabledExtensionCount = instance_enabled_extension_names.size();
+    // vk_instance_create_info.ppEnabledExtensionNames = instance_enabled_extension_names.data();
+    vk_instance_create_info.enabledLayerCount = 0;
+    vk_instance_create_info.ppEnabledLayerNames = nullptr;
+    vk_instance_create_info.enabledExtensionCount = 0;
+    vk_instance_create_info.ppEnabledExtensionNames = nullptr;
 
     VkAllocationCallbacks vk_allocation_callbacks = {};
     vk_allocation_callbacks.pUserData = nullptr;
@@ -198,7 +219,7 @@ int main()
     VkResult result = vk_CreateInstance(&vk_instance_create_info, &vk_allocation_callbacks, &vk_instance);
     if (result != VkResult::VK_SUCCESS)
     {
-        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateInstance failed");
+        throw Turbo::Core::TException(Turbo::Core::TResult::FAIL, "vkCreateInstance faile: ");
     }
     else
     {
@@ -249,6 +270,7 @@ int main()
 
     VkPhysicalDevice target_physical_device = VK_NULL_HANDLE;
     std::string target_physical_device_name;
+    uint32_t target_physical_device_vulkan_version = 0;
     for (VkPhysicalDevice physcail_devices_item : physcail_devices)
     {
         VkPhysicalDeviceProperties vk_physical_device_properties = {};
@@ -258,12 +280,14 @@ int main()
         {
             target_physical_device = physcail_devices_item;
             target_physical_device_name = std::string(vk_physical_device_properties.deviceName);
+            target_physical_device_vulkan_version = vk_physical_device_properties.apiVersion;
             break;
         }
         else if (vk_physical_device_properties.deviceType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
         {
             target_physical_device = physcail_devices_item;
             target_physical_device_name = std::string(vk_physical_device_properties.deviceName);
+            target_physical_device_vulkan_version = vk_physical_device_properties.apiVersion;
         }
     }
 
@@ -274,6 +298,13 @@ int main()
     else
     {
         std::cout << "Select Physical Device:" << target_physical_device_name << std::endl;
+
+        {
+            uint32_t major = VK_API_VERSION_MAJOR(target_physical_device_vulkan_version);
+            uint32_t minor = VK_API_VERSION_MINOR(target_physical_device_vulkan_version);
+            uint32_t patch = VK_API_VERSION_PATCH(target_physical_device_vulkan_version);
+            std::cout << "\tsupport Vulkan version:" << major << "." << minor << "." << patch << std::endl;
+        }
     }
 
     uint32_t queue_family_count = 0;
@@ -335,7 +366,7 @@ int main()
 
     vk_QueuePresentKHR = (PFN_vkQueuePresentKHR)vk_GetDeviceProcAddr(vk_device, "vkQueuePresentKHR");
     assert(vk_QueuePresentKHR && "vkQueuePresentKHR");
-    
+
     std::vector<VkQueue> vk_queues;
     for (VkDeviceQueueCreateInfo &vk_device_queue_create_info_item : vk_device_queue_create_infos)
     {
@@ -354,5 +385,4 @@ int main()
     std::cout << "vkDestroyInstance success" << std::endl;
 
     return 0;
-#endif
 }

@@ -3,6 +3,7 @@
 #define TURBO_CORE_TBUFFER_H
 #include "TMemoryTypeInfo.h"
 #include "TVulkanHandle.h"
+#include "TReferenced.h"
 
 namespace Turbo
 {
@@ -86,6 +87,8 @@ class TBuffer : public TVulkanHandle
     TMemoryTypeInfo GetMemoryTypeInfo() const;
 
     VkBuffer GetVkBuffer();
+
+    TDevice* GetDevice();
 
     // TODO: Add TDeviceSize GetSize() const; function
 

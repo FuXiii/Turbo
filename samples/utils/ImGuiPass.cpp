@@ -5,6 +5,136 @@
 #include <ReadFile.h>
 #include <TPipelineDescriptorSet.h>
 
+ImGuiKey GlfwKeyToImGuiKey(int key)
+{
+    // clang-format off
+    switch (key) {
+        case GLFW_KEY_SPACE              :{return ImGuiKey_::ImGuiKey_Space;}break;
+        case GLFW_KEY_APOSTROPHE         :{return ImGuiKey_::ImGuiKey_Apostrophe;}break;
+        case GLFW_KEY_COMMA              :{return ImGuiKey_::ImGuiKey_Comma;}break;
+        case GLFW_KEY_MINUS              :{return ImGuiKey_::ImGuiKey_Minus;}break;
+        case GLFW_KEY_PERIOD             :{return ImGuiKey_::ImGuiKey_Period;}break;
+        case GLFW_KEY_SLASH              :{return ImGuiKey_::ImGuiKey_Slash;}break;
+        case GLFW_KEY_0                  :{return ImGuiKey_::ImGuiKey_0;}break;
+        case GLFW_KEY_1                  :{return ImGuiKey_::ImGuiKey_1;}break;
+        case GLFW_KEY_2                  :{return ImGuiKey_::ImGuiKey_2;}break;
+        case GLFW_KEY_3                  :{return ImGuiKey_::ImGuiKey_3;}break;
+        case GLFW_KEY_4                  :{return ImGuiKey_::ImGuiKey_4;}break;
+        case GLFW_KEY_5                  :{return ImGuiKey_::ImGuiKey_5;}break;
+        case GLFW_KEY_6                  :{return ImGuiKey_::ImGuiKey_6;}break;
+        case GLFW_KEY_7                  :{return ImGuiKey_::ImGuiKey_7;}break;
+        case GLFW_KEY_8                  :{return ImGuiKey_::ImGuiKey_8;}break;
+        case GLFW_KEY_9                  :{return ImGuiKey_::ImGuiKey_9;}break;
+        case GLFW_KEY_SEMICOLON          :{return ImGuiKey_::ImGuiKey_Semicolon;}break;
+        case GLFW_KEY_EQUAL              :{return ImGuiKey_::ImGuiKey_Equal;}break;
+        case GLFW_KEY_A                  :{return ImGuiKey_::ImGuiKey_A;}break;
+        case GLFW_KEY_B                  :{return ImGuiKey_::ImGuiKey_B;}break;
+        case GLFW_KEY_C                  :{return ImGuiKey_::ImGuiKey_C;}break;
+        case GLFW_KEY_D                  :{return ImGuiKey_::ImGuiKey_D;}break;
+        case GLFW_KEY_E                  :{return ImGuiKey_::ImGuiKey_E;}break;
+        case GLFW_KEY_F                  :{return ImGuiKey_::ImGuiKey_F;}break;
+        case GLFW_KEY_G                  :{return ImGuiKey_::ImGuiKey_G;}break;
+        case GLFW_KEY_H                  :{return ImGuiKey_::ImGuiKey_H;}break;
+        case GLFW_KEY_I                  :{return ImGuiKey_::ImGuiKey_I;}break;
+        case GLFW_KEY_J                  :{return ImGuiKey_::ImGuiKey_J;}break;
+        case GLFW_KEY_K                  :{return ImGuiKey_::ImGuiKey_K;}break;
+        case GLFW_KEY_L                  :{return ImGuiKey_::ImGuiKey_L;}break;
+        case GLFW_KEY_M                  :{return ImGuiKey_::ImGuiKey_M;}break;
+        case GLFW_KEY_N                  :{return ImGuiKey_::ImGuiKey_N;}break;
+        case GLFW_KEY_O                  :{return ImGuiKey_::ImGuiKey_O;}break;
+        case GLFW_KEY_P                  :{return ImGuiKey_::ImGuiKey_P;}break;
+        case GLFW_KEY_Q                  :{return ImGuiKey_::ImGuiKey_Q;}break;
+        case GLFW_KEY_R                  :{return ImGuiKey_::ImGuiKey_R;}break;
+        case GLFW_KEY_S                  :{return ImGuiKey_::ImGuiKey_S;}break;
+        case GLFW_KEY_T                  :{return ImGuiKey_::ImGuiKey_T;}break;
+        case GLFW_KEY_U                  :{return ImGuiKey_::ImGuiKey_U;}break;
+        case GLFW_KEY_V                  :{return ImGuiKey_::ImGuiKey_V;}break;
+        case GLFW_KEY_W                  :{return ImGuiKey_::ImGuiKey_W;}break;
+        case GLFW_KEY_X                  :{return ImGuiKey_::ImGuiKey_X;}break;
+        case GLFW_KEY_Y                  :{return ImGuiKey_::ImGuiKey_Y;}break;
+        case GLFW_KEY_Z                  :{return ImGuiKey_::ImGuiKey_Z;}break;
+        case GLFW_KEY_LEFT_BRACKET       :{return ImGuiKey_::ImGuiKey_LeftBracket;}break;
+        case GLFW_KEY_BACKSLASH          :{return ImGuiKey_::ImGuiKey_Backslash;}break;
+        case GLFW_KEY_RIGHT_BRACKET      :{return ImGuiKey_::ImGuiKey_RightBracket;}break;
+        case GLFW_KEY_GRAVE_ACCENT       :{return ImGuiKey_::ImGuiKey_GraveAccent;}break;
+        case GLFW_KEY_WORLD_1            :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_WORLD_2            :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_ESCAPE             :{return ImGuiKey_::ImGuiKey_Escape;}break;
+        case GLFW_KEY_ENTER              :{return ImGuiKey_::ImGuiKey_Enter;}break;
+        case GLFW_KEY_TAB                :{return ImGuiKey_::ImGuiKey_Tab;}break;
+        case GLFW_KEY_BACKSPACE          :{return ImGuiKey_::ImGuiKey_Backspace;}break;
+        case GLFW_KEY_INSERT             :{return ImGuiKey_::ImGuiKey_Insert;}break;
+        case GLFW_KEY_DELETE             :{return ImGuiKey_::ImGuiKey_Delete;}break;
+        case GLFW_KEY_RIGHT              :{return ImGuiKey_::ImGuiKey_RightArrow;}break;
+        case GLFW_KEY_LEFT               :{return ImGuiKey_::ImGuiKey_LeftArrow;}break;
+        case GLFW_KEY_DOWN               :{return ImGuiKey_::ImGuiKey_DownArrow ;}break;
+        case GLFW_KEY_UP                 :{return ImGuiKey_::ImGuiKey_UpArrow;}break;
+        case GLFW_KEY_PAGE_UP            :{return ImGuiKey_::ImGuiKey_PageUp;}break;
+        case GLFW_KEY_PAGE_DOWN          :{return ImGuiKey_::ImGuiKey_PageUp;}break;
+        case GLFW_KEY_HOME               :{return ImGuiKey_::ImGuiKey_Home;}break;
+        case GLFW_KEY_END                :{return ImGuiKey_::ImGuiKey_End;}break;
+        case GLFW_KEY_CAPS_LOCK          :{return ImGuiKey_::ImGuiKey_CapsLock;}break;
+        case GLFW_KEY_SCROLL_LOCK        :{return ImGuiKey_::ImGuiKey_ScrollLock;}break;
+        case GLFW_KEY_NUM_LOCK           :{return ImGuiKey_::ImGuiKey_NumLock;}break;
+        case GLFW_KEY_PRINT_SCREEN       :{return ImGuiKey_::ImGuiKey_PrintScreen;}break;
+        case GLFW_KEY_PAUSE              :{return ImGuiKey_::ImGuiKey_Pause;}break;
+        case GLFW_KEY_F1                 :{return ImGuiKey_::ImGuiKey_F1;}break;
+        case GLFW_KEY_F2                 :{return ImGuiKey_::ImGuiKey_F2;}break;
+        case GLFW_KEY_F3                 :{return ImGuiKey_::ImGuiKey_F3;}break;
+        case GLFW_KEY_F4                 :{return ImGuiKey_::ImGuiKey_F4;}break;
+        case GLFW_KEY_F5                 :{return ImGuiKey_::ImGuiKey_F5;}break;
+        case GLFW_KEY_F6                 :{return ImGuiKey_::ImGuiKey_F6;}break;
+        case GLFW_KEY_F7                 :{return ImGuiKey_::ImGuiKey_F7;}break;
+        case GLFW_KEY_F8                 :{return ImGuiKey_::ImGuiKey_F8;}break;
+        case GLFW_KEY_F9                 :{return ImGuiKey_::ImGuiKey_F9;}break;
+        case GLFW_KEY_F10                :{return ImGuiKey_::ImGuiKey_F10;}break;
+        case GLFW_KEY_F11                :{return ImGuiKey_::ImGuiKey_F11;}break;
+        case GLFW_KEY_F12                :{return ImGuiKey_::ImGuiKey_F12;}break;
+        case GLFW_KEY_F13                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F14                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F15                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F16                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F17                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F18                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F19                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F20                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F21                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F22                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F23                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F24                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_F25                :{return ImGuiKey_::ImGuiKey_None;}break;
+        case GLFW_KEY_KP_0               :{return ImGuiKey_::ImGuiKey_Keypad0;}break;
+        case GLFW_KEY_KP_1               :{return ImGuiKey_::ImGuiKey_Keypad1;}break;
+        case GLFW_KEY_KP_2               :{return ImGuiKey_::ImGuiKey_Keypad2;}break;
+        case GLFW_KEY_KP_3               :{return ImGuiKey_::ImGuiKey_Keypad3;}break;
+        case GLFW_KEY_KP_4               :{return ImGuiKey_::ImGuiKey_Keypad4;}break;
+        case GLFW_KEY_KP_5               :{return ImGuiKey_::ImGuiKey_Keypad5;}break;
+        case GLFW_KEY_KP_6               :{return ImGuiKey_::ImGuiKey_Keypad6;}break;
+        case GLFW_KEY_KP_7               :{return ImGuiKey_::ImGuiKey_Keypad7;}break;
+        case GLFW_KEY_KP_8               :{return ImGuiKey_::ImGuiKey_Keypad8;}break;
+        case GLFW_KEY_KP_9               :{return ImGuiKey_::ImGuiKey_Keypad9;}break;
+        case GLFW_KEY_KP_DECIMAL         :{return ImGuiKey_::ImGuiKey_KeypadDecimal;}break;
+        case GLFW_KEY_KP_DIVIDE          :{return ImGuiKey_::ImGuiKey_KeypadDivide;}break;
+        case GLFW_KEY_KP_MULTIPLY        :{return ImGuiKey_::ImGuiKey_KeypadMultiply;}break;
+        case GLFW_KEY_KP_SUBTRACT        :{return ImGuiKey_::ImGuiKey_KeypadSubtract;}break;
+        case GLFW_KEY_KP_ADD             :{return ImGuiKey_::ImGuiKey_KeypadAdd;}break;
+        case GLFW_KEY_KP_ENTER           :{return ImGuiKey_::ImGuiKey_KeypadEnter;}break;
+        case GLFW_KEY_KP_EQUAL           :{return ImGuiKey_::ImGuiKey_KeypadEqual;}break;
+        case GLFW_KEY_LEFT_SHIFT         :{return ImGuiKey_::ImGuiKey_LeftShift;}break;
+        case GLFW_KEY_LEFT_CONTROL       :{return ImGuiKey_::ImGuiKey_LeftCtrl;}break;
+        case GLFW_KEY_LEFT_ALT           :{return ImGuiKey_::ImGuiKey_LeftAlt;}break;
+        case GLFW_KEY_LEFT_SUPER         :{return ImGuiKey_::ImGuiKey_LeftSuper;}break;
+        case GLFW_KEY_RIGHT_SHIFT        :{return ImGuiKey_::ImGuiKey_RightShift;}break;
+        case GLFW_KEY_RIGHT_CONTROL      :{return ImGuiKey_::ImGuiKey_RightCtrl;}break;
+        case GLFW_KEY_RIGHT_ALT          :{return ImGuiKey_::ImGuiKey_RightAlt;}break;
+        case GLFW_KEY_RIGHT_SUPER        :{return ImGuiKey_::ImGuiKey_RightSuper;}break;
+        case GLFW_KEY_MENU               :{return ImGuiKey_::ImGuiKey_Menu;}break;
+        default:{}break;
+    }
+    // clang-format on
+    return ImGuiKey_::ImGuiKey_None;
+}
+
 void ImGuiPassGlfwScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
     if (ImGui::GetCurrentContext() != nullptr)
@@ -13,10 +143,27 @@ void ImGuiPassGlfwScrollCallback(GLFWwindow *window, double xoffset, double yoff
     }
 }
 
+void ImGuiPassGlfwCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (ImGui::GetCurrentContext() != nullptr)
+    {
+        ImGui::GetIO().AddInputCharacter(key);
+        if (action == GLFW_RELEASE)
+        {
+            ImGui::GetIO().AddKeyEvent(GlfwKeyToImGuiKey(key), false);
+        }
+        else
+        {
+            ImGui::GetIO().AddKeyEvent(GlfwKeyToImGuiKey(key), true);
+        }
+    }
+}
+
 ImGuiPass::ImGuiPass(GLFWwindow *window)
 {
     window != nullptr ? this->window = window : throw std::runtime_error("Error: ImGuiPass need a valid GLFWwindow window.");
     glfwSetScrollCallback(window, ImGuiPassGlfwScrollCallback);
+    glfwSetKeyCallback(window, ImGuiPassGlfwCallback);
 }
 
 ImGuiPass::~ImGuiPass()

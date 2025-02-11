@@ -50,7 +50,7 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetInstanceLayers(
                     layers[layer_index].name = layer_propertiess[layer_index].layerName;
                     layers[layer_index].layerType = TLayerInfo::GetLayerTypeByLayerName(layers[layer_index].name);
                     uint32_t specification_version = layer_propertiess[layer_index].specVersion;
-                    layers[layer_index].specificationVersion = TVersion(VK_VERSION_MAJOR(specification_version), VK_VERSION_MINOR(specification_version), VK_VERSION_PATCH(specification_version), 0);
+                    layers[layer_index].specificationVersion = TVersion(VK_API_VERSION_MAJOR(specification_version), VK_API_VERSION_MINOR(specification_version), VK_API_VERSION_PATCH(specification_version), 0);
                     layers[layer_index].implementationVersion = layer_propertiess[layer_index].implementationVersion;
                     layers[layer_index].description = layer_propertiess[layer_index].description;
 
@@ -132,7 +132,7 @@ std::vector<Turbo::Core::TLayerInfo> Turbo::Core::TLayerInfo::GetPhysicalDeviceL
                     layers[layer_index].name = layer_propertiess[layer_index].layerName;
                     layers[layer_index].layerType = TLayerInfo::GetLayerTypeByLayerName(layers[layer_index].name);
                     uint32_t specification_version = layer_propertiess[layer_index].specVersion;
-                    layers[layer_index].specificationVersion = TVersion(VK_VERSION_MAJOR(specification_version), VK_VERSION_MINOR(specification_version), VK_VERSION_PATCH(specification_version), 0);
+                    layers[layer_index].specificationVersion = TVersion(VK_API_VERSION_MAJOR(specification_version), VK_API_VERSION_MINOR(specification_version), VK_API_VERSION_PATCH(specification_version), 0);
                     layers[layer_index].implementationVersion = layer_propertiess[layer_index].implementationVersion;
                     layers[layer_index].description = layer_propertiess[layer_index].description;
 

@@ -10,26 +10,36 @@ aux_source_directory(./src/ SRCS)
 
 add_subdirectory(./thirdparty)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/VulkanMemoryAllocator/src/VmaUsage.cpp")
-set(VMA_SRCS 
-./thirdparty/VulkanMemoryAllocator/src/VmaUsage.cpp
-./thirdparty/VulkanMemoryAllocator/include/vk_mem_alloc.h
-)
-else()
-message(FATAL_ERROR "Can not find VulkanMemoryAllocator")
-endif()
+#if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/VulkanMemoryAllocator/src/VmaUsage.cpp")
+#set(VMA_SRCS 
+#./thirdparty/VulkanMemoryAllocator/src/VmaUsage.cpp
+#./thirdparty/VulkanMemoryAllocator/include/vk_mem_alloc.h
+#)
+#else()
+#message(FATAL_ERROR "Can not find VulkanMemoryAllocator")
+#endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py")
-execute_process(
-    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang"
-    RESULT_VARIABLE update_glslang_sources_result_variable
+set(VMA_SRCS 
+${CMAKE_CURRENT_SOURCE_DIR}/VmaUsage/TVmaUsage.h
+${CMAKE_CURRENT_SOURCE_DIR}/VmaUsage/TVmaUsage.cpp
 )
-if(NOT update_glslang_sources_result_variable EQUAL 0)
-message(FATAL_ERROR "")
-endif()
+
+find_package(Python COMPONENTS Interpreter)
+if(Python_Interpreter_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py")
+    execute_process(
+        COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang/update_glslang_sources.py"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glslang"
+        RESULT_VARIABLE update_glslang_sources_result_variable
+    )
+    if(NOT update_glslang_sources_result_variable EQUAL 0)
+    message(FATAL_ERROR "")
+    endif()
+    else()
+    message(FATAL_ERROR "Can not find update_glslang_sources.py in glslang")
+    endif()
 else()
-message(FATAL_ERROR "Can not find update_glslang_sources.py in glslang")
+    message(FATAL_ERROR "Python interpreter not found")
 endif()
 
 if(
@@ -70,6 +80,8 @@ else()
         ${SPIRV_REFLECT_HEADERS}
     )
 endif()
+
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 target_link_libraries(${PROJECT_NAME} 
 PRIVATE glslang

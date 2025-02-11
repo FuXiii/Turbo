@@ -69,7 +69,7 @@ void Turbo::Core::TPhysicalDevice::EnumerateProperties()
     this->info.name = physicalDeviceProperties.deviceName;
 
     // api Version
-    this->info.apiVersion = Turbo::Core::TVersion(VK_VERSION_MAJOR(physicalDeviceProperties.apiVersion), VK_VERSION_MINOR(physicalDeviceProperties.apiVersion), VK_VERSION_PATCH(physicalDeviceProperties.apiVersion), 0);
+    this->info.apiVersion = Turbo::Core::TVersion(VK_API_VERSION_MAJOR(physicalDeviceProperties.apiVersion), VK_API_VERSION_MINOR(physicalDeviceProperties.apiVersion), VK_API_VERSION_PATCH(physicalDeviceProperties.apiVersion), 0);
 
     // driver Version
     this->info.driverVersion = physicalDeviceProperties.driverVersion;

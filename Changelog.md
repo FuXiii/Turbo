@@ -4,12 +4,64 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/10
+
+>* `samples/utils` 下增加 ``InfiniteCoordinateAxisPass`` 用于封装 ``无限坐标轴`` 渲染。
+>* `samples/utils` 下增加 ``Camera`` 用于封装 ``相机`` 。
+>* `core` 下 `TCommandBuffer` 增加 ``GetCurrentRenderPass()`` 函数。用于获取当前绑定的 `渲染管线` 。
+>* `core` 下 `TBuffer` 增加 ``GetDevice()`` 函数。用于获取 ``缓存`` 的 ``逻辑设备`` 。
+>* `samples` 下增加 ``InfiniteCoordinateAxisPassTest`` 示例。用于测试 ``InfiniteCoordinateAxisPass`` 。
+>* `core` 下 `TPipeline` 更新 ``Valid()`` 判断逻辑。修正 ``Bug`` 。
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``InfiniteCoordinateAxisPass`` 。
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。使用 ``GlobalWindPatchPass`` 封装关键代码 。
+
+## 2025/2/9
+
+>* `samples/FlowField` 下更新 ``ShowWindByPatch`` 示例。
+
+## 2025/2/7
+
+>* 适配 `VK_API_VERSION_VARIANT` 。
+>* 适配 `VK_API_VERSION_MAJOR` 弃用 ``VK_VERSION_MAJOR``。
+>* 适配 `VK_API_VERSION_MINOR` 弃用 ``VK_VERSION_MINOR``。
+>* 适配 `VK_API_VERSION_PATCH` 弃用 ``VK_VERSION_PATCH``。
+>* 更新 `TVersion` 适配 ``variant``。
+
+## 2025/2/6
+
+>* `.gitignore` 下增加对 ``.vscode/tasks.json`` 的版本追踪。
+>* 将 `gizmo` 下的文件移动到 ``samples/utils`` 下。
+>* `samples/FlowField` 下增加 ``ShowWindByPatch`` 示例。用面片的方式绘制风场。
+>* `samples/FlowField` 下增加 ``ShowWindByInstancedPoints`` 示例。用粒子的方式绘制风场。
+>* `engine/core` 下 ``TVulkanLoader`` 对于 ``设备函数`` 的获取，增加 ``Vulkan`` 实例版本的检查。
+>* `engine/core` 下 ``TVersion`` 使用新版规定的 ``VK_MAKE_API_VERSION`` ，遗弃使用 ``VK_MAKE_VERSION`` 。
+
+## 2025/1/29
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例。
+
+## 2025/1/28
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+>* `samples` 下更新 ``VulkanTest`` 示例，适配 ``Linux`` 平台。输出更多 ``Vulkan`` 信息。
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，适配键鼠操作。
+
+## 2025/1/27
+
+>* 尝试将 ``Turbo`` 适配到 ``Linux`` 。
+
+## 2025/1/24
+
+>* `samples` 下更新 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
+>* `samples/utils` 下更新 ``ImGuiPass`` ，增加键盘输入支持。
+
 ## 2025/1/23
 
 >* `engine\core\thirdparty` 下更新 ``ImGuiTest.cpp`` 示例，支持 ``鼠标滚轮`` 操作。
 >* `samples` 下增加 ``utils`` 文件夹。用于存放 ``示例`` 常见通用程序代码。
 >* `samples/utils` 下增加 ``ImGuiPass`` 接口，尝试将 ``ImGui`` 的代码封装到一个类中。
 >* `samples` 下增加 ``ImGuiPassTest`` 示例，测试 ``ImGuiPass`` 接口。
+>* `samples` 下增加 ``InfiniteCoordinateAxis`` 示例，用于尝试绘制一个 ``无限坐标系`` 。
 
 ## 2025/1/22
 
