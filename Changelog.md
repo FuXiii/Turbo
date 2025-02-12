@@ -8,6 +8,7 @@
 
 >* `samples/utils` 下更新 ``Camera`` 示例。增加 ``View`` 和 ``Projection`` 的逆矩阵。
 >* `samples/FlowField` 下更新 ``ShowWindByInstancedPoints`` 示例。增加地球模式显示。
+>* `asset/shaders` 下增加 ``Test`` 文件夹，并创建 ``TexInVertexShader.vert`` 。测试顶点着色器中的纹理采样。
 
 ## 2025/2/11
 
