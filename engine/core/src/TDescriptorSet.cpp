@@ -181,8 +181,8 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
             VkDescriptorImageInfo vk_descriptor_image_info = {};
             vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
             vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
-            // vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            // vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
 
             vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
         }
