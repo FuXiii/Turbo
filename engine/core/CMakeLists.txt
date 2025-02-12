@@ -110,6 +110,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 
 target_include_directories(${PROJECT_NAME}
 PUBLIC ./include
+PUBLIC ./thirdparty/Vulkan-Headers/include
 PRIVATE ./thirdparty/VulkanMemoryAllocator/include
 PRIVATE ./thirdparty/SPIRV-Cross
 PRIVATE ./thirdparty/glslang

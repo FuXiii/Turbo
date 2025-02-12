@@ -49,6 +49,8 @@ class GlobalWindInstancedPointsPass : public Turbo::Core::TObject
         float time = 0;
         float deltaTime = 0;
         float speed = 1;
+        bool isEarth = false;
+        float radius = 1000.0;
     };
     MyPushConstants myPushConstants;
 
@@ -88,7 +90,7 @@ class GlobalWindInstancedPointsPass : public Turbo::Core::TObject
 
             this->pipelineDescriptorSet = descriptorPool->Allocate(this->pipeline->GetPipelineLayout());
             this->pipelineDescriptorSet->BindData(0, 0, camera->GetViewProjectionBuffer());
-            this->pipelineDescriptorSet->BindData(0, 1, flowFieldImageView);
+            this->pipelineDescriptorSet->BindData(0, 1, std::make_pair(flowFieldImageView, sampler));
             this->pipelineDescriptorSet->BindData(0, 2, this->particalImageView);
         }
     }
@@ -121,6 +123,11 @@ class GlobalWindInstancedPointsPass : public Turbo::Core::TObject
     {
         ImGui::Begin(this->ToString().c_str());
         ImGui::SliderFloat("speed", &(this->myPushConstants.speed), 0, 1);
+        ImGui::Checkbox("Is earth", &(this->myPushConstants.isEarth));
+        if (this->myPushConstants.isEarth)
+        {
+            ImGui::SliderFloat("radius", &(this->myPushConstants.radius), 0, 1000.0 /*6378137.0*/);
+        }
         ImGui::End();
     }
 
@@ -178,13 +185,13 @@ class GlobalWindPatchPass : public Turbo::Core::TObject
                     flow_field_buffer->Unmap();
                 }
 
-                Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST | Turbo::Core::TImageUsageBits::IMAGE_STORAGE, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
+                Turbo::Core::TImage *result = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R32G32B32A32_SFLOAT, width, height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
                 {
                     Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> copy_command_buffer = command_pool->Allocate();
                     copy_command_buffer->Begin();
                     copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                     copy_command_buffer->CmdCopyBufferToImage(flow_field_buffer, result, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, width, height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, width, height, 1);
-                    copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::GENERAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+                    copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, result, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
                     copy_command_buffer->End();
 
                     Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);

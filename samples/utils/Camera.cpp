@@ -63,11 +63,16 @@ void Camera::Update()
                 auto center = this->position + forward;
                 auto up = attitude * glm::vec3(0, -1, 0);
 
-                return glm::lookAt(eye, center, up);
+                return glm::lookAt(eye, center, up); // glm::inverse()
             };
 
             this->viewProjectionMatrixs.view = cal_look_at();
-            this->viewProjectionMatrixs.projection = glm::perspective(glm::radians(45.0f), io.DisplaySize.x / io.DisplaySize.y, 0.1f, 10000.0f);
+            this->viewProjectionMatrixs.projection = glm::perspective(glm::radians(45.0f), io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100000.0f);
+            {
+                this->viewProjectionMatrixs.viewInverse = glm::inverse(this->viewProjectionMatrixs.view);
+                this->viewProjectionMatrixs.projectionInverse = glm::inverse(this->viewProjectionMatrixs.projection);
+            }
+
             {
                 void *projection_view_matrix_ptr = this->viewProjectionBuffer->Map();
                 memcpy(projection_view_matrix_ptr, &(this->viewProjectionMatrixs), sizeof(matrixs));
