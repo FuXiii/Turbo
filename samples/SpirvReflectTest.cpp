@@ -14,6 +14,7 @@
 
 #include <common.h>
 #include <functional>
+#include <filesystem>
 
 std::string asset_root(TURBO_ASSET_ROOT);
 std::string spirv_reflect_root(TURBO_SPIRV_REFLECT_ROOT);
@@ -225,9 +226,24 @@ std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::s
     return result;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    std::cout << "Hello World" << std::endl;
+    std::cout << "argc: " << argc << std::endl;
+    for (size_t index = 0; index < argc; index++)
+    {
+        std::cout << "argv[" << index << "]: " << argv[index] << std::endl;
+    }
+
+    if (argc >= 2)
+    {
+        auto dsa = (argv[1]);
+        std::filesystem::path path = std::string(argv[1]);
+        if (!path.empty() && std::filesystem::exists(path) && std::filesystem::is_regular_file(path))
+        {
+            std::cout << "path.filename(): " << path.filename() << std::endl;
+            std::cout << "path.extension(): " << path.extension() << std::endl;
+        }
+    }
 
     // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.vert"), ShaderType::VERTEX);
     // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.frag"), ShaderType::FRAGMENT, MakeVersion(1, 4), MakeVersion(1, 6));

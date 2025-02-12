@@ -4,9 +4,16 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/12
+
+>* `samples/utils` 下更新 ``Camera`` 示例。增加 ``View`` 和 ``Projection`` 的逆矩阵。
+>* `samples/FlowField` 下更新 ``ShowWindByInstancedPoints`` 示例。增加地球模式显示。
+
 ## 2025/2/11
 
 >* `samples` 下更新 ``ShowWindByInstancedPoints`` 示例。用粒子的方式绘制风场。
+>* `engine/core/thirdparty` 下新增 ``Vulkan-Headers`` 的 ``submodule`` 。
+>* `samples` 下更新 ``SpirvReflectTest`` 尝试通过指令行传入待解析着色器文件。
 
 ## 2025/2/10
 

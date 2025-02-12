@@ -28,3 +28,6 @@
 [submodule "engine/core/thirdparty/SPIRV-Reflect"]
 	path = engine/core/thirdparty/SPIRV-Reflect
 	url = git@github.com:KhronosGroup/SPIRV-Reflect.git
+[submodule "engine/core/thirdparty/Vulkan-Headers"]
+	path = engine/core/thirdparty/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
