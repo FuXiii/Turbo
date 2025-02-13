@@ -15,3 +15,4 @@ PUBLIC TURBO_PROJECT_NAME="ShowWindByTex"
 
 add_sample(ShowWindByPatch ./ShowWindByPatch.cpp ${CMAKE_SOURCE_DIR}/samples/utils/GlobalWind.cpp)
 add_sample(ShowWindByInstancedPoints ./ShowWindByInstancedPoints.cpp ${CMAKE_SOURCE_DIR}/samples/utils/GlobalWind.cpp)
+add_sample(ShowWIndByInstancedLines ./ShowWIndByInstancedLines.cpp ${CMAKE_SOURCE_DIR}/samples/utils/GlobalWind.cpp)

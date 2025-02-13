@@ -12,6 +12,7 @@ my_push_constants;
 
 layout(location = 0) in vec4 inColor;
 layout(location = 1) in vec3 inEyePos;
+layout(location = 2) in vec4 inSamplePos;
 layout(location = 3) in vec3 inParticalPos;
 
 layout(location = 0) out vec4 outColor;
