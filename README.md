@@ -159,9 +159,6 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
     TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
     ```
 
-> [!NOTE]
-> 假定使用 `Visual Studio` 环境
-
 ```
 cd ${自定义目录}
 git clone --recursive https://github.com/FuXiii/Turbo.git
