@@ -112,7 +112,6 @@
 > 二选其一
 
 ```
-git clone --recursive git@github.com:FuXiii/Turbo.git
 git clone --recursive https://github.com/FuXiii/Turbo.git
 ```
 
@@ -172,7 +171,7 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
 
 ```
 cd ${自定义目录}
-git clone --recursive git@github.com:FuXiii/Turbo.git
+git clone --recursive https://github.com/FuXiii/Turbo.git
 cd ./Turbo
 mkdir build
 cd ./build
@@ -218,7 +217,7 @@ sudo apt install build-essential
 sudo apt install freeglut3-dev   
 
 cd ${自定义目录}
-git clone --recursive git@github.com:FuXiii/Turbo.git
+git clone --recursive https://github.com/FuXiii/Turbo.git
 cd ./Turbo
 mkdir build
 cd ./build
