@@ -356,5 +356,5 @@ make
 ## 赞助项目
 
 <a href="https://indiafightscorona.giveindia.org">
-  <img alt="Vulkan 入门精要" src="https://img.shields.io/badge/Vulkan%20%E5%85%A5%E9%97%A8%E7%B2%BE%E8%A6%81-151718?style=for-the-badge&logo=vulkan&logoColor=a41e22"/>
+ <img alt="Vulkan 入门精要" src="https://img.shields.io/badge/Vulkan%20%E5%85%A5%E9%97%A8%E7%B2%BE%E8%A6%81-151718?style=for-the-badge&logo=vulkan&logoColor=a41e22"/>
 </a>
