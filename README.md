@@ -100,7 +100,7 @@
 | `Render`| `Turbo::Render`| [FrameGraphAdvance.md](./docs/Design/FrameGraphAdvance.md)|`./engine/render`|`Core`和`FrameGraph`|由于直接使用`Core`层进行渲染相对来说还是会比较繁琐吃力一些，`Render`模块的出现就是将`Core`和`FrameGraph`结合起来，提供更加方便的工作流，将开发者从繁杂的`Core`层脱离出来，提供更加简单易用的设计架构|
 -->
 
-> [!NOTE]\
+> [!NOTE]
 > 目前主要使用和维护 `Core` 模块
 
 <!--
@@ -112,7 +112,7 @@
 git clone --recursive https://github.com/FuXiii/Turbo.git
 ```
 
-> [!NOTE]\
+> [!NOTE]
 > 第三方库目前使用 `git` 的 `submodule` 进行维护，所以 `克隆` 时指定 `--recursive` 即可自动下载第三方库。
 
 <!--
@@ -159,12 +159,12 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
     TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
     ```
 
-> [!NOTE]\
+> [!NOTE]
 > 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 ### 示例
 
-> [!NOTE]\
+> [!NOTE]
 > 假定使用 `Visual Studio` 环境
 
 ```
@@ -201,7 +201,7 @@ cmake --build . --config Release
     TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
     ```
 
-> [!NOTE]\
+> [!NOTE]
 > 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 ### 示例
@@ -346,7 +346,7 @@ make
 -->
 # 日志
 
-> [!NOTE]\
+> [!NOTE]
 > 日志文件转移到了 [更新日志](./Changelog.md)
 
 # 赞助
