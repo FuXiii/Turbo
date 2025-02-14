@@ -124,17 +124,19 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
 # 编译
 
 > [!NOTE]\
+>
 > * `Turbo`目前主要有两个分支：`master`和`dev`。其中`master`是主分支，确保可以正常编译和使用，而`dev`分支会经常开发新功能，想看开发推进的可以查看`dev`分支，但不保证能够正常编译。
 > * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，可以单独编译，您可以直接将他拷贝出来放到自己的工程中。将会输出名为`TCore`的库文件。
 > * `Turbo`引擎会使用核心进行开发，有关如何使用该核心，目前可以参考`./main.cpp`和`./samples`文件夹下各个示例。该文件中有最新的核心实例代码，同时也是引擎的一部分。
 > * `Turbo`的 `核心` 模块使用如下第三方库：
+
 >
->   | 库 | 说明 |
+> | 库 | 说明 |
 >   | :------------ |:---------------|
->   |[glslang](https://github.com/KhronosGroup/glslang)|用于将`Shader`代码字符串编译成`Spir-V`|
->   |[SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) | 用于解析`Spir-V`，获取`Shader`中相关声明。（可能考虑使用 `SPIRV-Reflect` ，不再使用 `SPIRV-Cross` ）|
->   |[SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect) |用于解析`Spir-V`，获取`Shader`中相关声明|
->   |[VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) | 用于分配`Vulkan`资源内存|
+> |[glslang](https://github.com/KhronosGroup/glslang)|用于将`Shader`代码字符串编译成`Spir-V`|
+> |[SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) | 用于解析`Spir-V`，获取`Shader`中相关声明。（可能考虑使用 `SPIRV-Reflect` ，不再使用 `SPIRV-Cross` ）|
+> |[SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect) |用于解析`Spir-V`，获取`Shader`中相关声明|
+> |[VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) | 用于分配`Vulkan`资源内存|
 >
 > * `Turbo`的 `非核心` 模块（也就是目前除了`./engine/core`之外）使用如下第三方库：
 >
