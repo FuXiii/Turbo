@@ -160,11 +160,6 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
     ```
 
 > [!NOTE]
-> 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
-
-### 示例
-
-> [!NOTE]
 > 假定使用 `Visual Studio` 环境
 
 ```
@@ -176,6 +171,7 @@ cd ./build
 cmake ..
 cmake --build . --config Release
 ```
+
 </details>
 
 <details>
@@ -201,11 +197,6 @@ cmake --build . --config Release
     TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
     ```
 
-> [!NOTE]
-> 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
-
-### 示例
-
 ```cmd
 sudo apt install libx11-dev      
 sudo apt install libxrandr-dev   
@@ -224,8 +215,11 @@ cd ./build
 cmake ..
 make
 ```
+
 </details>
 
+> [!NOTE]
+> 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
 
 <!--
 ## Trifles
