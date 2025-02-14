@@ -1,51 +1,69 @@
 <h1 align="center">Turbo</h2>
 <p align="center">Turbo 是基于 Vulkan 开发的跨平台渲染引擎</p>
 <p align="center">
-
-  <p align="center">
-      <img alt="LICENSE" src="https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat" />
-
-  </p>
-
-[![LICENSE](https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat)](https://github.com/FuXiii/Turbo/blob/main/LICENSE)
-[![repo size](https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat)]()
-[![QQ Group](https://img.shields.io/badge/QQ%20Group-128656761-deepgreen?logo=tencentqq)](https://jq.qq.com/?_wv=1027&k=rZGd2LHr)
-[![Email](https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen)](https://jq.qq.com/?_wv=1027&k=q5R82fYN)
-[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
-
+  <img alt="LICENSE" src="https://img.shields.io/github/license/yiyungent/afdian-action.svg?style=flat"/>
+  <img alt="repo size" src="https://img.shields.io/github/repo-size/FuXiii/Turbo.svg?style=flat"/>
+  <img alt="QQ Group" src="https://img.shields.io/badge/QQ%20Group-128656761-deepgreen?logo=tencentqq"/>
+  <img alt="Email" src="https://img.shields.io/badge/Email-g1018505124@outlook.com-deepgreen"/>
+  <a href="https://afdian.net/@TurboEngine">
+    <img alt="爱发电" src="https://afdian.moeci.com/1/badge.svg"/>
+  </a>
 </p>
 
 ![TurboImage](./docs/TurboImage.png)
 
-## Platform
+<!--## Platform-->
+# 平台
 
-![Platform Linux](https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux&logoColor=f5f5f5)  
-![Platform Windows](https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows&logoColor=f5f5f5)  
-![Platform IOS](https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple&logoColor=f5f5f5)  
-![Platform Android](https://img.shields.io/badge/Android-Support-brightgreen?logo=Android&logoColor=f5f5f5)  
-![Platform HarmonyOS](https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos&logoColor=f5f5f5)  
-![Platform Web](https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer&logoColor=f5f5f5)  
+<p align="center">
+  <img alt="Linux" src="https://img.shields.io/badge/Linux-Support-brightgreen?logo=linux&logoColor=f5f5f5"/>
+  <img alt="Windows" src="https://img.shields.io/badge/Windows-Support-brightgreen?logo=windows&logoColor=f5f5f5"/>
+  <img alt="IOS" src="https://img.shields.io/badge/IOS-Future-lightgrey?logo=apple&logoColor=f5f5f5"/>
+  <img alt="Android" src="https://img.shields.io/badge/Android-Support-brightgreen?logo=Android&logoColor=f5f5f5"/>
+  <img alt="HarmonyOS" src="https://img.shields.io/badge/HarmonyOS-Future-lightgrey?logo=harmonyos&logoColor=f5f5f5"/>
+  <img alt="Web" src="https://img.shields.io/badge/Web(WebGPU)-Construction-orange?logo=internetexplorer&logoColor=f5f5f5"/>
+</p>
 
+<!--
 ## Version
 
 当前版本 0.0.0.12
+-->
 
+<!--
 ## State  
 
 * 研究开发 `Vulkan` 硬件实时光追。
 * 研究开发`C/C++`开发`WebGPU`项目，并发布到浏览器页面中。  
   * `./sample` 下新增 `PureCCppWebGPUTest` 项目，详细信息请参考 [WebGPU : C/C++](./docs/Design/WebGPU_CCPP.md) 文档。
   * `./sample` 下新增 `PureCCppMiniWebGPUTest` 项目。
+-->
 
-## Sponsor
+# 赞助
 
-想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为，如果赞助完真有困难可以退回，**未成年人禁止投喂！！！**  
-[![爱发电](https://afdian.moeci.com/1/badge.svg)](https://afdian.net/@TurboEngine)
-![爱发电Turbo引擎](./docs/Aifadian/aifadian.jpg)
+想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为。
+
+> [!WARNING]
+> 未成年人禁止投喂
+
+<p align="center">
+  <a href="https://indiafightscorona.giveindia.org">
+    <img src="./docs/Aifadian/aifadian.jpg" alt="Give india logo" width="50%" />
+  </a>
+</p>
 
 ### 赞助项目
 >
+>* [Vulkan 入门精要](https://fuxiii.github.io/Essentials.of.Vulkan/)
+
+* [![Next][Next.js]][Next-url]
+
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+
+<!--
 >* [体积云教程](https://afdian.net/p/9ed29bbe64a411ed8c7752540025c377)：详情请阅览[`./docs/VolumetricCloud.md`](./docs/VolumetricCloud.md)（进行中）<研究光照散射中>
+-->
 
 ## Document
 
