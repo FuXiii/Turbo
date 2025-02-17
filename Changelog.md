@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/17
+
+>* `samples` 下更新 ``SpirvReflectTest`` 示例。用外部参数传入着色器。
+
 ## 2025/2/14
 
 >* 更新 `README.md` 。优化显示。

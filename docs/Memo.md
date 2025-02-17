@@ -1,5 +1,11 @@
 # 备忘录
 
+## Important
+
+`DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。
+
+## code
+
 ```CXX
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     bindings.resize(binding_count);
@@ -323,3 +329,17 @@ typedef struct SpvReflectArrayTraits {
   uint32_t                          stride; // Measured in bytes //???。跨度
 } SpvReflectArrayTraits;
 ```
+
+### Resource Descriptors
+
+descriptor 是确切的数据结构，用于代表着色器资源，比如  buffer，buffer view，image view，sampler 或 combined image sampler。
+
+一个 descriptor set 中有多个 descriptor
+
+descriptor set 是在指令记录时用于绑定的
+
+如果开启了 descriptorBuffer 特性（feature）的话，可以将多个 descriptor 放到 descriptor buffers 中，其也将在指令记录时进行绑定（与 descriptor set 类似）
+
+着色器通过带有 绑定号 的变量声明，去相应的 descriptor set 的位置处定位资源。
+
+也可以通过使用 Physical Storage Buffer Access 直接访问缓存的64位地址，而不通过 descriptor 。(而不通过 descriptor??? 通过 VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER 类型 descriptor)
