@@ -293,7 +293,7 @@ make
 |`Turbo::Core::TDescriptorSetLayout` |`VkDescriptorSetLayout`的相关封装|
 |`Turbo::Core::TPipelineLayout` |`VkPipelineLayout`的相关封装|
 |`Turbo::Core::TPipeline` |`TPipelineLayout`的相关封装,内部有`VkPipeline vkPipeline`成员变量，但创建是在其子类中创建|
-|`Turbo::Core::TGraphicsPipeline` |继承自`Turbo::Core::TPipeline`,图形渲染管线`VkPipeline`的相关封装，回去创建父类中的`Turbo::Core::TPipeline::vkPipeline`|
+|`Turbo::Core::TGraphicsPipeline` |继承自`Turbo::Core::TPipeline`,图形渲染管线`VkPipeline`的相关封装，会去创建父类中的`Turbo::Core::TPipeline::vkPipeline`|
 |`Turbo::Core::TDescriptorSet` |`VkDescriptorSet`的相关封装|
 |`Turbo::Core::TPipelineDescriptorSet` |管线所有有关描述符集的总和抽象，对应多个`Turbo::Core::TDescriptorSet`|
 |`Turbo::Core::TFramebuffer` |`VkFramebuffer`相关封装|

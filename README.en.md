@@ -121,50 +121,49 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
 <!--
 ## Build
 -->
-# 编译
+# Build
 
 > [!NOTE]
 >
-> * `Turbo`目前主要有两个分支：`master`和`dev`。其中`master`是主分支，确保可以正常编译和使用，而`dev`分支会经常开发新功能，想看开发推进的可以查看`dev`分支，但不保证能够正常编译。
-> * For now `Turbo` have two main branches : `master` and `dev`. The `master` is default branch, it ensure that the compilation passed without deadly bug.
-> * `Turbo`引擎的核心位于`./engine/core`，这是一个单独的模块，可以单独编译，您可以直接将他拷贝出来放到自己的工程中。将会输出名为`TCore`的库文件。
-> * `Turbo`引擎会使用核心进行开发，有关如何使用该核心，目前可以参考`./main.cpp`和`./samples`文件夹下各个示例。该文件中有最新的核心实例代码，同时也是引擎的一部分。
-> * `Turbo`的 `核心` 模块使用如下第三方库：
+> * For now `Turbo` have two main branches : `master` and `dev`. The `master` is default branch, it ensure that compilation and develope passed without deadly bug. The `dev` usually develope new feature, if you want know what changed in develope forward, please check `dev` branch, this branch not promise can compile smoothly.
+> * `Turbo` engine kernel in `./engine/core` is a discrete modular and can be islanded compile. You can directly copy them to yourself project. Will output lib file which named `TCore` .
+> * `Turbo` engine will use kernel to develope new feature, about how to use them can reference codes under `./main.cpp` and `./samples` which supply many demo.
+> * `Core` modular used thirdparty：
 >
->   | 库 | 说明 |
+>   | lib | info |
 >   | :------------ |:---------------|
->   |[glslang](https://github.com/KhronosGroup/glslang)|用于将`Shader`代码字符串编译成`Spir-V`|
->   |[SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) | 用于解析`Spir-V`，获取`Shader`中相关声明。（可能考虑使用 `SPIRV-Reflect` ，不再使用 `SPIRV-Cross` ）|
->   |[SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect) |用于解析`Spir-V`，获取`Shader`中相关声明|
->   |[VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) | 用于分配`Vulkan`资源内存|
+>   |[glslang](https://github.com/KhronosGroup/glslang)|Compile `Shader` code string to `SPIR-V`|
+>   |[SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) | Parse `SPIR-V`，fetch declare interface in `Shader`.（Maybe consider to use  `SPIRV-Reflect` forsake `SPIRV-Cross` ）|
+>   |[SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect) |Parse `SPIR-V`，fetch declare interface in `Shader`.|
+>   |[VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) | Manage `Vulkan` memory resource|
 >
-> * `Turbo`的 `非核心` 模块（也就是目前除了`./engine/core`之外）使用如下第三方库：
+> * `Non-Core` modular used thirdparty：
 >
->   | 库 | 说明 |
+>   | lib | info |
 >   | :------------ |:---------------|
->   |[glfw](https://github.com/glfw/glfw)|窗口库|
->   |[glm](https://github.com/g-truc/glm)|用于向量矩阵等运算|
->   |[imgui](https://github.com/ocornut/imgui)|用于绘制界面UI|
->   |[KTX-Software](https://github.com/KhronosGroup/KTX-Software)|`Khronos Texture`通用纹理标准|
->   |[tinygltf](https://github.com/syoyo/tinygltf)|读取`gltf`文件库|
+>   |[glfw](https://github.com/glfw/glfw)|Window lib|
+>   |[glm](https://github.com/g-truc/glm)|Use for vector and matrix calculate|
+>   |[imgui](https://github.com/ocornut/imgui)|Use for draw UI|
+>   |[KTX-Software](https://github.com/KhronosGroup/KTX-Software)|`Khronos Texture` uniform texture standard|
+>   |[tinygltf](https://github.com/syoyo/tinygltf)|Read `gltf` |
 
 > [!IMPORTANT]\
-> [Vulkan SDK](https://vulkan.lunarg.com/) 不是 `Turbo` 的必需品（ `Turbo` 不依赖 [Vulkan SDK](https://vulkan.lunarg.com/)）
+> [Vulkan SDK](https://vulkan.lunarg.com/) is not necessity for `Turbo` (Not dependent [Vulkan SDK](https://vulkan.lunarg.com/))
 
 <details>
 <summary>Windows</summary>
 
-1. 首先请查看环境变量中是否已经加入了`git`的`bin`目录（`KTX-Sofware`编译依赖`bash.exe`，正常该程序位于`git`的`bin`目录下）
-2. 请安装 `Python` (第三方库很多使用`Python`脚本运行，安装完后请确保`Python`的`{Python的安装目录}/Python{版本号}/`目录和`{Python的安装目录}/Python{版本号}/Scripts`目录加入到了环境变量中)
-3. 之后使用`./CMakeLists.txt`即可
-4. 设置相关`CMake`参数如下：
+1. Need check the ``bin`` path under the ``git`` had been add in system enironment(`KTX-Sofware` compile dependent `bash.exe`, normaly it will under `git/bin`).
+2. Please install `Python` (Many thirdparty use `Python` script ，after install please make sure `${Python install path}/Python{Version}/`目录和`${Python install path}/Python{Version}/Scripts` had been add in system enironment)
+3. use `./CMakeLists.txt`
+4. related `CMake` variable:
 
     ```CPP
-    TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
+    TCORE_SHARED_LIBS=ON // Turbo core will output dynamic lib，if you want output static lib set to OFF (default is OFF)
     ```
 
 ```
-cd ${自定义目录}
+cd ${Custome path}
 git clone --recursive https://github.com/FuXiii/Turbo.git
 cd ./Turbo
 mkdir build
@@ -178,7 +177,7 @@ cmake --build . --config Release
 <details>
 <summary>Linux</summary>
 
-1. 安装如下环境
+1. Config environment
 
   ```cxx
   sudo apt install libx11-dev       //cmake
@@ -191,11 +190,11 @@ cmake --build . --config Release
   sudo apt install freeglut3-dev    //build 
   ```
 
-2. 之后使用`./CMakeLists.txt`即可
-3. 设置相关`CMake`参数如下：
+2. use `./CMakeLists.txt`
+4. related `CMake` variable:
 
     ```CPP
-    TCORE_SHARED_LIBS=ON // Turbo 的核心库输出为动态库，如果想输出为静态库请设置为 OFF (默认情况下为 OFF)
+    TCORE_SHARED_LIBS=ON // Turbo core will output dynamic lib，if you want output static lib set to OFF (default is OFF)
     ```
 
 ```cmd
@@ -208,7 +207,7 @@ sudo apt install libwayland-dev
 sudo apt install build-essential 
 sudo apt install freeglut3-dev   
 
-cd ${自定义目录}
+cd ${Custome path}
 git clone --recursive https://github.com/FuXiii/Turbo.git
 cd ./Turbo
 mkdir build
@@ -220,7 +219,7 @@ make
 </details>
 
 > [!NOTE]
-> 如果编译有遇到问题请查看[`常见问题文档`](./docs/FAQ.md)如果还是没有解决方法请提`Issue`*
+> If you meet some annoying question please check [`FAQ`](./docs/FAQ.md) first, if it still can't fixed your problem please create an `Issue`.
 
 <!--
 ## Trifles
@@ -269,39 +268,39 @@ make
 
 | Core | Vulkan |
 | :------------ |---------------:|
-|`Turbo::Core::TLayerInfo` |`Vulkan`相关验证层信息|
-|`Turbo::Core::TExtensionInfo` |`Vulkan`相关扩展信息|
-|`Turbo::Core::TVersion` |通用版本|
-|`Turbo::Core::TInstance` |`VkInstance`的相关封装|
-|`Turbo::Core::TPhysicalDevice` |`VkPhysicalDevice`相关封装|
-|`Turbo::Core::TDevice` |`VkDevice`相关封装|
-|`Turbo::Core::TDeviceQueue` |`VkQueue`相关封装|
-|`Turbo::Core::TImage` |`VkImage`相关封装|
-|`Turbo::Core::TImageView` |`VkImageView`相关封装|
-|`Turbo::Core::TCommandBufferPool` |`VkCommandPool`相关封装|
-|`Turbo::Core::TCommandBuffer` |`VkCommandBuffer`相关封装|
-|`Turbo::Core::TBuffer` |`VkBuffer`相关封装|
-|`Turbo::Core::TShader` |`VkShaderModule`相关封装|
-|`Turbo::Core::TDescriptorPool` |`VkDescriptorPool`相关封装|
-|`Turbo::Core::TSampler` |`VkSampler`相关封装|
-|`Turbo::Core::TSubpass` |`Vulkan`中`Subpass`抽象|
-|`Turbo::Core::TAttachment` |`Vulkan`中`Attachment`抽象|
-|`Turbo::Core::TRenderPass` |`VkRenderPass`相关封装|
-|`Turbo::Core::TVertexBinding` |`Vulkan`中顶点属性抽象|
-|`Turbo::Core::TViewport` |`Vulkan`中`Viewport`抽象|
-|`Turbo::Core::TScissor` |`Vulkan`中`Scissor`抽象|
-|`Turbo::Core::TDescriptor` |`Vulkan`中各种描述符抽象|
-|`Turbo::Core::TDescriptorSetLayout` |`VkDescriptorSetLayout`的相关封装|
-|`Turbo::Core::TPipelineLayout` |`VkPipelineLayout`的相关封装|
-|`Turbo::Core::TPipeline` |`TPipelineLayout`的相关封装,内部有`VkPipeline vkPipeline`成员变量，但创建是在其子类中创建|
-|`Turbo::Core::TGraphicsPipeline` |继承自`Turbo::Core::TPipeline`,图形渲染管线`VkPipeline`的相关封装，回去创建父类中的`Turbo::Core::TPipeline::vkPipeline`|
-|`Turbo::Core::TDescriptorSet` |`VkDescriptorSet`的相关封装|
-|`Turbo::Core::TPipelineDescriptorSet` |管线所有有关描述符集的总和抽象，对应多个`Turbo::Core::TDescriptorSet`|
-|`Turbo::Core::TFramebuffer` |`VkFramebuffer`相关封装|
-|`Turbo::Core::TSemaphore` |`VkSemaphore`相关封装|
-|`Turbo::Core::TFence` |`VkFence`相关封装|
-|`Turbo::Extension::TSurface` |`VkSurfaceKHR`相关封装|
-|`Turbo::Extension::TSwapchain` |`VkSwapchainKHR`相关封装|
+|`Turbo::Core::TLayerInfo` |`Vulkan` info about `Layer`|
+|`Turbo::Core::TExtensionInfo` |`Vulkan` info about `extension`|
+|`Turbo::Core::TVersion` |Common version|
+|`Turbo::Core::TInstance` |`VkInstance` encapsulation|
+|`Turbo::Core::TPhysicalDevice` |`VkPhysicalDevice` encapsulation|
+|`Turbo::Core::TDevice` |`VkDevice` encapsulation|
+|`Turbo::Core::TDeviceQueue` |`VkQueue` encapsulation|
+|`Turbo::Core::TImage` |`VkImage` encapsulation|
+|`Turbo::Core::TImageView` |`VkImageView` encapsulation|
+|`Turbo::Core::TCommandBufferPool` |`VkCommandPool` encapsulation|
+|`Turbo::Core::TCommandBuffer` |`VkCommandBuffer` encapsulation|
+|`Turbo::Core::TBuffer` |`VkBuffer` encapsulation|
+|`Turbo::Core::TShader` |`VkShaderModule` encapsulation|
+|`Turbo::Core::TDescriptorPool` |`VkDescriptorPool` encapsulation|
+|`Turbo::Core::TSampler` |`VkSampler` encapsulation|
+|`Turbo::Core::TSubpass` |`Subpass` abstruct|
+|`Turbo::Core::TAttachment` |`Attachment` abstruct|
+|`Turbo::Core::TRenderPass` |`VkRenderPass` encapsulation|
+|`Turbo::Core::TVertexBinding` |`Vulkan` vertex attribute abstruct|
+|`Turbo::Core::TViewport` |`Viewport` abstruct|
+|`Turbo::Core::TScissor` |`Scissor` abstruct|
+|`Turbo::Core::TDescriptor` |`Descriptor` abstruct|
+|`Turbo::Core::TDescriptorSetLayout` |`VkDescriptorSetLayout`encapsulation|
+|`Turbo::Core::TPipelineLayout` |`VkPipelineLayout`encapsulation|
+|`Turbo::Core::TPipeline` |`TPipelineLayout`encapsulation，internal have `VkPipeline vkPipeline` member variable，but create in child class|
+|`Turbo::Core::TGraphicsPipeline` |Inherited from `Turbo::Core::TPipeline`, graphic pipeline `VkPipeline` encapsulation，will create `Turbo::Core::TPipeline::vkPipeline` which in it's parent|
+|`Turbo::Core::TDescriptorSet` |`VkDescriptorSet`encapsulation|
+|`Turbo::Core::TPipelineDescriptorSet` |Manage all the `Descriptor Set` and abstruct，corresponding to multiple `Turbo::Core::TDescriptorSet`|
+|`Turbo::Core::TFramebuffer` |`VkFramebuffer` encapsulation|
+|`Turbo::Core::TSemaphore` |`VkSemaphore` encapsulation|
+|`Turbo::Core::TFence` |`VkFence` encapsulation|
+|`Turbo::Extension::TSurface` |`VkSurfaceKHR` encapsulation|
+|`Turbo::Extension::TSwapchain` |`VkSwapchainKHR` encapsulation|
 
 <!--
 ### 计划完成特性
@@ -339,17 +338,17 @@ make
 <!--
 # Log
 -->
-# 日志
+# Log
 
 > [!NOTE]
-> 日志文件转移到了 [更新日志](./Changelog.md)
+> Log file move to [Daily updates](./Changelog.md)
 
-# 赞助
+# Sponsor
 
-想赞助的小伙伴，欢迎使用`爱发电`赞助，请量力而为。
+If you want sponsor, welcome use `爱发电`.
 
 > [!WARNING]
-> 未成年人禁止投喂
+> Minors are prohibited for sponsor
 
 <p align="center">
   <a href="https://indiafightscorona.giveindia.org">
@@ -357,8 +356,8 @@ make
   </a>
 </p>
 
-## 赞助项目
+## Sponsored Project
 
 <a href="https://indiafightscorona.giveindia.org">
- <img alt="Vulkan 入门精要" src="https://img.shields.io/badge/Vulkan%20%E5%85%A5%E9%97%A8%E7%B2%BE%E8%A6%81-151718?style=for-the-badge&logo=vulkan&logoColor=a41e22"/>
+ <img alt="Essentials.of.Vulkan" src="https://img.shields.io/badge/Essentials.of.Vulkan-151718?style=for-the-badge&logo=vulkan&logoColor=a41e22"/>
 </a>
