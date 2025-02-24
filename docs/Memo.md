@@ -546,6 +546,182 @@ VK_DESCRIPTOR_TYPE_MUTABLE_EXT 表示该描述符可以变化成 VkMutableDescri
 
 当确切的描述符类型为 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 时，被认为时未定义描述符，如果着色器希望的描述符类型不是绑定的相应类型，对应的描述符类型也是未定义的。
 
-*题外话：也许可以用于占位符*
+*题外话：也许可以用于占位符* 不需要了！！！ 后文可以通过设置 VkDescriptorSetLayoutBinding::descriptorCount = 0 来进行占位
 
-查询哪些描述符类型支持 VK_DESCRIPTOR_TYPE_MUTABLE_EXT ，可以通过 vkGetDescriptorSetLayoutSupport 使用 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 绑定，也可以传入一系列描述符类型进行查询。
+查询哪些描述符类型支持 VK_DESCRIPTOR_TYPE_MUTABLE_EXT ，可以通过 vkGetDescriptorSetLayoutSupport 使用 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 绑定，通过 ``VkMutableDescriptorTypeCreateInfoEXT::pDescriptorTypes`` 传入一系列描述符类型进行查询。
+
+### Descriptor Sets
+
+``描述符集``（Descriptor Set）是多个 ``描述符``（Descriptor）的集合。
+
+描述符集中的描述符的类型和数量在 ``描述符布局`` （descriptor set layout）定义。
+
+描述符布局 用于与定义相关的 描述符 与 内存 或 资源 的绑定。
+
+#### Descriptor Set Layout
+
+包括以下：
+
+* descriptor binding
+* 可以访问 descriptor binding 的各着色器阶段
+* 多个（数组） 采样 描述符（如果使用 非-Mutable采样器，指定类型采样器）
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkCreateDescriptorSetLayout(
+    VkDevice                                    device,
+    const VkDescriptorSetLayoutCreateInfo*      pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkDescriptorSetLayout*                      pSetLayout);
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkDescriptorSetLayoutCreateInfo {
+    VkStructureType                        sType;
+    const void*                            pNext;
+    VkDescriptorSetLayoutCreateFlags       flags;
+    uint32_t                               bindingCount;
+    const VkDescriptorSetLayoutBinding*    pBindings;
+} VkDescriptorSetLayoutCreateInfo;
+```
+
+如果 `VkDescriptorSetLayoutCreateInfo::pNext` 或 `VkDescriptorPoolCreateInfo::pNext` 中包含 `VkMutableDescriptorTypeCreateInfoEXT` 结构体的话，则用于配置 Mutable 描述符的类型。
+
+```CXX
+// Provided by VK_EXT_mutable_descriptor_type
+typedef struct VkMutableDescriptorTypeCreateInfoEXT {
+    VkStructureType                          sType;
+    const void*                              pNext;
+    uint32_t                                 mutableDescriptorTypeListCount;
+    const VkMutableDescriptorTypeListEXT*    pMutableDescriptorTypeLists;
+} VkMutableDescriptorTypeCreateInfoEXT;
+```
+
+* `VkDescriptorSetLayoutCreateInfo::pBindings[i]` 使用的描述符类型在 ``VkMutableDescriptorTypeCreateInfoEXT::pMutableDescriptorTypeLists[i]`` 中列出
+
+```CXX
+// Provided by VK_EXT_mutable_descriptor_type
+typedef struct VkMutableDescriptorTypeListEXT {
+    uint32_t                   descriptorTypeCount;
+    const VkDescriptorType*    pDescriptorTypes;
+} VkMutableDescriptorTypeListEXT;
+```
+
+* `pDescriptorTypes` 一定不能包含 `VK_DESCRIPTOR_TYPE_MUTABLE_EXT`
+* `pDescriptorTypes` 一定不能包含 `VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC`
+* `pDescriptorTypes` 一定不能包含 `VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC`
+* `pDescriptorTypes` 一定不能包含 `VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkDescriptorSetLayoutCreateFlagBits {
+  // Provided by VK_VERSION_1_2
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT = 0x00000002,
+  // Provided by VK_VERSION_1_4
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT = 0x00000001,
+  // Provided by VK_EXT_descriptor_buffer
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT = 0x00000010,
+  // Provided by VK_EXT_descriptor_buffer
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_EMBEDDED_IMMUTABLE_SAMPLERS_BIT_EXT = 0x00000020,
+  // Provided by VK_NV_device_generated_commands_compute
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_INDIRECT_BINDABLE_BIT_NV = 0x00000080,
+  // Provided by VK_EXT_mutable_descriptor_type
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_EXT = 0x00000004,
+  // Provided by VK_NV_per_stage_descriptor_set
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV = 0x00000040,
+  // Provided by VK_KHR_push_descriptor
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT,
+  // Provided by VK_EXT_descriptor_indexing
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
+  // Provided by VK_VALVE_mutable_descriptor_type
+    VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_VALVE = VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_EXT,
+} VkDescriptorSetLayoutCreateFlagBits;
+```
+
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT`` ：
+  * 带这个标志位创建的 描述符集布局 所使用的额 描述符池 必须是使用 `VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT` 创建的。
+  * 使用该标志位创建的 描述符集 中 描述符 的数量有限制。
+  * 没使用该标志位的 描述符布局 仅仅统计 没使用该标志位的创建的描述符 的数量。
+  * 使用该标志位创建的 描述符集 中 统计 所有 描述符 的数量。这个数量限制也许会比没使用该标志位的多。
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT`` 表示当使用这个 描述符集 时，不分配该 描述符集。而是通过 ``vkCmdPushDescriptorSet`` 将描述符推送进设备。
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT`` 表示该布局仅用于 描述符buffers 中.
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_EMBEDDED_IMMUTABLE_SAMPLERS_BIT_EXT`` 表示该布局只有 非-Mutable 的 sampler，可以通过 `vkCmdBindDescriptorBufferEmbeddedSamplersEXT` 进行绑定。与正常的采样器不同，嵌入式 非-Mutable 采样器 并不需要 在 描述符buffer 中提供。
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_INDIRECT_BINDABLE_BIT_NV`` 该布局绑定到使用 `VK_PIPELINE_CREATE_INDIRECT_BINDABLE_BIT_NV` 创建的计算管线。用于 [Device-Generated Commands](https://docs.vulkan.org/spec/latest/chapters/device_generated_commands/generatedcommands.html#device-generated-commands)。
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_EXT`` 只能从 `VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT` 创建的 描述符池 中创建该布局。使用此位创建的 描述符集布局 对每个阶段的 最大描述符数量 没有 可表达的 限制。Host 描述符集只在 host 内存有限制，限制是实现规定的，取 非-Mutable 和 Mutable 中较大的那个。
+* ``VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV`` 表示描述符集中绑定资源在不同 阶段 可以是不同类型。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkDescriptorSetLayoutBinding {
+    uint32_t              binding;
+    VkDescriptorType      descriptorType;
+    uint32_t              descriptorCount;
+    VkShaderStageFlags    stageFlags;
+    const VkSampler*      pImmutableSamplers;
+} VkDescriptorSetLayoutBinding;
+```
+
+* ``binding`` 绑定号
+* ``descriptorType`` 类型
+* ``descriptorCount`` 数量。对于着色器，是一个数组。
+  * 如果 ``descriptorType`` 是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 则 ``descriptorCount`` 表示 ``inline uniform block`` 的字节大小。
+  * 如果 ``descriptorCount`` 是 ``0`` 的话，说明这个绑定项是 保留 的。
+* ``stageFlags``用于配置都哪些着色器阶段可以访问该描述符集。 ``VK_SHADER_STAGE_ALL`` 是一个快捷方式，用任何着色器阶段都可以访问该描述符集。
+  * 如果没有相应的着色器阶段，对应的着色器阶段就不应该读取对应数据。除了 ``input attachment`` 只能在 片源着色器 阶段进行访问
+* ``pImmutableSamplers`` 影响到采样器的初始化。
+  * 如果 ``descriptorType`` 是 ``VK_DESCRIPTOR_TYPE_SAMPLER`` 或 ``VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`` 类型的描述符，则 ``pImmutableSamplers`` 可用于初始化一系列的 非-Mutable 的采样器。
+  * 非-Mutable 的采样器将会永远绑定在该布局中，并且不会改变，更新一个 非-Mutable 的采样器是不被允许的（``VK_DESCRIPTOR_TYPE_SAMPLER``），或被忽略的（``VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER``，只有 imageview 会被更新）。
+  * 如果 ``pImmutableSamplers`` 非空，则其指向 采样器数组（大小与 ``descriptorCount`` 一致），并将其拷贝（只有 采样器 会被拷贝）至 描述符布局中，并被对应绑定的描述符使用。
+  * 如果还有``pImmutableSamplers`` 在使用该采样器，该采样器就不能被销毁。
+  * 如果 ``pImmutableSamplers`` 为空，则 采样器 是动态的，且采样器必须使用该布局进行绑定。
+  * 如果 ``descriptorType`` 不是 ``VK_DESCRIPTOR_TYPE_SAMPLER`` 或 ``VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`` 类型的描述符，忽略该成员变量
+
+* VkPhysicalDeviceLimits::maxDescriptorSet*  
+  * VkPhysicalDeviceLimits::maxDescriptorSetSamplers  
+  * VkPhysicalDeviceLimits::maxDescriptorSetUniformBuffers  
+  * ...
+
+##### Descriptor Set Layout Support
+
+查看一个 描述符集布局 是否被设备支持，调用 ``vkGetDescriptorSetLayoutSupport`` 接口：
+
+```CXX
+// Provided by VK_VERSION_1_1
+void vkGetDescriptorSetLayoutSupport(
+    VkDevice                                    device,
+    const VkDescriptorSetLayoutCreateInfo*      pCreateInfo,
+    VkDescriptorSetLayoutSupport*               pSupport);
+```
+
+或者
+
+```CXX
+// Provided by VK_KHR_maintenance3
+void vkGetDescriptorSetLayoutSupportKHR(
+    VkDevice                                    device,
+    const VkDescriptorSetLayoutCreateInfo*      pCreateInfo,
+    VkDescriptorSetLayoutSupport*               pSupport);
+```
+
+```CXX
+// Provided by VK_VERSION_1_1
+typedef struct VkDescriptorSetLayoutSupport {
+    VkStructureType    sType;
+    void*              pNext;
+    VkBool32           supported;
+} VkDescriptorSetLayoutSupport;
+```
+
+如果 ``VkDescriptorSetLayoutSupport::pNext`` 中包含 ``VkDescriptorSetVariableDescriptorCountLayoutSupport`` 的结构体指针的话，则会返回额外的信息。
+
+```CXX
+// Provided by VK_VERSION_1_2
+typedef struct VkDescriptorSetVariableDescriptorCountLayoutSupport {
+    VkStructureType    sType;
+    void*              pNext;
+    uint32_t           maxVariableDescriptorCount;
+} VkDescriptorSetVariableDescriptorCountLayoutSupport;
+```
+
+* ``maxVariableDescriptorCount`` 表示 布局中 绑定（binding）数最大的那个 描述符 所支持的最大个数，if that binding is variable-sized。如果是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 则返回最大字节数，if that binding is variable-sized.
