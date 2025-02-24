@@ -1,5 +1,11 @@
 # 备忘录
 
+## Important
+
+`DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。
+
+## code
+
 ```CXX
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     bindings.resize(binding_count);
@@ -323,3 +329,223 @@ typedef struct SpvReflectArrayTraits {
   uint32_t                          stride; // Measured in bytes //???。跨度
 } SpvReflectArrayTraits;
 ```
+
+## Resource Descriptors
+
+descriptor 是确切的数据结构，用于代表着色器资源，比如  buffer，buffer view，image view，sampler 或 combined image sampler。
+
+一个 descriptor set 中有多个 descriptor
+
+descriptor set 是在指令记录时用于绑定的
+
+如果开启了 descriptorBuffer 特性（feature）的话，可以将多个 descriptor 放到 descriptor buffers 中，其也将在指令记录时进行绑定（与 descriptor set 类似）
+
+着色器通过带有 绑定号 的变量声明，去相应的 descriptor set 的位置处定位资源。
+
+也可以通过使用 Physical Storage Buffer Access 直接访问缓存的64位地址，而不通过 descriptor 。(而不通过 descriptor??? 通过 VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER 类型 descriptor)
+
+### 描述符类型
+
+#### Storage Image
+
+VK_DESCRIPTOR_TYPE_STORAGE_IMAGE 通过一个 image view 与 image 资源相关联。
+
+* 如果 image 的 format 支持 VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT，所有着色器阶段支持 加载（load）操作。
+* 如果 image 的 format 支持 VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT，则 task，mesh 和 compute 着色器支持 存储（store）操作。
+* 如果 image 的 format 支持 VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT，则 task，mesh 和 compute 着色器支持 原子（atomic ）操作。
+
+* 当 fragmentStoresAndAtomics 特性激活后，片元着色器也能像计算着色器那样存储和原子操作 storage image。
+* 当 vertexPipelineStoresAndAtomics 特性激活后，vertex,tessellation 和 geometry 着色器也能像计算着色器那样存储和原子操作 storage image。
+
+如果想要访问 storage image 中的数据，layout 必须是 VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR 或 VK_IMAGE_LAYOUT_GENERAL 。
+
+#### Sampler
+
+VK_DESCRIPTOR_TYPE_SAMPLER 与 sampler 对象相关联，用于 sampled image 采样 。
+
+#### Sampled Image
+
+VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE 通过一个 image view 与 image 资源相关联。用于 采样 操作。
+
+着色器中使用一对 Sampler 和 Sampled Image 对图片进行采样
+
+被采样的 image 的 layout 必须是如下之一：
+
+* VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_GENERAL
+* VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+* VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
+* VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR
+* VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT
+
+#### Combined Image Sampler
+
+VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 与一对 image 和 sampler 对象相关联，将 Sampler 和 Sampled Image 合成一个。
+
+如果描述符应用一个采样器进行 Y′CBCR conversion 或者 subsampled image 操作，sampler 和 image 必须在同一个描述符中（Combined Image Sampler）。采样器进行的其他操作没有限制。
+
+被采样的 image 的 layout 必须是如下之一：
+
+* VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_GENERAL
+* VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+* VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
+* VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR
+* VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT
+
+在一些平台 Combined Image Sampler 更高效
+
+#### Uniform Texel Buffer
+
+VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER 通过一个 buffer view 与 buffer 资源相关联。可进行 图片采样 操作。
+
+Uniform texel buffers 使用一维数组存储像素数据，进而进行 图片采样。
+
+* 如果 buffer view 的 format 支持 VK_FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT，所有着色器阶段支持 加载（load）操作。
+
+#### Storage Texel Buffer
+
+VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER 通过一个 buffer view 与 buffer 资源相关联。可进行 图片加载、存储和原子 操作。
+
+在 Uniform texel buffers 支持的操作基础上，支持对数据的写入。
+
+* 如果 buffer view 的 format 支持 VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT，所有着色器阶段支持 加载（load）操作。
+* 如果 buffer view 的 format 支持 VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT，则 task，mesh 和 compute 着色器支持 存储（store）操作。
+* 如果 buffer view 的 format 支持 VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT，则 task，mesh 和 compute 着色器支持 原子（atomic ）操作。
+
+* 当 fragmentStoresAndAtomics 特性激活后，片元着色器也能像计算着色器那样存储和原子操作 storage texel buffer。
+* 当 vertexPipelineStoresAndAtomics 特性激活后，vertex,tessellation 和 geometry 着色器也能像计算着色器那样存储和原子操作 storage texel buffer。
+
+#### Storage Buffer
+
+VK_DESCRIPTOR_TYPE_STORAGE_BUFFER 通过与 buffer 资源直接相关联。可进行 加载、存储和原子 操作。用于描述一个结构体数据。
+
+#### Uniform Buffer
+
+VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER 通过与 buffer 资源直接相关联。可进行 加载 操作。用于描述一个结构体数据。
+
+#### Dynamic Uniform Buffer
+
+VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC 几乎与 Uniform Buffer 一样，与之唯一不同的是：指定了一个 buffer 的 offset 。
+
+``` CXX
+// Provided by VK_VERSION_1_0
+void vkCmdBindDescriptorSets(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineBindPoint                         pipelineBindPoint,
+    VkPipelineLayout                            layout,
+    uint32_t                                    firstSet,
+    uint32_t                                    descriptorSetCount,
+    const VkDescriptorSet*                      pDescriptorSets,
+    uint32_t                                    dynamicOffsetCount,
+    const uint32_t*                             pDynamicOffsets);
+```
+
+* dynamicOffsetCount
+* pDynamicOffsets
+
+用于配置 offset
+
+#### Dynamic Storage Buffer
+
+VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC 几乎与 Storage Buffer 一样，与之唯一不同的是：指定了一个 buffer 的 offset 。
+
+与 Dynamic Uniform Buffer 一样，通过 vkCmdBindDescriptorSets(...) 配置 offset
+
+#### Inline Uniform Block
+
+VK_VERSION_1_3 或 VK_EXT_inline_uniform_block 特性
+
+VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK 几乎与 Uniform Buffer 一样，与之唯一不同的是：直接从描述符自身内部进行存储，而不是与一个 buffer 进行关联。
+
+常用于访问 一块小常量，将描述符和buffer解耦，而不需要复杂的间接操作。
+
+与 push constants 相比，它允许在不同的渲染和调度指令间重用。
+
+inline uniform block 不能整合到一个数组中，相反在资源绑定时确定其大小（单位：字节）。
+
+```CXX
+// Provided by VK_VERSION_1_3
+typedef struct VkDescriptorPoolInlineUniformBlockCreateInfo {
+    VkStructureType    sType;
+    const void*        pNext;
+    uint32_t           maxInlineUniformBlockBindings;
+} VkDescriptorPoolInlineUniformBlockCreateInfo;
+
+// Provided by VK_VERSION_1_3
+typedef struct VkWriteDescriptorSetInlineUniformBlock {
+    VkStructureType    sType;
+    const void*        pNext;
+    uint32_t           dataSize;
+    const void*        pData;
+} VkWriteDescriptorSetInlineUniformBlock;
+```
+
+#### Sample Weight Image
+
+VK_QCOM_image_processing 特性
+
+VK_DESCRIPTOR_TYPE_SAMPLE_WEIGHT_IMAGE_QCOM 通过一个 image view 与 image 资源相关联。可用于 weight image sampling 。
+
+image view 必须使用 VkImageViewSampleWeightCreateInfoQCOM 创建
+
+着色器可以结合 weight 参数， sampled image 参数和一个 sampler 进行 weight image sampling 操作。
+
+* 如果 image view 的 format 支持 VK_FORMAT_FEATURE_2_WEIGHT_IMAGE_BIT_QCOM，所有着色器阶段支持 weight image sampling 操作。
+* 如果 image view 的 format 支持 VK_FORMAT_FEATURE_2_WEIGHT_SAMPLED_IMAGE_BIT_QCOM，所有着色器阶段支持 sampled image view 操作。
+
+如果想要访问 sample weight image 中的数据，layout 必须是 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL 或 VK_IMAGE_LAYOUT_GENERAL 。
+
+#### Block Matching Image
+
+VK_DESCRIPTOR_TYPE_BLOCK_MATCH_IMAGE_QCOM 通过一个 image view 与 image 资源相关联。可用于 block matching 。
+
+着色器可以结合 target image 参数， reference image 参数和一个 sampler 进行 block matching 操作。
+
+* 如果 target view 和 reference view 的 format 支持 VK_FORMAT_FEATURE_2_BLOCK_MATCHING_BIT_QCOM，所有着色器阶段支持 block matching 操作。
+
+如果想要访问 block matching image 中的数据，layout 必须是 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL 或 VK_IMAGE_LAYOUT_GENERAL 。
+
+#### Input Attachment
+
+VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT 通过一个 image view 与 image 资源相关联。可用于片元着色器中帧缓存坐标（framebuffer local）加载（load）操作。
+
+* 如果 image 的 format 支持 VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT 或 VK_FORMAT_FEATURE_2_LINEAR_COLOR_ATTACHMENT_BIT_NV 或 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT，image 就支持 input attachments 操作。
+
+image 的 layout 必须是如下之一：
+
+* VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_GENERAL
+* VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+* VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
+* VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
+* VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR
+* VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT
+* VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ
+
+#### Acceleration Structure
+
+VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR 或 VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV 与一个几何体相关联。用不用光线追踪。着色器对该描述符只读。
+
+#### Mutable
+
+VK_DESCRIPTOR_TYPE_MUTABLE_EXT 表示该描述符可以变化成 VkMutableDescriptorTypeListEXT::pDescriptorTypes 列出的任何一个描述符类型（指定于 VkMutableDescriptorTypeListEXT::pDescriptorTypes 的 pNext）。
+
+在任意一个时刻，该描述符都有明确的类型。不仅可以变成 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 类型，也可以变成 pDescriptorTypes 其中的一个类型。
+
+在描述符被更新时，描述符的类型可以进行改变。当一个描述符用于描述符集中的绑定，确切的描述符类型会被确定（不是 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 类型）
+
+当确切的描述符类型为 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 时，被认为时未定义描述符，如果着色器希望的描述符类型不是绑定的相应类型，对应的描述符类型也是未定义的。
+
+*题外话：也许可以用于占位符*
+
+查询哪些描述符类型支持 VK_DESCRIPTOR_TYPE_MUTABLE_EXT ，可以通过 vkGetDescriptorSetLayoutSupport 使用 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 绑定，也可以传入一系列描述符类型进行查询。

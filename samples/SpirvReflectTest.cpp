@@ -34,6 +34,7 @@ enum class ShaderLanguage
 
 enum class ShaderType
 {
+    UNKNOWN,
     VERTEX,
     TESS_CONTROL,
     TESS_EVALUATION,
@@ -130,7 +131,7 @@ std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::s
         }
         break;
         default: {
-            return EShLanguage::EShLangVertex;
+            return EShLanguage::EShLangCount;
         }
         break;
         }
@@ -228,6 +229,8 @@ std::vector<uint32_t> ShaderToSpirV(const ShaderLanguage &language, const std::s
 
 int main(int argc, char **argv)
 {
+    std::vector<uint32_t> spirv;
+
     std::cout << "argc: " << argc << std::endl;
     for (size_t index = 0; index < argc; index++)
     {
@@ -236,21 +239,72 @@ int main(int argc, char **argv)
 
     if (argc >= 2)
     {
-        auto dsa = (argv[1]);
         std::filesystem::path path = std::string(argv[1]);
         if (!path.empty() && std::filesystem::exists(path) && std::filesystem::is_regular_file(path))
         {
-            std::cout << "path.filename(): " << path.filename() << std::endl;
-            std::cout << "path.extension(): " << path.extension() << std::endl;
+            auto extension = path.extension();
+
+            auto file_extension_to_shader_type = [](const std::filesystem::path &extension) -> ShaderType {
+                ShaderType result = ShaderType::UNKNOWN;
+
+                struct ShaderExtensionHashAndType
+                {
+                    size_t hash;
+                    ShaderType type;
+                };
+
+                if (!extension.empty())
+                {
+                    static std::vector<ShaderExtensionHashAndType> shader_extension_hash_and_types = {
+                        {std::filesystem::hash_value(".vert"), ShaderType::VERTEX},          // for a vertex shader
+                        {std::filesystem::hash_value(".vs"), ShaderType::VERTEX},            // for a vertex shader
+                        {std::filesystem::hash_value(".frag"), ShaderType::FRAGMENT},        // for a fragment shader
+                        {std::filesystem::hash_value(".fs"), ShaderType::FRAGMENT},          // for a fragment shader
+                        {std::filesystem::hash_value(".gs"), ShaderType::GEOMETRY},          // for a geometry shader
+                        {std::filesystem::hash_value(".geom"), ShaderType::GEOMETRY},        // for a geometry shader
+                        {std::filesystem::hash_value(".comp"), ShaderType::COMPUTE},         // for a compute shader
+                        {std::filesystem::hash_value(".tesc"), ShaderType::TESS_CONTROL},    // for a tessellation control shader
+                        {std::filesystem::hash_value(".tese"), ShaderType::TESS_EVALUATION}, // for a tessellation evaluation shader
+                        {std::filesystem::hash_value(".rgen"), ShaderType::RAY_GEN},         // for a ray generation shader
+                        {std::filesystem::hash_value(".rint"), ShaderType::INTERSECT},       // for a ray intersection shader
+                        {std::filesystem::hash_value(".rahit"), ShaderType::ANY_HIT},        // for a ray any hit shader
+                        {std::filesystem::hash_value(".rchit"), ShaderType::CLOSEST_HIT},    // for a ray closest shader
+                        {std::filesystem::hash_value(".rmiss"), ShaderType::MISS},           // for a ray miss shader
+                        {std::filesystem::hash_value(".rcall"), ShaderType::CALLABLE},       // for a ray callable shader
+                        {std::filesystem::hash_value(".mesh"), ShaderType::MESH},            // for a mesh shader
+                        {std::filesystem::hash_value(".task"), ShaderType::TASK}             // for a task shader
+                    };
+
+                    auto target_shader_extension_hash = std::filesystem::hash_value(extension);
+                    for (auto extension_hash_and_type : shader_extension_hash_and_types)
+                    {
+                        if (extension_hash_and_type.hash == target_shader_extension_hash)
+                        {
+                            result = extension_hash_and_type.type;
+                            break;
+                        }
+                    }
+                }
+
+                return result;
+            };
+
+            auto shader_type = file_extension_to_shader_type(extension);
+            if (shader_type != ShaderType::UNKNOWN)
+            {
+                spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(path.string()), shader_type);
+            }
+            else
+            {
+                throw std::runtime_error("[Error] Unknown shader extension!");
+            }
         }
     }
 
-    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.vert"), ShaderType::VERTEX);
-    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/imgui_meta.frag"), ShaderType::FRAGMENT, MakeVersion(1, 4), MakeVersion(1, 6));
-    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/volumetric_cloud.frag"), ShaderType::FRAGMENT);
-    // auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.vert"), ShaderType::VERTEX);
-    auto spirv = ShaderToSpirV(ShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/BRDF.frag"), ShaderType::FRAGMENT);
-    // auto spirv = ShaderToSpirV(ShaderLanguage::HLSL, ReadTextFile(spirv_reflect_root + "/examples/sample.hlsl"), ShaderType::VERTEX);
+    if (spirv.empty())
+    {
+        throw std::runtime_error("[Error] Spirv is empty!");
+    }
 
     SpvReflectShaderModule module;
     SpvReflectResult result = spvReflectCreateShaderModule(spirv.size() * sizeof(uint32_t), spirv.data(), &module);
