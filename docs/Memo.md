@@ -1,8 +1,13 @@
 # 备忘录
 
-## Important
+## Current
 
 `DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。
+
+* ``问``：相同 set 中 binding 不连续，会如何？``答``：可以不连续（规范中有明确说明）
+* ``问``：相同 pipeline layout 中 set 不连续，会如何？``答``：pipeline layout 中没有设置 set 号的接口。只有将 一堆 描述符集 按照数组塞入 pipeline layout 中。因此 需要 “连续的” set（描述符集）
+
+* 什么是 ``variable-sized`` 描述符（Vulkan 1.2）
 
 ## code
 
@@ -665,7 +670,7 @@ typedef struct VkDescriptorSetLayoutBinding {
 * ``binding`` 绑定号
 * ``descriptorType`` 类型
 * ``descriptorCount`` 数量。对于着色器，是一个数组。
-  * 如果 ``descriptorType`` 是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 则 ``descriptorCount`` 表示 ``inline uniform block`` 的字节大小。
+  * 如果 ``descriptorType`` 是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 则 ``descriptorCount`` 表示 ``inline uniform block`` 的字节大小。并且必须是 ``4`` 的倍数。
   * 如果 ``descriptorCount`` 是 ``0`` 的话，说明这个绑定项是 保留 的。
 * ``stageFlags``用于配置都哪些着色器阶段可以访问该描述符集。 ``VK_SHADER_STAGE_ALL`` 是一个快捷方式，用任何着色器阶段都可以访问该描述符集。
   * 如果没有相应的着色器阶段，对应的着色器阶段就不应该读取对应数据。除了 ``input attachment`` 只能在 片源着色器 阶段进行访问
@@ -676,6 +681,16 @@ typedef struct VkDescriptorSetLayoutBinding {
   * 如果还有``pImmutableSamplers`` 在使用该采样器，该采样器就不能被销毁。
   * 如果 ``pImmutableSamplers`` 为空，则 采样器 是动态的，且采样器必须使用该布局进行绑定。
   * 如果 ``descriptorType`` 不是 ``VK_DESCRIPTOR_TYPE_SAMPLER`` 或 ``VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`` 类型的描述符，忽略该成员变量
+
+* If a binding has a descriptorType value of VK_DESCRIPTOR_TYPE_MUTABLE_EXT, then pImmutableSamplers must be NULL
+
+* The above layout definition allows the descriptor bindings to be specified ``sparsely`` such that not all binding numbers between 0 and the maximum binding number need to be specified in the pBindings array.
+
+* The maximum binding number specified should be as compact as possible to avoid wasted memory.
+
+* 规范文档中没说 VkDescriptorSetLayoutCreateInfo::pBindings 的 binding 是否可以重复。估计是不能重复。
+
+* If the inlineUniformBlock feature is not enabled, descriptorType must not be VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK
 
 * VkPhysicalDeviceLimits::maxDescriptorSet*  
   * VkPhysicalDeviceLimits::maxDescriptorSetSamplers  
@@ -725,3 +740,325 @@ typedef struct VkDescriptorSetVariableDescriptorCountLayoutSupport {
 ```
 
 * ``maxVariableDescriptorCount`` 表示 布局中 绑定（binding）数最大的那个 描述符 所支持的最大个数，if that binding is variable-sized。如果是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 则返回最大字节数，if that binding is variable-sized.
+
+### Pipeline Layouts
+
+一个 pipeline layout 包含如下：
+
+* Zero or more descriptor set layouts
+* zero or more push constant ranges
+
+每一个 pipeline 创建都需要指定 pipeline layout
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkCreatePipelineLayout(
+    VkDevice                                    device,
+    const VkPipelineLayoutCreateInfo*           pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkPipelineLayout*                           pPipelineLayout);
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineLayoutCreateInfo {
+    VkStructureType                 sType;
+    const void*                     pNext;
+    VkPipelineLayoutCreateFlags     flags;
+    uint32_t                        setLayoutCount;
+    const VkDescriptorSetLayout*    pSetLayouts;
+    uint32_t                        pushConstantRangeCount;
+    const VkPushConstantRange*      pPushConstantRanges;
+} VkPipelineLayoutCreateInfo;
+```
+
+* ``setLayoutCount`` <= ``VkPhysicalDeviceLimits::maxBoundDescriptorSets``
+* If setLayoutCount is not 0, pSetLayouts must be a valid pointer to an array of setLayoutCount valid or ``VK_NULL_HANDLE`` VkDescriptorSetLayout handles
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPushConstantRange {
+    VkShaderStageFlags    stageFlags;
+    uint32_t              offset;
+    uint32_t              size;
+} VkPushConstantRange;
+```
+
+* ``offset`` 必须是 ``4`` 的倍数
+* ``size`` 必须大于零，并且是 ``4`` 的倍数
+* ``size`` 必须 <= ``VkPhysicalDeviceLimits::maxPushConstantsSize - offset``
+
+创建完 ``pipeline layouts`` 之后，就可以在如下地方使用：
+
+* 创建 pipeline
+* 作为绑定描述符集的一部分
+* 作为设置 push constants 的一部分
+
+#### Pipeline Layout 兼容性
+
+* 两个 pipeline layout 间的 push constants 的 range 相同，则 push constant 兼容。
+* 两个 pipeline layout 间的 set 0~N 使用的相同的 描述符集布局，则 描述符集布局 兼容。
+* 两个 pipeline layout 间 要么都是使用 VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT 创建的，要么都不是，则 兼容。
+
+如果之前绑定了 描述符集 M，之后又绑定描述符集 N，如果绑定 M 和 N 的 pipeline layout 不兼容，则 M 会受到不稳定影响，如果兼容则不会受影响。
+
+如果之前绑定的 描述符集 N，和当前 pipeline layout 对应的 N 不兼容的话，则 N 之后所有绑定得到 描述符集 都会受影响。
+
+当绑定一个 pipeline 时，当之前绑定的 描述符集 N 与 pipeline layout 对应的 N 兼容的话，pipeline 可以正确的访问 描述符，否则会受到影响。
+
+*题外话：是否间接说明：最好在 pipeline 绑定前绑定 描述符集？*
+
+布局兼容 意味着 绑定的 描述符集 只要与 绑定的 pipeline 的 布局兼容，就可以被 pipeline 使用（而不需要先绑定某个特定 pipeline）。
+这也就意味着 绑定的 描述符集 可以在绑定不同 pipeline 时一直生效，并且新绑定的 pipeline 照样可以访问之前绑定的资源（描述符）
+
+当描述符集影响了绑定的描述符集，受影响的描述符集将会包含未定义形式
+
+note：
+
+  将更新频率越低的描述符集放到放到 pipeline layout 的开头，更新频率越高的描述符集放到 pipeline layout 的末端。当 pipeline 切换（绑定）时，只有失效的描述符需要进行更新，没有变化的将会保持原样。
+
+pipeline layout 可以绑定的描述符集有数量限制 `maxBoundDescriptorSets` 。
+
+### 分配 描述符集
+
+一个 descriptor pool 维护着一池子 描述符，描述符集就从这个 descriptor pool 中创建的。
+
+descriptor pool 不是多线程同步的，创建和销毁需要互斥访问。
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkCreateDescriptorPool(
+    VkDevice                                    device,
+    const VkDescriptorPoolCreateInfo*           pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkDescriptorPool*                           pDescriptorPool);
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkDescriptorPoolCreateInfo {
+    VkStructureType                sType;
+    const void*                    pNext;
+    VkDescriptorPoolCreateFlags    flags;
+    uint32_t                       maxSets;
+    uint32_t                       poolSizeCount;
+    const VkDescriptorPoolSize*    pPoolSizes;
+} VkDescriptorPoolCreateInfo;
+```
+
+* 如果 ``pPoolSizes`` 中有相同的 ``VkDescriptorPoolSize::type`` 的话，则会算这些 ``descriptorCount`` 的总数。
+
+* If pPoolSizes contains a descriptorType of VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK, the pNext chain must include a VkDescriptorPoolInlineUniformBlockCreateInfo structure whose maxInlineUniformBlockBindings member is not zero
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkDescriptorPoolCreateFlagBits {
+    VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT = 0x00000001,
+  // Provided by VK_VERSION_1_2
+    VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT = 0x00000002,
+  // Provided by VK_EXT_mutable_descriptor_type
+    VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT = 0x00000004,
+  // Provided by VK_NV_descriptor_pool_overallocation
+    VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_SETS_BIT_NV = 0x00000008,
+  // Provided by VK_NV_descriptor_pool_overallocation
+    VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_POOLS_BIT_NV = 0x00000010,
+  // Provided by VK_EXT_descriptor_indexing
+    VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+  // Provided by VK_VALVE_mutable_descriptor_type
+    VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_VALVE = VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT,
+} VkDescriptorPoolCreateFlagBits;
+```
+
+* ``VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT`` specifies that descriptor sets can return their individual allocations to the pool, i.e. all of vkAllocateDescriptorSets, vkFreeDescriptorSets, and vkResetDescriptorPool are allowed. Otherwise, descriptor sets allocated from the pool must not be individually freed back to the pool, i.e. only vkAllocateDescriptorSets and vkResetDescriptorPool are allowed.
+* ``VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT`` 表示描述符集可以单独回归至池中,比如，所有的 ``vkAllocateDescriptorSets``, ``vkFreeDescriptorSets``, 和 ``vkResetDescriptorPool`` 可以被调用。否则, 不能分别独立的回归到池中, 比如 只允许 vkAllocateDescriptorSets 和 vkResetDescriptorPool 调用。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkDescriptorPoolSize {
+    VkDescriptorType    type;
+    uint32_t            descriptorCount;
+} VkDescriptorPoolSize;
+```
+
+* 如果 ``type`` 是 ``VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK`` 的话，则 ``descriptorCount`` 是字节大小。并且必须是 ``4`` 的倍数。
+
+```CXX
+// Provided by VK_VERSION_1_0
+VkResult vkAllocateDescriptorSets(
+    VkDevice                                    device,
+    const VkDescriptorSetAllocateInfo*          pAllocateInfo,
+    VkDescriptorSet*                            pDescriptorSets);
+```
+
+一旦 vkAllocateDescriptorSets 调用中分配多个描述符集，一旦有一个分配失败，分配成功的将会被全部销毁，并返回错误信息。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkDescriptorSetAllocateInfo {
+    VkStructureType                 sType;
+    const void*                     pNext;
+    VkDescriptorPool                descriptorPool;
+    uint32_t                        descriptorSetCount;
+    const VkDescriptorSetLayout*    pSetLayouts;
+} VkDescriptorSetAllocateInfo;
+```
+
+如果 ``VkDescriptorSetAllocateInfo::pNext`` 中包含 ``VkDescriptorSetVariableDescriptorCountAllocateInfo`` 的话，这个结构体中使用数组存储包含每一个 set 的 variable-sized descriptor bindings。
+
+```CXX
+// Provided by VK_VERSION_1_2
+typedef struct VkDescriptorSetVariableDescriptorCountAllocateInfo {
+    VkStructureType    sType;
+    const void*        pNext;
+    uint32_t           descriptorSetCount;
+    const uint32_t*    pDescriptorCounts;
+} VkDescriptorSetVariableDescriptorCountAllocateInfo;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+void vkUpdateDescriptorSets(
+    VkDevice                                    device,
+    uint32_t                                    descriptorWriteCount,
+    const VkWriteDescriptorSet*                 pDescriptorWrites,
+    uint32_t                                    descriptorCopyCount,
+    const VkCopyDescriptorSet*                  pDescriptorCopies);
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkWriteDescriptorSet {
+    VkStructureType                  sType;
+    const void*                      pNext;
+    VkDescriptorSet                  dstSet;
+    uint32_t                         dstBinding;
+    uint32_t                         dstArrayElement;
+    uint32_t                         descriptorCount;
+    VkDescriptorType                 descriptorType;
+    const VkDescriptorImageInfo*     pImageInfo;
+    const VkDescriptorBufferInfo*    pBufferInfo;
+    const VkBufferView*              pTexelBufferView;
+} VkWriteDescriptorSet;
+```
+
+* dstArrayElement 对应数组的偏移（从哪个元素开始），如果绑定对应的类型是 VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK 的话，该项代表，字节偏移。
+* descriptorCount 对应数组的数量，如果绑定对应的类型是 VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK 的话，该项代表，字节长度。
+
+* descriptorType 用来告诉 驱动 使用 pImageInfo 还是 pBufferInfo 还是 pTexelBufferView 获取资源。
+
+* pNext VkWriteDescriptorSetInlineUniformBlock 和 VkWriteDescriptorSetAccelerationStructureKHR
+
+* If the destination descriptor is a mutable descriptor, the active descriptor type for the destination descriptor becomes ``descriptorType``.
+
+* If descriptorType is VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK, dstArrayElement must be an integer multiple of 4
+* If descriptorType is VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK, descriptorCount must be an integer multiple of 4
+* If descriptorType is VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK, the pNext chain must include a VkWriteDescriptorSetInlineUniformBlock structure whose dataSize member equals descriptorCount
+
+If the descriptorType member of VkWriteDescriptorSet is VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK then the data to write to the descriptor set is specified through a VkWriteDescriptorSetInlineUniformBlock structure included in the pNext chain of VkWriteDescriptorSet.
+
+```CXX
+// Provided by VK_VERSION_1_3
+typedef struct VkWriteDescriptorSetInlineUniformBlock {
+    VkStructureType    sType;
+    const void*        pNext;
+    uint32_t           dataSize;
+    const void*        pData;
+} VkWriteDescriptorSetInlineUniformBlock;
+```
+
+The VkWriteDescriptorSetAccelerationStructureKHR structure is defined as:
+
+```CXX
+// Provided by VK_KHR_acceleration_structure
+typedef struct VkWriteDescriptorSetAccelerationStructureKHR {
+    VkStructureType                      sType;
+    const void*                          pNext;
+    uint32_t                             accelerationStructureCount;
+    const VkAccelerationStructureKHR*    pAccelerationStructures;
+} VkWriteDescriptorSetAccelerationStructureKHR;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkCopyDescriptorSet {
+    VkStructureType    sType;
+    const void*        pNext;
+    VkDescriptorSet    srcSet;
+    uint32_t           srcBinding;
+    uint32_t           srcArrayElement;
+    VkDescriptorSet    dstSet;
+    uint32_t           dstBinding;
+    uint32_t           dstArrayElement;
+    uint32_t           descriptorCount;
+} VkCopyDescriptorSet;
+```
+
+### Descriptor Update Templates
+
+* Vulkan 1.1 特性 或 ``VK_KHR_descriptor_update_template`` 扩展
+
+A descriptor update template specifies a mapping from descriptor update information in host memory to descriptors in a descriptor set. It is designed to avoid passing redundant information to the driver when frequently updating the same set of descriptors in descriptor sets.
+
+描述符更新模板 描述了 一个映射 host端内存中 描述符 更新信息 -> 描述符集 中的 描述符
+
+描述符更新模板 用于 避免 当频繁更新 相同 描述符集 中的 描述符 的冗余信息推送
+
+描述符更新模板 是个句柄（对象）
+
+```CXX
+// Provided by VK_VERSION_1_1
+VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDescriptorUpdateTemplate)
+```
+
+#### Descriptor Set Updates With Templates
+
+更新大量 描述符集 是一个性能昂贵的操作，因为 应用必需 通过 一个 VkWriteDescriptorSet 将所有要更新的 描述符 或 描述符数组 进行组装。当多个 描述符集 有相同的 描述符 时，更新需要重复相同的状态。
+
+为了应对 同一个 描述符集布局 分配的 多个 相同的 描述符集 中 相同的 描述符 的更新。
+
+``vkUpdateDescriptorSetWithTemplate`` 可用于替代 ``vkUpdateDescriptorSets`` 。
+
+This allows large batches of updates to be executed without having to convert application data structures into a strictly-defined Vulkan data structure.
+
+``VkDescriptorUpdateTemplate`` 允许驱动 将 单一描述符集的 更新操作 通过 一个 内部格式 转换成 多个描述符 的 更新操作。与 ``vkCmdPushDescriptorSetWithTemplate`` 和 ``vkUpdateDescriptorSetWithTemplate`` 结合使用，与使用 ``vkCmdPushDescriptorSet`` 或 ``vkUpdateDescriptorSets`` 相比有更高的性能优势。
+
+这些 描述符本身 并没有 在 ``VkDescriptorUpdateTemplate`` 中指定，而通过 应用提供的 host 的一个内存指针的 偏移 与 vkCmdPushDescriptorSetWithTemplate 和 vkUpdateDescriptorSetWithTemplate 相结合 来指定的。
+
+这允许大批更新的执行 而不需要 将其转换成 Vulkan 定义好的数据 结构体中。
+
+```CXX
+// Provided by VK_VERSION_1_1
+VkResult vkCreateDescriptorUpdateTemplate(
+    VkDevice                                    device,
+    const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkDescriptorUpdateTemplate*                 pDescriptorUpdateTemplate);
+```
+
+```CXX
+// Provided by VK_KHR_descriptor_update_template
+VkResult vkCreateDescriptorUpdateTemplateKHR(
+    VkDevice                                    device,
+    const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkDescriptorUpdateTemplate*                 pDescriptorUpdateTemplate);
+```
+
+```CXX
+// Provided by VK_VERSION_1_1
+typedef struct VkDescriptorUpdateTemplateCreateInfo {
+    VkStructureType                           sType;
+    const void*                               pNext;
+    VkDescriptorUpdateTemplateCreateFlags     flags;
+    uint32_t                                  descriptorUpdateEntryCount;
+    const VkDescriptorUpdateTemplateEntry*    pDescriptorUpdateEntries;
+    VkDescriptorUpdateTemplateType            templateType;
+    VkDescriptorSetLayout                     descriptorSetLayout;
+    VkPipelineBindPoint                       pipelineBindPoint;
+    VkPipelineLayout                          pipelineLayout;
+    uint32_t                                  set;
+} VkDescriptorUpdateTemplateCreateInfo;
+
+// Provided by VK_KHR_descriptor_update_template
+typedef VkDescriptorUpdateTemplateCreateInfo VkDescriptorUpdateTemplateCreateInfoKHR;
+```

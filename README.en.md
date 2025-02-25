@@ -264,7 +264,7 @@ make
 * `FrameGraphSample` - `FrameGraph`的示例，目前该示例仅供测试（`FrameGraph`未实现完成），您可以通过该示例了解`FrameGraph`的基本流程
 -->
 
-# Vulkan 映射
+# Vulkan Map
 
 | Core | Vulkan |
 | :------------ |---------------:|

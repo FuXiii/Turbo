@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/2/25
+
+>* 更新 `README.en.md` 修正。
+>* 更新 `docs\Memo.md` 研究 `描述符`。
+
 ## 2025/2/24
 
 >* 更新 `README.en.md` 增加英文版的 `README`。
