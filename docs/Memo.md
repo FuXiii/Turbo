@@ -7,7 +7,15 @@
 * ``问``：相同 set 中 binding 不连续，会如何？``答``：可以不连续（规范中有明确说明）
 * ``问``：相同 pipeline layout 中 set 不连续，会如何？``答``：pipeline layout 中没有设置 set 号的接口。只有将 一堆 描述符集 按照数组塞入 pipeline layout 中。因此 需要 “连续的” set（描述符集）
 
-* 什么是 ``variable-sized`` 描述符（Vulkan 1.2）
+* ``问``：什么是 ``variable-sized`` 描述符（Vulkan 1.2）``答``：好像 是通过外部设置 描述符中元素数组长度 的另一种方式？
+
+## Need Dev
+
+* 描述符，描述符集，管线布局。`DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。
+  * Uniform Buffer 和 Dynamic Uniform Buffer。考虑是否为开发者提供外部配置接口，如果提供，接口如何设计？
+  * Storage Buffer 和 Dynamic Storage Buffer。考虑是否为开发者提供外部配置接口，如果提供，接口如何设计？
+  * VkDescriptorUpdateTemplate
+* VkBufferView
 
 ## code
 
@@ -1049,7 +1057,7 @@ VkResult vkCreateDescriptorUpdateTemplateKHR(
 typedef struct VkDescriptorUpdateTemplateCreateInfo {
     VkStructureType                           sType;
     const void*                               pNext;
-    VkDescriptorUpdateTemplateCreateFlags     flags;
+    VkDescriptorUpdateTemplateCreateFlags     flags; 
     uint32_t                                  descriptorUpdateEntryCount;
     const VkDescriptorUpdateTemplateEntry*    pDescriptorUpdateEntries;
     VkDescriptorUpdateTemplateType            templateType;
@@ -1061,4 +1069,240 @@ typedef struct VkDescriptorUpdateTemplateCreateInfo {
 
 // Provided by VK_KHR_descriptor_update_template
 typedef VkDescriptorUpdateTemplateCreateInfo VkDescriptorUpdateTemplateCreateInfoKHR;
+```
+
+* ``flags`` reserved for future use
+* ``descriptorUpdateEntryCount`` pDescriptorUpdateEntries 数量
+* ``pDescriptorUpdateEntries`` VkDescriptorUpdateTemplateEntry 数组
+* ``templateType`` 模板类型。
+  * 如果是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET`` 只能通过固定的 ``descriptorSetLayout`` 更新 描述符集
+  * 如果是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS`` 只能通过 ``pipelineBindPoint`` ， ``pipelineLayout`` 和 ``set`` 推送 描述符集
+* ``descriptorSetLayout`` 用于创建 模板的 描述符集布局。通过该 模板 更新的 描述符集们 的布局 必须 与 ``descriptorSetLayout`` 布局 相互匹配（is the same as, or defined identically to）。如果 ``templateType`` 不是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET`` 的话，则忽略该 ``descriptorSetLayout`` 参数。
+* ``pipelineBindPoint`` 指定何种类型的 pipeline 将会使用 描述符。如果 ``templateType`` 不是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS`` 的话，则忽略该 ``descriptorSetLayout`` 参数。
+* ``pipelineLayout`` 指定 目标 pipelineLayout 进行绑定。如果 ``templateType`` 不是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS`` 的话，则忽略该 ``descriptorSetLayout`` 参数。
+* ``set`` 指定 目标 pipelineLayout 中要进行更新的 描述符集号。如果 ``templateType`` 不是 ``VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS`` 的话，则忽略该 ``descriptorSetLayout`` 参数。
+
+```CXX
+// Provided by VK_VERSION_1_1
+typedef struct VkDescriptorUpdateTemplateEntry {
+    uint32_t            dstBinding;
+    uint32_t            dstArrayElement;
+    uint32_t            descriptorCount;
+    VkDescriptorType    descriptorType;
+    size_t              offset;
+    size_t              stride;
+} VkDescriptorUpdateTemplateEntry;
+```
+
+```CXX
+const char *ptr = (const char *)pData + pDescriptorUpdateEntries[i].offset + j * pDescriptorUpdateEntries[i].stride
+```
+
+```CXX
+// Provided by VK_VERSION_1_1
+void vkUpdateDescriptorSetWithTemplate(
+    VkDevice                                    device,
+    VkDescriptorSet                             descriptorSet,
+    VkDescriptorUpdateTemplate                  descriptorUpdateTemplate,
+    const void*                                 pData);
+
+// Provided by VK_KHR_descriptor_update_template
+void vkUpdateDescriptorSetWithTemplateKHR(
+    VkDevice                                    device,
+    VkDescriptorSet                             descriptorSet,
+    VkDescriptorUpdateTemplate                  descriptorUpdateTemplate,
+    const void*                                 pData);
+```
+
+* ``descriptorSet`` 要更新的 描述符集
+* ``descriptorUpdateTemplate`` 用于指定 ``pData`` 到 描述符集 的 更新映射
+* ``pData`` 指向一个内存，包含 一个 或 多个  ``VkDescriptorImageInfo`` 或 ``VkDescriptorBufferInfo`` 或 ``VkBufferView`` 或 ``VkAccelerationStructureKHR`` 或 ``VkAccelerationStructureNV``
+用于更新写入描述符
+
+### Descriptor Set Binding
+
+```CXX
+// Provided by VK_VERSION_1_0
+void vkCmdBindDescriptorSets(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineBindPoint                         pipelineBindPoint,
+    VkPipelineLayout                            layout,
+    uint32_t                                    firstSet,
+    uint32_t                                    descriptorSetCount,
+    const VkDescriptorSet*                      pDescriptorSets,
+    uint32_t                                    dynamicOffsetCount,
+    const uint32_t*                             pDynamicOffsets);
+```
+
+### Push Descriptor Updates
+
+Vulkan 1.4 和 ``VK_KHR_push_descriptor`` 扩展特性
+
+应用可以将描述符的更新记录到命令缓存中
+
+```CXX
+// Provided by VK_VERSION_1_4
+void vkCmdPushDescriptorSet(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineBindPoint                         pipelineBindPoint,
+    VkPipelineLayout                            layout,
+    uint32_t                                    set,
+    uint32_t                                    descriptorWriteCount,
+    const VkWriteDescriptorSet*                 pDescriptorWrites);
+
+// Provided by VK_KHR_push_descriptor
+void vkCmdPushDescriptorSetKHR(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineBindPoint                         pipelineBindPoint,
+    VkPipelineLayout                            layout,
+    uint32_t                                    set,
+    uint32_t                                    descriptorWriteCount,
+    const VkWriteDescriptorSet*                 pDescriptorWrites);
+```
+
+* Push descriptors 在 command buffer 内部进行存储并管理的，而不是写入描述符集之后进行绑定。
+* Push descriptors 允许增量更新描述符，而不需要管理描述符集的生命周期。
+
+* 当一个 command buffer 开始记录指令，所有的 push descriptors 都是 未定义 的。
+
+* Each element of pDescriptorWrites is interpreted as in VkWriteDescriptorSet, except the dstSet member is ignored.
+
+* Push descriptors 不支持 dynamic storage/uniform buffer
+
+```CXX
+// Provided by VK_VERSION_1_4
+void vkCmdPushDescriptorSet2(
+    VkCommandBuffer                             commandBuffer,
+    const VkPushDescriptorSetInfo*              pPushDescriptorSetInfo);
+
+// Provided by VK_KHR_maintenance6 with VK_KHR_push_descriptor
+void vkCmdPushDescriptorSet2KHR(
+    VkCommandBuffer                             commandBuffer,
+    const VkPushDescriptorSetInfo*              pPushDescriptorSetInfo);
+```
+
+```CXX
+// Provided by VK_VERSION_1_4
+typedef struct VkPushDescriptorSetInfo {
+    VkStructureType                sType;
+    const void*                    pNext;
+    VkShaderStageFlags             stageFlags;
+    VkPipelineLayout               layout;
+    uint32_t                       set;
+    uint32_t                       descriptorWriteCount;
+    const VkWriteDescriptorSet*    pDescriptorWrites;
+} VkPushDescriptorSetInfo;
+```
+
+与 ``vkCmdPushDescriptorSet`` 区别是多了个 ``stageFlags`` 可访问着色器阶段设置。
+
+### Push Descriptor Updates With Descriptor Update Templates
+
+```CXX
+// Provided by VK_VERSION_1_4
+void vkCmdPushDescriptorSetWithTemplate(
+    VkCommandBuffer                             commandBuffer,
+    VkDescriptorUpdateTemplate                  descriptorUpdateTemplate,
+    VkPipelineLayout                            layout,
+    uint32_t                                    set,
+    const void*                                 pData);
+
+// Provided by VK_KHR_descriptor_update_template with VK_KHR_push_descriptor, VK_KHR_push_descriptor with VK_VERSION_1_1 or VK_KHR_descriptor_update_template
+void vkCmdPushDescriptorSetWithTemplateKHR(
+    VkCommandBuffer                             commandBuffer,
+    VkDescriptorUpdateTemplate                  descriptorUpdateTemplate,
+    VkPipelineLayout                            layout,
+    uint32_t                                    set,
+    const void*                                 pData);
+```
+
+### Descriptor Buffers
+
+如果开启 ``descriptorBuffer`` 特性，可以通过 buffers 指定 描述符集，而不是 描述符集 对象。
+
+#### Putting Descriptors in Memory
+
+可以通过 ``Vulkan API`` 获取 描述符数据，并且定位给定的 描述符集布局 在内存中的布局，并在正确的位置写入数据。
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+void vkGetDescriptorSetLayoutSizeEXT(
+    VkDevice                                    device,
+    VkDescriptorSetLayout                       layout,
+    VkDeviceSize*                               pLayoutSizeInBytes);
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+void vkGetDescriptorSetLayoutBindingOffsetEXT(
+    VkDevice                                    device,
+    VkDescriptorSetLayout                       layout,
+    uint32_t                                    binding,
+    VkDeviceSize*                               pOffset);
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+void vkGetDescriptorEXT(
+    VkDevice                                    device,
+    const VkDescriptorGetInfoEXT*               pDescriptorInfo,
+    size_t                                      dataSize,
+    void*                                       pDescriptor);
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+typedef struct VkDescriptorGetInfoEXT {
+    VkStructureType        sType;
+    const void*            pNext;
+    VkDescriptorType       type;
+    VkDescriptorDataEXT    data;
+} VkDescriptorGetInfoEXT;
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+typedef union VkDescriptorDataEXT {
+    const VkSampler*                     pSampler;
+    const VkDescriptorImageInfo*         pCombinedImageSampler;
+    const VkDescriptorImageInfo*         pInputAttachmentImage;
+    const VkDescriptorImageInfo*         pSampledImage;
+    const VkDescriptorImageInfo*         pStorageImage;
+    const VkDescriptorAddressInfoEXT*    pUniformTexelBuffer;
+    const VkDescriptorAddressInfoEXT*    pStorageTexelBuffer;
+    const VkDescriptorAddressInfoEXT*    pUniformBuffer;
+    const VkDescriptorAddressInfoEXT*    pStorageBuffer;
+    VkDeviceAddress                      accelerationStructure;
+} VkDescriptorDataEXT;
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+typedef struct VkDescriptorAddressInfoEXT {
+    VkStructureType    sType;
+    void*              pNext;
+    VkDeviceAddress    address;
+    VkDeviceSize       range;
+    VkFormat           format;
+} VkDescriptorAddressInfoEXT;
+```
+
+##### Binding Descriptor Buffers
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+void vkCmdBindDescriptorBuffersEXT(
+    VkCommandBuffer                             commandBuffer,
+    uint32_t                                    bufferCount,
+    const VkDescriptorBufferBindingInfoEXT*     pBindingInfos);
+```
+
+```CXX
+// Provided by VK_EXT_descriptor_buffer
+typedef struct VkDescriptorBufferBindingInfoEXT {
+    VkStructureType       sType;
+    const void*           pNext;
+    VkDeviceAddress       address;
+    VkBufferUsageFlags    usage;
+} VkDescriptorBufferBindingInfoEXT;
 ```
