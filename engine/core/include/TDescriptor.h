@@ -48,7 +48,11 @@ typedef enum class TDescriptorType
     UNIFORM_BUFFER_DYNAMIC = 8,
     STORAGE_BUFFER_DYNAMIC = 9,
     INPUT_ATTACHMENT = 10,
-    ACCELERATION_STRUCTURE = 1000150000 // FIXME: How to maintain VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV
+    // INLINE_UNIFORM_BLOCK = 1000138000,   // VK_VERSION_1_3
+    ACCELERATION_STRUCTURE = 1000150000, // VK_KHR_acceleration_structure
+    // SAMPLE_WEIGHT_IMAGE = 1000440000,    // VK_QCOM_image_processing
+    // BLOCK_MATCH_IMAGE_QCOM = 1000440001, // VK_QCOM_image_processing
+    // MUTABLE = 1000351000,                // VK_EXT_mutable_descriptor_type
 } TDescriptorType;
 
 // Equivalent to VkDescriptorSetLayoutBinding

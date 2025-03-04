@@ -559,7 +559,7 @@ VK_DESCRIPTOR_TYPE_MUTABLE_EXT 表示该描述符可以变化成 VkMutableDescri
 
 当确切的描述符类型为 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 时，被认为时未定义描述符，如果着色器希望的描述符类型不是绑定的相应类型，对应的描述符类型也是未定义的。
 
-*题外话：也许可以用于占位符* 不需要了！！！ 后文可以通过设置 VkDescriptorSetLayoutBinding::descriptorCount = 0 来进行占位
+*题外话：也许可以用于占位符* 不需要了！！！ 后文可以通过设置 VkDescriptorSetLayoutBinding::descriptorCount = 0 来进行占位（VkDescriptorSetLayoutBinding::descriptorCount is zero this binding entry is reserved and the resource must not be accessed from any stage via this binding within any pipeline using the set layout.）
 
 查询哪些描述符类型支持 VK_DESCRIPTOR_TYPE_MUTABLE_EXT ，可以通过 vkGetDescriptorSetLayoutSupport 使用 VK_DESCRIPTOR_TYPE_MUTABLE_EXT 绑定，通过 ``VkMutableDescriptorTypeCreateInfoEXT::pDescriptorTypes`` 传入一系列描述符类型进行查询。
 
