@@ -39,6 +39,8 @@
 
 多出个 `PushConstant` 特性。
 
+不依赖 pipeline
+
 ```CXX
 typedef struct VkPipelineLayoutCreateInfo {
     VkStructureType                 sType;
@@ -145,4 +147,132 @@ typedef struct VkCopyDescriptorSet {
     uint32_t           dstArrayElement;
     uint32_t           descriptorCount;
 } VkCopyDescriptorSet;
+```
+
+#### 绑定
+
+绑定的单位：
+
+某个 ``Pipeline Layout`` 下的多个 描述符集。
+
+```CXX
+// Provided by VK_VERSION_1_0
+void vkCmdBindDescriptorSets(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineBindPoint                         pipelineBindPoint,
+    VkPipelineLayout                            layout,
+    uint32_t                                    firstSet,
+    uint32_t                                    descriptorSetCount,
+    const VkDescriptorSet*                      pDescriptorSets,
+    uint32_t                                    dynamicOffsetCount,
+    const uint32_t*                             pDynamicOffsets);
+```
+
+### 流程 接口
+
+描述符集的原始声明是在着色器中，需要从着色器中反序列化出相关描述符集信息。
+
+```GLSL
+layout(push_constant) uniform xxx;
+layout(set = 0, binding = 0) yyy;
+layout(set = 0, binding = 1) zzz;
+layout(set = 2, binding = 0) nnn;
+...
+```
+
+单个着色器只能推出描述符集的一部分，比如:
+
+```GLSL
+//顶点着色器
+layout(set = 0, binding = 0) x;
+
+//片元着色器
+layout(set = 0, binding = 1) y;
+```
+
+同一个 ``set(0)`` 的不同 ``binding`` 在不同着色器中。这样就需要所有渲染流程（pipeline）的着色器，才能知道全貌。
+
+* shader -> 部分 描述符集
+* pipeline -> 全部 描述符集 （目前Turbo使用该方式）
+
+``分配`` 的单位是 ``Set Layout`` 。可以一次性根据不同 ``Set Layout`` 分配多个 ``Set`` 。
+
+多个 管线着色器 -> Program
+
+```mermaid
+graph TD;
+
+Begin(("开始"))
+End(("结束"))
+
+subgraph Backend;
+    Manager[["后台管理器"]]
+end
+
+VertexShader["Vertex Shader"]
+OtherShader["... Shader"]
+FragmentShader["Fragment Shader"]
+
+Group(("合在一起"))
+
+subgraph PipelineLayout;
+    PipelineLayout_Content_VkPipelineLayout("VkPipelineLayout")
+    PipelineLayout_Content_PushConstant("PushConstant")
+end
+
+PipelineLayout_Content_VkPipelineLayout -.-o PipelineLayout_Content_PushConstant
+
+PipelineLayout-.-oBackend
+
+VertexShader==>Group
+OtherShader==>Group
+FragmentShader==>Group
+Group==导出==>PipelineLayout
+
+Pipeline["Pipeline"]
+
+subgraph DescriptorSetLayouts;
+    DescriptorSetLayout0["描述符集 Set 0 布局"]
+    DescriptorSetLayout1["描述符集 Set 1 布局"]
+    DescriptorSetLayoutOther["描述符集 Set ... 布局"]
+end
+
+DescriptorSet0["描述符集 Set 0"]
+DescriptorSet1["描述符集 Set 1"]
+DescriptorSetOther["描述符集 Set ..."]
+
+PipelineLayout==Create==>Pipeline
+
+PipelineLayout-.-oDescriptorSetLayouts
+DescriptorSetLayouts-.-oBackend
+
+ForEach{"DescriptorSetLayout [i]"}
+
+DescriptorSetLayout0-->ForEach
+DescriptorSetLayout1-->ForEach
+DescriptorSetLayoutOther-->ForEach
+
+ForEach==allocate(...)==>DescriptorSet0
+ForEach==allocate(...)==>DescriptorSet1
+ForEach==allocate(...)==>DescriptorSetOther
+
+subgraph Binding;
+    BindPipeline["绑定 Pipeline"]
+    BindDescriptorSet["绑定 DescriptorSet"]
+end
+
+Pipeline==>BindPipeline
+
+DescriptorSet0==>BindDescriptorSet
+DescriptorSet1==>BindDescriptorSet
+DescriptorSetOther==>BindDescriptorSet
+
+Begin==>VertexShader
+Begin==>OtherShader
+Begin==>FragmentShader
+
+Binding-->End
+
+style Begin fill:#22b14c
+style End fill:#e33023
 ```
