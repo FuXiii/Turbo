@@ -285,6 +285,12 @@ style End fill:#e33023
 ```CXX
 //LayoutManager.h
 
+class Descriptor
+{
+    Type type; //描述符类型
+    size_t count; //数量
+};
+
 class DescriptorSetLayout : public Referenced
 //真正的创建在 Manager 中
 //RefPtr 计数引用自动化管理内存
@@ -296,7 +302,7 @@ class DescriptorSetLayout : public Referenced
 class PipelineLayoutPackage
 {
     VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
-    std::vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+    vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
 };
 
 class PipelineLayout : public Referenced
@@ -305,7 +311,7 @@ class PipelineLayout : public Referenced
 //内部存有 VkPipelineLayout 句柄
 {
     VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
-    std::vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+    vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
 
     PipelineLayout(const vector<Shader*> shaders)
     {
@@ -321,10 +327,27 @@ class LayoutManager
 {
     vector<RefPtr<PipelineLayout>> pipelineLayouts;
 
-
     PipelineLayoutPackage ReuseOrCreateLayout(const vector<Shader*> shaders)
     {
+        using Set = size_t;
+        using Binding = size_t;
 
+        map<Set, map<binding, Descriptor>> set_binding_descriptor_map;
+        for(auto& shader : shaders)
+        {
+            auto& sets = shader.GetSets();
+            for(auto& set : sets)
+            {
+                Set set_id = set.first;
+                map<binding, Descriptor>& bindings = set.second;
+                for(auto binding : bindings)
+                {
+                    //set_binding_map[set_binding.set][set_binding.binding] = Binding(set_binding.type, set_binding.count);
+                }
+            }
+        }
+
+        auto find_result = pipelineLayouts.find_compatible(descriptor_set_layouts);
     }
 };
 
