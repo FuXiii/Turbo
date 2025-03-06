@@ -168,7 +168,7 @@ void vkCmdBindDescriptorSets(
     const uint32_t*                             pDynamicOffsets);
 ```
 
-### 流程 接口
+### 概要设计
 
 描述符集的原始声明是在着色器中，需要从着色器中反序列化出相关描述符集信息。
 
@@ -206,8 +206,9 @@ Begin(("开始"))
 End(("结束"))
 
 subgraph Backend;
-    Manager[["后台管理器"]]
+    Manager[["后台管理器（可复用 Layout）"]]
 end
+
 
 VertexShader["Vertex Shader"]
 OtherShader["... Shader"]
@@ -252,9 +253,9 @@ DescriptorSetLayout0-->ForEach
 DescriptorSetLayout1-->ForEach
 DescriptorSetLayoutOther-->ForEach
 
-ForEach==allocate(...)==>DescriptorSet0
-ForEach==allocate(...)==>DescriptorSet1
-ForEach==allocate(...)==>DescriptorSetOther
+ForEach==allocate(...)||使用已创建的==>DescriptorSet0
+ForEach==allocate(...)||使用已创建的==>DescriptorSet1
+ForEach==allocate(...)||使用已创建的==>DescriptorSetOther
 
 subgraph Binding;
     BindPipeline["绑定 Pipeline"]
@@ -267,6 +268,8 @@ DescriptorSet0==>BindDescriptorSet
 DescriptorSet1==>BindDescriptorSet
 DescriptorSetOther==>BindDescriptorSet
 
+PipelineLayout-.-oBindDescriptorSet
+
 Begin==>VertexShader
 Begin==>OtherShader
 Begin==>FragmentShader
@@ -275,4 +278,55 @@ Binding-->End
 
 style Begin fill:#22b14c
 style End fill:#e33023
+```
+
+### 详细设计
+
+```CXX
+//LayoutManager.h
+
+class DescriptorSetLayout : public Referenced
+//真正的创建在 Manager 中
+//RefPtr 计数引用自动化管理内存
+//内部存有 VkDescriptorSetLayout 句柄
+{
+    
+};
+
+class PipelineLayoutPackage
+{
+    VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
+    std::vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+};
+
+class PipelineLayout : public Referenced
+//真正的创建在 Manager 中
+//RefPtr 计数引用自动化管理内存
+//内部存有 VkPipelineLayout 句柄
+{
+    VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
+    std::vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+
+    PipelineLayout(const vector<Shader*> shaders)
+    {
+        auto pipeline_layout_package = shaders[0].GetDevice().GetLayoutManager()->ReuseOrCreateLayou(shaders);
+
+        this->vkPipelineLayout = pipeline_layout_package.vkPipelineLayout;
+        this->descriptorSetLayouts = pipeline_layout_package.descriptorSetLayouts;
+    }
+};
+
+// 由 Device 创建是个好主意。一个 Device 对应一个 LayoutManager
+class LayoutManager
+{
+    vector<RefPtr<PipelineLayout>> pipelineLayouts;
+
+
+    PipelineLayoutPackage ReuseOrCreateLayout(const vector<Shader*> shaders)
+    {
+
+    }
+};
+
+
 ```
