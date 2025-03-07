@@ -291,18 +291,19 @@ class Descriptor
     size_t count; //数量
 };
 
+using Set = size_t;
+using Binding = size_t;
+
+using Bindings = map<Binding, Descriptor>;
+using Descriptors = map<Set, Bindings>;
+
 class DescriptorSetLayout : public Referenced
 //真正的创建在 Manager 中
 //RefPtr 计数引用自动化管理内存
 //内部存有 VkDescriptorSetLayout 句柄
 {
-    
-};
-
-class PipelineLayoutPackage
-{
-    VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
-    vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+    VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
+    Bindings bindings;
 };
 
 class PipelineLayout : public Referenced
@@ -311,14 +312,14 @@ class PipelineLayout : public Referenced
 //内部存有 VkPipelineLayout 句柄
 {
     VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
-    vector<RefPtr<DescriptorSetLayout>> descriptorSetLayouts;
+    map<Set, RefPtr<DescriptorSetLayout>> layout;
 
     PipelineLayout(const vector<Shader*> shaders)
     {
-        auto pipeline_layout_package = shaders[0].GetDevice().GetLayoutManager()->ReuseOrCreateLayou(shaders);
+        auto pipeline_layout_pair = shaders[0].GetDevice().GetLayoutManager()->ReuseOrCreatePipelineLayout(shaders);
 
-        this->vkPipelineLayout = pipeline_layout_package.vkPipelineLayout;
-        this->descriptorSetLayouts = pipeline_layout_package.descriptorSetLayouts;
+        this->vkPipelineLayout = pipeline_layout_pair.first;
+        this->descriptorSetLayouts = pipeline_layout_pair.second;
     }
 };
 
@@ -327,27 +328,28 @@ class LayoutManager
 {
     vector<RefPtr<PipelineLayout>> pipelineLayouts;
 
-    PipelineLayoutPackage ReuseOrCreateLayout(const vector<Shader*> shaders)
+    pair<VkPipelineLayout, DescriptorSetLayout*> ReuseOrCreatePipelineLayout(const vector<Shader*>& shaders)
     {
-        using Set = size_t;
-        using Binding = size_t;
-
-        map<Set, map<binding, Descriptor>> set_binding_descriptor_map;
+        Descriptors descriptors;
         for(auto& shader : shaders)
         {
-            auto& sets = shader.GetSets();
-            for(auto& set : sets)
+            const Descriptors& descriptors = shader.GetDescriptors();
+            for(auto& set : descriptors)
             {
-                Set set_id = set.first;
-                map<binding, Descriptor>& bindings = set.second;
-                for(auto binding : bindings)
+                for(auto binding : set.second)
                 {
-                    //set_binding_map[set_binding.set][set_binding.binding] = Binding(set_binding.type, set_binding.count);
+                    descriptors[set.first][binding.first] = binding.second;
                 }
             }
         }
 
-        auto find_result = pipelineLayouts.find_compatible(descriptor_set_layouts);
+        auto find_result = pipelineLayouts.find_compatible(descriptors);
+        if(find_result != pipelineLayouts.end())
+        {
+            return *find_result;
+        }
+
+        //TODO: create new pipeline layout
     }
 };
 
