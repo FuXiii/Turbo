@@ -168,6 +168,28 @@ void vkCmdBindDescriptorSets(
     const uint32_t*                             pDynamicOffsets);
 ```
 
+```CXX
+// Provided by VK_VERSION_1_0
+void vkCmdPushConstants(
+    VkCommandBuffer                             commandBuffer,
+    VkPipelineLayout                            layout,
+    VkShaderStageFlags                          stageFlags,
+    uint32_t                                    offset,
+    uint32_t                                    size,
+    const void*                                 pValues);
+```
+
+#### Pipeline Layout 兼容性
+
+如果满足如下条件，说明两个 Pipeline Layout 兼容：
+
+* ``push constants`` 兼容: 使用 相同 的 ``push constant ranges`` 。
+* ``set N`` 兼容: 从 ``set 0`` 到 ``set N`` 使用相同 定义 的 ``descriptor set layouts`` 。
+
+#### 放置位置推荐说明
+
+更新频率越低的 descriptor sets ，越放到 pipeline layout 的开头。更新频率越高的，越放到 pipeline layout 的底部。
+
 ### 概要设计
 
 描述符集的原始声明是在着色器中，需要从着色器中反序列化出相关描述符集信息。
@@ -284,6 +306,7 @@ style End fill:#e33023
 
 ```CXX
 //LayoutManager.h
+//DescriptorLayout.h
 
 class Descriptor
 {
@@ -291,11 +314,22 @@ class Descriptor
     size_t count; //数量
 };
 
+class PushConstant
+{
+    //VkShaderStageFlags    stageFlags;
+
+    uint32_t              offset;
+    uint32_t              size;
+};
+
 using Set = size_t;
 using Binding = size_t;
+using Offset = uint32_t;
+using Size = uint32_t;
 
 using Bindings = map<Binding, Descriptor>;
-using Descriptors = map<Set, Bindings>;
+using Descriptors = map<Set, Bindings>; // 目前只在 Shader.GetDescriptors() 中会用到
+using PushConstants = map<PushConstant, VkShaderStageFlags>;//FIXME: 也许这个可以使用 unorder_map 效率会更高
 
 class DescriptorSetLayout : public Referenced
 //真正的创建在 Manager 中
@@ -313,13 +347,15 @@ class PipelineLayout : public Referenced
 {
     VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
     map<Set, RefPtr<DescriptorSetLayout>> layout;
+    PushConstants pushConstants;
 
     PipelineLayout(const vector<Shader*> shaders)
     {
         auto pipeline_layout_pair = shaders[0].GetDevice().GetLayoutManager()->ReuseOrCreatePipelineLayout(shaders);
 
-        this->vkPipelineLayout = pipeline_layout_pair.first;
-        this->descriptorSetLayouts = pipeline_layout_pair.second;
+        this->vkPipelineLayout = pipeline_layout_pair.pipelineLayout;
+        this->layout = pipeline_layout_pair.layout;
+        this->pushConstants = pipeline_layout_pair.pushConstants;
     }
 };
 
@@ -328,30 +364,54 @@ class LayoutManager
 {
     vector<RefPtr<PipelineLayout>> pipelineLayouts;
 
-    pair<VkPipelineLayout, DescriptorSetLayout*> ReuseOrCreatePipelineLayout(const vector<Shader*>& shaders)
+    pair<VkPipelineLayout, map<Set, RefPtr<DescriptorSetLayout>>> ReuseOrCreatePipelineLayout(const vector<Shader*>& shaders)
     {
+        PushConstants push_constants;//NOTE: 每一个 PushConstant 都需要知道哪些着色器会访问自身
         Descriptors descriptors;
         for(auto& shader : shaders)
         {
-            const Descriptors& descriptors = shader.GetDescriptors();
-            for(auto& set : descriptors)
+            PushConstant push_constant = shader.GetPushConstant();
+            auto& shader_type = shader.GetType();
+            switch(shader_type)
             {
-                for(auto binding : set.second)
-                {
-                    descriptors[set.first][binding.first] = binding.second;
-                }
+                case VERTEX:{push_constants[push_constant.offset][push_constant.size] |= vertex_flag;}break;
+                case FRAGMENT:{push_constants[push_constant.offset][push_constant.size] |= fragment_flag;}break;
+                case ...;
             }
+
+            descriptors.merge(shader.GetDescriptors());
         }
 
-        auto find_result = pipelineLayouts.find_compatible(descriptors);
+        //Find compatible DescriptorSetLayout use Bindings,
+        auto find_result = pipelineLayouts.find_compatible(push_constants, descriptors);//性能敏感性查找。NOTE: 需要单独设计，找的越快越好！见
         if(find_result != pipelineLayouts.end())
         {
             return *find_result;
         }
 
         //TODO: create new pipeline layout
+
+        // If can't found compatible pipeline layout
+        //1. Output DescriptorSetLayout which can be reusable and create which didn't exist previous.
+        //2. Create a new PipelineLayouts, otherwise need find a compatible PipelineLayouts.
+            //3.1 If had found a compatible PipelineLayouts means we can reuse it, otherwise we need create a new one.
     }
 };
-
-
 ```
+
+#### PipelineLayout find_compatible 快速查找
+
+每一个 ``PipelineLayout`` 都是由 ``push_constants`` 和 ``descriptors`` 组成的。
+
+最快的查找方式就是根据 ``push_constants`` 和 ``descriptors`` 生成一个 ``hash`` 值。该值由如下特点：
+
+* 相同的 ``push_constants`` 和 ``descriptors`` 对应的 ``hash`` 值是一样的。
+* ``push_constants`` 和 ``descriptors`` 其中只要有一个项目不相同，``hash`` 值就不一样。
+
+具有相同内容的对象将具有相同的哈希值，不同内容的对象将具有不同的哈希值。
+
+* **现在的问题变成** ：如何对 ``PipelineLayout`` 生成 ``hash`` 值？
+
+``C++`` 标准库中一个 ``hash`` 值为一个 ``std::size_t`` （C++11 起 std::size_t 的位宽度不小于 16，也就是 128 bits）
+
+* **重要** ：需要支持 ``hash`` 冲突处理（哈希碰撞）
