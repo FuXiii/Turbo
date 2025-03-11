@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/11
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
 ## 2025/3/10
 
 >* 更新 `docs\Design\Design.md` 设计 `Descriptor`。

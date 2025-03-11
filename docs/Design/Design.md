@@ -329,7 +329,8 @@ using Size = uint32_t;
 
 using Bindings = map<Binding, Descriptor>;
 using Descriptors = map<Set, Bindings>; // 目前只在 Shader.GetDescriptors() 中会用到
-using PushConstants = map<PushConstant, VkShaderStageFlags>;//FIXME: 也许这个可以使用 unorder_map 效率会更高
+//using PushConstants = map<PushConstant, VkShaderStageFlags>;//FIXME: 也许这个可以使用 unorder_map 效率会更高
+using PushConstants = map<Offset, map<Size, VkShaderStageFlags>>;//FIXME: 也许这个可以使用 unorder_map 效率会更高
 
 class DescriptorSetLayout : public Referenced
 //真正的创建在 Manager 中
@@ -359,10 +360,12 @@ class PipelineLayout : public Referenced
     }
 };
 
+using Hash = std::size_t;
+
 // 由 Device 创建是个好主意。一个 Device 对应一个 LayoutManager
 class LayoutManager
 {
-    vector<RefPtr<PipelineLayout>> pipelineLayouts;
+    unorder_map<Hash, forward_lis<RefPtr<PipelineLayout>>> pipelineLayouts;//NOTE:forward_lis 用于解决 hash 冲突的（概率很小，但不代表不会发生）。
 
     pair<VkPipelineLayout, map<Set, RefPtr<DescriptorSetLayout>>> ReuseOrCreatePipelineLayout(const vector<Shader*>& shaders)
     {
@@ -382,8 +385,14 @@ class LayoutManager
             descriptors.merge(shader.GetDescriptors());
         }
 
-        //Find compatible DescriptorSetLayout use Bindings,
-        auto find_result = pipelineLayouts.find_compatible(push_constants, descriptors);//性能敏感性查找。NOTE: 需要单独设计，找的越快越好！见
+        auto pipeline_layout_hash = [](const PushConstants& pushConstants, const Descriptors& descriptors)->std::size_t
+        {
+
+        };
+
+        //Find compatible DescriptorSetLayout use Bindings
+        //If had found a compatible PipelineLayouts means we can reuse it, otherwise we need create a new one.
+        auto find_result = pipelineLayouts.find(pipeline_layout_hash(push_constants, descriptors));//性能敏感性查找。NOTE: 需要单独设计，找的越快越好！见如下设计说明。
         if(find_result != pipelineLayouts.end())
         {
             return *find_result;
@@ -392,9 +401,9 @@ class LayoutManager
         //TODO: create new pipeline layout
 
         // If can't found compatible pipeline layout
-        //1. Output DescriptorSetLayout which can be reusable and create which didn't exist previous.
-        //2. Create a new PipelineLayouts, otherwise need find a compatible PipelineLayouts.
-            //3.1 If had found a compatible PipelineLayouts means we can reuse it, otherwise we need create a new one.
+        //1. Output(find_result) DescriptorSetLayout which can be reusable and create which didn't exist previous.
+        //2. Create a new PipelineLayouts.
+            //3.1 
     }
 };
 ```
@@ -415,3 +424,26 @@ class LayoutManager
 ``C++`` 标准库中一个 ``hash`` 值为一个 ``std::size_t`` （C++11 起 std::size_t 的位宽度不小于 16，也就是 128 bits）
 
 * **重要** ：需要支持 ``hash`` 冲突处理（哈希碰撞）
+
+##### PipelineLayout 生成 hash
+
+可以选择很多种方案都可生成 ``hash`` ：
+
+* 将 PipelineLayout 结构转换成字符串，再根据字符串生成 ``hash`` 值。
+  * 字符串越短越好，越简洁越好
+    * json
+    * 自定义结构字符串
+
+    * 优势：简单，可读性强
+    * 劣势：相较于直接操作二进制，可能较慢。
+
+* 将 PipelineLayout 结构转换成结构体，再根据结构体数据（二进制）生成 ``hash`` 值。
+  * 结构体越短越好，越简洁越好
+    * 结构体
+
+    * 优势：简单，速度极快。
+    * 劣势：可读性差
+
+**重要：** 声明 ``PipelineLayout`` 生成 ``hash`` 的接口，这样就可以选择不同的 ``hash`` 算法。
+
+**重要：** 根本上是使用 ``PushConstants`` 和 ``Descriptors`` 生成对应 ``PipelineLayout`` 的 ``hash`` 值。
