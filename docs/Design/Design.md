@@ -184,7 +184,51 @@ void vkCmdPushConstants(
 如果满足如下条件，说明两个 Pipeline Layout 兼容：
 
 * ``push constants`` 兼容: 使用 相同 的 ``push constant ranges`` 。
-* ``set N`` 兼容: 从 ``set 0`` 到 ``set N`` 使用相同 定义 的 ``descriptor set layouts`` 。
+* ``set N`` 兼容: 从 ``set 0`` 到 ``set N`` 使用 相同定义(Identically Defined) 的 ``descriptor set layouts`` 。
+  * 此外：要求 ``Pipeline Layout`` 要么 ``不`` 使用 ``VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT`` 要么 ``都`` 使用 创建
+  * 此外：要求 ``push constants`` 兼容
+
+推导 ``set N`` 兼容：如果其中的 Pipeline Layout m 是 Pipeline Layout M 的子集（[0,m]∈[0,M]）则 M 兼容于 m。
+
+相同定义:
+
+Identically Defined Objects:
+Objects of the same type where all arguments to their creation or allocation functions, with the exception of pAllocator, are
+
+1. Vulkan handles which refer to the same object or
+2. identical scalar or enumeration values or
+3. Host pointers which point to an array of values or structures which also satisfy these three constraints.
+
+如果对象的创建如下所有的参数或分配函数相同，则为 相同定义 对象：
+
+1. 相同的 Vulkan 句柄 或
+2. 相同的 标量 或 枚举值 或
+3. Host 端的指针指向数组或结构体，满足这三点的
+
+##### 绑定时 Pipeline Layout 兼容性
+
+绑定 ``descriptor set`` 时：
+
+```CXX
+...
+vkCmdBindingDescriptorSet(PipelineLayout x, Set M...);
+vkCmdBindingDescriptorSet(PipelineLayout y, Set N);
+```
+
+如果绑定 ``Set N`` ，比 ``N`` 小的哪些绑定的 ``Set M`` 们：
+
+* 如果这两次绑定的 ``PipelineLayout x`` 和 ``y`` 之间： ``set M`` 兼容的话，则 [小于M ~ M] 的绑定不受影响。
+* 如果这两次绑定的 ``PipelineLayout x`` 和 ``y`` 之间： ``set M`` ``不`` 兼容的话，则 [小于M ~ M] 的绑定 ``会`` 受影响。
+
+此外
+
+* 如果两次绑定的 ``PipelineLayout x`` 和 ``y`` 之间：``set N`` ``不`` 兼容的话，则之后所有大于 ``N`` 的绑定 ``都会`` 受影响。
+
+当绑定 ``Pipeline`` 的时候，如果与使用的 ``PipelineLayout`` 之间 ``Set N`` 兼容的话，Pipeline 就可以正确访问 [小于N ~ N] 绑定的描述符集。
+
+Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼容的 Pipeline 所访问，而不需要提前绑定某个特定的 Pipeline。同样意味着，当绑定的 Pipeline 发生变化时，描述符集仍可以保持有效，照样可以被新绑定的 Pipeline 所访问。
+
+当绑定 描述符集 的时候 描述符 受到影响（不兼容）的话，则对应的描述符集会被解析成 未定义 形式。
 
 #### 放置位置推荐说明
 
@@ -447,3 +491,18 @@ class LayoutManager
 **重要：** 声明 ``PipelineLayout`` 生成 ``hash`` 的接口，这样就可以选择不同的 ``hash`` 算法。
 
 **重要：** 根本上是使用 ``PushConstants`` 和 ``Descriptors`` 生成对应 ``PipelineLayout`` 的 ``hash`` 值。
+
+```glsl
+//descriptor set layout A
+(set=0, binding=0) sampler;
+(set=0, binding=1) image2D;
+(set=0, binding=2) AccelerationStructure;
+
+//descriptor set layout B
+(set=0, binding=0) sampler;
+(set=0, binding=1) image2D;
+
+//descriptor set layout C
+(set=0, binding=0) sampler;
+(set=0, binding=2) AccelerationStructure;
+```
