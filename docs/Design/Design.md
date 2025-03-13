@@ -205,6 +205,16 @@ Objects of the same type where all arguments to their creation or allocation fun
 2. 相同的 标量 或 枚举值 或
 3. Host 端的指针指向数组或结构体，满足这三点的
 
+##### 归总
+
+###### Descriptor Set Layout 间兼容
+
+如果两个 ``Descriptor Set Layout`` ``A`` 和 ``B`` ，其中 ``B`` 是 ``A`` 的子集（ ``B`` ∈ ``A`` ），则 ``B`` 被 ``A`` 兼容。
+
+###### Pipeline Layout 间兼容
+
+如果两个 ``Pipeline Layout`` ``A`` 和 ``B`` ，其中 ``B`` 中所有的 ``Descriptor Set Layout`` 被 ``A`` 兼容，则 ``B`` 被 ``A`` 兼容。+ Push_Constants 兼容限定
+
 ##### 绑定时 Pipeline Layout 兼容性
 
 绑定 ``descriptor set`` 时：
