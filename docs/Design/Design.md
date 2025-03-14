@@ -215,6 +215,16 @@ Objects of the same type where all arguments to their creation or allocation fun
 
 如果两个 ``Pipeline Layout`` ``A`` 和 ``B`` ，其中 ``B`` 中所有的 ``Descriptor Set Layout`` 被 ``A`` 兼容，则 ``B`` 被 ``A`` 兼容。+ Push_Constants 兼容限定
 
+###### 主要要解决的问题
+
+* 如何快速确定 A 和 B 之间的 子父集关系？
+
+集合关系有如下几种：
+
+* 被包含关系：B 是 A 的子集 -> A 是 B 的父集
+* 部分包含关系：B 部分包含于 A -> A 部分包含于 B
+* 无包含关系：B 与 A 没有交集
+
 ##### 绑定时 Pipeline Layout 兼容性
 
 绑定 ``descriptor set`` 时：
