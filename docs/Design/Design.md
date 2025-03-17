@@ -188,7 +188,7 @@ void vkCmdPushConstants(
   * 此外：要求 ``Pipeline Layout`` 要么 ``不`` 使用 ``VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT`` 要么 ``都`` 使用 创建
   * 此外：要求 ``push constants`` 兼容
 
-推导 ``set N`` 兼容：如果其中的 Pipeline Layout m 是 Pipeline Layout M 的子集（[0,m]∈[0,M]）则 M 兼容于 m。
+推导 ``set N`` 兼容：如果其中的 Pipeline Layout m 是 Pipeline Layout M 的子集（[0,m]∈[0,M]）则 m 被 M 兼容。
 
 相同定义:
 
@@ -204,6 +204,8 @@ Objects of the same type where all arguments to their creation or allocation fun
 1. 相同的 Vulkan 句柄 或
 2. 相同的 标量 或 枚举值 或
 3. Host 端的指针指向数组或结构体，满足这三点的
+
+>* 根据 Vulkan 标准的要求，两 Pipeline Layout 兼容意味着，两个 Pipeline Layout 在形式上一致（结构完全相同），而不存在 子父级 相互兼容的概念？
 
 ##### 归总
 
