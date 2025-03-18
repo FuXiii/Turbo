@@ -252,9 +252,78 @@ Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼
 
 当绑定 描述符集 的时候 描述符 受到影响（不兼容）的话，则对应的描述符集会被解析成 未定义 形式。
 
-#### 放置位置推荐说明
+##### 放置位置推荐说明
 
 更新频率越低的 descriptor sets ，越放到 pipeline layout 的开头。更新频率越高的，越放到 pipeline layout 的底部。
+
+##### 兼容性设计
+
+```mermaid
+
+    graph LR;
+
+    Root(("Root"))
+
+    Set0{{"Set 0"}}
+        Set0-->Set0_Binding0{{"Binding 0"}}
+            Set0_Binding0-->Set0_Binding0_Descriptor[["Descriptor ..."]]
+                Set0_Binding0_Descriptor-->
+                Set0_Binding0_Descriptor_PL0("PL"):::Green-->
+                Set0_Binding0_Descriptor_PL1("PL"):::Yellow-->
+                Set0_Binding0_Descriptor_PL2("PL"):::Red-->
+                Set0_Binding0_Descriptor_PL3("PL"):::Blue
+        Set0-->Set0_Binding1{{"Binding 1"}}
+            Set0_Binding1-->Set0_Binding1_Descriptor[["Descriptor ..."]]
+                Set0_Binding1_Descriptor-->
+                Set0_Binding1_Descriptor_PL0("PL"):::Blue-->
+                Set0_Binding1_Descriptor_PL1("PL"):::Red
+        Set0-->Set0_BindingOther{{"Binding ..."}}
+            Set0_BindingOther-->Set0_BindingOther_Descriptor[["Descriptor ..."]]
+                Set0_BindingOther_Descriptor-->
+                Set0_BindingOther_Descriptor_PL0("PL"):::Yellow-->
+                Set0_BindingOther_Descriptor_PL1("PL"):::Green-->
+                Set0_BindingOther_Descriptor_PL2("PL"):::Red
+
+    Set1{{"Set 1"}}
+        Set1-->Set1_Binding0{{"Binding 0"}}
+            Set1_Binding0-->Set1_Binding0_Descriptor[["Descriptor ..."]]
+                Set1_Binding0_Descriptor-->
+                Set1_Binding0_Descriptor_PL0("PL"):::Red-->
+                Set1_Binding0_Descriptor_PL1("PL"):::Blue
+        Set1-->Set1_Binding1{{"Binding 1"}}
+            Set1_Binding1-->Set1_Binding1_Descriptor[["Descriptor ..."]]
+                Set1_Binding1_Descriptor-->
+                Set1_Binding1_Descriptor_PL0("PL"):::Blue
+        Set1-->Set1_BindingOther{{"Binding ..."}}
+            Set1_BindingOther-->Set1_BindingOther_Descriptor[["Descriptor ..."]]
+                Set1_BindingOther_Descriptor-->
+                Set1_BindingOther_Descriptor_PL0("PL"):::Yellow-->
+                Set1_BindingOther_Descriptor_PL1("PL"):::Green
+
+    SetOther{{"Set ..."}}
+
+    Root-->Set0
+    Root-->Set1
+    Root-->SetOther
+
+    classDef Green fill:#60a917
+    classDef Yellow fill:#f0a30a
+    classDef Red fill:#e51400
+    classDef Blue fill:#0050ef
+
+```
+
+> 说明
+>
+>``PL`` 即 ``Pipeline Layout`` ，相同颜色的 ``PL`` 为同一个 ``Pipeline Layout`` 。将同一个 ``PL`` 根据布局安插在不同“set，binding，descriptor 组”中。
+>
+>当想查询某一输入的`PL`布局是否有兼容的`PL`时，可按照输入的布局查询各binding对应支持的所有`PL`。之后两两合并，保留都存在的元素，最终如果有元素剩余，说明为兼容 `PL` ，否则说明没有找到兼容的 `PL` 需要创建新 `PL`。
+>
+>其中 `两两合并，保留都存在的元素` 有一个快捷的方式：元素教少的先去元素多的中查询，如果有就保留，没有就移除，这样比较调用次数少，快。
+>
+>其中 `查询` 使用 `hash` 值进行查找，快。
+>
+>是否有兼容的 `Descriptor Set Layout` 也可以使用该方式进行快速查询。
 
 ### 概要设计
 
