@@ -323,7 +323,74 @@ Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼
 >
 >其中 `查询` 使用 `hash` 值进行查找，快。
 >
->是否有兼容的 `Descriptor Set Layout` 也可以使用该方式进行快速查询。
+
+```CXX
+
+class PipelineLayout;//指针可为Key（unorder_set，需要特化出对象的hash，而不是用指针形式的hash）
+class Descriptor//可为Key（unorder_map）
+{
+    size_t type;
+    size_t count;
+};
+
+using PipelineLayouts = std::unorder_set<PipelineLayout*>;
+
+using DescriptorsMap = std::unorder_map<Descriptor, PipelineLayouts>;
+
+using Binding = size_t;
+using BindingsMap = std::unorder_map<Binding, DescriptorsMap>;
+
+using Set = size_t;
+using SetsMap = std::unorder_map<Set, BindingsMap>;
+
+using Root = SetsMap;
+
+//展开
+
+std::unorder_map<Set, std::unorder_map<Binding, std::unorder_map<Descriptor, std::unorder_set<PipelineLayout>>>> root；
+
+```
+
+是否有兼容的 `Descriptor Set Layout` 也可以使用类似该方式进行快速查询。
+
+```mermaid
+    graph LR;
+
+    Set0(("Root"))
+        Set0-->Set0_Binding0{{"Binding 0"}}
+            Set0_Binding0-->Set0_Binding0_Descriptor[["Descriptor ..."]]
+                Set0_Binding0_Descriptor-->
+                Set0_Binding0_Descriptor_PL0("DSL"):::Green-->
+                Set0_Binding0_Descriptor_PL1("DSL"):::Yellow-->
+                Set0_Binding0_Descriptor_PL2("DSL"):::Red-->
+                Set0_Binding0_Descriptor_PL3("DSL"):::Blue
+        Set0-->Set0_Binding1{{"Binding 1"}}
+            Set0_Binding1-->Set0_Binding1_Descriptor[["Descriptor ..."]]
+                Set0_Binding1_Descriptor-->
+                Set0_Binding1_Descriptor_PL0("DSL"):::Blue-->
+                Set0_Binding1_Descriptor_PL1("DSL"):::Red
+        Set0-->Set0_BindingOther{{"Binding ..."}}
+            Set0_BindingOther-->Set0_BindingOther_Descriptor[["Descriptor ..."]]
+                Set0_BindingOther_Descriptor-->
+                Set0_BindingOther_Descriptor_PL0("DSL"):::Yellow-->
+                Set0_BindingOther_Descriptor_PL1("DSL"):::Green-->
+                Set0_BindingOther_Descriptor_PL2("DSL"):::Red
+
+    classDef Green fill:#60a917
+    classDef Yellow fill:#f0a30a
+    classDef Red fill:#e51400
+    classDef Blue fill:#0050ef
+```
+
+```CXX
+
+class DescriptorSetLayout;//指针可为Key（unorder_set，需要特化出对象的hash，而不是用指针形式的hash）
+using DescriptorSetLayouts = std::unorder_set<DescriptorSetLayout*>;
+using DescriptorsMap = std::unorder_map<Descriptor, DescriptorSetLayouts>;
+
+using Binding = size_t;
+using BindingsMap = std::unorder_map<Binding, DescriptorsMap>;
+```
 
 ### 概要设计
 

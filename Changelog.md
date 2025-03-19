@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/19
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下增加 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+
 ## 2025/3/18
 
 >* 更新 `docs\Design\Design.md` 设计 `Descriptor`。

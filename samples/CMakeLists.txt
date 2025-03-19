@@ -699,6 +699,7 @@ endif()
 add_sample(ImGuiPassTest ImGuiPassTest.cpp)
 add_sample(InfiniteCoordinateAxis InfiniteCoordinateAxis.cpp)
 add_sample(InfiniteCoordinateAxisPassTest InfiniteCoordinateAxisPassTest.cpp)
+add_sample(TurboAPIDesign_Descriptor TurboAPIDesign_Descriptor.cpp)
 
 add_subdirectory(./FlowField)
 
