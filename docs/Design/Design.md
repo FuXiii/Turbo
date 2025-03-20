@@ -324,6 +324,20 @@ Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼
 >其中 `查询` 使用 `hash` 值进行查找，快。
 >
 
+> **!!!问题!!!**
+>
+>相同类型的描述符但数量不同，数量大的应该是兼容数量小的。比如：
+>
+>
+>```CXX
+>layout(set = 0, binding = 0) uniform sampler[10];//A
+>layout(set = 0, binding = 0) uniform sampler[5];//B
+>```
+>
+>* `B` 应该被 `A` 兼容。
+>
+>但是由于分配描述符集的时候，是按照 `Descriptor Set` 进行分配的，虽然兼容，但可能并不是最优分配，会有冗余。
+
 ```CXX
 
 class PipelineLayout;//指针可为Key（unorder_set，需要特化出对象的hash，而不是用指针形式的hash）
