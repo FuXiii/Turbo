@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/21
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
 ## 2025/3/20
 
 >* `core\thirdparty` 下 `VulkanMemoryAllocator` 更新到最新版的 ``3.2.1`` 。

@@ -324,7 +324,7 @@ Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼
 >其中 `查询` 使用 `hash` 值进行查找，快。
 >
 
-> **!!!问题!!!**
+> **!!!问题!!!**：冗余使用
 >
 >相同类型的描述符但数量不同，数量大的应该是兼容数量小的。比如：
 >
@@ -337,6 +337,10 @@ Pipeline Layout 兼容意味着： 描述符集 可被任意 Pipeline Layout 兼
 >* `B` 应该被 `A` 兼容。
 >
 >但是由于分配描述符集的时候，是按照 `Descriptor Set` 进行分配的，虽然兼容，但可能并不是最优分配，会有冗余。
+>比如使用`A`的布局来承接`B`的描述符，会根据`A`创建`10`个`sampler`，但只使用其中`5`个元素。另外`5`个为冗余创建，造成浪费。
+
+>从描述符池中分配的描述符，使用的是 ``描述符集`` ，如果分配的描述符集有冗余，则会白白浪费珍贵的 ``描述符`` 资源，所以考虑不使用子父兼容性查找，直接按照 `pipeline layout` 中的 `set, binding, descriptor` 进行一致性 `hash` 查找（一样的描述就是一样的布局）。
+>
 
 ```CXX
 
@@ -347,6 +351,7 @@ class Descriptor//可为Key（unorder_map）
     size_t count;
 };
 
+// 兼容性方案:
 using PipelineLayouts = std::unorder_set<PipelineLayout*>;
 
 using DescriptorsMap = std::unorder_map<Descriptor, PipelineLayouts>;
@@ -357,12 +362,35 @@ using BindingsMap = std::unorder_map<Binding, DescriptorsMap>;
 using Set = size_t;
 using SetsMap = std::unorder_map<Set, BindingsMap>;
 
+using Sets = std::unordered_map<Set, DescriptorSetLayout*>;
+using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;
+
 using Root = SetsMap;
 
-//展开
-
+//如上等价展开
 std::unorder_map<Set, std::unorder_map<Binding, std::unorder_map<Descriptor, std::unorder_set<PipelineLayout>>>> root；
 
+// 一致性方案:
+// 需要处理可能的 hash 冲突问题（冲突的概率应该尽可能的小），所以需要 std::unordered_multimap
+std::unordered_multimap<std::size_t/*hash*/, PipelineLayout> root；
+//Hash 使用如下计算得出
+class PipelineLayout
+{
+  private:
+    VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
+
+    Sets sets;
+    PushConstants pushConstants;
+};// sets 和 pushConstants 生成 hash
+//TODO: sets 和 pushConstants 最好合一起归成一个类，这样好封装 hash 算法。这个类叫什么好呢？如下：
+class PipelineLayout
+{
+    class Layout //也许是个好主意
+    {
+        Sets sets;
+        PushConstants pushConstants;
+    };
+};
 ```
 
 是否有兼容的 `Descriptor Set Layout` 也可以使用类似该方式进行快速查询。
@@ -397,6 +425,11 @@ std::unorder_map<Set, std::unorder_map<Binding, std::unorder_map<Descriptor, std
 ```
 
 ```CXX
+class Descriptor
+{
+    Type type; //描述符类型
+    size_t count; //数量
+};
 
 class DescriptorSetLayout;//指针可为Key（unorder_set，需要特化出对象的hash，而不是用指针形式的hash）
 using DescriptorSetLayouts = std::unorder_set<DescriptorSetLayout*>;
@@ -404,6 +437,27 @@ using DescriptorsMap = std::unorder_map<Descriptor, DescriptorSetLayouts>;
 
 using Binding = size_t;
 using BindingsMap = std::unorder_map<Binding, DescriptorsMap>;
+
+using Bindings = std::unordered_map<Binding, Descriptor>;
+
+// 一致性方案:
+// 需要处理可能的 hash 冲突问题（冲突的概率应该尽可能的小），所以需要 std::unordered_multimap
+std::unordered_multimap<std::size_t/*hash*/, DescriptorSetLayout> root;
+//Hash 使用如下计算得出
+class DescriptorSetLayout
+{
+    Bindings bindings;//生成 DescriptorSetLayout 的 hash
+};
+
+//TODO: bindings 最好为一个类，这样好封装 hash 算法。这个类叫什么好呢？如下：
+class PipelineLayout
+{
+    class Layout //也许是个好主意
+    {
+        Sets sets;
+        PushConstants pushConstants;
+    };
+};
 ```
 
 ### 概要设计
