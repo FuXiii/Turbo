@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-class PushConstant//OK
+class PushConstant // OK
 {
   private:
     uint32_t offset = 0;
@@ -33,7 +33,7 @@ class PushConstant//OK
     }
 };
 
-class Descriptor//OK
+class Descriptor // OK
 {
   public:
     enum class Type
@@ -185,8 +185,15 @@ class StorageImage : public Descriptor
 using Binding = size_t;
 using Bindings = std::unordered_map<Binding, Descriptor>;
 
-class DescriptorSetLayout : public Turbo::Core::TReferenced//OK
+class DescriptorSetLayout : public Turbo::Core::TReferenced // OK
 {
+  public:
+    class Layout
+    {
+      private:
+        Bindings bindings;
+    };
+
   private:
     VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
 
@@ -212,7 +219,7 @@ using Offset = uint32_t;
 using Size = uint32_t;
 using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;
 
-class PipelineLayout : public Turbo::Core::TReferenced//OK
+class PipelineLayout : public Turbo::Core::TReferenced // OK
 {
   private:
     VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;

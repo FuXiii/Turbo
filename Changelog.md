@@ -7,6 +7,7 @@
 ## 2025/3/21
 
 >* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下更新 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
 
 ## 2025/3/20
 
