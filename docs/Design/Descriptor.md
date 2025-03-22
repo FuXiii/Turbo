@@ -389,8 +389,10 @@ class PipelineLayout
     {
         Sets sets;
         PushConstants pushConstants;
-    };
+    };//该类可作为 键 使用
 };
+// 一致性方案(使用 Layout 作为键):
+std::unordered_multimap<PipelineLayout::Layout/*hash*/, PipelineLayout> root；
 ```
 
 是否有兼容的 `Descriptor Set Layout` 也可以使用类似该方式进行快速查询。
@@ -450,14 +452,16 @@ class DescriptorSetLayout
 };
 
 //TODO: bindings 最好为一个类，这样好封装 hash 算法。这个类叫什么好呢？如下：
-class PipelineLayout
+class DescriptorSetLayout
 {
     class Layout //也许是个好主意
     {
         Sets sets;
         PushConstants pushConstants;
-    };
+    };//该类可作为 键 使用
 };
+// 一致性方案(使用 Layout 作为键):
+std::unordered_multimap<DescriptorSetLayout::Layout/*hash*/, DescriptorSetLayout> root;
 ```
 
 ### 概要设计
