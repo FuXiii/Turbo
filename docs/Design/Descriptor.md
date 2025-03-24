@@ -456,8 +456,7 @@ class DescriptorSetLayout
 {
     class Layout //也许是个好主意
     {
-        Sets sets;
-        PushConstants pushConstants;
+        Bindings bindings;
     };//该类可作为 键 使用
 };
 // 一致性方案(使用 Layout 作为键):
