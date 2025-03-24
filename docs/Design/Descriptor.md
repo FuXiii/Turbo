@@ -463,6 +463,12 @@ class DescriptorSetLayout
 std::unordered_multimap<DescriptorSetLayout::Layout/*hash*/, DescriptorSetLayout> root;
 ```
 
+DescriptorSetLayout::Layout 的 Hash 计算：
+
+```CXX
+使用 std::bitset 或 将 DescriptorSetLayout::Layout::bindings 数据按照二进制铺开计算 hash 值
+````
+
 ### 概要设计
 
 描述符集的原始声明是在着色器中，需要从着色器中反序列化出相关描述符集信息。

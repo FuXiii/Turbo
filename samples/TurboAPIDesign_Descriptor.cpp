@@ -72,8 +72,8 @@ class Descriptor // OK
     };
 
   private:
-    Type type = Type::SAMPLER; //描述符类型
-    size_t count = 0;          //数量
+    Type type = Type::SAMPLER; // 描述符类型
+    size_t count = 0;          // 数量
 
   public:
     Descriptor() = default;
@@ -83,12 +83,12 @@ class Descriptor // OK
         this->count = count;
     }
 
-    Type GetType() const
+    const Type &GetType() const
     {
         return this->type;
     }
 
-    size_t GetCount() const
+    const size_t &GetCount() const
     {
         return this->count;
     }
@@ -338,14 +338,50 @@ class DescriptorSetLayout : public Turbo::Core::TVulkanHandle // OK
     }
 };
 
-//namespace std {
-//    template<>
-//    class hash<DescriptorSetLayout::Layout>
-//    {
-//
-//    };
-//}
+namespace std
+{
+template <>
+class hash<DescriptorSetLayout::Layout>
+{
+  public:
+    std::size_t operator()(const DescriptorSetLayout::Layout &layout) const
+    {
+        class LayoutHasher
+        {
+          private:
+            std::string *str;
 
+          public:
+          LayoutHasher(const DescriptorSetLayout::Layout &layout)
+            {
+                this->str = new std::string();
+                for (auto &item : layout)
+                {
+                    auto &binding = item.first;
+                    auto &descriptor_type = item.second.GetType();
+                    auto &descriptor_count = item.second.GetCount();
+
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                }
+            }
+
+            ~LayoutHasher()
+            {
+                delete this->str;
+            }
+
+            std::size_t GetHash() const
+            {
+                return std::hash<std::string>{}(*(this->str));
+            }
+        };
+
+        return LayoutHasher(layout).GetHash();
+    }
+};
+} // namespace std
 
 using Set = size_t;
 using Sets = std::unordered_map<Set, Turbo::Core::TRefPtr<DescriptorSetLayout>>;
@@ -606,15 +642,57 @@ int main()
 
     if (true)
     {
-        std::unordered_map<DescriptorSetLayout::Layout, Turbo::Core::TRefPtr<DescriptorSetLayout>> layout_map;
-        if (layout_map.empty())
-        {
-            std::cout << "layout_map empty" << std::endl;
-        }
-        else
-        {
-            std::cout << "layout_map bot empty" << std::endl;
-        }
+        Bindings bindings;
+        bindings.insert({0, Descriptor(Descriptor::Type::SAMPLER)});
+        DescriptorSetLayout::Layout layout_0(bindings);
+        bindings.insert({1, Descriptor(Descriptor::Type::COMBINED_IMAGE_SAMPLER)});
+        DescriptorSetLayout::Layout layout_1(bindings);
+        bindings.insert({2, Descriptor(Descriptor::Type::SAMPLED_IMAGE)});
+        DescriptorSetLayout::Layout layout_2(bindings);
+        bindings.insert({3, Descriptor(Descriptor::Type::STORAGE_IMAGE)});
+        DescriptorSetLayout::Layout layout_3(bindings);
+        bindings.insert({4, Descriptor(Descriptor::Type::UNIFORM_TEXEL_BUFFER)});
+        DescriptorSetLayout::Layout layout_4(bindings);
+        bindings.insert({5, Descriptor(Descriptor::Type::STORAGE_TEXEL_BUFFER)});
+        DescriptorSetLayout::Layout layout_5(bindings);
+        bindings.insert({6, Descriptor(Descriptor::Type::UNIFORM_BUFFER)});
+        DescriptorSetLayout::Layout layout_6(bindings);
+        bindings.insert({7, Descriptor(Descriptor::Type::STORAGE_BUFFER)});
+        DescriptorSetLayout::Layout layout_7(bindings);
+        bindings.insert({8, Descriptor(Descriptor::Type::UNIFORM_BUFFER_DYNAMIC)});
+        DescriptorSetLayout::Layout layout_8(bindings);
+        bindings.insert({9, Descriptor(Descriptor::Type::STORAGE_BUFFER_DYNAMIC)});
+        DescriptorSetLayout::Layout layout_9(bindings);
+        DescriptorSetLayout::Layout layout_12(bindings);
+        bindings.insert({10, Descriptor(Descriptor::Type::INPUT_ATTACHMENT)});
+        DescriptorSetLayout::Layout layout_10(bindings);
+        DescriptorSetLayout::Layout layout_11(bindings);
+
+        // std::cout << "0 " << std::hash<DescriptorSetLayout::Layout>{}(layout_0) << std::endl;
+        // std::cout << "1 " << std::hash<DescriptorSetLayout::Layout>{}(layout_1) << std::endl;
+        // std::cout << "2 " << std::hash<DescriptorSetLayout::Layout>{}(layout_2) << std::endl;
+        // std::cout << "3 " << std::hash<DescriptorSetLayout::Layout>{}(layout_3) << std::endl;
+        // std::cout << "4 " << std::hash<DescriptorSetLayout::Layout>{}(layout_4) << std::endl;
+        // std::cout << "5 " << std::hash<DescriptorSetLayout::Layout>{}(layout_5) << std::endl;
+        // std::cout << "6 " << std::hash<DescriptorSetLayout::Layout>{}(layout_6) << std::endl;
+        // std::cout << "7 " << std::hash<DescriptorSetLayout::Layout>{}(layout_7) << std::endl;
+        // std::cout << "8 " << std::hash<DescriptorSetLayout::Layout>{}(layout_8) << std::endl;
+        // std::cout << "9 " << std::hash<DescriptorSetLayout::Layout>{}(layout_9) << std::endl;
+        // std::cout << "10 "<< std::hash<DescriptorSetLayout::Layout>{}(layout_10) << std::endl;
+
+        std::cout << "0:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_0) << std::endl;
+        std::cout << "1:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_1) << std::endl;
+        std::cout << "2:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_2) << std::endl;
+        std::cout << "3:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_3) << std::endl;
+        std::cout << "4:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_4) << std::endl;
+        std::cout << "5:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_5) << std::endl;
+        std::cout << "6:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_6) << std::endl;
+        std::cout << "7:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_7) << std::endl;
+        std::cout << "8:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_8) << std::endl;
+        std::cout << "9:  " << std::hash<DescriptorSetLayout::Layout>{}(layout_9) << std::endl;
+        std::cout << "12: " << std::hash<DescriptorSetLayout::Layout>{}(layout_12) << std::endl;
+        std::cout << "10: " << std::hash<DescriptorSetLayout::Layout>{}(layout_10) << std::endl;
+        std::cout << "11: " << std::hash<DescriptorSetLayout::Layout>{}(layout_11) << std::endl;
     }
 
     return 0;
