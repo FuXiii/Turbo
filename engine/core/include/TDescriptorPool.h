@@ -16,15 +16,15 @@ class TPipelineLayout;
 class TDescriptorSize : public Turbo::Core::TInfo
 {
   private:
-    TDescriptorType type;
+    TDescriptor::Type type;
     uint32_t count;
 
   public:
-    TDescriptorSize(TDescriptorType type, uint32_t count);
+    TDescriptorSize(TDescriptor::Type type, uint32_t count);
     ~TDescriptorSize() = default;
 
   public:
-    TDescriptorType GetDescriptorType() const;
+    TDescriptor::Type GetDescriptorType() const;
     uint32_t GetDescriptorCount() const;
 
   public:
@@ -47,7 +47,7 @@ class TDescriptorPool : public Turbo::Core::TVulkanHandle
 
   public:
     // TDescriptorPool(const TRefPtr<TDevice> &device, uint32_t maxSetsCount, std::vector<TDescriptorSize> &descriptorSizes);
-    TDescriptorPool(TDevice *device, uint32_t maxSetsCount,const std::vector<TDescriptorSize> &descriptorSizes);
+    TDescriptorPool(TDevice *device, uint32_t maxSetsCount, const std::vector<TDescriptorSize> &descriptorSizes);
 
   protected:
     virtual ~TDescriptorPool();

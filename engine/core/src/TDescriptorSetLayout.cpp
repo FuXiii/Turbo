@@ -6,6 +6,36 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
+Turbo::Core::TDescriptorSetLayout::Layout::Layout(const TBindings &bindings)
+{
+    this->bindings = bindings;
+}
+
+std::size_t Turbo::Core::TDescriptorSetLayout::Layout::GetCount() const
+{
+    return this->bindings.size();
+}
+
+Turbo::Core::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::Layout::begin() const
+{
+    return this->bindings.begin();
+}
+
+Turbo::Core::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::Layout::end() const
+{
+    return this->bindings.end();
+}
+
+bool Turbo::Core::TDescriptorSetLayout::Layout::operator==(const Layout &other) const
+{
+    return this->bindings == other.bindings;
+}
+
+bool Turbo::Core::TDescriptorSetLayout::Layout::operator!=(const Layout &other) const
+{
+    return !((*this) == other);
+}
+
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()
 {
     std::map</*binding*/ uint32_t, std::vector<TDescriptor *>> binding_map;
@@ -113,7 +143,7 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
-Turbo::Core::TDescriptorType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
+Turbo::Core::TDescriptor::Type Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
 {
     for (TDescriptor *dscriptor_item : this->descriptors)
     {

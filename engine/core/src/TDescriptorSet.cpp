@@ -71,7 +71,7 @@ uint32_t Turbo::Core::TDescriptorSet::GetSet() const
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {
-    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
+    Turbo::Core::TDescriptor::Type descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
 
     std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
     for (TBuffer *buffer_item : buffers)
@@ -92,7 +92,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
     vk_write_descriptor_set.dstArrayElement = dstArrayElement;
     vk_write_descriptor_set.descriptorCount = buffers.size();
     vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    if (descriptor_type == Turbo::Core::TDescriptorType::STORAGE_BUFFER)
+    if (descriptor_type == Turbo::Core::TDescriptor::Type::STORAGE_BUFFER)
     {
         vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     }
@@ -171,11 +171,11 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
 {
     std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
 
-    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
+    Turbo::Core::TDescriptor::Type descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
     switch (descriptor_type)
     {
-    case Turbo::Core::TDescriptorType::SAMPLED_IMAGE:
-    case Turbo::Core::TDescriptorType::INPUT_ATTACHMENT: {
+    case Turbo::Core::TDescriptor::Type::SAMPLED_IMAGE:
+    case Turbo::Core::TDescriptor::Type::INPUT_ATTACHMENT: {
         for (TImageView *image_view_item : imageViews)
         {
             VkDescriptorImageInfo vk_descriptor_image_info = {};
@@ -187,7 +187,7 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayEl
             vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
         }
     }
-    case Turbo::Core::TDescriptorType::STORAGE_IMAGE: {
+    case Turbo::Core::TDescriptor::Type::STORAGE_IMAGE: {
         for (TImageView *image_view_item : imageViews)
         {
             VkDescriptorImageInfo vk_descriptor_image_info = {};

@@ -363,7 +363,7 @@ using Set = size_t;
 using SetsMap = std::unorder_map<Set, BindingsMap>;
 
 using Sets = std::unordered_map<Set, DescriptorSetLayout*>;
-using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;
+using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;//NOTE: PushConstants 也可以将其定义成一个类
 
 using Root = SetsMap;
 
@@ -579,6 +579,39 @@ Binding-->End
 
 style Begin fill:#22b14c
 style End fill:#e33023
+```
+
+```CXX
+class Descriptor;
+
+using Set = std::size_t;
+using Binding = std::size_t;
+std::unordered_map<Set, std::unordered_map<Binding, Descriptor>> shader_layout = shader->GetLayout();//太长了，集成到 Shader::Layout 中
+
+class Shader
+{
+    class Layout
+    {
+        //std::unordered_map<Set, std::unordered_map<Binding, Descriptor>> layout;
+        //其中 std::unordered_map<Binding, Descriptor> 与 DescriptorSetLayout::Layout（Bindings）表示同一个事物，替换：
+        std::unordered_map<Set, DescriptorSetLayout::Layout> layout;
+        PushConstants pushConstants;
+        
+        void merge(const Layout& layout);
+    };
+};
+
+//in Pipeline Create
+Pipeline(shaders)
+{
+    Shader::Layout layout;//作为最终多个 shader 总和（合并）的布局：也就是用于创建 Pipeline Layout 的布局结构
+    for(auto& shader : shaders)
+    {
+        layout.merge(shader.GetLayout());
+    }
+
+    PipelineLayout pipeline_layout(layout);//创建 pipeline layout 时指定整体（全部）shader layout
+}
 ```
 
 ### 详细设计

@@ -319,10 +319,11 @@ class DescriptorSetLayout : public Turbo::Core::TVulkanHandle // OK
     }
 
   public:
-    DescriptorSetLayout(Turbo::Core::TDevice *device, const Bindings &bindings)
+    //DescriptorSetLayout(Turbo::Core::TDevice *device, const Bindings &bindings)
+    DescriptorSetLayout(Turbo::Core::TDevice *device, const Layout &layout)
     {
         this->device = device;
-        this->layout = bindings;
+        this->layout = layout;
 
         this->InternalCreate();
     }
@@ -352,7 +353,7 @@ class hash<DescriptorSetLayout::Layout>
             std::string *str;
 
           public:
-          LayoutHasher(const DescriptorSetLayout::Layout &layout)
+            LayoutHasher(const DescriptorSetLayout::Layout &layout)
             {
                 this->str = new std::string();
                 for (auto &item : layout)
@@ -640,7 +641,7 @@ int main()
         descriptor_set_layout_2->GetLayout() == descriptor_set_layout_3->GetLayout() ? std::cout << "[OK] Equal!" << std::endl : std::cout << "[NO] Not Equal!" << std::endl;
     }
 
-    if (true)
+    if (false)
     {
         Bindings bindings;
         bindings.insert({0, Descriptor(Descriptor::Type::SAMPLER)});
@@ -693,6 +694,11 @@ int main()
         std::cout << "12: " << std::hash<DescriptorSetLayout::Layout>{}(layout_12) << std::endl;
         std::cout << "10: " << std::hash<DescriptorSetLayout::Layout>{}(layout_10) << std::endl;
         std::cout << "11: " << std::hash<DescriptorSetLayout::Layout>{}(layout_11) << std::endl;
+    }
+
+    if (true)
+    {
+        
     }
 
     return 0;

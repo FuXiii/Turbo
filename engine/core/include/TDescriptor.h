@@ -2,6 +2,7 @@
 #ifndef TURBO_CORE_TDESCRIPTOR_H
 #define TURBO_CORE_TDESCRIPTOR_H
 #include "TInfo.h"
+#include <unordered_map>
 
 namespace Turbo
 {
@@ -35,52 +36,64 @@ typedef enum class TDescriptorDataType
     DESCRIPTOR_DATA_TYPE_RAYQUERY,
 } TDescriptorDataType;
 
-typedef enum class TDescriptorType
-{
-    SAMPLER = 0,
-    COMBINED_IMAGE_SAMPLER = 1,
-    SAMPLED_IMAGE = 2,
-    STORAGE_IMAGE = 3,
-    UNIFORM_TEXEL_BUFFER = 4,
-    STORAGE_TEXEL_BUFFER = 5,
-    UNIFORM_BUFFER = 6,
-    STORAGE_BUFFER = 7,
-    UNIFORM_BUFFER_DYNAMIC = 8,
-    STORAGE_BUFFER_DYNAMIC = 9,
-    INPUT_ATTACHMENT = 10,
-    // INLINE_UNIFORM_BLOCK = 1000138000,   // VK_VERSION_1_3
-    ACCELERATION_STRUCTURE = 1000150000, // VK_KHR_acceleration_structure
-    // SAMPLE_WEIGHT_IMAGE = 1000440000,    // VK_QCOM_image_processing
-    // BLOCK_MATCH_IMAGE_QCOM = 1000440001, // VK_QCOM_image_processing
-    // MUTABLE = 1000351000,                // VK_EXT_mutable_descriptor_type
-} TDescriptorType;
-
 // Equivalent to VkDescriptorSetLayoutBinding
 class TDescriptor : public Turbo::Core::TInfo
 {
+  public:
+    enum class Type // NOTE: For new Descriptor design
+    {
+        SAMPLER = 0,
+        COMBINED_IMAGE_SAMPLER = 1,
+        SAMPLED_IMAGE = 2,
+        STORAGE_IMAGE = 3,
+        UNIFORM_TEXEL_BUFFER = 4,
+        STORAGE_TEXEL_BUFFER = 5,
+        UNIFORM_BUFFER = 6,
+        STORAGE_BUFFER = 7,
+        UNIFORM_BUFFER_DYNAMIC = 8,
+        STORAGE_BUFFER_DYNAMIC = 9,
+        INPUT_ATTACHMENT = 10,
+
+        INLINE_UNIFORM_BLOCK = 1000138000,                   // Provided by VK_VERSION_1_3
+        ACCELERATION_STRUCTURE_KHR = 1000150000,             // Provided by VK_KHR_acceleration_structure
+        ACCELERATION_STRUCTURE = ACCELERATION_STRUCTURE_KHR, //
+        ACCELERATION_STRUCTURE_NV = 1000165000,              // Provided by VK_NV_ray_tracing
+        SAMPLE_WEIGHT_IMAGE_QCOM = 1000440000,               // Provided by VK_QCOM_image_processing
+        BLOCK_MATCH_IMAGE_QCOM = 1000440001,                 // Provided by VK_QCOM_image_processing
+        MUTABLE_EXT = 1000351000,                            // Provided by VK_EXT_mutable_descriptor_type
+        PARTITIONED_ACCELERATION_STRUCTURE_NV = 1000570000   // Provided by VK_NV_partitioned_acceleration_structure
+    };
+
   private:
     TShader *shader;
 
-    TDescriptorType type;
+    TDescriptor::Type type = TDescriptor::Type::SAMPLER; // NOTE: For new Descriptor design
+    uint32_t count = 0;                                  // NOTE: For new Descriptor design
+
     TDescriptorDataType dataType;
-    uint32_t count;
     uint32_t set;
     uint32_t binding;
     std::string name;
 
   public:
-    TDescriptor(TShader *shader, TDescriptorType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TDescriptor(TShader *shader, TDescriptor::Type type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
+    TDescriptor() = default;                             // NOTE: For new Descriptor design
+    TDescriptor(TDescriptor::Type type, uint32_t count); // NOTE: For new Descriptor design
+
   public:
-    TDescriptorType GetType() const;
+    const TDescriptor::Type &GetType() const;
     VkDescriptorType GetVkDescriptorType() const;
     TDescriptorDataType GetDataType() const;
-    uint32_t GetCount() const;
+    const uint32_t &GetCount() const;
     uint32_t GetSet() const;
     uint32_t GetBinding() const;
     const std::string &GetName() const;
     TShader *GetShader();
+
+    bool operator==(const TDescriptor &other) const;
+    bool operator!=(const TDescriptor &other) const;
 
   public:
     virtual std::string ToString() const override;
@@ -203,6 +216,10 @@ class TAccelerationStructureDescriptor : public TDescriptor
     TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TAccelerationStructureDescriptor();
 };
+
+using TBinding = std::size_t;
+using TBindings = std::unordered_map<TBinding, TDescriptor>;
+
 } // namespace Core
 } // namespace Turbo
 

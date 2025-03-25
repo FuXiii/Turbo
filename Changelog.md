@@ -4,6 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/25
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下更新 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+>* `engine\core` 下 `TDescriptor` 中将 `TDescriptorType` 转移至 `TDescriptor` 类中声明，并重命名为 `Type`。
+>* 将所有 `TDescriptorType` 修正为 `TDescriptor::Type` 声明。
+>* `engine\core` 下 `TDescriptorSetLayout` 新增 `Layout` 子类声明。
+
 ## 2025/3/24
 
 >* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
