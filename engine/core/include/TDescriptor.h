@@ -220,6 +220,18 @@ class TAccelerationStructureDescriptor : public TDescriptor
 using TBinding = std::size_t;
 using TBindings = std::unordered_map<TBinding, TDescriptor>;
 
+using TSet = std::size_t;
+
+class TPushConstants
+{
+  public:
+    using Offset = uint32_t;
+    using Size = uint32_t;
+
+  private:
+    std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>> pushConstants;
+};
+
 } // namespace Core
 } // namespace Turbo
 
