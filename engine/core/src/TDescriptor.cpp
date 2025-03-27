@@ -257,7 +257,6 @@ const Turbo::Core::TPushConstants::TConstants &Turbo::Core::TPushConstants::GetC
 
 void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
 {
-    // FIXME: Need implement
     const auto &source_constants = pushConstants.constants;
     for (auto &offset_item : source_constants)
     {
@@ -265,7 +264,7 @@ void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
         for (auto &size_item : offset_item.second)
         {
             TSize size = size_item.first;
-            VkShaderStageFlags shader_stage_flags = size_item.second;
+            VkShaderStageFlags vk_shader_stage_flags = size_item.second;
 
             {
                 auto offset_find_result = this->constants.find(offset);
@@ -275,19 +274,16 @@ void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
                     auto size_find_result = this_size_map.find(size);
                     if (size_find_result != this_size_map.end())
                     {
-                        // TODO:: merge VkShaderStageFlags
-                        (size_find_result->second) |= shader_stage_flags;
+                        (size_find_result->second) |= vk_shader_stage_flags;
                     }
                     else
                     {
-                        // TODO:: insert: size + VkShaderStageFlags
-                        this_size_map.insert({size, shader_stage_flags});
+                        this_size_map.insert({size, vk_shader_stage_flags});
                     }
                 }
                 else
                 {
-                    // TODO:: insert: offset + size + VkShaderStageFlags
-                    this->constants[offset][size] = shader_stage_flags;
+                    this->constants[offset][size] = vk_shader_stage_flags;
                 }
             }
         }
