@@ -40,7 +40,7 @@ typedef enum class TDescriptorDataType
 class TDescriptor : public Turbo::Core::TInfo
 {
   public:
-    enum class Type // NOTE: For new Descriptor design
+    enum class TType // NOTE: For new Descriptor design
     {
         SAMPLER = 0,
         COMBINED_IMAGE_SAMPLER = 1,
@@ -67,8 +67,8 @@ class TDescriptor : public Turbo::Core::TInfo
   private:
     TShader *shader;
 
-    TDescriptor::Type type = TDescriptor::Type::SAMPLER; // NOTE: For new Descriptor design
-    uint32_t count = 0;                                  // NOTE: For new Descriptor design
+    TDescriptor::TType type = TDescriptor::TType::SAMPLER; // NOTE: For new Descriptor design
+    uint32_t count = 0;                                    // NOTE: For new Descriptor design
 
     TDescriptorDataType dataType;
     uint32_t set;
@@ -76,14 +76,14 @@ class TDescriptor : public Turbo::Core::TInfo
     std::string name;
 
   public:
-    TDescriptor(TShader *shader, TDescriptor::Type type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
+    TDescriptor(TShader *shader, TDescriptor::TType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
-    TDescriptor() = default;                             // NOTE: For new Descriptor design
-    TDescriptor(TDescriptor::Type type, uint32_t count); // NOTE: For new Descriptor design
+    TDescriptor() = default;                              // NOTE: For new Descriptor design
+    TDescriptor(TDescriptor::TType type, uint32_t count); // NOTE: For new Descriptor design
 
   public:
-    const TDescriptor::Type &GetType() const;
+    const TDescriptor::TType &GetType() const;
     VkDescriptorType GetVkDescriptorType() const;
     TDescriptorDataType GetDataType() const;
     const uint32_t &GetCount() const;
@@ -217,19 +217,29 @@ class TAccelerationStructureDescriptor : public TDescriptor
     ~TAccelerationStructureDescriptor();
 };
 
-using TBinding = std::size_t;
-using TBindings = std::unordered_map<TBinding, TDescriptor>;
-
-using TSet = std::size_t;
-
 class TPushConstants
 {
   public:
-    using Offset = uint32_t;
-    using Size = uint32_t;
+    using TOffset = uint32_t;
+    using TSize = uint32_t;
+    using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
 
   private:
-    std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>> pushConstants;
+    TPushConstants::TConstants constants;
+
+  public:
+    TPushConstants() = default;
+    TPushConstants(const TPushConstants::TConstants &constants);
+    TPushConstants(TPushConstants::TConstants &&constants);
+
+    // TConstants::const_iterator begin() const;
+    // TConstants::const_iterator end() const;
+
+    const TPushConstants::TConstants &GetConstants() const;
+
+    void Merge(const TPushConstants &pushConstants);
+
+    std::string ToString() const;
 };
 
 } // namespace Core

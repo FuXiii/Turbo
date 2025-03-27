@@ -4,6 +4,15 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/27
+
+>* `engine\core` 下 `TDescriptor` 中 `TBinding` 声明转移至 `TDescriptorSetLayout::TLayout` 中。
+>* `engine\core` 下 `TDescriptor` 中 `TBindings` 声明转移至 `TDescriptorSetLayout::TLayout` 中。
+>* `engine\core` 下 `TDescriptor` 中 `Type` 枚举声明重命名为 `TType`。
+>* `engine\core` 下 `TDescriptor` 中 `TSet` 声明转移至 `TShader::TLayout` 中。
+>* `engine\core` 下 `TShader::TLayout` 中增加 `TPushConstants` 成员变量。
+>* `engine\core` 下 `TDescriptor` 中实现 `TPushConstants` 功能。
+
 ## 2025/3/26
 
 >* `engine\core` 下 `TDescriptor` 中新增 `TSet` 声明。

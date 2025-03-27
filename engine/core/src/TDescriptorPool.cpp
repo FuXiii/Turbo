@@ -6,13 +6,13 @@
 #include "TVulkanLoader.h"
 #include "TPipelineLayout.h"
 
-Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptor::Type type, uint32_t count)
+Turbo::Core::TDescriptorSize::TDescriptorSize(TDescriptor::TType type, uint32_t count)
 {
     this->type = type;
     this->count = count;
 }
 
-Turbo::Core::TDescriptor::Type Turbo::Core::TDescriptorSize::GetDescriptorType() const
+Turbo::Core::TDescriptor::TType Turbo::Core::TDescriptorSize::GetDescriptorType() const
 {
     return this->type;
 }
@@ -34,7 +34,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
     {
         switch (descriptor_size_item.GetDescriptorType())
         {
-        case TDescriptor::Type::SAMPLER: {
+        case TDescriptor::TType::SAMPLER: {
 
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -43,7 +43,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::COMBINED_IMAGE_SAMPLER: {
+        case TDescriptor::TType::COMBINED_IMAGE_SAMPLER: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -51,7 +51,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::SAMPLED_IMAGE: {
+        case TDescriptor::TType::SAMPLED_IMAGE: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -59,7 +59,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::STORAGE_IMAGE: {
+        case TDescriptor::TType::STORAGE_IMAGE: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -67,7 +67,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::UNIFORM_TEXEL_BUFFER: {
+        case TDescriptor::TType::UNIFORM_TEXEL_BUFFER: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -75,7 +75,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::STORAGE_TEXEL_BUFFER: {
+        case TDescriptor::TType::STORAGE_TEXEL_BUFFER: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -83,7 +83,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::UNIFORM_BUFFER: {
+        case TDescriptor::TType::UNIFORM_BUFFER: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -91,7 +91,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::STORAGE_BUFFER: {
+        case TDescriptor::TType::STORAGE_BUFFER: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -99,7 +99,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::UNIFORM_BUFFER_DYNAMIC: {
+        case TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -107,7 +107,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::STORAGE_BUFFER_DYNAMIC: {
+        case TDescriptor::TType::STORAGE_BUFFER_DYNAMIC: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -115,7 +115,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::INPUT_ATTACHMENT: {
+        case TDescriptor::TType::INPUT_ATTACHMENT: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -123,7 +123,7 @@ void Turbo::Core::TDescriptorPool::InternalCreate()
             vk_descriptor_pool_sizes.push_back(vk_descriptor_pool_size);
         }
         break;
-        case TDescriptor::Type::ACCELERATION_STRUCTURE: {
+        case TDescriptor::TType::ACCELERATION_STRUCTURE: {
             VkDescriptorPoolSize vk_descriptor_pool_size = {};
             vk_descriptor_pool_size.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
             vk_descriptor_pool_size.descriptorCount = descriptor_size_item.GetDescriptorCount();
@@ -186,51 +186,51 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
         {
             switch (descriptor_size_item.GetDescriptorType())
             {
-            case TDescriptor::Type::SAMPLER: {
+            case TDescriptor::TType::SAMPLER: {
                 sampler_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::COMBINED_IMAGE_SAMPLER: {
+            case TDescriptor::TType::COMBINED_IMAGE_SAMPLER: {
                 combined_image_sampler_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::SAMPLED_IMAGE: {
+            case TDescriptor::TType::SAMPLED_IMAGE: {
                 sampled_image_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::STORAGE_IMAGE: {
+            case TDescriptor::TType::STORAGE_IMAGE: {
                 storage_image_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::UNIFORM_TEXEL_BUFFER: {
+            case TDescriptor::TType::UNIFORM_TEXEL_BUFFER: {
                 uniform_texel_buffer_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::STORAGE_TEXEL_BUFFER: {
+            case TDescriptor::TType::STORAGE_TEXEL_BUFFER: {
                 storage_texel_buffer_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::UNIFORM_BUFFER: {
+            case TDescriptor::TType::UNIFORM_BUFFER: {
                 uniform_buffer_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::STORAGE_BUFFER: {
+            case TDescriptor::TType::STORAGE_BUFFER: {
                 storage_buffer_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::UNIFORM_BUFFER_DYNAMIC: {
+            case TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC: {
                 uniform_buffer_dynamic_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::STORAGE_BUFFER_DYNAMIC: {
+            case TDescriptor::TType::STORAGE_BUFFER_DYNAMIC: {
                 storage_buffer_dynamic_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::INPUT_ATTACHMENT: {
+            case TDescriptor::TType::INPUT_ATTACHMENT: {
                 input_attachment_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
-            case TDescriptor::Type::ACCELERATION_STRUCTURE: {
+            case TDescriptor::TType::ACCELERATION_STRUCTURE: {
                 acceleration_structure_count += descriptor_size_item.GetDescriptorCount();
             }
             break;
@@ -239,73 +239,73 @@ Turbo::Core::TDescriptorPool::TDescriptorPool(TDevice *device, uint32_t maxSetsC
 
         if (sampler_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::SAMPLER, sampler_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::SAMPLER, sampler_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (combined_image_sampler_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::COMBINED_IMAGE_SAMPLER, combined_image_sampler_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::COMBINED_IMAGE_SAMPLER, combined_image_sampler_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (sampled_image_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::SAMPLED_IMAGE, sampled_image_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::SAMPLED_IMAGE, sampled_image_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (storage_image_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::STORAGE_IMAGE, storage_image_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::STORAGE_IMAGE, storage_image_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (uniform_texel_buffer_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::UNIFORM_TEXEL_BUFFER, uniform_texel_buffer_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::UNIFORM_TEXEL_BUFFER, uniform_texel_buffer_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (storage_texel_buffer_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::STORAGE_TEXEL_BUFFER, storage_texel_buffer_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::STORAGE_TEXEL_BUFFER, storage_texel_buffer_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (uniform_buffer_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::UNIFORM_BUFFER, uniform_buffer_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::UNIFORM_BUFFER, uniform_buffer_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (storage_buffer_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::STORAGE_BUFFER, storage_buffer_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::STORAGE_BUFFER, storage_buffer_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (uniform_buffer_dynamic_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::UNIFORM_BUFFER_DYNAMIC, uniform_buffer_dynamic_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC, uniform_buffer_dynamic_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (storage_buffer_dynamic_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::STORAGE_BUFFER_DYNAMIC, storage_buffer_dynamic_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::STORAGE_BUFFER_DYNAMIC, storage_buffer_dynamic_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (input_attachment_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::INPUT_ATTACHMENT, input_attachment_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::INPUT_ATTACHMENT, input_attachment_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 
         if (acceleration_structure_count != 0)
         {
-            TDescriptorSize descriptor_size(TDescriptor::Type::ACCELERATION_STRUCTURE, acceleration_structure_count);
+            TDescriptorSize descriptor_size(TDescriptor::TType::ACCELERATION_STRUCTURE, acceleration_structure_count);
             this->descriptorSizes.push_back(descriptor_size);
         }
 

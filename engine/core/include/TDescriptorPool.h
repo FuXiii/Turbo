@@ -16,15 +16,15 @@ class TPipelineLayout;
 class TDescriptorSize : public Turbo::Core::TInfo
 {
   private:
-    TDescriptor::Type type;
+    TDescriptor::TType type;
     uint32_t count;
 
   public:
-    TDescriptorSize(TDescriptor::Type type, uint32_t count);
+    TDescriptorSize(TDescriptor::TType type, uint32_t count);
     ~TDescriptorSize() = default;
 
   public:
-    TDescriptor::Type GetDescriptorType() const;
+    TDescriptor::TType GetDescriptorType() const;
     uint32_t GetDescriptorCount() const;
 
   public:

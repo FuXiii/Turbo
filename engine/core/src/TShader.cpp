@@ -259,6 +259,34 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants)
+{
+    this->sets = sets;
+    this->pushConstants = pushConstants;
+}
+
+Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants)
+{
+    this->sets = std::move(sets);
+    this->pushConstants = std::move(pushConstants);
+}
+
+const Turbo::Core::TShader::TLayout::TSets &Turbo::Core::TShader::TLayout::GetSets() const
+{
+    return this->sets;
+}
+
+const Turbo::Core::TPushConstants &Turbo::Core::TShader::TLayout::GetPushConstants() const
+{
+    return this->pushConstants;
+}
+
+void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
+{
+    // FIXME: Need implement
+    throw Turbo::Core::TException(TResult::FAIL, "Need implement!", "Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)");
+}
+
 void Turbo::Core::TShader::InternalCreate()
 {
     VkShaderModuleCreateInfo vk_shader_module_create_info = {};
@@ -765,7 +793,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            //size = glsl.get_declared_struct_size(type);
+            // size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface in_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
@@ -805,7 +833,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            //size = glsl.get_declared_struct_size(type);
+            // size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);

@@ -100,10 +100,25 @@ class TShader : public Turbo::Core::TVulkanHandle
         TConstant value;
     };
 
-    class Layout
+    class TLayout
     {
+      public:
+        using TSet = std::size_t;
+        using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
+
       private:
-        std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::Layout> layout;
+        TShader::TLayout::TSets sets;
+        TPushConstants pushConstants;
+
+      public:
+        TLayout() = default;
+        TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants);
+        TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants);
+
+        const TShader::TLayout::TSets &GetSets() const;
+        const TPushConstants &GetPushConstants() const;
+
+        void Merge(const TLayout &layout);
     };
 
   private:

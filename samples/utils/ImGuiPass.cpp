@@ -188,7 +188,7 @@ void ImGuiPass::Init(Turbo::Core::TCommandBuffer *commandBuffer, Turbo::Core::TI
 
         {
             std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
-            descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::Type::COMBINED_IMAGE_SAMPLER, 1));
+            descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 1));
             this->descriptorPool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
         }
 

@@ -2,7 +2,7 @@
 #include "TException.h"
 #include "TShader.h"
 
-Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptor::Type type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
+Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptor::TType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {
     this->shader = shader;
     this->type = type;
@@ -13,7 +13,7 @@ Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptor::Type type, T
     this->name = name;
 }
 
-Turbo::Core::TDescriptor::TDescriptor(TDescriptor::Type type, uint32_t count)
+Turbo::Core::TDescriptor::TDescriptor(TDescriptor::TType type, uint32_t count)
 {
     this->type = type;
     this->count = count;
@@ -23,7 +23,7 @@ Turbo::Core::TDescriptor::~TDescriptor()
 {
 }
 
-const Turbo::Core::TDescriptor::Type &Turbo::Core::TDescriptor::GetType() const
+const Turbo::Core::TDescriptor::TType &Turbo::Core::TDescriptor::GetType() const
 {
     return this->type;
 }
@@ -137,7 +137,7 @@ std::string Turbo::Core::TStructMember::ToString() const
     return std::string();
 }
 
-Turbo::Core::TNaNDescriptor::TNaNDescriptor(uint32_t set) : Turbo::Core::TDescriptor(nullptr, TDescriptor::Type::SAMPLER, TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN, set, 0, 1, "NaN")
+Turbo::Core::TNaNDescriptor::TNaNDescriptor(uint32_t set) : Turbo::Core::TDescriptor(nullptr, TDescriptor::TType::SAMPLER, TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN, set, 0, 1, "NaN")
 {
 }
 
@@ -145,7 +145,7 @@ Turbo::Core::TNaNDescriptor::~TNaNDescriptor()
 {
 }
 
-Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, const std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::UNIFORM_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TUniformBufferDescriptor::TUniformBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name, const std::vector<TStructMember> &members, uint32_t size) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::UNIFORM_BUFFER, dataType, set, binding, count, name)
 {
     this->size = size;
     this->members = members;
@@ -160,7 +160,7 @@ Turbo::Core::TUniformBufferDescriptor::~TUniformBufferDescriptor()
 {
 }
 
-Turbo::Core::TStorageBufferDescriptor::TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::STORAGE_BUFFER, dataType, set, binding, count, name)
+Turbo::Core::TStorageBufferDescriptor::TStorageBufferDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::STORAGE_BUFFER, dataType, set, binding, count, name)
 {
 }
 
@@ -168,7 +168,7 @@ Turbo::Core::TStorageBufferDescriptor::~TStorageBufferDescriptor()
 {
 }
 
-Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
+Turbo::Core::TCombinedImageSamplerDescriptor::TCombinedImageSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::COMBINED_IMAGE_SAMPLER, dataType, set, binding, count, name)
 {
 }
 
@@ -176,7 +176,7 @@ Turbo::Core::TCombinedImageSamplerDescriptor::~TCombinedImageSamplerDescriptor()
 {
 }
 
-Turbo::Core::TSampledImageDescriptor::TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::SAMPLED_IMAGE, dataType, set, binding, count, name)
+Turbo::Core::TSampledImageDescriptor::TSampledImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::SAMPLED_IMAGE, dataType, set, binding, count, name)
 {
 }
 
@@ -184,7 +184,7 @@ Turbo::Core::TSampledImageDescriptor::~TSampledImageDescriptor()
 {
 }
 
-Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::SAMPLER, dataType, set, binding, count, name)
+Turbo::Core::TSamplerDescriptor::TSamplerDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::SAMPLER, dataType, set, binding, count, name)
 {
 }
 
@@ -200,7 +200,7 @@ Turbo::Core::TPushConstantDescriptor::~TPushConstantDescriptor()
 {
 }
 
-Turbo::Core::TInputAttachmentDescriptor::TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::INPUT_ATTACHMENT, dataType, set, binding, count, name)
+Turbo::Core::TInputAttachmentDescriptor::TInputAttachmentDescriptor(uint32_t index, TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::INPUT_ATTACHMENT, dataType, set, binding, count, name)
 {
     this->index = index;
 }
@@ -214,7 +214,7 @@ uint32_t Turbo::Core::TInputAttachmentDescriptor::GetIndex() const
     return this->index;
 }
 
-Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::STORAGE_IMAGE, dataType, set, binding, count, name)
+Turbo::Core::TStorageImageDescriptor::TStorageImageDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::STORAGE_IMAGE, dataType, set, binding, count, name)
 {
 }
 
@@ -222,10 +222,95 @@ Turbo::Core::TStorageImageDescriptor::~TStorageImageDescriptor()
 {
 }
 
-Turbo::Core::TAccelerationStructureDescriptor::TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::Type::ACCELERATION_STRUCTURE, dataType, set, binding, count, name)
+Turbo::Core::TAccelerationStructureDescriptor::TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TDescriptor(shader, TDescriptor::TType::ACCELERATION_STRUCTURE, dataType, set, binding, count, name)
 {
 }
 
 Turbo::Core::TAccelerationStructureDescriptor::~TAccelerationStructureDescriptor()
 {
+}
+
+Turbo::Core::TPushConstants::TPushConstants(const TPushConstants::TConstants &constants)
+{
+    this->constants = constants;
+}
+
+Turbo::Core::TPushConstants::TPushConstants(TPushConstants::TConstants &&constants)
+{
+    this->constants = std::move(constants);
+}
+
+// Turbo::Core::TPushConstants::TConstants::const_iterator Turbo::Core::TPushConstants::begin() const
+//{
+//     return this->constants.begin();
+// }
+//
+// Turbo::Core::TPushConstants::TConstants::const_iterator Turbo::Core::TPushConstants::end() const
+//{
+//     return this->constants.end();
+// }
+
+const Turbo::Core::TPushConstants::TConstants &Turbo::Core::TPushConstants::GetConstants() const
+{
+    return this->constants;
+}
+
+void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
+{
+    // FIXME: Need implement
+    const auto &source_constants = pushConstants.constants;
+    for (auto &offset_item : source_constants)
+    {
+        TOffset offset = offset_item.first;
+        for (auto &size_item : offset_item.second)
+        {
+            TSize size = size_item.first;
+            VkShaderStageFlags shader_stage_flags = size_item.second;
+
+            {
+                auto offset_find_result = this->constants.find(offset);
+                if (offset_find_result != this->constants.end())
+                {
+                    auto &this_size_map = offset_find_result->second;
+                    auto size_find_result = this_size_map.find(size);
+                    if (size_find_result != this_size_map.end())
+                    {
+                        // TODO:: merge VkShaderStageFlags
+                        (size_find_result->second) |= shader_stage_flags;
+                    }
+                    else
+                    {
+                        // TODO:: insert: size + VkShaderStageFlags
+                        this_size_map.insert({size, shader_stage_flags});
+                    }
+                }
+                else
+                {
+                    // TODO:: insert: offset + size + VkShaderStageFlags
+                    this->constants[offset][size] = shader_stage_flags;
+                }
+            }
+        }
+    }
+}
+
+#include <sstream>
+#include <bitset>
+std::string Turbo::Core::TPushConstants::ToString() const
+{
+    std::stringstream ss;
+
+    for (auto &offset_item : this->constants)
+    {
+        auto offset = offset_item.first;
+        for (auto &size_item : offset_item.second)
+        {
+            auto size = size_item.first;
+            auto shader_stage_flags = size_item.second;
+
+            ss << "(offset:" << offset << ", size: " << size << "): " << std::bitset<sizeof(shader_stage_flags) * 8>(shader_stage_flags) << std::endl;
+        }
+    }
+
+    return ss.str();
 }

@@ -13,14 +13,18 @@ class TDevice;
 class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 {
   public:
-    class Layout
+    class TLayout
     {
+      public:
+        using TBinding = std::size_t;
+        using TBindings = std::unordered_map<TBinding, TDescriptor>;
+
       private:
         TBindings bindings;
 
       public:
-        Layout() = default;
-        Layout(const TBindings &bindings);
+        TLayout() = default;
+        TLayout(const TBindings &bindings);
 
         std::size_t GetCount() const;
 
@@ -29,8 +33,8 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
         // TODO: hash for key
 
-        bool operator==(const Layout &other) const;
-        bool operator!=(const Layout &other) const;
+        bool operator==(const TLayout &other) const;
+        bool operator!=(const TLayout &other) const;
     };
 
   private:
@@ -54,7 +58,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
   public:
     uint32_t GetSet() const;
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
-    TDescriptor::Type GetDescriptorType(uint32_t binding) const;
+    TDescriptor::TType GetDescriptorType(uint32_t binding) const;
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;
@@ -66,10 +70,10 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 namespace std
 {
 template <>
-class hash<Turbo::Core::TDescriptorSetLayout::Layout>
+class hash<Turbo::Core::TDescriptorSetLayout::TLayout>
 {
   public:
-    std::size_t operator()(const Turbo::Core::TDescriptorSetLayout::Layout &layout) const
+    std::size_t operator()(const Turbo::Core::TDescriptorSetLayout::TLayout &layout) const
     {
         class TLayoutHasher
         {
@@ -77,7 +81,7 @@ class hash<Turbo::Core::TDescriptorSetLayout::Layout>
             std::string *str = nullptr;
 
           public:
-            TLayoutHasher(const Turbo::Core::TDescriptorSetLayout::Layout &layout)
+            TLayoutHasher(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
             {
                 this->str = new std::string();
                 for (auto &item : layout)

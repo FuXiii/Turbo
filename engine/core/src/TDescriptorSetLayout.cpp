@@ -6,32 +6,32 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
-Turbo::Core::TDescriptorSetLayout::Layout::Layout(const TBindings &bindings)
+Turbo::Core::TDescriptorSetLayout::TLayout::TLayout(const TBindings &bindings)
 {
     this->bindings = bindings;
 }
 
-std::size_t Turbo::Core::TDescriptorSetLayout::Layout::GetCount() const
+std::size_t Turbo::Core::TDescriptorSetLayout::TLayout::GetCount() const
 {
     return this->bindings.size();
 }
 
-Turbo::Core::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::Layout::begin() const
+Turbo::Core::TDescriptorSetLayout::TLayout::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::TLayout::begin() const
 {
     return this->bindings.begin();
 }
 
-Turbo::Core::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::Layout::end() const
+Turbo::Core::TDescriptorSetLayout::TLayout::TBindings::const_iterator Turbo::Core::TDescriptorSetLayout::TLayout::end() const
 {
     return this->bindings.end();
 }
 
-bool Turbo::Core::TDescriptorSetLayout::Layout::operator==(const Layout &other) const
+bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TLayout &other) const
 {
     return this->bindings == other.bindings;
 }
 
-bool Turbo::Core::TDescriptorSetLayout::Layout::operator!=(const Layout &other) const
+bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TLayout &other) const
 {
     return !((*this) == other);
 }
@@ -143,7 +143,7 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
-Turbo::Core::TDescriptor::Type Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
+Turbo::Core::TDescriptor::TType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
 {
     for (TDescriptor *dscriptor_item : this->descriptors)
     {

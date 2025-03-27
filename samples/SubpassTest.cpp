@@ -202,7 +202,7 @@ int main()
     std::cout << vertex_shader->ToString() << std::endl;
     std::cout << fragment_shader->ToString() << std::endl;
 
-    Turbo::Core::TDescriptorSize uniform_buffer_descriptor_size(Turbo::Core::TDescriptor::Type::UNIFORM_BUFFER, 100);
+    Turbo::Core::TDescriptorSize uniform_buffer_descriptor_size(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 100);
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(uniform_buffer_descriptor_size);
 

@@ -13,6 +13,7 @@
 #include <TVulkanHandle.h>
 #include <TVulkanAllocator.h>
 #include <TVulkanLoader.h>
+#include <TDescriptor.h>
 
 class PushConstant // OK
 {
@@ -319,7 +320,7 @@ class DescriptorSetLayout : public Turbo::Core::TVulkanHandle // OK
     }
 
   public:
-    //DescriptorSetLayout(Turbo::Core::TDevice *device, const Bindings &bindings)
+    // DescriptorSetLayout(Turbo::Core::TDevice *device, const Bindings &bindings)
     DescriptorSetLayout(Turbo::Core::TDevice *device, const Layout &layout)
     {
         this->device = device;
@@ -698,7 +699,26 @@ int main()
 
     if (true)
     {
-        
+        Turbo::Core::TPushConstants::TConstants constants_0;
+        constants_0[0][512] = 0b00001;
+        constants_0[10][123] = 0b00011;
+        constants_0[21][456] = 0b00101;
+
+        Turbo::Core::TPushConstants::TConstants constants_1;
+        constants_1[0][512] = 0b00110;
+        constants_1[10][123] = 0b00100;
+        constants_1[21][456] = 0b10001;
+        constants_1[21][455] = 0b01111;
+        constants_1[33][789] = 0b00001;
+
+        Turbo::Core::TPushConstants push_constants_0(constants_0);
+        std::cout << push_constants_0.ToString() << std::endl;
+
+        Turbo::Core::TPushConstants push_constants_1(constants_1);
+        std::cout << push_constants_1.ToString() << std::endl;
+
+        push_constants_0.Merge(push_constants_1);
+        std::cout << push_constants_0.ToString() << std::endl;
     }
 
     return 0;
