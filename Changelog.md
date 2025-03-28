@@ -10,6 +10,7 @@
 >* `engine\core` 下 `TPushConstants` 中优化实现 `ToString()` 成员函数。
 >* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `ToString()` 成员函数。
 >* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `Merge(...)` 成员函数。
+>* `engine\core` 下 `TShader::TLayout` 中实现 `Merge(...)` 成员函数。
 
 ## 2025/3/27
 

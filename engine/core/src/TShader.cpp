@@ -16,6 +16,8 @@
 #include <glslang/Public/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 
+#include <sstream>
+
 Turbo::Core::TInterface::TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
 {
     this->location = location;
@@ -283,8 +285,32 @@ const Turbo::Core::TPushConstants &Turbo::Core::TShader::TLayout::GetPushConstan
 
 void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
 {
-    // FIXME: Need implement
-    throw Turbo::Core::TException(TResult::FAIL, "Need implement!", "Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)");
+    for (auto &set_item : layout.sets)
+    {
+        TSet set = set_item.first;
+        auto set_find_result = this->sets.find(set);
+        if (set_find_result != this->sets.end())
+        {
+            this->sets[set].Merge(set_item.second);
+        }
+        else
+        {
+            this->sets[set] = set_item.second;
+        }
+    }
+
+    this->pushConstants.Merge(layout.pushConstants);
+}
+
+std::string Turbo::Core::TShader::TLayout::ToString() const
+{
+    std::stringstream ss;
+    for (auto &item : this->sets)
+    {
+        ss << item.first << std::endl << item.second.ToString() << std::endl;
+    }
+    ss << this->pushConstants.ToString();
+    return ss.str();
 }
 
 void Turbo::Core::TShader::InternalCreate()

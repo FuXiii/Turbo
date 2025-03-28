@@ -119,6 +119,8 @@ class TShader : public Turbo::Core::TVulkanHandle
         const TPushConstants &GetPushConstants() const;
 
         void Merge(const TLayout &layout);
+
+        std::string ToString() const;
     };
 
   private:
