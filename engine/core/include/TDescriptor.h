@@ -79,8 +79,8 @@ class TDescriptor : public Turbo::Core::TInfo
     TDescriptor(TShader *shader, TDescriptor::TType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TDescriptor();
 
-    TDescriptor() = default;                              // NOTE: For new Descriptor design
-    TDescriptor(TDescriptor::TType type, uint32_t count); // NOTE: For new Descriptor design
+    TDescriptor() = default;                                  // NOTE: For new Descriptor design
+    TDescriptor(TDescriptor::TType type, uint32_t count = 1); // NOTE: For new Descriptor design
 
   public:
     const TDescriptor::TType &GetType() const;

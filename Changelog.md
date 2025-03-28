@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/28
+
+>* `engine\core` 下 `TDescriptor` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TPushConstants` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `Merge(...)` 成员函数。
+
 ## 2025/3/27
 
 >* `engine\core` 下 `TDescriptor` 中 `TBinding` 声明转移至 `TDescriptorSetLayout::TLayout` 中。

@@ -31,10 +31,14 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
         TBindings::const_iterator begin() const;
         TBindings::const_iterator end() const;
 
+        void Merge(const TLayout &layout);
+
         // TODO: hash for key
 
         bool operator==(const TLayout &other) const;
         bool operator!=(const TLayout &other) const;
+
+        std::string ToString() const;
     };
 
   private:

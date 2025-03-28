@@ -1,6 +1,7 @@
 #include "TDescriptor.h"
 #include "TException.h"
 #include "TShader.h"
+#include <sstream>
 
 Turbo::Core::TDescriptor::TDescriptor(TShader *shader, TDescriptor::TType type, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name) : Turbo::Core::TInfo()
 {
@@ -75,7 +76,88 @@ bool Turbo::Core::TDescriptor::operator!=(const TDescriptor &other) const
 
 std::string Turbo::Core::TDescriptor::ToString() const
 {
-    return std::string();
+    std::stringstream ss;
+    auto this_type_to_str = [](TDescriptor::TType type) -> std::string {
+        switch (type)
+        {
+        case TDescriptor::TType::SAMPLER: {
+            return "SAMPLER";
+        }
+        break;
+        case TDescriptor::TType::COMBINED_IMAGE_SAMPLER: {
+            return "COMBINED_IMAGE_SAMPLER";
+        }
+        break;
+        case TDescriptor::TType::SAMPLED_IMAGE: {
+            return "SAMPLED_IMAGE";
+        }
+        break;
+        case TDescriptor::TType::STORAGE_IMAGE: {
+            return "STORAGE_IMAGE";
+        }
+        break;
+        case TDescriptor::TType::UNIFORM_TEXEL_BUFFER: {
+            return "UNIFORM_TEXEL_BUFFER";
+        }
+        break;
+        case TDescriptor::TType::STORAGE_TEXEL_BUFFER: {
+            return "STORAGE_TEXEL_BUFFER";
+        }
+        break;
+        case TDescriptor::TType::UNIFORM_BUFFER: {
+            return "UNIFORM_BUFFER";
+        }
+        break;
+        case TDescriptor::TType::STORAGE_BUFFER: {
+            return "STORAGE_BUFFER";
+        }
+        break;
+        case TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC: {
+            return "UNIFORM_BUFFER_DYNAMIC";
+        }
+        break;
+        case TDescriptor::TType::STORAGE_BUFFER_DYNAMIC: {
+            return "STORAGE_BUFFER_DYNAMIC";
+        }
+        break;
+        case TDescriptor::TType::INPUT_ATTACHMENT: {
+            return "INPUT_ATTACHMENT";
+        }
+        break;
+        case TDescriptor::TType::INLINE_UNIFORM_BLOCK: {
+            return "INLINE_UNIFORM_BLOCK";
+        }
+        break;
+        case TDescriptor::TType::ACCELERATION_STRUCTURE: {
+            return "ACCELERATION_STRUCTURE";
+        }
+        break;
+        case TDescriptor::TType::ACCELERATION_STRUCTURE_NV: {
+            return "ACCELERATION_STRUCTURE_NV";
+        }
+        break;
+        case TDescriptor::TType::SAMPLE_WEIGHT_IMAGE_QCOM: {
+            return "SAMPLE_WEIGHT_IMAGE_QCOM";
+        }
+        break;
+        case TDescriptor::TType::BLOCK_MATCH_IMAGE_QCOM: {
+            return "BLOCK_MATCH_IMAGE_QCOM";
+        }
+        break;
+        case TDescriptor::TType::MUTABLE_EXT: {
+            return "MUTABLE_EXT";
+        }
+        break;
+        case TDescriptor::TType::PARTITIONED_ACCELERATION_STRUCTURE_NV: {
+            return "PARTITIONED_ACCELERATION_STRUCTURE_NV";
+        }
+        break;
+        }
+
+        return "UNKNOWN";
+    };
+    ss << this_type_to_str(this->type) << "[" << this->count << "]";
+    return ss.str();
 }
 
 Turbo::Core::TStructMember::TStructMember(TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TInfo()
@@ -294,19 +376,28 @@ void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
 #include <bitset>
 std::string Turbo::Core::TPushConstants::ToString() const
 {
-    std::stringstream ss;
-
-    for (auto &offset_item : this->constants)
+    std::string result;
     {
-        auto offset = offset_item.first;
-        for (auto &size_item : offset_item.second)
-        {
-            auto size = size_item.first;
-            auto shader_stage_flags = size_item.second;
+        std::stringstream ss;
 
-            ss << "(offset:" << offset << ", size: " << size << "): " << std::bitset<sizeof(shader_stage_flags) * 8>(shader_stage_flags) << std::endl;
+        for (auto &offset_item : this->constants)
+        {
+            auto offset = offset_item.first;
+            for (auto &size_item : offset_item.second)
+            {
+                auto size = size_item.first;
+                auto shader_stage_flags = size_item.second;
+
+                ss << "(offset:" << offset << ", size: " << size << "): " << std::bitset<sizeof(shader_stage_flags) * 8>(shader_stage_flags) << std::endl;
+            }
+        }
+
+        result = std::move(ss.str());
+        if (!result.empty())
+        {
+            result.pop_back();
         }
     }
 
-    return ss.str();
+    return result;
 }

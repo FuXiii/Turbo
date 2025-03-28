@@ -5,6 +5,7 @@
 #include "TShader.h"
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
+#include <sstream>
 
 Turbo::Core::TDescriptorSetLayout::TLayout::TLayout(const TBindings &bindings)
 {
@@ -26,6 +27,19 @@ Turbo::Core::TDescriptorSetLayout::TLayout::TBindings::const_iterator Turbo::Cor
     return this->bindings.end();
 }
 
+void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TLayout &layout)
+{
+    for (auto &item : layout)
+    {
+        auto &binding = item.first;
+        auto find_result = this->bindings.find(binding);
+        if (find_result == this->bindings.end())
+        {
+            this->bindings.insert({binding, item.second});
+        }
+    }
+}
+
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TLayout &other) const
 {
     return this->bindings == other.bindings;
@@ -34,6 +48,26 @@ bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TLayout &other
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TLayout &other) const
 {
     return !((*this) == other);
+}
+
+std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
+{
+    std::string result;
+    {
+        std::stringstream ss;
+        for (auto &item : this->bindings)
+        {
+            ss << item.first << ": " << item.second.ToString() << std::endl;
+        }
+
+        result = std::move(ss.str());
+        if (!result.empty())
+        {
+            result.pop_back();
+        }
+    }
+
+    return result;
 }
 
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()

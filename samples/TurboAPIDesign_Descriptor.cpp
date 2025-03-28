@@ -14,6 +14,7 @@
 #include <TVulkanAllocator.h>
 #include <TVulkanLoader.h>
 #include <TDescriptor.h>
+#include <TDescriptorSetLayout.h>
 
 class PushConstant // OK
 {
@@ -697,7 +698,7 @@ int main()
         std::cout << "11: " << std::hash<DescriptorSetLayout::Layout>{}(layout_11) << std::endl;
     }
 
-    if (true)
+    if (false)
     {
         Turbo::Core::TPushConstants::TConstants constants_0;
         constants_0[0][512] = 0b00001;
@@ -719,6 +720,33 @@ int main()
 
         push_constants_0.Merge(push_constants_1);
         std::cout << push_constants_0.ToString() << std::endl;
+    }
+
+    if (true)
+    {
+        Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
+        bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});
+        bindings_0.insert({2, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 2)});
+        bindings_0.insert({12, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE, 30)});
+        bindings_0.insert({23, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE, 40)});
+        bindings_0.insert({43, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER, 50)});
+
+        Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_1;
+        bindings_1.insert({55, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_TEXEL_BUFFER, 60)});
+        bindings_1.insert({16, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 70)});
+        bindings_1.insert({67, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER, 80)});
+        bindings_1.insert({88, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC, 90)});
+        bindings_1.insert({99, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC, 100)});
+        bindings_1.insert({100, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT, 2000)});
+
+        Turbo::Core::TDescriptorSetLayout::TLayout layout_0(bindings_0);
+        Turbo::Core::TDescriptorSetLayout::TLayout layout_1(bindings_1);
+        std::cout << layout_0.ToString() << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << layout_1.ToString() << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        layout_0.Merge(layout_1);
+        std::cout << layout_0.ToString() << std::endl;
     }
 
     return 0;
