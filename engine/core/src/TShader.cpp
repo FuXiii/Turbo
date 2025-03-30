@@ -273,6 +273,11 @@ Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushCons
     this->pushConstants = std::move(pushConstants);
 }
 
+bool Turbo::Core::TShader::TLayout::Empty() const
+{
+    return this->sets.empty() || this->pushConstants.Empty();
+}
+
 const Turbo::Core::TShader::TLayout::TSets &Turbo::Core::TShader::TLayout::GetSets() const
 {
     return this->sets;

@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/3/30
+
+>* `engine\core\TDescriptor` 下 `TPushConstants` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TDescriptorSetLayout::TLayout` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TShader` 下 `TShader::TLayout` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TDescriptorSetLayout` 增加使用 `TDescriptorSetLayout::TLayout` 的构函数。
+
 ## 2025/3/28
 
 >* `engine\core` 下 `TDescriptor` 中优化实现 `ToString()` 成员函数。

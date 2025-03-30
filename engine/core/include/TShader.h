@@ -115,6 +115,8 @@ class TShader : public Turbo::Core::TVulkanHandle
         TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants);
         TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants);
 
+        bool Empty() const;
+
         const TShader::TLayout::TSets &GetSets() const;
         const TPushConstants &GetPushConstants() const;
 

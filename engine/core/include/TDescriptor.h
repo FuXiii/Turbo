@@ -236,6 +236,7 @@ class TPushConstants
     // TConstants::const_iterator end() const;
 
     const TPushConstants::TConstants &GetConstants() const;
+    bool Empty() const;
 
     void Merge(const TPushConstants &pushConstants);
 

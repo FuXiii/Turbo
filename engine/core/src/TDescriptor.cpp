@@ -337,6 +337,11 @@ const Turbo::Core::TPushConstants::TConstants &Turbo::Core::TPushConstants::GetC
     return this->constants;
 }
 
+bool Turbo::Core::TPushConstants::Empty() const
+{
+    return this->constants.empty();
+}
+
 void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
 {
     const auto &source_constants = pushConstants.constants;

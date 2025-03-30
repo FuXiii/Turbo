@@ -27,6 +27,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
         TLayout(const TBindings &bindings);
 
         std::size_t GetCount() const;
+        bool Empty() const;
 
         TBindings::const_iterator begin() const;
         TBindings::const_iterator end() const;
@@ -45,7 +46,8 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
 
-    T_VULKAN_HANDLE_DATA std::vector<TDescriptor *> descriptors;
+    std::vector<TDescriptor *> descriptors;
+    TDescriptorSetLayout::TLayout layout;
 
   protected:
     virtual void InternalCreate() override;
@@ -54,7 +56,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
   public:
     // TDescriptorSetLayout(const TRefPtr<TDevice> &device, std::vector<TDescriptor *> &descriptors);
     TDescriptorSetLayout(TDevice *device, const std::vector<TDescriptor *> &descriptors);
-    // TDescriptorSetLayout(TDevice *device, const Layout &layout); // FIXME: implement it!!!
+    TDescriptorSetLayout(TDevice *device, const TDescriptorSetLayout::TLayout &layout);
 
   protected:
     virtual ~TDescriptorSetLayout();

@@ -750,7 +750,7 @@ int main()
         std::cout << layout_0.ToString() << std::endl;
     }
 
-    if (true)
+    if (false)
     {
         Turbo::Core::TPushConstants::TConstants constants_0;
         constants_0[0][512] = 0b00001;
@@ -803,6 +803,20 @@ int main()
         std::cout << "layout_1 merge into layout_0:" << std::endl;
         layout_0.Merge(layout_1);
         std::cout << layout_0.ToString() << std::endl;
+    }
+
+    if (true)
+    {
+        DescriptorSetLayout::Layout layout; // empty layout
+        Turbo::Core::TRefPtr<DescriptorSetLayout> descriptor_set_layout = new DescriptorSetLayout(device, layout);
+        if (descriptor_set_layout.Valid())
+        {
+            std::cout << "[OK] DescriptorSetLayout create successed!" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Error] DescriptorSetLayout create failed!" << std::endl;
+        }
     }
 
     return 0;
