@@ -805,7 +805,7 @@ int main()
         std::cout << layout_0.ToString() << std::endl;
     }
 
-    if (true)
+    if (false)
     {
         DescriptorSetLayout::Layout layout; // empty layout
         Turbo::Core::TRefPtr<DescriptorSetLayout> descriptor_set_layout = new DescriptorSetLayout(device, layout);
@@ -816,6 +816,56 @@ int main()
         else
         {
             std::cout << "[Error] DescriptorSetLayout create failed!" << std::endl;
+        }
+    }
+
+    if (true)
+    {
+        Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
+        bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});
+        bindings_0.insert({2, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 2)});
+        bindings_0.insert({12, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE, 30)});
+        bindings_0.insert({23, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE, 40)});
+        bindings_0.insert({43, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER, 50)});
+
+        Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_1;
+        bindings_1.insert({55, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_TEXEL_BUFFER, 60)});
+        bindings_1.insert({16, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 70)});
+        bindings_1.insert({67, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER, 80)});
+        bindings_1.insert({88, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC, 90)});
+        bindings_1.insert({99, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC, 100)});
+        bindings_1.insert({100, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT, 2000)});
+
+        Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout> descriptor_set_layout_0 = new Turbo::Core::TDescriptorSetLayout(device, bindings_0);
+        if (descriptor_set_layout_0.Valid())
+        {
+            std::cout << "[OK] DescriptorSetLayout 0 create successed!" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Error] DescriptorSetLayout 0 create failed!" << std::endl;
+        }
+
+        Turbo::Core::TDescriptorSetLayout::TLayout layout_1(bindings_1);
+        Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout> descriptor_set_layout_1 = new Turbo::Core::TDescriptorSetLayout(device, layout_1);
+        if (descriptor_set_layout_1.Valid())
+        {
+            std::cout << "[OK] DescriptorSetLayout 1 create successed!" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Error] DescriptorSetLayout 1 create failed!" << std::endl;
+        }
+
+        layout_1.Merge(bindings_0);
+        Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout> descriptor_set_layout_2 = new Turbo::Core::TDescriptorSetLayout(device, layout_1);
+        if (descriptor_set_layout_2.Valid())
+        {
+            std::cout << "[OK] DescriptorSetLayout 2 create successed!" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Error] DescriptorSetLayout 2 create failed!" << std::endl;
         }
     }
 

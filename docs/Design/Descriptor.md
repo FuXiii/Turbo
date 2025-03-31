@@ -1,5 +1,9 @@
 # 设计
 
+## 需求
+
+* ``TShader`` 解析 ``SPIR-V`` 返回 ``TShader::TLayout``
+
 ## Descriptor
 
 * 一个 `VkDescriptorSetLayout` 对应一个 ``set 号`` （简称 ``set``）
@@ -612,6 +616,80 @@ Pipeline(shaders)
 
     PipelineLayout pipeline_layout(layout);//创建 pipeline layout 时指定整体（全部）shader layout
 }
+```
+
+PipelineLayout 创建流程
+
+```mermaid
+graph TD;
+
+Begin(("开始"))
+End(("结束"))
+
+InputShaderLayout["输入 Shader::Layout layout"]
+
+IfFindPipelineLayoutByShaderLayout{使用 Shader::Layout 查找兼容 PipelineLayout}
+
+subgraph FindPipelineLayoutByShaderLayout[" "];
+    FindPipelineByShaderLayoutHash["根据 Shader::Layout 的 hash 值查找兼容的 PipelineLayout"]
+        FindInPipelineLayoutSet[["在 std::unordered_multiset< PipelineLayout*>/std::unordered_map< std::size_t, PipelineLayout*> 中查找"]]:::Green
+        FirstConsideUseUnorderedMultiset["优先考虑使用 std::unordered_multiset< PipelineLayout*>"]
+    ShaderLayoutHashAndPieplineLayouotHashNeedEqual["Shader::Layout 的 hash 值算法应该和 PipelineLayout(*) 算法一致。"]
+
+    FindPipelineByShaderLayoutHash-.-oShaderLayoutHashAndPieplineLayouotHashNeedEqual:::Red
+    FindPipelineByShaderLayoutHash-->FindInPipelineLayoutSet
+    FindInPipelineLayoutSet-.-oFirstConsideUseUnorderedMultiset
+
+    NeedConsiderHashConflict_PipelineLayout["需要考虑 Hash 冲突"]:::Yellow
+end
+
+ReturnPipeline["返回可用 PipelineLayout"]
+
+Found{{"找到了"}}
+Unfound{{"未找到了"}}
+
+FindInPipelineLayoutSet--true-->Found
+FindInPipelineLayoutSet--false-->Unfound
+
+IfFindPipelineLayoutByShaderLayout--true-->Found-->ReturnPipeline-->End
+IfFindPipelineLayoutByShaderLayout--false-->Unfound
+
+subgraph FindAndCreateAllDescriptorSetLayoutByShaderLayout[" "];
+    FindAllReuseableDescriptorSetLayout["查找所有可重用的 DescriptorSetLayout"]-.-oFindInDescriptorSetLayouts[["在 std::unordered_multiset< DescriptorSetLayout*>/std::unordered_map< std::size_t, DescriptorSetLayout*> 中查找"]]:::Green
+    CanBeReuseableDescriptorSetLayouts["找的到的就是可重用的"]
+    CanNotBeReuseableDescriptorSetLayouts["找不到的就是需要创建的"]
+
+    CanBeReuseableDescriptorSetLayouts-->CreateAndReusableDescriptorSetLayouts["创建和重用 DescriptorSetLayouts"]
+    CanNotBeReuseableDescriptorSetLayouts-->CreateAndReusableDescriptorSetLayouts
+
+    TransformPushConstants["将 PushConstants 传递出去"]
+
+    CreateAndReusableDescriptorSetLayouts-->TransformPushConstants
+
+    CreateAndReusableDescriptorSetLayouts-->CreatePipelineLayout["创建 PipelineLayout"]
+    TransformPushConstants-->CreatePipelineLayout
+
+    FindAllReuseableDescriptorSetLayout-->CanBeReuseableDescriptorSetLayouts
+    FindAllReuseableDescriptorSetLayout-->CanNotBeReuseableDescriptorSetLayouts
+
+    NeedConsiderHashConflict_DescriptorSetLayout["需要考虑 Hash 冲突"]:::Yellow
+end
+
+FindAndCreateAllDescriptorSetLayoutByShaderLayout-->ReturnPipeline
+Unfound-->FindAndCreateAllDescriptorSetLayoutByShaderLayout
+
+IfFindPipelineLayoutByShaderLayout--oFindPipelineLayoutByShaderLayout
+
+Begin-->InputShaderLayout
+InputShaderLayout-->IfFindPipelineLayoutByShaderLayout
+classDef Green fill:#60a917
+classDef Yellow fill:#f0a30a
+classDef Red fill:#e51400
+classDef Blue fill:#0050ef
+
+style Begin fill:#22b14c
+style End fill:#e33023
+
 ```
 
 ### 详细设计
