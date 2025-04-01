@@ -4,8 +4,8 @@
 #include <utility>
 #include <ReadFile.h>
 
-// #include <spirv_reflect.h>
-#include "spirv_reflect.h"
+#include <spirv_reflect.h>
+//#include "spirv_reflect.h"
 
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Include/Types.h>
@@ -303,6 +303,7 @@ int main(int argc, char **argv)
 
     if (spirv.empty())
     {
+        std::cout << "[Error] Please provide a path to glsl file!" << std::endl;
         throw std::runtime_error("[Error] Spirv is empty!");
     }
 
@@ -314,6 +315,28 @@ int main(int argc, char **argv)
         std::cout << "<ShaderModule>" << std::endl;
         PrintModuleInfo(std::cout, module, "\t  - ");
         std::cout << "</ShaderModule>" << std::endl;
+    }
+
+    {
+        uint32_t count = 0;
+        spvReflectEnumerateSpecializationConstants(&module, &count, NULL);
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+        std::vector<SpvReflectSpecializationConstant *> specialization_constants(count);
+        result = spvReflectEnumerateSpecializationConstants(&module, &count, specialization_constants.data());
+        assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+        {
+            std::cout << "module._internal->type_description_count: " << module._internal->type_description_count << std::endl;
+        }
+
+        std::cout << "<SpecializationConstant>" << std::endl;
+        for (auto &item : specialization_constants)
+        {
+            std::cout << "\tspirv id: " << item->spirv_id << std::endl;
+            std::cout << "\tconstant id: " << item->constant_id << std::endl;
+            std::cout << "\tname: " << item->name << std::endl;
+        }
+        std::cout << "<SpecializationConstant>" << std::endl;
     }
 
     {

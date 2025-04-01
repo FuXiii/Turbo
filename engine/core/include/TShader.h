@@ -113,6 +113,8 @@ class TShader : public Turbo::Core::TVulkanHandle
       public:
         TLayout() = default;
         TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants);
+        TLayout(const TShader::TLayout::TSets &sets);
+        TLayout(const TPushConstants &pushConstants);
         TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants);
 
         bool Empty() const;
@@ -120,6 +122,8 @@ class TShader : public Turbo::Core::TVulkanHandle
         const TShader::TLayout::TSets &GetSets() const;
         const TPushConstants &GetPushConstants() const;
 
+        void Merge(const TShader::TLayout::TSets &sets);
+        void Merge(const TPushConstants &pushConstants);
         void Merge(const TLayout &layout);
 
         std::string ToString() const;

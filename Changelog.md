@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/1
+
+>* `engine\core\TShader` 下 `TLayout` 增加 `TSets` 、 `TPushConstants` 版本的构造函数和 `Merge` 成员函数。
+
+*注:目前`SPIRV-Reflect`对于`Specialization Constant`的支持还不是很完整。目前计划仍然使用 `SPIRV-Cross`进行解析*
+
 ## 2025/3/30
 
 >* `engine\core\TDescriptor` 下 `TPushConstants` 增加 `bool Empty() const` 成员函数。

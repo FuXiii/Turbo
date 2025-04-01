@@ -267,6 +267,16 @@ Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets, cons
     this->pushConstants = pushConstants;
 }
 
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets)
+{
+    this->sets = sets;
+}
+
+Turbo::Core::TShader::TLayout::TLayout(const TPushConstants &pushConstants)
+{
+    this->pushConstants = pushConstants;
+}
+
 Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants)
 {
     this->sets = std::move(sets);
@@ -288,9 +298,9 @@ const Turbo::Core::TPushConstants &Turbo::Core::TShader::TLayout::GetPushConstan
     return this->pushConstants;
 }
 
-void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TSets &sets)
 {
-    for (auto &set_item : layout.sets)
+    for (auto &set_item : sets)
     {
         TSet set = set_item.first;
         auto set_find_result = this->sets.find(set);
@@ -303,8 +313,17 @@ void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
             this->sets[set] = set_item.second;
         }
     }
+}
 
-    this->pushConstants.Merge(layout.pushConstants);
+void Turbo::Core::TShader::TLayout::Merge(const TPushConstants &pushConstants)
+{
+    this->pushConstants.Merge(pushConstants);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
+{
+    this->Merge(layout.sets);
+    this->Merge(layout.pushConstants);
 }
 
 std::string Turbo::Core::TShader::TLayout::ToString() const
