@@ -343,8 +343,8 @@ void Turbo::Core::TShader::InternalCreate()
     vk_shader_module_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     vk_shader_module_create_info.pNext = nullptr;
     vk_shader_module_create_info.flags = 0;
-    vk_shader_module_create_info.codeSize = this->size;
-    vk_shader_module_create_info.pCode = this->code;
+    vk_shader_module_create_info.codeSize = this->spirvCode.size() * sizeof(uint32_t);
+    vk_shader_module_create_info.pCode = this->spirvCode.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
@@ -364,12 +364,7 @@ void Turbo::Core::TShader::InternalDestroy()
 
 void Turbo::Core::TShader::InternalParseSpirV()
 {
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    spirv_cross::CompilerGLSL glsl(std::move(spirv));
+    spirv_cross::CompilerGLSL glsl(this->spirvCode.data(), this->spirvCode.size());
 
     spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
     opts.vulkan_semantics = true;
@@ -999,14 +994,13 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
             throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
-        std::vector<uint32_t> shader_spir;
-        glslang::GlslangToSpv(*(program.getIntermediate(esh_language)), shader_spir);
+        glslang::GlslangToSpv(*(program.getIntermediate(esh_language)), this->spirvCode);
 
         glslang::FinalizeProcess();
 
-        this->size = shader_spir.size() * sizeof(uint32_t);
-        this->code = (uint32_t *)malloc(size);
-        memcpy(this->code, shader_spir.data(), this->size);
+        // this->size = this->spirvCode.size() * sizeof(uint32_t);
+        // this->code = (uint32_t *)malloc(size);
+        // memcpy(this->code, this->spirvCode.data(), this->size);
 
         this->InternalCreate();
         this->InternalParseSpirV();
@@ -1024,10 +1018,12 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, size_t size, ui
         this->device = device;
         this->type = type;
         this->language = TShaderLanguage::SPIR;
-        this->size = size;
-        this->code = (uint32_t *)malloc(size);
+        // this->size = size;
+        // this->code = (uint32_t *)malloc(size);
+        this->spirvCode.resize(size);
+        memcpy(this->spirvCode.data(), code, size * sizeof(uint32_t));
+
         this->entryPoint = entryPoint;
-        memcpy(this->code, code, this->size);
 
         this->InternalCreate();
         this->InternalParseSpirV();
@@ -1096,9 +1092,9 @@ Turbo::Core::TShader::~TShader()
     }
     this->accelerationStructureDescriptors.clear();
 
-    free(this->code);
-    this->code = nullptr;
-    this->size = 0;
+    // free(this->code);
+    // this->code = nullptr;
+    // this->size = 0;
 }
 
 Turbo::Core::TDevice *Turbo::Core::TShader::GetDevice()
@@ -1287,24 +1283,14 @@ const std::map<uint32_t, Turbo::Core::TShader::TConstValue> &Turbo::Core::TShade
     return this->specializationMap;
 }
 
-std::vector<uint32_t> Turbo::Core::TShader::GetSpirV() const
+const std::vector<uint32_t> &Turbo::Core::TShader::GetSpirV() const
 {
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    return spirv;
+    return this->spirvCode;
 }
 
 std::string Turbo::Core::TShader::ToString() const
 {
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    spirv_cross::CompilerGLSL glsl(std::move(spirv));
+    spirv_cross::CompilerGLSL glsl(this->spirvCode.data(), this->spirvCode.size());
     spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
     opts.vulkan_semantics = true;
     glsl.set_common_options(opts);

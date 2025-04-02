@@ -80,8 +80,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_HANDLE VkShaderModule vkShaderModule = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN
 
-    T_VULKAN_HANDLE_DATA size_t size = 0;
-    T_VULKAN_HANDLE_DATA uint32_t *code = nullptr;
+    T_VULKAN_HANDLE_DATA std::vector<uint32_t> spirvCode;
     T_VULKAN_HANDLE_DATA TShaderLanguage language;
     T_VULKAN_HANDLE_DATA TShaderType type;
 
@@ -147,6 +146,8 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::map<uint32_t, TConstValue> specializationMap;
 
+    TShader::TLayout layout;
+
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
@@ -193,7 +194,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::map<uint32_t, TConstValue> &GetSpecializations() const;
     //</specialization constants>
 
-    std::vector<uint32_t> GetSpirV() const;
+    const std::vector<uint32_t>& GetSpirV() const;
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

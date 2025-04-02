@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/2
+
+>* `engine\core\TShader` 下优化 `spirv_cross::CompilerGLSL` 的创建，直接使用`SPIR-V`代码构建，而不是使用拷贝之后的数据，提高效率。
+>* `engine\core\TShader` 下优化，移除指针式内存分配，直接使用 `std::vector<uint32_t>` 存储和管理`SPIR-V`代码。提高效率。统一接口。
+
 ## 2025/4/1
 
 >* `engine\core\TShader` 下 `TLayout` 增加 `TSets` 、 `TPushConstants` 版本的构造函数和 `Merge` 成员函数。
