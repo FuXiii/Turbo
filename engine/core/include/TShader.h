@@ -3,7 +3,10 @@
 #define TURBO_CORE_TSHADER_H
 #include "TDescriptorSetLayout.h"
 #include "TVulkanHandle.h"
+#include "TVersion.h"
 #include <map>
+#include <filesystem>
+#include <unordered_set>
 
 namespace Turbo
 {
@@ -121,9 +124,14 @@ class TShader : public Turbo::Core::TVulkanHandle
         const TShader::TLayout::TSets &GetSets() const;
         const TPushConstants &GetPushConstants() const;
 
+        void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
+        void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);
+        void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout);
         void Merge(const TShader::TLayout::TSets &sets);
         void Merge(const TPushConstants &pushConstants);
-        void Merge(const TLayout &layout);
+        void Merge(const TShader::TLayout &layout);
+
+        Turbo::Core::TDescriptorSetLayout::TLayout &operator[](TSet &&set);
 
         std::string ToString() const;
     };
@@ -194,7 +202,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::map<uint32_t, TConstValue> &GetSpecializations() const;
     //</specialization constants>
 
-    const std::vector<uint32_t>& GetSpirV() const;
+    const std::vector<uint32_t> &GetSpirV() const;
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

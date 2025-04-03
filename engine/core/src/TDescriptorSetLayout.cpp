@@ -32,7 +32,20 @@ Turbo::Core::TDescriptorSetLayout::TLayout::TBindings::const_iterator Turbo::Cor
     return this->bindings.end();
 }
 
-void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TLayout &layout)
+void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor)
+{
+    TBindings bindings;
+    bindings.insert({binding, descriptor});
+    this->Merge(bindings);
+}
+
+void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TBindings &bindings)
+{
+    TDescriptorSetLayout::TLayout layout(bindings);
+    this->Merge(layout);
+}
+
+void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TDescriptorSetLayout::TLayout &layout)
 {
     for (auto &item : layout)
     {
@@ -45,12 +58,17 @@ void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TLayout &layout)
     }
 }
 
-bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TLayout &other) const
+Turbo::Core::TDescriptor &Turbo::Core::TDescriptorSetLayout::TLayout::operator[](Turbo::Core::TDescriptorSetLayout::TLayout::TBinding &&binding)
+{
+    return this->bindings[std::forward<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding>(binding)];
+}
+
+bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TDescriptorSetLayout::TLayout &other) const
 {
     return this->bindings == other.bindings;
 }
 
-bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TLayout &other) const
+bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TDescriptorSetLayout::TLayout &other) const
 {
     return !((*this) == other);
 }

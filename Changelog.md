@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/3
+
+>* `engine\core\TShader` 下 `TLayout` 增加使用 `TSet`、`TBinding`、`TDescriptor`、`TBindings` 和 `TDescriptorSetLayout::TLayout` 参数的 `Merge(...)` 函数。
+>* `engine\core\TShader` 下 `TLayout` 增加 `operator[]` 函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TLayout` 增加使用 `TBinding`、`TDescriptor`、`TBindings` 参数的 `Merge(...)` 函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TLayout` 增加 `operator[]` 函数。
+
 ## 2025/4/2
 
 >* `engine\core\TShader` 下优化 `spirv_cross::CompilerGLSL` 的创建，直接使用`SPIR-V`代码构建，而不是使用拷贝之后的数据，提高效率。

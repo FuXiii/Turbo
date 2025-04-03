@@ -32,10 +32,14 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
         TBindings::const_iterator begin() const;
         TBindings::const_iterator end() const;
 
-        void Merge(const TLayout &layout);
+        void Merge(TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
+        void Merge(const TBindings &bindings);
+        void Merge(const TDescriptorSetLayout::TLayout &layout);
 
-        bool operator==(const TLayout &other) const;
-        bool operator!=(const TLayout &other) const;
+        TDescriptor &operator[](TBinding &&binding);
+
+        bool operator==(const TDescriptorSetLayout::TLayout &other) const;
+        bool operator!=(const TDescriptorSetLayout::TLayout &other) const;
 
         std::string ToString() const;
     };

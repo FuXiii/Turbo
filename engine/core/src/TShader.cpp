@@ -298,6 +298,26 @@ const Turbo::Core::TPushConstants &Turbo::Core::TShader::TLayout::GetPushConstan
     return this->pushConstants;
 }
 
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor)
+{
+    TDescriptorSetLayout::TLayout::TBindings bindings;
+    bindings.insert({binding, descriptor});
+    this->Merge(set, bindings);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings)
+{
+    TDescriptorSetLayout::TLayout layout(bindings);
+    this->Merge(set, layout);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout)
+{
+    TShader::TLayout::TSets sets;
+    sets.insert({set, layout});
+    this->Merge(sets);
+}
+
 void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TSets &sets)
 {
     for (auto &set_item : sets)
@@ -320,10 +340,15 @@ void Turbo::Core::TShader::TLayout::Merge(const TPushConstants &pushConstants)
     this->pushConstants.Merge(pushConstants);
 }
 
-void Turbo::Core::TShader::TLayout::Merge(const TLayout &layout)
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout &layout)
 {
     this->Merge(layout.sets);
     this->Merge(layout.pushConstants);
+}
+
+Turbo::Core::TDescriptorSetLayout::TLayout &Turbo::Core::TShader::TLayout::operator[](TSet &&set)
+{
+    return this->sets[std::forward<TSet>(set)];
 }
 
 std::string Turbo::Core::TShader::TLayout::ToString() const
