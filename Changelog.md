@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/4
+
+>* `engine\core\TDescriptor` 下 `TPushConstants` 增加使用 `offset`、`size`、`flags` 参数的 `Merge(...)` 函数。
+
 ## 2025/4/3
 
 >* `engine\core\TShader` 下 `TLayout` 增加使用 `TSet`、`TBinding`、`TDescriptor`、`TBindings` 和 `TDescriptorSetLayout::TLayout` 参数的 `Merge(...)` 函数。

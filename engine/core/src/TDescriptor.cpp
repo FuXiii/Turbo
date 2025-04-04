@@ -342,6 +342,20 @@ bool Turbo::Core::TPushConstants::Empty() const
     return this->constants.empty();
 }
 
+void Turbo::Core::TPushConstants::Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags)
+{
+    auto &size_map = this->constants[offset];
+    auto find_size_iter = size_map.find(size);
+    if (find_size_iter != size_map.end())
+    {
+        find_size_iter->second |= flags;
+    }
+    else
+    {
+        find_size_iter->second = flags;
+    }
+}
+
 void Turbo::Core::TPushConstants::Merge(const TPushConstants &pushConstants)
 {
     const auto &source_constants = pushConstants.constants;
