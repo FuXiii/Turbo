@@ -128,6 +128,7 @@ class TShader : public Turbo::Core::TVulkanHandle
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout);
         void Merge(const TShader::TLayout::TSets &sets);
+        void Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags);
         void Merge(const TPushConstants &pushConstants);
         void Merge(const TShader::TLayout &layout);
 

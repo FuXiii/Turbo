@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/5
+
+>* `engine\core\TShader` 下 `InternalParseSpirV()` 增加对 `Layout` 的解析。
+
 ## 2025/4/4
 
 >* `engine\core\TDescriptor` 下 `TPushConstants` 增加使用 `offset`、`size`、`flags` 参数的 `Merge(...)` 函数。
