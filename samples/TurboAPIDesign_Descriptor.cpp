@@ -752,17 +752,8 @@ int main()
 
     if (false)
     {
-        Turbo::Core::TPushConstants::TConstants constants_0;
-        constants_0[0][512] = 0b00001;
-        constants_0[10][123] = 0b00011;
-        constants_0[21][456] = 0b00101;
-
-        Turbo::Core::TPushConstants::TConstants constants_1;
-        constants_1[0][512] = 0b00110;
-        constants_1[10][123] = 0b00100;
-        constants_1[21][456] = 0b10001;
-        constants_1[21][455] = 0b01111;
-        constants_1[33][789] = 0b00001;
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_0(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, 0, 512);
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_1(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, 512);
 
         Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
         bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});
@@ -791,8 +782,8 @@ int main()
         sets_1[0] = bindings_2;
         sets_1[2] = bindings_3;
 
-        Turbo::Core::TShader::TLayout layout_0(sets_0, constants_0);
-        Turbo::Core::TShader::TLayout layout_1(sets_1, constants_1);
+        Turbo::Core::TShader::TLayout layout_0(sets_0, push_constant_0);
+        Turbo::Core::TShader::TLayout layout_1(sets_1, push_constant_1);
 
         std::cout << "layout_0:" << std::endl;
         std::cout << layout_0.ToString() << std::endl;
