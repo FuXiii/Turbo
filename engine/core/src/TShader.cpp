@@ -594,6 +594,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
+
+        this->layout.Merge(set, binding, *combined_image_sampler_descriptor);
     }
 
     for (spirv_cross::Resource &separate_image_item : resources.separate_images)
@@ -633,6 +635,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
         TSampledImageDescriptor *sampled_image_descriptor = new TSampledImageDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->sampledImageDescriptors.push_back(sampled_image_descriptor);
+
+        this->layout.Merge(set, binding, *sampled_image_descriptor);
     }
 
     for (spirv_cross::Resource &storage_image_item : resources.storage_images)
@@ -667,6 +671,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
         TStorageImageDescriptor *storage_image_descriptor = new TStorageImageDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->storageImageDescriptors.push_back(storage_image_descriptor);
+
+        this->layout.Merge(set, binding, *storage_image_descriptor);
     }
 
     for (spirv_cross::Resource &separate_sampler_item : resources.separate_samplers)
@@ -701,6 +707,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TSamplerDescriptor *sampler_descriptor = new TSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->samplerDescriptors.push_back(sampler_descriptor);
+
+        this->layout.Merge(set, binding, *sampler_descriptor);
     }
 
     for (spirv_cross::Resource &uniform_buffers_item : resources.uniform_buffers)
@@ -783,6 +791,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, descriptor_data_type, set, binding, count, name, struct_members, size);
         this->uniformBufferDescriptors.push_back(uniform_buffer_descriptor);
+
+        this->layout.Merge(set, binding, *uniform_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &push_constant_buffer_item : resources.push_constant_buffers)
@@ -865,6 +875,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TPushConstantDescriptor *push_constant_descriptor = new TPushConstantDescriptor(this, descriptor_data_type, count, name, struct_members, size);
         this->pushConstantDescriptors.push_back(push_constant_descriptor);
+
+        //this->layout.Merge(set, binding, *push_constant_descriptor);
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)

@@ -232,12 +232,10 @@ class TPushConstants // FIXME: Move it to Pipeline Layout!!!
     TPushConstants(const TPushConstants::TConstants &constants);
     TPushConstants(TPushConstants::TConstants &&constants);
 
-    // TConstants::const_iterator begin() const;
-    // TConstants::const_iterator end() const;
-
     const TPushConstants::TConstants &GetConstants() const;
     bool Empty() const;
 
+    void Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags);
     void Merge(const TPushConstants &pushConstants);
 
     std::string ToString() const;

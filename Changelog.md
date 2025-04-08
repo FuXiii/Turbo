@@ -9,6 +9,14 @@
 >* `engine\core\TShader` 下 `TLayout` 中增加`TPushConstant`类。
 >* `engine\core\TShader` 下 `TLayout` 中移除`TPushConstants`使用。
 
+## 2025/4/5
+
+>* `engine\core\TShader` 下 `InternalParseSpirV()` 增加对 `Layout` 的解析。
+
+## 2025/4/4
+
+>* `engine\core\TDescriptor` 下 `TPushConstants` 增加使用 `offset`、`size`、`flags` 参数的 `Merge(...)` 函数。
+
 ## 2025/4/3
 
 >* `engine\core\TShader` 下 `TLayout` 增加使用 `TSet`、`TBinding`、`TDescriptor`、`TBindings` 和 `TDescriptorSetLayout::TLayout` 参数的 `Merge(...)` 函数。
