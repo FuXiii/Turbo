@@ -9,6 +9,12 @@
 
 * ``问``：什么是 ``variable-sized`` 描述符（Vulkan 1.2）``答``：好像 是通过外部设置 描述符中元素数组长度 的另一种方式？
 
+>需要规划设计 `push constants` ,一个着色器只能有一个，但 `pipeline layout` 有所有的着色器的 `push constant` 。
+
+>需要 `flags` 的模板，简化 `flags` 的使用。
+
+>需要所有的 `ToString()` 基于统一的标准输出，`Json` 标准是一个有效的方式。
+
 ## Need Dev
 
 * 描述符，描述符集，管线布局。`DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。

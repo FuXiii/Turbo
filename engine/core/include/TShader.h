@@ -108,27 +108,52 @@ class TShader : public Turbo::Core::TVulkanHandle
         using TSet = std::size_t;
         using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
 
+        class TPushConstant
+        {
+          public:
+            using TOffset = uint32_t;
+            using TSize = uint32_t;
+
+          private:
+            VkShaderStageFlags stageFlags = 0;
+            TPushConstant::TOffset offset = 0;
+            TPushConstant::TSize size = 0;
+
+          public:
+            TPushConstant() = default;
+            TPushConstant(VkShaderStageFlags stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size);
+
+            VkShaderStageFlags GetVkShaderStageFlags() const;
+            TPushConstant::TOffset GetOffset() const;
+            TPushConstant::TSize GetSize() const;
+
+            bool Empty() const;
+            void Merge(const TPushConstant &pushConstant);
+
+            std::string ToString() const;
+        };
+
       private:
         TShader::TLayout::TSets sets;
-        TPushConstants pushConstants;
+        TPushConstant pushConstant;
 
       public:
         TLayout() = default;
-        TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants);
+        TLayout(const TShader::TLayout::TSets &sets, const TShader::TLayout::TPushConstant &pushConstant);
         TLayout(const TShader::TLayout::TSets &sets);
-        TLayout(const TPushConstants &pushConstants);
-        TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants);
+        TLayout(const TShader::TLayout::TPushConstant &pushConstant);
+        TLayout(TShader::TLayout::TSets &&sets, TPushConstant &&pushConstant);
 
         bool Empty() const;
 
         const TShader::TLayout::TSets &GetSets() const;
-        const TPushConstants &GetPushConstants() const;
+        const TPushConstant &GetPushConstant() const;
 
         void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout);
         void Merge(const TShader::TLayout::TSets &sets);
-        void Merge(const TPushConstants &pushConstants);
+        void Merge(const TPushConstant &pushConstant);
         void Merge(const TShader::TLayout &layout);
 
         Turbo::Core::TDescriptorSetLayout::TLayout &operator[](TSet &&set);

@@ -70,6 +70,8 @@ typedef struct VkPushConstantRange {
 
 > * VkPipelineLayoutCreateInfo::pSetLayouts must not contain more than one descriptor set layout that was created with VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT set
 
+根据 `GLSL` 的标准：每一个着色器阶段，只能有一个 `push constant` 。
+
 ### 总结
 
 ```CXX
@@ -367,7 +369,8 @@ using Set = size_t;
 using SetsMap = std::unorder_map<Set, BindingsMap>;
 
 using Sets = std::unordered_map<Set, DescriptorSetLayout*>;
-using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;//NOTE: PushConstants 也可以将其定义成一个类
+using PushConstants = std::unordered_map<Offset, std::unordered_map<Size, VkShaderStageFlags>>;//NOTE: PushConstants 也可以将其定义成一个类。
+                                                                                               //NOTE: 目前只有 pipeline layout 会使用该结构，合并到 `pipeline layout` 中。
 
 using Root = SetsMap;
 
@@ -594,12 +597,24 @@ std::unordered_map<Set, std::unordered_map<Binding, Descriptor>> shader_layout =
 
 class Shader
 {
+    class PushConstant
+    {
+    public:
+        using TOffset = uint32_t;
+        using TSize = uint32_t;
+
+    private:
+        VkShaderStageFlags stageFlags = 0;
+        TPushConstant::TOffset offset = 0;
+        TPushConstant::TSize size = 0;
+    };
+
     class Layout
     {
         //std::unordered_map<Set, std::unordered_map<Binding, Descriptor>> layout;
         //其中 std::unordered_map<Binding, Descriptor> 与 DescriptorSetLayout::Layout（Bindings）表示同一个事物，替换：
         std::unordered_map<Set, DescriptorSetLayout::Layout> layout;
-        PushConstants pushConstants;
+        PushConstant pushConstant;//NOTE: 一个着色器只能有一个 push constant 所以这里不应该是 PushConstants，而是 Push Constant
         
         void merge(const Layout& layout);
     };
@@ -608,7 +623,7 @@ class Shader
 //in Pipeline Create
 Pipeline(shaders)
 {
-    Shader::Layout layout;//作为最终多个 shader 总和（合并）的布局：也就是用于创建 Pipeline Layout 的布局结构
+    Pipeline::Layout layout;//作为最终多个 shader 总和（合并）的布局：也就是用于创建 Pipeline Layout 的布局结构
     for(auto& shader : shaders)
     {
         layout.merge(shader.GetLayout());

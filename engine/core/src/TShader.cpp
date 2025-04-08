@@ -261,10 +261,147 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
-Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets, const TPushConstants &pushConstants)
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(VkShaderStageFlags stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
+{
+    this->stageFlags = stageFlags;
+    this->offset = offset;
+    this->size = size;
+}
+
+VkShaderStageFlags Turbo::Core::TShader::TLayout::TPushConstant::GetVkShaderStageFlags() const
+{
+    return this->stageFlags;
+}
+
+Turbo::Core::TShader::TLayout::TPushConstant::TOffset Turbo::Core::TShader::TLayout::TPushConstant::GetOffset() const
+{
+    return this->offset;
+}
+
+Turbo::Core::TShader::TLayout::TPushConstant::TSize Turbo::Core::TShader::TLayout::TPushConstant::GetSize() const
+{
+    return this->size;
+}
+
+bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
+{
+    if (this->stageFlags == 0 || this->size == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pushConstant)
+{
+    if (this->offset == pushConstant.offset && this->size == pushConstant.size)
+    {
+        this->stageFlags |= pushConstant.stageFlags;
+    }
+}
+
+std::string Turbo::Core::TShader::TLayout::TPushConstant::ToString() const
+{
+    auto vk_shader_stage_flags_to_str = [](const VkShaderStageFlags &stageFlags) -> std::string {
+        if (stageFlags == 0)
+        {
+            return std::string();
+        }
+
+        std::string result;
+
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT)
+        {
+            result += "VERTEX_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
+        {
+            result += "TESSELLATION_CONTROL_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
+        {
+            result += "TESSELLATION_EVALUATION_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT)
+        {
+            result += "GEOMETRY_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT)
+        {
+            result += "FRAGMENT_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT)
+        {
+            result += "COMPUTE_BIT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS) == VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS)
+        {
+            result += "ALL_GRAPHICS|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ALL) == VkShaderStageFlagBits::VK_SHADER_STAGE_ALL)
+        {
+            result += "ALL|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+        {
+            result += "RAYGEN_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR)
+        {
+            result += "ANY_HIT_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+        {
+            result += "CLOSEST_HIT_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR)
+        {
+            result += "MISS_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR)
+        {
+            result += "INTERSECTION_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR)
+        {
+            result += "CALLABLE_BIT_KHR|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT)
+        {
+            result += "TASK_BIT_EXT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT) == VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT)
+        {
+            result += "MESH_BIT_EXT|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI) == VkShaderStageFlagBits::VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI)
+        {
+            result += "SUBPASS_SHADING_BIT_HUAWEI|";
+        }
+        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI) == VkShaderStageFlagBits::VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI)
+        {
+            result += "CLUSTER_CULLING_BIT_HUAWEI|";
+        }
+
+        if (!result.empty())
+        {
+            result.pop_back();
+        }
+
+        return result;
+    };
+    std::stringstream ss;
+    ss << "offset: " << this->offset << std::endl;
+    ss << "size: " << this->size << std::endl;
+    ss << "stageFlags: " << vk_shader_stage_flags_to_str(this->stageFlags) << std::endl;
+    return ss.str();
+}
+
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets, const TShader::TLayout::TPushConstant &pushConstant)
 {
     this->sets = sets;
-    this->pushConstants = pushConstants;
+    this->pushConstant = pushConstant;
 }
 
 Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets)
@@ -272,20 +409,20 @@ Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets)
     this->sets = sets;
 }
 
-Turbo::Core::TShader::TLayout::TLayout(const TPushConstants &pushConstants)
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TPushConstant &pushConstant)
 {
-    this->pushConstants = pushConstants;
+    this->pushConstant = pushConstant;
 }
 
-Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushConstants &&pushConstants)
+Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushConstant &&pushConstant)
 {
     this->sets = std::move(sets);
-    this->pushConstants = std::move(pushConstants);
+    this->pushConstant = std::move(pushConstant);
 }
 
 bool Turbo::Core::TShader::TLayout::Empty() const
 {
-    return this->sets.empty() || this->pushConstants.Empty();
+    return this->sets.empty() && this->pushConstant.Empty();
 }
 
 const Turbo::Core::TShader::TLayout::TSets &Turbo::Core::TShader::TLayout::GetSets() const
@@ -293,9 +430,9 @@ const Turbo::Core::TShader::TLayout::TSets &Turbo::Core::TShader::TLayout::GetSe
     return this->sets;
 }
 
-const Turbo::Core::TPushConstants &Turbo::Core::TShader::TLayout::GetPushConstants() const
+const Turbo::Core::TShader::TLayout::TPushConstant &Turbo::Core::TShader::TLayout::GetPushConstant() const
 {
-    return this->pushConstants;
+    return this->pushConstant;
 }
 
 void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor)
@@ -335,15 +472,15 @@ void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TSets &sets)
     }
 }
 
-void Turbo::Core::TShader::TLayout::Merge(const TPushConstants &pushConstants)
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TPushConstant &pushConstant)
 {
-    this->pushConstants.Merge(pushConstants);
+    this->pushConstant.Merge(pushConstant);
 }
 
 void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout &layout)
 {
     this->Merge(layout.sets);
-    this->Merge(layout.pushConstants);
+    this->Merge(layout.pushConstant);
 }
 
 Turbo::Core::TDescriptorSetLayout::TLayout &Turbo::Core::TShader::TLayout::operator[](TSet &&set)
@@ -358,7 +495,7 @@ std::string Turbo::Core::TShader::TLayout::ToString() const
     {
         ss << item.first << std::endl << item.second.ToString() << std::endl;
     }
-    ss << this->pushConstants.ToString();
+    ss << this->pushConstant.ToString();
     return ss.str();
 }
 

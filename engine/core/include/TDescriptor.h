@@ -217,7 +217,7 @@ class TAccelerationStructureDescriptor : public TDescriptor
     ~TAccelerationStructureDescriptor();
 };
 
-class TPushConstants
+class TPushConstants // FIXME: Move it to Pipeline Layout!!!
 {
   public:
     using TOffset = uint32_t;
