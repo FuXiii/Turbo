@@ -476,6 +476,47 @@ DescriptorSetLayout::Layout 的 Hash 计算：
 使用 std::bitset 或 将 DescriptorSetLayout::Layout::bindings 数据按照二进制铺开计算 hash 值
 ````
 
+### Specialization Constant
+
+在着色器中还可以定义一系列 `固定常量`（Specialization Constant）：
+
+```CXX
+layout(constant_id = 0) const bool bool_const_vlaue = true;
+layout(constant_id = 1) const int int_const_vlaue = 1;
+layout(constant_id = 2) const uint uint_const_vlaue = 2;
+layout(constant_id = 3) const float float_const_vlaue = 3.0;
+layout(constant_id = 10) const double double_const_vlaue = 4.0;
+```
+
+而在创建 `Pipeline` 的时候是通过 `VkPipelineShaderStageCreateInfo::pSpecializationInfo` 指定 `固定常量`：
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineShaderStageCreateInfo {
+    VkStructureType                     sType;
+    const void*pNext;
+    VkPipelineShaderStageCreateFlags    flags;
+    VkShaderStageFlagBits               stage;
+    VkShaderModule                      module;
+    const char*                         pName;
+    const VkSpecializationInfo*         pSpecializationInfo;
+} VkPipelineShaderStageCreateInfo;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationInfo {
+    uint32_t                           mapEntryCount;
+    const VkSpecializationMapEntry*    pMapEntries;
+    size_t                             dataSize;
+    const void*                        pData;
+} VkSpecializationInfo;
+```
+
+所以需要在创建 `pipeline` 的时候需要提供设置自定义`固定常量`的接口。
+
+*注：目前`固定常量`是通过着色器设置的。不是很合理。*
+
 ### 概要设计
 
 描述符集的原始声明是在着色器中，需要从着色器中反序列化出相关描述符集信息。

@@ -4,10 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/9
+
+>* `engine\core\TShader` 下 `InternalParseSpirV()` 时将数据合并到 `layout` 中。
+
 ## 2025/4/8
 
->* `engine\core\TShader` 下 `TLayout` 中增加`TPushConstant`类。
->* `engine\core\TShader` 下 `TLayout` 中移除`TPushConstants`使用。
+>* `engine\core\TShader` 下 `TLayout` 中增加 `TPushConstant` 类。
+>* `engine\core\TShader` 下 `TLayout` 中移除 `TPushConstants` 使用。
 
 ## 2025/4/5
 

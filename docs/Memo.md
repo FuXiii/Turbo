@@ -9,11 +9,13 @@
 
 * ``问``：什么是 ``variable-sized`` 描述符（Vulkan 1.2）``答``：好像 是通过外部设置 描述符中元素数组长度 的另一种方式？
 
->需要规划设计 `push constants` ,一个着色器只能有一个，但 `pipeline layout` 有所有的着色器的 `push constant` 。
+>* 需要规划设计 `push constants` ,一个着色器只能有一个，但 `pipeline layout` 有所有的着色器的 `push constant` 。
 
->需要 `flags` 的模板，简化 `flags` 的使用。
+>* 需要 `flags` 的模板，简化 `flags` 的使用。
 
->需要所有的 `ToString()` 基于统一的标准输出，`Json` 标准是一个有效的方式。
+>* 需要所有的 `ToString()` 基于统一的标准输出，`Json` 标准是一个有效的方式。
+
+>* Pipeline 目前的构造函数参数太多了，太复杂，应该提供优化。
 
 ## Need Dev
 

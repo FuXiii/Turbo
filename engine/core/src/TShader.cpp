@@ -295,8 +295,10 @@ bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
 
 void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pushConstant)
 {
-    if (this->offset == pushConstant.offset && this->size == pushConstant.size)
+    if (pushConstant.size != 0 && pushConstant.stageFlags != 0)
     {
+        this->offset = offset;
+        this->size = size;
         this->stageFlags |= pushConstant.stageFlags;
     }
 }
@@ -876,7 +878,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         TPushConstantDescriptor *push_constant_descriptor = new TPushConstantDescriptor(this, descriptor_data_type, count, name, struct_members, size);
         this->pushConstantDescriptors.push_back(push_constant_descriptor);
 
-        //this->layout.Merge(set, binding, *push_constant_descriptor);
+        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetVkShaderStageFlags(), 0, size));
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)
@@ -913,6 +915,9 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TInputAttachmentDescriptor *input_attachment_descriptor = new TInputAttachmentDescriptor(attachment_index, this, descriptor_data_type, set, binding, count, name);
         this->inputAttachmentDescriptors.push_back(input_attachment_descriptor);
+
+        this->layout.Merge(set, binding, *input_attachment_descriptor);
+
     }
 
     for (spirv_cross::Resource &storage_buffer_item : resources.storage_buffers)
@@ -947,6 +952,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TStorageBufferDescriptor *storage_buffer_descriptor = new TStorageBufferDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->storageBufferDescriptors.push_back(storage_buffer_descriptor);
+
+        this->layout.Merge(set, binding, *storage_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &acceleration_structures_item : resources.acceleration_structures)
@@ -977,6 +984,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TAccelerationStructureDescriptor *acceleration_structure_descriptor = new TAccelerationStructureDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->accelerationStructureDescriptors.push_back(acceleration_structure_descriptor);
+
+        this->layout.Merge(set, binding, *acceleration_structure_descriptor);
     }
 
     for (spirv_cross::Resource &stage_input_item : resources.stage_inputs)
