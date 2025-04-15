@@ -674,7 +674,24 @@ Pipeline(shaders)
 }
 ```
 
-PipelineLayout 创建流程
+如上 PipelineLayout 创建会有一个问题：
+
+将多个 ``Shader::Layout`` 合并成一个 ``Pipeline::Layout`` ，一个 ``Pipeline::Layout`` 会存储对应 ``Descriptor Set`` （和 ``Push Constants`` ） 的信息，而在最终创建 ``PipelineLayout`` 时（内部的 ``Descriptor Set Layout`` ）也会去创建并存储 ``Descriptor Set`` 的信息。
+
+* ``Pipeline::Layout`` 会存储 ``Descriptor Set`` 的信息。
+* ``PipelineLayout`` 内部对应的 ``Descriptor Set Layout`` 也会存储 ``Descriptor Set`` 的信息。
+
+也就是 ``Descriptor Set`` 的信息重复存储了。
+
+理想状态是 ``Pipeline::Layout`` 中存储对应的 ``Descriptor Set Layout`` 。
+
+但 ``Pipeline::Layout`` 出现的目的就是用于配置 ``Descriptor Set`` 布局，之后根据布局去查找可重用和需要创建的 ``Descriptor Set Layout`` 。
+
+*``注``：``Pipeline::Layout::Sets`` 和 ``Shader::Layout::Sets`` 通用，可以使用同一个。*
+
+*``注``：``Pipeline::Layout`` 中是 ``PushConstants`` ，而 ``Shader::Layout`` 中是 ``PushConstant`` 。不是同一个。*
+
+#### PipelineLayout 创建流程
 
 ```mermaid
 graph TD;
@@ -747,6 +764,13 @@ style Begin fill:#22b14c
 style End fill:#e33023
 
 ```
+
+在使用 `TPipelineLayout::TLayout` 创建 `TPipelineLayout` 时内部应该有两个管理类：
+
+* `DescriptorSetLayoutManager` 查找并使用可重用或创建新`描述符集布局`。
+* `PipelineLayoutManager` 查找并使用可重用或创建新`管线布局`。
+
+对应 `DescriptorSetLayoutManager` 和 `PipelineLayoutManager` 可在 `Device` 中管理。每一个 `Device` 都有 `DescriptorSetLayoutManager` 和 `PipelineLayoutManager` 。
 
 ### 详细设计
 

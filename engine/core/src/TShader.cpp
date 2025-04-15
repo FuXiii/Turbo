@@ -416,7 +416,7 @@ Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TPushConstant &pu
     this->pushConstant = pushConstant;
 }
 
-Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TPushConstant &&pushConstant)
+Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TShader::TLayout::TPushConstant &&pushConstant)
 {
     this->sets = std::move(sets);
     this->pushConstant = std::move(pushConstant);
@@ -917,7 +917,6 @@ void Turbo::Core::TShader::InternalParseSpirV()
         this->inputAttachmentDescriptors.push_back(input_attachment_descriptor);
 
         this->layout.Merge(set, binding, *input_attachment_descriptor);
-
     }
 
     for (spirv_cross::Resource &storage_buffer_item : resources.storage_buffers)

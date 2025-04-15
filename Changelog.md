@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/15
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `engine\core\TPipelineLayout` 下增加 `TPipelineLayout::TLayout` 子类。
+>* 将 `engine\core\TDescriptor` 下 `TPushConstants` 移动到 `TPipelineLayout::TLayout` 子类下。
+
 ## 2025/4/9
 
 >* `engine\core\TShader` 下 `InternalParseSpirV()` 时将数据合并到 `layout` 中。

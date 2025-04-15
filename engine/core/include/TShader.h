@@ -135,25 +135,25 @@ class TShader : public Turbo::Core::TVulkanHandle
 
       private:
         TShader::TLayout::TSets sets;
-        TPushConstant pushConstant;
+        TShader::TLayout::TPushConstant pushConstant;
 
       public:
         TLayout() = default;
         TLayout(const TShader::TLayout::TSets &sets, const TShader::TLayout::TPushConstant &pushConstant);
         TLayout(const TShader::TLayout::TSets &sets);
         TLayout(const TShader::TLayout::TPushConstant &pushConstant);
-        TLayout(TShader::TLayout::TSets &&sets, TPushConstant &&pushConstant);
+        TLayout(TShader::TLayout::TSets &&sets, TShader::TLayout::TPushConstant &&pushConstant);
 
         bool Empty() const;
 
         const TShader::TLayout::TSets &GetSets() const;
-        const TPushConstant &GetPushConstant() const;
+        const TShader::TLayout::TPushConstant &GetPushConstant() const;
 
         void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout);
         void Merge(const TShader::TLayout::TSets &sets);
-        void Merge(const TPushConstant &pushConstant);
+        void Merge(const TShader::TLayout::TPushConstant &pushConstant);
         void Merge(const TShader::TLayout &layout);
 
         Turbo::Core::TDescriptorSetLayout::TLayout &operator[](TSet &&set);

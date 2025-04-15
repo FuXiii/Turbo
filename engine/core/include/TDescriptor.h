@@ -216,31 +216,6 @@ class TAccelerationStructureDescriptor : public TDescriptor
     TAccelerationStructureDescriptor(TShader *shader, TDescriptorDataType dataType, uint32_t set, uint32_t binding, uint32_t count, const std::string &name);
     ~TAccelerationStructureDescriptor();
 };
-
-class TPushConstants // FIXME: Move it to Pipeline Layout!!!
-{
-  public:
-    using TOffset = uint32_t;
-    using TSize = uint32_t;
-    using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
-
-  private:
-    TPushConstants::TConstants constants;
-
-  public:
-    TPushConstants() = default;
-    TPushConstants(const TPushConstants::TConstants &constants);
-    TPushConstants(TPushConstants::TConstants &&constants);
-
-    const TPushConstants::TConstants &GetConstants() const;
-    bool Empty() const;
-
-    void Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags);
-    void Merge(const TPushConstants &pushConstants);
-
-    std::string ToString() const;
-};
-
 } // namespace Core
 } // namespace Turbo
 
