@@ -455,86 +455,119 @@ class PipelineLayout : public Turbo::Core::TVulkanHandle // OK
     }
 };
 
+class VulkanContext
+{
+  private:
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance;
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device;
+    Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue;
+
+  public:
+    VulkanContext()
+    {
+        auto vulkan_verssion = Turbo::Core::TInstance::GetVulkanInstanceVersion();
+        std::cout << "vulkan verssion: " << vulkan_verssion.ToString() << std::endl;
+        std::vector<Turbo::Core::TLayerInfo> enable_layers;
+        {
+            auto instance_support_layers = Turbo::Core::TLayerInfo::GetInstanceLayers();
+            for (auto &layer : instance_support_layers)
+            {
+                switch (layer.GetLayerType())
+                {
+                case Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION: {
+                    enable_layers.push_back(layer);
+                }
+                break;
+                default: {
+                }
+                break;
+                }
+            }
+        }
+
+        std::vector<Turbo::Core::TExtensionInfo> enable_extensions;
+        {
+            auto instance_support_extensions = Turbo::Core::TExtensionInfo::GetInstanceExtensions();
+            for (auto &extension : instance_support_extensions)
+            {
+                switch (extension.GetExtensionType())
+                {
+                case Turbo::Core::TExtensionType::VK_KHR_SURFACE: {
+                    enable_extensions.push_back(extension);
+                }
+                break;
+                case Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE: {
+                    enable_extensions.push_back(extension);
+                }
+                break;
+                case Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE: {
+                    enable_extensions.push_back(extension);
+                }
+                break;
+                case Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE: {
+                    enable_extensions.push_back(extension);
+                }
+                break;
+                case Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE: {
+                    enable_extensions.push_back(extension);
+                }
+                break;
+                default: {
+                }
+                break;
+                }
+            }
+        }
+
+        this->instance = new Turbo::Core::TInstance(enable_layers, enable_extensions, vulkan_verssion);
+
+        auto physical_device = this->instance->GetBestPhysicalDevice();
+
+        std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
+        {
+            std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
+            for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
+            {
+                switch (extension.GetExtensionType())
+                {
+                case Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN: {
+                    enable_device_extensions.push_back(extension);
+                }
+                break;
+                default: {
+                }
+                break;
+                }
+            }
+        }
+
+        this->device = new Turbo::Core::TDevice(physical_device, {}, enable_device_extensions, {});
+        this->queue = device->GetBestGraphicsQueue();
+    }
+
+    Turbo::Core::TInstance *Instance()
+    {
+        return this->instance;
+    }
+
+    Turbo::Core::TDevice *Device()
+    {
+        return this->device;
+    }
+
+    Turbo::Core::TDeviceQueue *Queue()
+    {
+        return this->queue;
+    }
+};
+
 int main()
 {
-    auto vulkan_verssion = Turbo::Core::TInstance::GetVulkanInstanceVersion();
+    VulkanContext vulkan_context;
 
-    std::vector<Turbo::Core::TLayerInfo> enable_layers;
-    {
-        auto instance_support_layers = Turbo::Core::TLayerInfo::GetInstanceLayers();
-        for (auto &layer : instance_support_layers)
-        {
-            switch (layer.GetLayerType())
-            {
-            case Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION: {
-                enable_layers.push_back(layer);
-            }
-            break;
-            default: {
-            }
-            break;
-            }
-        }
-    }
-
-    std::vector<Turbo::Core::TExtensionInfo> enable_extensions;
-    {
-        auto instance_support_extensions = Turbo::Core::TExtensionInfo::GetInstanceExtensions();
-        for (auto &extension : instance_support_extensions)
-        {
-            switch (extension.GetExtensionType())
-            {
-            case Turbo::Core::TExtensionType::VK_KHR_SURFACE: {
-                enable_extensions.push_back(extension);
-            }
-            break;
-            case Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE: {
-                enable_extensions.push_back(extension);
-            }
-            break;
-            case Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE: {
-                enable_extensions.push_back(extension);
-            }
-            break;
-            case Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE: {
-                enable_extensions.push_back(extension);
-            }
-            break;
-            case Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE: {
-                enable_extensions.push_back(extension);
-            }
-            break;
-            default: {
-            }
-            break;
-            }
-        }
-    }
-
-    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = new Turbo::Core::TInstance(enable_layers, enable_extensions, vulkan_verssion);
-
-    auto physical_device = instance->GetBestPhysicalDevice();
-
-    std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    {
-        std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
-        for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
-        {
-            switch (extension.GetExtensionType())
-            {
-            case Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN: {
-                enable_device_extensions.push_back(extension);
-            }
-            break;
-            default: {
-            }
-            break;
-            }
-        }
-    }
-
-    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, {}, enable_device_extensions, {});
-    Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
+    Turbo::Core::TInstance *instance = vulkan_context.Instance();
+    Turbo::Core::TDevice *device = vulkan_context.Device();
+    Turbo::Core::TDeviceQueue *queue = vulkan_context.Queue();
 
     if (false)
     {

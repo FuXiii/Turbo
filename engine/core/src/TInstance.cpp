@@ -315,7 +315,6 @@ void Turbo::Core::TInstance::InternalCreate()
     }
 
     VkApplicationInfo vk_application_info = {};
-
     vk_application_info.sType = VkStructureType::VK_STRUCTURE_TYPE_APPLICATION_INFO;
     vk_application_info.pNext = nullptr;
     vk_application_info.pApplicationName = nullptr;
