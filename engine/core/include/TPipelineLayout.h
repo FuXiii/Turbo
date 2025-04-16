@@ -22,7 +22,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
         using TSet = std::size_t;
         using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
 
-        class TPushConstants // FIXME: Move it to Pipeline Layout!!!
+        class TPushConstants
         {
           public:
             using TOffset = uint32_t;
@@ -56,6 +56,9 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
         TLayout(const TPipelineLayout::TLayout::TSets &sets);
         TLayout(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
         TLayout(TPipelineLayout::TLayout::TSets &&sets, TPipelineLayout::TLayout::TPushConstants &&pushConstants);
+
+        const TPipelineLayout::TLayout::TSets &GetSets() const;
+        const TPipelineLayout::TLayout::TPushConstants &GetPushConstants() const;
 
         void Merge(const TPipelineLayout::TLayout::TSets &sets);
         void Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
@@ -96,4 +99,71 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
 } // namespace Core
 } // namespace Turbo
+
+namespace std
+{
+template <>
+class hash<Turbo::Core::TPipelineLayout::TLayout>
+{
+  public:
+    std::size_t operator()(const Turbo::Core::TPipelineLayout::TLayout &layout) const
+    {
+        class TLayoutHasher
+        {
+          private:
+            std::string *str = nullptr;
+
+          public:
+            TLayoutHasher(const Turbo::Core::TPipelineLayout::TLayout &layout)
+            {
+                this->str = new std::string();
+                for (auto &set_item : layout.GetSets())
+                {
+                    auto set = set_item.first;
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&set), sizeof(set));
+                    for (auto &binding_item : set_item.second)
+                    {
+                        auto &binding = binding_item.first;
+                        auto &descriptor_type = binding_item.second.GetType();
+                        auto &descriptor_count = binding_item.second.GetCount();
+
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                    }
+                }
+
+                for (auto &constant_item : layout.GetPushConstants().GetConstants())
+                {
+                    auto offset = constant_item.first;
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
+                    for (auto &size_flag_item : constant_item.second)
+                    {
+                        auto size = size_flag_item.first;
+                        auto flags = size_flag_item.second;
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&flags), sizeof(flags));
+                    }
+                }
+            }
+
+            ~TLayoutHasher()
+            {
+                if (this->str != nullptr)
+                {
+                    delete this->str;
+                    this->str = nullptr;
+                }
+            }
+
+            std::size_t Hash() const
+            {
+                return std::hash<std::string>{}(*(this->str));
+            }
+        };
+
+        return TLayoutHasher(layout).Hash();
+    }
+};
+} // namespace std
 #endif // !TURBO_CORE_TPIPELINELAYOUT_H

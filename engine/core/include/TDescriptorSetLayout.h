@@ -92,11 +92,11 @@ class hash<Turbo::Core::TDescriptorSetLayout::TLayout>
             TLayoutHasher(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
             {
                 this->str = new std::string();
-                for (auto &item : layout)
+                for (auto &binding_item : layout)
                 {
-                    auto &binding = item.first;
-                    auto &descriptor_type = item.second.GetType();
-                    auto &descriptor_count = item.second.GetCount();
+                    auto &binding = binding_item.first;
+                    auto &descriptor_type = binding_item.second.GetType();
+                    auto &descriptor_count = binding_item.second.GetCount();
 
                     this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
                     this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));

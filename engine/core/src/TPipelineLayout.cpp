@@ -129,6 +129,16 @@ Turbo::Core::TPipelineLayout::TLayout::TLayout(TPipelineLayout::TLayout::TSets &
     this->pushConstants = std::move(pushConstants);
 }
 
+const Turbo::Core::TPipelineLayout::TLayout::TSets &Turbo::Core::TPipelineLayout::TLayout::GetSets() const
+{
+    return this->sets;
+}
+
+const Turbo::Core::TPipelineLayout::TLayout::TPushConstants &Turbo::Core::TPipelineLayout::TLayout::GetPushConstants() const
+{
+    return this->pushConstants;
+}
+
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout::TSets &sets)
 {
     for (auto &set_item : sets)

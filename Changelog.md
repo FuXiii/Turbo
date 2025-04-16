@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/16
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `engine\core\TPipelineLayout` 下 `TPipelineLayout::TLayout` 子类增加 `GetSets()` 成员函数。
+>* `engine\core\TPipelineLayout` 下 `TPipelineLayout::TLayout` 子类增加 `GetPushConstants()` 成员函数。
+>* `engine\core\TPipelineLayout` 下增加 `std::hash<TPipelineLayout::TLayout>` 的特化。用于计算 `TPipelineLayout::TLayout` 的 `Hash` 值。
+
 ## 2025/4/15
 
 >* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。

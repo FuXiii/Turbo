@@ -772,6 +772,26 @@ style End fill:#e33023
 
 对应 `DescriptorSetLayoutManager` 和 `PipelineLayoutManager` 可在 `Device` 中管理。每一个 `Device` 都有 `DescriptorSetLayoutManager` 和 `PipelineLayoutManager` 。
 
+#### DescriptorSetLayoutManager
+
+``device`` 内部管理，以 ``DescriptorSetLayout::Layout(Hash)`` 为 ``键`` 进行查找重用和新建。
+
+这就需要 ``DescriptorSetLayout::Layout`` 能够生成相应的 ``Hash`` 值（使用 ``std::hash`` 标准）。
+
+*注：不一定非得叫 ``DescriptorSetLayoutManager`` 也可以考虑叫 ``DescriptorSetLayoutAllocator`` ?*
+
+*注：可能会发生 `Hash` 冲突。提供处理该冲突能力*
+
+#### PipelineLayoutManager
+
+``device`` 内部管理，以 ``PipelineLayout::Layout(Hash)`` 为 ``键`` 进行查找重用和新建。
+
+这就需要 ``PipelineLayout::Layout`` 能够生成相应的 ``Hash`` 值（使用 ``std::hash`` 标准）。
+
+*注：不一定非得叫 ``PipelineLayoutManager`` 也可以考虑叫 ``PipelineLayoutAllocator`` ?*
+
+*注：可能会发生 `Hash` 冲突。提供处理该冲突能力*
+
 ### 详细设计
 
 ```CXX
