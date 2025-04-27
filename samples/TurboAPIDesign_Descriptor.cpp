@@ -7,6 +7,8 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <bitset>
+#include <array>
 
 #include <TDevice.h>
 #include <TDeviceQueue.h>
@@ -561,6 +563,79 @@ class VulkanContext
     }
 };
 
+enum class TestFlagBits
+{
+    _1 = 0x00000001,
+    _10 = 0x00000002,
+    _100 = 0x00000004,
+    _1000 = 0x00000008,
+    _10000 = 0x00000010,
+    _100000 = 0x00000020,
+    _1000000 = 0x00000040,
+};
+
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value || std::is_enum<T>::value>>
+class TFlags
+{
+  private:
+    std::array<char, sizeof(T)> flags;
+
+  public:
+    TFlags(const T &flags)
+    {
+        std::memcpy(this->flags.data(), &flags, sizeof(T));
+    }
+
+    operator const T &() const
+    {
+        return this->flags;
+    }
+
+    bool Has(const T &flags)
+    {
+        if ((this->flags & flags) == flags)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    TFlags &operator|(const TFlags &flags)
+    {
+        this->flags | flags;
+        return *this;
+    }
+
+    std::string ToString() const
+    {
+        return "";
+    }
+};
+
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const TFlags<T> &flags)
+{
+    return os << flags.ToString();
+}
+
+// template <typename T>
+// TFlags<T> &operator|(const T &left, const T &right)
+//{
+//     // std::bitset<sizeof(T)> bit_set_left=left;
+//     return left | right;
+// }
+
+void FlagsTest()
+{
+    // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
+    // std::cout << "flags: " << flags << std::endl;
+
+    auto flags = TestFlagBits::_1;
+
+    std::array<char, sizeof(TestFlagBits::_1)> array;
+    //std::memcpy(array.data(),&flags,sizeof(expression-or-type))
+}
+
 int main()
 {
     VulkanContext vulkan_context;
@@ -845,7 +920,7 @@ int main()
         }
     }
 
-    if (true)
+    if (false)
     {
         Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
         bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});
@@ -894,6 +969,8 @@ int main()
             std::cout << "[Error] DescriptorSetLayout 2 create failed!" << std::endl;
         }
     }
+
+    FlagsTest();
 
     return 0;
 }
