@@ -565,22 +565,24 @@ class VulkanContext
 
 enum class TestFlagBits
 {
-    _1 = 0x00000001,
-    _10 = 0x00000002,
-    _100 = 0x00000004,
-    _1000 = 0x00000008,
-    _10000 = 0x00000010,
-    _100000 = 0x00000020,
-    _1000000 = 0x00000040,
+    _1 = 0b1,
+    _10 = 0b10,
+    _100 = 0b100,
+    _1000 = 0b1000,
+    _10000 = 0b10000,
+    _100000 = 0b100000,
+    _1000000 = 0b1000000,
 };
 
 template <typename T, typename = std::enable_if_t<std::is_integral<T>::value || std::is_enum<T>::value>>
 class TFlags
 {
   private:
-    std::array<char, sizeof(T)> flags;
+    std::array<char, sizeof(T)> flags = {0};
 
   public:
+    TFlags() = default;
+
     TFlags(const T &flags)
     {
         std::memcpy(this->flags.data(), &flags, sizeof(T));
@@ -593,24 +595,80 @@ class TFlags
 
     bool Has(const T &flags)
     {
-        if ((this->flags & flags) == flags)
+        const char *compare_flags = (const char *)(&flags);
+        for (std::size_t i = 0; i < this->flags.size(); i++)
         {
-            return true;
+            const char current_byte = *(compare_flags + i);
+            if ((this->flags[i] & current_byte) != current_byte)
+            {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
-    TFlags &operator|(const TFlags &flags)
+    TFlags &operator|=(const TFlags &other)
     {
-        this->flags | flags;
+        for (std::size_t i = 0; i < this->flags.size(); i++)
+        {
+            this->flags[i] |= other.flags[i];
+        }
+
         return *this;
+    }
+
+    TFlags operator|(const TFlags &other)
+    {
+        TFlags temp_flags = *this;
+        temp_flags |= other;
+        return temp_flags;
     }
 
     std::string ToString() const
     {
-        return "";
+        std::string str;
+        for (auto riter = this->flags.rbegin(); riter != this->flags.rend(); riter++) // 大字头、小字头
+        {
+            str += std::bitset<8 * sizeof(char)>(*riter).to_string() + " ";
+        }
+        str.pop_back();
+        return str;
     }
 };
+
+template <typename T>
+TFlags<T> operator|(const T &left, const T &right)
+{
+    TFlags<T> flags;
+    flags |= left;
+    flags |= right;
+    return flags;
+}
+
+template <typename T>
+TFlags<T> operator|(const T &left, const TFlags<T> &right)
+{
+    TFlags<T> flags;
+    flags |= left;
+    flags |= right;
+    return flags;
+}
+
+// template <typename T>
+// TFlags<T> operator|(const TFlags<T> &left, const T &right)
+//{
+//     TFlags<T> flags = left;
+//     flags |= right;
+//     return flags;
+// }
+//
+// template <typename T>
+// TFlags<T> operator|(const T &left, const TFlags<T> &right)
+//{
+//     TFlags<T> flags = left;
+//     flags |= right;
+//     return flags;
+// }
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const TFlags<T> &flags)
@@ -630,10 +688,38 @@ void FlagsTest()
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
     // std::cout << "flags: " << flags << std::endl;
 
-    auto flags = TestFlagBits::_1;
+    TFlags flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10;
+    flags |= TestFlagBits::_100;
+    std::cout << "flags: " << flags << std::endl;
 
-    std::array<char, sizeof(TestFlagBits::_1)> array;
-    //std::memcpy(array.data(),&flags,sizeof(expression-or-type))
+    if (flags.Has(TestFlagBits::_1))
+    {
+        std::cout << "has 1" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_10))
+    {
+        std::cout << "has 10" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_100))
+    {
+        std::cout << "has 100" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_1000))
+    {
+        std::cout << "has 1000" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_10000))
+    {
+        std::cout << "has 10000" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_100000))
+    {
+        std::cout << "has 100000" << std::endl;
+    }
+    if (flags.Has(TestFlagBits::_1000000))
+    {
+        std::cout << "has 1000000" << std::endl;
+    }
 }
 
 int main()
