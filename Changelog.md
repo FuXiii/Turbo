@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/28
+
+>* 更新 `samples\TurboAPIDesign_Descriptor` 中尝试实现 `TFlags` 。
+
 ## 2025/4/27
 
 >* 更新 `engine\core\include\TShader` 中 `TShaderType` 对应的枚举值，使其与 `VkShaderStageFlagBits` 保持一致。

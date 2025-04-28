@@ -593,13 +593,11 @@ class TFlags
         return this->flags;
     }
 
-    bool Has(const T &flags)
+    bool Has(const TFlags &flags)
     {
-        const char *compare_flags = (const char *)(&flags);
         for (std::size_t i = 0; i < this->flags.size(); i++)
         {
-            const char current_byte = *(compare_flags + i);
-            if ((this->flags[i] & current_byte) != current_byte)
+            if ((this->flags[i] & flags.flags[i]) != flags.flags[i])
             {
                 return false;
             }
@@ -629,9 +627,30 @@ class TFlags
         std::string str;
         for (auto riter = this->flags.rbegin(); riter != this->flags.rend(); riter++) // 大字头、小字头
         {
-            str += std::bitset<8 * sizeof(char)>(*riter).to_string() + " ";
+            str += std::bitset<8 * sizeof(char)>(*riter).to_string();
         }
-        str.pop_back();
+
+        if (!str.empty())
+        {
+            std::size_t pos = 0;
+            for (std::size_t i = 0; i < str.size(); i++)
+            {
+                if (str[i] != '0')
+                {
+                    break;
+                }
+                else
+                {
+                    pos = pos + 1;
+                }
+            }
+
+            if (pos != 0)
+            {
+                str = str.substr(pos);
+            }
+        }
+        
         return str;
     }
 };
