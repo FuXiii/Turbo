@@ -8,6 +8,8 @@
 #include <bitset>
 #include <ostream>
 
+#include <iostream>
+
 namespace Turbo
 {
 namespace Core
@@ -26,8 +28,16 @@ class TFlags
         std::memcpy(this->flags.data(), &flags, sizeof(T));
     }
 
+    template <typename Y>
+    TFlags(const TFlags<Y> &flags)
+    {
+        Y y = flags;
+        std::memcpy(this->flags.data(), &y, std::min(this->flags.size(), flags.Size()));
+    }
+
     operator T() const
     {
+        std::cout << "operator T() const" << std::endl;
         T t;
         memset(&t, 0, sizeof(T));
         memcpy(&t, this->flags.data(), sizeof(T));
@@ -51,6 +61,23 @@ class TFlags
         return true;
     }
 
+    TFlags &operator&=(const TFlags &other)
+    {
+        for (std::size_t i = 0; i < this->flags.size(); i++)
+        {
+            this->flags[i] &= other.flags[i];
+        }
+
+        return *this;
+    }
+
+    TFlags operator&(const TFlags &other) const
+    {
+        TFlags _flags = *this;
+        _flags &= other;
+        return _flags;
+    }
+
     TFlags &operator|=(const TFlags &other)
     {
         for (std::size_t i = 0; i < this->flags.size(); i++)
@@ -63,9 +90,68 @@ class TFlags
 
     TFlags operator|(const TFlags &other) const
     {
-        TFlags temp_flags = *this;
-        temp_flags |= other;
-        return temp_flags;
+        TFlags _flags = *this;
+        _flags |= other;
+        return _flags;
+    }
+
+    TFlags &operator^=(const TFlags &other)
+    {
+        for (std::size_t i = 0; i < this->flags.size(); i++)
+        {
+            this->flags[i] ^= other.flags[i];
+        }
+
+        return *this;
+    }
+
+    TFlags operator^(const TFlags &other) const
+    {
+        TFlags _flags = *this;
+        _flags ^= other;
+        return _flags;
+    }
+
+    TFlags operator~() const
+    {
+        TFlags _flags = *this;
+        for (std::size_t i = 0; i < _flags.flags.size(); i++)
+        {
+            _flags.flags[i] = ~_flags.flags[i];
+        }
+        return _flags;
+    }
+
+    bool operator!() const
+    {
+        for (std::size_t i = 0; i < this->flags.size(); i++)
+        {
+            if (!this->flags[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename Y>
+    bool operator==(const TFlags<Y> &other) const
+    {
+        auto size = std::min(this->flags.size(), other.Size());
+        for (std::size_t i = 0; i < size; i++)
+        {
+            if (this->flags[i] != other.flags[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename Y>
+    bool operator!=(const TFlags<Y> &other) const
+    {
+        return !(*this == other);
     }
 
     std::string ToString() const
@@ -98,6 +184,13 @@ class TFlags
         }
 
         return str;
+    }
+
+    uint32_t ToVkFlags() const
+    {
+        uint32_t vk_flags = 0;
+        std::memcpy(&vk_flags, this->flags.data(), std::min(this->flags.size(), sizeof(uint32_t)));
+        return vk_flags;
     }
 };
 } // namespace Core

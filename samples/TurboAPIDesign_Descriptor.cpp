@@ -619,8 +619,108 @@ void FlagsTest()
 void VulkanFlagsTest()
 {
     VkShaderStageFlags;
-    Turbo::Core::TFlags<VkShaderStageFlags> flags;
-    std::cout << flags << std::endl;
+    Turbo::Core::TFlags<VkShaderStageFlags> flags = VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT;
+    flags |= VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
+    flags |= VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
+    // flags |= VkCullModeFlagBits::VK_CULL_MODE_FRONT_BIT;
+    std::cout << "flags: " << flags << std::endl;
+    std::cout << "flags.ToVkFlags(): " << flags.ToVkFlags() << std::endl;
+
+    Turbo::Core::TFlags<VkShaderStageFlags> flags0 = VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT;
+    flags0 |= VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
+    flags0 |= VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    if (flags == flags0)
+    {
+        std::cout << "before flags == flags0" << std::endl;
+    }
+    else
+    {
+        std::cout << "before flags != flags0" << std::endl;
+    }
+
+    flags0 |= VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+
+    if (flags == flags0)
+    {
+        std::cout << "after flags == flags0" << std::endl;
+    }
+    else
+    {
+        std::cout << "after flags != flags0" << std::endl;
+    }
+
+    VkShaderStageFlags vk_shader_stage_flags = VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT;
+    vk_shader_stage_flags |= VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT;
+    vk_shader_stage_flags |= VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT;
+    std::cout << "vk_shader_stage_flags: " << vk_shader_stage_flags << std::endl;
+
+    assert(vk_shader_stage_flags == flags.ToVkFlags());
+
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT))
+    {
+        std::cout << "Has VERTEX_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT))
+    {
+        std::cout << "Has TESSELLATION_CONTROL_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT))
+    {
+        std::cout << "Has TESSELLATION_EVALUATION_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT))
+    {
+        std::cout << "Has GEOMETRY_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT))
+    {
+        std::cout << "Has FRAGMENT_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT))
+    {
+        std::cout << "Has COMPUTE_BIT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS))
+    {
+        std::cout << "Has ALL_GRAPHICS" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_ALL))
+    {
+        std::cout << "Has ALL" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR))
+    {
+        std::cout << "Has RAYGEN_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR))
+    {
+        std::cout << "Has ANY_HIT_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+    {
+        std::cout << "Has CLOSEST_HIT_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR))
+    {
+        std::cout << "Has MISS_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR))
+    {
+        std::cout << "Has INTERSECTION_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR))
+    {
+        std::cout << "Has CALLABLE_BIT_KHR" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT))
+    {
+        std::cout << "Has TASK_BIT_EXT" << std::endl;
+    }
+    if (flags.Has(VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT))
+    {
+        std::cout << "Has MESH_BIT_EXT" << std::endl;
+    }
 }
 
 int main()
