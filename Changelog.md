@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/4/29
+
+>* 更新 `engine\core` 下新增 `Turbo::Core::TFlags<T>` 的相关声明和定义。
+
 ## 2025/4/28
 
 >* 更新 `samples\TurboAPIDesign_Descriptor` 中尝试实现 `TFlags` 。

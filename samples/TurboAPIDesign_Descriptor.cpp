@@ -574,140 +574,15 @@ enum class TestFlagBits
     _1000000 = 0b1000000,
 };
 
-template <typename T, typename = std::enable_if_t<std::is_integral<T>::value || std::is_enum<T>::value>>
-class TFlags
-{
-  private:
-    std::array<char, sizeof(T)> flags = {0};
-
-  public:
-    TFlags() = default;
-
-    TFlags(const T &flags)
-    {
-        std::memcpy(this->flags.data(), &flags, sizeof(T));
-    }
-
-    operator const T &() const
-    {
-        return this->flags;
-    }
-
-    bool Has(const TFlags &flags)
-    {
-        for (std::size_t i = 0; i < this->flags.size(); i++)
-        {
-            if ((this->flags[i] & flags.flags[i]) != flags.flags[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    TFlags &operator|=(const TFlags &other)
-    {
-        for (std::size_t i = 0; i < this->flags.size(); i++)
-        {
-            this->flags[i] |= other.flags[i];
-        }
-
-        return *this;
-    }
-
-    TFlags operator|(const TFlags &other)
-    {
-        TFlags temp_flags = *this;
-        temp_flags |= other;
-        return temp_flags;
-    }
-
-    std::string ToString() const
-    {
-        std::string str;
-        for (auto riter = this->flags.rbegin(); riter != this->flags.rend(); riter++) // 大字头、小字头
-        {
-            str += std::bitset<8 * sizeof(char)>(*riter).to_string();
-        }
-
-        if (!str.empty())
-        {
-            std::size_t pos = 0;
-            for (std::size_t i = 0; i < str.size(); i++)
-            {
-                if (str[i] != '0')
-                {
-                    break;
-                }
-                else
-                {
-                    pos = pos + 1;
-                }
-            }
-
-            if (pos != 0)
-            {
-                str = str.substr(pos);
-            }
-        }
-        
-        return str;
-    }
-};
-
-template <typename T>
-TFlags<T> operator|(const T &left, const T &right)
-{
-    TFlags<T> flags;
-    flags |= left;
-    flags |= right;
-    return flags;
-}
-
-template <typename T>
-TFlags<T> operator|(const T &left, const TFlags<T> &right)
-{
-    TFlags<T> flags;
-    flags |= left;
-    flags |= right;
-    return flags;
-}
-
-// template <typename T>
-// TFlags<T> operator|(const TFlags<T> &left, const T &right)
-//{
-//     TFlags<T> flags = left;
-//     flags |= right;
-//     return flags;
-// }
-//
-// template <typename T>
-// TFlags<T> operator|(const T &left, const TFlags<T> &right)
-//{
-//     TFlags<T> flags = left;
-//     flags |= right;
-//     return flags;
-// }
-
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const TFlags<T> &flags)
-{
-    return os << flags.ToString();
-}
-
-// template <typename T>
-// TFlags<T> &operator|(const T &left, const T &right)
-//{
-//     // std::bitset<sizeof(T)> bit_set_left=left;
-//     return left | right;
-// }
+#include <TFlags.h>
 
 void FlagsTest()
 {
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
     // std::cout << "flags: " << flags << std::endl;
 
-    TFlags flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10;
+    auto flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10;
+    // Turbo::Core::TFlags<TestFlagBits> flags;
     flags |= TestFlagBits::_100;
     std::cout << "flags: " << flags << std::endl;
 
@@ -741,6 +616,13 @@ void FlagsTest()
     }
 }
 
+void VulkanFlagsTest()
+{
+    VkShaderStageFlags;
+    Turbo::Core::TFlags<VkShaderStageFlags> flags;
+    std::cout << flags << std::endl;
+}
+
 int main()
 {
     VulkanContext vulkan_context;
@@ -748,6 +630,9 @@ int main()
     Turbo::Core::TInstance *instance = vulkan_context.Instance();
     Turbo::Core::TDevice *device = vulkan_context.Device();
     Turbo::Core::TDeviceQueue *queue = vulkan_context.Queue();
+
+    // FlagsTest();
+    VulkanFlagsTest();
 
     if (false)
     {
@@ -1074,8 +959,6 @@ int main()
             std::cout << "[Error] DescriptorSetLayout 2 create failed!" << std::endl;
         }
     }
-
-    FlagsTest();
 
     return 0;
 }
