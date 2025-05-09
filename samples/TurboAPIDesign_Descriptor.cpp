@@ -576,6 +576,30 @@ enum class TestFlagBits
 
 #include <TFlags.h>
 
+// inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const TestFlagBits &right)
+//{
+//      Turbo::Core::TFlags<TestFlagBits> flags;
+//      flags |= left;
+//      flags |= right;
+//      return flags;
+// }
+
+inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
+{
+   Turbo::Core::TFlags<TestFlagBits> flags;
+   flags |= left;
+   flags |= right;
+   return flags;
+}
+
+// inline Turbo::Core::TFlags<TestFlagBits> operator|(const Turbo::Core::TFlags<TestFlagBits> &left, const TestFlagBits &right)
+//{
+//      Turbo::Core::TFlags<TestFlagBits> flags;
+//      flags |= left;
+//      flags |= right;
+//      return flags;
+//  }
+
 void FlagsTest()
 {
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;

@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <unordered_set>
 
+#include "TFlags.h"
+
 namespace Turbo
 {
 namespace Core
@@ -31,6 +33,32 @@ typedef enum class TShaderType
     INTERSECTION = 0x00001000,
     CALLABLE = 0x00002000,
 } TShaderType;
+
+// TURBO_DECLARE_EXPLICIT_FLAGS_TYPE_OR_OPERATOR(VkShaderStageFlags, VkShaderStageFlagBits);
+
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const VkShaderStageFlagBits &right)
+//{
+//     Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
+
+//inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+//{
+//    Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//    flags |= left;
+//    flags |= right;
+//    return flags;
+//}
+
+inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+{
+   Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+   flags |= left;
+   flags |= right;
+   return flags;
+}
 
 typedef enum class TShaderLanguage
 {
@@ -115,15 +143,16 @@ class TShader : public Turbo::Core::TVulkanHandle
             using TSize = uint32_t;
 
           private:
-            VkShaderStageFlags stageFlags = 0;
+            // VkShaderStageFlags stageFlags = 0;
+            TFlags<VkShaderStageFlags> stageFlags;
             TPushConstant::TOffset offset = 0;
             TPushConstant::TSize size = 0;
 
           public:
             TPushConstant() = default;
-            TPushConstant(VkShaderStageFlags stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size);
+            TPushConstant(const TFlags<VkShaderStageFlags> &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size);
 
-            VkShaderStageFlags GetVkShaderStageFlags() const;
+            const TFlags<VkShaderStageFlags> &GetShaderStageFlags() const;
             TPushConstant::TOffset GetOffset() const;
             TPushConstant::TSize GetSize() const;
 

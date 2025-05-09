@@ -261,14 +261,14 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
-Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(VkShaderStageFlags stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const TFlags<VkShaderStageFlags> &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
 {
     this->stageFlags = stageFlags;
     this->offset = offset;
     this->size = size;
 }
 
-VkShaderStageFlags Turbo::Core::TShader::TLayout::TPushConstant::GetVkShaderStageFlags() const
+const Turbo::Core::TFlags<VkShaderStageFlags> &Turbo::Core::TShader::TLayout::TPushConstant::GetShaderStageFlags() const
 {
     return this->stageFlags;
 }

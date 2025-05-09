@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/5/9
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+>* 更新 `engine\core\TShader` 下 `VkShaderStageFlags` 使用 `TFlags<VkShaderStageFlags>` 替代。
+
 ## 2025/4/29
 
 >* 更新 `engine\core` 下新增 `Turbo::Core::TFlags<T>` 的相关声明和定义。

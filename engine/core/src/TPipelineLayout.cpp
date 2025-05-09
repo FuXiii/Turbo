@@ -163,7 +163,7 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout
 
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TShader::TLayout::TPushConstant &pushConstant)
 {
-    this->pushConstants.Merge(pushConstant.GetOffset(), pushConstant.GetSize(), pushConstant.GetVkShaderStageFlags());
+    this->pushConstants.Merge(pushConstant.GetOffset(), pushConstant.GetSize(), pushConstant.GetShaderStageFlags());
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TLayout &layout)
