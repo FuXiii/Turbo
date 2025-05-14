@@ -586,10 +586,10 @@ enum class TestFlagBits
 
 inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
 {
-   Turbo::Core::TFlags<TestFlagBits> flags;
-   flags |= left;
-   flags |= right;
-   return flags;
+    Turbo::Core::TFlags<TestFlagBits> flags;
+    flags |= left;
+    flags |= right;
+    return flags;
 }
 
 // inline Turbo::Core::TFlags<TestFlagBits> operator|(const Turbo::Core::TFlags<TestFlagBits> &left, const TestFlagBits &right)
@@ -605,9 +605,15 @@ void FlagsTest()
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
     // std::cout << "flags: " << flags << std::endl;
 
-    auto flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10;
+    auto flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10 | Turbo::Core::TShaderType::VERTEX;
     // Turbo::Core::TFlags<TestFlagBits> flags;
     flags |= TestFlagBits::_100;
+    flags |= Turbo::Core::TShaderType::VERTEX;
+
+    Turbo::Core::TFlags<TestFlagBits> a = TestFlagBits::_100;
+    Turbo::Core::TFlags<Turbo::Core::TShaderType> b = Turbo::Core::TShaderType::VERTEX;
+    b = a;
+
     std::cout << "flags: " << flags << std::endl;
 
     if (flags.Has(TestFlagBits::_1))

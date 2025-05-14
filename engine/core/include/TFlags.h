@@ -29,6 +29,12 @@ class TFlags
     }
 
     template <typename Y>
+    TFlags(const Y &flags)
+    {
+        std::memcpy(this->flags.data(), &flags, std::min(this->flags.size(), sizeof(Y)));
+    }
+
+    template <typename Y>
     TFlags(const TFlags<Y> &flags)
     {
         Y y = flags;
@@ -88,17 +94,17 @@ class TFlags
         return *this;
     }
 
-    template <typename Y>
-    TFlags &operator|=(const TFlags<Y> &other)
-    {
-        auto size = std::min(this->flags.size(), other.Size());
-        for (std::size_t i = 0; i < size; i++)
-        {
-            this->flags[i] |= other.flags[i];
-        }
+    // template <typename Y>
+    // TFlags &operator|=(const TFlags<Y> &other)
+    // {
+    //     auto size = std::min(this->flags.size(), other.Size());
+    //     for (std::size_t i = 0; i < size; i++)
+    //     {
+    //         this->flags[i] |= other.flags[i];
+    //     }
 
-        return *this;
-    }
+    //     return *this;
+    // }
 
     TFlags operator|(const TFlags &other) const
     {
@@ -221,13 +227,13 @@ class TFlags
 //      return flags;
 // }
 //
-//template <typename T>
-//Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
+// template <typename T>
+// Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
 //{
-//    Turbo::Core::TFlags<T> flags;
-//    flags |= left;
-//    flags |= right;
-//    return flags;
+//   Turbo::Core::TFlags<T> flags;
+//   flags |= left;
+//   flags |= right;
+//   return flags;
 //}
 
 //#define TURBO_DECLARE_EXPLICIT_FLAGS_TYPE_OR_OPERATOR(TFlagsType, TBitsType)\

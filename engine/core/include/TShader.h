@@ -52,13 +52,13 @@ typedef enum class TShaderType
 //    return flags;
 //}
 
-inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
-{
-   Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
-   flags |= left;
-   flags |= right;
-   return flags;
-}
+//inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+//{
+//   Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//   flags |= left;
+//   flags |= right;
+//   return flags;
+//}
 
 typedef enum class TShaderLanguage
 {

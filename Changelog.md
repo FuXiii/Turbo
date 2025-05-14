@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/5/14
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+
 ## 2025/5/9
 
 >* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
