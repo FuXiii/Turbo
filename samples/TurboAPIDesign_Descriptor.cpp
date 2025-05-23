@@ -584,13 +584,24 @@ enum class TestFlagBits
 //      return flags;
 // }
 
-inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
-{
-    Turbo::Core::TFlags<TestFlagBits> flags;
-    flags |= left;
-    flags |= right;
-    return flags;
+#define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
+{\
+    Turbo::Core::TFlags<T> flags;\
+    flags |= left;\
+    flags |= right;\
+    return flags;\
 }
+
+TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(TestFlagBits)
+
+//inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
+//{
+//    Turbo::Core::TFlags<TestFlagBits> flags;
+//    flags |= left;
+//    flags |= right;
+//    return flags;
+//}
 
 // inline Turbo::Core::TFlags<TestFlagBits> operator|(const Turbo::Core::TFlags<TestFlagBits> &left, const TestFlagBits &right)
 //{
