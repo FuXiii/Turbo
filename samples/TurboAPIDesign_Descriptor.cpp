@@ -576,46 +576,56 @@ enum class TestFlagBits
 
 #include <TFlags.h>
 
-// inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const TestFlagBits &right)
+// OK
+//        #def ine TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
+//{\
+//    Turbo::Core::TFlags<T> flags;\
+//    flags |= left;\
+//    flags |= right;\
+//    return flags;\
+//}
+//
+// TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(TestFlagBits)
+
+// template <typename T>
+// Turbo::Core::TFlags<T> operator|(const T &left, const T &right)
 //{
-//      Turbo::Core::TFlags<TestFlagBits> flags;
-//      flags |= left;
-//      flags |= right;
-//      return flags;
+//     Turbo::Core::TFlags<T> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
 // }
 
-#define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
-inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
-{\
-    Turbo::Core::TFlags<T> flags;\
-    flags |= left;\
-    flags |= right;\
-    return flags;\
+template <typename T>
+Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
+{
+    Turbo::Core::TFlags<T> flags;
+    flags |= left;
+    flags |= right;
+    return flags;
 }
 
-TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(TestFlagBits)
-
-//inline Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
+// Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
 //{
-//    Turbo::Core::TFlags<TestFlagBits> flags;
-//    flags |= left;
-//    flags |= right;
-//    return flags;
-//}
+//     Turbo::Core::TFlags<TestFlagBits> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
 
-// inline Turbo::Core::TFlags<TestFlagBits> operator|(const Turbo::Core::TFlags<TestFlagBits> &left, const TestFlagBits &right)
-//{
-//      Turbo::Core::TFlags<TestFlagBits> flags;
-//      flags |= left;
-//      flags |= right;
-//      return flags;
-//  }
+//Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right);
 
 void FlagsTest()
 {
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
     // std::cout << "flags: " << flags << std::endl;
 
+    Turbo::Core::TFlags<TestFlagBits> ttt = TestFlagBits::_10000;
+    ttt |= TestFlagBits::_10000;
+    ttt |= TestFlagBits::_1000;
+
+    auto tt = TestFlagBits::_10000 | TestFlagBits::_1000;
     auto flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10 | Turbo::Core::TShaderType::VERTEX;
     // Turbo::Core::TFlags<TestFlagBits> flags;
     flags |= TestFlagBits::_100;

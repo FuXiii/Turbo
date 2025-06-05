@@ -214,6 +214,15 @@ class TFlags
 } // namespace Core
 } // namespace Turbo
 
+//template <typename T>
+//Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
+//{
+//    Turbo::Core::TFlags<T> flags;
+//    flags |= left;
+//    flags |= right;
+//    return flags;
+//}
+
 // FIXME: Turbo::Core::TFlags<T> operator| 操作符无限制会有问题。
 // FIXME: 这样会导致所有的 xxx|xxx 运算最终全部转成 TFlags<T> ，这在某些枚举声明中会导致不支持的语法。
 // FIXME: 一种有效的使用方式就是使用宏声明，主动声明确切的枚举类型支持 operator| 操作符。
