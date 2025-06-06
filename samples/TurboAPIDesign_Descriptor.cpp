@@ -577,7 +577,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//        #def ine TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+// #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -597,14 +597,14 @@ enum class TestFlagBits
 //     return flags;
 // }
 
-template <typename T>
-Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
-{
-    Turbo::Core::TFlags<T> flags;
-    flags |= left;
-    flags |= right;
-    return flags;
-}
+// template <typename T>
+// Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)
+//{
+//     Turbo::Core::TFlags<T> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
 
 // Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right)
 //{
@@ -614,7 +614,15 @@ Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &ri
 //     return flags;
 // }
 
-//Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right);
+// Turbo::Core::TFlags<TestFlagBits> operator|(const TestFlagBits &left, const Turbo::Core::TFlags<TestFlagBits> &right);
+
+//#define Test_Flags_(TTT) \
+//Turbo::Core::TFlags<TestFlagBits> operator|(TestFlagBits f1, const Turbo::Core::TFlags<TestFlagBits> &f2) noexcept \
+//{return Turbo::Core::TFlags<TestFlagBits>(f1) | f2;}
+
+//#define Test_Flags_(TTT) \
+//Turbo::Core::TFlags<TestFlagBits> operator|(TestFlagBits f1, const Turbo::Core::TFlags<TestFlagBits> &f2) noexcept \
+//{return Turbo::Core::TFlags<TestFlagBits>(f1) | f2;}
 
 void FlagsTest()
 {
