@@ -83,6 +83,10 @@ class PipelineLayoutManager
     std::unordered_map<PipelineLayout::Layout, VkPipelineLayout> pipelineLayouts;
 };
 
+先找有没有可重用的 PipelineLayout，有就用，没有就需要创建，创建完的 PipelineLayout 加入可重用组中。
+
+    先找可重用的 DescriptorSetLayout，有就用，没有就创建，创建完的 DescriptorSetLayout 加入可重用组中。
+
 ```
 
 ## Descriptor
