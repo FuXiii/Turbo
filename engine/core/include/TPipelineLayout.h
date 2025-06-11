@@ -22,6 +22,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
         using TSet = std::size_t;
         using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
 
+        // NOTE: Only one push_constant block is allowed per stage
+        // NOTE: VkPipelineLayoutCreateInfo::pPushConstantRanges : Any two elements of pPushConstantRanges must not include the same stage in stageFlags
         class TPushConstants
         {
           public:

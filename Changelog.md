@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/6/11
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+
 ## 2025/6/6
 
 >* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。

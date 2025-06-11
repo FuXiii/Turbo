@@ -44,21 +44,21 @@ typedef enum class TShaderType
 //     return flags;
 // }
 
-//inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+//{
+//     Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
+
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
 //{
 //    Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
 //    flags |= left;
 //    flags |= right;
 //    return flags;
-//}
-
-//inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
-//{
-//   Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
-//   flags |= left;
-//   flags |= right;
-//   return flags;
-//}
+// }
 
 typedef enum class TShaderLanguage
 {
@@ -136,6 +136,7 @@ class TShader : public Turbo::Core::TVulkanHandle
         using TSet = std::size_t;
         using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
 
+        // NOTE: Only one push_constant block is allowed per stage
         class TPushConstant
         {
           public:

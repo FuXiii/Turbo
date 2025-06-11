@@ -4,6 +4,87 @@
 
 * ``TShader`` 解析 ``SPIR-V`` 返回 ``TShader::TLayout``
 
+## 大纲
+
+* 一个 Shader 生成多个 DescriptorSetLayout::Layout，和一个 PushConstant
+* DescriptorSetLayout 使用 Shader 生成 DescriptorSetLayout::Layout 创建
+* 多个 Shader 生成一个 PipelineLayout
+
+Shader 和 PipelineLayout 都有相同的 多个 DescriptorSetLayout::Layout（Sets）声明
+
+```CXX
+class Descriptor
+{};
+
+class DescriptorSetLayout
+{
+    class Layout
+    {
+        using Binding = std::size_t;
+        using Sets = std::unordered_map<Binding, Descriptor>;
+        Sets sets;
+    };
+};
+
+class Shader
+{
+    class Layout
+    {
+        using Binding = std::size_t;
+        using Sets = std::unordered_map<Binding, Descriptor>;
+        Sets sets;
+
+        class PushConstant
+        {};
+        PushConstant pushConstant;
+    };
+};
+
+class PipelineLayout
+{
+    class Layout
+    {
+        using Binding = std::size_t;
+        using Sets = std::unordered_map<Binding, Descriptor>;
+        Sets sets;
+
+        class PushConstant
+        {};
+        std::vector<PushConstant> pushConstant;
+    };
+};
+
+Pipeline(std::vector<Shader*> shaders)
+{
+    PipelineLayout layout;
+    for(auto& shader: shaders)
+    {
+        layout.merge(shader.GetLayout());
+    }
+}
+
+//一个 device 有一个 Layout 管理器
+class LayoutManager
+{
+    std::unordered_map<DescriptorSetLayout::Layout, VkDescriptorSetLayout> descriptorSetLayouts;
+    std::unordered_map<PipelineLayout::Layout, VkPipelineLayout> pipelineLayouts;
+};
+
+//或者分成两个
+//一个 device 有一个 DescriptorSetLayout 管理器
+class DescriptorSetLayoutManager
+{
+    std::unordered_map<DescriptorSetLayout::Layout, VkDescriptorSetLayout> descriptorSetLayouts;
+};
+
+//一个 device 有一个 PipelineLayout 管理器
+class PipelineLayoutManager
+{
+    std::unordered_map<PipelineLayout::Layout, VkPipelineLayout> pipelineLayouts;
+};
+
+```
+
 ## Descriptor
 
 * 一个 `VkDescriptorSetLayout` 对应一个 ``set 号`` （简称 ``set``）
@@ -66,7 +147,7 @@ typedef struct VkPushConstantRange {
 } VkPushConstantRange;
 ```
 
->* Any two elements of VkPipelineLayoutCreateInfo::pPushConstantRanges must not include the same stage in stageFlags. 不同着色器阶段可以有不同的 push constant
+>* Any two elements of VkPipelineLayoutCreateInfo::pPushConstantRanges must not include the same stage in stageFlags. 不同着色器阶段可以有不同的 push_constant，每一个着色器只能有一个 PushConstant。也就是说一个 push_constant 要么多个着色器共用，要么个别着色器有自己单独的 push_constant。
 
 > * VkPipelineLayoutCreateInfo::pSetLayouts must not contain more than one descriptor set layout that was created with VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT set
 

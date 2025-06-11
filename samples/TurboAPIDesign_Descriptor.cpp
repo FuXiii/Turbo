@@ -577,7 +577,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-// #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//   #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -629,15 +629,13 @@ void FlagsTest()
     // TFlags flags = TestFlagBits::_1 | TestFlagBits::_10;
     // std::cout << "flags: " << flags << std::endl;
 
-    Turbo::Core::TFlags<TestFlagBits> ttt = TestFlagBits::_10000;
-    ttt |= TestFlagBits::_10000;
-    ttt |= TestFlagBits::_1000;
-
-    auto tt = TestFlagBits::_10000 | TestFlagBits::_1000;
-    auto flags = TestFlagBits::_10000 | TestFlagBits::_1000 | TestFlagBits::_10 | Turbo::Core::TShaderType::VERTEX;
-    // Turbo::Core::TFlags<TestFlagBits> flags;
+    Turbo::Core::TFlags<TestFlagBits> flags = TestFlagBits::_10000;
+    flags |= TestFlagBits::_10000;
+    flags |= TestFlagBits::_1000;
     flags |= TestFlagBits::_100;
     flags |= Turbo::Core::TShaderType::VERTEX;
+
+    // auto tt = TestFlagBits::_10000 | TestFlagBits::_1000;
 
     Turbo::Core::TFlags<TestFlagBits> a = TestFlagBits::_100;
     Turbo::Core::TFlags<Turbo::Core::TShaderType> b = Turbo::Core::TShaderType::VERTEX;

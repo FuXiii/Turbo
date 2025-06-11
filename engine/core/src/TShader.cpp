@@ -295,11 +295,18 @@ bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
 
 void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pushConstant)
 {
-    if (pushConstant.size != 0 && pushConstant.stageFlags != 0)
+    if (!pushConstant.Empty())
     {
-        this->offset = offset;
-        this->size = size;
-        this->stageFlags |= pushConstant.stageFlags;
+        if (this->Empty())
+        {
+            this->offset = pushConstant.offset;
+            this->size = pushConstant.size;
+            this->stageFlags = pushConstant.stageFlags;
+        }
+        else if (this->offset == pushConstant.offset && this->size == pushConstant.size)
+        {
+            this->stageFlags |= pushConstant.stageFlags;
+        }
     }
 }
 
