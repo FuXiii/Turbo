@@ -444,6 +444,11 @@ const Turbo::Core::TShader::TLayout::TPushConstant &Turbo::Core::TShader::TLayou
     return this->pushConstant;
 }
 
+bool Turbo::Core::TShader::TLayout::Has(const Turbo::Core::TShader::TLayout::TSet &set) const
+{
+    return this->sets.find(set) != this->sets.end();
+}
+
 void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor)
 {
     TDescriptorSetLayout::TLayout::TBindings bindings;

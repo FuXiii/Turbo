@@ -14,7 +14,7 @@ namespace Turbo
 {
 namespace Core
 {
-template <typename T /*, typename = std::enable_if_t<std::is_integral<T>::value || std::is_enum<T>::value>*/>
+template <typename T /*, typename = std::enable_if_t<std::is_integral<T>::value || std::is_enum<T>::value>*/, typename BitsHint = void>
 class TFlags
 {
   private:

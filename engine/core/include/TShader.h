@@ -145,6 +145,7 @@ class TShader : public Turbo::Core::TVulkanHandle
 
           private:
             // VkShaderStageFlags stageFlags = 0;
+            // TODO: VkShaderStageFlags need use TShaderType to override Vulkan define?
             TFlags<VkShaderStageFlags> stageFlags;
             TPushConstant::TOffset offset = 0;
             TPushConstant::TSize size = 0;
@@ -178,6 +179,8 @@ class TShader : public Turbo::Core::TVulkanHandle
 
         const TShader::TLayout::TSets &GetSets() const;
         const TShader::TLayout::TPushConstant &GetPushConstant() const;
+
+        bool Has(const TSet& set) const;
 
         void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);

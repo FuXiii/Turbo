@@ -58,6 +58,11 @@ void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TDescriptorSetLayou
     }
 }
 
+bool Turbo::Core::TDescriptorSetLayout::TLayout::Has(const TDescriptorSetLayout::TLayout::TBinding &binding) const
+{
+    return this->bindings.find(binding) != this->bindings.end();
+}
+
 Turbo::Core::TDescriptor &Turbo::Core::TDescriptorSetLayout::TLayout::operator[](Turbo::Core::TDescriptorSetLayout::TLayout::TBinding &&binding)
 {
     return this->bindings[std::forward<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding>(binding)];

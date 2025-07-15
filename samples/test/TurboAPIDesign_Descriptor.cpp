@@ -577,7 +577,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//   #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                             #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -780,6 +780,86 @@ void VulkanFlagsTest()
     }
 }
 
+void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    VkInstance vk_instance = instance->GetVkInstance();
+    VkDevice vk_device = device->GetVkDevice();
+    VkQueue vk_queue = queue->GetVkQueue();
+
+    // Provided by VK_VERSION_1_0
+    auto create_VkDescriptorSetLayoutBinding = [](uint32_t binding, VkDescriptorType type, uint32_t count) -> VkDescriptorSetLayoutBinding {
+        VkDescriptorSetLayoutBinding result;
+        result.binding = binding;
+        result.descriptorType = type;
+        result.descriptorCount = count;
+        result.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS;
+        result.pImmutableSamplers = VK_NULL_HANDLE;
+        return result;
+    };
+
+    {
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+        {
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(0, VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(1, VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(2, VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(3, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1));
+        }
+
+        VkDescriptorSetLayoutCreateInfo set = {};
+        {
+            set.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            set.pNext = 0;
+            set.flags = 0;
+            set.bindingCount = bindings.size();
+            set.pBindings = bindings.data();
+        }
+
+        VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
+        VkResult result0 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout);
+        if (result0 == VK_SUCCESS)
+        {
+            std::cout << "vkCreateDescriptorSetLayout Success" << std::endl;
+            device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout, nullptr);
+        }
+        else
+        {
+            std::cout << "vkCreateDescriptorSetLayout Failed" << std::endl;
+        }
+    }
+
+    {
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+        {
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(0, VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(2, VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(4, VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1));
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(7, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1));
+        }
+
+        VkDescriptorSetLayoutCreateInfo set = {};
+        {
+            set.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            set.pNext = 0;
+            set.flags = 0;
+            set.bindingCount = bindings.size();
+            set.pBindings = bindings.data();
+        }
+
+        VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
+        VkResult result1 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout);
+        if (result1 == VK_SUCCESS)
+        {
+            std::cout << "vkCreateDescriptorSetLayout Success" << std::endl;
+            device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout, nullptr);
+        }
+        else
+        {
+            std::cout << "vkCreateDescriptorSetLayout Failed" << std::endl;
+        }
+    }
+}
+
 int main()
 {
     VulkanContext vulkan_context;
@@ -788,8 +868,13 @@ int main()
     Turbo::Core::TDevice *device = vulkan_context.Device();
     Turbo::Core::TDeviceQueue *queue = vulkan_context.Queue();
 
-    // FlagsTest();
-    VulkanFlagsTest();
+    Test_PipelineLayout(instance, device, queue);
+
+    if (false)
+    {
+        // FlagsTest();
+        VulkanFlagsTest();
+    }
 
     if (false)
     {

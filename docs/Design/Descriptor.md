@@ -1037,3 +1037,72 @@ class LayoutManager
 (set=0, binding=0) sampler;
 (set=0, binding=2) AccelerationStructure;
 ```
+
+## Pipeline 和 Pipeline Layout
+
+`pipeline` 是根据多个 `着色器` 链接和其他数据构成的。
+
+其核心是多个 `着色器` 组成。多个着色器能够推出 `PipelineLayout`
+
+```mermaid
+    graph LR;
+
+    Shaders-->PipelineLayout("PipelineLayout(隐示)")-->Pipeline
+```
+
+接口原则上按照 `Vulkan` 标准设计。
+
+PipelineLayout 需要如下两种要素：
+
+1. VkDescriptorSetLayout(s) 来自于 `Shaders`
+2. VkPushConstantRange(s) 来自于 `Shaders`
+
+其中 `VkPushConstantRange` ：
+
+* `Offset` 按照着色器逻辑执行顺序计算偏移值。
+* `Size` 从 `Shader` 中获得。
+
+note: 一个 `着色器` 只能有一个 `PushConstant` 。
+
+用户设置值，只需要指定设置哪一个着色器的 `PushConstant` 即可：
+
+```CXX
+command->PushConstant(pipeline/*也可以根据上下文来推断*/, VERTEX_SHADER/*目标着色器，用于推算offset*/, (void*)data, size_t size = WHOLE/*按照着色器中解析的大小自动计算，用于推算size*/);
+```
+
+### 流程
+
+1. 读取并创建必要的着色器
+
+```CXX
+VertexShader* vertex = new Shader("./shader.vert");
+FragmentShader* frag = new Shader("./shader.frag");
+
+Pipeline* pipeline = new Pipeline(renderPass, vertex, frag, ...);
+```
+
+2. Pipeline 构造内部查找是否有可重用描述符资源
+
+note: 换句话说就是，用户不再需要维护 `描述符` 和 `描述符布局` ，只需要创建并指定 `描述符资源（数据）` 即可。
+
+## Pipeline Layout 重设计 1.0
+
+包括如下内容：
+
+* 多个 DescriptorSetLayout
+* 多个 PushConstant(Range)
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineLayoutCreateInfo {
+    VkStructureType                 sType;
+    const void*                     pNext;
+    VkPipelineLayoutCreateFlags     flags;
+    uint32_t                        setLayoutCount;
+    const VkDescriptorSetLayout*    pSetLayouts;
+    uint32_t                        pushConstantRangeCount;
+    const VkPushConstantRange*      pPushConstantRanges;
+} VkPipelineLayoutCreateInfo;
+```
+
+其中 `pSetLayouts` 没有指定着色器 `set` 号的地方，所以是按照顺序来的。也就是说，需要是连续的，如果从着色器中解析出来的 `set` 非连续，需要占位补充。

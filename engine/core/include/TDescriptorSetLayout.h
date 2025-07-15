@@ -36,6 +36,8 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
         void Merge(const TBindings &bindings);
         void Merge(const TDescriptorSetLayout::TLayout &layout);
 
+        bool Has(const TBinding &binding) const;
+
         // void Override(const TDescriptorSetLayout::TLayout &layout);
 
         TDescriptor &operator[](TBinding &&binding);

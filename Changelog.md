@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/15
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `samples` 增加 `test` 文件夹下。用于存放测试代码。
+>* `TurboAPIDesign_Descriptor` 从 `sample` 移动到 `test` 文件夹下。
+
 ## 2025/6/11
 
 >* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
