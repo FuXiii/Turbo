@@ -30,6 +30,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             using TOffset = uint32_t;
             using TSize = uint32_t;
             using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
+            using TConstants_ = std::unordered_map<VkShaderStageFlags, std::pair<TOffset, TSize>>; // TODO: New standard
 
           private:
             TPushConstants::TConstants constants;
@@ -84,7 +85,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
     TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
 
-    TPipelineLayout(TDevice *device, const TPipelineLayout::TLayout &layout);
+    TPipelineLayout(TDevice *device, const TPipelineLayout::TLayout &layout); // TODO: Implemented
 
   protected:
     virtual ~TPipelineLayout();
