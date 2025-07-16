@@ -577,7 +577,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                             #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                        #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -797,6 +797,34 @@ void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice 
         return result;
     };
 
+    VkDescriptorSetLayout placeholder_set_layout = VK_NULL_HANDLE;
+    {
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+        {
+            bindings.push_back(create_VkDescriptorSetLayoutBinding(0, VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER, 1));
+        }
+
+        VkDescriptorSetLayoutCreateInfo set = {};
+        {
+            set.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            set.pNext = 0;
+            set.flags = 0;
+            set.bindingCount = bindings.size();
+            set.pBindings = bindings.data();
+        }
+
+        VkResult result0 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &placeholder_set_layout);
+        if (result0 == VK_SUCCESS)
+        {
+            std::cout << "[Message] vkCreateDescriptorSetLayout placeholder_set_layout Success" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Message] vkCreateDescriptorSetLayout placeholder_set_layout Failed" << std::endl;
+        }
+    }
+
+    VkDescriptorSetLayout set_layout_0 = VK_NULL_HANDLE;
     {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
         {
@@ -815,19 +843,18 @@ void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice 
             set.pBindings = bindings.data();
         }
 
-        VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
-        VkResult result0 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout);
+        VkResult result0 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout_0);
         if (result0 == VK_SUCCESS)
         {
-            std::cout << "vkCreateDescriptorSetLayout Success" << std::endl;
-            device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout, nullptr);
+            std::cout << "[Message] vkCreateDescriptorSetLayout Success" << std::endl;
         }
         else
         {
-            std::cout << "vkCreateDescriptorSetLayout Failed" << std::endl;
+            std::cout << "[Message] vkCreateDescriptorSetLayout Failed" << std::endl;
         }
     }
 
+    VkDescriptorSetLayout set_layout_1 = VK_NULL_HANDLE;
     {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
         {
@@ -846,17 +873,61 @@ void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice 
             set.pBindings = bindings.data();
         }
 
-        VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
-        VkResult result1 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout);
+        VkResult result1 = device->GetDeviceDriver()->vkCreateDescriptorSetLayout(vk_device, &set, nullptr, &set_layout_1);
         if (result1 == VK_SUCCESS)
         {
-            std::cout << "vkCreateDescriptorSetLayout Success" << std::endl;
-            device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout, nullptr);
+            std::cout << "[Message] vkCreateDescriptorSetLayout Success" << std::endl;
+            device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout_1, nullptr);
         }
         else
         {
-            std::cout << "vkCreateDescriptorSetLayout Failed" << std::endl;
+            std::cout << "[Message] vkCreateDescriptorSetLayout Failed" << std::endl;
         }
+    }
+
+    if (set_layout_0 != VK_NULL_HANDLE && set_layout_1 != VK_NULL_HANDLE && placeholder_set_layout != VK_NULL_HANDLE)
+    {
+
+        std::vector<VkDescriptorSetLayout> set_layouts;
+        set_layouts.push_back(set_layout_0);
+        set_layouts.push_back(placeholder_set_layout);
+        set_layouts.push_back(set_layout_1);
+
+        VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
+        pipeline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipeline_layout_create_info.pNext = 0;
+        pipeline_layout_create_info.flags = 0;
+        pipeline_layout_create_info.setLayoutCount = set_layouts.size();
+        pipeline_layout_create_info.pSetLayouts = set_layouts.data();
+        pipeline_layout_create_info.pushConstantRangeCount = 0;
+        pipeline_layout_create_info.pPushConstantRanges = nullptr;
+
+        VkPipelineLayout pipeline_layout = VK_NULL_HANDLE;
+        VkResult result1 = device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, nullptr, &pipeline_layout);
+        if (result1 == VK_SUCCESS)
+        {
+            std::cout << "[Message] vkCreatePipelineLayout Success" << std::endl;
+            device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, pipeline_layout, nullptr);
+        }
+        else
+        {
+            std::cout << "[Message] vkCreatePipelineLayout Failed" << std::endl;
+        }
+    }
+
+    if (set_layout_0 != VK_NULL_HANDLE)
+    {
+        device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout_0, nullptr);
+    }
+
+    if (set_layout_1 != VK_NULL_HANDLE)
+    {
+        device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, set_layout_1, nullptr);
+    }
+
+    if (placeholder_set_layout != VK_NULL_HANDLE)
+    {
+        device->GetDeviceDriver()->vkDestroyDescriptorSetLayout(vk_device, placeholder_set_layout, nullptr);
     }
 }
 

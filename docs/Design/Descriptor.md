@@ -1106,3 +1106,7 @@ typedef struct VkPipelineLayoutCreateInfo {
 ```
 
 其中 `pSetLayouts` 没有指定着色器 `set` 号的地方，所以是按照顺序来的。也就是说，需要是连续的，如果从着色器中解析出来的 `set` 非连续，需要占位补充。
+
+### 占位 描述符集布局
+
+内部需要一个 DescriptorSetLayout 对应一个 sampler 描述符，用于占位用户非连续 `set` 。
