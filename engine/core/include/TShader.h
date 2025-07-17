@@ -32,6 +32,8 @@ typedef enum class TShaderType
     MISS = 0x00000800,
     INTERSECTION = 0x00001000,
     CALLABLE = 0x00002000,
+    // ALL_GRAPHICS = 0x0000001F,
+    // ALL = 0x7FFFFFFF
 } TShaderType;
 
 // TURBO_DECLARE_EXPLICIT_FLAGS_TYPE_OR_OPERATOR(VkShaderStageFlags, VkShaderStageFlagBits);
@@ -146,15 +148,17 @@ class TShader : public Turbo::Core::TVulkanHandle
           private:
             // VkShaderStageFlags stageFlags = 0;
             // TODO: VkShaderStageFlags need use TShaderType to override Vulkan define?
-            TFlags<VkShaderStageFlags> stageFlags;
+            // TFlags<VkShaderStageFlags> stageFlags;
+            // NOTE: Only one push constant pure shader, so don't need flags
+            Turbo::Core::TShaderType shaderType = Turbo::Core::TShaderType::VERTEX;
             TPushConstant::TOffset offset = 0;
             TPushConstant::TSize size = 0;
 
           public:
             TPushConstant() = default;
-            TPushConstant(const TFlags<VkShaderStageFlags> &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size);
+            TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TOffset offset, TPushConstant::TSize size);
 
-            const TFlags<VkShaderStageFlags> &GetShaderStageFlags() const;
+            const Turbo::Core::TShaderType &GetShaderType() const;
             TPushConstant::TOffset GetOffset() const;
             TPushConstant::TSize GetSize() const;
 
@@ -180,7 +184,7 @@ class TShader : public Turbo::Core::TVulkanHandle
         const TShader::TLayout::TSets &GetSets() const;
         const TShader::TLayout::TPushConstant &GetPushConstant() const;
 
-        bool Has(const TSet& set) const;
+        bool Has(const TSet &set) const;
 
         void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
         void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);

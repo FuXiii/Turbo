@@ -30,52 +30,17 @@ bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Empty() const
     return this->constants.empty();
 }
 
-void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags)
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(Turbo::Core::TShaderType shaderType, TPushConstants::TOffset offset, TPushConstants::TSize size)
 {
-    auto &size_map = this->constants[offset];
-    auto find_size_iter = size_map.find(size);
-    if (find_size_iter != size_map.end())
-    {
-        find_size_iter->second |= flags;
-    }
-    else
-    {
-        find_size_iter->second = flags;
-    }
+    this->constants[shaderType] = std::make_pair(offset, size);
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const TPushConstants &pushConstants)
 {
     const auto &source_constants = pushConstants.constants;
-    for (auto &offset_item : source_constants)
+    for (auto &source_item : source_constants)
     {
-        TOffset offset = offset_item.first;
-        for (auto &size_item : offset_item.second)
-        {
-            TSize size = size_item.first;
-            VkShaderStageFlags vk_shader_stage_flags = size_item.second;
-
-            {
-                auto offset_find_result = this->constants.find(offset);
-                if (offset_find_result != this->constants.end())
-                {
-                    auto &this_size_map = offset_find_result->second;
-                    auto size_find_result = this_size_map.find(size);
-                    if (size_find_result != this_size_map.end())
-                    {
-                        (size_find_result->second) |= vk_shader_stage_flags;
-                    }
-                    else
-                    {
-                        this_size_map.insert({size, vk_shader_stage_flags});
-                    }
-                }
-                else
-                {
-                    this->constants[offset][size] = vk_shader_stage_flags;
-                }
-            }
-        }
+        this->constants[source_item.first] = std::make_pair(source_item.second.first, source_item.second.second);
     }
 }
 
@@ -85,15 +50,10 @@ std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() co
     {
         std::stringstream ss;
 
-        for (auto &offset_item : this->constants)
+        for (auto &constant : this->constants)
         {
-            auto offset = offset_item.first;
-            for (auto &size_item : offset_item.second)
             {
-                auto size = size_item.first;
-                auto shader_stage_flags = size_item.second;
-
-                ss << "(offset:" << offset << ", size: " << size << "): " << std::bitset<sizeof(shader_stage_flags) * 8>(shader_stage_flags) << std::endl;
+                ss << "(offset:" << constant.second.first << ", size: " << constant.second.second << "): " << (VkShaderStageFlagBits)constant.first << std::endl;
             }
         }
 
@@ -163,7 +123,7 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout
 
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TShader::TLayout::TPushConstant &pushConstant)
 {
-    this->pushConstants.Merge(pushConstant.GetOffset(), pushConstant.GetSize(), pushConstant.GetShaderStageFlags());
+    this->pushConstants.Merge(pushConstant.GetShaderType(), pushConstant.GetOffset(), pushConstant.GetSize());
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TLayout &layout)

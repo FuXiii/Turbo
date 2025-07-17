@@ -1070,6 +1070,12 @@ note: 一个 `着色器` 只能有一个 `PushConstant` 。
 command->PushConstant(pipeline/*也可以根据上下文来推断*/, VERTEX_SHADER/*目标着色器，用于推算offset*/, (void*)data, size_t size = WHOLE/*按照着色器中解析的大小自动计算，用于推算size*/);
 ```
 
+note: 多个着色器可能会用同一个 `PushConstant` :
+
+```CXX
+command->PushConstant(pipeline/*也可以根据上下文来推断*/, VERTEX_SHADER | FRAGMENT_SHADER/*目标着色器，用于推算offset*/, (void*)data, size_t size = WHOLE/*按照着色器中解析的大小自动计算，用于推算size*/);
+```
+
 ### 流程
 
 1. 读取并创建必要的着色器

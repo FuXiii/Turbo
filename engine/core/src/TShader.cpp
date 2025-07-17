@@ -261,16 +261,16 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
-Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const TFlags<VkShaderStageFlags> &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
 {
-    this->stageFlags = stageFlags;
+    this->shaderType = shaderType;
     this->offset = offset;
     this->size = size;
 }
 
-const Turbo::Core::TFlags<VkShaderStageFlags> &Turbo::Core::TShader::TLayout::TPushConstant::GetShaderStageFlags() const
+const Turbo::Core::TShaderType &Turbo::Core::TShader::TLayout::TPushConstant::GetShaderType() const
 {
-    return this->stageFlags;
+    return this->shaderType;
 }
 
 Turbo::Core::TShader::TLayout::TPushConstant::TOffset Turbo::Core::TShader::TLayout::TPushConstant::GetOffset() const
@@ -285,7 +285,7 @@ Turbo::Core::TShader::TLayout::TPushConstant::TSize Turbo::Core::TShader::TLayou
 
 bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
 {
-    if (this->stageFlags == 0 || this->size == 0)
+    if (this->size == 0)
     {
         return true;
     }
@@ -301,109 +301,17 @@ void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pu
         {
             this->offset = pushConstant.offset;
             this->size = pushConstant.size;
-            this->stageFlags = pushConstant.stageFlags;
-        }
-        else if (this->offset == pushConstant.offset && this->size == pushConstant.size)
-        {
-            this->stageFlags |= pushConstant.stageFlags;
+            this->shaderType = pushConstant.shaderType;
         }
     }
 }
 
 std::string Turbo::Core::TShader::TLayout::TPushConstant::ToString() const
 {
-    auto vk_shader_stage_flags_to_str = [](const VkShaderStageFlags &stageFlags) -> std::string {
-        if (stageFlags == 0)
-        {
-            return std::string();
-        }
-
-        std::string result;
-
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT)
-        {
-            result += "VERTEX_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
-        {
-            result += "TESSELLATION_CONTROL_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
-        {
-            result += "TESSELLATION_EVALUATION_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT)
-        {
-            result += "GEOMETRY_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT)
-        {
-            result += "FRAGMENT_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT) == VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT)
-        {
-            result += "COMPUTE_BIT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS) == VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS)
-        {
-            result += "ALL_GRAPHICS|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ALL) == VkShaderStageFlagBits::VK_SHADER_STAGE_ALL)
-        {
-            result += "ALL|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-        {
-            result += "RAYGEN_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR)
-        {
-            result += "ANY_HIT_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-        {
-            result += "CLOSEST_HIT_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR)
-        {
-            result += "MISS_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR)
-        {
-            result += "INTERSECTION_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR) == VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR)
-        {
-            result += "CALLABLE_BIT_KHR|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT) == VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_EXT)
-        {
-            result += "TASK_BIT_EXT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT) == VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_EXT)
-        {
-            result += "MESH_BIT_EXT|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI) == VkShaderStageFlagBits::VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI)
-        {
-            result += "SUBPASS_SHADING_BIT_HUAWEI|";
-        }
-        if ((stageFlags & VkShaderStageFlagBits::VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI) == VkShaderStageFlagBits::VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI)
-        {
-            result += "CLUSTER_CULLING_BIT_HUAWEI|";
-        }
-
-        if (!result.empty())
-        {
-            result.pop_back();
-        }
-
-        return result;
-    };
     std::stringstream ss;
     ss << "offset: " << this->offset << std::endl;
     ss << "size: " << this->size << std::endl;
-    ss << "stageFlags: " << vk_shader_stage_flags_to_str(this->stageFlags) << std::endl;
+    ss << "stageFlags: " << (uint32_t)shaderType << std::endl;
     return ss.str();
 }
 
@@ -890,7 +798,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
         TPushConstantDescriptor *push_constant_descriptor = new TPushConstantDescriptor(this, descriptor_data_type, count, name, struct_members, size);
         this->pushConstantDescriptors.push_back(push_constant_descriptor);
 
-        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetVkShaderStageFlags(), 0, size));
+        // this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant((Turbo::Core::TShaderType)this->GetVkShaderStageFlagBits(), 0, size));
+        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetType(), 0, size));
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)

@@ -577,7 +577,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                        #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                          #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1114,26 +1114,26 @@ int main()
 
     if (false)
     {
-        Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TConstants constants_0;
-        constants_0[0][512] = 0b00001;
-        constants_0[10][123] = 0b00011;
-        constants_0[21][456] = 0b00101;
+        // Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TConstants constants_0;
+        // constants_0[0][512] = 0b00001;
+        // constants_0[10][123] = 0b00011;
+        // constants_0[21][456] = 0b00101;
 
-        Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TConstants constants_1;
-        constants_1[0][512] = 0b00110;
-        constants_1[10][123] = 0b00100;
-        constants_1[21][456] = 0b10001;
-        constants_1[21][455] = 0b01111;
-        constants_1[33][789] = 0b00001;
+        // Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TConstants constants_1;
+        // constants_1[0][512] = 0b00110;
+        // constants_1[10][123] = 0b00100;
+        // constants_1[21][456] = 0b10001;
+        // constants_1[21][455] = 0b01111;
+        // constants_1[33][789] = 0b00001;
 
-        Turbo::Core::TPipelineLayout::TLayout::TPushConstants push_constants_0(constants_0);
-        std::cout << push_constants_0.ToString() << std::endl;
+        // Turbo::Core::TPipelineLayout::TLayout::TPushConstants push_constants_0(constants_0);
+        // std::cout << push_constants_0.ToString() << std::endl;
 
-        Turbo::Core::TPipelineLayout::TLayout::TPushConstants push_constants_1(constants_1);
-        std::cout << push_constants_1.ToString() << std::endl;
+        // Turbo::Core::TPipelineLayout::TLayout::TPushConstants push_constants_1(constants_1);
+        // std::cout << push_constants_1.ToString() << std::endl;
 
-        push_constants_0.Merge(push_constants_1);
-        std::cout << push_constants_0.ToString() << std::endl;
+        // push_constants_0.Merge(push_constants_1);
+        // std::cout << push_constants_0.ToString() << std::endl;
     }
 
     if (false)
@@ -1165,8 +1165,8 @@ int main()
 
     if (false)
     {
-        Turbo::Core::TShader::TLayout::TPushConstant push_constant_0(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, 0, 512);
-        Turbo::Core::TShader::TLayout::TPushConstant push_constant_1(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, 512);
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_0(Turbo::Core::TShaderType::VERTEX, 0, 512);
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_1(Turbo::Core::TShaderType::FRAGMENT, 0, 512);
 
         Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
         bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});

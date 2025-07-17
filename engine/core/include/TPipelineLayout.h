@@ -29,8 +29,9 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
           public:
             using TOffset = uint32_t;
             using TSize = uint32_t;
-            using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
-            using TConstants_ = std::unordered_map<VkShaderStageFlags, std::pair<TOffset, TSize>>; // TODO: New standard
+            // using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
+            //  NOTE: One push constant pure shader type
+            using TConstants = std::unordered_map<Turbo::Core::TShaderType, std::pair<TOffset, TSize>>; // TODO: New standard
 
           private:
             TPushConstants::TConstants constants;
@@ -43,7 +44,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             const TPushConstants::TConstants &GetConstants() const;
             bool Empty() const;
 
-            void Merge(TPushConstants::TOffset offset, TPushConstants::TSize size, VkShaderStageFlags flags);
+            void Merge(Turbo::Core::TShaderType shaderType, TPushConstants::TOffset offset, TPushConstants::TSize size);
             void Merge(const TPushConstants &pushConstants);
 
             std::string ToString() const;
@@ -138,15 +139,13 @@ class hash<Turbo::Core::TPipelineLayout::TLayout>
 
                 for (auto &constant_item : layout.GetPushConstants().GetConstants())
                 {
-                    auto offset = constant_item.first;
+                    auto shader_type = constant_item.first;
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&shader_type), sizeof(shader_type));
+
+                    auto offset = constant_item.second.first;
+                    auto size = constant_item.second.second;
                     this->str->append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
-                    for (auto &size_flag_item : constant_item.second)
-                    {
-                        auto size = size_flag_item.first;
-                        auto flags = size_flag_item.second;
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&flags), sizeof(flags));
-                    }
+                    this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
                 }
             }
 
