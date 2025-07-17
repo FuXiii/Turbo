@@ -1116,3 +1116,27 @@ typedef struct VkPipelineLayoutCreateInfo {
 ### 占位 描述符集布局
 
 内部需要一个 DescriptorSetLayout 对应一个 sampler 描述符，用于占位用户非连续 `set` 。
+
+### Push Constant
+
+一共有 `VkPhysicalDeviceLimits::maxPushConstantsSize` 这么多位内存可用于 `Push Constant` 。
+
+一个着色器只能有一个 `Push Constant` ，每个 `Push Constant` 都代表 `Push Constant 内存` 的一部分。
+
+不同着色器中的 `Push Constant` 可以相同，也可以不同，也可以部分相同。
+
+从 `着色器` 中解析的 `Push Constant` 只能获得 `size` 而不知道 `offset` 。这个 `offset` 需要用户指定。
+
+如果多个着色器的 `Push Constant` 中的 `offset` 和 `size` 是一样的，说明是同一个 `Push Constant` 。
+
+在创建 `PipelineLayout` 时需要指定每一个着色器 `Push Constant` 的 `offset` (通过 `PipelineLayout` 设置)(和 `size` 是可选的)。如果未指定，则按照着色器逻辑顺序顺次计算 `offset` 和 `size` 。
+
+`Push Constant` 的 `size` 可通过 `Shader` 获取。
+
+## Shader PipelineLayout 和 Pipeline
+
+多个着色器组成一个 `PipelineLayout` ，一个 `PipelineLayout` 组成一个 `Pipeline` (当然还有其他数据)，其中 `Pipeline` 需要的着色器在 `PipelineLayout` 中。
+
+## Pipeline 的 SpecializationInfo
+
+目前是通过 `Shader` 进行设置，但正常应该是在创建 `Pipeline` 时进行设置！此处需要优化！

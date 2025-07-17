@@ -21,6 +21,10 @@
 
 #include <TPipelineLayout.h>
 
+#include <ReadFile.h>
+
+std::string asset_root(TURBO_ASSET_ROOT);
+
 class PushConstant // OK
 {
   private:
@@ -577,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                          #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                    #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -931,6 +935,17 @@ void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice 
     }
 }
 
+void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
+
+    auto vert_layout = vertex_shader->GetLayout();
+    auto frag_layout = fragment_shader->GetLayout();
+}
+
+// void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+
 int main()
 {
     VulkanContext vulkan_context;
@@ -1165,8 +1180,8 @@ int main()
 
     if (false)
     {
-        Turbo::Core::TShader::TLayout::TPushConstant push_constant_0(Turbo::Core::TShaderType::VERTEX, 0, 512);
-        Turbo::Core::TShader::TLayout::TPushConstant push_constant_1(Turbo::Core::TShaderType::FRAGMENT, 0, 512);
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_0(Turbo::Core::TShaderType::VERTEX, 512);
+        Turbo::Core::TShader::TLayout::TPushConstant push_constant_1(Turbo::Core::TShaderType::FRAGMENT, 512);
 
         Turbo::Core::TDescriptorSetLayout::TLayout::TBindings bindings_0;
         bindings_0.insert({0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER, 1)});

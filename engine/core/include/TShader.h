@@ -151,18 +151,18 @@ class TShader : public Turbo::Core::TVulkanHandle
             // TFlags<VkShaderStageFlags> stageFlags;
             // NOTE: Only one push constant pure shader, so don't need flags
             Turbo::Core::TShaderType shaderType = Turbo::Core::TShaderType::VERTEX;
-            TPushConstant::TOffset offset = 0;
+            // TPushConstant::TOffset offset = 0; // NOTE: We can't parse offset from shader code
             TPushConstant::TSize size = 0;
 
           public:
             TPushConstant() = default;
-            TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TOffset offset, TPushConstant::TSize size);
+            TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TSize size);
 
             const Turbo::Core::TShaderType &GetShaderType() const;
-            TPushConstant::TOffset GetOffset() const;
             TPushConstant::TSize GetSize() const;
 
             bool Empty() const;
+            void Merge(const TPushConstant::TSize &size);
             void Merge(const TPushConstant &pushConstant);
 
             std::string ToString() const;
@@ -254,6 +254,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     const std::vector<TSpecializationConstant> &GetSpecializationConstants() const;
 
     TShaderType GetType() const;
+    const TShader::TLayout &GetLayout() const;
 
     //<specialization constants>
     void SetConstant(uint32_t id, bool value);

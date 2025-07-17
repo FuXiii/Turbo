@@ -10,6 +10,14 @@
 #include <sstream>
 #include <bitset>
 
+Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TPushConstants(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size)
+{
+    if (size != 0)
+    {
+        this->Merge(shaderType, offset, size);
+    }
+}
+
 Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TPushConstants(const TPushConstants::TConstants &constants)
 {
     this->constants = constants;
@@ -30,9 +38,12 @@ bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Empty() const
     return this->constants.empty();
 }
 
-void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(Turbo::Core::TShaderType shaderType, TPushConstants::TOffset offset, TPushConstants::TSize size)
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size)
 {
-    this->constants[shaderType] = std::make_pair(offset, size);
+    if (size != 0)
+    {
+        this->constants[shaderType] = std::make_pair(offset, size);
+    }
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const TPushConstants &pushConstants)
@@ -119,11 +130,6 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants)
 {
     this->pushConstants.Merge(pushConstants);
-}
-
-void Turbo::Core::TPipelineLayout::TLayout::Merge(const TShader::TLayout::TPushConstant &pushConstant)
-{
-    this->pushConstants.Merge(pushConstant.GetShaderType(), pushConstant.GetOffset(), pushConstant.GetSize());
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TLayout &layout)

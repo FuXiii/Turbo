@@ -38,13 +38,14 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
           public:
             TPushConstants() = default;
+            TPushConstants(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size);
             TPushConstants(const TPushConstants::TConstants &constants);
             TPushConstants(TPushConstants::TConstants &&constants);
 
             const TPushConstants::TConstants &GetConstants() const;
             bool Empty() const;
 
-            void Merge(Turbo::Core::TShaderType shaderType, TPushConstants::TOffset offset, TPushConstants::TSize size);
+            void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size);
             void Merge(const TPushConstants &pushConstants);
 
             std::string ToString() const;
@@ -66,8 +67,6 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
         void Merge(const TPipelineLayout::TLayout::TSets &sets);
         void Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
-        void Merge(const TShader::TLayout::TPushConstant &pushConstant);
-
         void Merge(const Turbo::Core::TShader::TLayout &layout);
     };
 

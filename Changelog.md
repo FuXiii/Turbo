@@ -7,6 +7,7 @@
 ## 2025/7/17
 
 >* 更新 `TPipelineLayout` 和 `TShader` 中的 `Push Constant(s)` 和与之对应的 `Shader(Flag/Type)` 使其更加合理。
+>* 更新 `TShader::TLayout::TPushConstant` 中移除 ``TOffset`` 的存储。不需要该成员变量。
 
 ## 2025/7/16
 

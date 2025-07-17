@@ -261,21 +261,15 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
-Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &stageFlags, TPushConstant::TOffset offset, TPushConstant::TSize size)
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &stageFlags, TPushConstant::TSize size)
 {
     this->shaderType = shaderType;
-    this->offset = offset;
     this->size = size;
 }
 
 const Turbo::Core::TShaderType &Turbo::Core::TShader::TLayout::TPushConstant::GetShaderType() const
 {
     return this->shaderType;
-}
-
-Turbo::Core::TShader::TLayout::TPushConstant::TOffset Turbo::Core::TShader::TLayout::TPushConstant::GetOffset() const
-{
-    return this->offset;
 }
 
 Turbo::Core::TShader::TLayout::TPushConstant::TSize Turbo::Core::TShader::TLayout::TPushConstant::GetSize() const
@@ -293,13 +287,23 @@ bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
     return false;
 }
 
+void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant::TSize &size)
+{
+    if (size != 0)
+    {
+        if (this->size < size)
+        {
+            this->size = size;
+        }
+    }
+}
+
 void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pushConstant)
 {
     if (!pushConstant.Empty())
     {
         if (this->Empty())
         {
-            this->offset = pushConstant.offset;
             this->size = pushConstant.size;
             this->shaderType = pushConstant.shaderType;
         }
@@ -309,7 +313,6 @@ void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pu
 std::string Turbo::Core::TShader::TLayout::TPushConstant::ToString() const
 {
     std::stringstream ss;
-    ss << "offset: " << this->offset << std::endl;
     ss << "size: " << this->size << std::endl;
     ss << "stageFlags: " << (uint32_t)shaderType << std::endl;
     return ss.str();
@@ -799,7 +802,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         this->pushConstantDescriptors.push_back(push_constant_descriptor);
 
         // this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant((Turbo::Core::TShaderType)this->GetVkShaderStageFlagBits(), 0, size));
-        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetType(), 0, size));
+        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetType(), size));
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)
@@ -1349,6 +1352,11 @@ const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::G
 Turbo::Core::TShaderType Turbo::Core::TShader::GetType() const
 {
     return this->type;
+}
+
+const Turbo::Core::TShader::TLayout &Turbo::Core::TShader::GetLayout() const
+{
+    return this->layout;
 }
 
 void Turbo::Core::TShader::SetConstant(uint32_t id, bool value)
