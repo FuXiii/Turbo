@@ -156,7 +156,12 @@ std::string Turbo::Core::TDescriptor::ToString() const
 
         return "UNKNOWN";
     };
-    ss << this_type_to_str(this->type) << "[" << this->count << "]";
+
+    ss << "{";
+    ss << "\"type\"" << ":" << "\"" << this_type_to_str(this->type) << "\"" << ",";
+    ss << "\"count\"" << ":" << this->count;
+    ss << "}";
+
     return ss.str();
 }
 

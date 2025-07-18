@@ -83,16 +83,34 @@ std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
     std::string result;
     {
         std::stringstream ss;
-        for (auto &item : this->bindings)
+        ss << "{";
+        if (!this->bindings.empty())
         {
-            ss << item.first << ": " << item.second.ToString() << std::endl;
+            ss << "\"bindings\":{";
+
+            {
+                auto iter = this->bindings.begin();
+                while (iter != this->bindings.end())
+                {
+                    ss << "[\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "]";
+                    ++iter;
+                    if (iter != this->bindings.end())
+                    {
+                        ss << ",";
+                    }
+                }
+            }
+
+            ss << "}";
         }
 
-        result = std::move(ss.str());
         if (!result.empty())
         {
             result.pop_back();
         }
+        ss << "}";
+
+        result = std::move(ss.str());
     }
 
     return result;

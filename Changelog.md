@@ -8,6 +8,7 @@
 
 >* 更新 `TPipelineLayout` 的 `ToString()` 成员函数。
 >* 修正 `TShader::TLayout::TPushConstant()` 的构造函数 `Bug` 。
+>* 优化 `TDescriptorSetLayout::TLayout` 和 `TDescriptor` 的 `ToString()`函数。
 
 ## 2025/7/17
 
