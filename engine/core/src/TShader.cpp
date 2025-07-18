@@ -261,7 +261,7 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
-Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &stageFlags, TPushConstant::TSize size)
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TSize size)
 {
     this->shaderType = shaderType;
     this->size = size;
@@ -279,12 +279,7 @@ Turbo::Core::TShader::TLayout::TPushConstant::TSize Turbo::Core::TShader::TLayou
 
 bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
 {
-    if (this->size == 0)
-    {
-        return true;
-    }
-
-    return false;
+    return this->size == 0;
 }
 
 void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant::TSize &size)

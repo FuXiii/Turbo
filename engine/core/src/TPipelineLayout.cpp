@@ -55,6 +55,14 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const TPushCon
     }
 }
 
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShader::TLayout::TPushConstant &pushConstant)
+{
+    if (!pushConstant.Empty())
+    {
+        this->Merge(pushConstant.GetShaderType(), 0, pushConstant.GetSize());
+    }
+}
+
 std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() const
 {
     std::string result;
@@ -135,7 +143,29 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TLayout &layout)
 {
     this->Merge(layout.GetSets());
-    this->Merge(layout.GetPushConstant());
+    // this->Merge(layout.GetPushConstant());
+    this->pushConstants.Merge(layout.GetPushConstant());
+}
+
+std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
+{
+    std::string result;
+    {
+        std::stringstream ss;
+        for (auto &set_item : this->sets)
+        {
+            TSet set = set_item.first;
+            ss << set << std::endl;
+            ss << set_item.second.ToString() << std::endl;
+        }
+
+        {
+            ss << this->pushConstants.ToString() << std::endl;
+        }
+        result = std::move(ss.str());
+    }
+
+    return result;
 }
 
 void Turbo::Core::TPipelineLayout::InternalCreate()

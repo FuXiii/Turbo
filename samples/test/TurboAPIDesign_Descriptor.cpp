@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                    #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                             #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -942,6 +942,18 @@ void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDe
 
     auto vert_layout = vertex_shader->GetLayout();
     auto frag_layout = fragment_shader->GetLayout();
+
+    std::cout << vert_layout.ToString() << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << frag_layout.ToString() << std::endl;
+
+    Turbo::Core::TPipelineLayout::TLayout layout;
+    layout.Merge(vert_layout);
+    layout.Merge(frag_layout);
+
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
+    std::cout << layout.ToString() << std::endl;
 }
 
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
@@ -954,7 +966,8 @@ int main()
     Turbo::Core::TDevice *device = vulkan_context.Device();
     Turbo::Core::TDeviceQueue *queue = vulkan_context.Queue();
 
-    Test_PipelineLayout(instance, device, queue);
+    // Test_PipelineLayout(instance, device, queue);
+    Test_TurboPipelineLayout(instance, device, queue);
 
     if (false)
     {

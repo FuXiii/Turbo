@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/18
+
+>* 更新 `TPipelineLayout` 的 `ToString()` 成员函数。
+>* 修正 `TShader::TLayout::TPushConstant()` 的构造函数 `Bug` 。
+
 ## 2025/7/17
 
 >* 更新 `TPipelineLayout` 和 `TShader` 中的 `Push Constant(s)` 和与之对应的 `Shader(Flag/Type)` 使其更加合理。
