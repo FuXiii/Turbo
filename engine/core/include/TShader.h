@@ -412,4 +412,6 @@ class TCallableShader : public Turbo::Core::TShader
 };
 } // namespace Core
 } // namespace Turbo
+
+std::ostream &operator<<(std::ostream &os, const Turbo::Core::TShaderType &shaderType);
 #endif // !TURBO_CORE_TSHADER_H

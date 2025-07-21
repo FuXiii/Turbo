@@ -65,25 +65,27 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::C
 
 std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() const
 {
-    std::string result;
+    std::stringstream ss;
     {
-        std::stringstream ss;
-
-        for (auto &constant : this->constants)
+        auto iter = this->constants.begin();
+        ss << "[";
+        while (iter != this->constants.end())
         {
+            ss << "{";
+            ss << "\"offset\":" << (*iter).second.first << ",";
+            ss << "\"size\":" << (*iter).second.second << ",";
+            ss << "\"shader types\":\"" << (*iter).first << "\"";
+            ss << "}";
+            ++iter;
+            if (iter != this->constants.end())
             {
-                ss << "(offset:" << constant.second.first << ", size: " << constant.second.second << "): " << (VkShaderStageFlagBits)constant.first << std::endl;
+                ss << ",";
             }
         }
-
-        result = std::move(ss.str());
-        if (!result.empty())
-        {
-            result.pop_back();
-        }
+        ss << "]";
     }
 
-    return result;
+    return ss.str();
 }
 
 Turbo::Core::TPipelineLayout::TLayout::TLayout(const TPipelineLayout::TLayout::TSets &sets, const TPipelineLayout::TLayout::TPushConstants &pushConstants)
@@ -149,23 +151,30 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TL
 
 std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
 {
-    std::string result;
+    std::stringstream ss;
+    ss << "{";
     {
-        std::stringstream ss;
-        for (auto &set_item : this->sets)
+        if (!this->sets.empty())
         {
-            TSet set = set_item.first;
-            ss << set << std::endl;
-            ss << set_item.second.ToString() << std::endl;
+            ss << "\"sets\":";
+            ss << "[";
+            auto iter = this->sets.begin();
+            while (iter != this->sets.end())
+            {
+                ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
+                ++iter;
+                if (iter != this->sets.end())
+                {
+                    ss << ",";
+                }
+            }
+            ss << "],";
         }
-
-        {
-            ss << this->pushConstants.ToString() << std::endl;
-        }
-        result = std::move(ss.str());
     }
+    ss << "\"push constants\":" << this->pushConstants.ToString();
+    ss << "}";
 
-    return result;
+    return ss.str();
 }
 
 void Turbo::Core::TPipelineLayout::InternalCreate()

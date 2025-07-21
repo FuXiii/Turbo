@@ -14,6 +14,8 @@ layout(set = 0, binding = 2, rgba32f) uniform image2D myImage2D;
 layout(set = 1, binding = 3) uniform texture2D myTexture2D;
 layout(set = 1, binding = 4) uniform sampler mySampler;
 
+layout(set = 1, binding = 7) uniform texture3D myTexture3D[4];
+
 layout(push_constant) uniform my_push_constants_frag
 {
     float a;

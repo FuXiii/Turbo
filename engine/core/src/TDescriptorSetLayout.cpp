@@ -80,19 +80,18 @@ bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TDescriptorSet
 
 std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
 {
-    std::string result;
+    std::stringstream ss;
     {
-        std::stringstream ss;
         ss << "{";
         if (!this->bindings.empty())
         {
-            ss << "\"bindings\":{";
-
+            ss << "\"bindings\":";
+            ss << "[";
             {
                 auto iter = this->bindings.begin();
                 while (iter != this->bindings.end())
                 {
-                    ss << "[\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "]";
+                    ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
                     ++iter;
                     if (iter != this->bindings.end())
                     {
@@ -100,20 +99,11 @@ std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
                     }
                 }
             }
-
-            ss << "}";
-        }
-
-        if (!result.empty())
-        {
-            result.pop_back();
+            ss << "]";
         }
         ss << "}";
-
-        result = std::move(ss.str());
     }
-
-    return result;
+    return ss.str();
 }
 
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()

@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/21
+
+>* 更新 `TShader::TLayout::TPushConstant` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TPipelineLayout::TLayout` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TShader::TLayout` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TShaderType` 支持 `<<` 符号重载输出。
+
 ## 2025/7/18
 
 >* 更新 `TPipelineLayout` 的 `ToString()` 成员函数。

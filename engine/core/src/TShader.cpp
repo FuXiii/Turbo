@@ -308,8 +308,11 @@ void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pu
 std::string Turbo::Core::TShader::TLayout::TPushConstant::ToString() const
 {
     std::stringstream ss;
-    ss << "size: " << this->size << std::endl;
-    ss << "stageFlags: " << (uint32_t)shaderType << std::endl;
+    ss << "{";
+    ss << "\"size\":" << this->size << ",";
+    ss << "\"shader type\":\"" << this->shaderType << "\"";
+    ss << "}";
+
     return ss.str();
 }
 
@@ -411,11 +414,28 @@ Turbo::Core::TDescriptorSetLayout::TLayout &Turbo::Core::TShader::TLayout::opera
 std::string Turbo::Core::TShader::TLayout::ToString() const
 {
     std::stringstream ss;
-    for (auto &item : this->sets)
+    ss << "{";
     {
-        ss << item.first << std::endl << item.second.ToString() << std::endl;
+        if (!this->sets.empty())
+        {
+            ss << "\"sets\":";
+            ss << "[";
+            auto iter = this->sets.begin();
+            while (iter != this->sets.end())
+            {
+                ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
+                ++iter;
+                if (iter != this->sets.end())
+                {
+                    ss << ",";
+                }
+            }
+            ss << "],";
+        }
     }
-    ss << this->pushConstant.ToString();
+    ss << "\"push constant\":" << this->pushConstant.ToString();
+    ss << "}";
+
     return ss.str();
 }
 
@@ -1522,4 +1542,69 @@ Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, TSha
 
 Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, size, code, entryPoint)
 {
+}
+
+std::ostream &operator<<(std::ostream &os, const Turbo::Core::TShaderType &shaderType)
+{
+    switch (shaderType)
+    {
+    case Turbo::Core::TShaderType::VERTEX: {
+        return os << "VERTEX";
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_CONTROL: {
+        return os << "TESSELLATION_CONTROL";
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_EVALUATION: {
+        return os << "TESSELLATION_EVALUATION";
+    }
+    break;
+    case Turbo::Core::TShaderType::GEOMETRY: {
+        return os << "GEOMETRY";
+    }
+    break;
+    case Turbo::Core::TShaderType::FRAGMENT: {
+        return os << "FRAGMENT";
+    }
+    break;
+    case Turbo::Core::TShaderType::COMPUTE: {
+        return os << "COMPUTE";
+    }
+    break;
+    case Turbo::Core::TShaderType::TASK: {
+        return os << "TASK";
+    }
+    break;
+    case Turbo::Core::TShaderType::MESH: {
+        return os << "MESH";
+    }
+    break;
+    case Turbo::Core::TShaderType::RAY_GENERATION: {
+        return os << "RAY_GENERATION";
+    }
+    break;
+    case Turbo::Core::TShaderType::ANY_HIT: {
+        return os << "ANY_HIT";
+    }
+    break;
+    case Turbo::Core::TShaderType::CLOSEST_HIT: {
+        return os << "CLOSEST_HIT";
+    }
+    break;
+    case Turbo::Core::TShaderType::MISS: {
+        return os << "MISS";
+    }
+    break;
+    case Turbo::Core::TShaderType::INTERSECTION: {
+        return os << "INTERSECTION";
+    }
+    break;
+    case Turbo::Core::TShaderType::CALLABLE: {
+        return os << "CALLABLE";
+    }
+    break;
+    }
+
+    return os << "NONE";
 }
