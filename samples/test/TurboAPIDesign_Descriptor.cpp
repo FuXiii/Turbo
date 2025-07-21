@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                             #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -954,6 +954,14 @@ void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDe
     std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 
     std::cout << layout.ToString() << std::endl;
+
+    auto constants = layout.GetPushConstants().GetConstants();
+    for (auto &item : constants)
+    {
+        std::cout << "shader type: " << item.first << std::endl;
+        std::cout << "offset: " << item.second.first << std::endl;
+        std::cout << "second: " << item.second.second << std::endl;
+    }
 }
 
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
