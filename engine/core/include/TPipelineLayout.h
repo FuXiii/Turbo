@@ -30,7 +30,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             using TOffset = uint32_t;
             using TSize = uint32_t;
             // using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
-            //  NOTE: One push constant pure shader type
+            // NOTE: One push constant pure shader type
+            // NOTE: Both offset and size are in units of bytes and must be a multiple of 4.
             using TConstants = std::unordered_map<Turbo::Core::TShaderType, std::pair<TOffset, TSize>>; // TODO: New standard
 
           private:

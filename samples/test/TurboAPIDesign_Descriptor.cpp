@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                        #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -955,12 +955,43 @@ void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDe
 
     std::cout << layout.ToString() << std::endl;
 
-    auto constants = layout.GetPushConstants().GetConstants();
+    std::cout << "**************************************************************" << std::endl;
+
+    Turbo::Core::TPipelineLayout::TLayout::TPushConstants pcs;
+    pcs.Merge(Turbo::Core::TShaderType::VERTEX, 0, 8);
+    pcs.Merge(Turbo::Core::TShaderType::GEOMETRY, 0, 4);
+    pcs.Merge(Turbo::Core::TShaderType::TESSELLATION_EVALUATION, 0, 32);
+    pcs.Merge(Turbo::Core::TShaderType::FRAGMENT, 0, 64);
+    pcs.Merge(Turbo::Core::TShaderType::TESSELLATION_CONTROL, 0, 16);
+
+    std::vector<Turbo::Core::TShaderType> shaders;
+
+    auto &constants = pcs.GetConstants();
     for (auto &item : constants)
     {
         std::cout << "shader type: " << item.first << std::endl;
         std::cout << "offset: " << item.second.first << std::endl;
         std::cout << "second: " << item.second.second << std::endl;
+        std::cout << "------------------------" << std::endl;
+
+        shaders.push_back(item.first);
+    }
+
+    std::sort(shaders.begin(), shaders.end());
+    std::cout << "After sort------------------------" << std::endl;
+
+    std::size_t temp_offset = 0;
+    for (auto &item : shaders)
+    {
+        std::cout << "shader type: " << item << std::endl;
+        auto offset = constants.at(item).first;
+        auto size = constants.at(item).second;
+
+        std::cout << "offset: " << temp_offset << std::endl;
+        std::cout << "size: " << size << std::endl;
+        std::cout << "------------------------" << std::endl;
+
+        temp_offset += size;
     }
 }
 

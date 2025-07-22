@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/22
+
+>* 更新 `TurboAPIDesign_Descriptor` 。研究 `PushConstant` 的 `offset`格式输出。
+
 ## 2025/7/21
 
 >* 更新 `TShader::TLayout::TPushConstant` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
