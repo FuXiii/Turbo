@@ -37,6 +37,9 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
           private:
             TPushConstants::TConstants constants;
 
+          private:
+            void RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType);
+
           public:
             TPushConstants() = default;
             TPushConstants(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size);
@@ -47,8 +50,11 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             bool Empty() const;
 
             void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size);
+            void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset);
             void Merge(const TPushConstants &pushConstants);
             void Merge(const Turbo::Core::TShader::TLayout::TPushConstant &pushConstant);
+
+            const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &GetConstantSize(const Turbo::Core::TShaderType &shaderType) const;
 
             std::string ToString() const;
         };
@@ -66,10 +72,12 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
         const TPipelineLayout::TLayout::TSets &GetSets() const;
         const TPipelineLayout::TLayout::TPushConstants &GetPushConstants() const;
+        const TPipelineLayout::TLayout::TPushConstants::TSize &GetPushConstantSize(const Turbo::Core::TShaderType &shaderType) const;
 
         void Merge(const TPipelineLayout::TLayout::TSets &sets);
         void Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
         void Merge(const Turbo::Core::TShader::TLayout &layout);
+        void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset);
 
         std::string ToString() const;
     };
@@ -171,4 +179,6 @@ class hash<Turbo::Core::TPipelineLayout::TLayout>
     }
 };
 } // namespace std
+
+Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TShader &shader);
 #endif // !TURBO_CORE_TPIPELINELAYOUT_H

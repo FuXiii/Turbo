@@ -38,6 +38,38 @@ bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Empty() const
     return this->constants.empty();
 }
 
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType)
+{
+    std::vector<Turbo::Core::TShaderType> shader_types;
+    {
+        for (auto &item : this->constants)
+        {
+            // if (static_cast<std::size_t>(item.first) <= static_cast<std::size_t>(startShaderType))
+            if (item.first >= startShaderType)
+            {
+                shader_types.push_back(item.first);
+            }
+        }
+
+        std::sort(shader_types.begin(), shader_types.end());
+    }
+
+    Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset temp_offset = 0;
+    for (auto &item : shader_types)
+    {
+        auto &offset_and_size = this->constants.at(item);
+        auto &current_offset = offset_and_size.first;
+        if (current_offset == 0)
+        {
+            current_offset = temp_offset;
+        }
+        else
+        {
+            temp_offset = current_offset + offset_and_size.second;
+        }
+    }
+}
+
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size)
 {
     if (size != 0)
@@ -46,12 +78,24 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::C
     }
 }
 
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
+{
+    auto find_result = this->constants.find(shaderType);
+    if (find_result != this->constants.end())
+    {
+        find_result->second.first = offset;
+    }
+}
+
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const TPushConstants &pushConstants)
 {
     const auto &source_constants = pushConstants.constants;
-    for (auto &source_item : source_constants)
+    if (!source_constants.empty())
     {
-        this->constants[source_item.first] = std::make_pair(source_item.second.first, source_item.second.second);
+        for (auto &source_item : source_constants)
+        {
+            this->constants[source_item.first] = std::make_pair(source_item.second.first, source_item.second.second);
+        }
     }
 }
 
@@ -61,6 +105,17 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::C
     {
         this->Merge(pushConstant.GetShaderType(), 0, pushConstant.GetSize());
     }
+}
+
+const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &Turbo::Core::TPipelineLayout::TLayout::TPushConstants::GetConstantSize(const Turbo::Core::TShaderType &shaderType) const
+{
+    auto find_result = this->constants.find(shaderType);
+    if (find_result != this->constants.end())
+    {
+        return find_result->second.second;
+    }
+
+    return 0;
 }
 
 std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() const
@@ -120,6 +175,11 @@ const Turbo::Core::TPipelineLayout::TLayout::TPushConstants &Turbo::Core::TPipel
     return this->pushConstants;
 }
 
+const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &Turbo::Core::TPipelineLayout::TLayout::GetPushConstantSize(const Turbo::Core::TShaderType &shaderType) const
+{
+    return this->pushConstants.GetConstantSize(shaderType);
+}
+
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout::TSets &sets)
 {
     for (auto &set_item : sets)
@@ -147,6 +207,11 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TL
     this->Merge(layout.GetSets());
     // this->Merge(layout.GetPushConstant());
     this->pushConstants.Merge(layout.GetPushConstant());
+}
+
+void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
+{
+    this->pushConstants.Merge(shaderType, offset);
 }
 
 std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
@@ -295,4 +360,10 @@ bool Turbo::Core::TPipelineLayout::Valid() const
         return true;
     }
     return false;
+}
+
+Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TShader &shader)
+{
+    layout.Merge(shader.GetLayout());
+    return layout;
 }

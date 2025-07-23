@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                        #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                       #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -935,28 +935,8 @@ void Test_PipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice 
     }
 }
 
-void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+void Test_PushConstants(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 {
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
-
-    auto vert_layout = vertex_shader->GetLayout();
-    auto frag_layout = fragment_shader->GetLayout();
-
-    std::cout << vert_layout.ToString() << std::endl;
-    std::cout << "---------------------------------------------------------" << std::endl;
-    std::cout << frag_layout.ToString() << std::endl;
-
-    Turbo::Core::TPipelineLayout::TLayout layout;
-    layout.Merge(vert_layout);
-    layout.Merge(frag_layout);
-
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-    std::cout << layout.ToString() << std::endl;
-
-    std::cout << "**************************************************************" << std::endl;
-
     Turbo::Core::TPipelineLayout::TLayout::TPushConstants pcs;
     pcs.Merge(Turbo::Core::TShaderType::VERTEX, 0, 8);
     pcs.Merge(Turbo::Core::TShaderType::GEOMETRY, 0, 4);
@@ -980,6 +960,14 @@ void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDe
     std::sort(shaders.begin(), shaders.end());
     std::cout << "After sort------------------------" << std::endl;
 
+    {
+        pcs.Merge(Turbo::Core::TShaderType::VERTEX, 16);
+        pcs.Merge(Turbo::Core::TShaderType::GEOMETRY, 8);
+        pcs.Merge(Turbo::Core::TShaderType::TESSELLATION_EVALUATION, 64);
+        pcs.Merge(Turbo::Core::TShaderType::FRAGMENT, 32);
+        pcs.Merge(Turbo::Core::TShaderType::TESSELLATION_CONTROL, 128);
+    }
+
     std::size_t temp_offset = 0;
     for (auto &item : shaders)
     {
@@ -987,12 +975,55 @@ void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDe
         auto offset = constants.at(item).first;
         auto size = constants.at(item).second;
 
-        std::cout << "offset: " << temp_offset << std::endl;
+        std::cout << "offset: " << offset << std::endl;
         std::cout << "size: " << size << std::endl;
         std::cout << "------------------------" << std::endl;
 
         temp_offset += size;
     }
+}
+
+void Test_TurboPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
+
+    auto vert_layout = vertex_shader->GetLayout();
+    auto frag_layout = fragment_shader->GetLayout();
+
+    std::cout << vert_layout.ToString() << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << frag_layout.ToString() << std::endl;
+
+    Turbo::Core::TPipelineLayout::TLayout layout;
+    layout.Merge(vert_layout);
+    layout.Merge(frag_layout);
+
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
+    std::cout << layout.ToString() << std::endl;
+
+    std::cout << "**************************************************************" << std::endl;
+
+    layout.Merge(vertex_shader->GetType(), 16);
+    layout.Merge(fragment_shader->GetType(), 32);
+
+    std::cout << layout.ToString() << std::endl;
+}
+
+void Test_ShadersToPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
+
+    Turbo::Core::TPipelineLayout::TLayout layout;
+
+    layout << (*vertex_shader) << (*fragment_shader);
+
+    layout.Merge(vertex_shader->GetType(), 16);
+    layout.Merge(fragment_shader->GetType(), 32);
+
+    std::cout << layout.ToString() << std::endl;
 }
 
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
@@ -1006,7 +1037,8 @@ int main()
     Turbo::Core::TDeviceQueue *queue = vulkan_context.Queue();
 
     // Test_PipelineLayout(instance, device, queue);
-    Test_TurboPipelineLayout(instance, device, queue);
+    // Test_TurboPipelineLayout(instance, device, queue);
+    Test_ShadersToPipelineLayout(instance, device, queue);
 
     if (false)
     {

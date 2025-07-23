@@ -4,9 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/23
+
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 。支持配置 `offset` 。
+>* 更新 `TPipelineLayout::TLayout` 。增加多个 `Shader` 通过 `<<` 符号推导出 `TPipelineLayout::TLayout` 。
+
 ## 2025/7/22
 
->* 更新 `TurboAPIDesign_Descriptor` 。研究 `PushConstant` 的 `offset`格式输出。
+>* 更新 `TurboAPIDesign_Descriptor` 。研究 `PushConstant` 的 `offset` 格式输出。
 
 ## 2025/7/21
 
