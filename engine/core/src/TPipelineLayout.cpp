@@ -38,52 +38,89 @@ bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Empty() const
     return this->constants.empty();
 }
 
-void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType)
+Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets::TOffsetsMap::const_iterator Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets::begin() const
 {
-    std::vector<Turbo::Core::TShaderType> shader_types;
-    {
-        for (auto &item : this->constants)
-        {
-            // if (static_cast<std::size_t>(item.first) <= static_cast<std::size_t>(startShaderType))
-            if (item.first >= startShaderType)
-            {
-                shader_types.push_back(item.first);
-            }
-        }
+    return this->offsets.begin();
+}
 
-        std::sort(shader_types.begin(), shader_types.end());
-    }
+Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets::TOffsetsMap::const_iterator Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets::end() const
+{
+    return this->offsets.end();
+}
 
-    Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset temp_offset = 0;
-    for (auto &item : shader_types)
+void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
+{
+    if (offset % 4 == 0)
     {
-        auto &offset_and_size = this->constants.at(item);
-        auto &current_offset = offset_and_size.first;
-        if (current_offset == 0)
-        {
-            current_offset = temp_offset;
-        }
-        else
-        {
-            temp_offset = current_offset + offset_and_size.second;
-        }
+        this->offsets[shaderType] = offset;
     }
 }
 
+// void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType)
+//{
+//     std::vector<Turbo::Core::TShaderType> shader_types;
+//     {
+//         for (auto &item : this->constants)
+//         {
+//             // if (static_cast<std::size_t>(item.first) <= static_cast<std::size_t>(startShaderType))
+//             if (item.first >= startShaderType)
+//             {
+//                 shader_types.push_back(item.first);
+//             }
+//         }
+//
+//         std::sort(shader_types.begin(), shader_types.end());
+//     }
+//
+//     Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset temp_offset = 0;
+//     for (auto &item : shader_types)
+//     {
+//         auto &offset_and_size = this->constants.at(item);
+//         auto &current_offset = offset_and_size.first;
+//         if (current_offset == 0)
+//         {
+//             current_offset = temp_offset;
+//         }
+//         else
+//         {
+//             temp_offset = current_offset + offset_and_size.second;
+//         }
+//     }
+// }
+
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset, const TPushConstants::TSize &size)
 {
-    if (size != 0)
+    if ((offset % 4) == 0 && (size % 4) == 0 && size != 0)
     {
         this->constants[shaderType] = std::make_pair(offset, size);
+    }
+    else
+    {
+        // TODO: Wwarning!
     }
 }
 
 void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
 {
-    auto find_result = this->constants.find(shaderType);
-    if (find_result != this->constants.end())
+    if ((offset % 4) == 0)
     {
-        find_result->second.first = offset;
+        auto find_result = this->constants.find(shaderType);
+        if (find_result != this->constants.end())
+        {
+            find_result->second.first = offset;
+        }
+        else
+        {
+            // NOTE: Here we need init it for adapt operator<<(const TOffsets& offsets)
+            // NOTE: the push constant size will over write by shader layout
+            {
+                this->constants[shaderType] = std::make_pair(offset, 0);
+            }
+        }
+    }
+    else
+    {
+        // TODO: Wwarning!
     }
 }
 
@@ -94,7 +131,7 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const TPushCon
     {
         for (auto &source_item : source_constants)
         {
-            this->constants[source_item.first] = std::make_pair(source_item.second.first, source_item.second.second);
+            this->Merge(source_item.first, source_item.second.first, source_item.second.second);
         }
     }
 }
@@ -103,7 +140,23 @@ void Turbo::Core::TPipelineLayout::TLayout::TPushConstants::Merge(const Turbo::C
 {
     if (!pushConstant.Empty())
     {
-        this->Merge(pushConstant.GetShaderType(), 0, pushConstant.GetSize());
+        auto temp_size = pushConstant.GetSize();
+        if ((temp_size % 4) == 0 && temp_size != 0)
+        {
+            auto find_result = this->constants.find(pushConstant.GetShaderType());
+            if (find_result != this->constants.end())
+            {
+                find_result->second.second = pushConstant.GetSize();
+            }
+            else
+            {
+                this->Merge(pushConstant.GetShaderType(), 0, pushConstant.GetSize());
+            }
+        }
+        else
+        {
+            // TODO: Wwarning!
+        }
     }
 }
 
@@ -205,7 +258,6 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TLayout &layout)
 {
     this->Merge(layout.GetSets());
-    // this->Merge(layout.GetPushConstant());
     this->pushConstants.Merge(layout.GetPushConstant());
 }
 
@@ -365,5 +417,14 @@ bool Turbo::Core::TPipelineLayout::Valid() const
 Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TShader &shader)
 {
     layout.Merge(shader.GetLayout());
+    return layout;
+}
+
+Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets &offsets)
+{
+    for (auto &item : offsets)
+    {
+        layout.Merge(item.first, item.second);
+    }
     return layout;
 }

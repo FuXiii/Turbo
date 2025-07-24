@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/24
+
+>* 增加 `TPushConstants::TOffsets` 类。用于用户自定义配置 `PushConstant` 的 `offset` 。
+>* 更新 `TPipelineLayout::TLayout` 。增加 `TPushConstants::TOffsets` 通过 `<<` 符号推导出 `TPipelineLayout::TLayout` 。
+
 ## 2025/7/23
 
 >* 更新 `TPipelineLayout::TLayout::TPushConstants` 。支持配置 `offset` 。

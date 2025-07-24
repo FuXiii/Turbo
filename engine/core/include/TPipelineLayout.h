@@ -32,13 +32,28 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             // using TConstants = std::unordered_map<TOffset, std::unordered_map<TSize, VkShaderStageFlags>>;
             // NOTE: One push constant pure shader type
             // NOTE: Both offset and size are in units of bytes and must be a multiple of 4.
-            using TConstants = std::unordered_map<Turbo::Core::TShaderType, std::pair<TOffset, TSize>>; // TODO: New standard
+            using TConstants = std::unordered_map<Turbo::Core::TShaderType, std::pair<TPushConstants::TOffset, TPushConstants::TSize>>; // TODO: New standard
+
+            class TOffsets
+            {
+              public:
+                using TOffsetsMap = std::unordered_map<Turbo::Core::TShaderType, TPushConstants::TOffset>; // TODO: New standard
+
+              private:
+                TOffsetsMap offsets;
+
+              public:
+                TOffsetsMap::const_iterator begin() const;
+                TOffsetsMap::const_iterator end() const;
+
+                void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset);
+            };
 
           private:
             TPushConstants::TConstants constants;
 
           private:
-            void RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType);
+            // void RefreshPushConstantsOffset(const Turbo::Core::TShaderType &startShaderType);
 
           public:
             TPushConstants() = default;
@@ -181,4 +196,5 @@ class hash<Turbo::Core::TPipelineLayout::TLayout>
 } // namespace std
 
 Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TShader &shader);
+Turbo::Core::TPipelineLayout::TLayout &operator<<(Turbo::Core::TPipelineLayout::TLayout &layout, const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets &offsets);
 #endif // !TURBO_CORE_TPIPELINELAYOUT_H
