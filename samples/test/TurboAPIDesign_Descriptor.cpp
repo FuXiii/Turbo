@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                   #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1031,6 +1031,8 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
     Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
     Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
 
+    std::hash<Turbo::Core::TPipelineLayout::TLayout> hash;
+
     Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets offsets;
     offsets.Merge(vertex_shader->GetType(), 16);
     offsets.Merge(fragment_shader->GetType(), 32);
@@ -1039,24 +1041,28 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         Turbo::Core::TPipelineLayout::TLayout layout;
         layout << (*vertex_shader) << (*fragment_shader) << offsets;
         std::cout << layout.ToString() << std::endl;
+        std::cout << hash(layout) << std::endl;
     }
-
+    std::cout << "----------------------------------------------" << std::endl;
     {
         Turbo::Core::TPipelineLayout::TLayout layout;
         layout << offsets << (*vertex_shader) << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
+        std::cout << hash(layout) << std::endl;
     }
-
+    std::cout << "----------------------------------------------" << std::endl;
     {
         Turbo::Core::TPipelineLayout::TLayout layout;
         layout << (*vertex_shader) << offsets << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
+        std::cout << hash(layout) << std::endl;
     }
-
+    std::cout << "----------------------------------------------" << std::endl;
     {
         Turbo::Core::TPipelineLayout::TLayout layout;
         layout << offsets;
         std::cout << layout.ToString() << std::endl;
+        std::cout << hash(layout) << std::endl;
     }
 }
 

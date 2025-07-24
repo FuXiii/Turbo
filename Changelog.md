@@ -8,6 +8,7 @@
 
 >* 增加 `TPushConstants::TOffsets` 类。用于用户自定义配置 `PushConstant` 的 `offset` 。
 >* 更新 `TPipelineLayout::TLayout` 。增加 `TPushConstants::TOffsets` 通过 `<<` 符号推导出 `TPipelineLayout::TLayout` 。
+>* 更新 `docs\Design\Descriptor.md` 设计 `DescriptorSetLayout 和 PipelineLayout 和 Pipeline`。
 
 ## 2025/7/23
 

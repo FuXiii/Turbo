@@ -1140,3 +1140,67 @@ typedef struct VkPipelineLayoutCreateInfo {
 ## Pipeline 的 SpecializationInfo
 
 目前是通过 `Shader` 进行设置，但正常应该是在创建 `Pipeline` 时进行设置！此处需要优化！
+
+## DescriptorSetLayout 和 PipelineLayout 和 Pipeline
+
+映射表使用 `DescriptorSetLayout` 和 `PipelineLayout` 的 `hash` 值（ `std::size_t` ）作为映射。
+
+`DescriptorSetLayout` 使用 `DescriptorSetLayout::Layout` 直接创建，并将创建的 `VkDescriptorSetLayout`与其绑定：
+
+```CXX
+DescriptorSetLayout::Layout layout = ...;
+
+DescriptorSetLayout* ssl = new DescriptorSetLayout(device, layout);
+
+//DescriptorSetLayout 构造函数中
+DescriptorSetLayout(Device* device, const DescriptorSetLayout::Layout& layout)
+{
+    ...; //构造结束
+    
+    device->GetLayoutManager()->Add(layout, this);
+}
+
+class LayoutManager
+{
+    std::unorder_map<std::size_t/*hash*/, TRrfPtr<DescriptorSetLayout>> dscriptorSetLayoutMap;
+};
+```
+
+`PipelineLayout` 与 `DescriptorSetLayout` 类似使用 `PipelineLayout::Layout` 直接创建，并将创建的 `VkPipelineLayout`与其绑定：
+
+```CXX
+PipelineLayout::Layout layout = ...;
+
+PipelineLayout* ssl = new PipelineLayout(device, layout);
+
+//PipelineLayout 构造函数中
+PipelineLayout(Device* device, const PipelineLayout::Layout& layout)
+{
+    ...; //构造结束
+    
+    device->GetLayoutManager()->Add(layout, this);
+}
+
+class LayoutManager
+{
+    std::unorder_map<std::size_t/*hash*/, TRrfPtr<PipelineLayout>> pipelineLayoutMap;
+};
+```
+
+`Pipeline` 使用 `PipelineLayout::Layout` 创建。
+
+```CXX
+PipelineLayout::Layout layout = ...;
+
+Pipeline* pipeline = new Pipeline(device, layout, ...);
+
+//Pipeline 构造函数中
+Pipeline(Device* device, const PipelineLayout::Layout& layout)
+{
+    // Find reuse or create
+    {
+        device->GetLayoutManager()->Find(layout.Hash());
+        ...
+    }
+}
+```
