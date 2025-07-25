@@ -1143,6 +1143,10 @@ typedef struct VkPipelineLayoutCreateInfo {
 
 ## DescriptorSetLayout 和 PipelineLayout 和 Pipeline
 
+> note: `DescriptorSetLayout` 和 `PipelineLayout` 的创建和销毁应该交由 `Device::LayoutManager()` 管理！而不是各自的构造函数！
+
+> note: 先根据传入的 `layout` 的 `hash` 值进行查找，如果查找到就重复使用，如果没找到，就创建新的。
+
 映射表使用 `DescriptorSetLayout` 和 `PipelineLayout` 的 `hash` 值（ `std::size_t` ）作为映射。
 
 `DescriptorSetLayout` 使用 `DescriptorSetLayout::Layout` 直接创建，并将创建的 `VkDescriptorSetLayout`与其绑定：
@@ -1156,13 +1160,17 @@ DescriptorSetLayout* ssl = new DescriptorSetLayout(device, layout);
 DescriptorSetLayout(Device* device, const DescriptorSetLayout::Layout& layout)
 {
     ...; //构造结束
-    
-    device->GetLayoutManager()->Add(layout, this);
+    device->GetLayoutManager()->Add(layout, this);// 由 LayoutManager 内部自身调用应该更合理？
+                                                  // 在此处增加，有一个好处就是可以重用用户自己创建的 DescriptorSetLayout
 }
 
 class LayoutManager
 {
-    std::unorder_map<std::size_t/*hash*/, TRrfPtr<DescriptorSetLayout>> dscriptorSetLayoutMap;
+private:
+    std::unorder_map<std::size_t/*hash(layout.Hash())*/, TRrfPtr<DescriptorSetLayout>> dscriptorSetLayoutMap;
+
+public:
+    DescriptorSetLayout* GetOrCreateDscriptorSetLayout(const DescriptorSetLayout::Layout& layout);
 };
 ```
 
@@ -1176,14 +1184,23 @@ PipelineLayout* ssl = new PipelineLayout(device, layout);
 //PipelineLayout 构造函数中
 PipelineLayout(Device* device, const PipelineLayout::Layout& layout)
 {
+    std::vector<DescriptorSetLayout*> descriptor_set_layouts;
+    for(auto& set : layout.sets)
+    {
+       descriptor_set_layouts.push_back(device->GetLayoutManager()->GetOrCreateDscriptorSetLayout(set));
+    }
     ...; //构造结束
-    
-    device->GetLayoutManager()->Add(layout, this);
+    device->GetLayoutManager()->Add(layout, this);// 由 LayoutManager 内部自身调用应该更合理？
+                                                  // 在此处增加，有一个好处就是可以重用用户自己创建的 DescriptorSetLayout
 }
 
 class LayoutManager
 {
-    std::unorder_map<std::size_t/*hash*/, TRrfPtr<PipelineLayout>> pipelineLayoutMap;
+    private:
+        std::unorder_map<std::size_t/*hash(layout.Hash())*/, TRrfPtr<PipelineLayout>> pipelineLayoutMap;
+
+    public:
+        PipelineLayout* GetOrCreatePipelineLayout(const PipelineLayout::Layout& layout);
 };
 ```
 
@@ -1199,8 +1216,11 @@ Pipeline(Device* device, const PipelineLayout::Layout& layout)
 {
     // Find reuse or create
     {
-        device->GetLayoutManager()->Find(layout.Hash());
+        device->GetLayoutManager()->GetOrCreatePipelineLayout(layout);
         ...
     }
 }
 ```
+
+## TLayoutAllocator
+

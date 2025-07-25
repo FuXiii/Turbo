@@ -233,6 +233,11 @@ const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &Turbo::Core:
     return this->pushConstants.GetConstantSize(shaderType);
 }
 
+bool Turbo::Core::TPipelineLayout::TLayout::Empty() const
+{
+    return this->sets.empty() && this->pushConstants.Empty();
+}
+
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout::TSets &sets)
 {
     for (auto &set_item : sets)
@@ -264,6 +269,11 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TL
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
 {
     this->pushConstants.Merge(shaderType, offset);
+}
+
+std::size_t Turbo::Core::TPipelineLayout::TLayout::Hash() const
+{
+    return std::hash<Turbo::Core::TPipelineLayout::TLayout>{}(*(this));
 }
 
 std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const

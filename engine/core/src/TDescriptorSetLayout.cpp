@@ -68,6 +68,11 @@ Turbo::Core::TDescriptor &Turbo::Core::TDescriptorSetLayout::TLayout::operator[]
     return this->bindings[std::forward<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding>(binding)];
 }
 
+const Turbo::Core::TDescriptor &Turbo::Core::TDescriptorSetLayout::TLayout::operator[](const Turbo::Core::TDescriptorSetLayout::TLayout::TBinding &binding) const
+{
+    return this->bindings.at(binding);
+}
+
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TDescriptorSetLayout::TLayout &other) const
 {
     return this->bindings == other.bindings;
@@ -76,6 +81,11 @@ bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TDescriptorSet
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TDescriptorSetLayout::TLayout &other) const
 {
     return !((*this) == other);
+}
+
+std::size_t Turbo::Core::TDescriptorSetLayout::TLayout::Hash() const
+{
+    return std::hash<Turbo::Core::TDescriptorSetLayout::TLayout>{}(*(this));
 }
 
 std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const

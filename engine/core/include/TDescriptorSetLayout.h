@@ -4,6 +4,8 @@
 #include "TDescriptor.h"
 #include "TVulkanHandle.h"
 
+#include <algorithm>
+
 namespace Turbo
 {
 namespace Core
@@ -41,9 +43,12 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
         // void Override(const TDescriptorSetLayout::TLayout &layout);
 
         TDescriptor &operator[](TBinding &&binding);
+        const TDescriptor &operator[](const TBinding &binding) const;
 
         bool operator==(const TDescriptorSetLayout::TLayout &other) const;
         bool operator!=(const TDescriptorSetLayout::TLayout &other) const;
+
+        std::size_t Hash() const;
 
         std::string ToString() const;
     };
@@ -96,15 +101,29 @@ class hash<Turbo::Core::TDescriptorSetLayout::TLayout>
             TLayoutHasher(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
             {
                 this->str = new std::string();
-                for (auto &binding_item : layout)
-                {
-                    auto &binding = binding_item.first;
-                    auto &descriptor_type = binding_item.second.GetType();
-                    auto &descriptor_count = binding_item.second.GetCount();
 
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                if (!layout.Empty())
+                {
+                    std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
+                    {
+                        for (auto &binding_item : layout)
+                        {
+                            ordered_bindings.push_back(binding_item.first);
+                        }
+                        std::sort(ordered_bindings.begin(), ordered_bindings.end());
+                    }
+
+                    // for (auto &binding_item : layout)
+                    for (auto &binding : ordered_bindings)
+                    {
+                        auto &binding_item = layout[binding];
+                        auto &descriptor_type = binding_item.GetType();
+                        auto &descriptor_count = binding_item.GetCount();
+
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                    }
                 }
             }
 

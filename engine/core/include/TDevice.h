@@ -4,6 +4,8 @@
 #include "TPhysicalDevice.h"
 #include "TVulkanHandle.h"
 
+#include "TDescriptorSetLayout.h"
+#include "TPipelineLayout.h"
 namespace Turbo
 {
 namespace Core
@@ -25,6 +27,22 @@ class TDevice : public Turbo::Core::TVulkanHandle
     friend class TDeviceQueueCreateInfo;
     friend class TDeviceQueue;
     friend class TPhysicalDevice;
+
+  public:
+    class TLayoutManager
+    {
+      private:
+        TRefPtr<TDevice> device;
+
+        std::unordered_map<std::size_t, TRefPtr<TDescriptorSetLayout>> descriptorSetLayoutMap;
+        std::unordered_map<std::size_t, TRefPtr<TPipelineLayout>> pipelineLayoutMap;
+
+      public:
+        TLayoutManager(TDevice *device);
+
+        TDescriptorSetLayout *GetOrCreateLayout(const TDescriptorSetLayout::TLayout &layout);
+        TPipelineLayout *GetOrCreateLayout(const TPipelineLayout::TLayout &layout);
+    };
 
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TPhysicalDevice> physicalDevice;

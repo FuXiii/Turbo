@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/25
+
+>* 更新 `TDevice` 类增加 `TLayoutManager` 类用于管理 `TDescriptorSetLayout` 和 `TPipelineLayout`。
+>* 优化 `TDescriptorSetLayout` 和 `TPipelineLayout` 的 `hash` 算法。按照顺序计算。
+
 ## 2025/7/24
 
 >* 增加 `TPushConstants::TOffsets` 类。用于用户自定义配置 `PushConstant` 的 `offset` 。

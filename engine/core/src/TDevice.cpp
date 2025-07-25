@@ -8,6 +8,63 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
+Turbo::Core::TDevice::TLayoutManager::TLayoutManager(TDevice *device)
+{
+    this->device = device;
+}
+
+Turbo::Core::TDescriptorSetLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCreateLayout(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
+{
+    if (this->device.Valid())
+    {
+        if (!layout.Empty())
+        {
+            auto hash = layout.Hash();
+            auto find_result = this->descriptorSetLayoutMap.find(hash);
+            if (find_result == this->descriptorSetLayoutMap.end())
+            {
+                // TODO:Create a new layout and add it
+                Turbo::Core::TDescriptorSetLayout *descriptor_set_layout = new Turbo::Core::TDescriptorSetLayout(device, layout);
+                // this->descriptorSetLayoutMap.insert(std::make_pair(hash, descriptor_set_layout));
+                this->descriptorSetLayoutMap[hash] = descriptor_set_layout;
+                return descriptor_set_layout;
+            }
+            else
+            {
+                return find_result->second;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+Turbo::Core::TPipelineLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCreateLayout(const Turbo::Core::TPipelineLayout::TLayout &layout)
+{
+    if (this->device.Valid())
+    {
+        if (!layout.Empty())
+        {
+            auto hash = layout.Hash();
+            auto find_result = this->pipelineLayoutMap.find(hash);
+            if (find_result == this->pipelineLayoutMap.end())
+            {
+                // TODO:Create a new layout and add it
+                Turbo::Core::TPipelineLayout *pipeline_layout = new Turbo::Core::TPipelineLayout(device, layout);
+                // this->pipelineLayoutMap.insert(std::make_pair(hash, pipeline_layout));
+                this->pipelineLayoutMap[hash] = pipeline_layout;
+                return pipeline_layout;
+            }
+            else
+            {
+                return find_result->second;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
 {
     if (Turbo::Core::TReferenced::Valid(deviceQueue))

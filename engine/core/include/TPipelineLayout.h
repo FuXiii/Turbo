@@ -70,7 +70,6 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             void Merge(const Turbo::Core::TShader::TLayout::TPushConstant &pushConstant);
 
             const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &GetConstantSize(const Turbo::Core::TShaderType &shaderType) const;
-
             std::string ToString() const;
         };
 
@@ -89,10 +88,14 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
         const TPipelineLayout::TLayout::TPushConstants &GetPushConstants() const;
         const TPipelineLayout::TLayout::TPushConstants::TSize &GetPushConstantSize(const Turbo::Core::TShaderType &shaderType) const;
 
+        bool Empty() const;
+
         void Merge(const TPipelineLayout::TLayout::TSets &sets);
         void Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
         void Merge(const Turbo::Core::TShader::TLayout &layout);
         void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset);
+
+        std::size_t Hash() const;
 
         std::string ToString() const;
     };
@@ -147,31 +150,73 @@ class hash<Turbo::Core::TPipelineLayout::TLayout>
             TLayoutHasher(const Turbo::Core::TPipelineLayout::TLayout &layout)
             {
                 this->str = new std::string();
-                for (auto &set_item : layout.GetSets())
+
+                if (!layout.Empty())
                 {
-                    auto set = set_item.first;
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&set), sizeof(set));
-                    for (auto &binding_item : set_item.second)
+                    auto &sets = layout.GetSets();
+                    std::vector<Turbo::Core::TPipelineLayout::TLayout::TSet> ordered_sets;
                     {
-                        auto &binding = binding_item.first;
-                        auto &descriptor_type = binding_item.second.GetType();
-                        auto &descriptor_count = binding_item.second.GetCount();
-
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                        for (auto &set_item : sets)
+                        {
+                            ordered_sets.push_back(set_item.first);
+                        }
+                        std::sort(ordered_sets.begin(), ordered_sets.end());
                     }
-                }
 
-                for (auto &constant_item : layout.GetPushConstants().GetConstants())
-                {
-                    auto shader_type = constant_item.first;
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&shader_type), sizeof(shader_type));
+                    // for (auto &set_item : layout.GetSets())
+                    for (auto &set : ordered_sets)
+                    {
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&set), sizeof(set));
 
-                    auto offset = constant_item.second.first;
-                    auto size = constant_item.second.second;
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
-                    this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
+                        auto &descriptor_set_layout = sets.at(set);
+                        {
+                            if (!descriptor_set_layout.Empty())
+                            {
+                                std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
+                                {
+                                    for (auto &binding_item : descriptor_set_layout)
+                                    {
+                                        ordered_bindings.push_back(binding_item.first);
+                                    }
+                                    std::sort(ordered_bindings.begin(), ordered_bindings.end());
+                                }
+
+                                // for (auto &binding_item : layout)
+                                for (auto &binding : ordered_bindings)
+                                {
+                                    auto &binding_item = descriptor_set_layout[binding];
+                                    auto &descriptor_type = binding_item.GetType();
+                                    auto &descriptor_count = binding_item.GetCount();
+
+                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
+                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
+                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+                                }
+                            }
+                        }
+                    }
+
+                    auto &constants = layout.GetPushConstants().GetConstants();
+                    std::vector<Turbo::Core::TShaderType> ordered_shader_types;
+                    {
+                        for (auto &constant_item : constants)
+                        {
+                            ordered_shader_types.push_back(constant_item.first);
+                        }
+                        std::sort(ordered_shader_types.begin(), ordered_shader_types.end());
+                    }
+
+                    // for (auto &constant_item : layout.GetPushConstants().GetConstants())
+                    for (auto &shader_type : ordered_shader_types)
+                    {
+                        auto &constant_item = constants.at(shader_type);
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&shader_type), sizeof(shader_type));
+
+                        auto offset = constant_item.first;
+                        auto size = constant_item.second;
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
+                        this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
+                    }
                 }
             }
 
