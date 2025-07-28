@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                       #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1042,6 +1042,7 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << (*vertex_shader) << (*fragment_shader) << offsets;
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
+        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1049,6 +1050,7 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << offsets << (*vertex_shader) << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
+        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1056,6 +1058,7 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << (*vertex_shader) << offsets << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
+        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1063,6 +1066,7 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << offsets;
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
+        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
     }
 }
 

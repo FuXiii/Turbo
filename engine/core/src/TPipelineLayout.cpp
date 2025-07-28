@@ -175,17 +175,27 @@ std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() co
 {
     std::stringstream ss;
     {
-        auto iter = this->constants.begin();
-        ss << "[";
-        while (iter != this->constants.end())
+        std::vector<Turbo::Core::TShaderType> ordered_shader_types;
         {
+            for (auto &constant_item : this->constants)
+            {
+                ordered_shader_types.push_back(constant_item.first);
+            }
+            std::sort(ordered_shader_types.begin(), ordered_shader_types.end());
+        }
+
+        auto iter = ordered_shader_types.begin();
+        ss << "[";
+        while (iter != ordered_shader_types.end())
+        {
+            auto &offset_and_size = this->constants.at((*iter));
             ss << "{";
-            ss << "\"offset\":" << (*iter).second.first << ",";
-            ss << "\"size\":" << (*iter).second.second << ",";
-            ss << "\"shader types\":\"" << (*iter).first << "\"";
+            ss << "\"offset\":" << offset_and_size.first << ",";
+            ss << "\"size\":" << offset_and_size.second << ",";
+            ss << "\"shader types\":\"" << (*iter) << "\"";
             ss << "}";
             ++iter;
-            if (iter != this->constants.end())
+            if (iter != ordered_shader_types.end())
             {
                 ss << ",";
             }
@@ -283,14 +293,24 @@ std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
     {
         if (!this->sets.empty())
         {
+            std::vector<Turbo::Core::TPipelineLayout::TLayout::TSet> ordered_sets;
+            {
+                for (auto &set_item : this->sets)
+                {
+                    ordered_sets.push_back(set_item.first);
+                }
+                std::sort(ordered_sets.begin(), ordered_sets.end());
+            }
+
             ss << "\"sets\":";
             ss << "[";
-            auto iter = this->sets.begin();
-            while (iter != this->sets.end())
+            auto iter = ordered_sets.begin();
+            while (iter != ordered_sets.end())
             {
-                ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
+                auto set = this->sets.at((*iter));
+                ss << "{\"" << (*iter) << "\"" << ":" << set.ToString() << "}";
                 ++iter;
-                if (iter != this->sets.end())
+                if (iter != ordered_sets.end())
                 {
                     ss << ",";
                 }

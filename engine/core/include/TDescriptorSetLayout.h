@@ -90,59 +90,38 @@ template <>
 class hash<Turbo::Core::TDescriptorSetLayout::TLayout>
 {
   public:
+    std::string ToHashString(const Turbo::Core::TDescriptorSetLayout::TLayout &layout) const
+    {
+        std::string result;
+        if (!layout.Empty())
+        {
+            std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
+            {
+                for (auto &binding_item : layout)
+                {
+                    ordered_bindings.push_back(binding_item.first);
+                }
+                std::sort(ordered_bindings.begin(), ordered_bindings.end());
+            }
+
+            // for (auto &binding_item : layout)
+            for (auto &binding : ordered_bindings)
+            {
+                auto &binding_item = layout[binding];
+                auto &descriptor_type = binding_item.GetType();
+                auto &descriptor_count = binding_item.GetCount();
+
+                result.append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
+                result.append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
+                result.append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
+            }
+        }
+        return result;
+    }
+
     std::size_t operator()(const Turbo::Core::TDescriptorSetLayout::TLayout &layout) const
     {
-        class TLayoutHasher
-        {
-          private:
-            std::string *str = nullptr;
-
-          public:
-            TLayoutHasher(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
-            {
-                this->str = new std::string();
-
-                if (!layout.Empty())
-                {
-                    std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
-                    {
-                        for (auto &binding_item : layout)
-                        {
-                            ordered_bindings.push_back(binding_item.first);
-                        }
-                        std::sort(ordered_bindings.begin(), ordered_bindings.end());
-                    }
-
-                    // for (auto &binding_item : layout)
-                    for (auto &binding : ordered_bindings)
-                    {
-                        auto &binding_item = layout[binding];
-                        auto &descriptor_type = binding_item.GetType();
-                        auto &descriptor_count = binding_item.GetCount();
-
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
-                    }
-                }
-            }
-
-            ~TLayoutHasher()
-            {
-                if (this->str != nullptr)
-                {
-                    delete this->str;
-                    this->str = nullptr;
-                }
-            }
-
-            std::size_t Hash() const
-            {
-                return std::hash<std::string>{}(*(this->str));
-            }
-        };
-
-        return TLayoutHasher(layout).Hash();
+        return std::hash<std::string>{}(ToHashString(layout));
     }
 };
 } // namespace std

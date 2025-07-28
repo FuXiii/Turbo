@@ -95,15 +95,25 @@ std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
         ss << "{";
         if (!this->bindings.empty())
         {
+            std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
+            {
+                for (auto &binding_item : this->bindings)
+                {
+                    ordered_bindings.push_back(binding_item.first);
+                }
+                std::sort(ordered_bindings.begin(), ordered_bindings.end());
+            }
+
             ss << "\"bindings\":";
             ss << "[";
             {
-                auto iter = this->bindings.begin();
-                while (iter != this->bindings.end())
+                auto iter = ordered_bindings.begin();
+                while (iter != ordered_bindings.end())
                 {
-                    ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
+                    auto &descriptor = this->bindings.at((*iter));
+                    ss << "{\"" << (*iter) << "\"" << ":" << descriptor.ToString() << "}";
                     ++iter;
-                    if (iter != this->bindings.end())
+                    if (iter != ordered_bindings.end())
                     {
                         ss << ",";
                     }

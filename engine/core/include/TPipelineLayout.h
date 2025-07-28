@@ -139,103 +139,57 @@ template <>
 class hash<Turbo::Core::TPipelineLayout::TLayout>
 {
   public:
+    std::string ToHashString(const Turbo::Core::TPipelineLayout::TLayout &layout) const
+    {
+        std::string result;
+        if (!layout.Empty())
+        {
+            auto &sets = layout.GetSets();
+            std::vector<Turbo::Core::TPipelineLayout::TLayout::TSet> ordered_sets;
+            {
+                for (auto &set_item : sets)
+                {
+                    ordered_sets.push_back(set_item.first);
+                }
+                std::sort(ordered_sets.begin(), ordered_sets.end());
+            }
+
+            for (auto &set : ordered_sets)
+            {
+                result.append(reinterpret_cast<const std::string::value_type *>(&set), sizeof(set));
+
+                auto &descriptor_set_layout = sets.at(set);
+
+                result.append(std::hash<Turbo::Core::TDescriptorSetLayout::TLayout>{}.ToHashString(descriptor_set_layout));
+            }
+
+            auto &constants = layout.GetPushConstants().GetConstants();
+            std::vector<Turbo::Core::TShaderType> ordered_shader_types;
+            {
+                for (auto &constant_item : constants)
+                {
+                    ordered_shader_types.push_back(constant_item.first);
+                }
+                std::sort(ordered_shader_types.begin(), ordered_shader_types.end());
+            }
+
+            for (auto &shader_type : ordered_shader_types)
+            {
+                auto &constant_item = constants.at(shader_type);
+                result.append(reinterpret_cast<const std::string::value_type *>(&shader_type), sizeof(shader_type));
+
+                auto offset = constant_item.first;
+                auto size = constant_item.second;
+                result.append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
+                result.append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
+            }
+        }
+        return result;
+    }
+
     std::size_t operator()(const Turbo::Core::TPipelineLayout::TLayout &layout) const
     {
-        class TLayoutHasher
-        {
-          private:
-            std::string *str = nullptr;
-
-          public:
-            TLayoutHasher(const Turbo::Core::TPipelineLayout::TLayout &layout)
-            {
-                this->str = new std::string();
-
-                if (!layout.Empty())
-                {
-                    auto &sets = layout.GetSets();
-                    std::vector<Turbo::Core::TPipelineLayout::TLayout::TSet> ordered_sets;
-                    {
-                        for (auto &set_item : sets)
-                        {
-                            ordered_sets.push_back(set_item.first);
-                        }
-                        std::sort(ordered_sets.begin(), ordered_sets.end());
-                    }
-
-                    // for (auto &set_item : layout.GetSets())
-                    for (auto &set : ordered_sets)
-                    {
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&set), sizeof(set));
-
-                        auto &descriptor_set_layout = sets.at(set);
-                        {
-                            if (!descriptor_set_layout.Empty())
-                            {
-                                std::vector<Turbo::Core::TDescriptorSetLayout::TLayout::TBinding> ordered_bindings;
-                                {
-                                    for (auto &binding_item : descriptor_set_layout)
-                                    {
-                                        ordered_bindings.push_back(binding_item.first);
-                                    }
-                                    std::sort(ordered_bindings.begin(), ordered_bindings.end());
-                                }
-
-                                // for (auto &binding_item : layout)
-                                for (auto &binding : ordered_bindings)
-                                {
-                                    auto &binding_item = descriptor_set_layout[binding];
-                                    auto &descriptor_type = binding_item.GetType();
-                                    auto &descriptor_count = binding_item.GetCount();
-
-                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&binding), sizeof(binding));
-                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_type), sizeof(descriptor_type));
-                                    this->str->append(reinterpret_cast<const std::string::value_type *>(&descriptor_count), sizeof(descriptor_count));
-                                }
-                            }
-                        }
-                    }
-
-                    auto &constants = layout.GetPushConstants().GetConstants();
-                    std::vector<Turbo::Core::TShaderType> ordered_shader_types;
-                    {
-                        for (auto &constant_item : constants)
-                        {
-                            ordered_shader_types.push_back(constant_item.first);
-                        }
-                        std::sort(ordered_shader_types.begin(), ordered_shader_types.end());
-                    }
-
-                    // for (auto &constant_item : layout.GetPushConstants().GetConstants())
-                    for (auto &shader_type : ordered_shader_types)
-                    {
-                        auto &constant_item = constants.at(shader_type);
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&shader_type), sizeof(shader_type));
-
-                        auto offset = constant_item.first;
-                        auto size = constant_item.second;
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&offset), sizeof(offset));
-                        this->str->append(reinterpret_cast<const std::string::value_type *>(&size), sizeof(size));
-                    }
-                }
-            }
-
-            ~TLayoutHasher()
-            {
-                if (this->str != nullptr)
-                {
-                    delete this->str;
-                    this->str = nullptr;
-                }
-            }
-
-            std::size_t Hash() const
-            {
-                return std::hash<std::string>{}(*(this->str));
-            }
-        };
-
-        return TLayoutHasher(layout).Hash();
+        return std::hash<std::string>{}(ToHashString(layout));
     }
 };
 } // namespace std

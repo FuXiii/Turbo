@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/28
+
+>* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `Hash` 算法。将重复性代码合并。
+>* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `ToString()` 函数。将按 `set/bindings` 号顺序输出。
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 的 `ToString()` 函数。将按 `着色器` 顺序输出。
+
 ## 2025/7/25
 
 >* 更新 `TDevice` 类增加 `TLayoutManager` 类用于管理 `TDescriptorSetLayout` 和 `TPipelineLayout`。
