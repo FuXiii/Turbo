@@ -58,6 +58,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA TPhysicalDeviceFeatures enabledFeatures;
 
     TDeviceDriver *deviceDriver = nullptr;
+    TLayoutManager *layoutManager = nullptr;
 
   protected:
     virtual void AddChildHandle(TDeviceQueue *deviceQueue);
@@ -102,6 +103,8 @@ class TDevice : public Turbo::Core::TVulkanHandle
     void WaitIdle();
 
     const TDeviceDriver *GetDeviceDriver();
+
+    TLayoutManager& GetLayoutManager();
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

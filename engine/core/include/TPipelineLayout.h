@@ -107,6 +107,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA std::vector<TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
     T_VULKAN_HANDLE_DATA std::vector<TPushConstantDescriptor *> pushConstantDescriptors; // FIXME: check it
 
+    TPipelineLayout::TLayout layout;
+
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;

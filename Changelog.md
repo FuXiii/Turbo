@@ -9,6 +9,8 @@
 >* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `Hash` 算法。将重复性代码合并。
 >* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `ToString()` 函数。将按 `set/bindings` 号顺序输出。
 >* 更新 `TPipelineLayout::TLayout::TPushConstants` 的 `ToString()` 函数。将按 `着色器` 顺序输出。
+>* 更新 `TPipelineLayout` 类。完善 `VkPipelineLayout` 的创建。
+>* 更新 `TDevice` 的 `TLayoutManager` 类。完善 `TDescriptorSetLayout` 和 `TPipelineLayout` 的创建。
 
 ## 2025/7/25
 

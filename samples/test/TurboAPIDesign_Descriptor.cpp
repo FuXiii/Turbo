@@ -581,7 +581,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                       #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                    #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1026,6 +1026,34 @@ void Test_ShadersToPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core:
     std::cout << layout.ToString() << std::endl;
 }
 
+void Test_EmptyDescriptorSetAndPipelineLayout(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TDescriptorSetLayout::TLayout descriptor_set_empty_layout;
+    Turbo::Core::TPipelineLayout::TLayout pipeline_empty_layout;
+    std::cout << "descriptor_set_empty_layout.Hash(): " << descriptor_set_empty_layout.Hash() << std::endl;
+    std::cout << "pipeline_empty_layout.Hash(): " << pipeline_empty_layout.Hash() << std::endl;
+
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSetLayout> dsl = new Turbo::Core::TDescriptorSetLayout(device, descriptor_set_empty_layout);
+    if (dsl->Valid())
+    {
+        std::cout << "TDescriptorSetLayout create successed" << std::endl;
+    }
+    else
+    {
+        std::cout << "TDescriptorSetLayout create failed" << std::endl;
+    }
+
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineLayout> pl = new Turbo::Core::TPipelineLayout(device, pipeline_empty_layout);
+    if (pl->Valid())
+    {
+        std::cout << "TPipelineLayout create successed" << std::endl;
+    }
+    else
+    {
+        std::cout << "TPipelineLayout create failed" << std::endl;
+    }
+}
+
 void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 {
     Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
@@ -1042,7 +1070,15 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << (*vertex_shader) << (*fragment_shader) << offsets;
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
-        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
+        auto vk_layout = device->GetLayoutManager().GetOrCreateLayout(layout);
+        if (vk_layout->Valid())
+        {
+            std::cout << "layout create successed" << std::endl;
+        }
+        else
+        {
+            std::cout << "layout create failed" << std::endl;
+        }
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1050,7 +1086,15 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << offsets << (*vertex_shader) << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
-        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
+        auto vk_layout = device->GetLayoutManager().GetOrCreateLayout(layout);
+        if (vk_layout->Valid())
+        {
+            std::cout << "layout create successed" << std::endl;
+        }
+        else
+        {
+            std::cout << "layout create failed" << std::endl;
+        }
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1058,7 +1102,15 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << (*vertex_shader) << offsets << (*fragment_shader);
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
-        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
+        auto vk_layout = device->GetLayoutManager().GetOrCreateLayout(layout);
+        if (vk_layout->Valid())
+        {
+            std::cout << "layout create successed" << std::endl;
+        }
+        else
+        {
+            std::cout << "layout create failed" << std::endl;
+        }
     }
     std::cout << "----------------------------------------------" << std::endl;
     {
@@ -1066,7 +1118,15 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
         layout << offsets;
         std::cout << layout.ToString() << std::endl;
         std::cout << hash(layout) << std::endl;
-        std::cout << std::hash<Turbo::Core::TPipelineLayout::TLayout>{}.ToHashString(layout) << std::endl;
+        auto vk_layout = device->GetLayoutManager().GetOrCreateLayout(layout);
+        if (vk_layout->Valid())
+        {
+            std::cout << "layout create successed" << std::endl;
+        }
+        else
+        {
+            std::cout << "layout create failed" << std::endl;
+        }
     }
 }
 
@@ -1083,6 +1143,7 @@ int main()
     // Test_PipelineLayout(instance, device, queue);
     // Test_TurboPipelineLayout(instance, device, queue);
     // Test_ShadersToPipelineLayout(instance, device, queue);
+    // Test_EmptyDescriptorSetAndPipelineLayout(instance, device, queue);
     Test_ShadersToPipelineLayoutWithTOffsets(instance, device, queue);
 
     if (false)

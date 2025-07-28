@@ -116,7 +116,7 @@ void Turbo::Core::TPipeline::InternalCreate()
         descriptor_set_layouts.push_back(descriptor_set_layout);
     }
 
-    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors);
+    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors); // FIXME: Use new TLayout to create!
 }
 
 void Turbo::Core::TPipeline::InternalDestroy()

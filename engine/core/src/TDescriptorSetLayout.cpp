@@ -128,7 +128,7 @@ std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
 
 void Turbo::Core::TDescriptorSetLayout::InternalCreate()
 {
-    if (this->descriptors.empty()) // Create use layout
+    if (!this->layout.Empty()) // Create use layout
     {
         std::vector<VkDescriptorSetLayoutBinding> bindings(this->layout.GetCount());
         {
@@ -168,7 +168,7 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
             throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
         }
     }
-    else
+    else if (!this->descriptors.empty()) // FIXME: Need to deprecate!
     {
         std::map</*binding*/ uint32_t, std::vector<TDescriptor *>> binding_map;
         for (TDescriptor *descriptor_item : this->descriptors)
@@ -227,6 +227,23 @@ void Turbo::Core::TDescriptorSetLayout::InternalCreate()
         if (result != VK_SUCCESS)
         {
             throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TDescriptorSetLayout::InternalCreate::vkCreateDescriptorSetLayout");
+        }
+    }
+    else // TODO: Create an empty descriptor set layout
+    {
+        VkDescriptorSetLayoutCreateInfo vk_descriptor_set_layout_create_info = {};
+        vk_descriptor_set_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        vk_descriptor_set_layout_create_info.pNext = nullptr;
+        vk_descriptor_set_layout_create_info.flags = 0;
+        vk_descriptor_set_layout_create_info.bindingCount = 0;
+        vk_descriptor_set_layout_create_info.pBindings = nullptr;
+
+        auto driver = this->device->GetDeviceDriver();
+        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+        VkResult result = driver->vkCreateDescriptorSetLayout(this->device->GetVkDevice(), &vk_descriptor_set_layout_create_info, allocator, &(this->vkDescriptorSetLayout));
+        if (result != VkResult::VK_SUCCESS)
+        {
+            throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSetLayout::InternalCreate");
         }
     }
 }

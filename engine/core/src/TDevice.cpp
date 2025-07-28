@@ -17,7 +17,7 @@ Turbo::Core::TDescriptorSetLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCr
 {
     if (this->device.Valid())
     {
-        if (!layout.Empty())
+        // if (!layout.Empty())//NOTE:ignore empty because Vulkan can create empty layout
         {
             auto hash = layout.Hash();
             auto find_result = this->descriptorSetLayoutMap.find(hash);
@@ -25,7 +25,6 @@ Turbo::Core::TDescriptorSetLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCr
             {
                 // TODO:Create a new layout and add it
                 Turbo::Core::TDescriptorSetLayout *descriptor_set_layout = new Turbo::Core::TDescriptorSetLayout(device, layout);
-                // this->descriptorSetLayoutMap.insert(std::make_pair(hash, descriptor_set_layout));
                 this->descriptorSetLayoutMap[hash] = descriptor_set_layout;
                 return descriptor_set_layout;
             }
@@ -43,7 +42,7 @@ Turbo::Core::TPipelineLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCreateL
 {
     if (this->device.Valid())
     {
-        if (!layout.Empty())
+        // if (!layout.Empty())//NOTE:ignore empty because Vulkan can create empty layout
         {
             auto hash = layout.Hash();
             auto find_result = this->pipelineLayoutMap.find(hash);
@@ -1154,6 +1153,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
         }
 
         this->vmaAllocator = new TVmaAllocator(this);
+        this->layoutManager = new TLayoutManager(this);
     }
     else
     {
@@ -1198,6 +1198,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, const std::vector
         }
 
         this->vmaAllocator = new TVmaAllocator(this);
+        this->layoutManager = new TLayoutManager(this);
     }
     else
     {
@@ -1211,6 +1212,7 @@ Turbo::Core::TDevice::~TDevice()
     {
         this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
 
+        delete this->layoutManager;
         // delete this->vmaAllocator;
         this->vmaAllocator = nullptr;
 
@@ -1481,6 +1483,11 @@ void Turbo::Core::TDevice::WaitIdle()
 const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
 {
     return this->deviceDriver;
+}
+
+Turbo::Core::TDevice::TLayoutManager &Turbo::Core::TDevice::GetLayoutManager()
+{
+    return *(this->layoutManager);
 }
 
 std::string Turbo::Core::TDevice::ToString() const
