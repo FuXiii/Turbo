@@ -299,7 +299,7 @@ Turbo::Core::TDescriptorSetLayout::~TDescriptorSetLayout()
 
 uint32_t Turbo::Core::TDescriptorSetLayout::GetSet() const
 {
-    return this->descriptors[0]->GetSet();
+    return this->descriptors[0]->GetSet(); // FIXME: DescriptorSetLayout didn't had set number.
 }
 
 VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayout()
@@ -315,6 +315,11 @@ Turbo::Core::TDescriptor::TType Turbo::Core::TDescriptorSetLayout::GetDescriptor
         {
             return dscriptor_item->GetType();
         }
+    }
+
+    if (this->layout.Has(binding))
+    {
+        return this->layout[binding].GetType();
     }
 
     throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");

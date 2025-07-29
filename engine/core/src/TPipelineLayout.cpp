@@ -557,6 +557,11 @@ const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TPipelin
     return this->pushConstantDescriptors;
 }
 
+const Turbo::Core::TPipelineLayout::TLayout &Turbo::Core::TPipelineLayout::GetLayout() const
+{
+    return this->layout;
+}
+
 VkPipelineLayout Turbo::Core::TPipelineLayout::GetVkPipelineLayout()
 {
     return this->vkPipelineLayout;

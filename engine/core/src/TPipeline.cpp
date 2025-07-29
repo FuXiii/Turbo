@@ -14,6 +14,15 @@ bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 
 void Turbo::Core::TPipeline::InternalCreate()
 {
+    Turbo::Core::TPipelineLayout::TLayout layout;
+    for (auto &shader : this->shaders)
+    {
+        layout << (*shader);
+    }
+    this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(layout); // FIXME: Use new TLayout to create!
+
+    return;
+
     std::vector<TPushConstantDescriptor *> pipeline_push_constant_descriptors;
 
     std::vector<TRefPtr<TDescriptorSetLayout>> descriptor_set_layouts;
@@ -116,7 +125,7 @@ void Turbo::Core::TPipeline::InternalCreate()
         descriptor_set_layouts.push_back(descriptor_set_layout);
     }
 
-    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors); // FIXME: Use new TLayout to create!
+    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors);
 }
 
 void Turbo::Core::TPipeline::InternalDestroy()

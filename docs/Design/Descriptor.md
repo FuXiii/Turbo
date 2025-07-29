@@ -1222,5 +1222,4 @@ Pipeline(Device* device, const PipelineLayout::Layout& layout)
 }
 ```
 
-## TLayoutAllocator
-
+## Descriptor Set

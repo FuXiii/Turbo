@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/29
+
+>* 更新 `TPipelineDescriptorSet` 中描述符集中 `set` 号的使用。存在 `Bug` 需修正。
+
 ## 2025/7/28
 
 >* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `Hash` 算法。将重复性代码合并。

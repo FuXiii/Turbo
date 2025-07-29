@@ -126,6 +126,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
     const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors(); // FIXME: check it
 
+    const TPipelineLayout::TLayout &GetLayout() const;
+
     VkPipelineLayout GetVkPipelineLayout();
 
     virtual std::string ToString() const override;
