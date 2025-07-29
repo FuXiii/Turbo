@@ -1452,6 +1452,12 @@ void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipeline
         vk_shader_stage_flags |= push_constant_item->GetShader()->GetVkShaderStageFlags();
     }
 
+    auto constants = pipelineLayout->GetLayout().GetPushConstants().GetConstants();
+    for (auto &item : constants)
+    {
+        vk_shader_stage_flags |= static_cast<VkShaderStageFlagBits>(item.first);
+    }
+
     device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
 }
 

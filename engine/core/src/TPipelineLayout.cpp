@@ -393,16 +393,56 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
 
         std::vector<VkPushConstantRange> vk_push_constant_ranges;
         {
-            auto &push_constants = this->layout.GetPushConstants().GetConstants();
-            for (auto &item : push_constants)
+            std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset, std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize, VkShaderStageFlags>> push_constant_map;
             {
-                VkPushConstantRange vk_push_constant_range = {};
-                vk_push_constant_range.stageFlags = static_cast<VkShaderStageFlagBits>(item.first);
-                vk_push_constant_range.offset = item.second.first;
-                vk_push_constant_range.size = item.second.second;
-                if (vk_push_constant_range.size != 0)
+                auto &push_constants = this->layout.GetPushConstants().GetConstants();
+                for (auto &item : push_constants)
                 {
-                    vk_push_constant_ranges.push_back(vk_push_constant_range);
+                    auto shader_stage = static_cast<VkShaderStageFlagBits>(item.first);
+                    auto offset = item.second.first;
+                    auto size = item.second.second;
+
+                    push_constant_map[offset][size] = 0;
+
+                    auto offset_find_result = push_constant_map.find(offset);
+                    if (offset_find_result != push_constant_map.end())
+                    {
+                        auto &size_map = offset_find_result->second;
+                        auto size_find_result = size_map.find(size);
+                        if (size_find_result != size_map.end())
+                        {
+                            push_constant_map[offset][size] |= shader_stage;
+                        }
+                        else
+                        {
+                            push_constant_map[offset][size] = shader_stage;
+                        }
+                    }
+                    else
+                    {
+                        push_constant_map[offset][size] = shader_stage;
+                    }
+                }
+            }
+
+            for (auto &offset_item : push_constant_map)
+            {
+                auto offset = offset_item.first;
+                for (auto &size_item : offset_item.second)
+                {
+                    auto size = size_item.first;
+                    auto stage_flags = size_item.second;
+
+                    {
+                        VkPushConstantRange vk_push_constant_range = {};
+                        vk_push_constant_range.stageFlags = stage_flags;
+                        vk_push_constant_range.offset = offset;
+                        vk_push_constant_range.size = size;
+                        if (vk_push_constant_range.size != 0)
+                        {
+                            vk_push_constant_ranges.push_back(vk_push_constant_range);
+                        }
+                    }
                 }
             }
         }

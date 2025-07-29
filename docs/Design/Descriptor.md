@@ -1222,4 +1222,25 @@ Pipeline(Device* device, const PipelineLayout::Layout& layout)
 }
 ```
 
-## Descriptor Set
+## Descriptor Set 数据
+
+`Descriptor Set` 从 `Pool` 中分配出来的，一次可通过多个 `VkDescriptorSetLayout` 创建多个 `VkDescriptorSet`
+
+```CXX
+DescriptorPool* descriptor_pool = ...;
+
+DescriptorSetLayout::Layout layout;
+DescriptorSet* descriptor_set = descriptor_pool->Allocate(layout);
+
+DescriptorSetLayout* layout;
+DescriptorSet* descriptor_set = descriptor_pool->Allocate(layout);
+
+descriptor_set->BindData(...);
+```
+
+## Push Constants 数据
+
+```CXX
+CommandBuffer command_buffer = ...;
+command_buffer->CmdPushConstants(Flags<ShaderType> flags, size_t offset, size_t size, void* data);
+```

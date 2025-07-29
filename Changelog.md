@@ -7,6 +7,8 @@
 ## 2025/7/29
 
 >* 更新 `TPipelineDescriptorSet` 中描述符集中 `set` 号的使用。存在 `Bug` 需修正。
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor Set 数据` 和 `Push Constants 数据`。
+>* 更新 `TCommandBufferBase::CmdPushConstants(...)` 暂时使用 `Layout` 适配。不完整需要完善。
 
 ## 2025/7/28
 
