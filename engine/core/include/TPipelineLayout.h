@@ -105,7 +105,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_HANDLE VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 
     T_VULKAN_HANDLE_DATA std::vector<TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
-    T_VULKAN_HANDLE_DATA std::vector<TPushConstantDescriptor *> pushConstantDescriptors; // FIXME: check it
+    [[deprecated]] T_VULKAN_HANDLE_DATA std::vector<TPushConstantDescriptor *> pushConstantDescriptors; // FIXME: check it
 
     TPipelineLayout::TLayout layout;
 
@@ -124,7 +124,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
 
   public:
     std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
-    const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors(); // FIXME: check it
+    [[deprecated]] const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors(); // FIXME: check it
 
     const TPipelineLayout::TLayout &GetLayout() const;
 

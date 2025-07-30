@@ -57,7 +57,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
 
-    std::vector<TDescriptor *> descriptors;
+    [[deprecated]] std::vector<TDescriptor *> descriptors;
     TDescriptorSetLayout::TLayout layout;
 
   protected:
@@ -73,9 +73,11 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
     virtual ~TDescriptorSetLayout();
 
   public:
-    uint32_t GetSet() const;
+    [[deprecated]] uint32_t GetSet() const;
+
+    const TDescriptorSetLayout::TLayout &GetLayout() const;
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
-    TDescriptor::TType GetDescriptorType(uint32_t binding) const;
+    [[deprecated]] TDescriptor::TType GetDescriptorType(uint32_t binding) const;
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

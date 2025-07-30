@@ -1224,18 +1224,34 @@ Pipeline(Device* device, const PipelineLayout::Layout& layout)
 
 ## Descriptor Set 数据
 
-`Descriptor Set` 从 `Pool` 中分配出来的，一次可通过多个 `VkDescriptorSetLayout` 创建多个 `VkDescriptorSet`
+`Descriptor Set` 从 `Pool` 中分配出来的，一次可通过多个 `VkDescriptorSetLayout` 创建多个 `VkDescriptorSet` 。
+
+基础是通过 `DescriptorSetLayout` 和 `DescriptorSetLayout::Layout` 创建 `DescriptorSet` ：
 
 ```CXX
 DescriptorPool* descriptor_pool = ...;
 
-DescriptorSetLayout::Layout layout;
-DescriptorSet* descriptor_set = descriptor_pool->Allocate(layout);
-
 DescriptorSetLayout* layout;
 DescriptorSet* descriptor_set = descriptor_pool->Allocate(layout);
 
+DescriptorSetLayout::Layout layout;
+DescriptorSet* descriptor_set = descriptor_pool->Allocate(layout);
+
 descriptor_set->BindData(...);
+```
+
+进一步，通过 `PipelineLayout` 和 `PipelineLayout::Layout` 创建多个 `DescriptorSet` ：
+
+```CXX
+DescriptorPool* descriptor_pool = ...;
+
+PipelineLayout* layout;
+std::unordered_map<Set, DescriptorSet*> descriptor_sets = descriptor_pool->Allocate(layout);
+
+PipelineLayout::Layout layout;
+std::unordered_map<Set, DescriptorSet*> descriptor_sets = descriptor_pool->Allocate(layout);
+
+descriptor_set[i]->BindData(...);
 ```
 
 ## Push Constants 数据

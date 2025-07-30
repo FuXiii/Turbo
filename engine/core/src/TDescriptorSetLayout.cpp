@@ -302,6 +302,11 @@ uint32_t Turbo::Core::TDescriptorSetLayout::GetSet() const
     return this->descriptors[0]->GetSet(); // FIXME: DescriptorSetLayout didn't had set number.
 }
 
+const Turbo::Core::TDescriptorSetLayout::TLayout &Turbo::Core::TDescriptorSetLayout::GetLayout() const
+{
+    return this->layout;
+}
+
 VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayout()
 {
     return this->vkDescriptorSetLayout;

@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/30
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor Set 数据` 和 `Push Constants 数据`。
+
 ## 2025/7/29
 
 >* 更新 `TPipelineDescriptorSet` 中描述符集中 `set` 号的使用。存在 `Bug` 需修正。

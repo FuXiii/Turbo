@@ -65,14 +65,14 @@ class TDescriptor : public Turbo::Core::TInfo
     };
 
   private:
-    TShader *shader;
+    [[deprecated]] TShader *shader;
 
     TDescriptor::TType type = TDescriptor::TType::SAMPLER; // NOTE: For new Descriptor design
     uint32_t count = 0;                                    // NOTE: For new Descriptor design
 
     TDescriptorDataType dataType;
-    uint32_t set;
-    uint32_t binding;
+    [[deprecated]] uint32_t set;
+    [[deprecated]] uint32_t binding;
     std::string name;
 
   public:
@@ -87,10 +87,10 @@ class TDescriptor : public Turbo::Core::TInfo
     VkDescriptorType GetVkDescriptorType() const;
     TDescriptorDataType GetDataType() const;
     const uint32_t &GetCount() const;
-    uint32_t GetSet() const;
-    uint32_t GetBinding() const;
+    [[deprecated]]uint32_t GetSet() const;
+    [[deprecated]]uint32_t GetBinding() const;
     const std::string &GetName() const;
-    TShader *GetShader();
+    [[deprecated]]TShader *GetShader();
 
     bool operator==(const TDescriptor &other) const;
     bool operator!=(const TDescriptor &other) const;
