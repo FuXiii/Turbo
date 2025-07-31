@@ -104,7 +104,7 @@ class TDevice : public Turbo::Core::TVulkanHandle
 
     const TDeviceDriver *GetDeviceDriver();
 
-    TLayoutManager& GetLayoutManager();
+    TLayoutManager &GetLayoutManager();
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

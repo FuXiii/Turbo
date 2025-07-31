@@ -13,6 +13,7 @@
 #include <TSemaphore.h>
 #include <TAttachment.h>
 #include <TRenderPass.h>
+#include <TDescriptorPool.h>
 
 #include <imgui.h>
 #include <ReadFile.h>

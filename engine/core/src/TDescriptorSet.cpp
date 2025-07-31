@@ -9,6 +9,8 @@
 // #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
+#include "TDescriptorPool.h"
+
 void Turbo::Core::TDescriptorSet::InternalCreate()
 {
     VkDescriptorPool vk_descriptor_pool = this->descriptorPool->GetVkDescriptorPool();
@@ -64,10 +66,10 @@ VkDescriptorSet Turbo::Core::TDescriptorSet::GetVkDescriptorSet()
     return this->vkDescriptorSet;
 }
 
-uint32_t Turbo::Core::TDescriptorSet::GetSet() const
-{
-    return this->descriptorSetLayout->GetSet();
-}
+// uint32_t Turbo::Core::TDescriptorSet::GetSet() const
+//{
+//     return this->descriptorSetLayout->GetSet();
+// }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {

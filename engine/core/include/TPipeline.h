@@ -57,6 +57,7 @@ typedef enum TPipelineStageBits
 typedef VkFlags TPipelineStages;
 
 // FIXME: It's better let TPipeline to be a Pure Virtual Class
+// FIXME: Use PipelineLayout::Layout to create pipeline
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
   private:
@@ -90,6 +91,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(TDevice *device, ...光追标准着色器);//for future ray tracing Pipeline
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
+
+    
 
   protected:
     virtual ~TPipeline();

@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/7/31
+
+>* 更新 `TDescriptorPool` 自动推导 `maxSet` 。
+>* 更新 `TDescriptorPool` 适配 `DescriptorSetLayout/TLayout` 分配描述符。
+>* 更新 `TDescriptorPool` 适配 `PipelineDescriptorSetLayout/TLayout` 分配描述符。
+
 ## 2025/7/30
 
 >* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor Set 数据` 和 `Push Constants 数据`。

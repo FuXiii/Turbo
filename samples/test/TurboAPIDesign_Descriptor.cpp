@@ -18,6 +18,7 @@
 #include <TDescriptor.h>
 #include <TDescriptorSetLayout.h>
 #include <TShader.h>
+#include <TDescriptorPool.h>
 
 #include <TPipelineLayout.h>
 
@@ -581,7 +582,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                                    #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                                     #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1130,6 +1131,60 @@ void Test_ShadersToPipelineLayoutWithTOffsets(Turbo::Core::TInstance *instance, 
     }
 }
 
+void Test_DescriptorSetAndPipelineDescriptorSet(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.vert"));
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, ReadTextFile(asset_root + "/shaders/Test/Layout.frag"));
+
+    std::hash<Turbo::Core::TPipelineLayout::TLayout> hash;
+
+    Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffsets offsets;
+    offsets.Merge(vertex_shader->GetType(), 16);
+    offsets.Merge(fragment_shader->GetType(), 32);
+
+    Turbo::Core::TPipelineLayout::TLayout layout;
+    layout << (*vertex_shader) << (*fragment_shader) << offsets;
+    std::cout << layout.ToString() << std::endl;
+    std::cout << hash(layout) << std::endl;
+    auto vk_layout = device->GetLayoutManager().GetOrCreateLayout(layout);
+
+    std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT, 1000));
+
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes);
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(layout);
+
+    if (pipeline_descriptor_set.Valid())
+    {
+        std::cout << "TPipelineDescriptorSet allocate successed" << std::endl;
+    }
+    else
+    {
+        std::cout << "TPipelineDescriptorSet allocate failed" << std::endl;
+    }
+
+    Turbo::Core::TDescriptorSetLayout::TLayout descriptor_set_layout;
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSet> descriptor_set = new Turbo::Core::TDescriptorSet(descriptor_pool, device->GetLayoutManager().GetOrCreateLayout(descriptor_set_layout));
+    if (descriptor_set.Valid())
+    {
+        std::cout << "descriptor_set allocate successed" << std::endl;
+    }
+    else
+    {
+        std::cout << "descriptor_set allocate failed" << std::endl;
+    }
+}
+
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 
 int main()
@@ -1144,7 +1199,8 @@ int main()
     // Test_TurboPipelineLayout(instance, device, queue);
     // Test_ShadersToPipelineLayout(instance, device, queue);
     // Test_EmptyDescriptorSetAndPipelineLayout(instance, device, queue);
-    Test_ShadersToPipelineLayoutWithTOffsets(instance, device, queue);
+    // Test_ShadersToPipelineLayoutWithTOffsets(instance, device, queue);
+    Test_DescriptorSetAndPipelineDescriptorSet(instance, device, queue);
 
     if (false)
     {
