@@ -582,7 +582,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                                                     #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1173,15 +1173,26 @@ void Test_DescriptorSetAndPipelineDescriptorSet(Turbo::Core::TInstance *instance
         std::cout << "TPipelineDescriptorSet allocate failed" << std::endl;
     }
 
-    Turbo::Core::TDescriptorSetLayout::TLayout descriptor_set_layout;
-    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSet> descriptor_set = new Turbo::Core::TDescriptorSet(descriptor_pool, device->GetLayoutManager().GetOrCreateLayout(descriptor_set_layout));
-    if (descriptor_set.Valid())
+    Turbo::Core::TDescriptorSetLayout::TLayout empty_descriptor_set_layout;
+    Turbo::Core::TRefPtr<Turbo::Core::TDescriptorSet> empty_descriptor_set = new Turbo::Core::TDescriptorSet(descriptor_pool, device->GetLayoutManager().GetOrCreateLayout(empty_descriptor_set_layout));
+    if (empty_descriptor_set.Valid())
     {
-        std::cout << "descriptor_set allocate successed" << std::endl;
+        std::cout << "empty descriptor_set allocate successed" << std::endl;
     }
     else
     {
-        std::cout << "descriptor_set allocate failed" << std::endl;
+        std::cout << "empty descriptor_set allocate failed" << std::endl;
+    }
+
+    Turbo::Core::TPipelineLayout::TLayout empty_pipeline_layout;
+    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> empty_pipeline_descriptor_set = new Turbo::Core::TPipelineDescriptorSet(descriptor_pool, device->GetLayoutManager().GetOrCreateLayout(empty_pipeline_layout));
+    if (empty_pipeline_descriptor_set.Valid())
+    {
+        std::cout << "empty pipeline_descriptor_set allocate successed" << std::endl;
+    }
+    else
+    {
+        std::cout << "empty pipeline_descriptor_set allocate failed" << std::endl;
     }
 }
 

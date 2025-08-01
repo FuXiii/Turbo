@@ -92,8 +92,6 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
-    
-
   protected:
     virtual ~TPipeline();
 

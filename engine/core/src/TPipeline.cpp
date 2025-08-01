@@ -125,7 +125,15 @@ void Turbo::Core::TPipeline::InternalCreate()
         descriptor_set_layouts.push_back(descriptor_set_layout);
     }
 
-    this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors);
+    // this->pipelineLayout = new TPipelineLayout(this->device, descriptor_set_layouts, pipeline_push_constant_descriptors);
+    {
+        Turbo::Core::TPipelineLayout::TLayout layout;
+        for (auto &shader : this->shaders)
+        {
+            layout << (*shader);
+        }
+        this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(layout);
+    }
 }
 
 void Turbo::Core::TPipeline::InternalDestroy()

@@ -77,7 +77,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
     const TDescriptorSetLayout::TLayout &GetLayout() const;
     VkDescriptorSetLayout GetVkDescriptorSetLayout();
-    [[deprecated]] TDescriptor::TType GetDescriptorType(uint32_t binding) const; // FIXME: change to: TDescriptor GetDescriptor(uint32_t binding) const
+    //[[deprecated]] TDescriptor::TType GetDescriptorType(uint32_t binding) const; // FIXME: change to: TDescriptor GetDescriptor(uint32_t binding) const
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

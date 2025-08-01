@@ -312,23 +312,27 @@ VkDescriptorSetLayout Turbo::Core::TDescriptorSetLayout::GetVkDescriptorSetLayou
     return this->vkDescriptorSetLayout;
 }
 
-Turbo::Core::TDescriptor::TType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
-{
-    for (TDescriptor *dscriptor_item : this->descriptors)
-    {
-        if (dscriptor_item->GetBinding() == binding)
-        {
-            return dscriptor_item->GetType();
-        }
-    }
-
-    if (this->layout.Has(binding))
-    {
-        return this->layout[binding].GetType();
-    }
-
-    throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");
-}
+// Turbo::Core::TDescriptor::TType Turbo::Core::TDescriptorSetLayout::GetDescriptorType(uint32_t binding) const
+//{
+//     //[[deprecated]]
+//     if (false)
+//     {
+//         for (TDescriptor *dscriptor_item : this->descriptors)
+//         {
+//             if (dscriptor_item->GetBinding() == binding)
+//             {
+//                 return dscriptor_item->GetType();
+//             }
+//         }
+//     }
+//
+//     if (this->layout.Has(binding))
+//     {
+//         return this->layout[binding].GetType();
+//     }
+//
+//     throw Turbo::Core::TException(TResult::OUT_OF_RANGE, "Turbo::Core::TDescriptorSetLayout::TDescriptorSetLayout", "not finding the type binding please check the binding index");
+// }
 
 std::string Turbo::Core::TDescriptorSetLayout::ToString() const
 {

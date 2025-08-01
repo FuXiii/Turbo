@@ -87,10 +87,10 @@ class TDescriptor : public Turbo::Core::TInfo
     VkDescriptorType GetVkDescriptorType() const;
     TDescriptorDataType GetDataType() const;
     const uint32_t &GetCount() const;
-    [[deprecated]]uint32_t GetSet() const;
-    [[deprecated]]uint32_t GetBinding() const;
+    [[deprecated]] uint32_t GetSet() const;
+    [[deprecated]] uint32_t GetBinding() const;
     const std::string &GetName() const;
-    [[deprecated]]TShader *GetShader();
+    [[deprecated]] TShader *GetShader();
 
     bool operator==(const TDescriptor &other) const;
     bool operator!=(const TDescriptor &other) const;

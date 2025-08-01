@@ -351,8 +351,8 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         {
             vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
         }
-        vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
-        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data();
+        vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();                                  // FIXME: The array is indexed by attachment number. Only elements corresponding to cleared attachments are used. Other elements of pClearValues are ignored.
+        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data(); // FIXME: The array is indexed by attachment number. Only elements corresponding to cleared attachments are used. Other elements of pClearValues are ignored.
 
         switch (subpassContents)
         {

@@ -917,6 +917,15 @@ int main()
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
 
+    std::cout << vertex_shader->GetLayout().ToString() << std::endl;
+    std::cout << "**************************************************************************************" << std::endl;
+
+    std::cout << fragment_shader->GetLayout().ToString() << std::endl;
+    std::cout << "**************************************************************************************" << std::endl;
+
+    std::cout << pipeline->GetPipelineLayout()->GetLayout().ToString() << std::endl;
+    std::cout << "**************************************************************************************" << std::endl;
+
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);
     pipeline_descriptor_set->BindData(0, 1, 0, my_textures);

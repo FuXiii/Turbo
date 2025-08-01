@@ -511,7 +511,8 @@ Turbo::Core::TDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TDescriptorS
 
 Turbo::Core::TDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
 {
-    if (!layout.Empty() && this->device.Valid())
+    // if (!layout.Empty() && this->device.Valid())
+    if (this->device.Valid())
     {
         Turbo::Core::TDescriptorSet *result = new Turbo::Core::TDescriptorSet(this, this->device->GetLayoutManager().GetOrCreateLayout(layout));
         this->descriptorSets.push_back(result);
@@ -555,7 +556,8 @@ Turbo::Core::TPipelineDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(TPip
 
 Turbo::Core::TPipelineDescriptorSet *Turbo::Core::TDescriptorPool::Allocate(const TPipelineLayout::TLayout &layout)
 {
-    if (!layout.Empty() && this->device.Valid())
+    // if (!layout.Empty() && this->device.Valid())
+    if (this->device.Valid())
     {
         auto result = new Turbo::Core::TPipelineDescriptorSet(this, this->device->GetLayoutManager().GetOrCreateLayout(layout));
         this->pipelineDescriptorSets.push_back(result);

@@ -34,9 +34,8 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
 
   public:
     std::vector<TDescriptorSet *> GetDescriptorSet();
-    TPipelineLayout* GetPipelineLayout();
+    TPipelineLayout *GetPipelineLayout();
 
-    // TODO: this BindData function just for Test
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers);
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers);
     void BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement = 0);

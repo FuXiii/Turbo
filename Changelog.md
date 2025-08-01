@@ -4,11 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
-## 2025/7/31
+## 2025/8/1
 
->* 更新 `TDescriptorPool` 自动推导 `maxSet` 。
->* 更新 `TDescriptorPool` 适配 `DescriptorSetLayout/TLayout` 分配描述符。
->* 更新 `TDescriptorPool` 适配 `PipelineDescriptorSetLayout/TLayout` 分配描述符。
+>* 更新 `TDescriptorSetLayout` 移除 `GetDescriptorType(uint32_t binding)` 成员函数。转而使用 `TDescriptorSetLayout::GetLayout()` 。
+>* 更新 `TDescriptorSet` 移除 `TDescriptorSetLayout::GetDescriptorType(uint32_t binding)` 函数使用。转而使用 `TDescriptorSetLayout::GetLayout()` 。
+>* 更新 `示例` 适配使用 `Layout` 。
 
 ## 2025/7/30
 
