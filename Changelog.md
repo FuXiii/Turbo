@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/2
+
+>* 更新 `TPipelineDescriptorSet` 中的 `DescriptorSet` 附带 `set` 号。方便使用。
+>* 更新 `TPipelineLayout` 中的 `DescriptorSetLayout` 附带 `set` 号。方便使用。
+>* 修正 `TCommandBuffer` 中 `CmdBindPipelineDescriptorSet(...)` 对于管线描述符集对于正确 `set` 号的绑定，之前无 `set` 号检查，会产生 `bug` 现已修复。
+
 ## 2025/8/1
 
 >* 更新 `TDescriptorSetLayout` 移除 `GetDescriptorType(uint32_t binding)` 成员函数。转而使用 `TDescriptorSetLayout::GetLayout()` 。

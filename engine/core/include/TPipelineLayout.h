@@ -104,7 +104,9 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 
-    T_VULKAN_HANDLE_DATA std::vector<TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
+    //[[deprecated]] T_VULKAN_HANDLE_DATA std::vector<TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
+    T_VULKAN_HANDLE_DATA std::unordered_map<TPipelineLayout::TLayout::TSet, TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
+
     [[deprecated]] T_VULKAN_HANDLE_DATA std::vector<TPushConstantDescriptor *> pushConstantDescriptors; // FIXME: check it
 
     TPipelineLayout::TLayout layout;
@@ -114,8 +116,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-    TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
-    TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
+    //[[deprecated]] TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
+    //[[deprecated]] TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors /*FIXME: check it*/);
 
     TPipelineLayout(TDevice *device, const TPipelineLayout::TLayout &layout); // TODO: Implemented
 
@@ -123,7 +125,8 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     virtual ~TPipelineLayout();
 
   public:
-    std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
+    //[[deprecated]] std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
+    std::unordered_map<TPipelineLayout::TLayout::TSet, TDescriptorSetLayout *> GetDescriptorSetLayouts();
     [[deprecated]] const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors(); // FIXME: check it
 
     const TPipelineLayout::TLayout &GetLayout() const;

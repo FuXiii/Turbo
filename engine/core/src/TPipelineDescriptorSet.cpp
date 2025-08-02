@@ -9,19 +9,15 @@
 
 void Turbo::Core::TPipelineDescriptorSet::InternalCreate()
 {
-    std::vector<TDescriptorSetLayout *> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
-    for (TDescriptorSetLayout *descriptor_set_layout_item : descriptor_set_layouts)
+    auto descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
+    for (auto &item : descriptor_set_layouts)
     {
-        this->descriptorSets.push_back(new TDescriptorSet(this->descriptorPool, descriptor_set_layout_item));
+        this->descriptorSets[item.first] = (new TDescriptorSet(this->descriptorPool, item.second));
     }
 }
 
 void Turbo::Core::TPipelineDescriptorSet::InternalDestroy()
 {
-    for (TRefPtr<TDescriptorSet> &descriptor_set_item : this->descriptorSets)
-    {
-        descriptor_set_item = nullptr;
-    }
     this->descriptorSets.clear();
 }
 
@@ -43,9 +39,14 @@ Turbo::Core::TPipelineDescriptorSet::~TPipelineDescriptorSet()
     this->InternalDestroy();
 }
 
-std::vector<Turbo::Core::TDescriptorSet *> Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
+std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSet *> Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
 {
-    return Turbo::Core::RefsToPtrs(this->descriptorSets);
+    std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSet *> result;
+    for (auto &item : this->descriptorSets)
+    {
+        result[item.first] = item.second;
+    }
+    return result;
 }
 
 Turbo::Core::TPipelineLayout *Turbo::Core::TPipelineDescriptorSet::GetPipelineLayout()
@@ -253,9 +254,9 @@ std::string Turbo::Core::TPipelineDescriptorSet::ToString() const
 
 bool Turbo::Core::TPipelineDescriptorSet::Valid() const
 {
-    for (const TRefPtr<TDescriptorSet> &descriptor_set_item : this->descriptorSets)
+    for (auto &item : this->descriptorSets)
     {
-        if (!descriptor_set_item.Valid())
+        if (!item.second.Valid())
         {
             return false;
         }

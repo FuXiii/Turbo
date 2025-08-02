@@ -158,8 +158,12 @@ std::string Turbo::Core::TDescriptor::ToString() const
     };
 
     ss << "{";
-    ss << "\"type\"" << ":" << "\"" << this_type_to_str(this->type) << "\"" << ",";
-    ss << "\"count\"" << ":" << this->count;
+    ss << "\"type\""
+       << ":"
+       << "\"" << this_type_to_str(this->type) << "\""
+       << ",";
+    ss << "\"count\""
+       << ":" << this->count;
     ss << "}";
 
     return ss.str();

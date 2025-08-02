@@ -817,12 +817,6 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TShader> sky_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, SKY_VERT_SHADER_STR);
     Turbo::Core::TRefPtr<Turbo::Core::TShader> sky_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, SKY_FRAG_SHADER_STR);
 
-    std::cout << vertex_shader->ToString() << std::endl;
-    std::cout << fragment_shader->ToString() << std::endl;
-
-    std::cout << sky_vertex_shader->ToString() << std::endl;
-    std::cout << sky_fragment_shader->ToString() << std::endl;
-
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 1000));
     descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 1000));
@@ -916,15 +910,6 @@ int main()
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> input_attachment_depths;
     input_attachment_depths.push_back(depth_image_view);
-
-    std::cout << vertex_shader->GetLayout().ToString() << std::endl;
-    std::cout << "**************************************************************************************" << std::endl;
-
-    std::cout << fragment_shader->GetLayout().ToString() << std::endl;
-    std::cout << "**************************************************************************************" << std::endl;
-
-    std::cout << pipeline->GetPipelineLayout()->GetLayout().ToString() << std::endl;
-    std::cout << "**************************************************************************************" << std::endl;
 
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);

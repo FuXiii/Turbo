@@ -111,7 +111,8 @@ std::string Turbo::Core::TDescriptorSetLayout::TLayout::ToString() const
                 while (iter != ordered_bindings.end())
                 {
                     auto &descriptor = this->bindings.at((*iter));
-                    ss << "{\"" << (*iter) << "\"" << ":" << descriptor.ToString() << "}";
+                    ss << "{\"" << (*iter) << "\""
+                       << ":" << descriptor.ToString() << "}";
                     ++iter;
                     if (iter != ordered_bindings.end())
                     {

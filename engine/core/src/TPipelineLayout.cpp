@@ -309,7 +309,8 @@ std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
             while (iter != ordered_sets.end())
             {
                 auto set = this->sets.at((*iter));
-                ss << "{\"" << (*iter) << "\"" << ":" << set.ToString() << "}";
+                ss << "{\"" << (*iter) << "\""
+                   << ":" << set.ToString() << "}";
                 ++iter;
                 if (iter != ordered_sets.end())
                 {
@@ -383,10 +384,12 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
 
             for (auto &set_item : ordered_set_map)
             {
+                auto set = set_item.first;
                 auto descriptor_set_layout = set_item.second;
+
                 vk_descriptor_set_layouts.push_back(descriptor_set_layout->GetVkDescriptorSetLayout());
                 {
-                    this->descriptorSetLayouts.push_back(descriptor_set_layout);
+                    this->descriptorSetLayouts[set] = descriptor_set_layout;
                 }
             }
         }
@@ -465,44 +468,44 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
             throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
         }
     }
-    else if (!this->descriptorSetLayouts.empty() || !this->pushConstantDescriptors.empty()) // FIXME: Need to deprecate!
-    {
-        std::vector<VkDescriptorSetLayout> vk_descriptor_set_layouts;
-
-        for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
-        {
-            vk_descriptor_set_layouts.push_back(descriptor_set_layout_item->GetVkDescriptorSetLayout());
-        }
-
-        std::vector<VkPushConstantRange> vk_push_constant_ranges;
-        for (TPushConstantDescriptor *push_constant_descriptor_item : this->pushConstantDescriptors)
-        {
-            VkPushConstantRange vk_push_constant_range = {};
-            vk_push_constant_range.stageFlags = push_constant_descriptor_item->GetShader()->GetVkShaderStageFlags();
-            vk_push_constant_range.offset = 0;
-            vk_push_constant_range.size = push_constant_descriptor_item->GetSize();
-            vk_push_constant_ranges.push_back(vk_push_constant_range);
-        }
-
-        VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
-        vk_pipline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        vk_pipline_layout_create_info.pNext = nullptr;
-        vk_pipline_layout_create_info.flags = 0;
-        vk_pipline_layout_create_info.setLayoutCount = vk_descriptor_set_layouts.size();
-        vk_pipline_layout_create_info.pSetLayouts = vk_descriptor_set_layouts.data();
-
-        // NOTE:In Vulkan Spec:Any two elements of pPushConstantRanges must not include the same stage in stageFlags
-        vk_pipline_layout_create_info.pushConstantRangeCount = vk_push_constant_ranges.size();
-        vk_pipline_layout_create_info.pPushConstantRanges = vk_push_constant_ranges.data();
-
-        VkDevice vk_device = this->device->GetVkDevice();
-        VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-        VkResult result = this->device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
-        if (result != VkResult::VK_SUCCESS)
-        {
-            throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
-        }
-    }
+    // else if (!this->descriptorSetLayouts.empty() || !this->pushConstantDescriptors.empty()) // FIXME: Need to deprecate!
+    //{
+    //     std::vector<VkDescriptorSetLayout> vk_descriptor_set_layouts;
+    //
+    //    for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
+    //    {
+    //        vk_descriptor_set_layouts.push_back(descriptor_set_layout_item->GetVkDescriptorSetLayout());
+    //    }
+    //
+    //    std::vector<VkPushConstantRange> vk_push_constant_ranges;
+    //    for (TPushConstantDescriptor *push_constant_descriptor_item : this->pushConstantDescriptors)
+    //    {
+    //        VkPushConstantRange vk_push_constant_range = {};
+    //        vk_push_constant_range.stageFlags = push_constant_descriptor_item->GetShader()->GetVkShaderStageFlags();
+    //        vk_push_constant_range.offset = 0;
+    //        vk_push_constant_range.size = push_constant_descriptor_item->GetSize();
+    //        vk_push_constant_ranges.push_back(vk_push_constant_range);
+    //    }
+    //
+    //    VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
+    //    vk_pipline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    //    vk_pipline_layout_create_info.pNext = nullptr;
+    //    vk_pipline_layout_create_info.flags = 0;
+    //    vk_pipline_layout_create_info.setLayoutCount = vk_descriptor_set_layouts.size();
+    //    vk_pipline_layout_create_info.pSetLayouts = vk_descriptor_set_layouts.data();
+    //
+    //    // NOTE:In Vulkan Spec:Any two elements of pPushConstantRanges must not include the same stage in stageFlags
+    //    vk_pipline_layout_create_info.pushConstantRangeCount = vk_push_constant_ranges.size();
+    //    vk_pipline_layout_create_info.pPushConstantRanges = vk_push_constant_ranges.data();
+    //
+    //    VkDevice vk_device = this->device->GetVkDevice();
+    //    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+    //    VkResult result = this->device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
+    //    if (result != VkResult::VK_SUCCESS)
+    //    {
+    //        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
+    //    }
+    //}
     else // TODO: Create an empty pipeline layout
     {
         VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
@@ -533,35 +536,35 @@ void Turbo::Core::TPipelineLayout::InternalDestroy()
     this->device->GetDeviceDriver()->vkDestroyPipelineLayout(vk_device, this->vkPipelineLayout, allocator);
 }
 
-Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
-{
-    if (Turbo::Core::TReferenced::Valid(device))
-    {
-        this->device = device;
-        this->descriptorSetLayouts = Turbo::Core::PtrsToRefs(descriptorSetLayouts);
-        this->pushConstantDescriptors = pushConstantDescriptors;
-        this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
-    }
-}
-
-Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
-{
-    if (Turbo::Core::TReferenced::Valid(device))
-    {
-        this->device = device;
-        this->descriptorSetLayouts = descriptorSetLayouts;
-        this->pushConstantDescriptors = pushConstantDescriptors;
-        this->InternalCreate();
-    }
-    else
-    {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
-    }
-}
+// Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TDescriptorSetLayout *> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
+//{
+//     if (Turbo::Core::TReferenced::Valid(device))
+//     {
+//         this->device = device;
+//         this->descriptorSetLayouts = Turbo::Core::PtrsToRefs(descriptorSetLayouts);
+//         this->pushConstantDescriptors = pushConstantDescriptors;
+//         this->InternalCreate();
+//     }
+//     else
+//     {
+//         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
+//     }
+// }
+//
+// Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const std::vector<TRefPtr<TDescriptorSetLayout>> &descriptorSetLayouts, std::vector<TPushConstantDescriptor *> &pushConstantDescriptors)
+//{
+//     if (Turbo::Core::TReferenced::Valid(device))
+//     {
+//         this->device = device;
+//         this->descriptorSetLayouts = descriptorSetLayouts;
+//         this->pushConstantDescriptors = pushConstantDescriptors;
+//         this->InternalCreate();
+//     }
+//     else
+//     {
+//         throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipelineLayout::TPipelineLayout");
+//     }
+// }
 
 Turbo::Core::TPipelineLayout::TPipelineLayout(TDevice *device, const TPipelineLayout::TLayout &layout)
 {
@@ -581,15 +584,18 @@ Turbo::Core::TPipelineLayout::~TPipelineLayout()
 {
     this->InternalDestroy();
 
-    for (TRefPtr<TDescriptorSetLayout> &descriptor_set_layout_item : this->descriptorSetLayouts)
-    {
-        descriptor_set_layout_item = nullptr;
-    }
+    this->descriptorSetLayouts.clear();
 }
 
-std::vector<Turbo::Core::TDescriptorSetLayout *> Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
+std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSetLayout *> Turbo::Core::TPipelineLayout::GetDescriptorSetLayouts()
 {
-    return Turbo::Core::RefsToPtrs(this->descriptorSetLayouts);
+    std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSetLayout *> result;
+    for (auto &item : this->descriptorSetLayouts)
+    {
+        result[item.first] = item.second;
+    }
+
+    return result;
 }
 
 const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TPipelineLayout::GetPushConstantDescriptors()
