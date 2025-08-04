@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/4
+
+>* 增加 `test\FlagsTest.cpp` 示例。用于测试 `clangd` 内存溢出 `bug` 。
+
 ## 2025/8/2
 
 >* 更新 `TPipelineDescriptorSet` 中的 `DescriptorSet` 附带 `set` 号。方便使用。
