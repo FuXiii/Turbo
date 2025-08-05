@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/5
+
+>* 更新 `TPipeline` 增加使用 `TPipelineLayout::TLayout` 指定管线布局创建，并使用 `std::initializer_list` 管理传入的多个着色器。
+>* 更新 `TPipelineLayout::TLayout` 的 `operator==/!=` 成员函数。比较两者相等与否。
+
 ## 2025/8/4
 
 >* 增加 `test\FlagsTest.cpp` 示例。用于测试 `clangd` 内存溢出 `bug` 。

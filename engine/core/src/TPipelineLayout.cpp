@@ -172,6 +172,42 @@ const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &Turbo::Core:
     return 0;
 }
 
+bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::operator==(const TPushConstants &other) const
+{
+    if (this == &other)
+    {
+        return true;
+    }
+
+    if (other.constants.size() == this->constants.size())
+    {
+        for (auto &item : other.constants)
+        {
+            auto find_result = this->constants.find(item.first);
+            if (find_result != this->constants.end())
+            {
+                if (find_result->second.first != item.second.first || find_result->second.second != item.second.second)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::operator!=(const TPushConstants &other) const
+{
+    return !((*this) == other);
+}
+
 std::string Turbo::Core::TPipelineLayout::TLayout::TPushConstants::ToString() const
 {
     std::stringstream ss;
@@ -280,6 +316,47 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShader::TL
 void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset)
 {
     this->pushConstants.Merge(shaderType, offset);
+}
+
+bool Turbo::Core::TPipelineLayout::TLayout::operator==(const TPipelineLayout::TLayout &other) const
+{
+    if (this == &other)
+    {
+        return true;
+    }
+
+    if (other.pushConstants != this->pushConstants)
+    {
+        return false;
+    }
+
+    if (this->sets.size() == other.sets.size())
+    {
+        for (auto &item : other.sets)
+        {
+            auto find_result = this->sets.find(item.first);
+            if (find_result != this->sets.end())
+            {
+                if (find_result->second != item.second)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool Turbo::Core::TPipelineLayout::TLayout::operator!=(const TPipelineLayout::TLayout &other) const
+{
+    return !((*this) == other);
 }
 
 std::size_t Turbo::Core::TPipelineLayout::TLayout::Hash() const

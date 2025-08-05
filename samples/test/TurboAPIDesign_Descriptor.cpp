@@ -582,7 +582,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                                                      #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                                            #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1195,6 +1195,22 @@ void Test_DescriptorSetAndPipelineDescriptorSet(Turbo::Core::TInstance *instance
         std::cout << "empty pipeline_descriptor_set allocate failed" << std::endl;
     }
 }
+
+class TestA
+{
+  public:
+    TestA(const std::vector<int> &ints)
+    {
+    }
+};
+
+class TestB : public TestA
+{
+  public:
+    TestB(int a, int b, int c) : TestA({a, b, c})
+    {
+    }
+};
 
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 

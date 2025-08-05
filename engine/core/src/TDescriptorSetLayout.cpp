@@ -75,7 +75,32 @@ const Turbo::Core::TDescriptor &Turbo::Core::TDescriptorSetLayout::TLayout::oper
 
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator==(const TDescriptorSetLayout::TLayout &other) const
 {
-    return this->bindings == other.bindings;
+    if (this == &other)
+    {
+        return true;
+    }
+
+    if (this->bindings.size() == other.bindings.size())
+    {
+        for (auto &item : other.bindings)
+        {
+            auto find_result = this->bindings.find(item.first);
+            if (find_result != this->bindings.end())
+            {
+                if (find_result->second != item.second)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    return false;
 }
 
 bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TDescriptorSetLayout::TLayout &other) const

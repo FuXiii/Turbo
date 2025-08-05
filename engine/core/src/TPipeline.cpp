@@ -270,6 +270,54 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader
     }
 }
 
+Turbo::Core::TPipeline::TPipeline(TDevice *device, const std::initializer_list<TShader *> &shaders, const TPipelineLayout::TLayout &layout, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+{
+    if (Turbo::Core::TReferenced::Valid(device))
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        bool is_have_compute_shader = false; // FIXME: Need more elegant way to confirm pipeline type
+        for (auto &shader : shaders)
+        {
+            if (Turbo::Core::TReferenced::Valid(shader))
+            {
+                this->shaders.push_back(shader);
+                if (shader->GetType() == TShaderType::COMPUTE)
+                {
+                    is_have_compute_shader = true;
+                }
+            }
+        }
+        if (is_have_compute_shader)
+        {
+            this->type = TPipelineType::Compute;
+        }
+
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
+
+        {
+            if (!layout.Empty()) // FIXME: Check layout compatible, if don't compatible maybe need throw exception!
+            {
+                this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(layout);
+            }
+            else
+            {
+                Turbo::Core::TPipelineLayout::TLayout temp_layout;
+                for (auto &shader : this->shaders)
+                {
+                    temp_layout << (*shader);
+                }
+                this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(temp_layout);
+            }
+        }
+        // this->InternalCreate();//NOTE: Don't need call InternalCreate() to create pipeline layout, because we had create pipelie layout previous
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
 Turbo::Core::TPipeline::~TPipeline()
 {
     this->InternalDestroy();

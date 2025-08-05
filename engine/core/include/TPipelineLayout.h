@@ -70,6 +70,10 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             void Merge(const Turbo::Core::TShader::TLayout::TPushConstant &pushConstant);
 
             const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &GetConstantSize(const Turbo::Core::TShaderType &shaderType) const;
+
+            bool operator==(const TPushConstants &other) const;
+            bool operator!=(const TPushConstants &other) const;
+
             std::string ToString() const;
         };
 
@@ -94,6 +98,9 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
         void Merge(const TPipelineLayout::TLayout::TPushConstants &pushConstants);
         void Merge(const Turbo::Core::TShader::TLayout &layout);
         void Merge(const Turbo::Core::TShaderType &shaderType, const TPushConstants::TOffset &offset);
+
+        bool operator==(const TPipelineLayout::TLayout &other) const;
+        bool operator!=(const TPipelineLayout::TLayout &other) const;
 
         std::size_t Hash() const;
 
