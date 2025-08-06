@@ -296,17 +296,26 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, const std::initializer_list<T
         this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
 
         {
-            if (!layout.Empty()) // FIXME: Check layout compatible, if don't compatible maybe need throw exception!
+            Turbo::Core::TPipelineLayout::TLayout temp_layout;
+            {
+                for (auto &shader : this->shaders)
+                {
+                    temp_layout << (*shader);
+                }
+
+                auto &Constants = layout.GetPushConstants().GetConstants();
+                for (auto &item : Constants)
+                {
+                    temp_layout.Merge(item.first, item.second.first);
+                }
+            }
+
+            if (layout == temp_layout) // NOTE: Check layout compatible
             {
                 this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(layout);
             }
             else
             {
-                Turbo::Core::TPipelineLayout::TLayout temp_layout;
-                for (auto &shader : this->shaders)
-                {
-                    temp_layout << (*shader);
-                }
                 this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(temp_layout);
             }
         }

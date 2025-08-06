@@ -8,7 +8,8 @@
 
 >* 更新 `TPipelineLayout::TLayout` 增加 `operator>` 成员函数。
 >* 更新 `TPipelineDescriptorSet::TLayout` 增加 `operator>` 成员函数。
->* 更新 `TDescriptor.h` 增加 `operator>` 成员函数。
+>* 更新 `TDescriptor` 增加 `operator>` 成员函数。
+>* 更新 `TPipeline` 内部检查 `TPipelineLayout::TLayout` 的兼容性。
 
 ## 2025/8/5
 

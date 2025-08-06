@@ -582,7 +582,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                                                                              #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                                                                                                  #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1231,32 +1231,63 @@ void Test_PipelineLayoutCompare(Turbo::Core::TInstance *instance, Turbo::Core::T
     layout2.Merge(0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER));
     layout2.Merge(1, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER));
 
+    Turbo::Core::TDescriptorSetLayout::TLayout layout3;
+    layout2.Merge(0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE));
+    layout2.Merge(1, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER));
+    layout2.Merge(2, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER));
+    layout2.Merge(3, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT));
+    layout2.Merge(4, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE));
+    layout2.Merge(5, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC));
+    layout2.Merge(6, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER));
+
     Turbo::Core::TPipelineLayout::TLayout pipeline_layout0;
     pipeline_layout0.Merge(0, layout0);
     pipeline_layout0.Merge(1, layout1);
     pipeline_layout0.Merge(2, layout2);
+    pipeline_layout0.Merge(2, layout3);
 
     Turbo::Core::TPipelineLayout::TLayout pipeline_layout1;
     pipeline_layout1.Merge(0, layout0);
     pipeline_layout1.Merge(1, layout1);
     pipeline_layout1.Merge(2, layout2);
+    pipeline_layout1.Merge(2, layout3);
 
-    if (pipeline_layout0 == pipeline_layout1)
     {
-        std::cout << "pipeline_layout0 == pipeline_layout1" << std::endl;
-    }
-    else
-    {
-        std::cout << "pipeline_layout0 != pipeline_layout1" << std::endl;
+        bool all = true;
+        double sum = 0;
+        std::size_t loop_count = 5000;
+        for (std::size_t index = 0; index < loop_count; ++index)
+        {
+            {
+                auto begin = std::chrono::high_resolution_clock::now();
+                auto result = pipeline_layout0 == pipeline_layout1;
+                auto end = std::chrono::high_resolution_clock::now();
+                all = all || result;
+                std::chrono::duration<double, std::milli> step = end - begin;
+                sum += step.count();
+            }
+        }
+
+        std::cout << "pipeline_layout0 == pipeline_layout1 average " << " " << sum / loop_count << "ms " << all << std::endl;
     }
 
-    if (pipeline_layout0.Hash() == pipeline_layout1.Hash())
     {
-        std::cout << "pipeline_layout0.Hash() == pipeline_layout1.Hash()" << std::endl;
-    }
-    else
-    {
-        std::cout << "pipeline_layout0.Hash() != pipeline_layout1.Hash()" << std::endl;
+        bool all = true;
+        double sum = 0;
+        std::size_t loop_count = 5000;
+        for (std::size_t index = 0; index < loop_count; ++index)
+        {
+            {
+                auto begin = std::chrono::high_resolution_clock::now();
+                auto result = pipeline_layout0.Hash() == pipeline_layout1.Hash();
+                auto end = std::chrono::high_resolution_clock::now();
+                all = all && result;
+                std::chrono::duration<double, std::milli> step = end - begin;
+                sum += step.count();
+            }
+        }
+
+        std::cout << "pipeline_layout0.Hash() == pipeline_layout1.Hash() average " << " " << sum / loop_count << "ms " << all << std::endl;
     }
 }
 
