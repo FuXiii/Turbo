@@ -582,7 +582,7 @@ enum class TestFlagBits
 #include <TFlags.h>
 
 // OK
-//                                                                                                                                                                                                            #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
+//                                                                                                                                                                                                                              #define TURBO_DECLARE_INLINE_FLAGS_BITS_OPERATOR(T)\
 //inline Turbo::Core::TFlags<T> operator|(const T &left, const Turbo::Core::TFlags<T> &right)\
 //{\
 //    Turbo::Core::TFlags<T> flags;\
@@ -1212,6 +1212,54 @@ class TestB : public TestA
     }
 };
 
+void Test_PipelineLayoutCompare(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
+{
+    Turbo::Core::TDescriptorSetLayout::TLayout layout0;
+    layout0.Merge(0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE));
+    layout0.Merge(1, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE));
+    layout0.Merge(2, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER));
+    layout0.Merge(3, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT));
+    layout0.Merge(4, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER));
+
+    Turbo::Core::TDescriptorSetLayout::TLayout layout1;
+    layout1.Merge(0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::ACCELERATION_STRUCTURE));
+    layout1.Merge(1, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER));
+    layout1.Merge(2, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC));
+    layout1.Merge(3, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::SAMPLER));
+
+    Turbo::Core::TDescriptorSetLayout::TLayout layout2;
+    layout2.Merge(0, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER));
+    layout2.Merge(1, Turbo::Core::TDescriptor(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER));
+
+    Turbo::Core::TPipelineLayout::TLayout pipeline_layout0;
+    pipeline_layout0.Merge(0, layout0);
+    pipeline_layout0.Merge(1, layout1);
+    pipeline_layout0.Merge(2, layout2);
+
+    Turbo::Core::TPipelineLayout::TLayout pipeline_layout1;
+    pipeline_layout1.Merge(0, layout0);
+    pipeline_layout1.Merge(1, layout1);
+    pipeline_layout1.Merge(2, layout2);
+
+    if (pipeline_layout0 == pipeline_layout1)
+    {
+        std::cout << "pipeline_layout0 == pipeline_layout1" << std::endl;
+    }
+    else
+    {
+        std::cout << "pipeline_layout0 != pipeline_layout1" << std::endl;
+    }
+
+    if (pipeline_layout0.Hash() == pipeline_layout1.Hash())
+    {
+        std::cout << "pipeline_layout0.Hash() == pipeline_layout1.Hash()" << std::endl;
+    }
+    else
+    {
+        std::cout << "pipeline_layout0.Hash() != pipeline_layout1.Hash()" << std::endl;
+    }
+}
+
 // void Test_(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 
 int main()
@@ -1227,7 +1275,8 @@ int main()
     // Test_ShadersToPipelineLayout(instance, device, queue);
     // Test_EmptyDescriptorSetAndPipelineLayout(instance, device, queue);
     // Test_ShadersToPipelineLayoutWithTOffsets(instance, device, queue);
-    Test_DescriptorSetAndPipelineDescriptorSet(instance, device, queue);
+    // Test_DescriptorSetAndPipelineDescriptorSet(instance, device, queue);
+    Test_PipelineLayoutCompare(instance, device, queue);
 
     if (false)
     {

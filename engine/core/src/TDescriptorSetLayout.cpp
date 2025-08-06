@@ -108,6 +108,40 @@ bool Turbo::Core::TDescriptorSetLayout::TLayout::operator!=(const TDescriptorSet
     return !((*this) == other);
 }
 
+bool Turbo::Core::TDescriptorSetLayout::TLayout::operator>(const TDescriptorSetLayout::TLayout &other) const
+{
+    if (this == &other)
+    {
+        return false;
+    }
+
+    if (this->bindings.size() > other.bindings.size())
+    {
+        for (auto &item : other.bindings)
+        {
+            auto find_result = this->bindings.find(item.first);
+            if (find_result != this->bindings.end())
+            {
+                if (find_result->second > item.second)
+                {
+                    // NOTE: To do nothing!
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    return false;
+}
+
 std::size_t Turbo::Core::TDescriptorSetLayout::TLayout::Hash() const
 {
     return std::hash<Turbo::Core::TDescriptorSetLayout::TLayout>{}(*(this));

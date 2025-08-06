@@ -94,6 +94,7 @@ class TDescriptor : public Turbo::Core::TInfo
 
     bool operator==(const TDescriptor &other) const;
     bool operator!=(const TDescriptor &other) const;
+    bool operator>(const TDescriptor &other) const;
 
   public:
     virtual std::string ToString() const override;

@@ -47,6 +47,7 @@ class TDescriptorSetLayout : public Turbo::Core::TVulkanHandle
 
         bool operator==(const TDescriptorSetLayout::TLayout &other) const;
         bool operator!=(const TDescriptorSetLayout::TLayout &other) const;
+        bool operator>(const TDescriptorSetLayout::TLayout &other) const;
 
         std::size_t Hash() const;
 

@@ -74,6 +74,11 @@ bool Turbo::Core::TDescriptor::operator!=(const TDescriptor &other) const
     return !((*this) == other);
 }
 
+bool Turbo::Core::TDescriptor::operator>(const TDescriptor &other) const
+{
+    return (this->type == other.type) && (this->count > other.count);
+}
+
 std::string Turbo::Core::TDescriptor::ToString() const
 {
     std::stringstream ss;

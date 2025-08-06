@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/6
+
+>* 更新 `TPipelineLayout::TLayout` 增加 `operator>` 成员函数。
+>* 更新 `TPipelineDescriptorSet::TLayout` 增加 `operator>` 成员函数。
+>* 更新 `TDescriptor.h` 增加 `operator>` 成员函数。
+
 ## 2025/8/5
 
 >* 更新 `TPipeline` 增加使用 `TPipelineLayout::TLayout` 指定管线布局创建，并使用 `std::initializer_list` 管理传入的多个着色器。

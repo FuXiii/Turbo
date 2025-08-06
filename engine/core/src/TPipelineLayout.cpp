@@ -318,6 +318,19 @@ void Turbo::Core::TPipelineLayout::TLayout::Merge(const Turbo::Core::TShaderType
     this->pushConstants.Merge(shaderType, offset);
 }
 
+void Turbo::Core::TPipelineLayout::TLayout::Merge(const TPipelineLayout::TLayout::TSet &set, const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
+{
+    auto find_result = this->sets.find(set);
+    if (find_result != this->sets.end())
+    {
+        find_result->second.Merge(layout);
+    }
+    else
+    {
+        this->sets[set] = layout;
+    }
+}
+
 bool Turbo::Core::TPipelineLayout::TLayout::operator==(const TPipelineLayout::TLayout &other) const
 {
     if (this == &other)
@@ -357,6 +370,48 @@ bool Turbo::Core::TPipelineLayout::TLayout::operator==(const TPipelineLayout::TL
 bool Turbo::Core::TPipelineLayout::TLayout::operator!=(const TPipelineLayout::TLayout &other) const
 {
     return !((*this) == other);
+}
+
+bool Turbo::Core::TPipelineLayout::TLayout::operator>(const TPipelineLayout::TLayout &other) const
+{
+    if (this == &other)
+    {
+        return false;
+    }
+
+    if (this->sets.size() > other.sets.size())
+    {
+        // NOTE: Vulkan Spec: Two pipeline layouts are defined to be “compatible for push constants” if they were created with identical push constant ranges.
+        // NOTE: parent set push constant will Logically compatible child push constant
+        if (this->pushConstants != other.pushConstants)
+        {
+            return false;
+        }
+
+        for (auto &item : other.sets)
+        {
+            auto find_result = this->sets.find(item.first);
+            if (find_result != this->sets.end())
+            {
+                if (find_result->second > item.second)
+                {
+                    // NOTE: To do nothing!
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 std::size_t Turbo::Core::TPipelineLayout::TLayout::Hash() const
