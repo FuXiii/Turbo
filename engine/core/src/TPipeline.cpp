@@ -7,6 +7,106 @@
 #include "TVulkanAllocator.h"
 #include <map>
 
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const bool &value)
+{
+    this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
+    VkBool32 data = value ? VK_TRUE : VK_FALSE;
+    this->size = sizeof(VkBool32);
+    this->value = malloc(this->size);
+    memcpy(this->value, &data, this->size);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const int &value)
+{
+    this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
+    this->size = sizeof(value);
+    this->value = malloc(this->size);
+    memcpy(this->value, &value, this->size);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const std::uint32_t &value)
+{
+    this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
+    this->size = sizeof(value);
+    this->value = malloc(this->size);
+    memcpy(this->value, &value, this->size);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const float &value)
+{
+    this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
+    this->size = sizeof(value);
+    this->value = malloc(this->size);
+    memcpy(this->value, &value, this->size);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const double &value)
+{
+    this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
+    this->size = sizeof(value);
+    this->value = malloc(this->size);
+    memcpy(this->value, &value, this->size);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const TSpecializationConstant &other)
+{
+    if (other.type != Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && other.size > 0 && other.value != nullptr)
+    {
+        this->type = other.type;
+        this->size = other.size;
+        this->value = malloc(this->size);
+        memcpy(this->value, other.value, this->size);
+    }
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(TSpecializationConstant &&other)
+{
+    std::swap(this->type, other.type);
+    std::swap(this->size, other.size);
+    std::swap(this->value, other.value);
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant &Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::operator=(const TSpecializationConstant &other)
+{
+    if (this != &other)
+    {
+        if (this->value != nullptr)
+        {
+            free(this->value);
+            this->value = nullptr;
+        }
+
+        this->type = other.type;
+        this->size = other.size;
+        if (this->size > 0)
+        {
+            this->value = malloc(this->size);
+            memcpy(this->value, other.value, this->size);
+        }
+    }
+
+    return *this;
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant &Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::operator=(TSpecializationConstant &&other)
+{
+    this->type = std::move(other.type);
+    this->size = std::move(other.size);
+    this->value = std::move(other.value);
+    return *this;
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::~TSpecializationConstant()
+{
+    if (this->value != nullptr)
+    {
+        free(this->value);
+        this->value = nullptr;
+        this->size = 0;
+        this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
+    }
+}
+
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 {
     return lhs < rhs;

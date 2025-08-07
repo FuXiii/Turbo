@@ -61,6 +61,34 @@ typedef VkFlags TPipelineStages;
 // FIXME: Use PipelineLayout::Layout to create pipeline
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
+  public:
+    class TSpecializationConstants
+    {
+      public:
+        class TSpecializationConstant
+        {
+          private:
+            Turbo::Core::TDescriptorDataType type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
+            std::uint8_t size = 0;
+            void *value = nullptr;
+
+          public:
+            TSpecializationConstant()=default;
+            TSpecializationConstant(const bool &value);
+            TSpecializationConstant(const int &value);
+            TSpecializationConstant(const std::uint32_t &value);
+            TSpecializationConstant(const float &value);
+            TSpecializationConstant(const double &value);
+            TSpecializationConstant(const TSpecializationConstant &other);
+            TSpecializationConstant(TSpecializationConstant &&other);
+
+            TSpecializationConstant &operator=(const TSpecializationConstant &other);
+            TSpecializationConstant &operator=(TSpecializationConstant &&other);
+
+            ~TSpecializationConstant();
+        };
+    };
+
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout; // NOTE: Create Internal

@@ -15,6 +15,7 @@
 >* 更新 `samples\RayMarchingPerlinWorleyNoise` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
 >* 更新 `samples\VulkanKHRRayTracingTestForAnimationBLAS` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
 >* 更新 `TDescriptorSetLayout::TLayout` 的 `Merge(...)` 算法。使用强制合并。
+>* 更新 `TPipeline` 增加 `TSpecializationConstants` 类和 `TSpecializationConstant`。用于声明存储 `Specialization Constant` 数据。
 
 ## 2025/8/6
 
