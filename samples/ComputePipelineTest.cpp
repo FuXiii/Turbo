@@ -279,7 +279,9 @@ int main()
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> shaders{vertex_shader, fragment_shader};
     Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(compute_shader);
+    Turbo::Core::TPipelineLayout::TLayout compute_pipeline_layout;
+    compute_pipeline_layout << (*compute_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(compute_pipeline_layout, compute_shader);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> graphics_pipeline_image_views;
     graphics_pipeline_image_views.push_back(compute_image_view);

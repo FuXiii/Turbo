@@ -93,7 +93,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     [[deprecated]] TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
-    TPipeline(TDevice *device, const std::initializer_list<TShader *> &shaders, const TPipelineLayout::TLayout &layout, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TPipeline();

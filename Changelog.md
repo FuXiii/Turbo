@@ -4,6 +4,18 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/7
+
+>* 更新 `TComputePipeline` 适配使用 `TPipelineLayout::TLayout` 版本创建。
+>* 更新 `samples\ComputePipelineTest` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\ComputerPipelineGeneratePerlinWorley` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\ComputerPipelineGenerateWorley` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\SpecializationConstantsTest` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\VolumetricCloud` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\RayMarchingPerlinWorleyNoise` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\VulkanKHRRayTracingTestForAnimationBLAS` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `TDescriptorSetLayout::TLayout` 的 `Merge(...)` 算法。使用强制合并。
+
 ## 2025/8/6
 
 >* 更新 `TPipelineLayout::TLayout` 增加 `operator>` 成员函数。

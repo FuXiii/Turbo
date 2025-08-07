@@ -49,12 +49,7 @@ void Turbo::Core::TDescriptorSetLayout::TLayout::Merge(const TDescriptorSetLayou
 {
     for (auto &item : layout)
     {
-        auto &binding = item.first;
-        auto find_result = this->bindings.find(binding);
-        if (find_result == this->bindings.end())
-        {
-            this->bindings.insert({binding, item.second});
-        }
+        this->bindings[item.first] = item.second;
     }
 }
 

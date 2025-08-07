@@ -365,8 +365,13 @@ int main()
     graphics_pipeline_samplers.push_back(graphics_pipeline_sampler);
     graphics_pipeline_descriptor_set->BindData(0, 2, 0, graphics_pipeline_samplers);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_perlin_worley_computer_shader);
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> worley_compute_pipeline = new Turbo::Core::TComputePipeline(my_worley_computer_shader);
+    Turbo::Core::TPipelineLayout::TLayout perlin_worley_compute_pipeline_layout;
+    perlin_worley_compute_pipeline_layout << (*my_perlin_worley_computer_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(perlin_worley_compute_pipeline_layout, my_perlin_worley_computer_shader);
+
+    Turbo::Core::TPipelineLayout::TLayout worley_compute_pipeline_layout;
+    worley_compute_pipeline_layout << (*my_worley_computer_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> worley_compute_pipeline = new Turbo::Core::TComputePipeline(worley_compute_pipeline_layout, my_worley_computer_shader);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> perlin_worley_compute_pipeline_image_views;
     perlin_worley_compute_pipeline_image_views.push_back(perlin_worley_noise_3d_image_view);

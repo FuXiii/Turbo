@@ -270,7 +270,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, const std::initializer_list<TShader *> &shaders, const TPipelineLayout::TLayout &layout, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (Turbo::Core::TReferenced::Valid(device))
     {

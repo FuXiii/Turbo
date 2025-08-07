@@ -400,7 +400,9 @@ int main()
     graphics_pipeline_samplers.push_back(graphics_pipeline_sampler);
     graphics_pipeline_descriptor_set->BindData(0, 1, 0, graphics_pipeline_samplers);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(my_computer_shader);
+    Turbo::Core::TPipelineLayout::TLayout compute_pipeline_layout;
+    compute_pipeline_layout << (*my_computer_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(compute_pipeline_layout, my_computer_shader);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> compute_pipeline_image_views;
     compute_pipeline_image_views.push_back(worly_noise_3d_image_view);

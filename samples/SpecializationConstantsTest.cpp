@@ -332,7 +332,9 @@ int main()
         compute_shader->SetConstant(11, 4.);
         compute_shader->SetConstant(13, 41u);
 
-        Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(compute_shader);
+        Turbo::Core::TPipelineLayout::TLayout compute_pipeline_layout;
+        compute_pipeline_layout << (*compute_shader);
+        Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> compute_pipeline = new Turbo::Core::TComputePipeline(compute_pipeline_layout, compute_shader);
 
         Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> compute_pipeline_descriptor_set = descriptor_pool->Allocate(compute_pipeline->GetPipelineLayout());
 
@@ -515,7 +517,7 @@ int main()
             ImGui::NewFrame();
 
             {
-                ImGui::Begin(TURBO_PROJECT_NAME);     // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(TURBO_PROJECT_NAME);                // Create a window called "Hello, world!" and append into it.
                 ImGui::SliderFloat("value", &value, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();

@@ -142,12 +142,17 @@ void Turbo::Core::TComputePipeline::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TComputePipeline::TComputePipeline(TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader)
-{
-    this->InternalCreate();
-}
+// Turbo::Core::TComputePipeline::TComputePipeline(TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader)
+//{
+//     this->InternalCreate();
+// }
+//
+// Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
+//{
+//     this->InternalCreate();
+// }
 
-Turbo::Core::TComputePipeline::TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader) : Turbo::Core::TPipeline(computeShader->GetDevice(), computeShader, pipelineCache)
+Turbo::Core::TComputePipeline::TComputePipeline(const TPipelineLayout::TLayout &layout, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TPipeline(computeShader->GetDevice(), layout, {computeShader}, pipelineCache)
 {
     this->InternalCreate();
 }
