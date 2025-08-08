@@ -4,6 +4,15 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/8
+
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool GetBool() const` 成员函数。
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `int GetInt() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `std::uint32_t GetUint32() ` 成员函数const
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `float GetFloat() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `double GetDouble() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool Valid() const` 成员函数
+
 ## 2025/8/7
 
 >* 更新 `TComputePipeline` 适配使用 `TPipelineLayout::TLayout` 版本创建。

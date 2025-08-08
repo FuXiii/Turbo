@@ -73,7 +73,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
             void *value = nullptr;
 
           public:
-            TSpecializationConstant()=default;
+            TSpecializationConstant() = default;
             TSpecializationConstant(const bool &value);
             TSpecializationConstant(const int &value);
             TSpecializationConstant(const std::uint32_t &value);
@@ -86,7 +86,20 @@ class TPipeline : public Turbo::Core::TVulkanHandle
             TSpecializationConstant &operator=(TSpecializationConstant &&other);
 
             ~TSpecializationConstant();
+
+            bool GetBool() const;
+            int GetInt() const;
+            std::uint32_t GetUint32() const;
+            float GetFloat() const;
+            double GetDouble() const;
+
+            bool Valid() const;
         };
+
+        using ID = std::uint32_t;
+
+      private:
+        std::unordered_map<TPipeline::TSpecializationConstants::ID, TSpecializationConstant> specializationConstants;
     };
 
   private:

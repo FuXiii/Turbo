@@ -107,6 +107,61 @@ Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::~TSpe
     }
 }
 
+bool Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetBool() const
+{
+    bool result = false;
+    if (this->Valid() && this->size >= sizeof(result) && this->type == Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN)
+    {
+        memcpy(&result, this->value, sizeof(result));
+    }
+    return result;
+}
+
+int Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetInt() const
+{
+    int result = 0;
+    if (this->Valid() && this->size >= sizeof(result) && this->type == Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT)
+    {
+        memcpy(&result, this->value, sizeof(result));
+    }
+    return result;
+}
+
+std::uint32_t Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetUint32() const
+{
+    std::uint32_t result = 0;
+    if (this->Valid() && this->size >= sizeof(result) && this->type == Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT)
+    {
+        memcpy(&result, this->value, sizeof(result));
+    }
+    return result;
+}
+
+float Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetFloat() const
+{
+    float result = 0.0f;
+    if (this->Valid() && this->size >= sizeof(result) && this->type == Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT)
+    {
+        memcpy(&result, this->value, sizeof(result));
+    }
+    return result;
+}
+
+double Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetDouble() const
+{
+    double result = 0.0;
+    if (this->Valid() && this->size >= sizeof(result) && this->type == Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE)
+    {
+        memcpy(&result, this->value, sizeof(result));
+    }
+    return result;
+}
+
+bool Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::Valid() const
+{
+    return this->type != Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && this->size != 0 && this->value != nullptr;
+}
+
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
 {
     return lhs < rhs;
