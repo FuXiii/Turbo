@@ -195,14 +195,14 @@ void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TS
     this->specializationConstants[id] = value;
 }
 
-Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::begin() const
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::begin() const noexcept
 {
-    this->specializationConstants.begin();
+    return this->specializationConstants.begin();
 }
 
-Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::end() const
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::end() const noexcept
 {
-    this->specializationConstants.end();
+    return this->specializationConstants.end();
 }
 
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)

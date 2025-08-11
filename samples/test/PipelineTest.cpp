@@ -144,7 +144,6 @@ void Test_TSpecializationConstants(Turbo::Core::TInstance *instance, Turbo::Core
     scs.Merge(2880, true);
 
     std::cout << "begin" << std::endl;
-
     for (auto &item : scs)
     {
         // std::cout << item.first << ":" << (int)item.second.GetType() << std::endl;
@@ -157,6 +156,26 @@ void Test_TSpecializationConstants(Turbo::Core::TInstance *instance, Turbo::Core
 
 int main()
 {
+    Test_TSpecializationConstants(nullptr, nullptr, nullptr);
+    return 0;
+    if (false)
+    {
+        Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap scm;
+        scm[0] = 0.2f;
+        scm[1] = 1.0;
+        scm[3] = 2;
+        scm[6] = 3ui32;
+        scm[20] = 4;
+        scm[2880] = true;
+        std::cout << "Begin" << std::endl;
+
+        for (auto &item : scm)
+        {
+            std::cout << item.first << std::endl;
+        }
+        std::cout << "End" << std::endl;
+    }
+
     VulkanContext vulkan_context;
 
     Turbo::Core::TInstance *instance = vulkan_context.Instance();

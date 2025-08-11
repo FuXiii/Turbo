@@ -113,8 +113,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
         void Merge(const TPipeline::TSpecializationConstants::ID &id, const float &value);
         void Merge(const TPipeline::TSpecializationConstants::ID &id, const double &value);
 
-        TSpecializationConstantsMap::const_iterator begin() const;
-        TSpecializationConstantsMap::const_iterator end() const;
+        TSpecializationConstantsMap::const_iterator begin() const noexcept;
+        TSpecializationConstantsMap::const_iterator end() const noexcept;
     };
 
   private:

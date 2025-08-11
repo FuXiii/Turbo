@@ -4,15 +4,20 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/12
+
+>* 更新 `TPipeline` 中 `TSpecializationConstants` 。修正遍历 `Bug`。
+
 ## 2025/8/11
 
 >* 更新 `test` 中增加 `PipelineTest` 。用于测试 `TPipeline` 功能。
+>* 更新 `VulkanMemoryAllocator` 到最新版 。
 
 ## 2025/8/8
 
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool GetBool() const` 成员函数。
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `int GetInt() const` 成员函数
->* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `std::uint32_t GetUint32() ` 成员函数const
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `std::uint32_t GetUint32()` 成员函数const
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `float GetFloat() const` 成员函数
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `double GetDouble() const` 成员函数
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool Valid() const` 成员函数
