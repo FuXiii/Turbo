@@ -87,6 +87,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
             ~TSpecializationConstant();
 
+            Turbo::Core::TDescriptorDataType GetType() const;
+
             bool GetBool() const;
             int GetInt() const;
             std::uint32_t GetUint32() const;
@@ -98,8 +100,21 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
         using ID = std::uint32_t;
 
+      public:
+        using TSpecializationConstantsMap = std::unordered_map<TPipeline::TSpecializationConstants::ID, TSpecializationConstant>;
+
       private:
-        std::unordered_map<TPipeline::TSpecializationConstants::ID, TSpecializationConstant> specializationConstants;
+        TSpecializationConstantsMap specializationConstants;
+
+      public:
+        void Merge(const TPipeline::TSpecializationConstants::ID &id, const bool &value);
+        void Merge(const TPipeline::TSpecializationConstants::ID &id, const int &value);
+        void Merge(const TPipeline::TSpecializationConstants::ID &id, const std::uint32_t &value);
+        void Merge(const TPipeline::TSpecializationConstants::ID &id, const float &value);
+        void Merge(const TPipeline::TSpecializationConstants::ID &id, const double &value);
+
+        TSpecializationConstantsMap::const_iterator begin() const;
+        TSpecializationConstantsMap::const_iterator end() const;
     };
 
   private:

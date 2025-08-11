@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/11
+
+>* 更新 `test` 中增加 `PipelineTest` 。用于测试 `TPipeline` 功能。
+
 ## 2025/8/8
 
 >* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool GetBool() const` 成员函数。

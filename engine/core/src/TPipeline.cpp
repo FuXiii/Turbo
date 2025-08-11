@@ -90,9 +90,12 @@ Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant &Turbo
 
 Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant &Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::operator=(TSpecializationConstant &&other)
 {
-    this->type = std::move(other.type);
-    this->size = std::move(other.size);
-    this->value = std::move(other.value);
+    // this->type = std::move(other.type);
+    // this->size = std::move(other.size);
+    // this->value = std::move(other.value);
+    std::swap(this->type, other.type);
+    std::swap(this->size, other.size);
+    std::swap(this->value, other.value);
     return *this;
 }
 
@@ -105,6 +108,11 @@ Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::~TSpe
         this->size = 0;
         this->type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
     }
+}
+
+Turbo::Core::TDescriptorDataType Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetType() const
+{
+    return this->type;
 }
 
 bool Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::GetBool() const
@@ -160,6 +168,41 @@ double Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant
 bool Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::Valid() const
 {
     return this->type != Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && this->size != 0 && this->value != nullptr;
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const bool &value)
+{
+    this->specializationConstants[id] = value;
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const int &value)
+{
+    this->specializationConstants[id] = value;
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const std::uint32_t &value)
+{
+    this->specializationConstants[id] = value;
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const float &value)
+{
+    this->specializationConstants[id] = value;
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const double &value)
+{
+    this->specializationConstants[id] = value;
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::begin() const
+{
+    this->specializationConstants.begin();
+}
+
+Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::end() const
+{
+    this->specializationConstants.end();
 }
 
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)
