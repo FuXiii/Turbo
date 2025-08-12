@@ -7,6 +7,7 @@
 ## 2025/8/12
 
 >* 更新 `TPipeline` 中 `TSpecializationConstants` 。修正遍历 `Bug`。
+>* 更新 `TPipeline` 中 `TSpecializationConstants` 和 `TSpecializationConstant` 。增加 `ToString()` 成员函数。
 
 ## 2025/8/11
 

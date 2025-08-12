@@ -6,6 +6,7 @@
 #include "TShader.h"
 #include "TVulkanAllocator.h"
 #include <map>
+#include <sstream>
 
 Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::TSpecializationConstant(const bool &value)
 {
@@ -170,27 +171,115 @@ bool Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::
     return this->type != Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && this->size != 0 && this->value != nullptr;
 }
 
-void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const bool &value)
+std::string Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstant::ToString() const
+{
+    std::stringstream ss;
+    ss << "{";
+    {
+        {
+            ss << "\"type\":";
+            switch (this->type)
+            {
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN: {
+                ss << "\"unknown\"";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
+                ss << "\"boolean\"";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
+                ss << "\"int\"";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
+                ss << "\"uint\"";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
+                ss << "\"float\"";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
+                ss << "\"double\"";
+            }
+            break;
+            default: {
+                ss << "\"unknown\"";
+            }
+            }
+        }
+        ss << ",";
+        {
+            ss << "\"size\":" << static_cast<std::uint32_t>(this->size);
+        }
+        ss << ",";
+        {
+            ss << "\"value\":";
+            switch (this->type)
+            {
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN: {
+                ss << "null";
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
+                if (this->GetBool())
+                {
+                    ss << "true";
+                }
+                else
+                {
+                    ss << "false";
+                }
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
+                ss << this->GetInt();
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
+                ss << this->GetUint32();
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
+                ss << this->GetFloat();
+            }
+            break;
+            case Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
+                ss << this->GetDouble();
+            }
+            break;
+            default: {
+                ss << "null";
+            }
+            }
+        }
+    }
+    ss << "}";
+    return ss.str();
+}
+
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::TID &id, const bool &value)
 {
     this->specializationConstants[id] = value;
 }
 
-void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const int &value)
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::TID &id, const int &value)
 {
     this->specializationConstants[id] = value;
 }
 
-void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const std::uint32_t &value)
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::TID &id, const std::uint32_t &value)
 {
     this->specializationConstants[id] = value;
 }
 
-void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const float &value)
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::TID &id, const float &value)
 {
     this->specializationConstants[id] = value;
 }
 
-void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::ID &id, const double &value)
+void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TSpecializationConstants::TID &id, const double &value)
 {
     this->specializationConstants[id] = value;
 }
@@ -203,6 +292,43 @@ Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::c
 Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::end() const noexcept
 {
     return this->specializationConstants.end();
+}
+
+std::string Turbo::Core::TPipeline::TSpecializationConstants::ToString() const
+{
+    std::stringstream ss;
+    ss << "{";
+    {
+        if (!this->specializationConstants.empty())
+        {
+            std::vector<Turbo::Core::TPipeline::TSpecializationConstants::TID> ordered_ids;
+            {
+                for (auto &item : this->specializationConstants)
+                {
+                    ordered_ids.push_back(item.first);
+                }
+                std::sort(ordered_ids.begin(), ordered_ids.end());
+            }
+
+            ss << "\"specialization constants\":";
+            ss << "[";
+            auto iter = ordered_ids.begin();
+            while (iter != ordered_ids.end())
+            {
+                auto &specialization_constant = this->specializationConstants.at((*iter));
+                ss << "{\"" << (*iter) << "\""
+                   << ":" << specialization_constant.ToString() << "}";
+                ++iter;
+                if (iter != ordered_ids.end())
+                {
+                    ss << ",";
+                }
+            }
+            ss << "]";
+        }
+    }
+    ss << "}";
+    return ss.str();
 }
 
 bool DescriptorSetMapCompFunction(uint32_t lhs, uint32_t rhs)

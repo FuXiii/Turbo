@@ -96,25 +96,28 @@ class TPipeline : public Turbo::Core::TVulkanHandle
             double GetDouble() const;
 
             bool Valid() const;
+            std::string ToString() const;
         };
 
-        using ID = std::uint32_t;
+        using TID = std::uint32_t;
 
       public:
-        using TSpecializationConstantsMap = std::unordered_map<TPipeline::TSpecializationConstants::ID, TSpecializationConstant>;
+        using TSpecializationConstantsMap = std::unordered_map<TPipeline::TSpecializationConstants::TID, TSpecializationConstant>;
 
       private:
         TSpecializationConstantsMap specializationConstants;
 
       public:
-        void Merge(const TPipeline::TSpecializationConstants::ID &id, const bool &value);
-        void Merge(const TPipeline::TSpecializationConstants::ID &id, const int &value);
-        void Merge(const TPipeline::TSpecializationConstants::ID &id, const std::uint32_t &value);
-        void Merge(const TPipeline::TSpecializationConstants::ID &id, const float &value);
-        void Merge(const TPipeline::TSpecializationConstants::ID &id, const double &value);
+        void Merge(const TPipeline::TSpecializationConstants::TID &id, const bool &value);
+        void Merge(const TPipeline::TSpecializationConstants::TID &id, const int &value);
+        void Merge(const TPipeline::TSpecializationConstants::TID &id, const std::uint32_t &value);
+        void Merge(const TPipeline::TSpecializationConstants::TID &id, const float &value);
+        void Merge(const TPipeline::TSpecializationConstants::TID &id, const double &value);
 
         TSpecializationConstantsMap::const_iterator begin() const noexcept;
         TSpecializationConstantsMap::const_iterator end() const noexcept;
+
+        std::string ToString() const;
     };
 
   private:

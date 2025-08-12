@@ -440,7 +440,7 @@ std::string Turbo::Core::TPipelineLayout::TLayout::ToString() const
             auto iter = ordered_sets.begin();
             while (iter != ordered_sets.end())
             {
-                auto set = this->sets.at((*iter));
+                auto &set = this->sets.at((*iter));
                 ss << "{\"" << (*iter) << "\""
                    << ":" << set.ToString() << "}";
                 ++iter;
