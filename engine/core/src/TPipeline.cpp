@@ -284,6 +284,11 @@ void Turbo::Core::TPipeline::TSpecializationConstants::Merge(const TPipeline::TS
     this->specializationConstants[id] = value;
 }
 
+bool Turbo::Core::TPipeline::TSpecializationConstants::Empty() const
+{
+    return this->specializationConstants.empty();
+}
+
 Turbo::Core::TPipeline::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TPipeline::TSpecializationConstants::begin() const noexcept
 {
     return this->specializationConstants.begin();
@@ -594,7 +599,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, TComputeShader *computeShader
     }
 }
 
-Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, const TPipeline::TSpecializationConstants &specializationConstants, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
     if (Turbo::Core::TReferenced::Valid(device))
     {
@@ -644,6 +649,8 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayou
             }
         }
         // this->InternalCreate();//NOTE: Don't need call InternalCreate() to create pipeline layout, because we had create pipelie layout previous
+
+        this->specializationConstants = specializationConstants;
     }
     else
     {
@@ -689,6 +696,11 @@ Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()
 Turbo::Core::TPipelineCache *Turbo::Core::TPipeline::GetPipelineCache()
 {
     return this->pipelineCache;
+}
+
+const Turbo::Core::TPipeline::TSpecializationConstants &Turbo::Core::TPipeline::GetSpecializationConstants() const
+{
+    return this->specializationConstants;
 }
 
 // std::vector<Turbo::Core::TSpecializationConstant> Turbo::Core::TPipeline::GetSpecializationConstants() const

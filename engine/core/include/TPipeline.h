@@ -114,6 +114,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
         void Merge(const TPipeline::TSpecializationConstants::TID &id, const float &value);
         void Merge(const TPipeline::TSpecializationConstants::TID &id, const double &value);
 
+        bool Empty() const;
+
         TSpecializationConstantsMap::const_iterator begin() const noexcept;
         TSpecializationConstantsMap::const_iterator end() const noexcept;
 
@@ -126,6 +128,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShader>> shaders;
     T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache;
     TPipelineType type;
+
+    TSpecializationConstants specializationConstants;
 
   protected:
     T_VULKAN_HANDLE_HANDLE VkPipeline vkPipeline = VK_NULL_HANDLE;
@@ -152,7 +156,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     [[deprecated]] TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
-    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, const TPipeline::TSpecializationConstants &specializationConstants = {}, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TPipeline();
@@ -167,7 +171,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
 
-    // std::vector<TSpecializationConstant> GetSpecializationConstants() const;
+    const TPipeline::TSpecializationConstants &GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() const override;

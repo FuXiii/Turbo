@@ -23,7 +23,7 @@ class TComputePipeline : public Turbo::Core::TPipeline
     //[[deprecated]] TComputePipeline(TComputeShader *computeShader);
     //[[deprecated]] TComputePipeline(TPipelineCache *pipelineCache, TComputeShader *computeShader);
 
-    TComputePipeline(const TPipelineLayout::TLayout &layout, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    TComputePipeline(const TPipelineLayout::TLayout &layout, TComputeShader *computeShader, const TPipeline::TSpecializationConstants &specializationConstants = {}, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TComputePipeline();
