@@ -152,7 +152,7 @@ void Turbo::Core::TComputePipeline::InternalDestroy()
 //     this->InternalCreate();
 // }
 
-Turbo::Core::TComputePipeline::TComputePipeline(const TPipelineLayout::TLayout &layout, TComputeShader *computeShader, const TPipeline::TSpecializationConstants &specializationConstants, TPipelineCache *pipelineCache) : Turbo::Core::TPipeline(computeShader->GetDevice(), layout, {computeShader}, specializationConstants, pipelineCache)
+Turbo::Core::TComputePipeline::TComputePipeline(const TPipelineLayout::TLayout &layout, TComputeShader *computeShader, TPipelineCache *pipelineCache) : Turbo::Core::TPipeline(computeShader->GetDevice(), layout, {computeShader}, pipelineCache)
 {
     this->InternalCreate();
 }

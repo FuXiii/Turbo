@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/13
+
+>* 增加 `TShaderStage.h` 和 `TShaderStage.cpp` 并增加 `TShaderStage` 类。
+>* 将 `TPipeline::TSpecializationConstants` 全部移动到 `TShaderStage::TSpecializationConstants` 中。并更新相关代码。
+
 ## 2025/8/12
 
 >* 更新 `TPipeline` 中 `TSpecializationConstants` 。修正遍历 `Bug`。

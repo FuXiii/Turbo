@@ -25,6 +25,8 @@
 #include <ReadFile.h>
 #include <TPipeline.h>
 
+#include<TShaderStage.h>
+
 std::string asset_root(TURBO_ASSET_ROOT);
 
 class VulkanContext
@@ -135,7 +137,7 @@ class VulkanContext
 
 void Test_TSpecializationConstants(Turbo::Core::TInstance *instance, Turbo::Core::TDevice *device, Turbo::Core::TDeviceQueue *queue)
 {
-    Turbo::Core::TPipeline::TSpecializationConstants scs;
+    Turbo::Core::TShaderStage::TSpecializationConstants scs;
     scs.Merge(0, 0.2f);
     scs.Merge(1, 1.0);
     scs.Merge(3, 2);

@@ -61,67 +61,6 @@ typedef VkFlags TPipelineStages;
 // FIXME: Use PipelineLayout::Layout to create pipeline
 class TPipeline : public Turbo::Core::TVulkanHandle
 {
-  public:
-    class TSpecializationConstants
-    {
-      public:
-        class TSpecializationConstant
-        {
-          private:
-            Turbo::Core::TDescriptorDataType type = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
-            std::uint8_t size = 0;
-            void *value = nullptr;
-
-          public:
-            TSpecializationConstant() = default;
-            TSpecializationConstant(const bool &value);
-            TSpecializationConstant(const int &value);
-            TSpecializationConstant(const std::uint32_t &value);
-            TSpecializationConstant(const float &value);
-            TSpecializationConstant(const double &value);
-            TSpecializationConstant(const TSpecializationConstant &other);
-            TSpecializationConstant(TSpecializationConstant &&other);
-
-            TSpecializationConstant &operator=(const TSpecializationConstant &other);
-            TSpecializationConstant &operator=(TSpecializationConstant &&other);
-
-            ~TSpecializationConstant();
-
-            Turbo::Core::TDescriptorDataType GetType() const;
-
-            bool GetBool() const;
-            int GetInt() const;
-            std::uint32_t GetUint32() const;
-            float GetFloat() const;
-            double GetDouble() const;
-
-            bool Valid() const;
-            std::string ToString() const;
-        };
-
-        using TID = std::uint32_t;
-
-      public:
-        using TSpecializationConstantsMap = std::unordered_map<TPipeline::TSpecializationConstants::TID, TSpecializationConstant>;
-
-      private:
-        TSpecializationConstantsMap specializationConstants;
-
-      public:
-        void Merge(const TPipeline::TSpecializationConstants::TID &id, const bool &value);
-        void Merge(const TPipeline::TSpecializationConstants::TID &id, const int &value);
-        void Merge(const TPipeline::TSpecializationConstants::TID &id, const std::uint32_t &value);
-        void Merge(const TPipeline::TSpecializationConstants::TID &id, const float &value);
-        void Merge(const TPipeline::TSpecializationConstants::TID &id, const double &value);
-
-        bool Empty() const;
-
-        TSpecializationConstantsMap::const_iterator begin() const noexcept;
-        TSpecializationConstantsMap::const_iterator end() const noexcept;
-
-        std::string ToString() const;
-    };
-
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout; // NOTE: Create Internal
@@ -129,7 +68,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache;
     TPipelineType type;
 
-    TSpecializationConstants specializationConstants;
+    // TSpecializationConstants specializationConstants;
 
   protected:
     T_VULKAN_HANDLE_HANDLE VkPipeline vkPipeline = VK_NULL_HANDLE;
@@ -156,7 +95,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     [[deprecated]] TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
-    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, const TPipeline::TSpecializationConstants &specializationConstants = {}, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TPipeline();
@@ -171,7 +110,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
 
-    const TPipeline::TSpecializationConstants &GetSpecializationConstants() const;
+    // const TPipeline::TSpecializationConstants &GetSpecializationConstants() const;
 
   public:
     virtual std::string ToString() const override;
