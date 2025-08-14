@@ -329,6 +329,59 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayou
     }
 }
 
+Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShaderStage> &shaderStages, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
+{
+    if (Turbo::Core::TReferenced::Valid(device))
+    {
+        this->device = device;
+        this->type = TPipelineType::Graphics;
+        this->shaderStages = shaderStages;
+
+        if (shaderStages.size() == 1)
+        {
+            auto compute_shader = shaderStages.begin();
+            if (compute_shader->Valid() && compute_shader->GetShader()->GetType() == TShaderType::COMPUTE)
+            {
+                this->type = TPipelineType::Compute;
+            }
+        }
+
+        this->pipelineCache = Turbo::Core::TReferenced::Valid(pipelineCache) ? pipelineCache : nullptr;
+
+        {
+            Turbo::Core::TPipelineLayout::TLayout temp_layout;
+            {
+                for (auto &shader : this->shaders)
+                {
+                    temp_layout << (*shader);
+                }
+
+                auto &Constants = layout.GetPushConstants().GetConstants();
+                for (auto &item : Constants)
+                {
+                    temp_layout.Merge(item.first, item.second.first);
+                }
+            }
+
+            if (layout == temp_layout) // NOTE: Check layout compatible
+            {
+                this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(layout);
+            }
+            else
+            {
+                this->pipelineLayout = this->device->GetLayoutManager().GetOrCreateLayout(temp_layout);
+            }
+        }
+        // this->InternalCreate();//NOTE: Don't need call InternalCreate() to create pipeline layout, because we had create pipelie layout previous
+
+        // this->specializationConstants = specializationConstants;
+    }
+    else
+    {
+        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TPipeline::TPipeline");
+    }
+}
+
 Turbo::Core::TPipeline::~TPipeline()
 {
     this->InternalDestroy();
@@ -357,6 +410,11 @@ std::vector<Turbo::Core::TShader *> Turbo::Core::TPipeline::GetShaders()
         result.push_back(shader);
     }
     return result;
+}
+
+const std::vector<Turbo::Core::TShaderStage> &Turbo::Core::TPipeline::GetShaderStages() const
+{
+    return this->shaderStages;
 }
 
 Turbo::Core::TDevice *Turbo::Core::TPipeline::GetDevice()

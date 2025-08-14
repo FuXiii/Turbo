@@ -365,7 +365,7 @@ const Turbo::Core::TShaderStage::TSpecializationConstants &Turbo::Core::TShaderS
     return this->specializationConstants;
 }
 
-Turbo::Core::TShader *Turbo::Core::TShaderStage::GetShader()
+const Turbo::Core::TShader *Turbo::Core::TShaderStage::GetShader() const
 {
     return this->shader;
 }

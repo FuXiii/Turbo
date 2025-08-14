@@ -85,7 +85,7 @@ class TShaderStage
     void Merge(const TShaderStage::TSpecializationConstants::TID &id, const double &value);
 
     const TShaderStage::TSpecializationConstants &GetSpecializationConstants() const;
-    TShader* GetShader();
+    const TShader *GetShader() const;
 
     bool Valid() const;
 };

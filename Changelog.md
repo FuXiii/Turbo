@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/14
+
+>* 更新 `README` 增加 `submodule` 说明。
+>* 更新 `TPipeline` 使用 `TShaderStage` 说明。遗弃直接使用 `TShader` 。
+
 ## 2025/8/13
 
 >* 增加 `TShaderStage.h` 和 `TShaderStage.cpp` 并增加 `TShaderStage` 类。

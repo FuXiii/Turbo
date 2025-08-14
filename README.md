@@ -118,6 +118,14 @@ git clone --recursive https://github.com/FuXiii/Turbo.git
 > [!NOTE]
 > 第三方库目前使用 `git` 的 `submodule` 进行维护，所以 `克隆` 时指定 `--recursive` 即可自动下载第三方库。
 
+> [!NOTE]
+> 如果您克隆时没有指定 `--recursive` 参数，则在克隆完成之后，`Turbo` 目录下执行如下指令：
+>
+> ```cmd
+> git submodule init
+> git submodule update
+> ```
+
 <!--
 ## Build
 -->

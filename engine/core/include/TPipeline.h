@@ -5,7 +5,7 @@
 #include "TFormatInfo.h"
 #include "TPipelineCache.h"
 #include "TScissor.h"
-#include "TShader.h"
+#include "TShaderStage.h"
 #include "TViewport.h"
 #include "TVulkanHandle.h"
 #include <map>
@@ -33,6 +33,7 @@ typedef enum class TPipelineType
 {
     Graphics,
     Compute
+    // RayTracing
 } TPipelineType;
 
 typedef enum TPipelineStageBits
@@ -64,7 +65,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout; // NOTE: Create Internal
-    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShader>> shaders;
+    [[deprecated]] T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShader>> shaders;
+    T_VULKAN_HANDLE_CHILDREN std::vector<TShaderStage> shaderStages; // NOTE: new!
     T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache;
     TPipelineType type;
 
@@ -95,7 +97,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     // TPipeline(const TRefPtr<TDevice> &device, const TRefPtr<TComputeShader> &computeShader, const TRefPtr<TPipelineCache> &pipelineCache = nullptr); // for compute pipeline
     [[deprecated]] TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
-    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    [[deprecated]] TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr);
+    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShaderStage> &shaderStages, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TPipeline();
@@ -105,7 +108,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     VkPipeline GetVkPipeline();
 
     TPipelineType GetType() const;
-    std::vector<TShader *> GetShaders();
+    [[deprecated]] std::vector<TShader *> GetShaders();
+    const std::vector<TShaderStage> &GetShaderStages() const;
 
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();
