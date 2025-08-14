@@ -84,30 +84,32 @@ class TInterface : public Turbo::Core::TStructMember
     virtual std::string ToString() const override;
 };
 
-class TSpecializationConstant : public Turbo::Core::TInfo
-{
-  private:
-    uint32_t id;
-    std::string name;
-    Turbo::Core::TDescriptorDataType descriptorDataType;
-    uint32_t width;
-
-  public:
-    TSpecializationConstant() = default;
-    TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
-    ~TSpecializationConstant() = default;
-
-    uint32_t GetConstantID() const;
-    const std::string &GetName() const;
-    Turbo::Core::TDescriptorDataType GetDescriptorDataType() const;
-    uint32_t GetWidth() const;
-
-  public:
-    virtual std::string ToString() const override;
-};
-
 class TShader : public Turbo::Core::TVulkanHandle
 {
+  public:
+    class TSpecializationConstant : public Turbo::Core::TInfo
+    {
+      private:
+        [[deprecated]] uint32_t id;
+        std::string name;
+        Turbo::Core::TDescriptorDataType descriptorDataType;
+        uint32_t width;
+
+      public:
+        TSpecializationConstant() = default;
+        TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
+        TSpecializationConstant(const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
+        ~TSpecializationConstant() = default;
+
+        [[deprecated]] uint32_t GetConstantID() const;
+        const std::string &GetName() const;
+        Turbo::Core::TDescriptorDataType GetDescriptorDataType() const;
+        uint32_t GetWidth() const;
+
+      public:
+        virtual std::string ToString() const override;
+    };
+
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkShaderModule vkShaderModule = VK_NULL_HANDLE;
@@ -118,7 +120,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA TShaderType type;
 
   public:
-    union TConstant {
+    [[deprecated]] union TConstant {
         bool boolValue;
         int32_t intValue;
         uint32_t uintValue;
@@ -126,7 +128,7 @@ class TShader : public Turbo::Core::TVulkanHandle
         double doubleValue;
     };
 
-    struct TConstValue
+    [[deprecated]] struct TConstValue
     {
         Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
         TConstant value;
@@ -199,7 +201,8 @@ class TShader : public Turbo::Core::TVulkanHandle
     };
 
   private:
-    std::vector<TSpecializationConstant> specializationConstants;
+    //[[deprecated]] std::vector<TSpecializationConstant> specializationConstants;
+    std::unordered_map<std::uint32_t, TSpecializationConstant> specializationConstants;
     std::vector<TInterface> inputs;
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
@@ -214,7 +217,7 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::string entryPoint;
 
-    std::map<uint32_t, TConstValue> specializationMap;
+    [[deprecated]] std::map<uint32_t, TConstValue> specializationMap;
 
     TShader::TLayout layout;
 
@@ -251,18 +254,18 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TInterface> GetInputs() const;
     std::vector<TInterface> GetOutputs() const;
 
-    const std::vector<TSpecializationConstant> &GetSpecializationConstants() const;
+    const std::unordered_map<std::uint32_t, TShader::TSpecializationConstant> &GetSpecializationConstants() const;
 
     TShaderType GetType() const;
     const TShader::TLayout &GetLayout() const;
 
     //<specialization constants>
-    void SetConstant(uint32_t id, bool value);
-    void SetConstant(uint32_t id, int32_t value);
-    void SetConstant(uint32_t id, uint32_t value);
-    void SetConstant(uint32_t id, float value);
-    void SetConstant(uint32_t id, double value);
-    const std::map<uint32_t, TConstValue> &GetSpecializations() const;
+    [[deprecated]] void SetConstant(uint32_t id, bool value);
+    [[deprecated]] void SetConstant(uint32_t id, int32_t value);
+    [[deprecated]] void SetConstant(uint32_t id, uint32_t value);
+    [[deprecated]] void SetConstant(uint32_t id, float value);
+    [[deprecated]] void SetConstant(uint32_t id, double value);
+    [[deprecated]] const std::map<uint32_t, TConstValue> &GetSpecializations() const;
     //</specialization constants>
 
     const std::vector<uint32_t> &GetSpirV() const;

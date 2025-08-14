@@ -8,6 +8,10 @@
 
 >* 更新 `README` 增加 `submodule` 说明。
 >* 更新 `TPipeline` 使用 `TShaderStage` 说明。遗弃直接使用 `TShader` 。
+>* 更新 `TShader` 使 `TSpecializationConstant` 转移至 `TShader` 内部。
+>* 更新 `TShader` 中 `TSpecializationConstant` 存储结构。使用 `unordered_map` 存储，与 `id` 号对应。
+>* 遗弃 `TShader` 中 `SetConstant(...)` 相关操作。
+>* 更新 `TComputePipeline` 中 `SpecializationConstant` 相关计算。
 
 ## 2025/8/13
 

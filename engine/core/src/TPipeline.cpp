@@ -29,7 +29,7 @@ void Turbo::Core::TPipeline::InternalCreate()
 
     std::map</*set*/ uint32_t, std::vector<TDescriptor *>, bool (*)(uint32_t, uint32_t)> descriptor_set_map(DescriptorSetMapCompFunction);
 
-    std::map</*constant_id*/ uint32_t, TSpecializationConstant> specialization_constant_map;
+    // std::map</*constant_id*/ uint32_t, TSpecializationConstant> specialization_constant_map;
 
     for (TShader *shader_item : this->shaders)
     {
@@ -331,7 +331,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayou
 
 Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShaderStage> &shaderStages, TPipelineCache *pipelineCache) : Turbo::Core::TVulkanHandle()
 {
-    if (Turbo::Core::TReferenced::Valid(device))
+    if (Turbo::Core::TReferenced::Valid(device) && !std::empty(shaderStages))
     {
         this->device = device;
         this->type = TPipelineType::Graphics;
@@ -339,7 +339,7 @@ Turbo::Core::TPipeline::TPipeline(TDevice *device, const TPipelineLayout::TLayou
 
         if (shaderStages.size() == 1)
         {
-            auto compute_shader = shaderStages.begin();
+            auto compute_shader = this->shaderStages.begin();
             if (compute_shader->Valid() && compute_shader->GetShader()->GetType() == TShaderType::COMPUTE)
             {
                 this->type = TPipelineType::Compute;

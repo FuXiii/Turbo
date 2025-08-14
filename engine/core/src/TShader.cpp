@@ -32,7 +32,7 @@ std::string Turbo::Core::TInterface::ToString() const
     return Turbo::Core::TStructMember::ToString();
 }
 
-Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+Turbo::Core::TShader::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
 {
     this->id = id;
     this->name = name;
@@ -40,27 +40,34 @@ Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const
     this->width = width;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetConstantID() const
+Turbo::Core::TShader::TSpecializationConstant::TSpecializationConstant(const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+{
+    this->name = name;
+    this->descriptorDataType = descriptorDataType;
+    this->width = width;
+}
+
+uint32_t Turbo::Core::TShader::TSpecializationConstant::GetConstantID() const
 {
     return this->id;
 }
 
-const std::string &Turbo::Core::TSpecializationConstant::GetName() const
+const std::string &Turbo::Core::TShader::TSpecializationConstant::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType() const
+Turbo::Core::TDescriptorDataType Turbo::Core::TShader::TSpecializationConstant::GetDescriptorDataType() const
 {
     return this->descriptorDataType;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetWidth() const
+uint32_t Turbo::Core::TShader::TSpecializationConstant::GetWidth() const
 {
     return this->width;
 }
 
-std::string Turbo::Core::TSpecializationConstant::ToString() const
+std::string Turbo::Core::TShader::TSpecializationConstant::ToString() const
 {
     return std::string();
 }
@@ -1019,8 +1026,9 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t width = type.width;
 
         Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
-        Turbo::Core::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
-        this->specializationConstants.push_back(specialization_sonstant);
+        // Turbo::Core::TShader::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
+        Turbo::Core::TShader::TSpecializationConstant specialization_sonstant(name, descriptor_data_type, width);
+        this->specializationConstants.insert(std::make_pair(constant_id, specialization_sonstant));
     }
 }
 
@@ -1359,7 +1367,7 @@ std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs() const
     return this->outputs;
 }
 
-const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants() const
+const std::unordered_map<std::uint32_t, Turbo::Core::TShader::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants() const
 {
     return this->specializationConstants;
 }

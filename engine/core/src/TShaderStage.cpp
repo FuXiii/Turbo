@@ -109,6 +109,11 @@ Turbo::Core::TDescriptorDataType Turbo::Core::TShaderStage::TSpecializationConst
     return this->type;
 }
 
+std::uint8_t Turbo::Core::TShaderStage::TSpecializationConstants::TSpecializationConstant::GetSize() const
+{
+    return this->size;
+}
+
 bool Turbo::Core::TShaderStage::TSpecializationConstants::TSpecializationConstant::GetBool() const
 {
     bool result = false;
@@ -282,6 +287,31 @@ bool Turbo::Core::TShaderStage::TSpecializationConstants::Empty() const
     return this->specializationConstants.empty();
 }
 
+std::size_t Turbo::Core::TShaderStage::TSpecializationConstants::Size() const
+{
+    return this->specializationConstants.size();
+}
+
+bool Turbo::Core::TShaderStage::TSpecializationConstants::Has(const TShaderStage::TSpecializationConstants::TID &id, TShaderStage::TSpecializationConstants::TSpecializationConstant *specializationConstant) const
+{
+    bool result = false;
+    auto find_result = this->specializationConstants.find(id);
+    if (find_result != this->specializationConstants.end())
+    {
+        result = true;
+        if (specializationConstant != nullptr)
+        {
+            (*specializationConstant) = find_result->second;
+        }
+    }
+    return result;
+}
+
+const Turbo::Core::TShaderStage::TSpecializationConstants::TSpecializationConstant &Turbo::Core::TShaderStage::TSpecializationConstants::Get(const Turbo::Core::TShaderStage::TSpecializationConstants::TID &id) const
+{
+    return this->specializationConstants.at(id);
+}
+
 Turbo::Core::TShaderStage::TSpecializationConstants::TSpecializationConstantsMap::const_iterator Turbo::Core::TShaderStage::TSpecializationConstants::begin() const noexcept
 {
     return this->specializationConstants.begin();
@@ -365,7 +395,7 @@ const Turbo::Core::TShaderStage::TSpecializationConstants &Turbo::Core::TShaderS
     return this->specializationConstants;
 }
 
-const Turbo::Core::TShader *Turbo::Core::TShaderStage::GetShader() const
+const Turbo::Core::TRefPtr<Turbo::Core::TShader> &Turbo::Core::TShaderStage::GetShader() const
 {
     return this->shader;
 }

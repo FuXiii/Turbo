@@ -37,6 +37,8 @@ class TShaderStage
 
             Turbo::Core::TDescriptorDataType GetType() const;
 
+            std::uint8_t GetSize() const;
+
             bool GetBool() const;
             int GetInt() const;
             std::uint32_t GetUint32() const;
@@ -63,6 +65,9 @@ class TShaderStage
         void Merge(const TShaderStage::TSpecializationConstants::TID &id, const double &value);
 
         bool Empty() const;
+        std::size_t Size() const;
+        bool Has(const TShaderStage::TSpecializationConstants::TID &id, TShaderStage::TSpecializationConstants::TSpecializationConstant *specializationConstant = nullptr) const;
+        const TShaderStage::TSpecializationConstants::TSpecializationConstant &Get(const TShaderStage::TSpecializationConstants::TID &id) const;
 
         TSpecializationConstantsMap::const_iterator begin() const noexcept;
         TSpecializationConstantsMap::const_iterator end() const noexcept;
@@ -72,7 +77,7 @@ class TShaderStage
 
   private:
     Turbo::Core::TRefPtr<TShader> shader;
-    TSpecializationConstants specializationConstants;
+    TShaderStage::TSpecializationConstants specializationConstants;
 
   public:
     TShaderStage() = default;
@@ -85,7 +90,7 @@ class TShaderStage
     void Merge(const TShaderStage::TSpecializationConstants::TID &id, const double &value);
 
     const TShaderStage::TSpecializationConstants &GetSpecializationConstants() const;
-    const TShader *GetShader() const;
+    const Turbo::Core::TRefPtr<TShader> &GetShader() const;
 
     bool Valid() const;
 };
