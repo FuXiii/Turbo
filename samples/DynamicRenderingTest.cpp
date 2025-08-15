@@ -258,14 +258,17 @@ int main()
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> shaders{vertex_shader, fragment_shader};
-
     // TODO: we need to create Dynamic Rendering Pipeline
     Turbo::Core::TAttachmentsFormat rendering_attachments = {};
     rendering_attachments.AddColorAttachmentFormat(swapchain_image_views[0]->GetFormat().GetFormatType());
     rendering_attachments.SetDepthAttachmentFormat(depth_image_view->GetFormat().GetFormatType());
 
-    Turbo::Core::TRefPtr<Turbo::Core::TRenderingPipeline> rendering_pipeline = new Turbo::Core::TRenderingPipeline(rendering_attachments, vertex_bindings, vertex_shader, fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    Turbo::Core::TPipelineLayout::TLayout rendering_pipeline_layout;
+    rendering_pipeline_layout << *vertex_shader << *fragment_shader;
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShaderStage> vertex_shader_stage = new Turbo::Core::TVertexShaderStage(vertex_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShaderStage> fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(fragment_shader);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TRenderingPipeline> rendering_pipeline = new Turbo::Core::TRenderingPipeline(rendering_pipeline_layout, rendering_attachments, vertex_bindings, vertex_shader_stage, fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(rendering_pipeline->GetPipelineLayout());
     pipeline_descriptor_set->BindData(0, 0, 0, buffers);

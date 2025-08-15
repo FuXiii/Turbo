@@ -1909,7 +1909,8 @@ int main()
 
         Turbo::Core::TPipelineLayout::TLayout vertex_buffer_update_compute_pipeline_layout;
         vertex_buffer_update_compute_pipeline_layout << (*vertex_buffer_update_compute_shader);
-        vertex_buffer_update_compute_pipeline = new Turbo::Core::TComputePipeline(vertex_buffer_update_compute_pipeline_layout, vertex_buffer_update_compute_shader);
+        Turbo::Core::TRefPtr<Turbo::Core::TComputeShaderStage> vertex_buffer_update_compute_shader_stage = new Turbo::Core::TComputeShaderStage(vertex_buffer_update_compute_shader);
+        vertex_buffer_update_compute_pipeline = new Turbo::Core::TComputePipeline(vertex_buffer_update_compute_pipeline_layout, vertex_buffer_update_compute_shader_stage);
 
         vertex_buffer_update_compute_pipeline_descriptor_set = descriptor_pool->Allocate(vertex_buffer_update_compute_pipeline->GetPipelineLayout());
         vertex_buffer_update_compute_pipeline_descriptor_set->BindData(0, 0, device_local_vertex_buffer);

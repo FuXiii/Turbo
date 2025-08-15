@@ -408,3 +408,55 @@ bool Turbo::Core::TShaderStage::Valid() const
 Turbo::Core::TComputeShaderStage::TComputeShaderStage(TComputeShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
 {
 }
+
+Turbo::Core::TVertexShaderStage::TVertexShaderStage(TVertexShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TTessellationControlShaderStage::TTessellationControlShaderStage(TTessellationControlShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TTessellationEvaluationShaderStage::TTessellationEvaluationShaderStage(TTessellationEvaluationShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TGeometryShaderStage::TGeometryShaderStage(TGeometryShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TFragmentShaderStage::TFragmentShaderStage(TFragmentShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TTaskShaderStage::TTaskShaderStage(TTaskShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TMeshShaderStage::TMeshShaderStage(TMeshShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TRayGenerationShaderStage::TRayGenerationShaderStage(TRayGenerationShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TAnyHitShaderStage::TAnyHitShaderStage(TAnyHitShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TClosestHitShaderStage::TClosestHitShaderStage(TClosestHitShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TMissShaderStage::TMissShaderStage(TMissShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TIntersectionShaderStage::TIntersectionShaderStage(TIntersectionShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
+
+Turbo::Core::TCallableShaderStage::TCallableShaderStage(TCallableShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}

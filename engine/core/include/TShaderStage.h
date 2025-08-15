@@ -101,6 +101,98 @@ class TComputeShaderStage : public TShaderStage
     TComputeShaderStage() = default;
     TComputeShaderStage(TComputeShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
 };
+
+class TVertexShaderStage : public TShaderStage
+{
+  public:
+    TVertexShaderStage() = default;
+    TVertexShaderStage(TVertexShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TTessellationControlShaderStage : public TShaderStage
+{
+  public:
+    TTessellationControlShaderStage() = default;
+    TTessellationControlShaderStage(TTessellationControlShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TTessellationEvaluationShaderStage : public TShaderStage
+{
+  public:
+    TTessellationEvaluationShaderStage() = default;
+    TTessellationEvaluationShaderStage(TTessellationEvaluationShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TGeometryShaderStage : public TShaderStage
+{
+  public:
+    TGeometryShaderStage() = default;
+    TGeometryShaderStage(TGeometryShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TFragmentShaderStage : public TShaderStage
+{
+  public:
+    TFragmentShaderStage() = default;
+    TFragmentShaderStage(TFragmentShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TTaskShaderStage : public TShaderStage
+{
+  public:
+    TTaskShaderStage() = default;
+    TTaskShaderStage(TTaskShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TMeshShaderStage : public TShaderStage
+{
+  public:
+    TMeshShaderStage() = default;
+    TMeshShaderStage(TMeshShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TRayGenerationShaderStage : public TShaderStage
+{
+  public:
+    TRayGenerationShaderStage() = default;
+    TRayGenerationShaderStage(TRayGenerationShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TAnyHitShaderStage : public TShaderStage
+{
+  public:
+    TAnyHitShaderStage() = default;
+    TAnyHitShaderStage(TAnyHitShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TClosestHitShaderStage : public TShaderStage
+{
+  public:
+    TClosestHitShaderStage() = default;
+    TClosestHitShaderStage(TClosestHitShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TMissShaderStage : public TShaderStage
+{
+  public:
+    TMissShaderStage() = default;
+    TMissShaderStage(TMissShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TIntersectionShaderStage : public TShaderStage
+{
+  public:
+    TIntersectionShaderStage() = default;
+    TIntersectionShaderStage(TIntersectionShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
+class TCallableShaderStage : public TShaderStage
+{
+  public:
+    TCallableShaderStage() = default;
+    TCallableShaderStage(TCallableShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
+};
+
 } // namespace Core
 } // namespace Turbo
 #endif // !TURBO_CORE_TSHADERSTAGE_H

@@ -367,11 +367,15 @@ int main()
 
     Turbo::Core::TPipelineLayout::TLayout perlin_worley_compute_pipeline_layout;
     perlin_worley_compute_pipeline_layout << (*my_perlin_worley_computer_shader);
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(perlin_worley_compute_pipeline_layout, my_perlin_worley_computer_shader);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TComputeShaderStage> my_perlin_worley_computer_shader_stage = new Turbo::Core::TComputeShaderStage(my_perlin_worley_computer_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> perlin_worley_compute_pipeline = new Turbo::Core::TComputePipeline(perlin_worley_compute_pipeline_layout, my_perlin_worley_computer_shader_stage);
 
     Turbo::Core::TPipelineLayout::TLayout worley_compute_pipeline_layout;
     worley_compute_pipeline_layout << (*my_worley_computer_shader);
-    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> worley_compute_pipeline = new Turbo::Core::TComputePipeline(worley_compute_pipeline_layout, my_worley_computer_shader);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TComputeShaderStage> my_worley_computer_shader_stage = new Turbo::Core::TComputeShaderStage(my_perlin_worley_computer_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TComputePipeline> worley_compute_pipeline = new Turbo::Core::TComputePipeline(worley_compute_pipeline_layout, my_worley_computer_shader_stage);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TImageView>> perlin_worley_compute_pipeline_image_views;
     perlin_worley_compute_pipeline_image_views.push_back(perlin_worley_noise_3d_image_view);

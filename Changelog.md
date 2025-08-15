@@ -10,6 +10,49 @@
 >* 更新 `TPipeline` 增加 `ShaderStageToSpecializationInfo(...)` 。用于将 `SpecializationInfo` 创建信息自动从 `ShaderStage` 中提取出来。
 >* 更新 `TGraphicsPipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
 >* 更新 `TComputePipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+>* 更新 `TPipeline` 遗弃 `TShader` 的相关使用，转而使用 `TShaderStage`。
+>* 更新 `TPipeline` 遗弃老版本的构造函数，转而使用 `TShaderStage`。
+>* 更新 `TGraphicsPipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TRenderingPipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TComputePipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TComputePipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TShader` 移除 `specialization constants` 设置有关的功能。
+>* 更新 `samples/Auroras.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/BRDF.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/CineShaderLava.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputePipelineTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputerPipelineGeneratePerlinWorley.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputerPipelineGenerateWorley.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/DynamicRenderingTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/GeometryShaderTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/GreenFieldDiorama.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/HelloTriangle.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ImGuiTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/InfiniteCoordinateAxis.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/InstancedDrawTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/IspGlassball11Mix.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/LineAndLineWidth.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/MeshShaderTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/MultiDrawTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/NormalTexture.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/Octagrams.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PBRTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PerlinWorleyNoiseTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PointCloud.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ProteanClouds.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureCombinedImageSampler.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureHelloTriangle.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureIndexDraw.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureSeparateImageSampler.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PushConstantTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingBoundingBoxTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingPerlinWorleyNoise.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/SecondaryCommandBufferTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ShaderIncludeTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/SpecializationConstantsTest.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/VolumetricCloud.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/VulkanKHRRayTracingTestForAnimationBLAS.cpp` 适配新版 TPipelineLayout::TLayout` 和 `ShaderStage`。
 
 ## 2025/8/14
 

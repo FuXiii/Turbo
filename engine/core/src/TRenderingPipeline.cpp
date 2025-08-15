@@ -94,15 +94,16 @@ void Turbo::Core::TRenderingPipeline::InternalCreate()
 {
     std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
 
-    std::vector<TShader *> shaders = this->GetShaders();
-    for (auto &shader_item : shaders)
+    auto shader_stages = this->GetShaderStages();
+    for (auto &shader_stage_item : shader_stages)
     {
+        auto shader = shader_stage_item->GetShader();
         VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
         vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vk_pipeline_shader_stage_create_info.pNext = nullptr;
         vk_pipeline_shader_stage_create_info.flags = 0;
-        vk_pipeline_shader_stage_create_info.stage = shader_item->GetVkShaderStageFlagBits();
-        vk_pipeline_shader_stage_create_info.module = shader_item->GetVkShaderModule();
+        vk_pipeline_shader_stage_create_info.stage = shader->GetVkShaderStageFlagBits();
+        vk_pipeline_shader_stage_create_info.module = shader->GetVkShaderModule();
         vk_pipeline_shader_stage_create_info.pName = "main";
         vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
 
@@ -381,9 +382,9 @@ void Turbo::Core::TRenderingPipeline::InternalDestroy()
     device->GetDeviceDriver()->vkDestroyPipeline(vk_device, this->vkPipeline, allocator);
 }
 
-Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TAttachmentsFormat &renderingAttachments, const std::vector<TVertexBinding> &vertexBindings, TVertexShader *vertexShader, TFragmentShader *fragmentShader, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShader->GetDevice(), vertexShader, fragmentShader)
+Turbo::Core::TRenderingPipeline::TRenderingPipeline(const TPipelineLayout::TLayout &layout, const TAttachmentsFormat &renderingAttachments, const std::vector<TVertexBinding> &vertexBindings, TVertexShaderStage *vertexShaderStage, TFragmentShaderStage *fragmentShaderStage, TTopologyType topology, bool primitiveRestartEnable, bool depthClampEnable, bool rasterizerDiscardEnable, TPolygonMode polygonMode, TCullModes cullMode, TFrontFace frontFace, bool depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth, bool multisampleEnable, TSampleCountBits sample, bool depthTestEnable, bool depthWriteEnable, TCompareOp depthCompareOp, bool depthBoundsTestEnable, bool stencilTestEnable, TStencilOp frontFailOp, TStencilOp frontPassOp, TStencilOp frontDepthFailOp, TCompareOp frontCompareOp, uint32_t frontCompareMask, uint32_t frontWriteMask, uint32_t frontReference, TStencilOp backFailOp, TStencilOp backPassOp, TStencilOp backDepthFailOp, TCompareOp backCompareOp, uint32_t backCompareMask, uint32_t backWriteMask, uint32_t backReference, float minDepthBounds, float maxDepthBounds, bool logicOpEnable, TLogicOp logicOp, bool blendEnable, TBlendFactor srcColorBlendFactor, TBlendFactor dstColorBlendFactor, TBlendOp colorBlendOp, TBlendFactor srcAlphaBlendFactor, TBlendFactor dstAlphaBlendFactor, TBlendOp alphaBlendOp, float constantR, float constantG, float constantB, float constantA) : Turbo::Core::TPipeline(vertexShaderStage->GetShader()->GetDevice(), layout, {vertexShaderStage, fragmentShaderStage})
 {
-    Turbo::Core::TPhysicalDeviceFeatures physical_device_feature = vertexShader->GetDevice()->GetEnableDeviceFeatures();
+    Turbo::Core::TPhysicalDeviceFeatures physical_device_feature = vertexShaderStage->GetShader()->GetDevice()->GetEnableDeviceFeatures();
     if (physical_device_feature.dynamicRendering)
     {
         // VkPipelineRenderingCreateInfo

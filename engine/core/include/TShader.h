@@ -120,20 +120,6 @@ class TShader : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_DATA TShaderType type;
 
   public:
-    [[deprecated]] union TConstant {
-        bool boolValue;
-        int32_t intValue;
-        uint32_t uintValue;
-        float floatValue;
-        double doubleValue;
-    };
-
-    [[deprecated]] struct TConstValue
-    {
-        Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
-        TConstant value;
-    };
-
     class TLayout
     {
       public:
@@ -217,8 +203,6 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::string entryPoint;
 
-    [[deprecated]] std::map<uint32_t, TConstValue> specializationMap;
-
     TShader::TLayout layout;
 
   protected:
@@ -258,15 +242,6 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     TShaderType GetType() const;
     const TShader::TLayout &GetLayout() const;
-
-    //<specialization constants>
-    [[deprecated]] void SetConstant(uint32_t id, bool value);
-    [[deprecated]] void SetConstant(uint32_t id, int32_t value);
-    [[deprecated]] void SetConstant(uint32_t id, uint32_t value);
-    [[deprecated]] void SetConstant(uint32_t id, float value);
-    [[deprecated]] void SetConstant(uint32_t id, double value);
-    [[deprecated]] const std::map<uint32_t, TConstValue> &GetSpecializations() const;
-    //</specialization constants>
 
     const std::vector<uint32_t> &GetSpirV() const;
 
