@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <vector>
+#include <initializer_list>
 namespace Turbo
 {
 namespace Core
@@ -347,6 +348,44 @@ std::vector<Turbo::Core::TRefPtr<T>> PtrsToRefs(const std::vector<T *> &ptrs)
         for (size_t index = 0; index < size; index++)
         {
             refs[index] = ptrs[index];
+        }
+    }
+    return refs;
+}
+
+template <typename T>
+std::vector<T *> RefsToPtrs(const std::initializer_list<Turbo::Core::TRefPtr<T>> &refs)
+{
+    std::vector<T *> ptrs;
+    size_t size = refs.size();
+    if (size != 0)
+    {
+        ptrs.resize(size, nullptr);
+
+        size_t index = 0;
+        for (auto &item : ptrs)
+        {
+            ptrs[index] = item;
+            ++index;
+        }
+    }
+    return ptrs;
+}
+
+template <typename T>
+std::vector<Turbo::Core::TRefPtr<T>> PtrsToRefs(const std::initializer_list<T *> &ptrs)
+{
+    std::vector<Turbo::Core::TRefPtr<T>> refs;
+    size_t size = ptrs.size();
+    if (size != 0)
+    {
+        refs.resize(size, nullptr);
+
+        size_t index = 0;
+        for (auto &item : ptrs)
+        {
+            refs[index] = item;
+            ++index;
         }
     }
     return refs;

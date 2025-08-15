@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/15
+
+>* 更新 `TReferenced` 增加 `TMemory` 。用于纯内存管理。
+>* 更新 `TPipeline` 增加 `ShaderStageToSpecializationInfo(...)` 。用于将 `SpecializationInfo` 创建信息自动从 `ShaderStage` 中提取出来。
+>* 更新 `TGraphicsPipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+>* 更新 `TComputePipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+
 ## 2025/8/14
 
 >* 更新 `README` 增加 `submodule` 说明。

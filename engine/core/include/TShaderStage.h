@@ -7,7 +7,7 @@ namespace Turbo
 {
 namespace Core
 {
-class TShaderStage
+class TShaderStage : public Turbo::Core::TReferenced
 {
   public:
     class TSpecializationConstants
@@ -93,6 +93,13 @@ class TShaderStage
     const Turbo::Core::TRefPtr<TShader> &GetShader() const;
 
     bool Valid() const;
+};
+
+class TComputeShaderStage : public TShaderStage
+{
+  public:
+    TComputeShaderStage() = default;
+    TComputeShaderStage(TComputeShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants = {});
 };
 } // namespace Core
 } // namespace Turbo

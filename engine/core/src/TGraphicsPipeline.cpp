@@ -125,104 +125,46 @@ std::string Turbo::Core::TVertexBinding::ToString() const
 
 void Turbo::Core::TGraphicsPipeline::InternalCreate()
 {
-    std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
+    std::vector<std::pair<Turbo::Core::TRefPtr<Turbo::Core::TMemory>, Turbo::Core::TRefPtr<Turbo::Core::TMemory>>> specialization_info_datas;
+    std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos; // NOTE: need delete all pSpecializationInfo
 
-    std::vector<TShader *> shaders = this->GetShaders();
-    std::map<TRefPtr<TShader>, std::vector<VkSpecializationMapEntry>> shader_specialization_map_entry_map;
-    std::map<TRefPtr<TShader>, VkSpecializationInfo> shader_specialization_info_map;
-    for (auto &shader_item : shaders)
+    auto shader_stages = this->GetShaderStages();
+    for (auto &shader_item : shader_stages)
     {
-        const std::vector<TSpecializationConstant> &specialization_constants = shader_item->GetSpecializationConstants();
-        const std::map<uint32_t, TShader::TConstValue> &specializations = shader_item->GetSpecializations();
-
-        size_t data_size = 0;
-        for (auto &specialization_item : specializations)
+        if (Turbo::Core::TReferenced::Valid(shader_item))
         {
-            uint32_t id = specialization_item.first;
-            TShader::TConstValue value = specialization_item.second;
+            auto &shader = shader_item->GetShader();
+            VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
+            vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            vk_pipeline_shader_stage_create_info.pNext = nullptr;
+            vk_pipeline_shader_stage_create_info.flags = 0;
+            vk_pipeline_shader_stage_create_info.stage = shader->GetVkShaderStageFlagBits();
+            vk_pipeline_shader_stage_create_info.module = shader->GetVkShaderModule();
+            vk_pipeline_shader_stage_create_info.pName = "main";
 
-            for (const TSpecializationConstant &specialization_constant_item : specialization_constants)
             {
-                uint32_t constant_id = specialization_constant_item.GetConstantID();
-                if (constant_id == id)
+                auto specialization_info_data = this->ShaderStageToSpecializationInfo(shader_item);
+                if (specialization_info_data.second.Valid())
                 {
-                    TDescriptorDataType constant_type = specialization_constant_item.GetDescriptorDataType();
-                    uint32_t constant_width = specialization_constant_item.GetWidth() / 8;
-                    if (constant_type == TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN)
-                    {
-                        constant_width = sizeof(VkBool32);
-                    }
+                    specialization_info_datas.push_back(specialization_info_data);
 
-                    if (constant_type != TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN && constant_type == value.dataType && constant_width != 0)
+                    VkSpecializationInfo *vk_specialization_info = new VkSpecializationInfo(); // NOTE: need delete
                     {
-                        VkSpecializationMapEntry vk_specialization_map_entry = {};
-                        vk_specialization_map_entry.constantID = id;
-                        vk_specialization_map_entry.offset = data_size;
-                        vk_specialization_map_entry.size = constant_width;
-                        shader_specialization_map_entry_map[shader_item].push_back(vk_specialization_map_entry);
-                        data_size = data_size + constant_width;
+                        vk_specialization_info->mapEntryCount = specialization_info_data.first->Size() / sizeof(VkSpecializationMapEntry);
+                        vk_specialization_info->pMapEntries = static_cast<VkSpecializationMapEntry *>(specialization_info_data.first->Data());
+                        vk_specialization_info->dataSize = specialization_info_data.second->Size();
+                        vk_specialization_info->pData = specialization_info_data.second->Data();
                     }
-                    break;
+                    vk_pipeline_shader_stage_create_info.pSpecializationInfo = vk_specialization_info;
+                }
+                else
+                {
+                    vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
                 }
             }
+
+            vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
         }
-
-        void *specialization_constants_data = malloc(data_size);
-        for (VkSpecializationMapEntry &vk_specialization_map_entry_item : shader_specialization_map_entry_map[shader_item])
-        {
-            uint32_t constant_id = vk_specialization_map_entry_item.constantID;
-            uint32_t offset = vk_specialization_map_entry_item.offset;
-            size_t size = vk_specialization_map_entry_item.size;
-
-            TDescriptorDataType data_type = specializations.at(constant_id).dataType;
-            TShader::TConstant data_value = specializations.at(constant_id).value;
-            switch (data_type)
-            {
-            case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN: {
-                VkBool32 value = data_value.boolValue ? VK_TRUE : VK_FALSE;
-                memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
-            }
-            break;
-            case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT: {
-                int value = data_value.intValue;
-                memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
-            }
-            break;
-            case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT: {
-                uint32_t value = data_value.uintValue;
-                memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
-            }
-            break;
-            case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT: {
-                float value = data_value.floatValue;
-                memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
-            }
-            break;
-            case TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE: {
-                double value = data_value.doubleValue;
-                memcpy(static_cast<uint8_t *>(specialization_constants_data) + offset, &value, size);
-            }
-            break;
-            default: {
-            }
-            }
-        }
-
-        shader_specialization_info_map[shader_item].mapEntryCount = shader_specialization_map_entry_map[shader_item].size();
-        shader_specialization_info_map[shader_item].pMapEntries = shader_specialization_map_entry_map[shader_item].data();
-        shader_specialization_info_map[shader_item].dataSize = data_size;
-        shader_specialization_info_map[shader_item].pData = specialization_constants_data;
-
-        VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
-        vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vk_pipeline_shader_stage_create_info.pNext = nullptr;
-        vk_pipeline_shader_stage_create_info.flags = 0;
-        vk_pipeline_shader_stage_create_info.stage = shader_item->GetVkShaderStageFlagBits();
-        vk_pipeline_shader_stage_create_info.module = shader_item->GetVkShaderModule();
-        vk_pipeline_shader_stage_create_info.pName = "main";
-        vk_pipeline_shader_stage_create_info.pSpecializationInfo = &shader_specialization_info_map[shader_item];
-
-        vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
     }
 
     std::vector<VkVertexInputBindingDescription> vk_vertex_input_binding_descriptions;
@@ -252,30 +194,36 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
     }
 
     VkPipelineVertexInputStateCreateInfo vk_pipeline_vertex_input_state_create_info = {};
-    vk_pipeline_vertex_input_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vk_pipeline_vertex_input_state_create_info.pNext = nullptr;
-    vk_pipeline_vertex_input_state_create_info.flags = 0;
-    vk_pipeline_vertex_input_state_create_info.vertexBindingDescriptionCount = vk_vertex_input_binding_descriptions.size();
-    vk_pipeline_vertex_input_state_create_info.pVertexBindingDescriptions = vk_vertex_input_binding_descriptions.data();
-    vk_pipeline_vertex_input_state_create_info.vertexAttributeDescriptionCount = vk_vertex_input_attribute_descriptions.size();
-    vk_pipeline_vertex_input_state_create_info.pVertexAttributeDescriptions = vk_vertex_input_attribute_descriptions.data();
+    {
+        vk_pipeline_vertex_input_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vk_pipeline_vertex_input_state_create_info.pNext = nullptr;
+        vk_pipeline_vertex_input_state_create_info.flags = 0;
+        vk_pipeline_vertex_input_state_create_info.vertexBindingDescriptionCount = vk_vertex_input_binding_descriptions.size();
+        vk_pipeline_vertex_input_state_create_info.pVertexBindingDescriptions = vk_vertex_input_binding_descriptions.data();
+        vk_pipeline_vertex_input_state_create_info.vertexAttributeDescriptionCount = vk_vertex_input_attribute_descriptions.size();
+        vk_pipeline_vertex_input_state_create_info.pVertexAttributeDescriptions = vk_vertex_input_attribute_descriptions.data();
+    }
 
     VkPipelineInputAssemblyStateCreateInfo vk_pipeline_input_assembly_state_create_info = {};
-    vk_pipeline_input_assembly_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    vk_pipeline_input_assembly_state_create_info.pNext = nullptr;
-    vk_pipeline_input_assembly_state_create_info.flags = 0;
-    vk_pipeline_input_assembly_state_create_info.topology = (VkPrimitiveTopology)this->topology;
-    vk_pipeline_input_assembly_state_create_info.primitiveRestartEnable = VK_FALSE;
-    if (this->primitiveRestartEnable)
     {
-        vk_pipeline_input_assembly_state_create_info.primitiveRestartEnable = VK_TRUE;
+        vk_pipeline_input_assembly_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        vk_pipeline_input_assembly_state_create_info.pNext = nullptr;
+        vk_pipeline_input_assembly_state_create_info.flags = 0;
+        vk_pipeline_input_assembly_state_create_info.topology = (VkPrimitiveTopology)this->topology;
+        vk_pipeline_input_assembly_state_create_info.primitiveRestartEnable = VK_FALSE;
+        if (this->primitiveRestartEnable)
+        {
+            vk_pipeline_input_assembly_state_create_info.primitiveRestartEnable = VK_TRUE;
+        }
     }
 
     VkPipelineTessellationStateCreateInfo vk_pipeline_tessellation_state_create_info = {};
-    vk_pipeline_tessellation_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-    vk_pipeline_tessellation_state_create_info.pNext = nullptr;
-    vk_pipeline_tessellation_state_create_info.flags = 0;
-    vk_pipeline_tessellation_state_create_info.patchControlPoints = this->patchControlPoints;
+    {
+        vk_pipeline_tessellation_state_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+        vk_pipeline_tessellation_state_create_info.pNext = nullptr;
+        vk_pipeline_tessellation_state_create_info.flags = 0;
+        vk_pipeline_tessellation_state_create_info.patchControlPoints = this->patchControlPoints;
+    }
 
     std::vector<VkViewport> vk_viewports;
     VkViewport vk_viewport = {};
@@ -488,9 +436,12 @@ void Turbo::Core::TGraphicsPipeline::InternalCreate()
         result = device->GetDeviceDriver()->vkCreateGraphicsPipelines(vk_device, VK_NULL_HANDLE, 1, &vk_graphics_pipeline_create_info, allocator, &this->vkPipeline);
     }
 
-    for (auto &shader_specialization_info_item : shader_specialization_info_map)
+    for (auto &pipeline_shader_stage_create_info_item : vk_pipeline_shader_stage_create_infos)
     {
-        free((void *)shader_specialization_info_item.second.pData);
+        if (pipeline_shader_stage_create_info_item.pSpecializationInfo != nullptr)
+        {
+            delete pipeline_shader_stage_create_info_item.pSpecializationInfo;
+        }
     }
 
     if (result != VkResult::VK_SUCCESS)

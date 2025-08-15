@@ -11,6 +11,7 @@
 #include <map>
 #include "TPipelineLayout.h"
 #include <initializer_list>
+#include <tuple>
 
 namespace Turbo
 {
@@ -66,7 +67,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE TRefPtr<TPipelineLayout> pipelineLayout; // NOTE: Create Internal
     [[deprecated]] T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShader>> shaders;
-    T_VULKAN_HANDLE_CHILDREN std::vector<TShaderStage> shaderStages; // NOTE: new!
+    T_VULKAN_HANDLE_CHILDREN std::vector<TRefPtr<TShaderStage>> shaderStages; // NOTE: new!
     T_VULKAN_HANDLE_CHILDREN TRefPtr<TPipelineCache> pipelineCache;
     TPipelineType type;
 
@@ -78,6 +79,8 @@ class TPipeline : public Turbo::Core::TVulkanHandle
   protected:
     virtual void InternalCreate() override;
     virtual void InternalDestroy() override;
+
+    std::pair<Turbo::Core::TRefPtr<Turbo::Core::TMemory> /*vector<VkSpecializationMapEntry>*/, Turbo::Core::TRefPtr<Turbo::Core::TMemory> /*pData*/> ShaderStageToSpecializationInfo(TShaderStage *shaderStage);
 
   public:
     [[deprecated]] TPipeline(const TRefPtr<TDevice> &device, TPipelineType type, std::vector<TRefPtr<TShader>> &shaders, const TRefPtr<TPipelineCache> &pipelineCache = nullptr);
@@ -98,7 +101,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
     [[deprecated]] TPipeline(TDevice *device, TComputeShader *computeShader, TPipelineCache *pipelineCache = nullptr); // for compute pipeline
 
     [[deprecated]] TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShader *> &shaders, TPipelineCache *pipelineCache = nullptr);
-    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShaderStage> &shaderStages, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
+    TPipeline(TDevice *device, const TPipelineLayout::TLayout &layout, const std::initializer_list<TShaderStage*> &shaderStages, TPipelineCache *pipelineCache = nullptr); // NOTE: new!
 
   protected:
     virtual ~TPipeline();
@@ -109,7 +112,7 @@ class TPipeline : public Turbo::Core::TVulkanHandle
 
     TPipelineType GetType() const;
     [[deprecated]] std::vector<TShader *> GetShaders();
-    const std::vector<TShaderStage> &GetShaderStages() const;
+    std::vector<TShaderStage*> GetShaderStages() const;
 
     TDevice *GetDevice();
     TPipelineCache *GetPipelineCache();

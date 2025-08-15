@@ -404,3 +404,7 @@ bool Turbo::Core::TShaderStage::Valid() const
 {
     return this->shader.Valid();
 }
+
+Turbo::Core::TComputeShaderStage::TComputeShaderStage(TComputeShader *shader, const TShaderStage::TSpecializationConstants &specializationConstants) : TShaderStage(shader, specializationConstants)
+{
+}
