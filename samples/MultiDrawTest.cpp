@@ -1023,7 +1023,7 @@ int main()
     float angle = 180;
     float _time = glfwGetTime();
 
-    float __scale = 1;
+    float my_scale = 0.5;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -1037,7 +1037,7 @@ int main()
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
         value_buffer->Unmap();
 
-        my_buffer_data.scale = __scale;
+        my_buffer_data.scale = my_scale;
         _ptr = value_buffer1->Map();
         memcpy(_ptr, &my_buffer_data, sizeof(my_buffer_data));
         value_buffer1->Unmap();
@@ -1158,7 +1158,7 @@ int main()
                 ImGui::SliderFloat("metallic", &push_constant_data.metallic, 0.0f, 1.0f);     // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("roughness", &push_constant_data.roughness, 0.0f, 1.0f);   // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("value", &my_buffer_data.value, -10.0f, 0.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("scale", &__scale, 0.0f, 1.0f);                            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::SliderFloat("scale", &my_scale, 0.0f, 1.0f);                            // Edit 1 float using a slider from 0.0f to 1.0f
 
                 if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                     counter++;

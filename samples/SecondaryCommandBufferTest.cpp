@@ -308,6 +308,7 @@ int main()
     PUSH_CONSTANT_DATA push_constant_data = {};
     push_constant_data.alpha = 1;
     push_constant_data.intensity = 20;
+    push_constant_data.roughness = 0.3;
 
     MY_BUFFER_DATA my_buffer_data = {};
     my_buffer_data.value = -5;

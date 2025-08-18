@@ -26,6 +26,23 @@
 >* 更新 `sample` 中 `VulkanKHRRayTracingTestForLighting` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
 >* 更新 `sample` 中 `VulkanKHRRayTracingTestForLightingShadow` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
 >* 更新 `sample` 中 `VulkanKHRRayTracingTestForLightingShadowWithTexture` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `main` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWIndByInstancedLines.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByInstancedPoints.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByPatch.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByTex.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `LineAndLineWidth.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `MultiDrawTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `SecondaryCommandBufferTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForMultiClosestHits.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForReflections.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForReflections_WithoutLimited.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanRayQueryTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `utils/ImGuiPass.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `utils/InfiniteCoordinateAxisPass.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 修正 `TComputePipeline` 中对于无效 `SpecializationInfo` 进行计算的 `Bug`。
+>* 修正 `TRenderingPipeline` 中对于 `TRenderingAttachment` 成员指针未初始化导致的内存访问 `Bug`。
+>* 更新 `TRenderingPipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
 
 ## 2025/8/15
 

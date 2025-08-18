@@ -14,14 +14,8 @@ void Turbo::Core::TComputePipeline::InternalCreate()
         throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TComputePipeline::InternalCreate", "Invalid shader stage");
     }
     auto compute_shader = shader_stage->GetShader();
-
     auto specialization_info_data = this->ShaderStageToSpecializationInfo(shader_stage);
-
     VkSpecializationInfo vk_specialization_info = {};
-    vk_specialization_info.mapEntryCount = specialization_info_data.first->Size() / sizeof(VkSpecializationMapEntry);
-    vk_specialization_info.pMapEntries = static_cast<VkSpecializationMapEntry *>(specialization_info_data.first->Data());
-    vk_specialization_info.dataSize = specialization_info_data.second->Size();
-    vk_specialization_info.pData = specialization_info_data.second->Data();
 
     VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
     vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -30,7 +24,22 @@ void Turbo::Core::TComputePipeline::InternalCreate()
     vk_pipeline_shader_stage_create_info.stage = compute_shader->GetVkShaderStageFlagBits();
     vk_pipeline_shader_stage_create_info.module = compute_shader->GetVkShaderModule();
     vk_pipeline_shader_stage_create_info.pName = "main";
-    vk_pipeline_shader_stage_create_info.pSpecializationInfo = specialization_info_data.second.Valid() ? &vk_specialization_info : nullptr;
+
+    {
+        if (specialization_info_data.second.Valid())
+        {
+            vk_specialization_info.mapEntryCount = specialization_info_data.first->Size() / sizeof(VkSpecializationMapEntry);
+            vk_specialization_info.pMapEntries = static_cast<VkSpecializationMapEntry *>(specialization_info_data.first->Data());
+            vk_specialization_info.dataSize = specialization_info_data.second->Size();
+            vk_specialization_info.pData = specialization_info_data.second->Data();
+
+            vk_pipeline_shader_stage_create_info.pSpecializationInfo = &vk_specialization_info;
+        }
+        else
+        {
+            vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
+        }
+    }
 
     VkComputePipelineCreateInfo vk_compute_pipeline_create_info = {};
     vk_compute_pipeline_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;

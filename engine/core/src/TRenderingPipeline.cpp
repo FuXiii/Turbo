@@ -92,22 +92,64 @@ const Turbo::Core::TFormatType &Turbo::Core::TAttachmentsFormat::GetStencilAttac
 
 void Turbo::Core::TRenderingPipeline::InternalCreate()
 {
-    std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
+    // std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos;
+
+    // auto shader_stages = this->GetShaderStages();
+    // for (auto &shader_stage_item : shader_stages)
+    // {
+    //     auto shader = shader_stage_item->GetShader();
+    //     VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
+    //     vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    //     vk_pipeline_shader_stage_create_info.pNext = nullptr;
+    //     vk_pipeline_shader_stage_create_info.flags = 0;
+    //     vk_pipeline_shader_stage_create_info.stage = shader->GetVkShaderStageFlagBits();
+    //     vk_pipeline_shader_stage_create_info.module = shader->GetVkShaderModule();
+    //     vk_pipeline_shader_stage_create_info.pName = "main";
+    //     vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
+
+    //     vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
+    // }
+
+    std::vector<std::pair<Turbo::Core::TRefPtr<Turbo::Core::TMemory>, Turbo::Core::TRefPtr<Turbo::Core::TMemory>>> specialization_info_datas;
+    std::vector<VkPipelineShaderStageCreateInfo> vk_pipeline_shader_stage_create_infos; // NOTE: need delete all pSpecializationInfo
 
     auto shader_stages = this->GetShaderStages();
-    for (auto &shader_stage_item : shader_stages)
+    for (auto &shader_item : shader_stages)
     {
-        auto shader = shader_stage_item->GetShader();
-        VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
-        vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vk_pipeline_shader_stage_create_info.pNext = nullptr;
-        vk_pipeline_shader_stage_create_info.flags = 0;
-        vk_pipeline_shader_stage_create_info.stage = shader->GetVkShaderStageFlagBits();
-        vk_pipeline_shader_stage_create_info.module = shader->GetVkShaderModule();
-        vk_pipeline_shader_stage_create_info.pName = "main";
-        vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
+        if (Turbo::Core::TReferenced::Valid(shader_item))
+        {
+            auto &shader = shader_item->GetShader();
+            VkPipelineShaderStageCreateInfo vk_pipeline_shader_stage_create_info = {};
+            vk_pipeline_shader_stage_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            vk_pipeline_shader_stage_create_info.pNext = nullptr;
+            vk_pipeline_shader_stage_create_info.flags = 0;
+            vk_pipeline_shader_stage_create_info.stage = shader->GetVkShaderStageFlagBits();
+            vk_pipeline_shader_stage_create_info.module = shader->GetVkShaderModule();
+            vk_pipeline_shader_stage_create_info.pName = "main";
 
-        vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
+            {
+                auto specialization_info_data = this->ShaderStageToSpecializationInfo(shader_item);
+                if (specialization_info_data.second.Valid())
+                {
+                    specialization_info_datas.push_back(specialization_info_data);
+
+                    VkSpecializationInfo *vk_specialization_info = new VkSpecializationInfo(); // NOTE: need delete
+                    {
+                        vk_specialization_info->mapEntryCount = specialization_info_data.first->Size() / sizeof(VkSpecializationMapEntry);
+                        vk_specialization_info->pMapEntries = static_cast<VkSpecializationMapEntry *>(specialization_info_data.first->Data());
+                        vk_specialization_info->dataSize = specialization_info_data.second->Size();
+                        vk_specialization_info->pData = specialization_info_data.second->Data();
+                    }
+                    vk_pipeline_shader_stage_create_info.pSpecializationInfo = vk_specialization_info;
+                }
+                else
+                {
+                    vk_pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
+                }
+            }
+
+            vk_pipeline_shader_stage_create_infos.push_back(vk_pipeline_shader_stage_create_info);
+        }
     }
 
     std::vector<VkVertexInputBindingDescription> vk_vertex_input_binding_descriptions;
