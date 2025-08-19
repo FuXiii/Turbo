@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/19
+
+>* 增加 `docs/platform/OpenHarmony.md` 研究 `OpenHarmony` 适配。
+
 ## 2025/8/18
 
 >* 更新 `sample` 中 `SpecializationConstantsTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
