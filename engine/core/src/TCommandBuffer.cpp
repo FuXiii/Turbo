@@ -1433,8 +1433,67 @@ void Turbo::Core::TCommandBufferBase::CmdResolveImage(TImage *srcImage, TImageLa
     device->GetDeviceDriver()->vkCmdResolveImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_resolve);
 }
 
+void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, const TFlags<TShaderType> shaderTypeflags, uint32_t offset, uint32_t size, const void *values)
+{
+    if (Turbo::Core::TReferenced::Valid(pipelineLayout))
+    {
+        auto &constants = pipelineLayout->GetLayout().GetPushConstants().GetConstants();
+        if (!constants.empty())
+        {
+            auto cal_intersection = [](uint32_t aBegin, uint32_t aEnd, uint32_t bBegin, uint32_t bEnd) -> std::tuple<bool, uint32_t, uint32_t> {
+
+            };
+
+            for (auto &item : constants)
+            {
+            }
+            VkShaderStageFlags vk_shader_stage_flags = 0;
+            uint32_t check_size = 0;
+            uint32_t check_offset = 0;
+
+            auto filter_push_constant = [&](const TShaderType &shaderType) {
+                if (shaderTypeflags.Has(shaderType))
+                {
+                    auto constant_size = push_constants.GetConstantSize(shaderType);
+                    if (constant_size > check_size)
+                    {
+                        check_size = constant_size;
+                        vk_shader_stage_flags |= static_cast<VkShaderStageFlagBits>(shaderType);
+                    }
+                }
+            };
+
+            filter_push_constant(TShaderType::TESSELLATION_CONTROL);
+            filter_push_constant(TShaderType::TESSELLATION_EVALUATION);
+            filter_push_constant(TShaderType::GEOMETRY);
+            filter_push_constant(TShaderType::FRAGMENT);
+            filter_push_constant(TShaderType::COMPUTE);
+            filter_push_constant(TShaderType::TASK);
+            filter_push_constant(TShaderType::MESH);
+            filter_push_constant(TShaderType::RAY_GENERATION);
+            filter_push_constant(TShaderType::ANY_HIT);
+            filter_push_constant(TShaderType::CLOSEST_HIT);
+            filter_push_constant(TShaderType::MISS);
+            filter_push_constant(TShaderType::INTERSECTION);
+            filter_push_constant(TShaderType::CALLABLE);
+
+            check_size = std::min(check_size, size);
+
+            {
+
+                TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+                /*
+                    NOTE: As stageFlags needs to include all flags the relevant push constant ranges were created with, any flags that are not supported by the queue family that the VkCommandPool used to allocate commandBuffer was created on are ignored.
+                */
+                device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
+            }
+        }
+    }
+}
+
 void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
 {
+    return;
     if (!Turbo::Core::TReferenced::Valid(pipelineLayout))
     {
         return;

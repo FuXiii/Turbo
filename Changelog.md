@@ -4,6 +4,13 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/20
+
+>* 更新 `docs/platform/OpenHarmony.md` 研究 `OpenHarmony` 适配。
+>* 更新 `TPipelineLayout` 移除 `pushConstantDescriptors` 的相关使用。已被遗弃。
+>* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 增加 `GetConstantOffset(...)` 成员函数。
+
 ## 2025/8/19
 
 >* 增加 `docs/platform/OpenHarmony.md` 研究 `OpenHarmony` 适配。

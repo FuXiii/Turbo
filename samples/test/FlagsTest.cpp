@@ -17,6 +17,8 @@ enum class TestFlagBits
 
 int main()
 {
+    sizeof(TestFlagBits);
+
     Turbo::Core::TFlags<TestFlagBits> flags = TestFlagBits::_10000;
     flags |= TestFlagBits::_10000;
     flags |= TestFlagBits::_1000;

@@ -172,6 +172,17 @@ const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &Turbo::Core:
     return 0;
 }
 
+const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset &Turbo::Core::TPipelineLayout::TLayout::TPushConstants::GetConstantOffset(const Turbo::Core::TShaderType &shaderType) const
+{
+    auto find_result = this->constants.find(shaderType);
+    if (find_result != this->constants.end())
+    {
+        return find_result->second.first;
+    }
+
+    return 0;
+}
+
 bool Turbo::Core::TPipelineLayout::TLayout::TPushConstants::operator==(const TPushConstants &other) const
 {
     if (this == &other)
@@ -600,44 +611,6 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
             throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
         }
     }
-    // else if (!this->descriptorSetLayouts.empty() || !this->pushConstantDescriptors.empty()) // FIXME: Need to deprecate!
-    //{
-    //     std::vector<VkDescriptorSetLayout> vk_descriptor_set_layouts;
-    //
-    //    for (TDescriptorSetLayout *descriptor_set_layout_item : this->descriptorSetLayouts)
-    //    {
-    //        vk_descriptor_set_layouts.push_back(descriptor_set_layout_item->GetVkDescriptorSetLayout());
-    //    }
-    //
-    //    std::vector<VkPushConstantRange> vk_push_constant_ranges;
-    //    for (TPushConstantDescriptor *push_constant_descriptor_item : this->pushConstantDescriptors)
-    //    {
-    //        VkPushConstantRange vk_push_constant_range = {};
-    //        vk_push_constant_range.stageFlags = push_constant_descriptor_item->GetShader()->GetVkShaderStageFlags();
-    //        vk_push_constant_range.offset = 0;
-    //        vk_push_constant_range.size = push_constant_descriptor_item->GetSize();
-    //        vk_push_constant_ranges.push_back(vk_push_constant_range);
-    //    }
-    //
-    //    VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
-    //    vk_pipline_layout_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    //    vk_pipline_layout_create_info.pNext = nullptr;
-    //    vk_pipline_layout_create_info.flags = 0;
-    //    vk_pipline_layout_create_info.setLayoutCount = vk_descriptor_set_layouts.size();
-    //    vk_pipline_layout_create_info.pSetLayouts = vk_descriptor_set_layouts.data();
-    //
-    //    // NOTE:In Vulkan Spec:Any two elements of pPushConstantRanges must not include the same stage in stageFlags
-    //    vk_pipline_layout_create_info.pushConstantRangeCount = vk_push_constant_ranges.size();
-    //    vk_pipline_layout_create_info.pPushConstantRanges = vk_push_constant_ranges.data();
-    //
-    //    VkDevice vk_device = this->device->GetVkDevice();
-    //    VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
-    //    VkResult result = this->device->GetDeviceDriver()->vkCreatePipelineLayout(vk_device, &vk_pipline_layout_create_info, allocator, &this->vkPipelineLayout);
-    //    if (result != VkResult::VK_SUCCESS)
-    //    {
-    //        throw Turbo::Core::TException(TResult::INITIALIZATION_FAILED, "Turbo::Core::TPipelineLayout::InternalCreate::vkCreatePipelineLayout");
-    //    }
-    //}
     else // TODO: Create an empty pipeline layout
     {
         VkPipelineLayoutCreateInfo vk_pipline_layout_create_info = {};
@@ -728,11 +701,6 @@ std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDe
     }
 
     return result;
-}
-
-const std::vector<Turbo::Core::TPushConstantDescriptor *> &Turbo::Core::TPipelineLayout::GetPushConstantDescriptors()
-{
-    return this->pushConstantDescriptors;
 }
 
 const Turbo::Core::TPipelineLayout::TLayout &Turbo::Core::TPipelineLayout::GetLayout() const

@@ -167,7 +167,8 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
 
     void CmdSetLineWidth(float lineWidth);
 
-    void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
+    void CmdPushConstants(TPipelineLayout *pipelineLayout, const TFlags<TShaderType> shaderTypeflags, uint32_t offset, uint32_t size, const void *values);
+    [[deprecated]] void CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values);
     void CmdPushConstants(uint32_t offset, uint32_t size, const void *values);
 
     void CmdDispatch(uint32_t workGroupsX, uint32_t workGroupsY, uint32_t workGroupsZ);

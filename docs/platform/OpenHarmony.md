@@ -61,4 +61,31 @@ OH_NativeXComponent_RegisterCallback(nativeXComponent, &callback);
 
 XComponent 组件中获取 Native XComponent 之后通过 OH_NativeXComponent_RegisterCallback 注册回调获取 OHNativeWindow
 
-OHNativeWindow 声明在 native_window/external_window.h 中位于 libnative_window.so 库中
+* OHNativeWindow 声明在 <native_window/external_window.h> 中，位于 libnative_window.so 库中
+
+* OH_NativeXComponent_Callback 回调类型用于获取 OH_NativeXComponent 的 原生 window 。声明在 <ace/xcomponent/native_interface_xcomponent.h> 中，位于 libace_ndk.z.so 库中。
+
+```CXX
+
+void(* OH_NativeXComponent_Callback::OnSurfaceCreated) (OH_NativeXComponent *component, void *window);
+void(* OH_NativeXComponent_Callback::OnSurfaceChanged) (OH_NativeXComponent *component, void *window);
+void(* OH_NativeXComponent_Callback::OnSurfaceDestroyed) (OH_NativeXComponent *component, void *window);
+void(* OH_NativeXComponent_Callback::DispatchTouchEvent) (OH_NativeXComponent *component, void *window);
+
+struct OH_NativeXComponent_Callback
+{
+OnSurfaceCreated OnSurfaceCreated;
+OnSurfaceChanged OnSurfaceChanged;
+OnSurfaceDestroyed OnSurfaceDestroyed;
+DispatchTouchEvent DispatchTouchEvent;
+};
+```
+
+* OH_NativeXComponent_RegisterCallback 用于 `Native` 向 `鸿蒙` 注册 OH_NativeXComponent_Callback 回调。声明在 <ace/xcomponent/native_interface_xcomponent.h> 中，位于 libace_ndk.z.so 库中。
+
+* napi_define_properties 用于 `Native` 向 `鸿蒙` 注册指定回调接口。声明在 <napi/native_api.h> 中，位于 libace_napi.z.so 库中。
+
+
+## 鸿蒙窗口
+
+对于管理和维护用于显示渲染结果的 `鸿蒙窗口` 有多种[开发方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-xcomponent-guidelines)可选

@@ -70,6 +70,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
             void Merge(const Turbo::Core::TShader::TLayout::TPushConstant &pushConstant);
 
             const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TSize &GetConstantSize(const Turbo::Core::TShaderType &shaderType) const;
+            const Turbo::Core::TPipelineLayout::TLayout::TPushConstants::TOffset &GetConstantOffset(const Turbo::Core::TShaderType &shaderType) const;
 
             bool operator==(const TPushConstants &other) const;
             bool operator!=(const TPushConstants &other) const;
@@ -116,8 +117,6 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     //[[deprecated]] T_VULKAN_HANDLE_DATA std::vector<TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
     T_VULKAN_HANDLE_DATA std::unordered_map<TPipelineLayout::TLayout::TSet, TRefPtr<TDescriptorSetLayout>> descriptorSetLayouts;
 
-    [[deprecated]] T_VULKAN_HANDLE_DATA std::vector<TPushConstantDescriptor *> pushConstantDescriptors; // FIXME: check it
-
     TPipelineLayout::TLayout layout;
 
   protected:
@@ -134,9 +133,7 @@ class TPipelineLayout : public Turbo::Core::TVulkanHandle
     virtual ~TPipelineLayout();
 
   public:
-    //[[deprecated]] std::vector<TDescriptorSetLayout *> GetDescriptorSetLayouts();
     std::unordered_map<TPipelineLayout::TLayout::TSet, TDescriptorSetLayout *> GetDescriptorSetLayouts();
-    [[deprecated]] const std::vector<TPushConstantDescriptor *> &GetPushConstantDescriptors(); // FIXME: check it
 
     const TPipelineLayout::TLayout &GetLayout() const;
 
