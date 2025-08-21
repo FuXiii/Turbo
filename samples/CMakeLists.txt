@@ -60,6 +60,15 @@ endfunction()
 #target_link_libraries(FrameGraphSample PUBLIC ${LIBS})
 #target_compile_definitions(FrameGraphSample PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset")
 
+add_executable(InstancedDrawTest ./InstancedDrawTest.cpp ${IMGUI_SOURCE_PATH})
+target_include_directories(InstancedDrawTest PUBLIC ${INCLUDE_PARTH})
+target_link_directories(InstancedDrawTest PUBLIC ${LINK_PARTH})
+target_link_libraries(InstancedDrawTest PUBLIC ${LIBS})
+target_compile_definitions(InstancedDrawTest 
+PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+PUBLIC TURBO_PROJECT_NAME="InstancedDrawTest"
+)
+
 add_executable(HelloTriangle ./HelloTriangle.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(HelloTriangle PUBLIC ${INCLUDE_PARTH})
 target_link_directories(HelloTriangle PUBLIC ${LINK_PARTH})
@@ -157,15 +166,6 @@ target_link_libraries(LineAndLineWidth PUBLIC ${LIBS})
 target_compile_definitions(LineAndLineWidth 
 PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
 PUBLIC TURBO_PROJECT_NAME="LineAndLineWidth"
-)
-
-add_executable(InstancedDrawTest ./InstancedDrawTest.cpp ${IMGUI_SOURCE_PATH})
-target_include_directories(InstancedDrawTest PUBLIC ${INCLUDE_PARTH})
-target_link_directories(InstancedDrawTest PUBLIC ${LINK_PARTH})
-target_link_libraries(InstancedDrawTest PUBLIC ${LIBS})
-target_compile_definitions(InstancedDrawTest 
-PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
-PUBLIC TURBO_PROJECT_NAME="InstancedDrawTest"
 )
 
 add_executable(CppStandardTest ./CppStandardTest.cpp ${IMGUI_SOURCE_PATH})
@@ -701,4 +701,5 @@ add_sample(InfiniteCoordinateAxis InfiniteCoordinateAxis.cpp)
 add_sample(InfiniteCoordinateAxisPassTest InfiniteCoordinateAxisPassTest.cpp)
 
 add_subdirectory(./FlowField)
+add_subdirectory(./test)
 

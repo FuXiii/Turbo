@@ -255,74 +255,74 @@ PlyData LoadPly(const std::string &url)
     result.min = min;
     result.max = max;
 
-    //#define AXIS_SCALE 0.001
-    //    {
-    //        for (int i = 0; i < 1000; i++)
-    //        {
-    //            Point ply_point_data;
-    //            ply_point_data.position.x = i * AXIS_SCALE;
-    //            ply_point_data.position.y = 0;
-    //            ply_point_data.position.z = 0;
-    //            ply_point_data.position.w = 0;
-    //            ply_point_data.color.r = 1;
-    //            ply_point_data.color.g = 0;
-    //            ply_point_data.color.b = 0;
-    //            ply_point_data.color.a = 1;
+    // #define AXIS_SCALE 0.001
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             Point ply_point_data;
+    //             ply_point_data.position.x = i * AXIS_SCALE;
+    //             ply_point_data.position.y = 0;
+    //             ply_point_data.position.z = 0;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 1;
+    //             ply_point_data.color.g = 0;
+    //             ply_point_data.color.b = 0;
+    //             ply_point_data.color.a = 1;
     //
-    //            result.points.push_back(ply_point_data);
-    //        }
-    //    }
+    //             result.points.push_back(ply_point_data);
+    //         }
+    //     }
     //
-    //    {
-    //        for (int i = 0; i < 1000; i++)
-    //        {
-    //            Point ply_point_data;
-    //            ply_point_data.position.x = 0;
-    //            ply_point_data.position.y = i * AXIS_SCALE;
-    //            ply_point_data.position.z = 0;
-    //            ply_point_data.position.w = 0;
-    //            ply_point_data.color.r = 0;
-    //            ply_point_data.color.g = 1;
-    //            ply_point_data.color.b = 0;
-    //            ply_point_data.color.a = 1;
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             Point ply_point_data;
+    //             ply_point_data.position.x = 0;
+    //             ply_point_data.position.y = i * AXIS_SCALE;
+    //             ply_point_data.position.z = 0;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 0;
+    //             ply_point_data.color.g = 1;
+    //             ply_point_data.color.b = 0;
+    //             ply_point_data.color.a = 1;
     //
-    //            result.points.push_back(ply_point_data);
-    //        }
-    //    }
+    //             result.points.push_back(ply_point_data);
+    //         }
+    //     }
     //
-    //    {
-    //        for (int i = 0; i < 1000; i++)
-    //        {
-    //            Point ply_point_data;
-    //            ply_point_data.position.x = 0;
-    //            ply_point_data.position.y = 0;
-    //            ply_point_data.position.z = i * AXIS_SCALE;
-    //            ply_point_data.position.w = 0;
-    //            ply_point_data.color.r = 0;
-    //            ply_point_data.color.g = 0;
-    //            ply_point_data.color.b = 1;
-    //            ply_point_data.color.a = 1;
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             Point ply_point_data;
+    //             ply_point_data.position.x = 0;
+    //             ply_point_data.position.y = 0;
+    //             ply_point_data.position.z = i * AXIS_SCALE;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 0;
+    //             ply_point_data.color.g = 0;
+    //             ply_point_data.color.b = 1;
+    //             ply_point_data.color.a = 1;
     //
-    //            result.points.push_back(ply_point_data);
-    //        }
-    //    }
+    //             result.points.push_back(ply_point_data);
+    //         }
+    //     }
     //
-    //    {
-    //        for (int i = 0; i < 1000; i++)
-    //        {
-    //            Point ply_point_data;
-    //            ply_point_data.position.x = i * AXIS_SCALE;
-    //            ply_point_data.position.y = i * AXIS_SCALE;
-    //            ply_point_data.position.z = i * AXIS_SCALE;
-    //            ply_point_data.position.w = 0;
-    //            ply_point_data.color.r = 1;
-    //            ply_point_data.color.g = 1;
-    //            ply_point_data.color.b = 0;
-    //            ply_point_data.color.a = 1;
+    //     {
+    //         for (int i = 0; i < 1000; i++)
+    //         {
+    //             Point ply_point_data;
+    //             ply_point_data.position.x = i * AXIS_SCALE;
+    //             ply_point_data.position.y = i * AXIS_SCALE;
+    //             ply_point_data.position.z = i * AXIS_SCALE;
+    //             ply_point_data.position.w = 0;
+    //             ply_point_data.color.r = 1;
+    //             ply_point_data.color.g = 1;
+    //             ply_point_data.color.b = 0;
+    //             ply_point_data.color.a = 1;
     //
-    //            result.points.push_back(ply_point_data);
-    //        }
-    //    }
+    //             result.points.push_back(ply_point_data);
+    //         }
+    //     }
 
     return result;
 }
@@ -706,17 +706,17 @@ int main()
     Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> my_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, MY_FRAG_SHADER_STR);
 
     std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::SAMPLED_IMAGE, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_IMAGE, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_TEXEL_BUFFER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_TEXEL_BUFFER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::UNIFORM_BUFFER_DYNAMIC, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::STORAGE_BUFFER_DYNAMIC, 1000));
-    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::INPUT_ATTACHMENT, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::SAMPLER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_IMAGE, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_TEXEL_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::STORAGE_BUFFER_DYNAMIC, 1000));
+    descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT, 1000));
 
     Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
@@ -748,7 +748,12 @@ int main()
 
     std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
 
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphics_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 0, vertex_bindings, my_vertex_shader, my_fragment_shader, Turbo::Core::TTopologyType::POINT_LIST, false, false, false, Turbo::Core::TPolygonMode::POINT, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TPipelineLayout::TLayout graphics_pipeline_layout;
+    graphics_pipeline_layout << *my_vertex_shader << *my_fragment_shader;
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShaderStage> my_vertex_shader_stage = new Turbo::Core::TVertexShaderStage(my_vertex_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShaderStage> my_fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(my_fragment_shader);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> graphics_pipeline = new Turbo::Core::TGraphicsPipeline(graphics_pipeline_layout, render_pass, 0, vertex_bindings, my_vertex_shader_stage, my_fragment_shader_stage, Turbo::Core::TTopologyType::POINT_LIST, false, false, false, Turbo::Core::TPolygonMode::POINT, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet>> graphics_pipeline_descriptor_sets;
     for (auto &points_image_data_item : all_points_image_data)
@@ -804,22 +809,23 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TSampler> imgui_sampler = new Turbo::Core::TSampler(device);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TShader> imgui_vertex_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::VERTEX, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
-    Turbo::Core::TRefPtr<Turbo::Core::TShader> imgui_fragment_shader = new Turbo::Core::TShader(device, Turbo::Core::TShaderType::FRAGMENT, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> imgui_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> imgui_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
 
     Turbo::Core::TVertexBinding imgui_vertex_binding(0, sizeof(ImDrawVert), Turbo::Core::TVertexRate::VERTEX);
     imgui_vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, pos));  // position
     imgui_vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, uv));   // uv
     imgui_vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R8G8B8A8_UNORM, IM_OFFSETOF(ImDrawVert, col)); // color
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TShader>> imgui_shaders;
-    imgui_shaders.push_back(imgui_vertex_shader);
-    imgui_shaders.push_back(imgui_fragment_shader);
-
     std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
     imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> imgui_pipeline = new Turbo::Core::TGraphicsPipeline(render_pass, 1, imgui_vertex_bindings, imgui_shaders, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+    Turbo::Core::TPipelineLayout::TLayout imgui_pipeline_layout;
+    imgui_pipeline_layout << *imgui_vertex_shader << *imgui_fragment_shader;
+    Turbo::Core::TRefPtr<Turbo::Core::TVertexShaderStage> imgui_vertex_shader_stage = new Turbo::Core::TVertexShaderStage(imgui_vertex_shader);
+    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShaderStage> imgui_fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(imgui_fragment_shader);
+
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> imgui_pipeline = new Turbo::Core::TGraphicsPipeline(imgui_pipeline_layout, render_pass, 1, imgui_vertex_bindings, imgui_vertex_shader_stage, imgui_fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
 
     unsigned char *imgui_font_pixels;
     int imgui_font_width, imgui_font_height;

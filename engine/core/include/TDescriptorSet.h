@@ -4,7 +4,6 @@
 #include "TVulkanHandle.h"
 #include "TDescriptorSetLayout.h"
 #include "TBuffer.h"
-#include "TDescriptorPool.h"
 
 namespace Turbo
 {
@@ -37,9 +36,8 @@ class TDescriptorSet : public Turbo::Core::TVulkanHandle
   public:
     VkDescriptorSet GetVkDescriptorSet();
 
-    uint32_t GetSet() const;
+    // [[deprecated]] uint32_t GetSet() const;
 
-    // TODO: this BindData function just for Test
     void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers);
     void BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers);
     void BindData(uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement = 0);

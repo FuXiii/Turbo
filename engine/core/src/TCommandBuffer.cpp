@@ -351,8 +351,8 @@ void Turbo::Core::TCommandBufferBase::CmdBeginRenderPass(TRenderPass *renderPass
         {
             vk_render_pass_begin_info.renderArea.extent.height = framebuffer->GetHeight();
         }
-        vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();
-        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data();
+        vk_render_pass_begin_info.clearValueCount = vk_clear_values.size();                                  // FIXME: The array is indexed by attachment number. Only elements corresponding to cleared attachments are used. Other elements of pClearValues are ignored.
+        vk_render_pass_begin_info.pClearValues = vk_clear_values.empty() ? nullptr : vk_clear_values.data(); // FIXME: The array is indexed by attachment number. Only elements corresponding to cleared attachments are used. Other elements of pClearValues are ignored.
 
         switch (subpassContents)
         {
@@ -478,13 +478,11 @@ void Turbo::Core::TCommandBufferBase::CmdBindPipelineDescriptorSet(TPipelineDesc
         return;
     }
 
-    std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
-
-    for (Turbo::Core::TDescriptorSet *descriptor_set_item : descriptor_sets)
+    auto descriptor_sets = pipelineDescriptorSet->GetDescriptorSet();
+    for (auto &item : descriptor_sets)
     {
-        uint32_t first_set = descriptor_set_item->GetSet();
-        std::vector<Turbo::Core::TDescriptorSet *> descriptor_set{descriptor_set_item};
-        this->CmdBindDescriptorSets(first_set, descriptor_set);
+        std::vector<Turbo::Core::TDescriptorSet *> descriptor_sets{item.second};
+        this->CmdBindDescriptorSets(item.first, descriptor_sets);
     }
 }
 
@@ -1437,21 +1435,91 @@ void Turbo::Core::TCommandBufferBase::CmdResolveImage(TImage *srcImage, TImageLa
 
 void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
 {
-    if (!Turbo::Core::TReferenced::Valid(pipelineLayout))
+    if (Turbo::Core::TReferenced::Valid(pipelineLayout) && size > 0)
     {
-        return;
+        auto &constants = pipelineLayout->GetLayout().GetPushConstants().GetConstants();
+        if (!constants.empty())
+        {
+            auto cal_intersection = [](uint32_t aOffset, uint32_t aSize, uint32_t bOffset, uint32_t bSize) -> std::tuple<bool /*is_intersect*/, uint32_t /*offset*/, uint32_t /*size*/> {
+                bool is_intersect = false;
+                if (aSize == 0 || bSize == 0)
+                {
+                    return {false, 0, 0};
+                }
+
+                uint32_t intersection_begin_pos = 0;
+                uint32_t intersection_end_pos = 0;
+
+                uint32_t a_begin_pos = aOffset;
+                uint32_t a_end_pos = a_begin_pos + aSize - 1;
+
+                uint32_t b_begin_pos = bOffset;
+                uint32_t b_end_pos = b_begin_pos + bSize - 1;
+
+                if (a_begin_pos >= b_begin_pos && a_begin_pos <= b_end_pos)
+                {
+                    intersection_begin_pos = a_begin_pos;
+                    intersection_end_pos = b_end_pos;
+                    if (a_end_pos < b_end_pos)
+                    {
+                        intersection_end_pos = a_end_pos;
+                    }
+
+                    return {true, intersection_begin_pos, intersection_end_pos - intersection_begin_pos + 1};
+                }
+                if (a_end_pos >= b_begin_pos && a_end_pos <= b_end_pos)
+                {
+                    intersection_end_pos = a_end_pos;
+                    intersection_begin_pos = b_begin_pos;
+                    if (a_begin_pos > b_begin_pos)
+                    {
+                        intersection_begin_pos = a_begin_pos;
+                    }
+
+                    return {true, intersection_begin_pos, intersection_end_pos - intersection_begin_pos + 1};
+                }
+
+                if (a_begin_pos < b_begin_pos && a_end_pos > b_end_pos)
+                {
+                    return {true, b_begin_pos, b_end_pos - b_begin_pos + 1};
+                }
+
+                return {false, 0, 0};
+            };
+
+            std::unordered_map<uint32_t /*offset*/, std::unordered_map<uint32_t /*size*/, TFlags<TShaderType>>> push_constants_map;
+            {
+                for (auto &item : constants)
+                {
+                    auto &shader_type = item.first;
+                    auto &constant_offset = item.second.first;
+                    auto &constant_size = item.second.second;
+
+                    auto intersection = cal_intersection(constant_offset, constant_size, offset, size);
+                    if (std::get<0>(intersection))
+                    {
+                        push_constants_map[std::get<1>(intersection)][std::get<2>(intersection)] |= shader_type;
+                    }
+                }
+            }
+
+            TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+
+            for (auto &offset_item : push_constants_map)
+            {
+                auto constant_offset = offset_item.first;
+                for (auto &size_item : offset_item.second)
+                {
+                    auto constant_size = size_item.first;
+
+                    /*
+                        NOTE: As stageFlags needs to include all flags the relevant push constant ranges were created with, any flags that are not supported by the queue family that the VkCommandPool used to allocate commandBuffer was created on are ignored.
+                    */
+                    device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), size_item.second.ToVkFlags(), constant_offset, constant_size, values);
+                }
+            }
+        }
     }
-
-    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-
-    VkShaderStageFlags vk_shader_stage_flags = 0;
-    std::vector<TPushConstantDescriptor *> push_constant_descriptors = pipelineLayout->GetPushConstantDescriptors();
-    for (TPushConstantDescriptor *push_constant_item : push_constant_descriptors)
-    {
-        vk_shader_stage_flags |= push_constant_item->GetShader()->GetVkShaderStageFlags();
-    }
-
-    device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
 }
 
 void Turbo::Core::TCommandBufferBase::CmdPushConstants(uint32_t offset, uint32_t size, const void *values)

@@ -16,6 +16,8 @@
 #include <glslang/Public/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 
+#include <sstream>
+
 Turbo::Core::TInterface::TInterface(uint32_t location, TDescriptorDataType dataType, uint32_t width, uint32_t offset, uint32_t vecSize, uint32_t columns, uint32_t size, uint32_t count, uint32_t arrayStride, uint32_t matrixStride, const std::string &name) : Turbo::Core::TStructMember(dataType, width, offset, vecSize, columns, size, count, arrayStride, matrixStride, name)
 {
     this->location = location;
@@ -30,7 +32,7 @@ std::string Turbo::Core::TInterface::ToString() const
     return Turbo::Core::TStructMember::ToString();
 }
 
-Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+Turbo::Core::TShader::TSpecializationConstant::TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
 {
     this->id = id;
     this->name = name;
@@ -38,27 +40,34 @@ Turbo::Core::TSpecializationConstant::TSpecializationConstant(uint32_t id, const
     this->width = width;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetConstantID() const
+Turbo::Core::TShader::TSpecializationConstant::TSpecializationConstant(const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width)
+{
+    this->name = name;
+    this->descriptorDataType = descriptorDataType;
+    this->width = width;
+}
+
+uint32_t Turbo::Core::TShader::TSpecializationConstant::GetConstantID() const
 {
     return this->id;
 }
 
-const std::string &Turbo::Core::TSpecializationConstant::GetName() const
+const std::string &Turbo::Core::TShader::TSpecializationConstant::GetName() const
 {
     return this->name;
 }
 
-Turbo::Core::TDescriptorDataType Turbo::Core::TSpecializationConstant::GetDescriptorDataType() const
+Turbo::Core::TDescriptorDataType Turbo::Core::TShader::TSpecializationConstant::GetDescriptorDataType() const
 {
     return this->descriptorDataType;
 }
 
-uint32_t Turbo::Core::TSpecializationConstant::GetWidth() const
+uint32_t Turbo::Core::TShader::TSpecializationConstant::GetWidth() const
 {
     return this->width;
 }
 
-std::string Turbo::Core::TSpecializationConstant::ToString() const
+std::string Turbo::Core::TShader::TSpecializationConstant::ToString() const
 {
     return std::string();
 }
@@ -259,14 +268,192 @@ Turbo::Core::TDescriptorDataType SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType
     return Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
 }
 
+Turbo::Core::TShader::TLayout::TPushConstant::TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TSize size)
+{
+    this->shaderType = shaderType;
+    this->size = size;
+}
+
+const Turbo::Core::TShaderType &Turbo::Core::TShader::TLayout::TPushConstant::GetShaderType() const
+{
+    return this->shaderType;
+}
+
+Turbo::Core::TShader::TLayout::TPushConstant::TSize Turbo::Core::TShader::TLayout::TPushConstant::GetSize() const
+{
+    return this->size;
+}
+
+bool Turbo::Core::TShader::TLayout::TPushConstant::Empty() const
+{
+    return this->size == 0;
+}
+
+void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant::TSize &size)
+{
+    if (size != 0)
+    {
+        if (this->size < size)
+        {
+            this->size = size;
+        }
+    }
+}
+
+void Turbo::Core::TShader::TLayout::TPushConstant::Merge(const TPushConstant &pushConstant)
+{
+    if (!pushConstant.Empty())
+    {
+        if (this->Empty())
+        {
+            this->size = pushConstant.size;
+            this->shaderType = pushConstant.shaderType;
+        }
+    }
+}
+
+std::string Turbo::Core::TShader::TLayout::TPushConstant::ToString() const
+{
+    std::stringstream ss;
+    ss << "{";
+    ss << "\"size\":" << this->size << ",";
+    ss << "\"shader type\":\"" << this->shaderType << "\"";
+    ss << "}";
+
+    return ss.str();
+}
+
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets, const TShader::TLayout::TPushConstant &pushConstant)
+{
+    this->sets = sets;
+    this->pushConstant = pushConstant;
+}
+
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TSets &sets)
+{
+    this->sets = sets;
+}
+
+Turbo::Core::TShader::TLayout::TLayout(const TShader::TLayout::TPushConstant &pushConstant)
+{
+    this->pushConstant = pushConstant;
+}
+
+Turbo::Core::TShader::TLayout::TLayout(TShader::TLayout::TSets &&sets, TShader::TLayout::TPushConstant &&pushConstant)
+{
+    this->sets = std::move(sets);
+    this->pushConstant = std::move(pushConstant);
+}
+
+bool Turbo::Core::TShader::TLayout::Empty() const
+{
+    return this->sets.empty() && this->pushConstant.Empty();
+}
+
+const Turbo::Core::TShader::TLayout::TSets &Turbo::Core::TShader::TLayout::GetSets() const
+{
+    return this->sets;
+}
+
+const Turbo::Core::TShader::TLayout::TPushConstant &Turbo::Core::TShader::TLayout::GetPushConstant() const
+{
+    return this->pushConstant;
+}
+
+bool Turbo::Core::TShader::TLayout::Has(const Turbo::Core::TShader::TLayout::TSet &set) const
+{
+    return this->sets.find(set) != this->sets.end();
+}
+
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor)
+{
+    TDescriptorSetLayout::TLayout::TBindings bindings;
+    bindings.insert({binding, descriptor});
+    this->Merge(set, bindings);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings)
+{
+    TDescriptorSetLayout::TLayout layout(bindings);
+    this->Merge(set, layout);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout)
+{
+    TShader::TLayout::TSets sets;
+    sets.insert({set, layout});
+    this->Merge(sets);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TSets &sets)
+{
+    for (auto &set_item : sets)
+    {
+        TSet set = set_item.first;
+        auto set_find_result = this->sets.find(set);
+        if (set_find_result != this->sets.end())
+        {
+            this->sets[set].Merge(set_item.second);
+        }
+        else
+        {
+            this->sets[set] = set_item.second;
+        }
+    }
+}
+
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout::TPushConstant &pushConstant)
+{
+    this->pushConstant.Merge(pushConstant);
+}
+
+void Turbo::Core::TShader::TLayout::Merge(const TShader::TLayout &layout)
+{
+    this->Merge(layout.sets);
+    this->Merge(layout.pushConstant);
+}
+
+Turbo::Core::TDescriptorSetLayout::TLayout &Turbo::Core::TShader::TLayout::operator[](TSet &&set)
+{
+    return this->sets[std::forward<TSet>(set)];
+}
+
+std::string Turbo::Core::TShader::TLayout::ToString() const
+{
+    std::stringstream ss;
+    ss << "{";
+    {
+        if (!this->sets.empty())
+        {
+            ss << "\"sets\":";
+            ss << "[";
+            auto iter = this->sets.begin();
+            while (iter != this->sets.end())
+            {
+                ss << "{\"" << (*iter).first << "\"" << ":" << (*iter).second.ToString() << "}";
+                ++iter;
+                if (iter != this->sets.end())
+                {
+                    ss << ",";
+                }
+            }
+            ss << "],";
+        }
+    }
+    ss << "\"push constant\":" << this->pushConstant.ToString();
+    ss << "}";
+
+    return ss.str();
+}
+
 void Turbo::Core::TShader::InternalCreate()
 {
     VkShaderModuleCreateInfo vk_shader_module_create_info = {};
     vk_shader_module_create_info.sType = VkStructureType::VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     vk_shader_module_create_info.pNext = nullptr;
     vk_shader_module_create_info.flags = 0;
-    vk_shader_module_create_info.codeSize = this->size;
-    vk_shader_module_create_info.pCode = this->code;
+    vk_shader_module_create_info.codeSize = this->spirvCode.size() * sizeof(uint32_t);
+    vk_shader_module_create_info.pCode = this->spirvCode.data();
 
     VkDevice vk_device = this->device->GetVkDevice();
     VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
@@ -286,12 +473,7 @@ void Turbo::Core::TShader::InternalDestroy()
 
 void Turbo::Core::TShader::InternalParseSpirV()
 {
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    spirv_cross::CompilerGLSL glsl(std::move(spirv));
+    spirv_cross::CompilerGLSL glsl(this->spirvCode.data(), this->spirvCode.size());
 
     spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
     opts.vulkan_semantics = true;
@@ -359,6 +541,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TCombinedImageSamplerDescriptor *combined_image_sampler_descriptor = new TCombinedImageSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->combinedImageSamplerDescriptors.push_back(combined_image_sampler_descriptor);
+
+        this->layout.Merge(set, binding, *combined_image_sampler_descriptor);
     }
 
     for (spirv_cross::Resource &separate_image_item : resources.separate_images)
@@ -398,6 +582,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
         TSampledImageDescriptor *sampled_image_descriptor = new TSampledImageDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->sampledImageDescriptors.push_back(sampled_image_descriptor);
+
+        this->layout.Merge(set, binding, *sampled_image_descriptor);
     }
 
     for (spirv_cross::Resource &storage_image_item : resources.storage_images)
@@ -432,6 +618,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
         // VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
         TStorageImageDescriptor *storage_image_descriptor = new TStorageImageDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->storageImageDescriptors.push_back(storage_image_descriptor);
+
+        this->layout.Merge(set, binding, *storage_image_descriptor);
     }
 
     for (spirv_cross::Resource &separate_sampler_item : resources.separate_samplers)
@@ -466,6 +654,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TSamplerDescriptor *sampler_descriptor = new TSamplerDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->samplerDescriptors.push_back(sampler_descriptor);
+
+        this->layout.Merge(set, binding, *sampler_descriptor);
     }
 
     for (spirv_cross::Resource &uniform_buffers_item : resources.uniform_buffers)
@@ -548,6 +738,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TUniformBufferDescriptor *uniform_buffer_descriptor = new TUniformBufferDescriptor(this, descriptor_data_type, set, binding, count, name, struct_members, size);
         this->uniformBufferDescriptors.push_back(uniform_buffer_descriptor);
+
+        this->layout.Merge(set, binding, *uniform_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &push_constant_buffer_item : resources.push_constant_buffers)
@@ -630,6 +822,9 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TPushConstantDescriptor *push_constant_descriptor = new TPushConstantDescriptor(this, descriptor_data_type, count, name, struct_members, size);
         this->pushConstantDescriptors.push_back(push_constant_descriptor);
+
+        // this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant((Turbo::Core::TShaderType)this->GetVkShaderStageFlagBits(), 0, size));
+        this->layout.Merge(Turbo::Core::TShader::TLayout::TPushConstant(this->GetType(), size));
     }
 
     for (spirv_cross::Resource &subpass_input_item : resources.subpass_inputs)
@@ -666,6 +861,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TInputAttachmentDescriptor *input_attachment_descriptor = new TInputAttachmentDescriptor(attachment_index, this, descriptor_data_type, set, binding, count, name);
         this->inputAttachmentDescriptors.push_back(input_attachment_descriptor);
+
+        this->layout.Merge(set, binding, *input_attachment_descriptor);
     }
 
     for (spirv_cross::Resource &storage_buffer_item : resources.storage_buffers)
@@ -700,6 +897,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TStorageBufferDescriptor *storage_buffer_descriptor = new TStorageBufferDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->storageBufferDescriptors.push_back(storage_buffer_descriptor);
+
+        this->layout.Merge(set, binding, *storage_buffer_descriptor);
     }
 
     for (spirv_cross::Resource &acceleration_structures_item : resources.acceleration_structures)
@@ -730,6 +929,8 @@ void Turbo::Core::TShader::InternalParseSpirV()
 
         TAccelerationStructureDescriptor *acceleration_structure_descriptor = new TAccelerationStructureDescriptor(this, descriptor_data_type, set, binding, count, name);
         this->accelerationStructureDescriptors.push_back(acceleration_structure_descriptor);
+
+        this->layout.Merge(set, binding, *acceleration_structure_descriptor);
     }
 
     for (spirv_cross::Resource &stage_input_item : resources.stage_inputs)
@@ -765,7 +966,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            //size = glsl.get_declared_struct_size(type);
+            // size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface in_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
@@ -805,7 +1006,7 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t size = width * vec_size / 8;
         if (base_type == spirv_cross::SPIRType::BaseType::Struct)
         {
-            //size = glsl.get_declared_struct_size(type);
+            // size = glsl.get_declared_struct_size(type);
         }
 
         Turbo::Core::TInterface out_interface(location, descriptor_data_type, width, 0, vec_size, colums, size, count, 0, 0, name);
@@ -825,8 +1026,9 @@ void Turbo::Core::TShader::InternalParseSpirV()
         size_t width = type.width;
 
         Turbo::Core::TDescriptorDataType descriptor_data_type = SpirvCrossSPIRTypeBaseTypeToTDescriptorDataType(base_type);
-        Turbo::Core::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
-        this->specializationConstants.push_back(specialization_sonstant);
+        // Turbo::Core::TShader::TSpecializationConstant specialization_sonstant(constant_id, name, descriptor_data_type, width);
+        Turbo::Core::TShader::TSpecializationConstant specialization_sonstant(name, descriptor_data_type, width);
+        this->specializationConstants.insert(std::make_pair(constant_id, specialization_sonstant));
     }
 }
 
@@ -921,14 +1123,13 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, TShaderLanguage
             throw Turbo::Core::TException(TResult::SHADER_LINK_FAILED, "Turbo::Core::TShader::TShader", log_messgae);
         }
 
-        std::vector<uint32_t> shader_spir;
-        glslang::GlslangToSpv(*(program.getIntermediate(esh_language)), shader_spir);
+        glslang::GlslangToSpv(*(program.getIntermediate(esh_language)), this->spirvCode);
 
         glslang::FinalizeProcess();
 
-        this->size = shader_spir.size() * sizeof(uint32_t);
-        this->code = (uint32_t *)malloc(size);
-        memcpy(this->code, shader_spir.data(), this->size);
+        // this->size = this->spirvCode.size() * sizeof(uint32_t);
+        // this->code = (uint32_t *)malloc(size);
+        // memcpy(this->code, this->spirvCode.data(), this->size);
 
         this->InternalCreate();
         this->InternalParseSpirV();
@@ -946,10 +1147,12 @@ Turbo::Core::TShader::TShader(TDevice *device, TShaderType type, size_t size, ui
         this->device = device;
         this->type = type;
         this->language = TShaderLanguage::SPIR;
-        this->size = size;
-        this->code = (uint32_t *)malloc(size);
+        // this->size = size;
+        // this->code = (uint32_t *)malloc(size);
+        this->spirvCode.resize(size);
+        memcpy(this->spirvCode.data(), code, size * sizeof(uint32_t));
+
         this->entryPoint = entryPoint;
-        memcpy(this->code, code, this->size);
 
         this->InternalCreate();
         this->InternalParseSpirV();
@@ -1018,9 +1221,9 @@ Turbo::Core::TShader::~TShader()
     }
     this->accelerationStructureDescriptors.clear();
 
-    free(this->code);
-    this->code = nullptr;
-    this->size = 0;
+    // free(this->code);
+    // this->code = nullptr;
+    // this->size = 0;
 }
 
 Turbo::Core::TDevice *Turbo::Core::TShader::GetDevice()
@@ -1164,7 +1367,7 @@ std::vector<Turbo::Core::TInterface> Turbo::Core::TShader::GetOutputs() const
     return this->outputs;
 }
 
-const std::vector<Turbo::Core::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants() const
+const std::unordered_map<std::uint32_t, Turbo::Core::TShader::TSpecializationConstant> &Turbo::Core::TShader::GetSpecializationConstants() const
 {
     return this->specializationConstants;
 }
@@ -1174,59 +1377,19 @@ Turbo::Core::TShaderType Turbo::Core::TShader::GetType() const
     return this->type;
 }
 
-void Turbo::Core::TShader::SetConstant(uint32_t id, bool value)
+const Turbo::Core::TShader::TLayout &Turbo::Core::TShader::GetLayout() const
 {
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_BOOLEAN;
-    this->specializationMap[id].value.boolValue = value;
+    return this->layout;
 }
 
-void Turbo::Core::TShader::SetConstant(uint32_t id, int32_t value)
+const std::vector<uint32_t> &Turbo::Core::TShader::GetSpirV() const
 {
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_INT;
-    this->specializationMap[id].value.intValue = value;
-}
-
-void Turbo::Core::TShader::SetConstant(uint32_t id, uint32_t value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UINT;
-    this->specializationMap[id].value.uintValue = value;
-}
-
-void Turbo::Core::TShader::SetConstant(uint32_t id, float value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_FLOAT;
-    this->specializationMap[id].value.floatValue = value;
-}
-
-void Turbo::Core::TShader::SetConstant(uint32_t id, double value)
-{
-    this->specializationMap[id].dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_DOUBLE;
-    this->specializationMap[id].value.doubleValue = value;
-}
-
-const std::map<uint32_t, Turbo::Core::TShader::TConstValue> &Turbo::Core::TShader::GetSpecializations() const
-{
-    return this->specializationMap;
-}
-
-std::vector<uint32_t> Turbo::Core::TShader::GetSpirV() const
-{
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    return spirv;
+    return this->spirvCode;
 }
 
 std::string Turbo::Core::TShader::ToString() const
 {
-    std::vector<uint32_t> spirv;
-    spirv.resize(this->size / sizeof(uint32_t));
-    uint32_t *spirv_data = spirv.data();
-    memcpy(spirv_data, this->code, this->size);
-
-    spirv_cross::CompilerGLSL glsl(std::move(spirv));
+    spirv_cross::CompilerGLSL glsl(this->spirvCode.data(), this->spirvCode.size());
     spirv_cross::CompilerGLSL::Options opts = glsl.get_common_options();
     opts.vulkan_semantics = true;
     glsl.set_common_options(opts);
@@ -1352,4 +1515,69 @@ Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, TSha
 
 Turbo::Core::TCallableShader::TCallableShader(Turbo::Core::TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint) : Turbo::Core::TShader(device, TShaderType::CALLABLE, size, code, entryPoint)
 {
+}
+
+std::ostream &operator<<(std::ostream &os, const Turbo::Core::TShaderType &shaderType)
+{
+    switch (shaderType)
+    {
+    case Turbo::Core::TShaderType::VERTEX: {
+        return os << "VERTEX";
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_CONTROL: {
+        return os << "TESSELLATION_CONTROL";
+    }
+    break;
+    case Turbo::Core::TShaderType::TESSELLATION_EVALUATION: {
+        return os << "TESSELLATION_EVALUATION";
+    }
+    break;
+    case Turbo::Core::TShaderType::GEOMETRY: {
+        return os << "GEOMETRY";
+    }
+    break;
+    case Turbo::Core::TShaderType::FRAGMENT: {
+        return os << "FRAGMENT";
+    }
+    break;
+    case Turbo::Core::TShaderType::COMPUTE: {
+        return os << "COMPUTE";
+    }
+    break;
+    case Turbo::Core::TShaderType::TASK: {
+        return os << "TASK";
+    }
+    break;
+    case Turbo::Core::TShaderType::MESH: {
+        return os << "MESH";
+    }
+    break;
+    case Turbo::Core::TShaderType::RAY_GENERATION: {
+        return os << "RAY_GENERATION";
+    }
+    break;
+    case Turbo::Core::TShaderType::ANY_HIT: {
+        return os << "ANY_HIT";
+    }
+    break;
+    case Turbo::Core::TShaderType::CLOSEST_HIT: {
+        return os << "CLOSEST_HIT";
+    }
+    break;
+    case Turbo::Core::TShaderType::MISS: {
+        return os << "MISS";
+    }
+    break;
+    case Turbo::Core::TShaderType::INTERSECTION: {
+        return os << "INTERSECTION";
+    }
+    break;
+    case Turbo::Core::TShaderType::CALLABLE: {
+        return os << "CALLABLE";
+    }
+    break;
+    }
+
+    return os << "NONE";
 }

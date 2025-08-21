@@ -188,7 +188,7 @@ void ImGuiPass::Init(Turbo::Core::TCommandBuffer *commandBuffer, Turbo::Core::TI
 
         {
             std::vector<Turbo::Core::TDescriptorSize> descriptor_sizes;
-            descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptorType::COMBINED_IMAGE_SAMPLER, 1));
+            descriptor_sizes.push_back(Turbo::Core::TDescriptorSize(Turbo::Core::TDescriptor::TType::COMBINED_IMAGE_SAMPLER, 1));
             this->descriptorPool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
         }
 
@@ -224,7 +224,13 @@ void ImGuiPass::Init(Turbo::Core::TCommandBuffer *commandBuffer, Turbo::Core::TI
             std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
             imgui_vertex_bindings.push_back(imgui_vertex_binding);
 
-            this->pipeline = new Turbo::Core::TGraphicsPipeline(this->renderPass, 0, imgui_vertex_bindings, imgui_vertex_shader, imgui_fragment_shader, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
+            Turbo::Core::TPipelineLayout::TLayout layout;
+            layout << *imgui_vertex_shader << *imgui_fragment_shader;
+
+            Turbo::Core::TVertexShaderStage *imgui_vertex_shader_stage = new Turbo::Core::TVertexShaderStage(imgui_vertex_shader);
+            Turbo::Core::TFragmentShaderStage *imgui_fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(imgui_fragment_shader);
+
+            this->pipeline = new Turbo::Core::TGraphicsPipeline(layout, this->renderPass, 0, imgui_vertex_bindings, imgui_vertex_shader_stage, imgui_fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_NONE, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
         }
 
         {

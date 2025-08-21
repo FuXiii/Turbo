@@ -1,9 +1,14 @@
 #pragma once
 #ifndef TURBO_CORE_TSHADER_H
 #define TURBO_CORE_TSHADER_H
-#include "TDescriptor.h"
+#include "TDescriptorSetLayout.h"
 #include "TVulkanHandle.h"
+#include "TVersion.h"
 #include <map>
+#include <filesystem>
+#include <unordered_set>
+
+#include "TFlags.h"
 
 namespace Turbo
 {
@@ -13,21 +18,49 @@ class TDevice;
 
 typedef enum class TShaderType
 {
-    VERTEX = 0,
-    TESSELLATION_CONTROL = 1,
-    TESSELLATION_EVALUATION = 2,
-    GEOMETRY = 3,
-    FRAGMENT = 4,
-    COMPUTE = 5,
-    TASK = 6,
-    MESH = 7,
-    RAY_GENERATION = 8,
-    ANY_HIT = 9,
-    CLOSEST_HIT = 10,
-    MISS = 11,
-    INTERSECTION = 12,
-    CALLABLE = 13,
+    VERTEX = 0x00000001,
+    TESSELLATION_CONTROL = 0x00000002,
+    TESSELLATION_EVALUATION = 0x00000004,
+    GEOMETRY = 0x00000008,
+    FRAGMENT = 0x00000010,
+    COMPUTE = 0x00000020,
+    TASK = 0x00000040,
+    MESH = 0x00000080,
+    RAY_GENERATION = 0x00000100,
+    ANY_HIT = 0x00000200,
+    CLOSEST_HIT = 0x00000400,
+    MISS = 0x00000800,
+    INTERSECTION = 0x00001000,
+    CALLABLE = 0x00002000,
+    // ALL_GRAPHICS = 0x0000001F,
+    // ALL = 0x7FFFFFFF
 } TShaderType;
+
+// TURBO_DECLARE_EXPLICIT_FLAGS_TYPE_OR_OPERATOR(VkShaderStageFlags, VkShaderStageFlagBits);
+
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const VkShaderStageFlagBits &right)
+//{
+//     Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
+
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+//{
+//     Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//     flags |= left;
+//     flags |= right;
+//     return flags;
+// }
+
+// inline Turbo::Core::TFlags<VkShaderStageFlagBits> operator|(const VkShaderStageFlagBits &left, const Turbo::Core::TFlags<VkShaderStageFlagBits> &right)
+//{
+//    Turbo::Core::TFlags<VkShaderStageFlagBits> flags;
+//    flags |= left;
+//    flags |= right;
+//    return flags;
+// }
 
 typedef enum class TShaderLanguage
 {
@@ -51,57 +84,111 @@ class TInterface : public Turbo::Core::TStructMember
     virtual std::string ToString() const override;
 };
 
-class TSpecializationConstant : public Turbo::Core::TInfo
-{
-  private:
-    uint32_t id;
-    std::string name;
-    Turbo::Core::TDescriptorDataType descriptorDataType;
-    uint32_t width;
-
-  public:
-    TSpecializationConstant() = default;
-    TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
-    ~TSpecializationConstant() = default;
-
-    uint32_t GetConstantID() const;
-    const std::string &GetName() const;
-    Turbo::Core::TDescriptorDataType GetDescriptorDataType() const;
-    uint32_t GetWidth() const;
-
-  public:
-    virtual std::string ToString() const override;
-};
-
 class TShader : public Turbo::Core::TVulkanHandle
 {
+  public:
+    class TSpecializationConstant : public Turbo::Core::TInfo
+    {
+      private:
+        [[deprecated]] uint32_t id;
+        std::string name;
+        Turbo::Core::TDescriptorDataType descriptorDataType;
+        uint32_t width;
+
+      public:
+        TSpecializationConstant() = default;
+        TSpecializationConstant(uint32_t id, const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
+        TSpecializationConstant(const std::string &name, Turbo::Core::TDescriptorDataType descriptorDataType, uint32_t width);
+        ~TSpecializationConstant() = default;
+
+        [[deprecated]] uint32_t GetConstantID() const;
+        const std::string &GetName() const;
+        Turbo::Core::TDescriptorDataType GetDescriptorDataType() const;
+        uint32_t GetWidth() const;
+
+      public:
+        virtual std::string ToString() const override;
+    };
+
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TDevice> device;
     T_VULKAN_HANDLE_HANDLE VkShaderModule vkShaderModule = VK_NULL_HANDLE;
     T_VULKAN_HANDLE_CHILDREN
 
-    T_VULKAN_HANDLE_DATA size_t size = 0;
-    T_VULKAN_HANDLE_DATA uint32_t *code = nullptr;
+    T_VULKAN_HANDLE_DATA std::vector<uint32_t> spirvCode;
     T_VULKAN_HANDLE_DATA TShaderLanguage language;
     T_VULKAN_HANDLE_DATA TShaderType type;
 
   public:
-    union TConstant {
-        bool boolValue;
-        int32_t intValue;
-        uint32_t uintValue;
-        float floatValue;
-        double doubleValue;
-    };
-
-    struct TConstValue
+    class TLayout
     {
-        Turbo::Core::TDescriptorDataType dataType = Turbo::Core::TDescriptorDataType::DESCRIPTOR_DATA_TYPE_UNKNOWN;
-        TConstant value;
+      public:
+        using TSet = std::size_t;
+        using TSets = std::unordered_map<TSet, Turbo::Core::TDescriptorSetLayout::TLayout>;
+
+        // NOTE: Only one push_constant block is allowed per stage
+        class TPushConstant
+        {
+          public:
+            using TOffset = uint32_t;
+            using TSize = uint32_t;
+
+          private:
+            // VkShaderStageFlags stageFlags = 0;
+            // TODO: VkShaderStageFlags need use TShaderType to override Vulkan define?
+            // TFlags<VkShaderStageFlags> stageFlags;
+            // NOTE: Only one push constant pure shader, so don't need flags
+            Turbo::Core::TShaderType shaderType = Turbo::Core::TShaderType::VERTEX;
+            // TPushConstant::TOffset offset = 0; // NOTE: We can't parse offset from shader code
+            TPushConstant::TSize size = 0;
+
+          public:
+            TPushConstant() = default;
+            TPushConstant(const Turbo::Core::TShaderType &shaderType, TPushConstant::TSize size);
+
+            const Turbo::Core::TShaderType &GetShaderType() const;
+            TPushConstant::TSize GetSize() const;
+
+            bool Empty() const;
+            void Merge(const TPushConstant::TSize &size);
+            void Merge(const TPushConstant &pushConstant);
+
+            std::string ToString() const;
+        };
+
+      private:
+        TShader::TLayout::TSets sets;
+        TShader::TLayout::TPushConstant pushConstant;
+
+      public:
+        TLayout() = default;
+        TLayout(const TShader::TLayout::TSets &sets, const TShader::TLayout::TPushConstant &pushConstant);
+        TLayout(const TShader::TLayout::TSets &sets);
+        TLayout(const TShader::TLayout::TPushConstant &pushConstant);
+        TLayout(TShader::TLayout::TSets &&sets, TShader::TLayout::TPushConstant &&pushConstant);
+
+        bool Empty() const;
+
+        const TShader::TLayout::TSets &GetSets() const;
+        const TShader::TLayout::TPushConstant &GetPushConstant() const;
+
+        bool Has(const TSet &set) const;
+
+        void Merge(TShader::TLayout::TSet set, TDescriptorSetLayout::TLayout::TBinding binding, const TDescriptor &descriptor);
+        void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout::TBindings &bindings);
+        void Merge(TShader::TLayout::TSet set, const TDescriptorSetLayout::TLayout &layout);
+        void Merge(const TShader::TLayout::TSets &sets);
+        void Merge(const TShader::TLayout::TPushConstant &pushConstant);
+        void Merge(const TShader::TLayout &layout);
+
+        Turbo::Core::TDescriptorSetLayout::TLayout &operator[](TSet &&set);
+
+        std::string ToString() const;
     };
 
   private:
-    std::vector<TSpecializationConstant> specializationConstants;
+    //[[deprecated]] std::vector<TSpecializationConstant> specializationConstants;
+    std::unordered_map<std::uint32_t, TSpecializationConstant> specializationConstants;
     std::vector<TInterface> inputs;
     std::vector<TInterface> outputs;
     std::vector<TUniformBufferDescriptor *> uniformBufferDescriptors;
@@ -116,7 +203,7 @@ class TShader : public Turbo::Core::TVulkanHandle
 
     std::string entryPoint;
 
-    std::map<uint32_t, TConstValue> specializationMap;
+    TShader::TLayout layout;
 
   protected:
     virtual void InternalCreate() override;
@@ -131,7 +218,7 @@ class TShader : public Turbo::Core::TVulkanHandle
     virtual ~TShader();
 
   public:
-    TDevice*GetDevice();
+    TDevice *GetDevice();
     VkShaderStageFlags GetVkShaderStageFlags() const;
     VkShaderStageFlagBits GetVkShaderStageFlagBits() const;
     VkShaderModule GetVkShaderModule();
@@ -151,20 +238,12 @@ class TShader : public Turbo::Core::TVulkanHandle
     std::vector<TInterface> GetInputs() const;
     std::vector<TInterface> GetOutputs() const;
 
-    const std::vector<TSpecializationConstant> &GetSpecializationConstants() const;
+    const std::unordered_map<std::uint32_t, TShader::TSpecializationConstant> &GetSpecializationConstants() const;
 
     TShaderType GetType() const;
+    const TShader::TLayout &GetLayout() const;
 
-    //<specialization constants>
-    void SetConstant(uint32_t id, bool value);
-    void SetConstant(uint32_t id, int32_t value);
-    void SetConstant(uint32_t id, uint32_t value);
-    void SetConstant(uint32_t id, float value);
-    void SetConstant(uint32_t id, double value);
-    const std::map<uint32_t, TConstValue> &GetSpecializations() const;
-    //</specialization constants>
-
-    std::vector<uint32_t> GetSpirV() const;
+    const std::vector<uint32_t> &GetSpirV() const;
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;
@@ -173,8 +252,8 @@ class TShader : public Turbo::Core::TVulkanHandle
 class TVertexShader : public Turbo::Core::TShader
 {
   public:
-    TVertexShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TVertexShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TVertexShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TVertexShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TVertexShader() = default;
@@ -183,8 +262,8 @@ class TVertexShader : public Turbo::Core::TShader
 class TFragmentShader : public Turbo::Core::TShader
 {
   public:
-    TFragmentShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TFragmentShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TFragmentShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TFragmentShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TFragmentShader() = default;
@@ -193,8 +272,8 @@ class TFragmentShader : public Turbo::Core::TShader
 class TComputeShader : public Turbo::Core::TShader
 {
   public:
-    TComputeShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TComputeShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TComputeShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TComputeShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TComputeShader() = default;
@@ -203,8 +282,8 @@ class TComputeShader : public Turbo::Core::TShader
 class TTessellationControlShader : public Turbo::Core::TShader
 {
   public:
-    TTessellationControlShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TTessellationControlShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TTessellationControlShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTessellationControlShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TTessellationControlShader() = default;
@@ -213,8 +292,8 @@ class TTessellationControlShader : public Turbo::Core::TShader
 class TTessellationEvaluationShader : public Turbo::Core::TShader
 {
   public:
-    TTessellationEvaluationShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TTessellationEvaluationShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TTessellationEvaluationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTessellationEvaluationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TTessellationEvaluationShader() = default;
@@ -223,8 +302,8 @@ class TTessellationEvaluationShader : public Turbo::Core::TShader
 class TGeometryShader : public Turbo::Core::TShader
 {
   public:
-    TGeometryShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TGeometryShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TGeometryShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TGeometryShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TGeometryShader() = default;
@@ -233,8 +312,8 @@ class TGeometryShader : public Turbo::Core::TShader
 class TTaskShader : public Turbo::Core::TShader
 {
   public:
-    TTaskShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TTaskShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TTaskShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TTaskShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TTaskShader() = default;
@@ -243,8 +322,8 @@ class TTaskShader : public Turbo::Core::TShader
 class TMeshShader : public Turbo::Core::TShader
 {
   public:
-    TMeshShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TMeshShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TMeshShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TMeshShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TMeshShader() = default;
@@ -253,8 +332,8 @@ class TMeshShader : public Turbo::Core::TShader
 class TRayGenerationShader : public Turbo::Core::TShader
 {
   public:
-    TRayGenerationShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TRayGenerationShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TRayGenerationShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TRayGenerationShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TRayGenerationShader() = default;
@@ -263,8 +342,8 @@ class TRayGenerationShader : public Turbo::Core::TShader
 class TAnyHitShader : public Turbo::Core::TShader
 {
   public:
-    TAnyHitShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TAnyHitShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TAnyHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TAnyHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TAnyHitShader() = default;
@@ -273,8 +352,8 @@ class TAnyHitShader : public Turbo::Core::TShader
 class TClosestHitShader : public Turbo::Core::TShader
 {
   public:
-    TClosestHitShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TClosestHitShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TClosestHitShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TClosestHitShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TClosestHitShader() = default;
@@ -283,8 +362,8 @@ class TClosestHitShader : public Turbo::Core::TShader
 class TMissShader : public Turbo::Core::TShader
 {
   public:
-    TMissShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TMissShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TMissShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TMissShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TMissShader() = default;
@@ -293,8 +372,8 @@ class TMissShader : public Turbo::Core::TShader
 class TIntersectionShader : public Turbo::Core::TShader
 {
   public:
-    TIntersectionShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TIntersectionShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TIntersectionShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TIntersectionShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TIntersectionShader() = default;
@@ -303,12 +382,14 @@ class TIntersectionShader : public Turbo::Core::TShader
 class TCallableShader : public Turbo::Core::TShader
 {
   public:
-    TCallableShader(TDevice*device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
-    TCallableShader(TDevice*device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
+    TCallableShader(TDevice *device, TShaderLanguage language, const std::string &code, const std::vector<std::string> &includePaths = std::vector<std::string>(), const std::string &entryPoint = "main");
+    TCallableShader(TDevice *device, size_t size, uint32_t *code, const std::string &entryPoint = "main");
 
   protected:
     virtual ~TCallableShader() = default;
 };
 } // namespace Core
 } // namespace Turbo
+
+std::ostream &operator<<(std::ostream &os, const Turbo::Core::TShaderType &shaderType);
 #endif // !TURBO_CORE_TSHADER_H

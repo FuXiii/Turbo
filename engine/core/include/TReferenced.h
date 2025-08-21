@@ -62,9 +62,30 @@ class TReferenced
         }
         return true;
     }
+
   protected:
     virtual ~TReferenced();
 };
+
+class TMemory : public TReferenced
+{
+  private:
+    void *data = nullptr;
+    std::size_t size = 0;
+
+  public:
+    TMemory() = default;
+    TMemory(void *data, const std::size_t &size);
+    TMemory(const std::size_t &size);
+    ~TMemory();
+
+    const std::size_t &Size() const;
+    const void *Data() const;
+    void *Data();
+
+    bool Valid() const override;
+};
+
 } // namespace Core
 } // namespace Turbo
 

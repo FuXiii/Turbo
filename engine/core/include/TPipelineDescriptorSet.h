@@ -2,6 +2,7 @@
 #ifndef TURBO_CORE_TPIPELINEDESCRIPTORSET_H
 #define TURBO_CORE_TPIPELINEDESCRIPTORSET_H
 #include "TVulkanHandle.h"
+#include "TPipelineLayout.h"
 
 namespace Turbo
 {
@@ -19,7 +20,8 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
   private:
     T_VULKAN_HANDLE_PARENT TRefPtr<TPipelineLayout> pipelineLayout;
     T_VULKAN_HANDLE_PARENT TRefPtr<TDescriptorPool> descriptorPool;
-    T_VULKAN_HANDLE_HANDLE std::vector<TRefPtr<TDescriptorSet>> descriptorSets;
+    //[[deprecated]] T_VULKAN_HANDLE_HANDLE std::vector<TRefPtr<TDescriptorSet>> descriptorSets;
+    T_VULKAN_HANDLE_HANDLE std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, TRefPtr<TDescriptorSet>> descriptorSets;
     T_VULKAN_HANDLE_CHILDREN;
 
   protected:
@@ -33,9 +35,10 @@ class TPipelineDescriptorSet : public Turbo::Core::TVulkanHandle
     virtual ~TPipelineDescriptorSet();
 
   public:
-    std::vector<TDescriptorSet *> GetDescriptorSet();
+    //[[deprecated]] std::vector<TDescriptorSet *> GetDescriptorSet();
+    std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, TDescriptorSet *> GetDescriptorSet();
+    TPipelineLayout *GetPipelineLayout();
 
-    // TODO: this BindData function just for Test
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers);
     void BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers);
     void BindData(uint32_t set, uint32_t binding, TBuffer *buffer, uint32_t dstArrayElement = 0);

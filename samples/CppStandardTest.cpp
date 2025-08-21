@@ -123,48 +123,52 @@ bool Return(bool v) // Test clang and clangd
 int main()
 {
     std::cout << "Hello World" << std::endl;
-    std::cout << "Return: " << Return(true) << std::endl;
 
-    bool is_class = std::is_class_v<A_Test>;
-    std::cout << is_class << ":A_Test" << std::endl;
-
-    struct B_Test
+    if (false)
     {
-        float test;
-        uint16_t uint16_t_test;
-        double double_test;
-    };
+        std::cout << "Return: " << Return(true) << std::endl;
 
-    TestUniformBuffer<B_Test> test_buffer;
-    test_buffer.Create("test uniform bffer", {123}, nullptr);
+        bool is_class = std::is_class_v<A_Test>;
+        std::cout << is_class << ":A_Test" << std::endl;
 
-    TestContext tc;
-    tc.BindingTestUniformBuffer(test_buffer);
+        struct B_Test
+        {
+            float test;
+            uint16_t uint16_t_test;
+            double double_test;
+        };
 
-    {
-        TRefA *a = new TRefA;
-        TRefB *b = new TRefB;
-        TRefC *c = new TRefC;
+        TestUniformBuffer<B_Test> test_buffer;
+        test_buffer.Create("test uniform bffer", {123}, nullptr);
 
-        std::vector<Turbo::Core::TReferenced *> refs_with_ptr;
-        refs_with_ptr.push_back(a);
-        refs_with_ptr.push_back(b);
-        refs_with_ptr.push_back(c);
+        TestContext tc;
+        tc.BindingTestUniformBuffer(test_buffer);
 
-        std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> refs_with_refptr;
-        refs_with_refptr.push_back(a);
-        refs_with_refptr.push_back(b);
-        refs_with_refptr.push_back(c);
+        {
+            TRefA *a = new TRefA;
+            TRefB *b = new TRefB;
+            TRefC *c = new TRefC;
 
-        TestVectorRefs(refs_with_ptr);
-        std::cout << "-----------" << std::endl;
-        TestVectorRefs(refs_with_refptr);
+            std::vector<Turbo::Core::TReferenced *> refs_with_ptr;
+            refs_with_ptr.push_back(a);
+            refs_with_ptr.push_back(b);
+            refs_with_ptr.push_back(c);
 
-        // std::cout << "Valids(a, a, a) :" << Turbo::Core::TReferenced::Valid(a, a, a) << std::endl;
-        // std::cout << "Valids(a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c) << std::endl;
-        // std::cout << "Valids(a, b, c, a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c, a, b, c) << std::endl;
-        // std::cout << "Valids(a, c) :" << Turbo::Core::TReferenced::Valid(a, c) << std::endl;
-        // std::cout << "Valids(c) :" << Turbo::Core::TReferenced::Valid(c) << std::endl;
-        //  std::cout << "Valids() :" << Turbo::Core::TReferenced::Valids(nullptr) << std::endl;
+            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TReferenced>> refs_with_refptr;
+            refs_with_refptr.push_back(a);
+            refs_with_refptr.push_back(b);
+            refs_with_refptr.push_back(c);
+
+            TestVectorRefs(refs_with_ptr);
+            std::cout << "-----------" << std::endl;
+            TestVectorRefs(refs_with_refptr);
+
+            // std::cout << "Valids(a, a, a) :" << Turbo::Core::TReferenced::Valid(a, a, a) << std::endl;
+            // std::cout << "Valids(a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c) << std::endl;
+            // std::cout << "Valids(a, b, c, a, b, c) :" << Turbo::Core::TReferenced::Valid(a, b, c, a, b, c) << std::endl;
+            // std::cout << "Valids(a, c) :" << Turbo::Core::TReferenced::Valid(a, c) << std::endl;
+            // std::cout << "Valids(c) :" << Turbo::Core::TReferenced::Valid(c) << std::endl;
+            //  std::cout << "Valids() :" << Turbo::Core::TReferenced::Valids(nullptr) << std::endl;
+        }
     }
 }

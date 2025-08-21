@@ -58,3 +58,45 @@ bool Turbo::Core::TReferenced::Valid() const
 {
     return true;
 }
+
+Turbo::Core::TMemory::TMemory(void *data, const std::size_t &size) : data(data), size(size)
+{
+}
+
+Turbo::Core::TMemory::TMemory(const std::size_t &size) : size(size)
+{
+    if (size > 0)
+    {
+        this->data = malloc(size);
+    }
+}
+
+Turbo::Core::TMemory::~TMemory()
+{
+    if (this->data != nullptr)
+    {
+        free(this->data);
+        this->data = nullptr;
+        this->size = 0;
+    }
+}
+
+const std::size_t &Turbo::Core::TMemory::Size() const
+{
+    return this->size;
+}
+
+const void *Turbo::Core::TMemory::Data() const
+{
+    return this->data;
+}
+
+void *Turbo::Core::TMemory::Data()
+{
+    return this->data;
+}
+
+bool Turbo::Core::TMemory::Valid() const
+{
+    return this->data != nullptr && this->size > 0;
+}

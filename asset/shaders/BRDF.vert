@@ -1,4 +1,4 @@
-#version 450
+#version 450 core
 
 layout(location = 0) in vec3 POSITION;
 layout(location = 1) in vec3 NORMAL;
@@ -26,10 +26,10 @@ void main()
     vec3 tangent = normalize((Matrixs.m * vec4(TANGENT.xyz, 0.0)).xyz);
     vec3 bitangent = normalize(cross(normal, tangent));
     TBN = mat3(tangent, bitangent, normal);
-    //TBN = mat3(tangent, normal, bitangent);
-    //TBN = mat3(bitangent, normal, tangent);
-    //TBN = mat3(bitangent, tangent, normal);
-    //TBN = mat3(normal, tangent, bitangent);
-    //TBN = mat3(normal, bitangent, tangent);
+    // TBN = mat3(tangent, normal, bitangent);
+    // TBN = mat3(bitangent, normal, tangent);
+    // TBN = mat3(bitangent, tangent, normal);
+    // TBN = mat3(normal, tangent, bitangent);
+    // TBN = mat3(normal, bitangent, tangent);
     uv = UV;
 }

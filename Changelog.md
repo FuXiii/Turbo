@@ -4,9 +4,459 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/21
+
+>* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
+>* 更新 `TPipelineLayout` 的 `PushConstant` 计算结果被覆盖的 `Bug`。
+
+## 2025/8/20
+
+>* 更新 `docs/platform/OpenHarmony.md` 研究 `OpenHarmony` 适配。
+>* 更新 `TPipelineLayout` 移除 `pushConstantDescriptors` 的相关使用。已被遗弃。
+>* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 增加 `GetConstantOffset(...)` 成员函数。
+
+## 2025/8/19
+
+>* 增加 `docs/platform/OpenHarmony.md` 研究 `OpenHarmony` 适配。
+
+## 2025/8/18
+
+>* 更新 `sample` 中 `SpecializationConstantsTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `SubpassTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `TessellationAndGeometry` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `TessellationTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `TurboTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VolumeTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VolumetricCloud` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanDynamicRenderingTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingAnyHitShader` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingJitterCamera` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTest` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForAnimationBLAS` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForAnimationTLAS` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForCallableShader` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForGLTF` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForInstances` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForIntersectionShader` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForLighting` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForLightingShadow` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForLightingShadowWithTexture` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `main` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWIndByInstancedLines.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByInstancedPoints.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByPatch.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `FlowField/ShowWindByTex.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `LineAndLineWidth.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `MultiDrawTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `SecondaryCommandBufferTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForMultiClosestHits.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForReflections.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanKHRRayTracingTestForReflections_WithoutLimited.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `VulkanRayQueryTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `utils/ImGuiPass.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `sample` 中 `utils/InfiniteCoordinateAxisPass.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 修正 `TComputePipeline` 中对于无效 `SpecializationInfo` 进行计算的 `Bug`。
+>* 修正 `TRenderingPipeline` 中对于 `TRenderingAttachment` 成员指针未初始化导致的内存访问 `Bug`。
+>* 更新 `TRenderingPipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+
+## 2025/8/15
+
+>* 更新 `TReferenced` 增加 `TMemory` 。用于纯内存管理。
+>* 更新 `TPipeline` 增加 `ShaderStageToSpecializationInfo(...)` 。用于将 `SpecializationInfo` 创建信息自动从 `ShaderStage` 中提取出来。
+>* 更新 `TGraphicsPipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+>* 更新 `TComputePipeline` 创建适配 `ShaderStageToSpecializationInfo(...)`。
+>* 更新 `TPipeline` 遗弃 `TShader` 的相关使用，转而使用 `TShaderStage`。
+>* 更新 `TPipeline` 遗弃老版本的构造函数，转而使用 `TShaderStage`。
+>* 更新 `TGraphicsPipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TRenderingPipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TComputePipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TComputePipeline` 创建适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `TShader` 移除 `specialization constants` 设置有关的功能。
+>* 更新 `samples/Auroras.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/BRDF.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/CineShaderLava.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputePipelineTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputerPipelineGeneratePerlinWorley.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ComputerPipelineGenerateWorley.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/DynamicRenderingTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/GeometryShaderTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/GreenFieldDiorama.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/HelloTriangle.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ImGuiTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/InfiniteCoordinateAxis.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/InstancedDrawTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/IspGlassball11Mix.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/LineAndLineWidth.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/MeshShaderTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/MultiDrawTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/NormalTexture.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/Octagrams.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PBRTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PerlinWorleyNoiseTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PointCloud.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ProteanClouds.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureCombinedImageSampler.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureHelloTriangle.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureIndexDraw.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PureSeparateImageSampler.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/PushConstantTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingBoundingBoxTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingPerlinWorleyNoise.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/RayMarchingTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/SecondaryCommandBufferTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/ShaderIncludeTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/SpecializationConstantsTest.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/VolumetricCloud.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+>* 更新 `samples/VulkanKHRRayTracingTestForAnimationBLAS.cpp` 适配新版 `TPipelineLayout::TLayout` 和 `ShaderStage`。
+
+## 2025/8/14
+
+>* 更新 `README` 增加 `submodule` 说明。
+>* 更新 `TPipeline` 使用 `TShaderStage` 说明。遗弃直接使用 `TShader` 。
+>* 更新 `TShader` 使 `TSpecializationConstant` 转移至 `TShader` 内部。
+>* 更新 `TShader` 中 `TSpecializationConstant` 存储结构。使用 `unordered_map` 存储，与 `id` 号对应。
+>* 遗弃 `TShader` 中 `SetConstant(...)` 相关操作。
+>* 更新 `TComputePipeline` 中 `SpecializationConstant` 相关计算。
+
+## 2025/8/13
+
+>* 增加 `TShaderStage.h` 和 `TShaderStage.cpp` 并增加 `TShaderStage` 类。
+>* 将 `TPipeline::TSpecializationConstants` 全部移动到 `TShaderStage::TSpecializationConstants` 中。并更新相关代码。
+
+## 2025/8/12
+
+>* 更新 `TPipeline` 中 `TSpecializationConstants` 。修正遍历 `Bug`。
+>* 更新 `TPipeline` 中 `TSpecializationConstants` 和 `TSpecializationConstant` 。增加 `ToString()` 成员函数。
+>* 更新 `TPipeline` 增加 `TSpecializationConstants` 类型成员变量并提供相关接口和构造函数。
+>* 更新 `TComputePipeline` 增加 `TSpecializationConstants` 类型成员变量并提供相关接口和构造函数。
+
+## 2025/8/11
+
+>* 更新 `test` 中增加 `PipelineTest` 。用于测试 `TPipeline` 功能。
+>* 更新 `VulkanMemoryAllocator` 到最新版 。
+
+## 2025/8/8
+
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool GetBool() const` 成员函数。
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `int GetInt() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `std::uint32_t GetUint32()` 成员函数const
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `float GetFloat() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `double GetDouble() const` 成员函数
+>* 更新 `TPipeline` 中的 `TSpecializationConstant` 类。增加 `bool Valid() const` 成员函数
+
+## 2025/8/7
+
+>* 更新 `TComputePipeline` 适配使用 `TPipelineLayout::TLayout` 版本创建。
+>* 更新 `samples\ComputePipelineTest` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\ComputerPipelineGeneratePerlinWorley` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\ComputerPipelineGenerateWorley` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\SpecializationConstantsTest` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\VolumetricCloud` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\RayMarchingPerlinWorleyNoise` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `samples\VulkanKHRRayTracingTestForAnimationBLAS` 示例。使用适配 `TPipelineLayout::TLayout` 的 `TComputePipeline`。
+>* 更新 `TDescriptorSetLayout::TLayout` 的 `Merge(...)` 算法。使用强制合并。
+>* 更新 `TPipeline` 增加 `TSpecializationConstants` 类和 `TSpecializationConstant`。用于声明存储 `Specialization Constant` 数据。
+
+## 2025/8/6
+
+>* 更新 `TPipelineLayout::TLayout` 增加 `operator>` 成员函数。
+>* 更新 `TPipelineDescriptorSet::TLayout` 增加 `operator>` 成员函数。
+>* 更新 `TDescriptor` 增加 `operator>` 成员函数。
+>* 更新 `TPipeline` 内部检查 `TPipelineLayout::TLayout` 的兼容性。
+
+## 2025/8/5
+
+>* 更新 `TPipeline` 增加使用 `TPipelineLayout::TLayout` 指定管线布局创建，并使用 `std::initializer_list` 管理传入的多个着色器。
+>* 更新 `TPipelineLayout::TLayout` 的 `operator==/!=` 成员函数。比较两者相等与否。
+
+## 2025/8/4
+
+>* 增加 `test\FlagsTest.cpp` 示例。用于测试 `clangd` 内存溢出 `bug` 。
+
+## 2025/8/2
+
+>* 更新 `TPipelineDescriptorSet` 中的 `DescriptorSet` 附带 `set` 号。方便使用。
+>* 更新 `TPipelineLayout` 中的 `DescriptorSetLayout` 附带 `set` 号。方便使用。
+>* 修正 `TCommandBuffer` 中 `CmdBindPipelineDescriptorSet(...)` 对于管线描述符集对于正确 `set` 号的绑定，之前无 `set` 号检查，会产生 `bug` 现已修复。
+
+## 2025/8/1
+
+>* 更新 `TDescriptorSetLayout` 移除 `GetDescriptorType(uint32_t binding)` 成员函数。转而使用 `TDescriptorSetLayout::GetLayout()` 。
+>* 更新 `TDescriptorSet` 移除 `TDescriptorSetLayout::GetDescriptorType(uint32_t binding)` 函数使用。转而使用 `TDescriptorSetLayout::GetLayout()` 。
+>* 更新 `示例` 适配使用 `Layout` 。
+
+## 2025/7/30
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor Set 数据` 和 `Push Constants 数据`。
+
+## 2025/7/29
+
+>* 更新 `TPipelineDescriptorSet` 中描述符集中 `set` 号的使用。存在 `Bug` 需修正。
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor Set 数据` 和 `Push Constants 数据`。
+>* 更新 `TCommandBufferBase::CmdPushConstants(...)` 暂时使用 `Layout` 适配。不完整需要完善。
+
+## 2025/7/28
+
+>* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `Hash` 算法。将重复性代码合并。
+>* 更新 `TDescriptorSetLayout::TLayout` 和 `TPipelineLayout::TLayout` 类的 `ToString()` 函数。将按 `set/bindings` 号顺序输出。
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 的 `ToString()` 函数。将按 `着色器` 顺序输出。
+>* 更新 `TPipelineLayout` 类。完善 `VkPipelineLayout` 的创建。
+>* 更新 `TDevice` 的 `TLayoutManager` 类。完善 `TDescriptorSetLayout` 和 `TPipelineLayout` 的创建。
+
+## 2025/7/25
+
+>* 更新 `TDevice` 类增加 `TLayoutManager` 类用于管理 `TDescriptorSetLayout` 和 `TPipelineLayout`。
+>* 优化 `TDescriptorSetLayout` 和 `TPipelineLayout` 的 `hash` 算法。按照顺序计算。
+
+## 2025/7/24
+
+>* 增加 `TPushConstants::TOffsets` 类。用于用户自定义配置 `PushConstant` 的 `offset` 。
+>* 更新 `TPipelineLayout::TLayout` 。增加 `TPushConstants::TOffsets` 通过 `<<` 符号推导出 `TPipelineLayout::TLayout` 。
+>* 更新 `docs\Design\Descriptor.md` 设计 `DescriptorSetLayout 和 PipelineLayout 和 Pipeline`。
+
+## 2025/7/23
+
+>* 更新 `TPipelineLayout::TLayout::TPushConstants` 。支持配置 `offset` 。
+>* 更新 `TPipelineLayout::TLayout` 。增加多个 `Shader` 通过 `<<` 符号推导出 `TPipelineLayout::TLayout` 。
+
+## 2025/7/22
+
+>* 更新 `TurboAPIDesign_Descriptor` 。研究 `PushConstant` 的 `offset` 格式输出。
+
+## 2025/7/21
+
+>* 更新 `TShader::TLayout::TPushConstant` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TPipelineLayout::TLayout` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TShader::TLayout` 的 `ToString()` 成员函数。使用 `Json` 格式输出。
+>* 更新 `TShaderType` 支持 `<<` 符号重载输出。
+
+## 2025/7/18
+
+>* 更新 `TPipelineLayout` 的 `ToString()` 成员函数。
+>* 修正 `TShader::TLayout::TPushConstant()` 的构造函数 `Bug` 。
+>* 优化 `TDescriptorSetLayout::TLayout` 和 `TDescriptor` 的 `ToString()`函数。
+
+## 2025/7/17
+
+>* 更新 `TPipelineLayout` 和 `TShader` 中的 `Push Constant(s)` 和与之对应的 `Shader(Flag/Type)` 使其更加合理。
+>* 更新 `TShader::TLayout::TPushConstant` 中移除 ``TOffset`` 的存储。不需要该成员变量。
+
+## 2025/7/16
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+
+## 2025/7/15
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `samples` 增加 `test` 文件夹下。用于存放测试代码。
+>* `TurboAPIDesign_Descriptor` 从 `sample` 移动到 `test` 文件夹下。
+
+## 2025/6/11
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+
+## 2025/6/6
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+
+## 2025/6/5
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+
+## 2025/5/23
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+
+## 2025/5/14
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+
+## 2025/5/9
+
+>* 研究 `Turbo::Core::TFlags<T>` 的 `operator|` 对于明确类型的操作。
+>* 更新 `engine\core\TShader` 下 `VkShaderStageFlags` 使用 `TFlags<VkShaderStageFlags>` 替代。
+
+## 2025/4/29
+
+>* 更新 `engine\core` 下新增 `Turbo::Core::TFlags<T>` 的相关声明和定义。
+
+## 2025/4/28
+
+>* 更新 `samples\TurboAPIDesign_Descriptor` 中尝试实现 `TFlags` 。
+
+## 2025/4/27
+
+>* 更新 `engine\core\include\TShader` 中 `TShaderType` 对应的枚举值，使其与 `VkShaderStageFlagBits` 保持一致。
+>* 更新 `samples\TurboAPIDesign_Descriptor` 中尝试实现 `TFlags` 。
+
+## 2025/4/16
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `engine\core\TPipelineLayout` 下 `TPipelineLayout::TLayout` 子类增加 `GetSets()` 成员函数。
+>* `engine\core\TPipelineLayout` 下 `TPipelineLayout::TLayout` 子类增加 `GetPushConstants()` 成员函数。
+>* `engine\core\TPipelineLayout` 下增加 `std::hash<TPipelineLayout::TLayout>` 的特化。用于计算 `TPipelineLayout::TLayout` 的 `Hash` 值。
+
+## 2025/4/15
+
+>* 更新 `docs\Design\Descriptor.md` 设计 `Descriptor`。
+>* `engine\core\TPipelineLayout` 下增加 `TPipelineLayout::TLayout` 子类。
+>* 将 `engine\core\TDescriptor` 下 `TPushConstants` 移动到 `TPipelineLayout::TLayout` 子类下。
+
+## 2025/4/9
+
+>* `engine\core\TShader` 下 `InternalParseSpirV()` 时将数据合并到 `layout` 中。
+
+## 2025/4/8
+
+>* `engine\core\TShader` 下 `TLayout` 中增加 `TPushConstant` 类。
+>* `engine\core\TShader` 下 `TLayout` 中移除 `TPushConstants` 使用。
+
+## 2025/4/5
+
+>* `engine\core\TShader` 下 `InternalParseSpirV()` 增加对 `Layout` 的解析。
+
+## 2025/4/4
+
+>* `engine\core\TDescriptor` 下 `TPushConstants` 增加使用 `offset`、`size`、`flags` 参数的 `Merge(...)` 函数。
+
+## 2025/4/3
+
+>* `engine\core\TShader` 下 `TLayout` 增加使用 `TSet`、`TBinding`、`TDescriptor`、`TBindings` 和 `TDescriptorSetLayout::TLayout` 参数的 `Merge(...)` 函数。
+>* `engine\core\TShader` 下 `TLayout` 增加 `operator[]` 函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TLayout` 增加使用 `TBinding`、`TDescriptor`、`TBindings` 参数的 `Merge(...)` 函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TLayout` 增加 `operator[]` 函数。
+
+## 2025/4/2
+
+>* `engine\core\TShader` 下优化 `spirv_cross::CompilerGLSL` 的创建，直接使用`SPIR-V`代码构建，而不是使用拷贝之后的数据，提高效率。
+>* `engine\core\TShader` 下优化，移除指针式内存分配，直接使用 `std::vector<uint32_t>` 存储和管理`SPIR-V`代码。提高效率。统一接口。
+
+## 2025/4/1
+
+>* `engine\core\TShader` 下 `TLayout` 增加 `TSets` 、 `TPushConstants` 版本的构造函数和 `Merge` 成员函数。
+
+*注:目前`SPIRV-Reflect`对于`Specialization Constant`的支持还不是很完整。目前计划仍然使用 `SPIRV-Cross`进行解析*
+
+## 2025/3/30
+
+>* `engine\core\TDescriptor` 下 `TPushConstants` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TDescriptorSetLayout::TLayout` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TShader` 下 `TShader::TLayout` 增加 `bool Empty() const` 成员函数。
+>* `engine\core\TDescriptorSetLayout` 下 `TDescriptorSetLayout` 增加使用 `TDescriptorSetLayout::TLayout` 的构函数。
+
+## 2025/3/28
+
+>* `engine\core` 下 `TDescriptor` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TPushConstants` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `ToString()` 成员函数。
+>* `engine\core` 下 `TDescriptorSetLayout::TLayout` 中优化实现 `Merge(...)` 成员函数。
+>* `engine\core` 下 `TShader::TLayout` 中实现 `Merge(...)` 成员函数。
+
+## 2025/3/27
+
+>* `engine\core` 下 `TDescriptor` 中 `TBinding` 声明转移至 `TDescriptorSetLayout::TLayout` 中。
+>* `engine\core` 下 `TDescriptor` 中 `TBindings` 声明转移至 `TDescriptorSetLayout::TLayout` 中。
+>* `engine\core` 下 `TDescriptor` 中 `Type` 枚举声明重命名为 `TType`。
+>* `engine\core` 下 `TDescriptor` 中 `TSet` 声明转移至 `TShader::TLayout` 中。
+>* `engine\core` 下 `TShader::TLayout` 中增加 `TPushConstants` 成员变量。
+>* `engine\core` 下 `TDescriptor` 中实现 `TPushConstants` 功能。
+
+## 2025/3/26
+
+>* `engine\core` 下 `TDescriptor` 中新增 `TSet` 声明。
+>* `engine\core` 下 `TDescriptor` 中新增 `TPushConstants` 声明。
+>* `engine\core` 下 `TShader` 中新增 `Layout` 子类声明。
+
+## 2025/3/25
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下更新 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+>* `engine\core` 下 `TDescriptor` 中将 `TDescriptorType` 转移至 `TDescriptor` 类中声明，并重命名为 `Type`。
+>* 将所有 `TDescriptorType` 修正为 `TDescriptor::Type` 声明。
+>* `engine\core` 下 `TDescriptorSetLayout` 新增 `Layout` 子类声明。
+
+## 2025/3/24
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下更新 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+
+## 2025/3/22
+
+>* `docs\Design\Design.md` 重命名为 `Descriptor` 设计 `Descriptor`。
+
+## 2025/3/21
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下更新 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+
+## 2025/3/20
+
+>* `core\thirdparty` 下 `VulkanMemoryAllocator` 更新到最新版的 ``3.2.1`` 。
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/19
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+>* `samples` 下增加 `TurboAPIDesign_Descriptor` 示例用于测试设计代码。
+
+## 2025/3/18
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/17
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/14
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/13
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/12
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/11
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/10
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/7
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/6
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/5
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/3/4
+
+>* 更新 `docs\Design\Design.md` 设计 `Descriptor`。
+
+## 2025/2/26
+
+>* 更新 `docs\Memo.md` 研究 `描述符`。
+
+## 2025/2/25
+
+>* 更新 `README.en.md` 修正。
+>* 更新 `docs\Memo.md` 研究 `描述符`。
+
 ## 2025/2/24
 
 >* 更新 `README.en.md` 增加英文版的 `README`。
+>* 更新 `docs\Memo.md` 研究 `描述符`。
 
 ## 2025/2/17
 

@@ -8,6 +8,62 @@
 #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
+Turbo::Core::TDevice::TLayoutManager::TLayoutManager(TDevice *device)
+{
+    this->device = device;
+}
+
+Turbo::Core::TDescriptorSetLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCreateLayout(const Turbo::Core::TDescriptorSetLayout::TLayout &layout)
+{
+    if (this->device.Valid())
+    {
+        // if (!layout.Empty())//NOTE:ignore empty because Vulkan can create empty layout
+        {
+            auto hash = layout.Hash();
+            auto find_result = this->descriptorSetLayoutMap.find(hash);
+            if (find_result == this->descriptorSetLayoutMap.end())
+            {
+                // TODO:Create a new layout and add it
+                Turbo::Core::TDescriptorSetLayout *descriptor_set_layout = new Turbo::Core::TDescriptorSetLayout(device, layout);
+                this->descriptorSetLayoutMap[hash] = descriptor_set_layout;
+                return descriptor_set_layout;
+            }
+            else
+            {
+                return find_result->second;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+Turbo::Core::TPipelineLayout *Turbo::Core::TDevice::TLayoutManager::GetOrCreateLayout(const Turbo::Core::TPipelineLayout::TLayout &layout)
+{
+    if (this->device.Valid())
+    {
+        // if (!layout.Empty())//NOTE:ignore empty because Vulkan can create empty layout
+        {
+            auto hash = layout.Hash();
+            auto find_result = this->pipelineLayoutMap.find(hash);
+            if (find_result == this->pipelineLayoutMap.end())
+            {
+                // TODO:Create a new layout and add it
+                Turbo::Core::TPipelineLayout *pipeline_layout = new Turbo::Core::TPipelineLayout(device, layout);
+                // this->pipelineLayoutMap.insert(std::make_pair(hash, pipeline_layout));
+                this->pipelineLayoutMap[hash] = pipeline_layout;
+                return pipeline_layout;
+            }
+            else
+            {
+                return find_result->second;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void Turbo::Core::TDevice::AddChildHandle(TDeviceQueue *deviceQueue)
 {
     if (Turbo::Core::TReferenced::Valid(deviceQueue))
@@ -1097,6 +1153,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, std::vector<TLaye
         }
 
         this->vmaAllocator = new TVmaAllocator(this);
+        this->layoutManager = new TLayoutManager(this);
     }
     else
     {
@@ -1141,6 +1198,7 @@ Turbo::Core::TDevice::TDevice(TPhysicalDevice *physicalDevice, const std::vector
         }
 
         this->vmaAllocator = new TVmaAllocator(this);
+        this->layoutManager = new TLayoutManager(this);
     }
     else
     {
@@ -1154,6 +1212,7 @@ Turbo::Core::TDevice::~TDevice()
     {
         this->deviceDriver->vkDeviceWaitIdle(this->vkDevice);
 
+        delete this->layoutManager;
         // delete this->vmaAllocator;
         this->vmaAllocator = nullptr;
 
@@ -1424,6 +1483,11 @@ void Turbo::Core::TDevice::WaitIdle()
 const Turbo::Core::TDeviceDriver *Turbo::Core::TDevice::GetDeviceDriver()
 {
     return this->deviceDriver;
+}
+
+Turbo::Core::TDevice::TLayoutManager &Turbo::Core::TDevice::GetLayoutManager()
+{
+    return *(this->layoutManager);
 }
 
 std::string Turbo::Core::TDevice::ToString() const

@@ -9,6 +9,8 @@
 // #include "TVulkanAllocator.h"
 #include "TVulkanLoader.h"
 
+#include "TDescriptorPool.h"
+
 void Turbo::Core::TDescriptorSet::InternalCreate()
 {
     VkDescriptorPool vk_descriptor_pool = this->descriptorPool->GetVkDescriptorPool();
@@ -64,45 +66,65 @@ VkDescriptorSet Turbo::Core::TDescriptorSet::GetVkDescriptorSet()
     return this->vkDescriptorSet;
 }
 
-uint32_t Turbo::Core::TDescriptorSet::GetSet() const
-{
-    return this->descriptorSetLayout->GetSet();
-}
+// uint32_t Turbo::Core::TDescriptorSet::GetSet() const
+//{
+//     return this->descriptorSetLayout->GetSet();
+// }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {
-    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
-
-    std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
-    for (TBuffer *buffer_item : buffers)
+    if (buffers.empty())
     {
-        VkDescriptorBufferInfo vk_descriptor_buffer_info;
-        vk_descriptor_buffer_info.buffer = buffer_item->GetVkBuffer();
-        vk_descriptor_buffer_info.offset = 0;
-        vk_descriptor_buffer_info.range = VK_WHOLE_SIZE;
-
-        vk_descriptor_buffer_infos.push_back(vk_descriptor_buffer_info);
+        return;
     }
 
-    VkWriteDescriptorSet vk_write_descriptor_set;
-    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    vk_write_descriptor_set.pNext = nullptr;
-    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
-    vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = buffers.size();
-    vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    if (descriptor_type == Turbo::Core::TDescriptorType::STORAGE_BUFFER)
+    auto &layout = this->descriptorSetLayout->GetLayout();
+    if (layout.Has(binding))
     {
-        vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    }
-    vk_write_descriptor_set.pImageInfo = nullptr;
-    vk_write_descriptor_set.pBufferInfo = vk_descriptor_buffer_infos.data();
-    vk_write_descriptor_set.pTexelBufferView = nullptr;
+        auto &type = layout[binding].GetType();
+        switch (type)
+        {
+        case TDescriptor::TType::UNIFORM_TEXEL_BUFFER:
+        case TDescriptor::TType::STORAGE_TEXEL_BUFFER:
+        case TDescriptor::TType::UNIFORM_BUFFER:
+        case TDescriptor::TType::STORAGE_BUFFER:
+        case TDescriptor::TType::UNIFORM_BUFFER_DYNAMIC:
+        case TDescriptor::TType::STORAGE_BUFFER_DYNAMIC: {
+            std::vector<VkDescriptorBufferInfo> vk_descriptor_buffer_infos;
+            for (TBuffer *buffer_item : buffers)
+            {
+                VkDescriptorBufferInfo vk_descriptor_buffer_info;
+                vk_descriptor_buffer_info.buffer = buffer_item->GetVkBuffer();
+                vk_descriptor_buffer_info.offset = 0;
+                vk_descriptor_buffer_info.range = VK_WHOLE_SIZE;
 
-    TDevice *device = this->descriptorPool->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+                vk_descriptor_buffer_infos.push_back(vk_descriptor_buffer_info);
+            }
+
+            VkWriteDescriptorSet vk_write_descriptor_set;
+            vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            vk_write_descriptor_set.pNext = nullptr;
+            vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+            vk_write_descriptor_set.dstBinding = binding;
+            vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+            vk_write_descriptor_set.descriptorCount = buffers.size();
+            vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            vk_write_descriptor_set.descriptorType = static_cast<VkDescriptorType>(type);
+            vk_write_descriptor_set.pImageInfo = nullptr;
+            vk_write_descriptor_set.pBufferInfo = vk_descriptor_buffer_infos.data();
+            vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+            TDevice *device = this->descriptorPool->GetDevice();
+            VkDevice vk_device = device->GetVkDevice();
+            device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+        }
+        break;
+        default: {
+        }
+        break;
+        }
+        return;
+    }
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TBuffer>> &buffers)
@@ -119,35 +141,77 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TBuffer *buffer, ui
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
-    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (auto &combined_image_sampler_item : combinedImageSamplers)
+    if (combinedImageSamplers.empty())
     {
-        TImageView *image_view = combined_image_sampler_item.first;
-        TSampler *sampler = combined_image_sampler_item.second;
-
-        VkDescriptorImageInfo vk_descriptor_image_info = {};
-        vk_descriptor_image_info.sampler = sampler->GetVkSampler();
-        vk_descriptor_image_info.imageView = image_view->GetVkImageView();
-        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+        return;
     }
 
-    VkWriteDescriptorSet vk_write_descriptor_set;
-    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    vk_write_descriptor_set.pNext = nullptr;
-    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
-    vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = combinedImageSamplers.size();
-    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
-    vk_write_descriptor_set.pBufferInfo = nullptr;
-    vk_write_descriptor_set.pTexelBufferView = nullptr;
+    auto &layout = this->descriptorSetLayout->GetLayout();
+    if (layout.Has(binding))
+    {
+        auto &type = layout[binding].GetType();
+        switch (type)
+        {
+        case TDescriptor::TType::SAMPLER: {
+            std::vector<TSampler *> samplers(combinedImageSamplers.size());
+            for (std::size_t index = 0; index < samplers.size(); index++)
+            {
+                samplers[index] = combinedImageSamplers[index].second;
+            }
+            this->BindData(binding, dstArrayElement, samplers);
+        }
+        break;
+        case TDescriptor::TType::COMBINED_IMAGE_SAMPLER: {
+            std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
+            for (auto &combined_image_sampler_item : combinedImageSamplers)
+            {
+                TImageView *image_view = combined_image_sampler_item.first;
+                TSampler *sampler = combined_image_sampler_item.second;
 
-    TDevice *device = this->descriptorPool->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+                VkDescriptorImageInfo vk_descriptor_image_info = {};
+                vk_descriptor_image_info.sampler = sampler->GetVkSampler();
+                vk_descriptor_image_info.imageView = image_view->GetVkImageView();
+                vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+            }
+
+            VkWriteDescriptorSet vk_write_descriptor_set;
+            vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            vk_write_descriptor_set.pNext = nullptr;
+            vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+            vk_write_descriptor_set.dstBinding = binding;
+            vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+            vk_write_descriptor_set.descriptorCount = combinedImageSamplers.size();
+            vk_write_descriptor_set.descriptorType = static_cast<VkDescriptorType>(type);
+            ;
+            vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+            vk_write_descriptor_set.pBufferInfo = nullptr;
+            vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+            TDevice *device = this->descriptorPool->GetDevice();
+            VkDevice vk_device = device->GetVkDevice();
+            device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+        }
+        break;
+        case TDescriptor::TType::SAMPLED_IMAGE:
+        case TDescriptor::TType::STORAGE_IMAGE:
+        case TDescriptor::TType::INPUT_ATTACHMENT: {
+
+            std::vector<TImageView *> image_views(combinedImageSamplers.size());
+            for (std::size_t index = 0; index < image_views.size(); index++)
+            {
+                image_views[index] = combinedImageSamplers[index].first;
+            }
+            this->BindData(binding, dstArrayElement, image_views);
+        }
+        break;
+        default: {
+        }
+        break;
+        }
+        return;
+    }
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TRefPtr<TImageView>, TRefPtr<TSampler>>> &combinedImageSamplers)
@@ -169,57 +233,75 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, const std::pair<TIm
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TImageView *> &imageViews)
 {
-    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-
-    Turbo::Core::TDescriptorType descriptor_type = this->descriptorSetLayout->GetDescriptorType(binding);
-    switch (descriptor_type)
+    if (imageViews.empty())
     {
-    case Turbo::Core::TDescriptorType::SAMPLED_IMAGE:
-    case Turbo::Core::TDescriptorType::INPUT_ATTACHMENT: {
-        for (TImageView *image_view_item : imageViews)
+        return;
+    }
+
+    auto &layout = this->descriptorSetLayout->GetLayout();
+    if (layout.Has(binding))
+    {
+        auto &type = layout[binding].GetType();
+        switch (type)
         {
-            VkDescriptorImageInfo vk_descriptor_image_info = {};
-            vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
-            vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
-            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            // vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+        case TDescriptor::TType::SAMPLED_IMAGE:
+        case TDescriptor::TType::STORAGE_IMAGE:
+        case TDescriptor::TType::INPUT_ATTACHMENT: {
+            std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
 
-            vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+            switch (type)
+            {
+            case Turbo::Core::TDescriptor::TType::SAMPLED_IMAGE:
+            case Turbo::Core::TDescriptor::TType::INPUT_ATTACHMENT: {
+                for (TImageView *image_view_item : imageViews)
+                {
+                    VkDescriptorImageInfo vk_descriptor_image_info = {};
+                    vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+                    vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
+                    vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    // vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+                    vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+                }
+            }
+            case Turbo::Core::TDescriptor::TType::STORAGE_IMAGE: {
+                for (TImageView *image_view_item : imageViews)
+                {
+                    VkDescriptorImageInfo vk_descriptor_image_info = {};
+                    vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
+                    vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
+                    vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+
+                    vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+                }
+            }
+            break;
+            }
+
+            VkWriteDescriptorSet vk_write_descriptor_set;
+            vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            vk_write_descriptor_set.pNext = nullptr;
+            vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+            vk_write_descriptor_set.dstBinding = binding;
+            vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+            vk_write_descriptor_set.descriptorCount = imageViews.size();
+            vk_write_descriptor_set.descriptorType = static_cast<VkDescriptorType>(type);
+            ;
+            vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+            vk_write_descriptor_set.pBufferInfo = nullptr;
+            vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+            TDevice *device = this->descriptorPool->GetDevice();
+            VkDevice vk_device = device->GetVkDevice();
+            device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
         }
-    }
-    case Turbo::Core::TDescriptorType::STORAGE_IMAGE: {
-        for (TImageView *image_view_item : imageViews)
-        {
-            VkDescriptorImageInfo vk_descriptor_image_info = {};
-            vk_descriptor_image_info.sampler = VK_NULL_HANDLE;
-            vk_descriptor_image_info.imageView = image_view_item->GetVkImageView();
-            vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
-
-            vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+        break;
+        default: {
         }
+        break;
+        }
+        return;
     }
-    break;
-    default: {
-        throw Turbo::Core::TException(TResult::INVALID_PARAMETER, "Turbo::Core::TDescriptorSet::BindData", "this descriptor binding type not compatible current layout binding type");
-    }
-    break;
-    }
-
-    VkWriteDescriptorSet vk_write_descriptor_set;
-    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    vk_write_descriptor_set.pNext = nullptr;
-    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
-    vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = imageViews.size();
-    vk_write_descriptor_set.descriptorType = (VkDescriptorType)descriptor_type;
-    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
-    vk_write_descriptor_set.pBufferInfo = nullptr;
-    vk_write_descriptor_set.pTexelBufferView = nullptr;
-
-    TDevice *device = this->descriptorPool->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TImageView>> &imageViews)
@@ -236,32 +318,52 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TImageView *imageVi
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TSampler *> &samplers)
 {
-    std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
-    for (TSampler *sampler_item : samplers)
+    if (samplers.empty())
     {
-        VkDescriptorImageInfo vk_descriptor_image_info = {};
-        vk_descriptor_image_info.sampler = sampler_item->GetVkSampler();
-        vk_descriptor_image_info.imageView = VK_NULL_HANDLE;
-        vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-
-        vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+        return;
     }
 
-    VkWriteDescriptorSet vk_write_descriptor_set;
-    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    vk_write_descriptor_set.pNext = nullptr;
-    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
-    vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = samplers.size();
-    vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-    vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
-    vk_write_descriptor_set.pBufferInfo = nullptr;
-    vk_write_descriptor_set.pTexelBufferView = nullptr;
+    auto &layout = this->descriptorSetLayout->GetLayout();
+    if (layout.Has(binding))
+    {
+        auto &type = layout[binding].GetType();
+        switch (type)
+        {
+        case TDescriptor::TType::SAMPLER: {
+            std::vector<VkDescriptorImageInfo> vk_descriptor_image_infos;
+            for (TSampler *sampler_item : samplers)
+            {
+                VkDescriptorImageInfo vk_descriptor_image_info = {};
+                vk_descriptor_image_info.sampler = sampler_item->GetVkSampler();
+                vk_descriptor_image_info.imageView = VK_NULL_HANDLE;
+                vk_descriptor_image_info.imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
 
-    TDevice *device = this->descriptorPool->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+                vk_descriptor_image_infos.push_back(vk_descriptor_image_info);
+            }
+
+            VkWriteDescriptorSet vk_write_descriptor_set;
+            vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            vk_write_descriptor_set.pNext = nullptr;
+            vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+            vk_write_descriptor_set.dstBinding = binding;
+            vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+            vk_write_descriptor_set.descriptorCount = samplers.size();
+            vk_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+            vk_write_descriptor_set.pImageInfo = vk_descriptor_image_infos.data();
+            vk_write_descriptor_set.pBufferInfo = nullptr;
+            vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+            TDevice *device = this->descriptorPool->GetDevice();
+            VkDevice vk_device = device->GetVkDevice();
+            device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+        }
+        break;
+        default: {
+        }
+        break;
+        }
+        return;
+    }
 }
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<TRefPtr<TSampler>> &samplers)
@@ -278,27 +380,47 @@ void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, TSampler *sampler, 
 
 void Turbo::Core::TDescriptorSet::BindData(uint32_t binding, uint32_t dstArrayElement, const std::vector<VkAccelerationStructureKHR> &accelerationStructures)
 {
-    VkWriteDescriptorSetAccelerationStructureKHR vk_write_descriptor_set_acceleration_structure_khr;
-    vk_write_descriptor_set_acceleration_structure_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
-    vk_write_descriptor_set_acceleration_structure_khr.pNext = nullptr;
-    vk_write_descriptor_set_acceleration_structure_khr.accelerationStructureCount = accelerationStructures.size();
-    vk_write_descriptor_set_acceleration_structure_khr.pAccelerationStructures = accelerationStructures.data();
+    if (accelerationStructures.empty())
+    {
+        return;
+    }
 
-    VkWriteDescriptorSet vk_write_descriptor_set;
-    vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    vk_write_descriptor_set.pNext = &vk_write_descriptor_set_acceleration_structure_khr;
-    vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
-    vk_write_descriptor_set.dstBinding = binding;
-    vk_write_descriptor_set.dstArrayElement = dstArrayElement;
-    vk_write_descriptor_set.descriptorCount = accelerationStructures.size();
-    vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-    vk_write_descriptor_set.pImageInfo = nullptr;
-    vk_write_descriptor_set.pBufferInfo = nullptr;
-    vk_write_descriptor_set.pTexelBufferView = nullptr;
+    auto &layout = this->descriptorSetLayout->GetLayout();
+    if (layout.Has(binding))
+    {
+        auto &type = layout[binding].GetType();
+        switch (type)
+        {
+        case TDescriptor::TType::ACCELERATION_STRUCTURE: {
+            VkWriteDescriptorSetAccelerationStructureKHR vk_write_descriptor_set_acceleration_structure_khr;
+            vk_write_descriptor_set_acceleration_structure_khr.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+            vk_write_descriptor_set_acceleration_structure_khr.pNext = nullptr;
+            vk_write_descriptor_set_acceleration_structure_khr.accelerationStructureCount = accelerationStructures.size();
+            vk_write_descriptor_set_acceleration_structure_khr.pAccelerationStructures = accelerationStructures.data();
 
-    TDevice *device = this->descriptorPool->GetDevice();
-    VkDevice vk_device = device->GetVkDevice();
-    device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+            VkWriteDescriptorSet vk_write_descriptor_set;
+            vk_write_descriptor_set.sType = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            vk_write_descriptor_set.pNext = &vk_write_descriptor_set_acceleration_structure_khr;
+            vk_write_descriptor_set.dstSet = this->vkDescriptorSet;
+            vk_write_descriptor_set.dstBinding = binding;
+            vk_write_descriptor_set.dstArrayElement = dstArrayElement;
+            vk_write_descriptor_set.descriptorCount = accelerationStructures.size();
+            vk_write_descriptor_set.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+            vk_write_descriptor_set.pImageInfo = nullptr;
+            vk_write_descriptor_set.pBufferInfo = nullptr;
+            vk_write_descriptor_set.pTexelBufferView = nullptr;
+
+            TDevice *device = this->descriptorPool->GetDevice();
+            VkDevice vk_device = device->GetVkDevice();
+            device->GetDeviceDriver()->vkUpdateDescriptorSets(vk_device, 1, &vk_write_descriptor_set, 0, nullptr);
+        }
+        break;
+        default: {
+        }
+        break;
+        }
+        return;
+    }
 }
 
 std::string Turbo::Core::TDescriptorSet::ToString() const

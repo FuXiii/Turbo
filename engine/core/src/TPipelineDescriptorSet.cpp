@@ -9,19 +9,15 @@
 
 void Turbo::Core::TPipelineDescriptorSet::InternalCreate()
 {
-    std::vector<TDescriptorSetLayout *> descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
-    for (TDescriptorSetLayout *descriptor_set_layout_item : descriptor_set_layouts)
+    auto descriptor_set_layouts = this->pipelineLayout->GetDescriptorSetLayouts();
+    for (auto &item : descriptor_set_layouts)
     {
-        this->descriptorSets.push_back(new TDescriptorSet(this->descriptorPool, descriptor_set_layout_item));
+        this->descriptorSets[item.first] = (new TDescriptorSet(this->descriptorPool, item.second));
     }
 }
 
 void Turbo::Core::TPipelineDescriptorSet::InternalDestroy()
 {
-    for (TRefPtr<TDescriptorSet> &descriptor_set_item : this->descriptorSets)
-    {
-        descriptor_set_item = nullptr;
-    }
     this->descriptorSets.clear();
 }
 
@@ -43,21 +39,37 @@ Turbo::Core::TPipelineDescriptorSet::~TPipelineDescriptorSet()
     this->InternalDestroy();
 }
 
-std::vector<Turbo::Core::TDescriptorSet *> Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
+std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSet *> Turbo::Core::TPipelineDescriptorSet::GetDescriptorSet()
 {
-    return Turbo::Core::RefsToPtrs(this->descriptorSets);
+    std::unordered_map<Turbo::Core::TPipelineLayout::TLayout::TSet, Turbo::Core::TDescriptorSet *> result;
+    for (auto &item : this->descriptorSets)
+    {
+        result[item.first] = item.second;
+    }
+    return result;
+}
+
+Turbo::Core::TPipelineLayout *Turbo::Core::TPipelineDescriptorSet::GetPipelineLayout()
+{
+    return this->pipelineLayout;
 }
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TBuffer *> &buffers)
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    // for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    //{
+    //     if (descriptor_set_item->GetSet() == set)
+    //     {
+    //         // TODO: to find is have the binding descriptor? throw TException
+    //         descriptor_set_item->BindData(binding, dstArrayElement, buffers);
+    //         return;
+    //     }
+    // }
+
+    if (this->descriptorSets.size() > set)
     {
-        if (descriptor_set_item->GetSet() == set)
-        {
-            // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, buffers);
-            return;
-        }
+        this->descriptorSets[set]->BindData(binding, dstArrayElement, buffers);
+        return;
     }
 
     std::stringstream ss;
@@ -85,14 +97,20 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<std::pair<TImageView *, TSampler *>> &combinedImageSamplers)
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    // for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    //{
+    //     if (descriptor_set_item->GetSet() == set)
+    //     {
+    //         // TODO: to find is have the binding descriptor? throw TException
+    //         descriptor_set_item->BindData(binding, dstArrayElement, combinedImageSamplers);
+    //         return;
+    //     }
+    // }
+
+    if (this->descriptorSets.size() > set)
     {
-        if (descriptor_set_item->GetSet() == set)
-        {
-            // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, combinedImageSamplers);
-            return;
-        }
+        this->descriptorSets[set]->BindData(binding, dstArrayElement, combinedImageSamplers);
+        return;
     }
 
     std::stringstream ss;
@@ -127,14 +145,20 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TImageView *> &imageViews)
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    // for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    //{
+    //     if (descriptor_set_item->GetSet() == set)
+    //     {
+    //         // TODO: to find is have the binding descriptor? throw TException
+    //         descriptor_set_item->BindData(binding, dstArrayElement, imageViews);
+    //         return;
+    //     }
+    // }
+
+    if (this->descriptorSets.size() > set)
     {
-        if (descriptor_set_item->GetSet() == set)
-        {
-            // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, imageViews);
-            return;
-        }
+        this->descriptorSets[set]->BindData(binding, dstArrayElement, imageViews);
+        return;
     }
 
     std::stringstream ss;
@@ -162,14 +186,20 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, const std::vector<TSampler *> &samplers)
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    // for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    //{
+    //     if (descriptor_set_item->GetSet() == set)
+    //     {
+    //         // TODO: to find is have the binding descriptor? throw TException
+    //         descriptor_set_item->BindData(binding, dstArrayElement, samplers);
+    //         return;
+    //     }
+    // }
+
+    if (this->descriptorSets.size() > set)
     {
-        if (descriptor_set_item->GetSet() == set)
-        {
-            // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, samplers);
-            return;
-        }
+        this->descriptorSets[set]->BindData(binding, dstArrayElement, samplers);
+        return;
     }
 
     std::stringstream ss;
@@ -196,14 +226,20 @@ void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t bindin
 
 void Turbo::Core::TPipelineDescriptorSet::BindData(uint32_t set, uint32_t binding, uint32_t dstArrayElement, std::vector<VkAccelerationStructureKHR> &accelerationStructures)
 {
-    for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    // for (TDescriptorSet *descriptor_set_item : this->descriptorSets)
+    //{
+    //     if (descriptor_set_item->GetSet() == set)
+    //     {
+    //         // TODO: to find is have the binding descriptor? throw TException
+    //         descriptor_set_item->BindData(binding, dstArrayElement, accelerationStructures);
+    //         return;
+    //     }
+    // }
+
+    if (this->descriptorSets.size() > set)
     {
-        if (descriptor_set_item->GetSet() == set)
-        {
-            // TODO: to find is have the binding descriptor? throw TException
-            descriptor_set_item->BindData(binding, dstArrayElement, accelerationStructures);
-            return;
-        }
+        this->descriptorSets[set]->BindData(binding, dstArrayElement, accelerationStructures);
+        return;
     }
 
     std::stringstream ss;
@@ -218,9 +254,9 @@ std::string Turbo::Core::TPipelineDescriptorSet::ToString() const
 
 bool Turbo::Core::TPipelineDescriptorSet::Valid() const
 {
-    for (const TRefPtr<TDescriptorSet> &descriptor_set_item : this->descriptorSets)
+    for (auto &item : this->descriptorSets)
     {
-        if (!descriptor_set_item.Valid())
+        if (!item.second.Valid())
         {
             return false;
         }
