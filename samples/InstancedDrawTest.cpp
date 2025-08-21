@@ -315,7 +315,7 @@ int main()
     push_constant_data.intensity = 20.0f;
 
     MY_BUFFER_DATA my_buffer_data = {};
-    my_buffer_data.value = -5;
+    my_buffer_data.value = -86;
 
     MVP_BUFFER_DATA mvp_buffer_data = {};
 

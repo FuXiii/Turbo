@@ -548,8 +548,6 @@ void Turbo::Core::TPipelineLayout::InternalCreate()
                     auto offset = item.second.first;
                     auto size = item.second.second;
 
-                    push_constant_map[offset][size] = 0;
-
                     auto offset_find_result = push_constant_map.find(offset);
                     if (offset_find_result != push_constant_map.end())
                     {

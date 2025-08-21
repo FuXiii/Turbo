@@ -7,6 +7,7 @@
 ## 2025/8/21
 
 >* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
+>* 更新 `TPipelineLayout` 的 `PushConstant` 计算结果被覆盖的 `Bug`。
 
 ## 2025/8/20
 
