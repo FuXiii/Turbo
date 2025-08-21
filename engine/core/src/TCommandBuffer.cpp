@@ -1433,88 +1433,93 @@ void Turbo::Core::TCommandBufferBase::CmdResolveImage(TImage *srcImage, TImageLa
     device->GetDeviceDriver()->vkCmdResolveImage(this->vkCommandBuffer, srcImage->GetVkImage(), (VkImageLayout)srcLayout, dstImage->GetVkImage(), (VkImageLayout)dstLayout, 1, &vk_image_resolve);
 }
 
-void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, const TFlags<TShaderType> shaderTypeflags, uint32_t offset, uint32_t size, const void *values)
+void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
 {
-    if (Turbo::Core::TReferenced::Valid(pipelineLayout))
+    if (Turbo::Core::TReferenced::Valid(pipelineLayout) && size > 0)
     {
         auto &constants = pipelineLayout->GetLayout().GetPushConstants().GetConstants();
         if (!constants.empty())
         {
-            auto cal_intersection = [](uint32_t aBegin, uint32_t aEnd, uint32_t bBegin, uint32_t bEnd) -> std::tuple<bool, uint32_t, uint32_t> {
+            auto cal_intersection = [](uint32_t aOffset, uint32_t aSize, uint32_t bOffset, uint32_t bSize) -> std::tuple<bool /*is_intersect*/, uint32_t /*offset*/, uint32_t /*size*/> {
+                bool is_intersect = false;
+                if (aSize == 0 || bSize == 0)
+                {
+                    return {false, 0, 0};
+                }
 
+                uint32_t intersection_begin_pos = 0;
+                uint32_t intersection_end_pos = 0;
+
+                uint32_t a_begin_pos = aOffset;
+                uint32_t a_end_pos = a_begin_pos + aSize - 1;
+
+                uint32_t b_begin_pos = bOffset;
+                uint32_t b_end_pos = b_begin_pos + bSize - 1;
+
+                if (a_begin_pos >= b_begin_pos && a_begin_pos <= b_end_pos)
+                {
+                    intersection_begin_pos = a_begin_pos;
+                    intersection_end_pos = b_end_pos;
+                    if (a_end_pos < b_end_pos)
+                    {
+                        intersection_end_pos = a_end_pos;
+                    }
+
+                    return {true, intersection_begin_pos, intersection_end_pos - intersection_begin_pos + 1};
+                }
+                if (a_end_pos >= b_begin_pos && a_end_pos <= b_end_pos)
+                {
+                    intersection_end_pos = a_end_pos;
+                    intersection_begin_pos = b_begin_pos;
+                    if (a_begin_pos > b_begin_pos)
+                    {
+                        intersection_begin_pos = a_begin_pos;
+                    }
+
+                    return {true, intersection_begin_pos, intersection_end_pos - intersection_begin_pos + 1};
+                }
+
+                if (a_begin_pos < b_begin_pos && a_end_pos > b_end_pos)
+                {
+                    return {true, b_begin_pos, b_end_pos - b_begin_pos + 1};
+                }
+
+                return {false, 0, 0};
             };
 
-            for (auto &item : constants)
+            std::unordered_map<uint32_t /*offset*/, std::unordered_map<uint32_t /*size*/, TFlags<TShaderType>>> push_constants_map;
             {
-            }
-            VkShaderStageFlags vk_shader_stage_flags = 0;
-            uint32_t check_size = 0;
-            uint32_t check_offset = 0;
-
-            auto filter_push_constant = [&](const TShaderType &shaderType) {
-                if (shaderTypeflags.Has(shaderType))
+                for (auto &item : constants)
                 {
-                    auto constant_size = push_constants.GetConstantSize(shaderType);
-                    if (constant_size > check_size)
+                    auto &shader_type = item.first;
+                    auto &constant_offset = item.second.first;
+                    auto &constant_size = item.second.second;
+
+                    auto intersection = cal_intersection(constant_offset, constant_size, offset, size);
+                    if (std::get<0>(intersection))
                     {
-                        check_size = constant_size;
-                        vk_shader_stage_flags |= static_cast<VkShaderStageFlagBits>(shaderType);
+                        push_constants_map[std::get<1>(intersection)][std::get<2>(intersection)] |= shader_type;
                     }
                 }
-            };
+            }
 
-            filter_push_constant(TShaderType::TESSELLATION_CONTROL);
-            filter_push_constant(TShaderType::TESSELLATION_EVALUATION);
-            filter_push_constant(TShaderType::GEOMETRY);
-            filter_push_constant(TShaderType::FRAGMENT);
-            filter_push_constant(TShaderType::COMPUTE);
-            filter_push_constant(TShaderType::TASK);
-            filter_push_constant(TShaderType::MESH);
-            filter_push_constant(TShaderType::RAY_GENERATION);
-            filter_push_constant(TShaderType::ANY_HIT);
-            filter_push_constant(TShaderType::CLOSEST_HIT);
-            filter_push_constant(TShaderType::MISS);
-            filter_push_constant(TShaderType::INTERSECTION);
-            filter_push_constant(TShaderType::CALLABLE);
+            TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
 
-            check_size = std::min(check_size, size);
-
+            for (auto &offset_item : push_constants_map)
             {
+                auto constant_offset = offset_item.first;
+                for (auto &size_item : offset_item.second)
+                {
+                    auto constant_size = size_item.first;
 
-                TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-                /*
-                    NOTE: As stageFlags needs to include all flags the relevant push constant ranges were created with, any flags that are not supported by the queue family that the VkCommandPool used to allocate commandBuffer was created on are ignored.
-                */
-                device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
+                    /*
+                        NOTE: As stageFlags needs to include all flags the relevant push constant ranges were created with, any flags that are not supported by the queue family that the VkCommandPool used to allocate commandBuffer was created on are ignored.
+                    */
+                    device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), size_item.second.ToVkFlags(), constant_offset, constant_size, values);
+                }
             }
         }
     }
-}
-
-void Turbo::Core::TCommandBufferBase::CmdPushConstants(TPipelineLayout *pipelineLayout, uint32_t offset, uint32_t size, const void *values)
-{
-    return;
-    if (!Turbo::Core::TReferenced::Valid(pipelineLayout))
-    {
-        return;
-    }
-
-    TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
-
-    VkShaderStageFlags vk_shader_stage_flags = 0;
-    std::vector<TPushConstantDescriptor *> push_constant_descriptors = pipelineLayout->GetPushConstantDescriptors();
-    for (TPushConstantDescriptor *push_constant_item : push_constant_descriptors)
-    {
-        vk_shader_stage_flags |= push_constant_item->GetShader()->GetVkShaderStageFlags();
-    }
-
-    auto constants = pipelineLayout->GetLayout().GetPushConstants().GetConstants();
-    for (auto &item : constants)
-    {
-        vk_shader_stage_flags |= static_cast<VkShaderStageFlagBits>(item.first);
-    }
-
-    device->GetDeviceDriver()->vkCmdPushConstants(this->vkCommandBuffer, pipelineLayout->GetVkPipelineLayout(), vk_shader_stage_flags, offset, size, values);
 }
 
 void Turbo::Core::TCommandBufferBase::CmdPushConstants(uint32_t offset, uint32_t size, const void *values)
