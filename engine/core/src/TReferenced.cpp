@@ -1,5 +1,6 @@
 #include "TReferenced.h"
 #include <limits>
+#include <cstdlib>
 
 Turbo::Core::TReferenced::TReferenced()
 {

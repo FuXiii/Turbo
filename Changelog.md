@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/23
+
+>* 更新 `TReferenced` 增加 `cstdlib` 头文件（`malloc`）。
+
 ## 2025/8/21
 
 >* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
