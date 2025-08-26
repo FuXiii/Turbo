@@ -4,6 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/26
+
+>* 更新 `engine/core/CMakeLists.txt` 增加 `OHOS` 选项。用于指示目标是否为系统 `（开源）鸿蒙` 。
+>* 更新 `TCore` 增加 `TURBO_PLATFORM_OPEN_HARMONY` 宏定义判断与声明。适配 `（开源）鸿蒙` 。
+>* 更新 `TSurface` 适配 `（开源）鸿蒙` 。
+>* 更新 `TAllocator` 适配 `（开源）鸿蒙` 。
+>* 更新 `TVulkanLoader` 适配 `（开源）鸿蒙` 。
+
 ## 2025/8/23
 
 >* 更新 `TReferenced` 增加 `cstdlib` 头文件（`malloc`）。

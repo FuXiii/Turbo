@@ -56,6 +56,7 @@ Turbo::Core::TVulkanLoader::TVulkanLoader()
 
 Turbo::Core::TVulkanLoader::~TVulkanLoader()
 {
+    // TODO: release library?
 }
 
 Turbo::Core::TVulkanLoader *Turbo::Core::TVulkanLoader::Instance()
