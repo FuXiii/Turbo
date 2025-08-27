@@ -108,6 +108,7 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_ANDROID_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     case TExtensionType::VK_KHR_BIND_MEMORY2: {
@@ -372,18 +373,22 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
     }
     break;
     case TExtensionType::VK_KHR_WAYLAND_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     case TExtensionType::VK_KHR_WIN32_KEYED_MUTEX: {
     }
     break;
     case TExtensionType::VK_KHR_WIN32_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     case TExtensionType::VK_KHR_XCB_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     case TExtensionType::VK_KHR_XLIB_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     case TExtensionType::VK_EXT_4444_FORMATS: {
@@ -872,6 +877,10 @@ void Turbo::Core::TDevice::InspectExtensionAndVersionDependencies(TExtensionType
         {
             this->enabledExtensions.push_back(this->physicalDevice->GetExtensionByType(TExtensionType::VK_KHR_RAY_QUERY));
         }
+    }
+    break;
+    case TExtensionType::VK_OHOS_SURFACE: {
+        this->InspectExtensionAndVersionDependencies(TExtensionType::VK_KHR_SURFACE);
     }
     break;
     }

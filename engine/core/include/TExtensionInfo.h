@@ -231,6 +231,8 @@ typedef enum class TExtensionType
     VK_KHR_ACCELERATION_STRUCTURE,
     VK_KHR_RAY_TRACING_PIPELINE,
     VK_KHR_RAY_QUERY,
+
+    VK_OHOS_SURFACE,
 } TExtensionTypeEnum;
 
 class TLayerInfo;

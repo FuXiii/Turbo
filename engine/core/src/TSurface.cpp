@@ -151,7 +151,7 @@ void Turbo::Extension::TSurface::InternalCreate()
             }
             else
             {
-                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_ANDROID_SURFACE extensions");
             }
 #elif defined(TURBO_PLATFORM_LINUX)
             if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
@@ -263,7 +263,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, OHNativeWindo
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_win32_surface extension");
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_OHOS_SURFACE extension");
         }
 
         if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
@@ -304,7 +304,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_win32_surface extension");
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_WIN32_SURFACE extension");
         }
 
         if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))

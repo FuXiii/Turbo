@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/27
+
+>* 更新 `TExtensionInfo` 和 `TDevice` 增加和适配 `VK_OHOS_SURFACE` 扩展。用于 `（开源）鸿蒙` 系统。
+>* 更新 `TDevice` 的 `InspectExtensionAndVersionDependencies(...)` 成员函数。添加 `VK_KHR_SURFACE` 扩展依赖检查。
+
 ## 2025/8/26
 
 >* 更新 `engine/core/CMakeLists.txt` 增加 `OHOS` 选项。用于指示目标是否为系统 `（开源）鸿蒙` 。
