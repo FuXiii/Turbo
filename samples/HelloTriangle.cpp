@@ -435,7 +435,7 @@ int main()
 
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = frame.commandBuffer;
             command_buffer->Begin();
-
+std::cout<<"frame.imageIndex: "<<frame.imageIndex<<std::endl;
             // Triangle
             {
                 command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[frame.imageIndex]);
@@ -457,9 +457,8 @@ int main()
                 ImGui::End();
             });
             command_buffer->End();
-
             queue->Submit({frame.imageReady}, {frame.drawFinished}, command_buffer);
-
+            
             frames.push_back(frame);
         }
         break;

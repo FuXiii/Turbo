@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/29
+
+>* 更新 `TDeviceQueue` 的 `std::initializer_list<TSemaphore>` 版本 `Submit(...)` 成员函数未返回数据 `Bug` 。
+
 ## 2025/8/28
 
 >* 更新 `TDeviceQueue` 的 `Present(...)` 成员函数。增加 `TSemaphore` 参数指定。

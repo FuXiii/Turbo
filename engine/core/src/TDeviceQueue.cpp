@@ -179,7 +179,7 @@ bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TSemaphore *> &waitSema
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
     VkFence vk_fence = VK_NULL_HANDLE;
-    // if (fence.Valid())
+    
     if (Turbo::Core::TReferenced::Valid(fence))
     {
         vk_fence = fence->GetVkFence();
@@ -223,8 +223,10 @@ bool Turbo::Core::TDeviceQueue::Submit(const std::initializer_list<TSemaphore *>
             }
         }
 
-        this->Submit(wait_semaphores, signal_semaphores, commandBuffer, fence);
+        return this->Submit(wait_semaphores, signal_semaphores, commandBuffer, fence);
     }
+
+    return false;
 }
 
 bool Turbo::Core::TDeviceQueue::Submit(TCommandBuffer *commandBuffer, TFence *fence)
