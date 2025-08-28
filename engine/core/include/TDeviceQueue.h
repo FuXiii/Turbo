@@ -58,15 +58,16 @@ class TDeviceQueue : public TVulkanHandle
 
     VkQueue GetVkQueue();
 
-    bool Submit(const std::vector<TSemaphore *> &waitSemaphores, const std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
-    bool Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence);
+    bool Submit(const std::vector<TSemaphore *> &waitSemaphores, const std::vector<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence = nullptr);
+    bool Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence = nullptr);
+    bool Submit(const std::initializer_list<TSemaphore *> &waitSemaphores, const std::initializer_list<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence = nullptr);
     bool Submit(TCommandBuffer *commandBuffer, TFence *fence);
 
     void WaitIdle();
 
     bool IsSupportSurface(Turbo::Extension::TSurface *surface) const;
 
-    TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex);
+    TResult Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex, const std::vector<TSemaphore *> &waitSemaphores = {});
 
     virtual std::string ToString() const override;
     virtual bool Valid() const override;

@@ -4,6 +4,12 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/8/28
+
+>* 更新 `TDeviceQueue` 的 `Present(...)` 成员函数。增加 `TSemaphore` 参数指定。
+>* 更新 `TDeviceQueue` 的 `Submit(...)` 成员函数。增加 `std::initializer_list<TSemaphore>` 版本参数指定。
+>* 更新 `HelloTriangle` 。优化代码。
+
 ## 2025/8/27
 
 >* 更新 `TExtensionInfo` 和 `TDevice` 增加和适配 `VK_OHOS_SURFACE` 扩展。用于 `（开源）鸿蒙` 系统。

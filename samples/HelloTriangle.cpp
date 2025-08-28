@@ -47,41 +47,8 @@
 #include <stdio.h>
 #include <string.h>
 
-static bool g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
-static GLFWcursor *g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
-
-const std::string IMGUI_VERT_SHADER_STR = "#version 450\n"
-                                          "layout (location = 0) in vec2 inPos;\n"
-                                          "layout (location = 1) in vec2 inUV;\n"
-                                          "layout (location = 2) in vec4 inColor;\n"
-                                          "layout (push_constant) uniform PushConstants {\n"
-                                          "	vec2 scale;\n"
-                                          "	vec2 translate;\n"
-                                          "} pushConstants;\n"
-                                          "layout (location = 0) out vec2 outUV;\n"
-                                          "layout (location = 1) out vec4 outColor;\n"
-                                          "out gl_PerVertex \n"
-                                          "{\n"
-                                          "	vec4 gl_Position;   \n"
-                                          "};\n"
-                                          "void main() \n"
-                                          "{\n"
-                                          "	outUV = inUV;\n"
-                                          "	outColor = inColor;\n"
-                                          "	gl_Position = vec4(inPos * pushConstants.scale + pushConstants.translate, 0.0, 1.0);\n"
-                                          "}\n";
-
-const std::string IMGUI_FRAG_SHADER_STR = "#version 450\n"
-                                          "layout (binding = 0) uniform sampler2D fontSampler;\n"
-                                          "layout (location = 0) in vec2 inUV;\n"
-                                          "layout (location = 1) in vec4 inColor;\n"
-                                          "layout (location = 0) out vec4 outColor;\n"
-                                          "layout (location = 1) out vec4 outCustomColor;\n"
-                                          "void main() \n"
-                                          "{\n"
-                                          "	outColor = inColor * texture(fontSampler, inUV);\n"
-                                          "	outCustomColor = outColor;\n"
-                                          "}";
+#include <ImGuiPass.h>
+#include <list>
 
 const std::string VERT_SHADER_STR = "#version 450 core\n"
                                     "layout (set = 0, binding = 0) uniform bufferVals {\n"
@@ -140,64 +107,67 @@ typedef struct TEXCOORD
 
 int main()
 {
+    float value = 1.0f;
+
     std::vector<POSITION_AND_COLOR> POSITION_AND_COLOR_DATA;
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.0f, -0.5f, 0.0f}, {1.f, 0.f, 0.f}});
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{0.5f, 0.5f, 0.0f}, {0.f, 1.f, 0.f}});
     POSITION_AND_COLOR_DATA.push_back(POSITION_AND_COLOR{{-0.5f, 0.5f, 0.0f}, {0.f, 0.f, 1.f}});
 
-    float value = 1.0f;
-
-    std::vector<Turbo::Core::TLayerInfo> support_layers;
-    std::vector<Turbo::Core::TExtensionInfo> instance_support_extensions;
+    std::vector<Turbo::Core::TLayerInfo> enable_layers;
     {
-        Turbo::Core::TRefPtr<Turbo::Core::TInstance> temp_instance = new Turbo::Core::TInstance();
-        support_layers = temp_instance->GetSupportLayers();
-        instance_support_extensions = temp_instance->GetSupportExtensions();
-    }
-
-    Turbo::Core::TLayerInfo khronos_validation;
-    for (Turbo::Core::TLayerInfo &layer : support_layers)
-    {
-        if (layer.GetLayerType() == Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION)
+        auto instance_support_layers = Turbo::Core::TLayerInfo::GetInstanceLayers();
+        for (auto &layer : instance_support_layers)
         {
-            khronos_validation = layer;
+            switch (layer.GetLayerType())
+            {
+            case Turbo::Core::TLayerType::VK_LAYER_KHRONOS_VALIDATION: {
+                enable_layers.push_back(layer);
+            }
             break;
+            default: {
+            }
+            break;
+            }
         }
     }
 
-    std::vector<Turbo::Core::TLayerInfo> enable_layer;
-    if (khronos_validation.GetLayerType() != Turbo::Core::TLayerType::UNDEFINED)
+    std::vector<Turbo::Core::TExtensionInfo> enable_extensions;
     {
-        enable_layer.push_back(khronos_validation);
-    }
-
-    std::vector<Turbo::Core::TExtensionInfo> enable_instance_extensions;
-    for (Turbo::Core::TExtensionInfo &extension : instance_support_extensions)
-    {
-        if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SURFACE)
+        auto instance_support_extensions = Turbo::Core::TExtensionInfo::GetInstanceExtensions();
+        for (auto &extension : instance_support_extensions)
         {
-            enable_instance_extensions.push_back(extension);
-        }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE)
-        {
-            enable_instance_extensions.push_back(extension);
-        }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE)
-        {
-            enable_instance_extensions.push_back(extension);
-        }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE)
-        {
-            enable_instance_extensions.push_back(extension);
-        }
-        else if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE)
-        {
-            enable_instance_extensions.push_back(extension);
+            switch (extension.GetExtensionType())
+            {
+            case Turbo::Core::TExtensionType::VK_KHR_SURFACE: {
+                enable_extensions.push_back(extension);
+            }
+            break;
+            case Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE: {
+                enable_extensions.push_back(extension);
+            }
+            break;
+            case Turbo::Core::TExtensionType::VK_KHR_WAYLAND_SURFACE: {
+                enable_extensions.push_back(extension);
+            }
+            break;
+            case Turbo::Core::TExtensionType::VK_KHR_XCB_SURFACE: {
+                enable_extensions.push_back(extension);
+            }
+            break;
+            case Turbo::Core::TExtensionType::VK_KHR_XLIB_SURFACE: {
+                enable_extensions.push_back(extension);
+            }
+            break;
+            default: {
+            }
+            break;
+            }
         }
     }
 
     Turbo::Core::TVersion instance_version(1, 0, 0, 0);
-    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = new Turbo::Core::TInstance(&enable_layer, &enable_instance_extensions, &instance_version);
+    Turbo::Core::TRefPtr<Turbo::Core::TInstance> instance = new Turbo::Core::TInstance(&enable_layers, &enable_extensions, &instance_version);
     Turbo::Core::TRefPtr<Turbo::Core::TPhysicalDevice> physical_device = instance->GetBestPhysicalDevice();
 
     if (!glfwInit())
@@ -208,11 +178,9 @@ int main()
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(window_width, window_height, "Turbo", NULL, NULL);
     VkSurfaceKHR vk_surface_khr = VK_NULL_HANDLE;
-    VkInstance vk_instance = instance->GetVkInstance();
-    glfwCreateWindowSurface(vk_instance, window, NULL, &vk_surface_khr);
+    glfwCreateWindowSurface(instance->GetVkInstance(), window, NULL, &vk_surface_khr);
 
-    Turbo::Core::TPhysicalDeviceFeatures physical_device_features = {};
-    physical_device_features.sampleRateShading = true;
+    Turbo::Core::TRefPtr<ImGuiPass> imgui_pass = new ImGuiPass(window);
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
     physical_device->GetSupportExtensions();
@@ -225,7 +193,7 @@ int main()
         }
     }
 
-    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions, &physical_device_features);
+    Turbo::Core::TRefPtr<Turbo::Core::TDevice> device = new Turbo::Core::TDevice(physical_device, nullptr, &enable_device_extensions);
     Turbo::Core::TRefPtr<Turbo::Core::TDeviceQueue> queue = device->GetBestGraphicsQueue();
 
     Turbo::Core::TRefPtr<Turbo::Extension::TSurface> surface = new Turbo::Extension::TSurface(device, nullptr, vk_surface_khr);
@@ -234,6 +202,7 @@ int main()
 
     uint32_t swapchain_image_count = max_image_count <= min_image_count ? min_image_count : max_image_count - 1;
 
+    // FIXME: Auto get support format!!!
     Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> swapchain = new Turbo::Extension::TSwapchain(surface, swapchain_image_count, Turbo::Core::TFormatType::B8G8R8A8_SRGB, 1, Turbo::Core::TImageUsageBits::IMAGE_COLOR_ATTACHMENT | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_SRC | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, true);
 
     std::vector<Turbo::Core::TImage *> swapchain_images = swapchain->GetImages();
@@ -246,7 +215,6 @@ int main()
     }
 
     Turbo::Core::TRefPtr<Turbo::Core::TCommandBufferPool> command_pool = new Turbo::Core::TCommandBufferPool(queue);
-    Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = command_pool->Allocate();
 
     Turbo::Core::TRefPtr<Turbo::Core::TBuffer> value_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_UNIFORM_BUFFER | Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, sizeof(float));
     void *value_ptr = value_buffer->Map();
@@ -293,7 +261,7 @@ int main()
     std::vector<Turbo::Core::TSubpass> subpasses;
     subpasses.push_back(subpass); // subpass 0
 
-    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::PRESENT_SRC_KHR);
+    Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
     std::vector<Turbo::Core::TAttachment> attachemts;
@@ -335,368 +303,30 @@ int main()
         swpachain_framebuffers.push_back(swapchain_framebuffer);
     }
 
-    //<IMGUI>
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-
-    ImGui::StyleColorsDark();
-
-    Turbo::Core::TRefPtr<Turbo::Core::TSampler> imgui_sampler = new Turbo::Core::TSampler(device);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShader> imgui_vertex_shader = new Turbo::Core::TVertexShader(device, Turbo::Core::TShaderLanguage::GLSL, IMGUI_VERT_SHADER_STR);
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShader> imgui_fragment_shader = new Turbo::Core::TFragmentShader(device, Turbo::Core::TShaderLanguage::GLSL, IMGUI_FRAG_SHADER_STR);
-
-    Turbo::Core::TVertexBinding imgui_vertex_binding(0, sizeof(ImDrawVert), Turbo::Core::TVertexRate::VERTEX);
-    imgui_vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, pos));  // position
-    imgui_vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32_SFLOAT, IM_OFFSETOF(ImDrawVert, uv));   // uv
-    imgui_vertex_binding.AddAttribute(2, Turbo::Core::TFormatType::R8G8B8A8_UNORM, IM_OFFSETOF(ImDrawVert, col)); // color
-
-    std::vector<Turbo::Core::TVertexBinding> imgui_vertex_bindings;
-    imgui_vertex_bindings.push_back(imgui_vertex_binding);
-
-    Turbo::Core::TPipelineLayout::TLayout imgui_pipeline_layout;
-    imgui_pipeline_layout << *imgui_vertex_shader << *imgui_fragment_shader;
-    Turbo::Core::TRefPtr<Turbo::Core::TVertexShaderStage> imgui_vertex_shader_stage = new Turbo::Core::TVertexShaderStage(imgui_vertex_shader);
-    Turbo::Core::TRefPtr<Turbo::Core::TFragmentShaderStage> imgui_fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(imgui_fragment_shader);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> imgui_pipeline = new Turbo::Core::TGraphicsPipeline(imgui_pipeline_layout, render_pass, 0, imgui_vertex_bindings, imgui_vertex_shader_stage, imgui_fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, false, false, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false, false, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TStencilOp::KEEP, Turbo::Core::TCompareOp::ALWAYS, 0, 0, 0, 0, 0, false, Turbo::Core::TLogicOp::NO_OP, true, Turbo::Core::TBlendFactor::SRC_ALPHA, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendOp::ADD, Turbo::Core::TBlendFactor::ONE_MINUS_SRC_ALPHA, Turbo::Core::TBlendFactor::ZERO, Turbo::Core::TBlendOp::ADD);
-
-    unsigned char *imgui_font_pixels;
-    int imgui_font_width, imgui_font_height;
-    io.Fonts->GetTexDataAsRGBA32(&imgui_font_pixels, &imgui_font_width, &imgui_font_height);
-    size_t imgui_upload_size = imgui_font_width * imgui_font_height * 4 * sizeof(char);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TImage> imgui_font_image = new Turbo::Core::TImage(device, 0, Turbo::Core::TImageType::DIMENSION_2D, Turbo::Core::TFormatType::R8G8B8A8_UNORM, imgui_font_width, imgui_font_height, 1, 1, 1, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, Turbo::Core::TImageTiling::OPTIMAL, Turbo::Core::TImageUsageBits::IMAGE_SAMPLED | Turbo::Core::TImageUsageBits::IMAGE_TRANSFER_DST, Turbo::Core::TMemoryFlagsBits::DEDICATED_MEMORY);
-    Turbo::Core::TRefPtr<Turbo::Core::TImageView> imgui_font_image_view = new Turbo::Core::TImageView(imgui_font_image, Turbo::Core::TImageViewType::IMAGE_VIEW_2D, imgui_font_image->GetFormat(), Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
+    struct TFrame
     {
-        Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_font_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_TRANSFER_SRC, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, imgui_upload_size);
-        void *imgui_font_ptr = imgui_font_buffer->Map();
-        memcpy(imgui_font_ptr, imgui_font_pixels, imgui_upload_size);
-        imgui_font_buffer->Unmap();
+        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> imageReady;
+        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> commandBuffer;
+        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> drawFinished;
+        uint32_t imageIndex = std::numeric_limits<uint32_t>::max();
+    };
 
-        Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> imgui_copy_command_buffer = command_pool->Allocate();
-        imgui_copy_command_buffer->Begin();
-        imgui_copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::HOST_BIT, Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TAccessBits::HOST_WRITE_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, imgui_font_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        imgui_copy_command_buffer->CmdCopyBufferToImage(imgui_font_buffer, imgui_font_image, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, 0, imgui_font_width, imgui_font_height, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 0, 1, 0, 0, 0, imgui_font_width, imgui_font_height, 1);
-        imgui_copy_command_buffer->CmdTransformImageLayout(Turbo::Core::TPipelineStageBits::TRANSFER_BIT, Turbo::Core::TPipelineStageBits::FRAGMENT_SHADER_BIT, Turbo::Core::TAccessBits::TRANSFER_WRITE_BIT, Turbo::Core::TAccessBits::SHADER_READ_BIT, Turbo::Core::TImageLayout::TRANSFER_DST_OPTIMAL, Turbo::Core::TImageLayout::SHADER_READ_ONLY_OPTIMAL, imgui_font_image, Turbo::Core::TImageAspectBits::ASPECT_COLOR_BIT, 0, 1, 0, 1);
-        imgui_copy_command_buffer->End();
+    std::list<TFrame> frames;
 
-        Turbo::Core::TRefPtr<Turbo::Core::TFence> imgui_font_copy_fence = new Turbo::Core::TFence(device);
-        queue->Submit(imgui_copy_command_buffer, imgui_font_copy_fence);
-
-        imgui_font_copy_fence->WaitUntil();
-    }
-
-    std::vector<std::pair<Turbo::Core::TRefPtr<Turbo::Core::TImageView>, Turbo::Core::TRefPtr<Turbo::Core::TSampler>>> imgui_combined_image_samplers;
-    imgui_combined_image_samplers.push_back(std::make_pair(imgui_font_image_view, imgui_sampler));
-
-    Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> imgui_pipeline_descriptor_set = descriptor_pool->Allocate(imgui_pipeline->GetPipelineLayout());
-    imgui_pipeline_descriptor_set->BindData(0, 0, 0, imgui_combined_image_samplers);
-
-    io.Fonts->TexID = (ImTextureID)(intptr_t)(imgui_font_image->GetVkImage());
-
-    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_vertex_buffer = nullptr;
-    Turbo::Core::TRefPtr<Turbo::Core::TBuffer> imgui_index_buffer = nullptr;
-    //</IMGUI>
-
-    bool show_demo_window = true;
-
-    float _time = glfwGetTime();
+    float previous_time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
-        void *_ptr = value_buffer->Map();
-        memcpy(_ptr, &value, sizeof(value));
-        value_buffer->Unmap();
-
-        //<Begin Rendering>
-        uint32_t current_image_index = UINT32_MAX;
-        Turbo::Core::TRefPtr<Turbo::Core::TSemaphore> wait_image_ready = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
-        Turbo::Core::TResult result = swapchain->AcquireNextImageUntil(wait_image_ready, nullptr, &current_image_index);
-        switch (result)
+        if (!frames.empty())
         {
-        case Turbo::Core::TResult::SUCCESS: {
-            // successed get image and go on rendering
-
-            // because we just have one command buffer, so we should reset the command buffer for each frame
-            // If we create command buffer for each swapchain image, we don't need to reset it each frame
-
-            //<IMGUI Update>
-            int window_w, window_h;
-            int display_w, display_h;
-            glfwGetWindowSize(window, &window_w, &window_h);
-            glfwGetFramebufferSize(window, &display_w, &display_h);
-            io.DisplaySize = ImVec2((float)window_w, (float)window_h);
-            if (window_w > 0 && window_h > 0)
-            {
-                io.DisplayFramebufferScale = ImVec2((float)display_w / window_w, (float)display_h / window_h);
-            }
-            double current_time = glfwGetTime();
-            io.DeltaTime = _time > 0.0 ? (float)(current_time - _time) : (float)(1.0f / 60.0f);
-            _time = current_time;
-
-            // UpdateMousePosAndButtons
-            {
-                // Update buttons
-                ImGuiIO &io = ImGui::GetIO();
-                for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
-                {
-                    // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-                    io.MouseDown[i] = g_MouseJustPressed[i] || glfwGetMouseButton(window, i) != 0;
-                    g_MouseJustPressed[i] = false;
-                }
-
-                // Update mouse position
-                const ImVec2 mouse_pos_backup = io.MousePos;
-                io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-
-                const bool focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
-                if (focused)
-                {
-                    if (io.WantSetMousePos)
-                    {
-                        glfwSetCursorPos(window, (double)mouse_pos_backup.x, (double)mouse_pos_backup.y);
-                    }
-                    else
-                    {
-                        double mouse_x, mouse_y;
-                        glfwGetCursorPos(window, &mouse_x, &mouse_y);
-                        io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
-                    }
-                }
-            }
-
-            // IUpdateMouseCursor
-            {
-                ImGuiIO &io = ImGui::GetIO();
-                if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-                    break;
-
-                ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-                if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
-                {
-                    // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-                }
-                else
-                {
-                    // Show OS mouse cursor
-                    // FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-                    glfwSetCursor(window, g_MouseCursors[imgui_cursor] ? g_MouseCursors[imgui_cursor] : g_MouseCursors[ImGuiMouseCursor_Arrow]);
-                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                }
-            }
-
-            ImGui::NewFrame();
-
-            {
-                static float f = 0.0f;
-                static int counter = 0;
-
-                ImGui::Begin(TURBO_PROJECT_NAME); // Create a window called "Hello, world!" and append into it.
-
-                ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-                ImGui::SliderFloat("value", &value, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-
-                if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-                    counter++;
-                ImGui::SameLine();
-                ImGui::Text("counter = %d", counter);
-
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-                ImGui::End();
-            }
-            //</IMGUI Update>
-
-            Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
-            Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight());
-
-            std::vector<Turbo::Core::TViewport> frame_viewports;
-            frame_viewports.push_back(frame_viewport);
-
-            std::vector<Turbo::Core::TScissor> frame_scissors;
-            frame_scissors.push_back(frame_scissor);
-
-            command_buffer->Begin();
-            command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[current_image_index]);
-
-            // Triangle
-            command_buffer->CmdBindPipeline(pipeline);
-            command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-            command_buffer->CmdBindVertexBuffers(vertex_buffers);
-            command_buffer->CmdSetViewport(frame_viewports);
-            command_buffer->CmdSetScissor(frame_scissors);
-            command_buffer->CmdDraw(3, 1, 0, 0);
-
-            //<IMGUI Rendering>
-            ImGui::Render();
-            ImDrawData *draw_data = ImGui::GetDrawData();
-            const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
-
-            if (!is_minimized)
-            {
-                // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
-                int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
-                int fb_height = (int)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
-                if (fb_width <= 0 || fb_height <= 0)
-                {
-                    break;
-                }
-
-                if (draw_data->TotalVtxCount > 0)
-                {
-                    size_t vertex_size = draw_data->TotalVtxCount * sizeof(ImDrawVert);
-                    size_t index_size = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
-
-                    if (imgui_vertex_buffer != nullptr)
-                    {
-                        // delete imgui_vertex_buffer;
-                        imgui_vertex_buffer = nullptr;
-                    }
-
-                    if (imgui_index_buffer != nullptr)
-                    {
-                        // delete imgui_index_buffer;
-                        imgui_index_buffer = nullptr;
-                    }
-
-                    imgui_vertex_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_VERTEX_BUFFER, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, vertex_size);
-                    imgui_index_buffer = new Turbo::Core::TBuffer(device, 0, Turbo::Core::TBufferUsageBits::BUFFER_INDEX_BUFFER, Turbo::Core::TMemoryFlagsBits::HOST_ACCESS_SEQUENTIAL_WRITE, index_size);
-
-                    ImDrawVert *vtx_dst = (ImDrawVert *)imgui_vertex_buffer->Map();
-                    ImDrawIdx *idx_dst = (ImDrawIdx *)imgui_index_buffer->Map();
-                    for (int n = 0; n < draw_data->CmdListsCount; n++)
-                    {
-                        const ImDrawList *cmd_list = draw_data->CmdLists[n];
-                        memcpy(vtx_dst, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
-                        memcpy(idx_dst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
-                        vtx_dst += cmd_list->VtxBuffer.Size;
-                        idx_dst += cmd_list->IdxBuffer.Size;
-                    }
-                    imgui_vertex_buffer->Unmap();
-                    imgui_index_buffer->Unmap();
-
-                    command_buffer->CmdBindPipeline(imgui_pipeline);
-                    command_buffer->CmdBindPipelineDescriptorSet(imgui_pipeline_descriptor_set);
-
-                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> imgui_vertex_buffers;
-                    imgui_vertex_buffers.push_back(imgui_vertex_buffer);
-                    command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
-                    command_buffer->CmdBindIndexBuffer(imgui_index_buffer, 0, sizeof(ImDrawIdx) == 2 ? Turbo::Core::TIndexType::UINT16 : Turbo::Core::TIndexType::UINT32);
-
-                    float scale[2];
-                    scale[0] = 2.0f / draw_data->DisplaySize.x;
-                    scale[1] = 2.0f / draw_data->DisplaySize.y;
-                    float translate[2];
-                    translate[0] = -1.0f - draw_data->DisplayPos.x * scale[0];
-                    translate[1] = -1.0f - draw_data->DisplayPos.y * scale[1];
-
-                    command_buffer->CmdPushConstants(sizeof(float) * 0, sizeof(float) * 2, scale);
-                    command_buffer->CmdPushConstants(sizeof(float) * 2, sizeof(float) * 2, translate);
-
-                    ImVec2 clip_off = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
-                    ImVec2 clip_scale = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
-
-                    int global_vtx_offset = 0;
-                    int global_idx_offset = 0;
-
-                    for (int n = 0; n < draw_data->CmdListsCount; n++)
-                    {
-                        const ImDrawList *cmd_list = draw_data->CmdLists[n];
-                        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-                        {
-                            const ImDrawCmd *pcmd = &cmd_list->CmdBuffer[cmd_i];
-                            if (pcmd->UserCallback != NULL)
-                            {
-                                // User callback, registered via ImDrawList::AddCallback()
-                                // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
-                                if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
-                                {
-                                    command_buffer->CmdBindPipeline(imgui_pipeline);
-                                    command_buffer->CmdBindPipelineDescriptorSet(imgui_pipeline_descriptor_set);
-
-                                    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> __imgui_vertex_buffers;
-                                    __imgui_vertex_buffers.push_back(imgui_vertex_buffer);
-                                    // command_buffer->CmdBindVertexBuffers(imgui_vertex_buffers);
-                                    command_buffer->CmdBindVertexBuffers(__imgui_vertex_buffers);
-                                    command_buffer->CmdBindIndexBuffer(imgui_index_buffer, 0, sizeof(ImDrawIdx) == 2 ? Turbo::Core::TIndexType::UINT16 : Turbo::Core::TIndexType::UINT32);
-
-                                    float __scale[2];
-                                    __scale[0] = 2.0f / draw_data->DisplaySize.x;
-                                    __scale[1] = 2.0f / draw_data->DisplaySize.y;
-                                    float __translate[2];
-                                    __translate[0] = -1.0f - draw_data->DisplayPos.x * scale[0];
-                                    __translate[1] = -1.0f - draw_data->DisplayPos.y * scale[1];
-
-                                    command_buffer->CmdPushConstants(sizeof(float) * 0, sizeof(float) * 2, __scale);
-                                    command_buffer->CmdPushConstants(sizeof(float) * 2, sizeof(float) * 2, __translate);
-                                }
-                                else
-                                    pcmd->UserCallback(cmd_list, pcmd);
-                            }
-                            else
-                            {
-                                // Project scissor/clipping rectangles into framebuffer space
-                                ImVec4 clip_rect;
-                                clip_rect.x = (pcmd->ClipRect.x - clip_off.x) * clip_scale.x;
-                                clip_rect.y = (pcmd->ClipRect.y - clip_off.y) * clip_scale.y;
-                                clip_rect.z = (pcmd->ClipRect.z - clip_off.x) * clip_scale.x;
-                                clip_rect.w = (pcmd->ClipRect.w - clip_off.y) * clip_scale.y;
-
-                                if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f)
-                                {
-                                    // Negative offsets are illegal for vkCmdSetScissor
-                                    if (clip_rect.x < 0.0f)
-                                        clip_rect.x = 0.0f;
-                                    if (clip_rect.y < 0.0f)
-                                        clip_rect.y = 0.0f;
-
-                                    // Apply scissor/clipping rectangle
-                                    VkRect2D scissor;
-                                    scissor.offset.x = (int32_t)(clip_rect.x);
-                                    scissor.offset.y = (int32_t)(clip_rect.y);
-                                    scissor.extent.width = (uint32_t)(clip_rect.z - clip_rect.x);
-                                    scissor.extent.height = (uint32_t)(clip_rect.w - clip_rect.y);
-
-                                    Turbo::Core::TScissor imgui_scissor(scissor.offset.x, scissor.offset.y, scissor.extent.width, scissor.extent.height);
-                                    std::vector<Turbo::Core::TScissor> imgui_scissors;
-                                    imgui_scissors.push_back(imgui_scissor);
-                                    command_buffer->CmdSetScissor(imgui_scissors);
-
-                                    // Draw
-                                    command_buffer->CmdDrawIndexed(pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
-                                }
-                            }
-                        }
-                        global_idx_offset += cmd_list->IdxBuffer.Size;
-                        global_vtx_offset += cmd_list->VtxBuffer.Size;
-                    }
-                }
-            }
-            //</IMGUI Rendering>
-
-            command_buffer->CmdEndRenderPass();
-            command_buffer->End();
-
-            Turbo::Core::TRefPtr<Turbo::Core::TFence> fence = new Turbo::Core::TFence(device);
-            std::vector<Turbo::Core::TRefPtr<Turbo::Core::TSemaphore>> wait_semaphores;
-            wait_semaphores.push_back(wait_image_ready);
-
-            queue->Submit(wait_semaphores, {}, command_buffer, fence);
-
-            fence->WaitUntil(); // or you can use semaphore to wait for get higher performance
-
-            // delete fence;
-
-            command_buffer->Reset(); // you can create an command buffer each for one swapchain image,for now just one command buffer
-
-            Turbo::Core::TResult present_result = queue->Present(swapchain, current_image_index);
+            auto front = frames.front();
+            Turbo::Core::TResult present_result = queue->Present(swapchain, front.imageIndex, {front.drawFinished});
             switch (present_result)
             {
             case Turbo::Core::TResult::MISMATCH: {
                 // the size of the window had changed you need to recreate swapchain
+                frames.clear();
 
                 // waite for idle
                 device->WaitIdle();
@@ -758,6 +388,8 @@ int main()
                     Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer> swapchain_framebuffer = new Turbo::Core::TFramebuffer(render_pass, swapchain_image_views);
                     swpachain_framebuffers.push_back(swapchain_framebuffer);
                 }
+
+                continue;
             }
             break;
             default: {
@@ -765,6 +397,70 @@ int main()
             }
             break;
             }
+
+            frames.pop_front();
+        }
+
+        TFrame frame = {};
+        frame.imageReady = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        frame.commandBuffer = command_pool->Allocate();
+        frame.drawFinished = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+
+        float current_time = glfwGetTime();
+        float delta_time = current_time - previous_time;
+        previous_time = current_time;
+
+        void *_ptr = value_buffer->Map();
+        memcpy(_ptr, &value, sizeof(value));
+        value_buffer->Unmap();
+
+        //<Begin Rendering>
+        Turbo::Core::TResult result = swapchain->AcquireNextImage(30000, frame.imageReady, nullptr, &frame.imageIndex);
+        switch (result)
+        {
+        case Turbo::Core::TResult::SUCCESS: {
+            // successed get image and go on
+
+            // because we just have one command buffer, so we should reset the command buffer for each frame
+            // If we create command buffer for each swapchain image, we don't need to reset it each frame
+
+            Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
+            Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight());
+
+            std::vector<Turbo::Core::TViewport> frame_viewports;
+            frame_viewports.push_back(frame_viewport);
+
+            std::vector<Turbo::Core::TScissor> frame_scissors;
+            frame_scissors.push_back(frame_scissor);
+
+            Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = frame.commandBuffer;
+            command_buffer->Begin();
+
+            // Triangle
+            {
+                command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[frame.imageIndex]);
+                command_buffer->CmdBindPipeline(pipeline);
+                command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
+                command_buffer->CmdBindVertexBuffers(vertex_buffers);
+                command_buffer->CmdSetViewport(frame_viewports);
+                command_buffer->CmdSetScissor(frame_scissors);
+                command_buffer->CmdDraw(3, 1, 0, 0);
+                command_buffer->CmdEndRenderPass();
+            }
+
+            imgui_pass->Draw(delta_time, command_buffer, swapchain_image_views[frame.imageIndex], [&]() {
+                ImGui::Begin(TURBO_PROJECT_NAME);
+                if (ImGui::SliderFloat("value", &value, 0.0f, 1.0f))
+                {
+                }
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::End();
+            });
+            command_buffer->End();
+
+            queue->Submit({frame.imageReady}, {frame.drawFinished}, command_buffer);
+
+            frames.push_back(frame);
         }
         break;
         case Turbo::Core::TResult::TIMEOUT: {
@@ -777,6 +473,7 @@ int main()
         break;
         case Turbo::Core::TResult::MISMATCH: {
             // the size of the window had changed you need to recreate swapchain
+            frames.clear();
 
             // waite for idle
             device->WaitIdle();
@@ -845,56 +542,10 @@ int main()
         }
         break;
         }
-
-        wait_image_ready = nullptr;
         //</End Rendering>
     }
 
-    // if (imgui_vertex_buffer != nullptr)
-    //{
-    //     delete imgui_vertex_buffer;
-    // }
-    // if (imgui_index_buffer != nullptr)
-    //{
-    //     delete imgui_index_buffer;
-    // }
-    descriptor_pool->Free(imgui_pipeline_descriptor_set);
-    // delete imgui_font_image_view;
-    // delete imgui_font_image;
-    // delete imgui_pipeline;
-    // delete imgui_vertex_shader;
-    // delete imgui_fragment_shader;
-    // delete imgui_sampler;
-
     descriptor_pool->Free(pipeline_descriptor_set);
-    // delete pipeline;
-    // for (Turbo::Core::TFramebuffer *framebuffer_item : swpachain_framebuffers)
-    //{
-    //     delete framebuffer_item;
-    // }
-
-    // delete render_pass;
-    //
-    // delete descriptor_pool;
-    // delete vertex_shader;
-    // delete fragment_shader;
-    // delete depth_image_view;
-    // delete depth_image;
-    // for (Turbo::Core::TImageView *image_view_item : swapchain_image_views)
-    //{
-    //    delete image_view_item;
-    //}
-    // delete vertex_buffer;
-    // delete value_buffer;
-    command_pool->Free(command_buffer);
-    // delete command_pool;
-    // delete swapchain;
-    // delete surface;
-    // PFN_vkDestroySurfaceKHR pfn_vk_destroy_surface_khr = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
-    // pfn_vk_destroy_surface_khr(instance->GetVkInstance(), vk_surface_khr, nullptr);
     glfwTerminate();
-    // delete device;
-    // delete instance;
-
     return 0;
 }
