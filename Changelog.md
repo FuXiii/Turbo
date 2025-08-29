@@ -7,6 +7,7 @@
 ## 2025/8/29
 
 >* 更新 `TDeviceQueue` 的 `std::initializer_list<TSemaphore>` 版本 `Submit(...)` 成员函数未返回数据 `Bug` 。
+>* 优化 `HelloTriangle` 示例。更加简单合理易于理解。
 
 ## 2025/8/28
 

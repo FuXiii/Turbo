@@ -179,7 +179,7 @@ bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TSemaphore *> &waitSema
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
     VkFence vk_fence = VK_NULL_HANDLE;
-    
+
     if (Turbo::Core::TReferenced::Valid(fence))
     {
         vk_fence = fence->GetVkFence();
