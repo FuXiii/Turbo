@@ -7,7 +7,8 @@
 ## 2025/9/8
 
 >* 更新 `TCommandBuffer` 其中 `CmdBindVertexBuffers(...)` 增加 `std::initializer_list<TBuffer *>` 参数版本函数。
->* 优化 `HelloTriangle` 示例。简化代码，更加简单合理易于理解。
+>* 优化 `HelloTriangle` 示例。自动获取支持的图片格式。简化代码，更加简单合理易于理解。
+>* 更新 `README` 。增加 `示例` 章节。
 
 ## 2025/8/29
 
