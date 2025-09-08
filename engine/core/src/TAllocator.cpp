@@ -2,7 +2,7 @@
 
 #if defined(TURBO_PLATFORM_WINDOWS)
 #include <malloc.h>
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
 #include <malloc.h>
 #elif defined(TURBO_PLATFORM_ANDROID)
 #include <cstdlib>
@@ -113,7 +113,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Allocate(size_t size, size_t alignment)
     // std::cout << "TAllocator::Allocation" << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_malloc(size, alignment);
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     return memalign(alignment, size);
 #elif defined(TURBO_PLATFORM_ANDROID)
     if (alignment < sizeof(void *))
@@ -131,7 +131,7 @@ void *VKAPI_PTR Turbo::Core::TAllocator::Reallocate(void *pOriginal, size_t size
     // std::cout << "TAllocator::Reallocation" << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_realloc(pOriginal, size, alignment);
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     void *new_memory = memalign(alignment, size);
     if (new_memory)
     {
@@ -159,7 +159,7 @@ void VKAPI_PTR Turbo::Core::TAllocator::Free(void *pMemory)
     // std::cout << "TAllocator::Free::" << pMemory << std::endl;
 #if defined(TURBO_PLATFORM_WINDOWS)
     return _aligned_free(pMemory);
-#elif defined(TURBO_PLATFORM_LINUX)
+#elif defined(TURBO_PLATFORM_LINUX) || defined(TURBO_PLATFORM_OPEN_HARMONY)
     free(pMemory);
 #elif defined(TURBO_PLATFORM_ANDROID)
     free(pMemory);

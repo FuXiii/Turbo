@@ -69,14 +69,16 @@ PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
 PUBLIC TURBO_PROJECT_NAME="InstancedDrawTest"
 )
 
-add_executable(HelloTriangle ./HelloTriangle.cpp ${IMGUI_SOURCE_PATH})
-target_include_directories(HelloTriangle PUBLIC ${INCLUDE_PARTH})
-target_link_directories(HelloTriangle PUBLIC ${LINK_PARTH})
-target_link_libraries(HelloTriangle PUBLIC ${LIBS})
-target_compile_definitions(HelloTriangle 
-PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
-PUBLIC TURBO_PROJECT_NAME="HelloTriangle"
-)
+#add_executable(HelloTriangle ./HelloTriangle.cpp ${IMGUI_SOURCE_PATH})
+#target_include_directories(HelloTriangle PUBLIC ${INCLUDE_PARTH})
+#target_link_directories(HelloTriangle PUBLIC ${LINK_PARTH})
+#target_link_libraries(HelloTriangle PUBLIC ${LIBS})
+#target_compile_definitions(HelloTriangle 
+#PUBLIC TURBO_ASSET_ROOT="${CMAKE_SOURCE_DIR}/asset"
+#PUBLIC TURBO_PROJECT_NAME="HelloTriangle"
+#)
+
+add_sample(HelloTriangle HelloTriangle.cpp)
 
 add_executable(PureHelloTriangle ./PureHelloTriangle.cpp ${IMGUI_SOURCE_PATH})
 target_include_directories(PureHelloTriangle PUBLIC ${INCLUDE_PARTH})

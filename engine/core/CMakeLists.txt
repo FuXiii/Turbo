@@ -1,5 +1,8 @@
 project(TCore)
 
+option(TCORE_SHARED_LIBS "create TCore shared libraries" OFF)
+option(OHOS "target platform is OpenHarmony" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
@@ -61,8 +64,6 @@ else()
 message(FATAL_ERROR "Can not find SPIRV-Reflect")
 endif()
 
-option(TCORE_SHARED_LIBS "flag to create TCore shared libraries if on" OFF)
-
 if(TCORE_SHARED_LIBS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     add_library(${PROJECT_NAME} SHARED
@@ -116,3 +117,15 @@ PRIVATE ./thirdparty/SPIRV-Cross
 PRIVATE ./thirdparty/glslang
 PRIVATE ${SPIRV_REFLECT_INCLUDE_PATH}
 )
+
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC VK_NO_PROTOTYPES=1
+)
+
+if(OHOS)
+target_compile_definitions(${PROJECT_NAME}
+    #PUBLIC VK_USE_PLATFORM_OHOS=1 ##include "vulkan_ohos.h" #Manual judgment and addition
+    PUBLIC TURBO_OHOS_PLATFORM=1
+)
+else() 
+endif()

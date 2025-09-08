@@ -6,7 +6,10 @@
 #include "TQueueFamilyInfo.h"
 #include "TVulkanHandle.h"
 
-#if defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+#include <vulkan/vulkan_ohos.h>
+#include <native_window/external_window.h>
+#elif defined(TURBO_PLATFORM_WINDOWS)
 #include <windows.h>
 #include "vulkan/vulkan_win32.h"
 #elif defined(TURBO_PLATFORM_APPLE)
@@ -139,7 +142,10 @@ class TSurface : public Turbo::Core::TVulkanHandle
     std::vector<Turbo::Extension::TSurfaceFormat> surfaceFormats;
     std::vector<Turbo::Extension::TPresentMode> presentModes;
 
-#if defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+    OHNativeWindow *window = nullptr;
+    VULKAN_INSTANCE_API VULKAN_EXTENSION PFN_vkCreateSurfaceOHOS vkCreateSurfaceOHOS = nullptr;
+#elif defined(TURBO_PLATFORM_WINDOWS)
     HINSTANCE hinstance = nullptr;
     HWND hwnd = nullptr;
 
@@ -192,7 +198,9 @@ class TSurface : public Turbo::Core::TVulkanHandle
     virtual void InternalDestroy() override;
 
   public:
-#if defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+    explicit TSurface(Turbo::Core::TDevice *device, OHNativeWindow *window);
+#elif defined(TURBO_PLATFORM_WINDOWS)
     explicit TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd);
 #elif defined(__APPLE__)
     explicit TSurface(...);

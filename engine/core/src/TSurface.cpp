@@ -91,7 +91,27 @@ void Turbo::Extension::TSurface::InternalCreate()
     {
         if (!this->isExternalHandle)
         {
-#if defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+            if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_OHOS_SURFACE))
+            {
+                VkOHSurfaceCreateInfoOHOS vk_oh_surface_create_info_ohos = {};
+                vk_oh_surface_create_info_ohos.sType = VkStructureType::VK_STRUCTURE_TYPE_OH_SURFACE_CREATE_INFO_OHOS;
+                vk_oh_surface_create_info_ohos.pNext = nullptr;
+                vk_oh_surface_create_info_ohos.flags = 0;
+                vk_oh_surface_create_info_ohos.window = this->window;
+
+                VkAllocationCallbacks *allocator = Turbo::Core::TVulkanAllocator::Instance()->GetVkAllocationCallbacks();
+                VkResult result = this->vkCreateSurfaceOHOS(instance->GetVkInstance(), &vk_oh_surface_create_info_ohos, allocator, &this->vkSurfaceKHR);
+                if (result != VK_SUCCESS)
+                {
+                    throw Turbo::Core::TException(Turbo::Core::TResult::INITIALIZATION_FAILED, "Turbo::Extension::TSurface::InternalCreate::vkCreateSurfaceOHOS");
+                }
+            }
+            else
+            {
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_OHOS_SURFACE extensions");
+            }
+#elif defined(TURBO_PLATFORM_WINDOWS)
             if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE) && instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_WIN32_SURFACE))
             {
                 VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
@@ -131,7 +151,7 @@ void Turbo::Extension::TSurface::InternalCreate()
             }
             else
             {
-                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_WIN32_SURFACE extensions");
+                throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::InternalCreate", "please enable VK_KHR_SURFACE and VK_KHR_ANDROID_SURFACE extensions");
             }
 #elif defined(TURBO_PLATFORM_LINUX)
             if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)
@@ -227,7 +247,46 @@ void Turbo::Extension::TSurface::InternalDestroy()
     }
 }
 
-#if defined(TURBO_PLATFORM_WINDOWS)
+#if defined(TURBO_PLATFORM_OPEN_HARMONY)
+Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, OHNativeWindow *window)
+{
+    if (Turbo::Core::TReferenced::Valid(device))
+    {
+        this->isExternalHandle = false;
+        this->device = device;
+        this->window = window;
+
+        Turbo::Core::TInstance *instance = this->device->GetPhysicalDevice()->GetInstance();
+        if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_OHOS_SURFACE))
+        {
+            this->vkCreateSurfaceOHOS = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkCreateSurfaceOHOS>(instance, "vkCreateSurfaceOHOS");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_OHOS_SURFACE extension");
+        }
+
+        if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
+        {
+            this->vkDestroySurfaceKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkDestroySurfaceKHR>(instance, "vkDestroySurfaceKHR");
+            this->vkGetPhysicalDeviceSurfaceSupportKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+            this->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+            this->vkGetPhysicalDeviceSurfaceFormatsKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+            this->vkGetPhysicalDeviceSurfacePresentModesKHR = Turbo::Core::TVulkanLoader::Instance()->LoadInstanceFunction<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+        }
+        else
+        {
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_surface extension");
+        }
+
+        this->InternalCreate();
+    }
+    else
+    {
+        throw Turbo::Core::TException(Turbo::Core::TResult::INVALID_PARAMETER, "Turbo::Extension::TSurface::TSurface");
+    }
+}
+#elif defined(TURBO_PLATFORM_WINDOWS)
 Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hinstance, HWND hwnd)
 {
     if (Turbo::Core::TReferenced::Valid(device))
@@ -245,7 +304,7 @@ Turbo::Extension::TSurface::TSurface(Turbo::Core::TDevice *device, HINSTANCE hin
         }
         else
         {
-            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_win32_surface extension");
+            throw Turbo::Core::TException(Turbo::Core::TResult::EXTENSION_NOT_PRESENT, "Turbo::Extension::TSurface::TSurface", "Please enable the VK_KHR_WIN32_SURFACE extension");
         }
 
         if (instance->IsEnabledExtension(Turbo::Core::TExtensionType::VK_KHR_SURFACE))
@@ -509,7 +568,7 @@ void Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys()
                         throw Turbo::Core::TException(Turbo::Core::TResult::UNSUPPORTED, "Turbo::Extension::TSurface::GetSurfaceSupportQueueFamilys", "this device unsupport present this surface to the window, please change another device");
                     }
 #elif defined(__APPLE__)
-#elif defined(TURBO_PLATFORM_ANDROID)
+#elif defined(TURBO_PLATFORM_ANDROID) || defined(TURBO_PLATFORM_OPEN_HARMONY)
                     this->supportQueueFamilys.push_back(queue_family);
 #elif defined(TURBO_PLATFORM_LINUX)
                     if (this->waylandDisplay != nullptr || this->waylandSurface != nullptr)

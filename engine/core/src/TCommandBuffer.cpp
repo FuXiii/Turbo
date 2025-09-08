@@ -510,6 +510,28 @@ void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(const std::vector<TRe
     this->CmdBindVertexBuffers(Turbo::Core::RefsToPtrs(vertexBuffers));
 }
 
+void Turbo::Core::TCommandBufferBase::CmdBindVertexBuffers(const std::initializer_list<TBuffer *> &vertexBuffers)
+{
+    if (!std::empty(vertexBuffers))
+    {
+        TDevice *device = this->commandBufferPool->GetDeviceQueue()->GetDevice();
+
+        std::vector<VkBuffer> vertex_buffers;
+        std::vector<VkDeviceSize> offsets;
+
+        for (TBuffer *buffer_item : vertexBuffers)
+        {
+            if (Turbo::Core::TReferenced::Valid(buffer_item))
+            {
+                vertex_buffers.push_back(buffer_item->GetVkBuffer());
+                offsets.push_back(0);
+            }
+        }
+
+        device->GetDeviceDriver()->vkCmdBindVertexBuffers(this->vkCommandBuffer, 0, vertexBuffers.size(), vertex_buffers.data(), offsets.data());
+    }
+}
+
 void Turbo::Core::TCommandBufferBase::CmdSetViewport(const std::vector<TViewport> &viewports)
 {
     if (!viewports.empty())

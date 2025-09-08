@@ -179,7 +179,7 @@ bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TSemaphore *> &waitSema
     vk_submit_info.pSignalSemaphores = signal_semaphores.data();
 
     VkFence vk_fence = VK_NULL_HANDLE;
-    // if (fence.Valid())
+
     if (Turbo::Core::TReferenced::Valid(fence))
     {
         vk_fence = fence->GetVkFence();
@@ -197,6 +197,36 @@ bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TSemaphore *> &waitSema
 bool Turbo::Core::TDeviceQueue::Submit(const std::vector<TRefPtr<TSemaphore>> &waitSemaphores, const std::vector<TRefPtr<TSemaphore>> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)
 {
     return this->Submit(Turbo::Core::RefsToPtrs(waitSemaphores), Turbo::Core::RefsToPtrs(signalSemaphores), commandBuffer, fence);
+}
+
+bool Turbo::Core::TDeviceQueue::Submit(const std::initializer_list<TSemaphore *> &waitSemaphores, const std::initializer_list<TSemaphore *> &signalSemaphores, TCommandBuffer *commandBuffer, TFence *fence)
+{
+    std::vector<TSemaphore *> wait_semaphores;
+    std::vector<TSemaphore *> signal_semaphores;
+    if (Turbo::Core::TReferenced::Valid(commandBuffer))
+    {
+        {
+            for (auto &item : waitSemaphores)
+            {
+                if (Turbo::Core::TReferenced::Valid(item))
+                {
+                    wait_semaphores.push_back(item);
+                }
+            }
+
+            for (auto &item : signalSemaphores)
+            {
+                if (Turbo::Core::TReferenced::Valid(item))
+                {
+                    signal_semaphores.push_back(item);
+                }
+            }
+        }
+
+        return this->Submit(wait_semaphores, signal_semaphores, commandBuffer, fence);
+    }
+
+    return false;
 }
 
 bool Turbo::Core::TDeviceQueue::Submit(TCommandBuffer *commandBuffer, TFence *fence)
@@ -231,20 +261,29 @@ bool Turbo::Core::TDeviceQueue::IsSupportSurface(Turbo::Extension::TSurface *sur
     return false;
 }
 
-Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex)
+Turbo::Core::TResult Turbo::Core::TDeviceQueue::Present(Turbo::Extension::TSwapchain *swapchain, uint32_t imageIndex, const std::vector<TSemaphore *> &waitSemaphores)
 {
     if (Turbo::Core::TReferenced::Valid(swapchain))
     {
         VkSwapchainKHR vk_swapchain_khr = swapchain->GetVkSwapchainKHR();
-        uint32_t image_index = imageIndex;
         VkPresentInfoKHR vk_present_info_khr = {};
         vk_present_info_khr.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         vk_present_info_khr.pNext = nullptr;
-        vk_present_info_khr.waitSemaphoreCount = 0;
-        vk_present_info_khr.pWaitSemaphores = nullptr;
+        std::vector<VkSemaphore> wait_semaphores;
+        {
+            for (auto &semaphore : waitSemaphores)
+            {
+                if (Turbo::Core::TReferenced::Valid(semaphore))
+                {
+                    wait_semaphores.push_back(semaphore->GetVkSemaphore());
+                }
+            }
+        }
+        vk_present_info_khr.waitSemaphoreCount = wait_semaphores.size();
+        vk_present_info_khr.pWaitSemaphores = wait_semaphores.data();
         vk_present_info_khr.swapchainCount = 1;
         vk_present_info_khr.pSwapchains = &vk_swapchain_khr;
-        vk_present_info_khr.pImageIndices = &image_index;
+        vk_present_info_khr.pImageIndices = &imageIndex;
         vk_present_info_khr.pResults = nullptr;
 
         // TODO: load vkQueuePresentKHR(...) by TVulkanLoader

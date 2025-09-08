@@ -9,8 +9,8 @@
 #include <iostream>
 //</Test Delete>
 
-#if defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
-#define TURBO_PLATFORM_WINDOWS
+#if defined(VK_USE_PLATFORM_OHOS) || defined(TURBO_OHOS_PLATFORM)
+#define TURBO_PLATFORM_OPEN_HARMONY
 #elif defined(__APPLE__)
 #define TURBO_PLATFORM_APPLE
 #elif defined(ANDROID) || defined(__ANDROID__)
@@ -19,8 +19,8 @@
 #define TURBO_PLATFORM_LINUX
 #elif defined(__unix) || defined(__unix__)
 #define TURBO_PLATFORM_UNIX
-#elif defined(VK_USE_PLATFORM_OHOS) || defined(OHOS_PLATFORM)
-#define TURBO_PLATFORM_OPEN_HARMONY
+#elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
+#define TURBO_PLATFORM_WINDOWS
 #else
 #define TURBO_PLATFORM_UNDEFINED
 #endif

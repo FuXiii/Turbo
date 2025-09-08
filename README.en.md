@@ -221,6 +221,14 @@ make
 > [!NOTE]
 > If you meet some annoying question please check [`FAQ`](./docs/FAQ.md) first, if it still can't fixed your problem please create an `Issue`.
 
+# Sample
+
+在 `samples` 下有很多示例供开发者查阅。
+
+In `samples` folder there has many demo for developer.
+
+> Among which `HelloTriangle（HelloTriangle.cpp）` is the demo which recommend to beginner(major code about `400` lines)。By drawing a triangle to show the core usage, it is relatively simple and friendly to beginners.
+
 <!--
 ## Trifles
 

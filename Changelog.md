@@ -4,6 +4,40 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/9/8
+
+>* 更新 `TCommandBuffer` 其中 `CmdBindVertexBuffers(...)` 增加 `std::initializer_list<TBuffer *>` 参数版本函数。
+>* 优化 `HelloTriangle` 示例。自动获取支持的图片格式。简化代码，更加简单合理易于理解。
+>* 更新 `README` 。增加 `示例` 章节。
+
+## 2025/8/29
+
+>* 更新 `TDeviceQueue` 的 `std::initializer_list<TSemaphore>` 版本 `Submit(...)` 成员函数未返回数据 `Bug` 。
+>* 优化 `HelloTriangle` 示例。更加简单合理易于理解。
+
+## 2025/8/28
+
+>* 更新 `TDeviceQueue` 的 `Present(...)` 成员函数。增加 `TSemaphore` 参数指定。
+>* 更新 `TDeviceQueue` 的 `Submit(...)` 成员函数。增加 `std::initializer_list<TSemaphore>` 版本参数指定。
+>* 更新 `HelloTriangle` 。优化代码。
+
+## 2025/8/27
+
+>* 更新 `TExtensionInfo` 和 `TDevice` 增加和适配 `VK_OHOS_SURFACE` 扩展。用于 `（开源）鸿蒙` 系统。
+>* 更新 `TDevice` 的 `InspectExtensionAndVersionDependencies(...)` 成员函数。添加 `VK_KHR_SURFACE` 扩展依赖检查。
+
+## 2025/8/26
+
+>* 更新 `engine/core/CMakeLists.txt` 增加 `OHOS` 选项。用于指示目标是否为系统 `（开源）鸿蒙` 。
+>* 更新 `TCore` 增加 `TURBO_PLATFORM_OPEN_HARMONY` 宏定义判断与声明。适配 `（开源）鸿蒙` 。
+>* 更新 `TSurface` 适配 `（开源）鸿蒙` 。
+>* 更新 `TAllocator` 适配 `（开源）鸿蒙` 。
+>* 更新 `TVulkanLoader` 适配 `（开源）鸿蒙` 。
+
+## 2025/8/23
+
+>* 更新 `TReferenced` 增加 `cstdlib` 头文件（`malloc`）。
+
 ## 2025/8/21
 
 >* 更新 `TCommandBuffer` 的 `CmdPushConstants(...)` 成员函数。适配自动化配置。
