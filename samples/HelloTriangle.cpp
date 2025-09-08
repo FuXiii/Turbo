@@ -25,8 +25,6 @@
 #include <TFence.h>
 #include <TSemaphore.h>
 
-#include <fstream>
-
 #include <GLFW/glfw3.h>
 
 #include <TSurface.h>
@@ -43,7 +41,6 @@
 
 #include <imgui.h>
 
-#include <memory>
 #include <stdio.h>
 #include <string.h>
 
@@ -183,13 +180,14 @@ int main()
     Turbo::Core::TRefPtr<ImGuiPass> imgui_pass = new ImGuiPass(window);
 
     std::vector<Turbo::Core::TExtensionInfo> enable_device_extensions;
-    physical_device->GetSupportExtensions();
-    std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
-    for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
     {
-        if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN)
+        std::vector<Turbo::Core::TExtensionInfo> physical_device_support_extensions = physical_device->GetSupportExtensions();
+        for (Turbo::Core::TExtensionInfo &extension : physical_device_support_extensions)
         {
-            enable_device_extensions.push_back(extension);
+            if (extension.GetExtensionType() == Turbo::Core::TExtensionType::VK_KHR_SWAPCHAIN)
+            {
+                enable_device_extensions.push_back(extension);
+            }
         }
     }
 
@@ -251,31 +249,18 @@ int main()
 
     Turbo::Core::TRefPtr<Turbo::Core::TDescriptorPool> descriptor_pool = new Turbo::Core::TDescriptorPool(device, descriptor_sizes.size() * 1000, descriptor_sizes);
 
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> buffers;
-    buffers.push_back(value_buffer);
-
     Turbo::Core::TSubpass subpass(Turbo::Core::TPipelineType::Graphics);
     subpass.AddColorAttachmentReference(0, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);                // swapchain color image
     subpass.SetDepthStencilAttachmentReference(1, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // depth image
 
-    std::vector<Turbo::Core::TSubpass> subpasses;
-    subpasses.push_back(subpass); // subpass 0
-
     Turbo::Core::TAttachment swapchain_color_attachment(swapchain_images[0]->GetFormat(), swapchain_images[0]->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::COLOR_ATTACHMENT_OPTIMAL);
     Turbo::Core::TAttachment depth_attachment(depth_image->GetFormat(), depth_image->GetSampleCountBits(), Turbo::Core::TLoadOp::CLEAR, Turbo::Core::TStoreOp::STORE, Turbo::Core::TLoadOp::DONT_CARE, Turbo::Core::TStoreOp::DONT_CARE, Turbo::Core::TImageLayout::UNDEFINED, Turbo::Core::TImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-    std::vector<Turbo::Core::TAttachment> attachemts;
-    attachemts.push_back(swapchain_color_attachment);
-    attachemts.push_back(depth_attachment);
-
-    Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, attachemts, subpasses);
+    Turbo::Core::TRefPtr<Turbo::Core::TRenderPass> render_pass = new Turbo::Core::TRenderPass(device, {swapchain_color_attachment, depth_attachment}, {subpass});
 
     Turbo::Core::TVertexBinding vertex_binding(0, sizeof(POSITION_AND_COLOR), Turbo::Core::TVertexRate::VERTEX);
     vertex_binding.AddAttribute(0, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, position)); // position
     vertex_binding.AddAttribute(1, Turbo::Core::TFormatType::R32G32B32_SFLOAT, offsetof(POSITION_AND_COLOR, color));    // color
-
-    std::vector<Turbo::Core::TVertexBinding> vertex_bindings;
-    vertex_bindings.push_back(vertex_binding);
 
     Turbo::Core::TViewport viewport(0, 0, 500, 500, 0, 1);
     Turbo::Core::TScissor scissor(0, 0, 500, 500);
@@ -284,13 +269,10 @@ int main()
     pipeline_layout << *vertex_shader << *fragment_shader;
     Turbo::Core::TRefPtr<Turbo::Core::TVertexShaderStage> vertex_shader_stage = new Turbo::Core::TVertexShaderStage(vertex_shader);
     Turbo::Core::TRefPtr<Turbo::Core::TFragmentShaderStage> fragment_shader_stage = new Turbo::Core::TFragmentShaderStage(fragment_shader);
-    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(pipeline_layout, render_pass, 0, vertex_bindings, vertex_shader_stage, fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
+    Turbo::Core::TRefPtr<Turbo::Core::TGraphicsPipeline> pipeline = new Turbo::Core::TGraphicsPipeline(pipeline_layout, render_pass, 0, {vertex_binding}, vertex_shader_stage, fragment_shader_stage, Turbo::Core::TTopologyType::TRIANGLE_LIST, false, false, false, Turbo::Core::TPolygonMode::FILL, Turbo::Core::TCullModeBits::MODE_BACK_BIT, Turbo::Core::TFrontFace::CLOCKWISE, false, 0, 0, 0, 1, false, Turbo::Core::TSampleCountBits::SAMPLE_1_BIT, true, true, Turbo::Core::TCompareOp::LESS_OR_EQUAL, false);
 
     Turbo::Core::TRefPtr<Turbo::Core::TPipelineDescriptorSet> pipeline_descriptor_set = descriptor_pool->Allocate(pipeline->GetPipelineLayout());
-    pipeline_descriptor_set->BindData(0, 0, 0, buffers);
-
-    std::vector<Turbo::Core::TRefPtr<Turbo::Core::TBuffer>> vertex_buffers;
-    vertex_buffers.push_back(vertex_buffer);
+    pipeline_descriptor_set->BindData(0, 0, {value_buffer});
 
     std::vector<Turbo::Core::TRefPtr<Turbo::Core::TFramebuffer>> swpachain_framebuffers;
     for (Turbo::Core::TRefPtr<Turbo::Core::TImageView> swapchain_image_view_item : swapchain_image_views)
@@ -312,15 +294,12 @@ int main()
     };
 
     std::list<TFrame> frames;
-    std::vector<TFrame> old_frames(swapchain_images.size());
 
     auto recreate_swapchain_and_framebuffer = [&]() {
         // waite for idle
         device->WaitIdle();
 
         frames.clear();
-
-        // destroy related resource
 
         // clear old swapchain image
         swapchain_images.clear();
@@ -330,11 +309,6 @@ int main()
         swpachain_framebuffers.clear();
 
         // recreate swapchain
-        // Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> old_swapchain = swapchain;
-        // Turbo::Core::TRefPtr<Turbo::Extension::TSwapchain> new_swapchain = new Turbo::Extension::TSwapchain(old_swapchain);
-        // // delete old_swapchain;
-        // old_swapchain = nullptr;
-
         uint32_t current_height = 0;
         uint32_t current_width = 0;
         do
@@ -376,6 +350,14 @@ int main()
     {
         glfwPollEvents();
 
+        float current_time = glfwGetTime();
+        float delta_time = current_time - previous_time;
+        previous_time = current_time;
+
+        void *_ptr = value_buffer->Map();
+        memcpy(_ptr, &value, sizeof(value));
+        value_buffer->Unmap();
+
         if (!frames.empty())
         {
             auto &show_frame = frames.front();
@@ -400,36 +382,19 @@ int main()
         }
 
         TFrame frame = {};
-        frame.imageReady = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
-        frame.commandBuffer = command_pool->Allocate();
-        frame.drawFinished = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        {
+            frame.imageReady = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+            frame.commandBuffer = command_pool->Allocate();
+            frame.drawFinished = new Turbo::Core::TSemaphore(device, Turbo::Core::TPipelineStageBits::COLOR_ATTACHMENT_OUTPUT_BIT);
+        }
 
-        float current_time = glfwGetTime();
-        float delta_time = current_time - previous_time;
-        previous_time = current_time;
-
-        void *_ptr = value_buffer->Map();
-        memcpy(_ptr, &value, sizeof(value));
-        value_buffer->Unmap();
-
-        //<Begin Rendering>
         Turbo::Core::TResult result = swapchain->AcquireNextImage(30000, frame.imageReady, nullptr, &frame.imageIndex);
         switch (result)
         {
         case Turbo::Core::TResult::SUCCESS: {
-            // successed get image and go on
-
-            // because we just have one command buffer, so we should reset the command buffer for each frame
-            // If we create command buffer for each swapchain image, we don't need to reset it each frame
 
             Turbo::Core::TViewport frame_viewport(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight(), 0, 1);
             Turbo::Core::TScissor frame_scissor(0, 0, swapchain->GetWidth() <= 0 ? 1 : swapchain->GetWidth(), swapchain->GetHeight() <= 0 ? 1 : swapchain->GetHeight());
-
-            std::vector<Turbo::Core::TViewport> frame_viewports;
-            frame_viewports.push_back(frame_viewport);
-
-            std::vector<Turbo::Core::TScissor> frame_scissors;
-            frame_scissors.push_back(frame_scissor);
 
             Turbo::Core::TRefPtr<Turbo::Core::TCommandBuffer> command_buffer = frame.commandBuffer;
             command_buffer->Begin();
@@ -439,26 +404,29 @@ int main()
                 command_buffer->CmdBeginRenderPass(render_pass, swpachain_framebuffers[frame.imageIndex]);
                 command_buffer->CmdBindPipeline(pipeline);
                 command_buffer->CmdBindPipelineDescriptorSet(pipeline_descriptor_set);
-                command_buffer->CmdBindVertexBuffers(vertex_buffers);
-                command_buffer->CmdSetViewport(frame_viewports);
-                command_buffer->CmdSetScissor(frame_scissors);
+                command_buffer->CmdBindVertexBuffers({vertex_buffer});
+                command_buffer->CmdSetViewport({frame_viewport});
+                command_buffer->CmdSetScissor({frame_scissor});
                 command_buffer->CmdDraw(3, 1, 0, 0);
                 command_buffer->CmdEndRenderPass();
             }
 
-            imgui_pass->Draw(delta_time, command_buffer, swapchain_image_views[frame.imageIndex], [&]() {
-                ImGui::Begin(TURBO_PROJECT_NAME);
-                if (ImGui::SliderFloat("value", &value, 0.0f, 1.0f))
-                {
-                }
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-                ImGui::End();
-            });
+            // imGui
+            {
+                imgui_pass->Draw(delta_time, command_buffer, swapchain_image_views[frame.imageIndex], [&]() {
+                    ImGui::Begin(TURBO_PROJECT_NAME);
+                    if (ImGui::SliderFloat("value", &value, 0.0f, 1.0f))
+                    {
+                    }
+                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                    ImGui::End();
+                });
+            }
+
             command_buffer->End();
             queue->Submit({frame.imageReady}, {frame.drawFinished}, command_buffer);
 
             frames.push_back(frame);
-            // frames[frame.imageIndex] = frame;
         }
         break;
         case Turbo::Core::TResult::TIMEOUT: {
@@ -475,11 +443,9 @@ int main()
         }
         break;
         default: {
-            //
         }
         break;
         }
-        //</End Rendering>
     }
 
     device->WaitIdle();

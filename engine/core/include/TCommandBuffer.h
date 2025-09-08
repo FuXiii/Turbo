@@ -93,6 +93,8 @@ class TCommandBufferBase : public Turbo::Core::TVulkanHandle
     void CmdBindVertexBuffers(const std::vector<TBuffer *> &vertexBuffers = {});
     void CmdBindVertexBuffers(const std::vector<TRefPtr<TBuffer>> &vertexBuffers = {});
 
+    void CmdBindVertexBuffers(const std::initializer_list<TBuffer *> &vertexBuffers = {});
+
     void CmdSetViewport(const std::vector<TViewport> &viewports = {});
     void CmdSetScissor(const std::vector<TScissor> &scissors = {});
     void CmdSetViewport(const TViewport &viewport);

@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/9/8
+
+>* 更新 `TCommandBuffer` 其中 `CmdBindVertexBuffers(...)` 增加 `std::initializer_list<TBuffer *>` 参数版本函数。
+>* 优化 `HelloTriangle` 示例。简化代码，更加简单合理易于理解。
+
 ## 2025/8/29
 
 >* 更新 `TDeviceQueue` 的 `std::initializer_list<TSemaphore>` 版本 `Submit(...)` 成员函数未返回数据 `Bug` 。
