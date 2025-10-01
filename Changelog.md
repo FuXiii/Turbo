@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/10/2
+
+>* 适配 `Linux`
+
 ## 2025/9/8
 
 >* 更新 `TCommandBuffer` 其中 `CmdBindVertexBuffers(...)` 增加 `std::initializer_list<TBuffer *>` 参数版本函数。

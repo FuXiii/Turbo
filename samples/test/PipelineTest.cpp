@@ -141,7 +141,7 @@ void Test_TSpecializationConstants(Turbo::Core::TInstance *instance, Turbo::Core
     scs.Merge(0, 0.2f);
     scs.Merge(1, 1.0);
     scs.Merge(3, 2);
-    scs.Merge(6, 3ui32);
+    scs.Merge(6, 3);
     scs.Merge(20, 4);
     scs.Merge(2880, true);
 

@@ -9,6 +9,8 @@
 #include <ostream>
 
 #include <iostream>
+#include <cstring>
+#include <cstdint>
 
 namespace Turbo
 {
