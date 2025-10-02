@@ -7,6 +7,7 @@
 ## 2025/10/2
 
 >* 适配 `Linux`
+>* `docs/Design` 下创建 `Pipeline.md` 用于研究设计 `pipeline`
 
 ## 2025/9/8
 
