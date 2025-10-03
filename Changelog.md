@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2025/10/3
+
+>* 更新 `docs/Design` 下 `Pipeline.md` 用于研究设计 `pipeline`
+
 ## 2025/10/2
 
 >* 适配 `Linux`
