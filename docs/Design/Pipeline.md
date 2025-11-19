@@ -168,3 +168,73 @@ shader_stage << std::make_paire(3, true);//指定 specialization
 ```
 
 ### pVertexInputState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineVertexInputStateCreateInfo {
+    VkStructureType                             sType;
+    const void*                                 pNext;
+    VkPipelineVertexInputStateCreateFlags       flags;
+    uint32_t                                    vertexBindingDescriptionCount;
+    const VkVertexInputBindingDescription*      pVertexBindingDescriptions;
+    uint32_t                                    vertexAttributeDescriptionCount;
+    const VkVertexInputAttributeDescription*    pVertexAttributeDescriptions;
+} VkPipelineVertexInputStateCreateInfo;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkVertexInputBindingDescription {
+    uint32_t             binding;
+    uint32_t             stride;
+    VkVertexInputRate    inputRate;
+} VkVertexInputBindingDescription;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkVertexInputRate {
+    VK_VERTEX_INPUT_RATE_VERTEX = 0,
+    VK_VERTEX_INPUT_RATE_INSTANCE = 1,
+} VkVertexInputRate;
+```
+
+渲染开始前需要通过 `vkCmdBindVertexBuffers` 绑定多个顶点缓存。
+
+顶点着色器需要从一个或多个 `Buffer` 中获取顶点属性数据。
+
+* 其中 `VkVertexInputBindingDescription::binding` 指的就是 `vkCmdBindVertexBuffers` 中绑定的第 `VkVertexInputBindingDescription::binding` 个 `Buffer` 。
+
+* 其中 `VkVertexInputBindingDescription::stride` 指的就是对应绑定的额 `Buffer` 中连续元素数据的长度。
+
+* 其中 `VkVertexInputBindingDescription::inputRate` 用于指定缓存中的数据是给每个顶点用的还是给每个实例用的。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkVertexInputAttributeDescription {
+    uint32_t    location;
+    uint32_t    binding;
+    VkFormat    format;
+    uint32_t    offset;
+} VkVertexInputAttributeDescription;
+```
+
+每一次渲染(`DrawCall`)都需要指定顶点绑定数据：
+
+```GLSL
+#version 450 core
+
+layout(location = 0) in vec3 POSITION;
+layout(location = 1) in vec3 NORMAL;
+layout(location = 2) in vec2 UV;
+layout(location = 3) in vec4 TANGENT;
+
+...
+```
+
+* 其中 `VkVertexInputAttributeDescription::location` 指的就是着色器中对应的顶点数据位置(`location`)。
+* 其中 `VkVertexInputAttributeDescription::binding` 与 `VkVertexInputBindingDescription::binding` 对应。
+
+
+
+最多的 `location` 数量 `VkPhysicalDeviceLimits::maxVertexInputAttributes`
