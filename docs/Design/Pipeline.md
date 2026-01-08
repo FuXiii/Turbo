@@ -182,6 +182,8 @@ typedef struct VkPipelineVertexInputStateCreateInfo {
 } VkPipelineVertexInputStateCreateInfo;
 ```
 
+如果图形管线激活使用 `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` 的话，那么 `vertex input attribute` 和 `vertex input binding` 将会通过 `vkCmdSetVertexInputEXT` 设置，并且 `VkGraphicsPipelineCreateInfo::pVertexInputState` 将会被忽略。
+
 ```CXX
 // Provided by VK_VERSION_1_0
 typedef struct VkVertexInputBindingDescription {
@@ -205,7 +207,7 @@ typedef enum VkVertexInputRate {
 
 * 其中 `VkVertexInputBindingDescription::binding` 指的就是 `vkCmdBindVertexBuffers` 中绑定的第 `VkVertexInputBindingDescription::binding` 个 `Buffer` 。
 
-* 其中 `VkVertexInputBindingDescription::stride` 指的就是对应绑定的额 `Buffer` 中连续元素数据的长度。
+* 其中 `VkVertexInputBindingDescription::stride` 指的就是对应绑定的 `Buffer` 中连续元素数据的长度。比如用户在 `Buffer` 中塞入多个格式为 `Vec3, Vec2, float` 的数据，则 `stride` 为这三个元素的长度之和。
 
 * 其中 `VkVertexInputBindingDescription::inputRate` 用于指定缓存中的数据是给每个顶点用的还是给每个实例用的。
 
@@ -235,6 +237,16 @@ layout(location = 3) in vec4 TANGENT;
 * 其中 `VkVertexInputAttributeDescription::location` 指的就是着色器中对应的顶点数据位置(`location`)。
 * 其中 `VkVertexInputAttributeDescription::binding` 与 `VkVertexInputBindingDescription::binding` 对应。
 
+最多的 `location` 数量 `VkPhysicalDeviceLimits::maxVertexInputAttributes` 。
 
+* 对于 `pVertexAttributeDescriptions` 中每个元素的 `binding` ， `pVertexBindingDescriptions` 中需要有与之对应的 `binding`
+* `pVertexBindingDescriptions` 中的所有的元素的 `binding` 号是唯一的，不能重复。
+* `pVertexAttributeDescriptions` 中的所有的元素的 `location` 号是唯一的，不能重复（ `binding` 是可以重复的）。
 
-最多的 `location` 数量 `VkPhysicalDeviceLimits::maxVertexInputAttributes`
+其中 `VkVertexInputAttributeDescription` 的 `location` , `format` 可以通过着色器推算出来（这有个问题，推算出来是个 `Vec3` 但 用户实际传递的参数是 `Vec2` 格式，这将会导致问题自动推算的结果与需要的不一致）。所以只有 `location` 是可以正确推算出来的。所以还需开放给用户自行配置。
+
+其中 `VkVertexInputAttributeDescription::offset` 的偏移是相对于 `VkVertexInputBindingDescription::stride` 内的偏移，比如用户在 `Buffer` 中塞入多个格式为 `Vec3, Vec2, float` 的数据，则 `stride` 为这三个元素的长度之和。而对于 `Vec2` 的 `VkVertexInputAttributeDescription::offset` 为 `offset = sizeof(Vec3)` 。
+
+一个 `Vertex input binding` 下可以有多个 `Vertex Attribute Description` 用于告诉 `GPU` 如何解析 `Vertex input binding` 对应 `Buffer` 中的数据。
+
+这样的话绑定的 `Buffer` 既可以是单格式（比如全是 `Vec2` 或全是 `Vec3` 等），也可以是多格式（比如多个 `Vec3, Vec2, float` 等）。每个 `Buffer` 对应一个 `Vertex input binding` ，每个  `Vertex input binding` 可以配置多个 `Vertex Attribute Description` 用于确定如何解析 `Buffer` 中的数据。
