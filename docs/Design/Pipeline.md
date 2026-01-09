@@ -250,3 +250,75 @@ layout(location = 3) in vec4 TANGENT;
 一个 `Vertex input binding` 下可以有多个 `Vertex Attribute Description` 用于告诉 `GPU` 如何解析 `Vertex input binding` 对应 `Buffer` 中的数据。
 
 这样的话绑定的 `Buffer` 既可以是单格式（比如全是 `Vec2` 或全是 `Vec3` 等），也可以是多格式（比如多个 `Vec3, Vec2, float` 等）。每个 `Buffer` 对应一个 `Vertex input binding` ，每个  `Vertex input binding` 可以配置多个 `Vertex Attribute Description` 用于确定如何解析 `Buffer` 中的数据。
+
+#### VertexInput API
+
+`Vertex Attribute` 可以被多个 `VertexBinding`
+
+```CXX
+class VertexAtrribute
+{
+private:
+    uint32_t location=0;
+    //uint32_t binding=0;//NOTE: binding 可通过传入哪一个 VertexBinding 推导确定，所以该成员变量可不用手动设置。
+    VkFormat format=0;
+    uint32_t offset=0;
+
+public:
+    VertexAtrribute()=default;
+    VertexAtrribute(uint32_t location, /*uint32_t binding,*/ VkFormat format, uint32_t offset);
+};
+
+class VertexBinding
+{
+private:
+    //uint32_t binding=0;//NOTE: binding 可通过传入 VertexInput 推导确定，所以该成员变量可不用手动设置。
+    uint32_t stride=0;
+    VkVertexInputRate inputRate=VkVertexInputRate::VERTEX;
+
+    std::vector<VertexAtrribute> vertexAtrributes;// NOTE: 存有多个 VertexAtrribute
+    
+public:
+    VertexBinding()=default;
+    VertexBinding(/*uint32_t binding, */uint32_t stride, VkVertexInputRate inputRate)；
+};
+
+class VertexInput
+{
+private:
+    std::unordered_map<uint32_t/*NOTE: 对应 VkVertexInputAttributeDescription::binding*/, VertexBinding> VertexBindingMap;
+};
+
+struct Vertex
+{
+    vec3 vertex;
+    vec2 uv;
+    vec3 normal;
+};
+
+struct VertexOther
+{
+    vec4 color;
+};
+
+VertexAtrribute vertex_att(0, VK_FORMAT_R32G32B32, offsizeof(Vertex, vertex));
+VertexAtrribute uv_att(1, VK_FORMAT_R32G32, offsizeof(Vertex, uv));
+VertexAtrribute normal_att(2, VK_FORMAT_R32G32B32, offsizeof(Vertex, normal));
+VertexAtrribute color_att(3, VK_FORMAT_R32G32B32A32, offsizeof(VertexOther, color));
+
+VertexBinding vb(sizeof(Vertex),VkVertexInputRate::VERTEX);
+vb << vertex_att;//底层应该调用 VertexBinding::AddAtrribute(...)
+vb << uv_att;//底层应该调用 VertexBinding::AddAtrribute(...)
+vb << normal_att;//底层应该调用 VertexBinding::AddAtrribute(...)
+
+VertexBinding vb_other(sizeof(VertexOther),VkVertexInputRate::VERTEX);
+vb_other << color_att;//底层应该调用 VertexBinding::AddAtrribute(...)
+
+VertexInput vi;
+vi.Add(0/*对应 VkVertexInputAttributeDescription::binding*/, vb);
+vi.Add(1/*对应 VkVertexInputAttributeDescription::binding*/, vb_other);
+//或
+vi[0] = vb;
+vi[1] = vb_other;
+
+```
