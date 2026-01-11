@@ -135,7 +135,7 @@ typedef struct VkGraphicsPipelineCreateInfo {
 } VkGraphicsPipelineCreateInfo;
 ```
 
-### pStages
+### VkPipelineShaderStageCreateInfo* pStages
 
 ```cxx
 // Provided by VK_VERSION_1_0
@@ -167,7 +167,7 @@ shader_stage << std::make_paire(2, 3.0);//指定 specialization
 shader_stage << std::make_paire(3, true);//指定 specialization
 ```
 
-### pVertexInputState
+### VkPipelineVertexInputStateCreateInfo* pVertexInputState
 
 ```CXX
 // Provided by VK_VERSION_1_0
@@ -320,5 +320,65 @@ vi.Add(1/*对应 VkVertexInputAttributeDescription::binding*/, vb_other);
 //或
 vi[0] = vb;
 vi[1] = vb_other;
+```
 
+dynamic `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` :
+
+```CXX
+// Provided by VK_EXT_shader_object, VK_EXT_vertex_input_dynamic_state
+void vkCmdSetVertexInputEXT(
+    VkCommandBuffer                             commandBuffer,
+    uint32_t                                    vertexBindingDescriptionCount,
+    const VkVertexInputBindingDescription2EXT*  pVertexBindingDescriptions,
+    uint32_t                                    vertexAttributeDescriptionCount,
+    const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions);
+```
+
+### VkPipelineInputAssemblyStateCreateInfo* pInputAssemblyState
+
+```CXX
+typedef struct VkPipelineInputAssemblyStateCreateInfo {
+    VkStructureType                            sType;
+    const void*                                pNext;
+    VkPipelineInputAssemblyStateCreateFlags    flags;
+    VkPrimitiveTopology                        topology;
+    VkBool32                                   primitiveRestartEnable;
+} VkPipelineInputAssemblyStateCreateInfo;
+```
+
+* `flags` 目前没有明确用途规定。
+* `primitiveRestartEnable` 用于指代某一特殊顶点索引值是否解析成重新开始图元绘制。只有在索引绘制时该成员才被采用（vkCmdDrawIndexed，vkCmdDrawMultiIndexedEXT 和 vkCmdDrawIndexedIndirect）。特殊值:
+
+> * VK_INDEX_TYPE_UINT32 -> 0xFFFFFFFF
+> * VK_INDEX_TYPE_UINT16 -> 0xFFFF
+> * VK_INDEX_TYPE_UINT8 -> 0xFF
+
+正常情况下 `"list"` 图元不支持重开图元绘制，除非开启了如下 `feature`：
+
+> * primitiveTopologyPatchListRestart (用于 VK_PRIMITIVE_TOPOLOGY_PATCH_LIST)
+> * primitiveTopologyListRestart (用于所有其他的 list 拓扑)
+
+```CXX
+typedef enum VkPrimitiveTopology {
+    VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
+    VK_PRIMITIVE_TOPOLOGY_LINE_LIST = 1,
+    VK_PRIMITIVE_TOPOLOGY_LINE_STRIP = 2,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST = 3,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP = 4,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN = 5,
+    VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY = 6,
+    VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY = 7,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY = 8,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY = 9,
+    VK_PRIMITIVE_TOPOLOGY_PATCH_LIST = 10,
+} VkPrimitiveTopology;
+```
+
+dynamic `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` :
+
+```CXX
+// Provided by VK_VERSION_1_3
+void vkCmdSetPrimitiveTopology(
+    VkCommandBuffer                             commandBuffer,
+    VkPrimitiveTopology                         primitiveTopology);
 ```
