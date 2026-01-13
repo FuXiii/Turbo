@@ -182,7 +182,7 @@ typedef struct VkPipelineVertexInputStateCreateInfo {
 } VkPipelineVertexInputStateCreateInfo;
 ```
 
-如果图形管线激活使用 `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` 的话，那么 `vertex input attribute` 和 `vertex input binding` 将会通过 `vkCmdSetVertexInputEXT` 设置，并且 `VkGraphicsPipelineCreateInfo::pVertexInputState` 将会被忽略。
+> 如果图形管线激活使用 `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` 的话，那么 `vertex input attribute` 和 `vertex input binding` 将会通过 `vkCmdSetVertexInputEXT` 设置，并且 `VkGraphicsPipelineCreateInfo::pVertexInputState` 将会被忽略。
 
 ```CXX
 // Provided by VK_VERSION_1_0
@@ -322,17 +322,17 @@ vi[0] = vb;
 vi[1] = vb_other;
 ```
 
-dynamic `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` :
-
-```CXX
-// Provided by VK_EXT_shader_object, VK_EXT_vertex_input_dynamic_state
-void vkCmdSetVertexInputEXT(
-    VkCommandBuffer                             commandBuffer,
-    uint32_t                                    vertexBindingDescriptionCount,
-    const VkVertexInputBindingDescription2EXT*  pVertexBindingDescriptions,
-    uint32_t                                    vertexAttributeDescriptionCount,
-    const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions);
-```
+>* dynamic `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` :
+>
+>```CXX
+>// Provided by VK_EXT_shader_object, VK_EXT_vertex_input_dynamic_state
+>void vkCmdSetVertexInputEXT(
+>    VkCommandBuffer                             commandBuffer,
+>    uint32_t                                    vertexBindingDescriptionCount,
+>    const VkVertexInputBindingDescription2EXT*  pVertexBindingDescriptions,
+>    uint32_t                                    vertexAttributeDescriptionCount,
+>    const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions);
+>```
 
 ### VkPipelineInputAssemblyStateCreateInfo* pInputAssemblyState
 
@@ -374,11 +374,123 @@ typedef enum VkPrimitiveTopology {
 } VkPrimitiveTopology;
 ```
 
-dynamic `VK_DYNAMIC_STATE_VERTEX_INPUT_EXT` :
+>* dynamic `VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY` :
+>
+>```CXX
+>// Provided by VK_VERSION_1_3
+>void vkCmdSetPrimitiveTopology(
+>    VkCommandBuffer                             commandBuffer,
+>    VkPrimitiveTopology                         primitiveTopology);
+>```
+>
+>* dynamic `VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`
+
+If the `VK_EXT_extended_dynamic_state3` extension is enabled, it can be `NULL` if the pipeline is created with both `VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE`, and `VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY` dynamic states set and `dynamicPrimitiveTopologyUnrestricted` is `VK_TRUE`.
+
+* 如果包含`mesh`着色器的话 `pInputAssemblyState` 将会被忽略。
+
+### VkPipelineTessellationStateCreateInfo* pTessellationState
 
 ```CXX
-// Provided by VK_VERSION_1_3
-void vkCmdSetPrimitiveTopology(
-    VkCommandBuffer                             commandBuffer,
-    VkPrimitiveTopology                         primitiveTopology);
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineTessellationStateCreateInfo {
+    VkStructureType                           sType;
+    const void*                               pNext;
+    VkPipelineTessellationStateCreateFlags    flags;
+    uint32_t                                  patchControlPoints;
+} VkPipelineTessellationStateCreateInfo;
+```
+
+* `flags` 目前没有明确用途规定。
+* `patchControlPoints` 每一个 `patch` 的控制点数量。
+
+>* dynamic `VK_DYNAMIC_STATE_PATCH_CONTROL_POINTS_EXT`:
+>
+>```CXX
+>// Provided by VK_EXT_extended_dynamic_state2, VK_EXT_shader_object
+>void vkCmdSetPatchControlPointsEXT(
+>    VkCommandBuffer                             commandBuffer,
+>    uint32_t                                    patchControlPoints);
+>```
+
+### VkPipelineViewportStateCreateInfo* pViewportState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineViewportStateCreateInfo {
+    VkStructureType                       sType;
+    const void*                           pNext;
+    VkPipelineViewportStateCreateFlags    flags;
+    uint32_t                              viewportCount;
+    const VkViewport*                     pViewports;
+    uint32_t                              scissorCount;
+    const VkRect2D*                       pScissors;
+} VkPipelineViewportStateCreateInfo;
+```
+
+* 如果没有激活 `multiViewport` 特性的话 `viewportCount` 必须是 `1`
+* 如果没有激活 `multiViewport` 特性的话 `scissorCount` 必须是 `1`
+* If `scissorCount` and `viewportCount` are both not dynamic, then `scissorCount` and `viewportCount` must be identical
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkViewport {
+    float    x;
+    float    y;
+    float    width;
+    float    height;
+    float    minDepth;
+    float    maxDepth;
+} VkViewport;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkRect2D {
+    VkOffset2D    offset;
+    VkExtent2D    extent;
+} VkRect2D;
+```
+
+>* dynamic `VK_DYNAMIC_STATE_VIEWPORT`:
+>
+>```CXX
+>// Provided by VK_VERSION_1_0
+>void vkCmdSetViewport(
+>    VkCommandBuffer                             commandBuffer,
+>    uint32_t                                    firstViewport,
+>    uint32_t                                    viewportCount,
+>    const VkViewport*                           pViewports);
+>```
+
+>* dynamic `VK_DYNAMIC_STATE_SCISSOR`:
+>
+>```CXX
+>// Provided by VK_VERSION_1_0
+>void vkCmdSetScissor(
+>    VkCommandBuffer                             commandBuffer,
+>    uint32_t                                    firstScissor,
+>    uint32_t                                    scissorCount,
+>    const VkRect2D*                             pScissors);
+>```
+
+### VkPipelineRasterizationStateCreateInfo* pRasterizationState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineRasterizationStateCreateInfo {
+    VkStructureType                            sType;
+    const void*                                pNext;
+    VkPipelineRasterizationStateCreateFlags    flags;
+    VkBool32                                   depthClampEnable;
+    VkBool32                                   rasterizerDiscardEnable;
+    VkPolygonMode                              polygonMode;
+    VkCullModeFlags                            cullMode;
+    VkFrontFace                                frontFace;
+    VkBool32                                   depthBiasEnable;
+    float                                      depthBiasConstantFactor;
+    float                                      depthBiasClamp;
+    float                                      depthBiasSlopeFactor;
+    float                                      lineWidth;
+} VkPipelineRasterizationStateCreateInfo;
 ```
