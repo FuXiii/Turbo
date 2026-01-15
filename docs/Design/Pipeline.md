@@ -494,3 +494,46 @@ typedef struct VkPipelineRasterizationStateCreateInfo {
     float                                      lineWidth;
 } VkPipelineRasterizationStateCreateInfo;
 ```
+
+* 如果激活 `depthClampEnable` 则深度值将会限制在 `VkViewport::minDepth` 和 `VkViewport::maxDepth` 之间。如果激活了 `depthClampControl` 特性，并且 `VkPipelineViewportDepthClampControlCreateInfoEXT::depthClampMode` 是 `VK_DEPTH_CLAMP_MODE_USER_DEFINED_RANGE_EXT`的话，则其范围为使用 `VkDepthClampRangeEXT` 限制：
+
+```CXX
+// Provided by VK_EXT_depth_clamp_control
+typedef struct VkPipelineViewportDepthClampControlCreateInfoEXT {
+    VkStructureType                sType;
+    const void*                    pNext;
+    VkDepthClampModeEXT            depthClampMode;
+    const VkDepthClampRangeEXT*    pDepthClampRange;
+} VkPipelineViewportDepthClampControlCreateInfoEXT;
+
+// Provided by VK_EXT_depth_clamp_control
+typedef enum VkDepthClampModeEXT {
+    VK_DEPTH_CLAMP_MODE_VIEWPORT_RANGE_EXT = 0,
+    VK_DEPTH_CLAMP_MODE_USER_DEFINED_RANGE_EXT = 1,
+} VkDepthClampModeEXT;
+
+// Provided by VK_EXT_depth_clamp_control
+typedef struct VkDepthClampRangeEXT {
+    float    minDepthClamp;
+    float    maxDepthClamp;
+} VkDepthClampRangeEXT;
+```
+
+如果 `VkPhysicalDeviceDepthClampZeroOneFeaturesKHR::depthClampZeroOne` 特性激活了的话：
+
+* 如果深度附件的深度格式是浮点数的话，并且开启 `VK_EXT_depth_range_unrestricted` 扩展的话，则深度值不会发生改变。
+* 否则深度值会被限制在[0, 1]之间。
+
+```CXX
+// Provided by VK_KHR_depth_clamp_zero_one
+typedef struct VkPhysicalDeviceDepthClampZeroOneFeaturesKHR {
+    VkStructureType    sType;
+    void*              pNext;
+    VkBool32           depthClampZeroOne;
+} VkPhysicalDeviceDepthClampZeroOneFeaturesKHR;
+```
+
+否则
+
+* 如果深度不在 `VkViewport::minDepth` 和 `VkViewport::maxDepth` 之间，则深度值是未定义的。
+* 如果深度附件是浮点格式并且深度值不是 [0, 1] 之间，则深度值是未定义的。
