@@ -358,6 +358,8 @@ typedef struct VkPipelineInputAssemblyStateCreateInfo {
 > * primitiveTopologyPatchListRestart (用于 VK_PRIMITIVE_TOPOLOGY_PATCH_LIST)
 > * primitiveTopologyListRestart (用于所有其他的 list 拓扑)
 
+* `topology` 代表图元的拓扑结构。
+
 ```CXX
 typedef enum VkPrimitiveTopology {
     VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
@@ -537,3 +539,17 @@ typedef struct VkPhysicalDeviceDepthClampZeroOneFeaturesKHR {
 
 * 如果深度不在 `VkViewport::minDepth` 和 `VkViewport::maxDepth` 之间，则深度值是未定义的。
 * 如果深度附件是浮点格式并且深度值不是 [0, 1] 之间，则深度值是未定义的。
+
+* `depthClampEnable` 用于控制图元是否在光栅化阶段之前立马剔除。
+* `polygonMode` 是三角形渲染模式。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkPolygonMode {
+    VK_POLYGON_MODE_FILL = 0,
+    VK_POLYGON_MODE_LINE = 1,
+    VK_POLYGON_MODE_POINT = 2,
+  // Provided by VK_NV_fill_rectangle
+    VK_POLYGON_MODE_FILL_RECTANGLE_NV = 1000153000,
+} VkPolygonMode;
+```
