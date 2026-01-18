@@ -540,7 +540,7 @@ typedef struct VkPhysicalDeviceDepthClampZeroOneFeaturesKHR {
 * 如果深度不在 `VkViewport::minDepth` 和 `VkViewport::maxDepth` 之间，则深度值是未定义的。
 * 如果深度附件是浮点格式并且深度值不是 [0, 1] 之间，则深度值是未定义的。
 
-* `depthClampEnable` 用于控制图元是否在光栅化阶段之前立马剔除。
+* `rasterizerDiscardEnable` 用于控制图元是否在光栅化阶段之前立马剔除。但会执行光栅化之前的阶段。
 * `polygonMode` 是三角形渲染模式。
 
 ```CXX
@@ -553,3 +553,142 @@ typedef enum VkPolygonMode {
     VK_POLYGON_MODE_FILL_RECTANGLE_NV = 1000153000,
 } VkPolygonMode;
 ```
+
+* `cullMode` 指定要剔除的三角正反面。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkCullModeFlagBits {
+    VK_CULL_MODE_NONE = 0,
+    VK_CULL_MODE_FRONT_BIT = 0x00000001,
+    VK_CULL_MODE_BACK_BIT = 0x00000002,
+    VK_CULL_MODE_FRONT_AND_BACK = 0x00000003,
+} VkCullModeFlagBits;
+```
+
+* `frontFace` 指定正面三角面的点顺序，用于确定正反面。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkFrontFace {
+    VK_FRONT_FACE_COUNTER_CLOCKWISE = 0,//逆时针
+    VK_FRONT_FACE_CLOCKWISE = 1,//顺时针
+} VkFrontFace;
+```
+
+* `depthBiasEnable` 控制是否偏移片元深度值。
+* `depthBiasConstantFactor` 用于控制每一个片元的深度值加上该固定值（实际上会作为系数与深度值相乘后相加）。
+* `depthBiasClamp` 指定一个片元的最大或最小的深度偏移。当大于`0`取最小值，当小于`0`取取最大值，等于`0`时不做改变（具体可看深度偏移计算公式）。
+* `depthBiasSlopeFactor` 用于指定深度偏移计算的斜率。
+* `lineWidth` 线宽。
+
+### VkPipelineMultisampleStateCreateInfo* pMultisampleState
+
+```CXX
+typedef uint32_t VkSampleMask;
+
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineMultisampleStateCreateInfo {
+    VkStructureType                          sType;
+    const void*                              pNext;
+    VkPipelineMultisampleStateCreateFlags    flags;
+    VkSampleCountFlagBits                    rasterizationSamples;
+    VkBool32                                 sampleShadingEnable;
+    float                                    minSampleShading;
+    const VkSampleMask*                      pSampleMask;
+    VkBool32                                 alphaToCoverageEnable;
+    VkBool32                                 alphaToOneEnable;
+} VkPipelineMultisampleStateCreateInfo;
+```
+
+* `flags` 目前没有明确用途规定。
+* `rasterizationSamples` 用于指定光栅化阶段的多采样点数量。
+* `sampleShadingEnable` 用于激活使用多采样着色。开启后片元着色器将会进行多采样。
+* `minSampleShading` 如果`sampleShadingEnable`开启则用于设置多采样的最小分子。必须在 [0, 1] 之间。用于控制 [1, rasterizationSamples] 数量的采样点的。
+* `pSampleMask` 指向数量为 `rasterizationSamples` 个 `VkSampleMask` 数组。用于采样遮罩测试（与片元的 coverage mask 进行测试）。
+* `alphaToCoverageEnable` 用于指示透明通道是否用于覆盖计算。
+* `alphaToOneEnable` 用于控制输出的透明通道是否为 `1`。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkSampleCountFlagBits {
+    VK_SAMPLE_COUNT_1_BIT = 0x00000001,
+    VK_SAMPLE_COUNT_2_BIT = 0x00000002,
+    VK_SAMPLE_COUNT_4_BIT = 0x00000004,
+    VK_SAMPLE_COUNT_8_BIT = 0x00000008,
+    VK_SAMPLE_COUNT_16_BIT = 0x00000010,
+    VK_SAMPLE_COUNT_32_BIT = 0x00000020,
+    VK_SAMPLE_COUNT_64_BIT = 0x00000040,
+} VkSampleCountFlagBits;
+```
+
+### VkPipelineDepthStencilStateCreateInfo* pDepthStencilState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineDepthStencilStateCreateInfo {
+    VkStructureType                           sType;
+    const void*                               pNext;
+    VkPipelineDepthStencilStateCreateFlags    flags;
+    VkBool32                                  depthTestEnable;
+    VkBool32                                  depthWriteEnable;
+    VkCompareOp                               depthCompareOp;
+    VkBool32                                  depthBoundsTestEnable;
+    VkBool32                                  stencilTestEnable;
+    VkStencilOpState                          front;
+    VkStencilOpState                          back;
+    float                                     minDepthBounds;
+    float                                     maxDepthBounds;
+} VkPipelineDepthStencilStateCreateInfo;
+```
+
+* `flags` 目前没有明确用途规定。
+* `depthTestEnable` 是否开启深度测试。
+* `depthWriteEnable` 是否开启深度写入。当 `depthTestEnable` 开启后深度写入才有效。
+* `depthCompareOp` 深度测试的比较操作。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkCompareOp {
+    VK_COMPARE_OP_NEVER = 0,
+    VK_COMPARE_OP_LESS = 1,
+    VK_COMPARE_OP_EQUAL = 2,
+    VK_COMPARE_OP_LESS_OR_EQUAL = 3,
+    VK_COMPARE_OP_GREATER = 4,
+    VK_COMPARE_OP_NOT_EQUAL = 5,
+    VK_COMPARE_OP_GREATER_OR_EQUAL = 6,
+    VK_COMPARE_OP_ALWAYS = 7,
+} VkCompareOp;
+```
+
+* `depthBoundsTestEnable` 开启深度范围测试（深度值被限制在了 `minDepthBounds` 和 `maxDepthBounds` 之间，超过这个范围会被限制在 `0`）。
+* `stencilTestEnable` 开启模板测试。
+* `front` 和 `back` 用于配置模板测试。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkStencilOpState {
+    VkStencilOp    failOp;
+    VkStencilOp    passOp;
+    VkStencilOp    depthFailOp;
+    VkCompareOp    compareOp;
+    uint32_t       compareMask;
+    uint32_t       writeMask;
+    uint32_t       reference;
+} VkStencilOpState;
+
+// Provided by VK_VERSION_1_0
+typedef enum VkStencilOp {
+    VK_STENCIL_OP_KEEP = 0,
+    VK_STENCIL_OP_ZERO = 1,
+    VK_STENCIL_OP_REPLACE = 2,
+    VK_STENCIL_OP_INCREMENT_AND_CLAMP = 3,
+    VK_STENCIL_OP_DECREMENT_AND_CLAMP = 4,
+    VK_STENCIL_OP_INVERT = 5,
+    VK_STENCIL_OP_INCREMENT_AND_WRAP = 6,
+    VK_STENCIL_OP_DECREMENT_AND_WRAP = 7,
+} VkStencilOp;
+```
+
+* `minDepthBounds` 深度范围测试的最小值。
+* `maxDepthBounds` 深度范围测试的最大值。

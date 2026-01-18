@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/1/18
+
+>* 更新 `docs/Design` 下 `Pipeline.md` 用于研究设计 `pipeline`
+
 ## 2026/1/16
 
 >* 更新 `docs/Design` 下 `Pipeline.md` 用于研究设计 `pipeline`
