@@ -677,6 +677,20 @@ typedef struct VkStencilOpState {
     uint32_t       reference;
 } VkStencilOpState;
 
+```CXX
+if((reference & compareMask) compareOp (stencilBufferValue & compareMask))
+{
+    //通过模板测试
+    //写入的模板值根据 passOp 配置
+}
+else
+{
+    //未通过模板测试
+    //写入的模板值根据 failOp 配置
+}
+```
+
+```CXX
 // Provided by VK_VERSION_1_0
 typedef enum VkStencilOp {
     VK_STENCIL_OP_KEEP = 0,
@@ -692,3 +706,20 @@ typedef enum VkStencilOp {
 
 * `minDepthBounds` 深度范围测试的最小值。
 * `maxDepthBounds` 深度范围测试的最大值。
+
+### VkPipelineColorBlendStateCreateInfo* pColorBlendState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineColorBlendStateCreateInfo {
+    VkStructureType                               sType;
+    const void*                                   pNext;
+    VkPipelineColorBlendStateCreateFlags          flags;
+    VkBool32                                      logicOpEnable;
+    VkLogicOp                                     logicOp;
+    uint32_t                                      attachmentCount;
+    const VkPipelineColorBlendAttachmentState*    pAttachments;
+    float                                         blendConstants[4];
+} VkPipelineColorBlendStateCreateInfo;
+```
+
