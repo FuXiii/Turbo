@@ -723,3 +723,101 @@ typedef struct VkPipelineColorBlendStateCreateInfo {
 } VkPipelineColorBlendStateCreateInfo;
 ```
 
+* `logicOpEnable` 控制是否进行逻辑操作。
+* `logicOp` 控制使用何种逻辑操作。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkLogicOp {
+    VK_LOGIC_OP_CLEAR = 0,
+    VK_LOGIC_OP_AND = 1,
+    VK_LOGIC_OP_AND_REVERSE = 2,
+    VK_LOGIC_OP_COPY = 3,
+    VK_LOGIC_OP_AND_INVERTED = 4,
+    VK_LOGIC_OP_NO_OP = 5,
+    VK_LOGIC_OP_XOR = 6,
+    VK_LOGIC_OP_OR = 7,
+    VK_LOGIC_OP_NOR = 8,
+    VK_LOGIC_OP_EQUIVALENT = 9,
+    VK_LOGIC_OP_INVERT = 10,
+    VK_LOGIC_OP_OR_REVERSE = 11,
+    VK_LOGIC_OP_COPY_INVERTED = 12,
+    VK_LOGIC_OP_OR_INVERTED = 13,
+    VK_LOGIC_OP_NAND = 14,
+    VK_LOGIC_OP_SET = 15,
+} VkLogicOp;
+```
+
+* `attachmentCount` 指定 `pAttachments` 的数量。
+* `pAttachments` 控制每一个颜色附件的颜色混合。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineColorBlendAttachmentState {
+    VkBool32                 blendEnable;
+    VkBlendFactor            srcColorBlendFactor;
+    VkBlendFactor            dstColorBlendFactor;
+    VkBlendOp                colorBlendOp;
+    VkBlendFactor            srcAlphaBlendFactor;
+    VkBlendFactor            dstAlphaBlendFactor;
+    VkBlendOp                alphaBlendOp;
+    VkColorComponentFlags    colorWriteMask;
+} VkPipelineColorBlendAttachmentState;
+```
+
+* `blendEnable` 是否开启混合测试。
+* `srcColorBlendFactor` 源颜色混合系数。
+* `dstColorBlendFactor` 目标颜色混合系数。
+* `colorBlendOp` 颜色混合操作。
+* `srcAlphaBlendFactor` 源透明混合系数。
+* `dstAlphaBlendFactor` 目标透明混合系数。
+* `alphaBlendOp` 透明混合操作。
+* `colorWriteMask` 颜色写入遮罩。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkBlendFactor {
+    VK_BLEND_FACTOR_ZERO = 0,
+    VK_BLEND_FACTOR_ONE = 1,
+    VK_BLEND_FACTOR_SRC_COLOR = 2,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR = 3,
+    VK_BLEND_FACTOR_DST_COLOR = 4,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR = 5,
+    VK_BLEND_FACTOR_SRC_ALPHA = 6,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA = 7,
+    VK_BLEND_FACTOR_DST_ALPHA = 8,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA = 9,
+    VK_BLEND_FACTOR_CONSTANT_COLOR = 10,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR = 11,
+    VK_BLEND_FACTOR_CONSTANT_ALPHA = 12,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA = 13,
+    VK_BLEND_FACTOR_SRC_ALPHA_SATURATE = 14,
+    VK_BLEND_FACTOR_SRC1_COLOR = 15,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR = 16,
+    VK_BLEND_FACTOR_SRC1_ALPHA = 17,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA = 18,
+} VkBlendFactor;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkBlendOp {
+    VK_BLEND_OP_ADD = 0,
+    VK_BLEND_OP_SUBTRACT = 1,
+    VK_BLEND_OP_REVERSE_SUBTRACT = 2,
+    VK_BLEND_OP_MIN = 3,
+    VK_BLEND_OP_MAX = 4,
+} VkBlendOp;
+```
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkColorComponentFlagBits {
+    VK_COLOR_COMPONENT_R_BIT = 0x00000001,
+    VK_COLOR_COMPONENT_G_BIT = 0x00000002,
+    VK_COLOR_COMPONENT_B_BIT = 0x00000004,
+    VK_COLOR_COMPONENT_A_BIT = 0x00000008,
+} VkColorComponentFlagBits;
+```
+
+* `blendConstants` 固定颜色混合。比如使用 `VK_BLEND_FACTOR_CONSTANT_COLOR` 时就会用到 `blendConstants` 。其为 `4` 个 `float` 值，分别对应 `RGBA` 各分量。
