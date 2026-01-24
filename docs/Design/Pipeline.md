@@ -476,6 +476,8 @@ typedef struct VkRect2D {
 >    const VkRect2D*                             pScissors);
 >```
 
+* `multiViewport` feature
+
 ### VkPipelineRasterizationStateCreateInfo* pRasterizationState
 
 ```CXX
@@ -821,3 +823,72 @@ typedef enum VkColorComponentFlagBits {
 ```
 
 * `blendConstants` 固定颜色混合。比如使用 `VK_BLEND_FACTOR_CONSTANT_COLOR` 时就会用到 `blendConstants` 。其为 `4` 个 `float` 值，分别对应 `RGBA` 各分量。
+
+### VkPipelineDynamicStateCreateInfo* pDynamicState
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef struct VkPipelineDynamicStateCreateInfo {
+    VkStructureType                      sType;
+    const void*                          pNext;
+    VkPipelineDynamicStateCreateFlags    flags;
+    uint32_t                             dynamicStateCount;
+    const VkDynamicState*                pDynamicStates;
+} VkPipelineDynamicStateCreateInfo;
+```
+
+* `dynamicStateCount` 指示 `pDynamicStates` 中的元素数量。
+* `pDynamicStates` 为 `VkDynamicState` 的数组（元素不能重复）。
+
+```CXX
+// Provided by VK_VERSION_1_0
+typedef enum VkDynamicState {
+    VK_DYNAMIC_STATE_VIEWPORT = 0,
+    VK_DYNAMIC_STATE_SCISSOR = 1,
+    VK_DYNAMIC_STATE_LINE_WIDTH = 2,
+    VK_DYNAMIC_STATE_DEPTH_BIAS = 3,
+    VK_DYNAMIC_STATE_BLEND_CONSTANTS = 4,
+    VK_DYNAMIC_STATE_DEPTH_BOUNDS = 5,
+    VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK = 6,
+    VK_DYNAMIC_STATE_STENCIL_WRITE_MASK = 7,
+    VK_DYNAMIC_STATE_STENCIL_REFERENCE = 8,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_CULL_MODE = 1000267000,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_FRONT_FACE = 1000267001,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY = 1000267002,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_VIEWPORT_WITH_COUNT = 1000267003,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_SCISSOR_WITH_COUNT = 1000267004,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE = 1000267005,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_DEPTH_TEST_ENABLE = 1000267006,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_DEPTH_WRITE_ENABLE = 1000267007,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_DEPTH_COMPARE_OP = 1000267008,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_DEPTH_BOUNDS_TEST_ENABLE = 1000267009,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_STENCIL_TEST_ENABLE = 1000267010,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_STENCIL_OP = 1000267011,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_RASTERIZER_DISCARD_ENABLE = 1000377001,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_DEPTH_BIAS_ENABLE = 1000377002,
+  // Provided by VK_VERSION_1_3
+    VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE = 1000377004,
+  // Provided by VK_VERSION_1_4
+    VK_DYNAMIC_STATE_LINE_STIPPLE = 1000259000,
+} VkDynamicState;
+```
+
+* `VK_DYNAMIC_STATE_VIEWPORT` 将会忽略 `VkPipelineViewportStateCreateInf::pViewports` 并且必须在绘制命令之前调用 `vkCmdSetViewport` 。
+* `VK_DYNAMIC_STATE_SCISSOR` 将会忽略 `VkPipelineViewportStateCreateInfo::pScissors` 并且必须在绘制命令之前调用 `vkCmdSetViewport` 。
+* `VK_DYNAMIC_STATE_LINE_WIDTH` 将会忽略 `VkPipelineRasterizationStateCreateInfo::lineWidth` 并且必须在绘制命令之前调用 `vkCmdSetLineWidth` 。
+* `VK_DYNAMIC_STATE_DEPTH_BIAS` 将会忽略 `VkPipelineRasterizationStateCreateInfo::depthBiasConstantFactor/depthBiasClamp/depthBiasSlopeFactor` 和其 `pNext` 下的 `VkDepthBiasRepresentationInfoEXT` ，并且必须在绘制命令之前调用 `vkCmdSetDepthBias`或者`vkCmdSetDepthBias2EXT` 。
+* `VK_DYNAMIC_STATE_BLEND_CONSTANTS` 将会忽略 `VkPipelineColorBlendStateCreateInfo::blendConstants` 并且必须在绘制命令之前调用 `vkCmdSetBlendConstants`。
