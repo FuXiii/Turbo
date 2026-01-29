@@ -892,3 +892,6 @@ typedef enum VkDynamicState {
 * `VK_DYNAMIC_STATE_LINE_WIDTH` 将会忽略 `VkPipelineRasterizationStateCreateInfo::lineWidth` 并且必须在绘制命令之前调用 `vkCmdSetLineWidth` 。
 * `VK_DYNAMIC_STATE_DEPTH_BIAS` 将会忽略 `VkPipelineRasterizationStateCreateInfo::depthBiasConstantFactor/depthBiasClamp/depthBiasSlopeFactor` 和其 `pNext` 下的 `VkDepthBiasRepresentationInfoEXT` ，并且必须在绘制命令之前调用 `vkCmdSetDepthBias`或者`vkCmdSetDepthBias2EXT` 。
 * `VK_DYNAMIC_STATE_BLEND_CONSTANTS` 将会忽略 `VkPipelineColorBlendStateCreateInfo::blendConstants` 并且必须在绘制命令之前调用 `vkCmdSetBlendConstants`。
+* `VK_DYNAMIC_STATE_DEPTH_BOUNDS` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::minDepthBounds/maxDepthBounds` 并且必须在绘制命令之前调用 `vkCmdSetDepthBounds` (`VkPipelineDepthStencilStateCreateInfo::depthBoundsTestEnable` 为 `VK_TRUE`)。
+* `VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::compareMask::front/back` 并且必须在绘制命令之前调用 `vkCmdSetStencilCompareMask` (`VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 为 `VK_TRUE`)。
+* `VK_DYNAMIC_STATE_STENCIL_REFERENCE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::front/back` 并且必须在绘制命令之前调用 `vkCmdSetStencilReference` (`VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 为 `VK_TRUE`)。
