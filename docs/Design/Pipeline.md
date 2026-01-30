@@ -895,3 +895,19 @@ typedef enum VkDynamicState {
 * `VK_DYNAMIC_STATE_DEPTH_BOUNDS` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::minDepthBounds/maxDepthBounds` 并且必须在绘制命令之前调用 `vkCmdSetDepthBounds` (`VkPipelineDepthStencilStateCreateInfo::depthBoundsTestEnable` 为 `VK_TRUE`)。
 * `VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::compareMask::front/back` 并且必须在绘制命令之前调用 `vkCmdSetStencilCompareMask` (`VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 为 `VK_TRUE`)。
 * `VK_DYNAMIC_STATE_STENCIL_REFERENCE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::front/back` 并且必须在绘制命令之前调用 `vkCmdSetStencilReference` (`VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 为 `VK_TRUE`)。
+* `VK_DYNAMIC_STATE_CULL_MODE` 将会忽略 `VkPipelineRasterizationStateCreateInfo::cullMode` 并且必须在绘制命令之前调用 `vkCmdSetCullMode`。
+* `VK_DYNAMIC_STATE_FRONT_FACE` 将会忽略 `VkPipelineRasterizationStateCreateInfo::frontFace` 并且必须在绘制命令之前调用 `vkCmdSetFrontFace`。
+* `VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY` 将会忽略 `VkPipelineInputAssemblyStateCreateInfo::topology` 并且必须在绘制命令之前调用 `vkCmdSetPrimitiveTopology`。
+* `VK_DYNAMIC_STATE_VIEWPORT_WITH_COUNT` 将会忽略 `VkPipelineViewportStateCreateInfo::viewportCount/pViewports` 并且必须在绘制命令之前调用 `vkCmdSetViewportWithCount`。
+* `VK_DYNAMIC_STATE_SCISSOR_WITH_COUNT` 将会忽略 `VkPipelineViewportStateCreateInfo::scissorCount/pScissors` 并且必须在绘制命令之前调用 `vkCmdSetScissorWithCount`。
+* `VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE` 将会忽略 `VkVertexInputBindingDescription::stride` 并且必须在绘制命令之前调用 `vkCmdBindVertexBuffers2`。
+* `VK_DYNAMIC_STATE_DEPTH_TEST_ENABLE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::depthTestEnable` 并且必须在绘制命令之前调用 `vkCmdSetDepthTestEnable`。
+* `VK_DYNAMIC_STATE_DEPTH_WRITE_ENABLE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::depthWriteEnable` 并且必须在绘制命令之前调用 `vkCmdSetDepthWriteEnable`。
+* `VK_DYNAMIC_STATE_DEPTH_COMPARE_OP` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::depthCompareOp` 并且必须在绘制命令之前调用 `vkCmdSetDepthCompareOp`。
+* `VK_DYNAMIC_STATE_DEPTH_BOUNDS_TEST_ENABLE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::depthBoundsTestEnable` 并且必须在绘制命令之前调用 `vkCmdSetDepthBoundsTestEnable`。
+* `VK_DYNAMIC_STATE_STENCIL_TEST_ENABLE` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 并且必须在绘制命令之前调用 `vkCmdSetStencilTestEnable`。
+* `VK_DYNAMIC_STATE_STENCIL_OP` 将会忽略 `VkPipelineDepthStencilStateCreateInfo::front/back` 的 `failOp`, `passOp`, `depthFailOp` 和 `compareOp` 并且必须在绘制命令之前调用 `vkCmdSetStencilOp`  (`VkPipelineDepthStencilStateCreateInfo::stencilTestEnable` 为 `VK_TRUE`)。
+* `VK_DYNAMIC_STATE_RASTERIZER_DISCARD_ENABLE` 将会忽略 `VkPipelineRasterizationStateCreateInfo::rasterizerDiscardEnable` 并且必须在绘制命令之前调用 `vkCmdSetRasterizerDiscardEnable`。
+* `VK_DYNAMIC_STATE_DEPTH_BIAS_ENABLE` 将会忽略 `VkPipelineRasterizationStateCreateInfo::depthBiasEnable` 并且必须在绘制命令之前调用 `vkCmdSetDepthBiasEnable`。
+* `VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE` 将会忽略 `VkPipelineInputAssemblyStateCreateInfo::primitiveRestartEnable` 并且必须在绘制命令之前调用 `vkCmdSetPrimitiveRestartEnable`。
+* `VK_DYNAMIC_STATE_LINE_STIPPLE` 将会忽略 `VkPipelineRasterizationLineStateCreateInfo::lineStippleFactor/lineStipplePattern` 并且必须在绘制命令之前调用 `vkCmdSetLineStipple` (`VkPipelineRasterizationLineStateCreateInfo::stippledLineEnable` 为 `VK_TRUE`)。
