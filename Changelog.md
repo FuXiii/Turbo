@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/2/28
+
+>* `docs/Design` 下新增 `LegacyAndSupersededFunctionality.md` 用于研究 `Vulkan` 被遗弃的特性。
+
 ## 2026/1/30
 
 >* 更新 `docs/Design` 下 `Pipeline.md` 用于研究设计 `pipeline`
