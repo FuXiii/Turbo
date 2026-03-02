@@ -20,19 +20,21 @@
 
 ## Render Pass
 
-`Vulkan 1.3` 推出了 `VK_KHR_dynamic_rendering` 不需要创建 `VkFramebuffer` 和 `VkRenderPass` 就可以进行渲染。但 `VK_KHR_dynamic_rendering` 不支持多 `Subpass` ，其只支持一个 `pass` 的情况。
+`Vulkan 1.2` 和 `VK_KHR_create_renderpass2` 为 `Render Pass` 提供了新功能. 在 `Vulkan 1.0` 的基础上提供更强的扩展性。
 
-`VK_KHR_dynamic_rendering_local_read` 和 `Vulkan 1.4` later allowed the expression of most subpass functionality in core or extensions. Any subpass functionality which was not replicated is still expressible but requires applications to split work over multiple dynamic render pass instances. Functionality not covered with local reads would result in most or all vendors splitting the subpass internally.
+`Vulkan 1.3` 和 `VK_KHR_dynamic_rendering` 不需要创建 `VkFramebuffer` 和 `VkRenderPass` 就可以进行渲染，但不支持 `Subpass`（多 `pass`），其只支持一个 `pass` 的情况。
 
-`VK_KHR_dynamic_rendering_local_read` 和 `Vulkan 1.4` 允许核心或扩展支持多 `Subpass` 。
+`Vulkan 1.4` 和 `VK_KHR_dynamic_rendering_local_read` 提供了对 `Subpass` 的支持.需要开发者将其分散在多个动态渲染中。
 
 注：`VK_QCOM_render_pass_shader_resolve` 还不能被动态渲染代替
 
+如果不使用扩展的话，推荐开发者使用动态渲染的 `vkCmdBeginRendering` 和 `vkCmdEndRendering` 管理渲染.
+
 ## Sampler 和 Buffer View Objects
 
-当使用 `descriptor heaps` 时， `sampler` 和 `buffer view objects` 将完全不必要创建，并且直接使用 `vkWriteSamplerDescriptorsEXT` 和 `vkWriteResourceDescriptorsEXT` 跳过了需要一起创建对象。此种情况下 `sampler` 可以通过 `shader bindings` 将采样器嵌入着色器中，且只需要 `VkSamplerCreateInfo` 而不需要创建采样器对象。
+当使用 `descriptor heaps` 时， `sampler` 和 `buffer view objects` 将完全不必要创建，并且直接使用 `vkWriteSamplerDescriptorsEXT` 和 `vkWriteResourceDescriptorsEXT` 转成描述符，跳过了需要一起创建对象。此种情况下 `sampler` 可以通过 `shader bindings` 将采样器嵌入着色器中，且只需要 `VkSamplerCreateInfo` 而不需要创建采样器对象。
 
-图片用于描述符也可以跳过 `Image View` 创建，但在使用 `Render Pass` 时 `Image View` 还是需要创建。
+与之类似的，图片用于描述符也可以跳过 `Image View` 创建，但在使用 `Render Pass` 时 `Image View` 还是需要创建。
 
 ## 描述符管理，通过描述符堆
 
