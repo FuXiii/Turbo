@@ -4,6 +4,11 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/3/3
+
+>* `docs/Design` 下更新 `Pipeline.md`。
+>* `docs/Design` 下新增 `RenderPass.md` 用于研究 `RenderPass`。
+
 ## 2026/3/2
 
 >* `docs/Design` 下更新 `LegacyAndSupersededFunctionality.md` 用于研究 `Vulkan` 被遗弃的特性。
