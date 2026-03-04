@@ -919,3 +919,27 @@ typedef enum VkDynamicState {
 在某些情况下 `动态渲染` 并不能很好的完成需求，这需要 `RenderPass` 和 `动态渲染` 一起使用，用于满足不同的渲染需求。
 
 而 `Echo` 需要屏蔽这种差异，提供统一的抽象结构，在底层根据情况确认是使用 `RenderPass` 还是 `动态渲染` 进行渲染。
+
+## API
+
+```CXX
+class Pipeline: public Object//虚基类
+{};
+
+class ComputePipeline: public Pipeline//虚基类
+{}；
+
+class GraphicBasePipelie: public Pipeline//图形管线虚基类
+{};
+
+class GraphicPipelie: public GraphicBasePipelie//图形管线类
+{};
+
+class RenderingPipelie: public GraphicBasePipelie//动态渲染管线类
+{};
+
+
+
+
+
+```

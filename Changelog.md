@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/3/4
+
+>* `docs/Design` 下更新 `RenderPass.md` 用于研究 `RenderPass`。
+
 ## 2026/3/3
 
 >* `docs/Design` 下更新 `Pipeline.md`。
