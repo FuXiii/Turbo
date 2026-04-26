@@ -4,6 +4,14 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/4/26
+
+>* `docs` 下更新 `platform/OpenHarmony.md` 用于研究 `鸿蒙` 系统适配。
+
+## 2026/4/25
+
+>* `docs` 下更新 `platform/OpenHarmony.md` 用于研究 `鸿蒙` 系统适配。
+
 ## 2026/3/4
 
 >* `docs/Design` 下更新 `RenderPass.md` 用于研究 `RenderPass`。

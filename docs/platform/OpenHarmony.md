@@ -85,7 +85,300 @@ DispatchTouchEvent DispatchTouchEvent;
 
 * napi_define_properties 用于 `Native` 向 `鸿蒙` 注册指定回调接口。声明在 <napi/native_api.h> 中，位于 libace_napi.z.so 库中。
 
-
 ## 鸿蒙窗口
 
 对于管理和维护用于显示渲染结果的 `鸿蒙窗口` 有多种[开发方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-xcomponent-guidelines)可选
+
+## 鸿蒙 API 19
+
+从 `API 8` 开始，开发者可以通过基于 `OH_NativeXComponent` 实例相关的接口进行 `XComponent` 组件 `Surface` 的生命周期监听，在 `API 19` 版本中推荐使用新的 `OH_ArkUI_SurfaceHolder` 管理，其提供了更加安全，丰富的交互与管理。
+
+> 最终目的是获取 `OHNativeWindow* VkSurfaceCreateInfoOHOS::window`
+
+可通过 `OH_NativeXComponent_Callback` 接口获取 `OHNativeWindow`
+
+`XComponent(value: {id: string, type: string, libraryname?: string, controller?: XComponentController}) //从 API 8 开始支持，从 API 12 开始废弃`
+
+建议使用：
+
+`XComponent(value: {id: string, type: XComponentType, libraryname?: string, controller?: XComponentController}) //从 API 10 开始支持，从 API 12 开始不再演进`
+
+建议使用：
+
+`XComponent(options: XComponentOptions) //从 API 12 开始支持`
+
+参数相较于之前版本最主要的区别是去掉了 `id` 和 `libraryname` 参数，增加 `imageAIOptions` 参数。
+
+`XComponent(params: NativeXComponentParameters) //从 API 19 开始支持`
+
+参数相较于之前版本最主要的区别是只有 `type` 和 `imageAIOptions` 参数。
+
+`OH_ArkUI_SurfaceHolder` 从 `API 19` 开始支持。
+
+### Surface 生命周期管理
+
+#### 使用 `XComponentController` 管理 `Surface` 生命周期场景
+
+该场景在 `ArkTS` 侧的 `XComponentController` 获取 `SurfaceId` ，生命周期回调、触摸、鼠标、按键等事件回调等均在 `ArkTS` 侧触发。
+
+适用于视频播放、相机预览等媒体播放类场景，该场景需要在ArkTS侧获取SurfaceId，并将SurfaceId传入对应接口。
+
+* 基于 `ArkTS` 侧获取的 `SurfaceId` ，在 `Native` 侧调用 `OH_NativeWindow_CreateNativeWindowFromSurfaceId` 接口创建出 `NativeWindow` 实例。
+* 利用 `NativeWindow` 和 `EGL` 接口开发自定义绘制内容以及申请和提交 `Buffer` 到图形队列。
+* `ArkTS` 侧获取生命周期、事件等信息传递到 `Native` 侧处理。
+
+核心的思路是自定义 `XComponentController` 派生类，实现自己的 `Surface` 生命周期回调，并在对应的回调中通知 `C/C++` 层：
+
+```TS
+// 重写XComponentController，设置生命周期回调
+class MyXComponentController extends XComponentController {
+    onSurfaceCreated(surfaceId: string): void {
+        console.info(`onSurfaceCreated surfaceId: ${surfaceId}`)
+        nativeRender.SetSurfaceId(BigInt(surfaceId));
+    }
+
+    onSurfaceChanged(surfaceId: string, rect: SurfaceRect): void {
+        console.info(`onSurfaceChanged surfaceId: ${surfaceId}, rect: ${JSON.stringify(rect)}}`)
+        // 在onSurfaceChanged中调用ChangeSurface绘制内容
+        nativeRender.ChangeSurface(BigInt(surfaceId), rect.surfaceWidth, rect.surfaceHeight)
+    }
+
+    onSurfaceDestroyed(surfaceId: string): void {
+        console.info(`onSurfaceDestroyed surfaceId: ${surfaceId}`)
+        nativeRender.DestroySurface(BigInt(surfaceId))
+    }
+}
+
+@Entry
+@Component
+struct Index {
+    xComponentController: XComponentController = new MyXComponentController();
+
+    build() {
+        Column() {
+            XComponent({
+                type: XComponentType.SURFACE,
+                controller: this.xComponentController //NOTE: 指定自定义控制器
+            })
+        }
+    }
+}
+```
+
+对于 `Native` 层相关的核心代码如下：
+
+```CXX
+// 解析从ArkTS侧传入的surfaceId，此处surfaceId是一个64位int值
+int64_t ParseId(napi_env env, napi_callback_info info) {
+    if ((env == nullptr) || (info == nullptr)) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "ParseId", "env or info is null");
+        return -1;
+    }
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    if (napi_ok != napi_get_cb_info(env, info, &argc, args, nullptr, nullptr)) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "ParseId", "GetContext napi_get_cb_info failed");
+        return -1;
+    }
+    int64_t value = 0;
+    bool lossless = true;
+    if (napi_ok != napi_get_value_bigint_int64(env, args[0], &value, &lossless)) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "ParseId", "Get value failed");
+        return -1;
+    }
+    return value;
+}
+
+// 设置SurfaceId，基于SurfaceId完成对NativeWindow的初始化
+napi_value PluginManager::SetSurfaceId(napi_env env, napi_callback_info info) {
+    int64_t surfaceId = ParseId(env, info);
+    OHNativeWindow *nativeWindow;
+    PluginRender *pluginRender;
+    if (windowMap_.find(surfaceId) == windowMap_.end()) {//查看是否已经存在创建的 OHNativeWindow，没有则新建一个
+        OH_NativeWindow_CreateNativeWindowFromSurfaceId(surfaceId, &nativeWindow);//新建 OHNativeWindow
+        windowMap_[surfaceId] = nativeWindow;
+    } else {
+        return nullptr;
+    }
+    if (pluginRenderMap_.find(surfaceId) == pluginRenderMap_.end()) {//查看是否已经存在对应的渲染器，没有则新建一个
+        pluginRender = new PluginRender(surfaceId);
+        pluginRenderMap_[surfaceId] = pluginRender;
+    }
+    pluginRender->InitNativeWindow(nativeWindow);//根据 OHNativeWindow 初始化渲染器（本人意见：该函数调用应该放到上面 if 块中，创建后初始化一次）
+    return nullptr;
+}
+
+// 根据传入的surfaceId、width、height实现Surface大小的变动
+napi_value PluginManager::ChangeSurface(napi_env env, napi_callback_info info) {
+    if ((env == nullptr) || (info == nullptr)) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager",
+                     "ChangeSurface: OnLoad env or info is null");
+        return nullptr;
+    }
+    int64_t surfaceId = 0;
+    size_t argc = 3;
+    napi_value args[3] = {nullptr};
+
+    if (napi_ok != napi_get_cb_info(env, info, &argc, args, nullptr, nullptr)) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager",
+                     "ChangeSurface: GetContext napi_get_cb_info failed");
+        return nullptr;
+    }
+    bool lossless = true;
+    int index = 0;
+    if (napi_ok != napi_get_value_bigint_int64(env, args[index++], &surfaceId, &lossless)) {//获取 surfaceId
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "ChangeSurface: Get value failed");
+        return nullptr;
+    }
+    double width;
+    if (napi_ok != napi_get_value_double(env, args[index++], &width)) {//获取 width
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "ChangeSurface: Get width failed");
+        return nullptr;
+    }
+    double height;
+    if (napi_ok != napi_get_value_double(env, args[index++], &height)) {//获取 height
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "ChangeSurface: Get height failed");
+        return nullptr;
+    }
+    auto pluginRender = GetPluginRender(surfaceId);//根据 surfaceId 获取对应 渲染器
+    if (pluginRender == nullptr) {
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "ChangeSurface: Get pluginRender failed");
+        return nullptr;
+    }
+    pluginRender->UpdateNativeWindowSize(width, height);//通知渲染器画面大小发生变化
+    return nullptr;
+}
+
+// 销毁Surface
+napi_value PluginManager::DestroySurface(napi_env env, napi_callback_info info) {
+    int64_t surfaceId = ParseId(env, info);
+    auto pluginRenderMapIter = pluginRenderMap_.find(surfaceId);
+    if (pluginRenderMapIter != pluginRenderMap_.end()) {//如果找到已存在对应的渲染器，销毁并移除
+        delete pluginRenderMapIter->second;
+        pluginRenderMap_.erase(pluginRenderMapIter);
+    }
+    auto windowMapIter = windowMap_.find(surfaceId);
+    if (windowMapIter != windowMap_.end()) {//如果找到已存在对应的 OHNativeWindow，销毁并移除
+        OH_NativeWindow_DestroyNativeWindow(windowMapIter->second);
+        windowMap_.erase(windowMapIter);
+    }
+    return nullptr;
+}
+```
+
+#### 使用 `OH_ArkUI_SurfaceHolder` 管理 `Surface` 生命周期场景
+
+该场景根据 `XComponent` 组件对应的 `ArkUI_NodeHandle` 创建 `OH_ArkUI_SurfaceHolder` ，生命周期回调、触摸等事件回调、无障碍和可变帧率回调等均在 `Native` 侧触发。
+
+适用于如下场景：
+
+1. 有较复杂的交互逻辑、对频繁跨语言调用导致性能损耗敏感的场景。
+2. 希望能控制 `Surface` 生命周期触发时机的场景。
+
+> XComponent -> ArkUI_NodeHandle -> OH_ArkUI_SurfaceHolder -> 注册Surface生命周期
+
+与使用 `XComponentController` 管理 `Surface` 生命周期场景不同，本场景允许应用根据 `XComponent` 组件对应的 `ArkUI_NodeHandle` 中创建 `OH_ArkUI_SurfaceHolder` ，并通过 `OH_ArkUI_SurfaceHolder` 上的相关接口注册 `Surface` 生命周期，`XComponent` 组件相关的无障碍、可变帧率等能力也可根据 `ArkUI_NodeHandle` 通过相关接口来实现。同时，`XComponent` 组件上的基础/手势事件也可通过 `ArkUI_NodeHandle` 对象使用 `ArkUI NDK` 接口来监听。
+
+* 在 `ArkTS` 侧创建的 `XComponent` 组件可以将其对应的 `FrameNode` 节点传递到 `Native` 侧以获取 `ArkUI_NodeHandle` ，或者在 `Native` 侧直接创建 `XComponent` 组件对应的 `ArkUI_NodeHandle` ，然后调用 `OH_ArkUI_SurfaceHolder_Create` 接口创建 `OH_ArkUI_SurfaceHolder` 实例。
+* 基于 `OH_ArkUI_SurfaceHolder` 实例注册相应的生命周期回调、事件回调，获取 `NativeWindow` 实例。
+* 利用 `NativeWindow` 和 `EGL` 接口开发自定义绘制内容以及申请和提交 `Buffer` 到图形队列。
+
+`FrameNode` 表示组件树的实体节点。
+
+```TS
+import native from 'libnativerender.so';
+
+@Entry
+@Component
+struct Index {
+    xcomponentId: string = 'xcp' + (new Date().getTime());
+
+    build() {
+        Column() {
+            XComponent({
+                type: XComponentType.SURFACE
+            })
+            .id(this.xcomponentId)//自定义一个id
+            .onAttach(() => {//组件挂载到组件树时触发此回调
+                let node = this.getUIContext().getFrameNodeById(this.xcomponentId)//通过 id 获取组件的 FrameNode，getFrameNodeById 通过遍历查询对应 id 的节点，性能较差。推荐使用 getAttachedFrameNodeById。
+                native.bindNode(this.xcomponentId, node)//将获取到的 FrameNode 传递给 Native 层，进行绑定。
+            })
+            .onDetach(() => {
+                native.unbindNode(this.xcomponentId)//解绑
+            })
+            .focusable(true)
+            .focusOnTouch(true)
+            .defaultFocus(true)
+        }
+    }
+}
+```
+
+对于 `Native` 层相关的核心代码如下：
+
+```CXX
+std::unordered_map<std::string, ArkUI_NodeHandle> PluginManager::nodeHandleMap_;
+std::unordered_map<void *, EGLRender *> PluginManager::renderMap_;
+std::unordered_map<void *, OH_ArkUI_SurfaceCallback *> PluginManager::callbackMap_;
+std::unordered_map<void *, OH_ArkUI_SurfaceHolder *> PluginManager::surfaceHolderMap_;
+
+//获取 Native 侧对应函数接口
+ArkUI_NativeNodeAPI_1 *nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1 *>(OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));//获取 ArkUI 提供的 Native 侧 Node 类型接口集合
+
+std::string value2String(napi_env env, napi_value value) { // 将napi_value转化为string类型的变量
+    size_t stringSize = 0;
+    napi_get_value_string_utf8(env, value, nullptr, 0, &stringSize);
+    std::string valueString;
+    valueString.resize(stringSize);
+    napi_get_value_string_utf8(env, value, &valueString[0], stringSize + 1, &stringSize);
+    return valueString;
+}
+
+napi_value PluginManager::BindNode(napi_env env, napi_callback_info info) {
+    size_t argc = 2;
+    napi_value args[2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    std::string nodeId = value2String(env, args[0]);//获取自定义的 XComponent 的 id
+
+    ArkUI_NodeHandle handle;
+    OH_ArkUI_GetNodeHandleFromNapiValue(env, args[1], &handle); // 获取nodeHandle, ArkUI 侧传入的 FrameNode
+
+    OH_ArkUI_SurfaceHolder *holder = OH_ArkUI_SurfaceHolder_Create(handle); // 获取SurfaceHolder
+    nodeHandleMap_[nodeId] = handle;
+    surfaceHolderMap_[handle] = holder;
+
+    auto callback = OH_ArkUI_SurfaceCallback_Create(); // 创建SurfaceCallback
+    callbackMap_[holder] = callback;
+    OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent(callback, OnSurfaceCreated); // 注册OnSurfaceCreated回调
+    OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(callback, OnSurfaceChanged); // 注册OnSurfaceChanged回调
+    OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(callback, OnSurfaceDestroyed); // 注册OnSurfaceDestroyed回调
+    OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent(callback, OnSurfaceShow); // 注册OnSurfaceShow回调
+    OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(callback, OnSurfaceHide); // 注册OnSurfaceHide回调
+    OH_ArkUI_XComponent_RegisterOnFrameCallback(handle, OnFrameCallback); // 注册OnFrameCallback回调
+
+    OH_ArkUI_SurfaceHolder_AddSurfaceCallback(holder, callback); // 注册SurfaceCallback回调
+
+    if (!nodeAPI->addNodeEventReceiver(handle, onEvent)) { // 添加事件监听，返回成功码 0 （该函数添加的监听回调函数触发时机会先于registerNodeEventReceiver注册的全局回调函数。）
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "addNodeEventReceiver error");
+    }
+    if (!nodeAPI->registerNodeEvent(handle, NODE_TOUCH_EVENT, 0, nullptr)) { // 用C接口注册touch事件，返回成功码 0 （这样之前 addNodeEventReceiver 注册的 onEvent 将会在 NODE_TOUCH_EVENT 事件发生时进行回调）
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "registerTouchEvent error");
+    }
+    provider_ = OH_ArkUI_AccessibilityProvider_Create(handle); // 创建一个ArkUI_AccessibilityProvider类型的对象（用于无障碍功能）
+    /**
+    * 获取ArkUI_AccessibilityProvider后，如果注册无障碍回调函数请参考：
+    * https://gitcode.com/openharmony/docs/blob/OpenHarmony-5.1.0-Release/zh-cn/application-dev/ui/ndk-accessibility-xcomponent.md
+    * **/
+    return nullptr;
+}
+
+```
+
+#### 使用 `NativeXComponent` 管理 `Surface` 生命周期场景
+
+该场景在 `native` 层获取 `Native XComponent` 实例，在 `Native` 侧注册 `XComponent` 的生命周期回调，以及触摸、鼠标、按键等事件回调。
+
+与使用 `OH_ArkUI_SurfaceHolder` 管理 `Surface` 生命周期场景类似，但交互事件接口不够丰富，且使用不当容易出现稳定性问题，建议使用 `OH_ArkUI_SurfaceHolder` 的接口。
+
+#### 根据推荐方式使用 `OH_ArkUI_SurfaceHolder` 管理 `Surface` 生命周期场景
