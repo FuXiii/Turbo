@@ -373,6 +373,117 @@ napi_value PluginManager::BindNode(napi_env env, napi_callback_info info) {
     return nullptr;
 }
 
+napi_value PluginManager::UnbindNode(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    std::string nodeId = value2String(env, args[0]);
+    auto node = nodeHandleMap_[nodeId];
+    OH_ArkUI_XComponent_UnregisterOnFrameCallback(node); // 解注册帧回调
+    OH_ArkUI_AccessibilityProvider_Dispose(provider_); // 销毁ArkUI_AccessibilityProvider
+    nodeAPI->disposeNode(node); // 销毁nodeHandle
+    nodeHandleMap_.erase(nodeId);
+    return nullptr;
+}
+
+napi_value PluginManager::SetFrameRate(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value args[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    std::string nodeId = value2String(env, args[0]);
+    auto node = nodeHandleMap_[nodeId];
+    
+    int32_t min = 0;
+    napi_get_value_int32( env, args[1], &min);
+
+    int32_t max = 0;
+    napi_get_value_int32(env, args[2], &max);
+
+    int32_t expected = 0;
+    napi_get_value_int32(env, args[3], &expected);
+    OH_NativeXComponent_ExpectedRateRange range = {
+        .min = min,
+        .max = max,
+        .expected = expected
+    };
+    OH_ArkUI_XComponent_SetExpectedFrameRateRange(node, range); // 设置期望帧率
+    return nullptr;
+}
+
+napi_value PluginManager::SetNeedSoftKeyboard(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    napi_value args[2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    std::string nodeId = value2String(env, args[0]);
+    auto node = nodeHandleMap_[nodeId];
+    
+    bool needSoftKeyboard = false;
+    napi_get_value_bool( env, args[1], &needSoftKeyboard);
+    OH_ArkUI_XComponent_SetNeedSoftKeyboard(node, needSoftKeyboard); // 设置是否需要软键盘
+    return nullptr;
+}
+```
+
+定义 `Surface` 创建成功，发生改变，销毁和事件，可变帧率回调接口。
+
+```CXX
+void OnSurfaceCreated(OH_ArkUI_SurfaceHolder *holder) {
+    auto window = OH_ArkUI_XComponent_GetNativeWindow(holder); // 获取native window
+    auto render = new EGLRender();//创建自己的渲染器
+    PluginManager::renderMap_[holder] = render;
+    render->SetUpEGLContext(window);//将 NativeWindow 传递给自定义渲染器
+}
+
+void OnSurfaceChanged(OH_ArkUI_SurfaceHolder *holder, uint64_t width, uint64_t height) {
+    if (PluginManager::renderMap_.count(holder)) {//判断 holder 是否存在。返回拥有与指定实参 key 比较相等的键的元素数，因为此容器不允许重复故为 1 或 0。
+        auto render = PluginManager::renderMap_[holder];
+        render->SetEGLWindowSize(width, height); // 设置绘制区域大小
+        render->DrawStar(true); // 绘制五角星
+    }
+}
+
+void OnSurfaceDestroyed(OH_ArkUI_SurfaceHolder *holder) {
+    OH_LOG_Print(LOG_APP, LOG_ERROR, 0xff00, "onBind", "on destroyed");
+    if (PluginManager::renderMap_.count(holder)) { // 销毁render对象
+        auto render = PluginManager::renderMap_[holder];
+        delete render;
+        PluginManager::renderMap_.erase(holder);
+    }
+    if (PluginManager::callbackMap_.count(holder)) {
+        auto callback = PluginManager::callbackMap_[holder];
+        OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback(holder, callback); // 移除SurfaceCallback
+        OH_ArkUI_SurfaceCallback_Dispose(callback); // 销毁surfaceCallback
+        PluginManager::callbackMap_.erase(holder);
+    }
+    OH_ArkUI_SurfaceHolder_Dispose(holder); // 销毁surfaceHolder
+}
+
+void OnSurfaceShow(OH_ArkUI_SurfaceHolder* holder)
+{
+    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "on surface show");
+}
+
+void OnSurfaceHide(OH_ArkUI_SurfaceHolder* holder)
+{
+    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "on surface hide");
+}
+
+void onEvent(ArkUI_NodeEvent *event) {
+    auto eventType = OH_ArkUI_NodeEvent_GetEventType(event); // 获取组件事件类型
+    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "on event");
+    if (eventType == NODE_TOUCH_EVENT) {
+        ArkUI_NodeHandle handle = OH_ArkUI_NodeEvent_GetNodeHandle(event); // 获取触发该事件的组件对象
+        auto holder = PluginManager::surfaceHolderMap_[handle];
+        if (PluginManager::renderMap_.count(holder)) {
+            auto render = PluginManager::renderMap_[holder];
+            render->DrawStar(false); // 绘制五角星  
+        }
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "on touch");
+    }
+}
 ```
 
 #### 使用 `NativeXComponent` 管理 `Surface` 生命周期场景
