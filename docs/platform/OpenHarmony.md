@@ -89,7 +89,92 @@ DispatchTouchEvent DispatchTouchEvent;
 
 对于管理和维护用于显示渲染结果的 `鸿蒙窗口` 有多种[开发方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-xcomponent-guidelines)可选
 
-## 鸿蒙 API 19
+## 鸿蒙 API 9 (HarmonyOS 3.1/4.0)
+
+```TS
+XComponent(value: {id: string, type: string, libraryname?: string, controller?: XComponentController})
+```
+
+> 注：该函数在高版本的鸿蒙中已被弃用
+
+* 其中 `type` 使用 `surface`
+* 其中 `libraryname` 必须与在 `native` 侧 `Napi` 模块注册时 `nm_modname` 的名字一致
+
+```TS
+XComponent({ id: 'xcomponentId1', type: 'surface', libraryname: 'nativerender' })
+  .onLoad((context) => {})
+  .onDestroy(() => {})
+```
+
+在 `Native` 侧：
+
+* 每一个模块对应一个 `so` 。
+* `so` 的命名规则为 `lib{模块名}.so` 。
+
+```CXX
+static napi_value Init(napi_env env, napi_value exports)
+{
+    // 定义暴露在模块上的方法
+    napi_property_descriptor desc[] ={
+        DECLARE_NAPI_FUNCTION("changeColor", PluginRender::NapiChangeColor),
+    };
+    // 通过此接口开发者可在exports上挂载native方法（即上面的PluginRender::NapiChangeColor），exports会通过js引擎绑定到js层的一个js对象
+    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    return exports;
+}
+
+static napi_module nativerenderModule = {
+    .nm_version = 1,
+    .nm_flags = 0,
+    .nm_filename = nullptr,
+    .nm_register_func = Init, // 指定加载对应模块时的回调函数
+    .nm_modname = "nativerender", // 指定模块名称，对于XComponent相关开发，这个名称必须和ArkTS侧XComponent中libraryname的值保持一致
+    .nm_priv = ((void*)0),
+    .reserved = { 0 },
+};
+
+extern "C" __attribute__((constructor)) void RegisterModule(void)
+{
+    // 注册so模块
+    napi_module_register(&nativerenderModule);
+}
+```
+
+在模块被加载时的回调内（`Init(napi_env, napi_value)`）解析获得NativeXComponent实例：
+
+```CXX
+{
+    // ...
+    napi_status status;
+    napi_value exportInstance = nullptr;
+    OH_NativeXComponent *nativeXComponent = nullptr;
+    // 用来解析出被wrap了NativeXComponent指针的属性
+    status = napi_get_named_property(env, exports, OH_NATIVE_XCOMPONENT_OBJ, &exportInstance);
+    if (status != napi_ok) {
+        return false;
+    }
+    // 通过napi_unwrap接口，解析出NativeXComponent的实例指针
+    status = napi_unwrap(env, exportInstance, reinterpret_cast<void**>(&nativeXComponent));
+    // ...
+}
+```
+
+获得 `NativeXComponent` 指针后（`OH_NativeXComponent`），通过 `OH_NativeXComponent_RegisterCallback` 接口进行回调注册：
+
+```CXX
+  OH_NativeXComponent *nativeXComponent = nullptr;
+    // 解析出NativeXComponent实例
+
+    OH_NativeXComponent_Callback callback;
+    callback->OnSurfaceCreated = OnSurfaceCreatedCB; // surface创建成功后触发，开发者可以从中获取native window的句柄
+    callback->OnSurfaceChanged = OnSurfaceChangedCB; // surface发生变化后触发，开发者可以从中获取native window的句柄以及XComponent的变更信息
+    callback->OnSurfaceDestroyed = OnSurfaceDestroyedCB; // surface销毁时触发，开发者可以在此释放资源
+    callback->DispatchTouchEvent = DispatchTouchEventCB; // XComponent的touch事件回调接口，开发者可以从中获得此次touch事件的信息
+
+    OH_NativeXComponent_RegisterCallback(nativeXComponent, callback);
+```
+
+## 鸿蒙 API 19 (HarmonyOS 5.1.1)
 
 从 `API 8` 开始，开发者可以通过基于 `OH_NativeXComponent` 实例相关的接口进行 `XComponent` 组件 `Surface` 的生命周期监听，在 `API 19` 版本中推荐使用新的 `OH_ArkUI_SurfaceHolder` 管理，其提供了更加安全，丰富的交互与管理。
 
@@ -493,3 +578,79 @@ void onEvent(ArkUI_NodeEvent *event) {
 与使用 `OH_ArkUI_SurfaceHolder` 管理 `Surface` 生命周期场景类似，但交互事件接口不够丰富，且使用不当容易出现稳定性问题，建议使用 `OH_ArkUI_SurfaceHolder` 的接口。
 
 #### 根据推荐方式使用 `OH_ArkUI_SurfaceHolder` 管理 `Surface` 生命周期场景
+
+## 每帧回调
+
+### `VSync` (从 `API 9` 开始)
+
+```CXX
+#include <native_vsync/native_vsync.h>
+```
+
+首先需要定义一个 `VSyn` `C`回调函数
+
+```CXX
+void RenderEngine::OnVsync(long long timestamp, void *data)
+{
+    OH_LOG_Print(LOG_APP, LOG_DEBUG, LOG_PRINT_DOMAIN, "RenderEngine", "OnVsync %{public}lld.", timestamp);
+    auto renderEngine = reinterpret_cast<RenderEngine *>(data);
+    if (renderEngine == nullptr) {
+        return;
+    }
+
+    renderEngine->vSyncCnt_++;
+    renderEngine->wakeUpCond_.notify_one();
+}
+```
+
+创建 `OH_NativeVSync` 实例
+
+```CXX
+const char* demoName = "NativeImageSample";
+nativeVsync_ = OH_NativeVSync_Create(demoName, strlen(demoName));
+```
+
+通过 `OH_NativeVSync` 实例设置 `VSync` 回调函数。
+
+```CXX
+wakeUpCond_.wait(lock, [this]() { return wakeUp_ || vSyncCnt_ > 0; });
+wakeUp_ = false;
+if (vSyncCnt_ > 0) {
+    vSyncCnt_--;
+    (void)OH_NativeVSync_RequestFrame(nativeVsync_, &RenderEngine::OnVsync, this);
+    OH_NativeVSync_GetPeriod(nativeVsync_, &period);
+}
+```
+
+在 `NativeVsync` 中可以创建与窗口绑定的OH_NativeVSync实例：
+
+```CXX
+OH_NativeVSync* OH_NativeVSync_Create_ForAssociatedWindow(uint64_t windowID, const char* name, unsigned int length)
+```
+
+使用本接口创建出来的 `OH_NativeVSync` 实例的实际 `vsync` 周期与系统 `vsync` 周期不完全一致，系统会根据窗口的状态对实际 `vsync` 周期进行调整。
+
+其中 `windowID` 可以通过 `OH_NativeWindow_GetSurfaceId` 接口获取。
+
+### NativeDisplaySoloist  (从 `API 12` 开始)
+
+如果开发者想在独立线程中实现帧率控制的 `Native` 侧业务，可以通过 `DisplaySoloist` 来实现，如游戏、自绘制 `UI` 框架对接等场景。
+
+开发者可以选择多个 `DisplaySoloist` 实例共享一个线程，也可以选择每个 `DisplaySoloist` 实例独占一个线程。
+
+```TS
+XComponent({
+  id: 'xcomponentId_120',
+  type: XComponentType.SURFACE,
+  libraryname: 'entry'
+})
+  .onLoad((xComponentContext) => {
+    this.xComponentContext = xComponentContext as XComponentContext;
+  }).width('640px')
+```
+
+```CXX
+#include <native_display_soloist/native_display_soloist.h>
+```
+
+> 注: 部分功能与 `XComponent` 重叠。
