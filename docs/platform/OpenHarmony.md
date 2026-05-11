@@ -625,7 +625,7 @@ if (vSyncCnt_ > 0) {
 在 `NativeVsync` 中可以创建与窗口绑定的OH_NativeVSync实例：
 
 ```CXX
-OH_NativeVSync* OH_NativeVSync_Create_ForAssociatedWindow(uint64_t windowID, const char* name, unsigned int length)
+OH_NativeVSync* OH_NativeVSync_Create_ForAssociatedWindow(uint64_t windowID, const char* name, unsigned int length)//起始版本 14
 ```
 
 使用本接口创建出来的 `OH_NativeVSync` 实例的实际 `vsync` 周期与系统 `vsync` 周期不完全一致，系统会根据窗口的状态对实际 `vsync` 周期进行调整。
