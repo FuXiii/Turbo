@@ -654,3 +654,56 @@ XComponent({
 ```
 
 > 注: 部分功能与 `XComponent` 重叠。
+
+```CXX
+char idStr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {'\0'};
+uint64_t idSize = OH_XCOMPONENT_ID_LEN_MAX + 1;
+if (OH_NativeXComponent_GetXComponentId(nativeXComponent, idStr, &idSize) != OH_NATIVEXCOMPONENT_RESULT_SUCCESS) {
+   SAMPLE_LOGE("NapiRegister: Unable to get XComponent id");
+   return nullptr;
+}
+std::string id(idStr);
+
+g_displaySync[id] = OH_DisplaySoloist_Create(true);//创建 DisplaySoloist
+
+// 设置期望帧率范围
+// 此结构体成员变量分别为帧率范围的最小值、最大值以及期望帧率
+DisplaySoloist_ExpectedRateRange range;
+if (id == "xcomponentId30") {
+   // 第一个XComponent期望帧率为30Hz
+   range = {30, 120, 30};
+}
+if (id == "xcomponentId120") {
+   // 第二个XComponent期望帧率为120Hz
+   range = {30, 120, 120};
+}
+OH_DisplaySoloist_SetExpectedFrameRateRange(nativeDisplaySoloist, &range);
+// 注册回调与使能每帧回调
+OH_DisplaySoloist_Start(nativeDisplaySoloist, TestCallback, nativeXComponent);
+
+static void TestCallback(long long timestamp, long long targetTimestamp, void *data) 
+{
+    //自定义回调内容
+}
+```
+
+销毁与结束：
+
+```CXX
+napi_value SampleXComponent::NapiUnregister(napi_env env, napi_callback_info info)
+{
+    // ...
+    // 取消注册每帧回调
+    OH_DisplaySoloist_Stop(g_displaySync[id]);
+    // ...
+}
+
+napi_value SampleXComponent::NapiDestroy(napi_env env, napi_callback_info info)
+{
+    // ...
+    // 销毁OH_DisplaySoloist实例
+    OH_DisplaySoloist_Destroy(g_displaySync[id]);
+    g_displaySync.erase(id);       
+    // ...
+}
+```

@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/5/12
+
+>* `docs` 下更新 `platform/OpenHarmony.md` 用于研究 `鸿蒙` 系统适配。
+
 ## 2026/4/30
 
 >* `docs` 下更新 `platform/OpenHarmony.md` 用于研究 `鸿蒙` 系统适配。
