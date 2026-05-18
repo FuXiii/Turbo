@@ -707,3 +707,46 @@ napi_value SampleXComponent::NapiDestroy(napi_env env, napi_callback_info info)
     // ...
 }
 ```
+
+## NDK 开发
+
+只要通过 `CMake` 开发。主要参数：
+
+```cmd
+-D OHOS_STL=c++_shared -D OHOS_ARCH=arm64-v8a -D OHOS_PLATFORM=OHOS
+```
+
+* `OHOS_STL` 设置 `C++` 标准库连接方式。可选值为 `c++_shared / c++_static` (默认为 `c++_shared` )。
+* `OHOS_ARCH` 设置目标架构。可选值为 `armeabi-v7a / arm64-v8a / x86_64` （ `arm64-v8a` 为主流同时也是默认值）。
+* `OHOS_PLATFORM` 目标平台。可选值为 `OHOS` 。
+
+通过设置 `${OHOS_SDK}/native/build/cmake/ohos.toolchain.cmake` 工具链编译：
+
+```cmd
+cmake -D OHOS_STL=c++_shared -D OHOS_ARCH=arm64-v8a -D OHOS_PLATFORM=OHOS -D CMAKE_TOOLCHAIN_FILE={ohos-sdk}/linux/native/build/cmake/ohos.toolchain.cmake ..
+cmake --build .
+```
+
+`ohos.toolchain.cmake` 内部会设置 `set(OHOS OHOS)` 变量，项目可通过该变量判断是否为 `鸿蒙` 平台。
+
+在 `Windows` 平台下还需要设置使用的生成器，官网使用的是 `Ninja` 。
+
+```cmd
+ F:\windows\native\build-tools\cmake\bin\cmake.exe -G "Ninja" -D OHOS_STL=c++_shared -D OHOS_ARCH=arm64-v8a -D OHOS_PLATFORM=OHOS -D CMAKE_TOOLCHAIN_FILE=F:\windows\native\build\cmake\ohos.toolchain.cmake ..
+```
+
+> 注：如需 `debug` 调试，增加参数 `-D CMAKE_BUILD_TYPE=Debug` 。
+
+引用已经编译好的 `鸿蒙` 平台库：
+
+```cmake
+# 比如引入 avcodec_ffmpeg 库
+add_library(library SHARED hello.cpp)
+
+add_library(avcodec_ffmpeg SHARED IMPORTED)
+set_target_properties(avcodec_ffmpeg
+    PROPERTIES
+    IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/third_party/FFmpeg/libs/${OHOS_ARCH}/libavcodec_ffmpeg.so)
+
+target_link_libraries(library PUBLIC libace_napi.z.so avcodec_ffmpeg)
+```
