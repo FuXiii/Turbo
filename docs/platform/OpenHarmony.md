@@ -750,3 +750,233 @@ set_target_properties(avcodec_ffmpeg
 
 target_link_libraries(library PUBLIC libace_napi.z.so avcodec_ffmpeg)
 ```
+
+### sysroot
+
+使用 `ohos.toolchain.cmake` 内部默认配置的是 `${OHOS_SDK_NATIVE}/sysroot` 。
+
+### 选择编译器
+
+使用 `ohos.toolchain.cmake` 内部默认配置的是 `${OHOS_SDK_NATIVE}/llvm/bin/clang` 和 `clang++` 。鸿蒙自己的编译器：毕昇，如果使用毕昇编译的话，最简单的方法就是将：
+
+1. `${OHOS_SDK_NATIVE}/llvm` 的 `llvm` 重命名一个名字，比如 `llvm-bak`
+2. 将 `xxx/sdk/default/hms/native/BiSheng` 的 `BiSheng` 文件夹拷贝到 `${OHOS_SDK_NATIVE}` 文件夹下
+3. 将拷贝的文件夹重命名为 `llvm`
+
+说白了就是:将 `llvm` 下的内容替换为 `BiSheng` 的内容，这样使用默认的 `llvm` 时，起始使用的是毕昇编译器。
+
+毕昇编译的程序有优化提升，并有 `IClang` 等编译优化手段。
+
+### 已知C++兼容性问题
+
+应用启动或 `dlopen` 时，`hilog` 报错 `symbol not found, s=__emutls_get_address`。原因是 `API9` 及之前版本的 `libc++_shared.so`无此符号，而 `API11` 之后版本的 `libc++_shared.so` 有此符号。解决方法是更新应用或HAR包的SDK版本。
+
+### Node-API 交互
+
+1. `初始化阶段`：当`ArkTS`侧在`import`一个`Native`模块时，`ArkTS`引擎会调用 `ModuleManager` 加载模块对应的 `so` 及其依赖。首次加载时会触发模块的注册，将模块定义的方法属性挂载到 `exports` 对象上并返回该对象。
+
+2. `调用阶段`：当 `ArkTS` 侧通过上述 `import` 返回的对象调用方法时，`ArkTS` 引擎会找到并调用对应的 `C/C++` 方法。
+
+* `ArkTS` 侧：实现 `C++` 方法的调用，通过 `import` 所需的 `so` 库后，可以调用 `C++` 方法。
+* `Native` 侧：`.cpp` 文件，实现模块的注册。需要提供注册 `lib` 库的名称，并在注册回调方法中定义接口的映射关系，即 `Native` 方法及对应的 `JS/ArkTS` 接口名称等。
+
+#### 设置模块注册信息
+
+`ArkTS` 侧 `import native` 模块时，会加载其对应的 `so` 。加载 `so` 时，首先会调用 `napi_module_register` 方法，将模块注册到系统中，并调用模块初始化函数。
+
+`napi_module` 有两个关键属性：
+
+1. `.nm_register_func` 定义模块初始化函数。
+2. `.nm_modname` 定义模块的名称，也就是 `ArkTS` 侧引入的 `so` 库的名称，模块系统会根据此名称来区分不同的 `so` 。
+
+> 注：注册代码写在 `Native` 项目更目录下的 `napi_init.cpp` 中。
+
+```CXX
+// entry/src/main/cpp/napi_init.cpp
+
+// 准备模块加载相关信息，将上述Init函数与本模块名等信息记录下来。
+static napi_module demoModule = {
+    .nm_version = 1,
+    .nm_flags = 0,
+    .nm_filename = nullptr,
+    .nm_register_func = Init,
+    .nm_modname = "entry",
+    .nm_priv = ((void*)0),
+    .reserved = {0},
+};
+
+// 加载so时，该函数会自动被调用，将上述demoModule模块注册到系统中。
+extern "C" __attribute__((constructor)) void RegisterDemoModule() {
+    napi_module_register(&demoModule);
+}
+```
+
+>注：以上代码无须复制，创建 `Native C++` 工程以后在 `napi_init.cpp` 代码中已配置好。
+
+#### 模块初始化
+
+实现 `ArkTS` 接口与 `C++` 接口的绑定和映射。
+
+> 注：注册代码写在 `Native` 项目更目录下的 `napi_init.cpp` 中。
+
+```CXX
+// entry/src/main/cpp/napi_init.cpp
+EXTERN_C_START
+// 模块初始化
+static napi_value Init(napi_env env, napi_value exports) {
+    // ArkTS接口与C++接口的绑定和映射
+    napi_property_descriptor desc[] = {
+        // 注：仅需复制以下两行代码，Init在完成创建Native C++工程以后在napi_init.cpp中已配置好。
+        {"callNative", nullptr, CallNative, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"nativeCallArkTS", nullptr, NativeCallArkTS, nullptr, nullptr, nullptr, napi_default, nullptr}
+    };
+    // 在exports对象上挂载CallNative/NativeCallArkTS两个Native方法
+    napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
+    return exports;
+}
+EXTERN_C_END
+```
+
+在 `index.d.ts` 文件中，提供 `JS` 侧的接口方法。
+
+```ts
+// entry/src/main/cpp/types/libentry/index.d.ts
+export const callNative: (a: number, b: number) => number;
+export const nativeCallArkTS: (cb: (a: number) => number) => number;
+```
+
+在 `oh-package.json5` 文件中将 `index.d.ts` 与 `cpp` 文件关联起来。
+
+```json
+// entry/src/main/cpp/types/libentry/oh-package.json5
+{
+  "name": "libentry.so",
+  "types": "./index.d.ts",
+  "version": "",
+  "description": "Please describe the basic information."
+}
+```
+
+在 `CMakeLists.txt` 文件中配置 `CMake` 打包参数。
+
+```cmake
+# entry/src/main/cpp/CMakeLists.txt
+cmake_minimum_required(VERSION 3.4.1)
+project(MyApplication2)
+
+set(NATIVERENDER_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+include_directories(${NATIVERENDER_ROOT_PATH}
+                    ${NATIVERENDER_ROOT_PATH}/include)
+
+# 添加名为entry的库
+add_library(entry SHARED napi_init.cpp)
+# 构建此可执行文件需要链接的库
+target_link_libraries(entry PUBLIC libace_napi.z.so)
+```
+
+实现 `Native` 侧的 `CallNative` 以及 `NativeCallArkTS` 接口。具体代码如下：
+
+```CXX
+// entry/src/main/cpp/napi_init.cpp
+static napi_value CallNative(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    // 声明参数数组
+    napi_value args[2] = {nullptr};
+
+    // 获取传入的参数并依次放入参数数组中
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // 依次获取参数
+    double value0;
+    napi_get_value_double(env, args[0], &value0);
+    double value1;
+    napi_get_value_double(env, args[1], &value1);
+
+    // 返回两数相加的结果
+    napi_value sum;
+    napi_create_double(env, value0 + value1, &sum);
+    return sum;
+}
+
+static napi_value NativeCallArkTS(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    // 声明参数数组
+    napi_value args[1] = {nullptr};
+
+    // 获取传入的参数并依次放入参数数组中
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // 创建一个int，作为ArkTS的入参
+    napi_value argv = nullptr;
+    napi_create_int32(env, 2, &argv);
+
+    // 调用传入的callback，并将其结果返回
+    napi_value result = nullptr;
+    napi_call_function(env, nullptr, args[0], 1, &argv, &result);
+    return result;
+}
+```
+
+#### ArkTS侧调用C/C++方法实现
+
+`ArkTS` 侧通过 `import` 引入 `Native` 侧包含处理逻辑的 `so` 来使用 `C/C++` 的方法。
+
+```ts
+
+// entry/src/main/ets/pages/Index.ets
+// 通过import的方式，引入Native能力。
+import nativeModule from 'libentry.so'
+
+@Entry
+@Component
+struct Index {
+  @State message: string = 'Test Node-API callNative result: ';
+  @State message2: string = 'Test Node-API nativeCallArkTS result: ';
+  build() {
+    Row() {
+      Column() {
+        // 第一个按钮，调用callNative方法，对应到Native侧的CallNative方法，进行两数相加。
+        Text(this.message)
+          .fontSize(50)
+          .fontWeight(FontWeight.Bold)
+          .onClick(() => {
+            this.message += nativeModule.callNative(2, 3);
+            })
+        // 第二个按钮，调用nativeCallArkTS方法，对应到Native的NativeCallArkTS，在Native调用ArkTS function。
+        Text(this.message2)
+          .fontSize(50)
+          .fontWeight(FontWeight.Bold)
+          .onClick(() => {
+            this.message2 += nativeModule.nativeCallArkTS((a: number)=> {
+                return a * 2;
+            });
+          })
+      }
+      .width('100%')
+    }
+    .height('100%')
+  }
+}
+```
+
+### Node-API的约束限制
+
+#### `SO` 命名规则
+
+导入使用的模块名和注册时的模块名大小写保持一致，如模块名为 `entry` ，则 `so` 的名字为 `libentry.so` ，`napi_module` 中 `nm_modname` 字段应为 `entry` ， `ArkTS` 侧使用时写作：`import xxx from 'libentry.so'` 。
+
+#### 注册建议
+
+* `nm_register_func` 对应的函数（如上述 `Init` 函数）需要加上 `static` ，防止与其他 `so` 里的符号冲突。
+* 模块注册的入口，即使用 `__attribute__((constructor))` 修饰的函数的函数名（如上述 `RegisterDemoModule` 函数）需要确保不与其它模块重复。
+
+#### 多线程限制
+
+每个引擎实例对应一个 `ArkTS` 线程，实例上的对象不能跨线程操作，否则会引起应用 `crash` 。使用时需要遵循如下原则：
+
+* `Node-API` 接口只能在 `ArkTS` 线程使用。
+* `Native` 接口入参 `env` 与特定 `ArkTS` 线程绑定，只能在创建该 `env` 的线程使用。
+* 使用 `Node-API` 接口创建的数据需在 `env` 完全销毁前进行释放，避免内存泄漏。此外，在 `napi_env` 销毁后访问/使用这些数据，可能会导致进程崩溃。
