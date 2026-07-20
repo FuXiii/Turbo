@@ -4,6 +4,10 @@
 
 [备忘录](./docs/Memo.md)
 
+## 2026/7/21
+
+>* `docs` 下增加 `dynamic_rendering.md` 用于研究 `Dynamic Rendering`。
+
 ## 2026/5/21
 
 >* `docs` 下更新 `platform/OpenHarmony.md` 用于研究 `鸿蒙` 系统适配。
