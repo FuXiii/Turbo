@@ -1,5 +1,15 @@
 # 备忘录
 
+## 自动化模板参数
+
+```CXX
+template <typename T, typename... Args> 
+T* Create(const Args &...args)
+{
+    return new T(args...);
+}
+```
+
 ## Current
 
 `DescriptorSet` 和 `DescriptorSetLayout` 需要重构，相同的 `DescriptorSet/DescriptorSetLayout` 可以重复利用，而不需要重复创建。提高利用率。
