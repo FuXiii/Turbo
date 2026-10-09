@@ -296,7 +296,7 @@ void SetCull(bool)
 
 ## 资源依赖
 
-如果用户创建 `VkRenderPass` 并不需要获取真正的资源，只需要知道目标资源的属性（比如 `fomat` ，`layout` ，`size` `等）即可创建VkRenderPass` 。
+如果用户创建 `VkRenderPass` 并不需要获取真正的资源，只需要知道目标资源的属性（比如 `fomat` ，`layout` ，`size` 等）即可创建`VkRenderPass` 。
 
 但本 `fg` 不能设计为使用Vulkan，该 `fg` 设计应该是图形接口无关的设计。
 
@@ -460,14 +460,14 @@ class MyCustomeResource
                 char b = 0;
                 void* c = nullptr;
 
-                size_t dependsID = 0;
+                size_t dependID = 0;
         };
 
         static MyCustomeResource* Create(const MyCustomeResource::Descriptor& descriptor, const fg::Resources& depends)
         {
             MyCustomeResource result = ...;
 
-            auto resource = depends.Get<XXX>(descriptor.dependsID);
+            auto resource = depends.Get<XXX>(descriptor.dependID);
             
             return result;
         }
@@ -484,7 +484,7 @@ class MyCustomeResource
                 char b = 0;
                 void* c = nullptr;
 
-                size_t dependsID = 0;
+                size_t dependID = 0;
         };
 
         MyCustomeResource(const MyCustomeResource::Descriptor& descriptor, const fg::Resources& depends)
@@ -514,11 +514,66 @@ class MyCustomeResource
     //这样的话创建循序将会是：cr1_id -> cr0_id -> cr_id
 
     auto& target_descriptor = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr_id);
-    target_descriptor.dependsID = cr0_id;
+    target_descriptor.dependID = cr0_id;
 
     auto& target_descriptor0 = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr0_id);
-    target_descriptor0.dependsID = cr1_id;
+    target_descriptor0.dependID = cr1_id;
 }
 ```
 
 这会引发一个问题：`cr_id.DependsOn(cr0_id)` 已经指定了依赖资源 `id` 而 `target_descriptor.dependsID = cr0_id` 又存了一份感觉重复。感觉有点麻烦。
+
+虽然稍微有些繁琐，但这应该是最灵活的方式了。可以简化代码将配置依赖和赋值一起做：
+
+```CXX
+//setup
+[&](TFrameGraph::TBuilder &builder, MyPassData &data) {
+
+    MyCustomeResource::Descriptor descriptor = {};
+    descriptor.a = 123.456f;
+    descriptor.b = 91;
+
+    auto cr_id = builder.Create<MyCustomeResource>("MyCustomeResource", descriptor);
+    auto cr0_id = builder.Create<MyCustomeResource>("MyCustomeResource0", descriptor);
+    auto cr1_id = builder.Create<MyCustomeResource>("MyCustomeResource1", descriptor);
+
+    builder.DependsOn(cr_id, cr0_id);// cr_id 依赖 cr0_id
+    builder.DependsOn(cr0_id, cr1_id);// cr0_id 依赖 cr1_id
+
+    //或者更直接的接口
+
+    auto& target_descriptor = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr_id);
+    target_descriptor.dependID = cr_id.DependsOn(cr0_id);
+
+    auto& target_descriptor0 = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr0_id);
+    target_descriptor0.dependID = cr0_id.DependsOn(cr1_id);
+
+    //这样的话创建循序将会是：cr1_id -> cr0_id -> cr_id
+}
+```
+
+在资源真正被创建时需要通过 `const fg::Resources& depends` 参数获取依赖的资源，为了简单该参数可合并到 `描述符基类` 中，这样只需要一个用户自定义继承自  `描述符基类` 的描述符类即可，省了再次创建一个新参数。
+
+```CXX
+//如果使用 RAII 思想设计
+class MyCustomeResource
+{
+    public:
+        class Descriptor:public fg::DescriptorBase//或者使用 struct
+        {
+            public:
+                float a = 0;
+                char b = 0;
+                void* c = nullptr;
+
+                size_t dependID = 0;
+        };
+
+        MyCustomeResource(const MyCustomeResource::Descriptor& descriptor)
+        {
+            auto resource = descriptor.GetResource<XXX>(descriptor.dependID);
+        }
+};
+```
+
+这样 `fg` 负责在调用真正的资源创建前在对应的资源描述符中准备好依赖的资源。
