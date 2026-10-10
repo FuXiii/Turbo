@@ -261,7 +261,7 @@ class TResourceProxy:public ResourceProxy
 
 销毁思路与创建类似。
 
-由于资源完全可以自定义，所有很多常用资源都可以自定义，比如：
+由于资源完全可以自定义，所以很多常用资源都可以自定义，比如：
 
 * Image
 * ImageView
@@ -269,7 +269,7 @@ class TResourceProxy:public ResourceProxy
 * Framebuffer
 * CommandBuffer
 
-## Pass 与 Pass代理
+## Pass 与 资源
 
 `pass` 可以有多个读写 `resource` 。
 
@@ -289,16 +289,16 @@ void SetCull(bool)
 
 如果按照资源来创建的话，`pass` 资源就需要在 `image` 资源创建完成后创建，并且 `pass` 创建回调中能够获取 `fg` 创建的图像资源。
 
-所以资源创建需要有2亮点特性：
+所以资源创建需要有2个亮点特性：
 
-1. 创建资源时，能够获取到依赖的资源
-2. 资源之间能够配置依赖
+1. 资源之间能够配置依赖
+2. 创建资源时，能够获取到依赖的资源
 
-## 资源依赖
+### 资源依赖
 
 如果用户创建 `VkRenderPass` 并不需要获取真正的资源，只需要知道目标资源的属性（比如 `fomat` ，`layout` ，`size` 等）即可创建`VkRenderPass` 。
 
-但本 `fg` 不能设计为使用Vulkan，该 `fg` 设计应该是图形接口无关的设计。
+但本 `fg` 不能设计为使用 `Vulkan`，该 `fg` 设计应该是图形接口无关的设计。
 
 所以在资源创建设置依赖时，需要配置是否依赖底层创建的资源，如果依赖，则会在依赖资源在底层创建完成之后再创建该资源。
 
@@ -321,7 +321,7 @@ Framebuffer 依赖 image 和 renderpass
 
 之后 `fg` 会创建这些资源 在 `execute` 阶段通过录制 `GPU` 指令渲染即可。
 
-## 配置与获取依赖
+### 配置与获取依赖
 
 在 `setup` 阶段会创建（虚）资源，并将资源 `ID` 返回给调用端，使用该 `ID` 配置依赖：
 
@@ -537,16 +537,16 @@ class MyCustomeResource
     auto cr0_id = builder.Create<MyCustomeResource>("MyCustomeResource0", descriptor);
     auto cr1_id = builder.Create<MyCustomeResource>("MyCustomeResource1", descriptor);
 
-    builder.DependsOn(cr_id, cr0_id);// cr_id 依赖 cr0_id
-    builder.DependsOn(cr0_id, cr1_id);// cr0_id 依赖 cr1_id
+    auto& target_descriptor = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr_id);
+    auto& target_descriptor0 = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr0_id);
+
+    target_descriptor.dependID =  builder.DependsOn(cr_id, cr0_id);// cr_id 依赖 cr0_id
+    target_descriptor0.dependID = builder.DependsOn(cr0_id, cr1_id);// cr0_id 依赖 cr1_id
 
     //或者更直接的接口
 
-    auto& target_descriptor = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr_id);
-    target_descriptor.dependID = cr_id.DependsOn(cr0_id);
-
-    auto& target_descriptor0 = builder.GetDescriptor<MyCustomeResource::Descriptor>(cr0_id);
-    target_descriptor0.dependID = cr0_id.DependsOn(cr1_id);
+    target_descriptor.dependID = cr_id.DependsOn(cr0_id);//返回 cr0_id
+    target_descriptor0.dependID = cr0_id.DependsOn(cr1_id);//返回 cr1_id
 
     //这样的话创建循序将会是：cr1_id -> cr0_id -> cr_id
 }
@@ -577,3 +577,34 @@ class MyCustomeResource
 ```
 
 这样 `fg` 负责在调用真正的资源创建前在对应的资源描述符中准备好依赖的资源。
+
+### 资源依赖存储
+
+资源的依赖资源仅将资源 `ID` 进行存储即可。
+
+```CXX
+class ResourceProxy
+{
+public:
+    std::vector<ResourceID> depends;//元素不重复容器
+};
+
+a.DependsOn(b);//本质上找到 a 的资源代理 a'，将 b 保存到 a' 的 `ResourceProxy::depends` 中。
+```
+
+依赖可能导致链式依赖，比如 `a->b->c->d` 依赖链，`fg` 会自动查询依赖的资源是否已创建，未创建将会自动创建。
+
+## Pass 与 Pass代理
+
+`fg` 中的 `Pass` 在底层代理主要需要保存如下信息：
+
+* 创建的资源（元素不重复容器，只需要存储 `ID`）
+* 读取的资源（元素不重复容器，只需要存储 `ID`）
+* 写入的资源（元素不重复容器，只需要存储 `ID`）
+* Pass 资源清单数据（用户自定义结构体或类，一般是个结构体）
+* setup 函数（注：这个函数一般不用存储，在 `fg.AddPass<XXX>(...)` 的内部直接调用了，不需要存储做延迟调用）
+* execute 函数
+
+### Pass 代理 与资源
+
+一个 `Pass`
