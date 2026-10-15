@@ -605,6 +605,114 @@ a.DependsOn(b);//本质上找到 a 的资源代理 a'，将 b 保存到 a' 的 `
 * setup 函数（注：这个函数一般不用存储，在 `fg.AddPass<XXX>(...)` 的内部直接调用了，不需要存储做延迟调用）
 * execute 函数
 
-### Pass 代理 与资源
+`Pass 代理` 存储在 `fg` 中。
 
-一个 `Pass`
+### Pass 与资源清单
+
+一个 `Pass` 有 `3` 阶段
+
+1. setup（用户可配置）
+2. compile（ `fg` 内部配置）
+3. execute（用户可配置）
+
+这几个阶段所需要使用到的资源都位于 `资源清单` 中。这样在 `setup` 阶段配置需要的资源，在 `execute` 阶段使用配置的资源。
+
+一般 `资源清单` 就是个用户自定义结构体，内部多用于存储资源 `ID` 。
+
+```CXX
+struct MyResourceList
+{
+    size_t colorTex;
+    size_t depthTex;
+    size_t storageTex;
+    size_t pipeline;
+};
+
+TFrameGraph fg;
+fg.AddPass<MyResourceList>(
+    "NyPass",
+    //Setup
+    [&](MyResourceList &data, TFrameGraph::TBuilder &builder) {
+        data.colorTex = builder.Create<MyTexture>(...);
+        data.depthTex = builder.Create<MyTexture>(...);
+        data.storageTex = builder.Create<MyTexture>(...);
+        data.pipeline = builder.Create<MyPipeline>(...);
+    },
+    //Execute
+    [](const MyResourceList &data, const Resources &resources){ 
+        auto color_tex = resources.Get<MyTexture>(data.colorTex);
+        auto depth_tex = resources.Get<MyTexture>(data.depthTex);
+        auto storage_tex = resources.Get<MyTexture>(data.storageTex);
+
+        vkCmdBeginRendePass(...);
+        ...
+        vkCmdEndRendePass();           
+    }
+);
+
+fg.Compile();
+fg.Execute();
+```
+
+这样在 `execute` 阶段就可以知道要使用哪些资源了。
+
+此时会引出一个问题：此时获取的资源都仅仅是当前 `Pass` 所知的资源，如果当前 `Pass` 需要其他 `Pass` 创建的资源的话，如何获得相应的资源 `id` ？
+
+#### Pass 获取其他 Pass 创建的资源
+
+有两种情况：
+
+1. 所有资源都是用户创建的（已知）
+2. 有些资源是别人封装的不可见（比如封装到一个函数中）
+
+第 `1` 种情况简单，用户已知，就可以自己存自己使用。
+第 `2` 种情况的话，就需要开发者自身暴露资源给外界（相当于告诉你我这些资源都是些什么，做什么用的）。如果不暴露，使用者也不知道具体都有哪些资源。
+
+虽然用户对于闭源 `Pass` 内的各资源不清楚具体含义，但可以知道该 `Pass` 下哪些是创建的、哪些是读写的。
+
+其次用户要使用其他 `Pass` 的资源，也需要提前知道资源的类型，否则只知道个资源 `ID` 也无济于事。
+
+所以如果资源是闭源 `Pass` 创建的，要想使用对应的资源需要知道：`ID` + `类型`
+
+其中 `类型` 要么是引擎自带的，要么是第三方作者开源的，别无他法。
+
+其中 `ID` 的话，为了方便快捷， `fg` 中应该维护一个 `Blackboard` 对象，本质上就是一个 `std::map<std::string, id>` 的映射表，这就要求注册到映射表中的名字唯一。
+
+这样其他 `Pass` 直接通过注册的资源名称进行 `ID` 获取。
+
+但大多数情况下都是用户自定义组建 `fg` ，每个 `Pass` 的资源如何使用是已知的。
+
+```CXX
+class FrameGraph
+{
+    class Blackboard
+    {
+    private:
+        std::unordered_map<std::string, size_t/*id*/> shareResourcesMap;
+    };
+};
+
+FrameGraph fg;
+fg.AddPass<MyResourceList>(
+    "NyPass",
+    //Setup
+    [&](MyResourceList &data, FrameGraph::TBuilder &builder) {
+        data.colorTex = builder.Create<MyTexture>(...);
+        builder.GetBlackboard()["xxx"] = data.colorTex;
+    },
+    //Execute
+    [](const MyResourceList &data, const Resources &resources){ 
+    }
+);
+
+fg.AddPass<MyResourceList>(
+    "NyPass0",
+    //Setup
+    [&](MyResourceList &data, FrameGraph::TBuilder &builder) {
+        data.colorTex = builder.GetBlackboard()["xxx"];
+    },
+    //Execute
+    [](const MyResourceList &data, const Resources &resources){ 
+    }
+);
+```
