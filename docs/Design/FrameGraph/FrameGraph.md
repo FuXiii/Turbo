@@ -716,3 +716,54 @@ fg.AddPass<MyResourceList>(
     }
 );
 ```
+
+## Compile（编译阶段）
+
+现在用户已经配置好了 `setup` 阶段的所有 `Pass` 和 `Resource` 。
+
+```mermaid
+flowchart LR
+
+    Pass0:::Pass
+    Pass1["Pass1<br>Cull(false)"]:::Pass
+
+    Color(Color):::Resource 
+    Depth(Depth):::Resource 
+    Normal(Normal):::Resource 
+    Pos(Position):::Resource 
+    Present("Present"):::Resource 
+
+    Pass0-->Color
+    Pass0-->Depth
+    Pass0-->Normal
+    Pass0-->Pos
+
+    Color-->Pass1
+    Depth-->Pass1
+    Normal-->Pass1
+
+    Pass1-->Present
+
+    classDef Pass fill:#f96
+    classDef Resource fill:#70c015
+```
+
+### 资源剔除
+
+在某些情况下，有些资源并没有被使用到，比如说上图中的 `Position` 资源，一个资源在创建后如何没有 `Pass` 对其读取的话，则该资源判定为冗余资源，将会从图中剔除。但有时有些资源可能在不同 `Pass` 间被写入，需要为每个次写入生成一个版本（副本），如果中间有些阶段没有读取该资源，剔除算法可据此判断哪些中间资源需要被剔除。
+
+### Pass 剔除
+
+如果一个 `Pass` 的所有写入的资源都因为没有被读取而被剔除的话，该 `Pass` 也将会被剔除。
+
+### 多起点与多终点
+
+由于 `fg` 图本质上来说就是个有向无环图，正常来说，用户可以配置多起点与多终点的 `fg` 图。
+
+对于多终点来说 `fg` 可通过调用 `Pass` 的 `AsEnd(true)` 标记该 `Pass` 为终点。
+
+对于多起点来说 `fg` 可通过对终点节点的逆向遍历获知哪些节点是起始节点。
+
+#### 多 Pass 的 setup 顺序
+
+由于 `fg` 中 `Pass` 的增加不一定是按顺序增加的。在向 `Blackboard` 中获取取某一个资源时，可能相应的资源的注册 `Pass` 还未初始化，此时获取不到对应的资源，这就需要 `Blackboard` 的注册（写入）和获取不在同一阶段，向 `Blackboard` 中写入可以发生在 `setup` 阶段，但资源的获取需要在 `compile` 阶段获取，确保所有的资源注册已经发生，此时获取资源一定能够正确获取。
